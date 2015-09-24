@@ -1,0 +1,21 @@
+{
+    "name": "ems/core",
+    "description": "The ems core components",
+    "type": "library",
+    "require": {
+        "php": ">=5.4.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Ems\\Core\\": ""
+        }
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Michael Tils",
+            "email": "mtils@web-utils.de"
+        }
+    ],
+    "minimum-stability": "dev"
+}
