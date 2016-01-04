@@ -5,14 +5,14 @@ namespace Ems\Model\Eloquent;
 use InvalidArgumentException;
 use Ems\Contracts\Core\Identifiable;
 use Ems\Contracts\Core\Repository as RepositoryContract;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Model as EloquentModel;
 
 class Repository implements RepositoryContract
 {
 
     protected $model;
 
-    public function __construct(Model $model)
+    public function __construct(EloquentModel $model)
     {
         $this->checkIsIdentifiable($model);
         $this->model = $model;
@@ -26,7 +26,7 @@ class Repository implements RepositoryContract
      **/
     public function get($id)
     {
-        return $this->model->get($id);
+        return $this->model->find($id);
     }
 
     /**
@@ -99,11 +99,13 @@ class Repository implements RepositoryContract
 
         $this->checkIsModel($model);
 
-        if ($this->fill($model, $newAttributes)){
-            return true;
+        if (!$this->fill($model, $newAttributes)) {
+            return false;
         }
 
-        return false;
+        $model->save();
+
+        return true;
 
     }
 
@@ -155,7 +157,7 @@ class Repository implements RepositoryContract
      **/
     protected function checkIsModel($model)
     {
-        if (!$model instanceof Model) {
+        if (!$model instanceof EloquentModel) {
             throw new InvalidArgumentException('Identifiable has to be instanceof Eloquent Model');
         }
     }
