@@ -1,6 +1,6 @@
 {
-    "name": "ems/core",
-    "description": "The ems core components",
+    "name": "ems/mail",
+    "description": "The ems mail components",
     "type": "library",
     "require": {
         "php": ">=5.4.0",
@@ -8,7 +8,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Ems\\Core\\": ""
+            "Ems\\Mail\\": ""
         }
     },
     "license": "MIT",
