@@ -15,9 +15,19 @@ interface Mailer
 {
 
     /**
-     * Sets the recipient or the recipients for the message
-     * 
+     * Sets the recipient or the recipients for the message. If more than one
+     * Recipients are passed, the mail will be generated multiple times for
+     * each recipient.
+     *
+     * Send one mail to one recipient:
      * @example Mailer::to('foo@somewhere.com')->send('template',$data)
+     *
+     * Send two separatly generated mails to two recipients
+     * @example Mailer::to('foo@bar.de', 'bar@foo.de')->send(...)
+     *
+     * Send a mass mail to many recpients
+     * @example $users = Users::all(); Mailer::to($users)->send(...)
+     *
      * @param mixed $recipient string|array for more than one
      * @return self
      **/
@@ -26,20 +36,20 @@ interface Mailer
     /**
      * Sends a message with plan text. $data has to contain the subject
      *
-     * @param string $view The template name
-     * @param array $data The view vars
-     * @param callable $callback (optional) A closure to modify the mail before send
+     * @param string $resourceId A resource id like registrations.activate
+     * @param array $data (optional) The view vars (subject, body, ...)
+     * @param callable $callback (optional) A closure to modify the mail(s) before send
      **/
-    public function plain($view, array $data, $callback=null);
+    public function plain($resourceId, array $data=[], $callback=null);
 
     /**
      * Sends a html mail. $data has to contain the subject
      *
-     * @param string $view The template name
-     * @param array $data The view vars
-     * @param callable $callback (optional) A closure to modify the mail before send
+     * @param string $resourceId A resource id like registrations.activate
+     * @param array $data (optional) The view vars (subject, body, ...)
+     * @param callable $callback (optional) A closure to modify the mail(s) before send
      **/
-    public function send($view, array $data, $callback=null);
+    public function send($resourceId, array $data=[], $callback=null);
 
     /**
      * Do some processing with the passed $data in plain() and send(). Only one

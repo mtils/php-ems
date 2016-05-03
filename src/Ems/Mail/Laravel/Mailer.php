@@ -2,7 +2,11 @@
 
 namespace Ems\Mail\Laravel;
 
+use UnexpectedValueException;
+use Traversable;
+
 use Ems\Contracts\Mail\Mailer as MailerContract;
+use Ems\Contracts\Mail\MailConfigBuilder;
 use Illuminate\Contracts\Mail\Mailer as LaravelMailer;
 
 class Mailer implements MailerContract
@@ -34,17 +38,18 @@ class Mailer implements MailerContract
     protected $viewNameProcessor;
 
     /**
-     * @param \Illuminate\Contracts\Mail\Mailer $laravelMailer
+     * @var \Ems\Contracts\Mail\MailConfigBuilder
      **/
-    public function __construct(LaravelMailer $laravelMailer)
+    protected $configBuilder;
+
+    /**
+     * @param \Illuminate\Contracts\Mail\Mailer $laravelMailer
+     * @param \Ems\Contracts\Mail\MailConfigBuilder $configBuilder
+     **/
+    public function __construct(LaravelMailer $laravelMailer, MailConfigBuilder $configBuilder)
     {
-
         $this->laravelMailer = $laravelMailer;
-
-        $this->dataProcessor = function($data){};
-
-        $this->viewNameProcessor = function($viewName){};
-
+        $this->configBuilder = $configBuilder;
     }
 
     /**
@@ -55,30 +60,29 @@ class Mailer implements MailerContract
      **/
     public function to($recipient)
     {
-        $to = func_num_args() > 1 ? func_get_args() : (array)$recipient;
-        return $this->replicateForFluidApi($to);
+        return $this->replicateForFluidApi($this->parseRecipients(func_get_args()));
     }
 
     /**
      * {@inheritdoc}
      *
-     * @param string $view The template name
-     * @param array $data The view vars
-     * @param callable $callback (optional) A closure to modify the mail before send
+     * @param string $resourceId A resource id like registrations.activate
+     * @param array $data (optional) The view vars (subject, body, ...)
+     * @param callable $callback (optional) A closure to modify the mail(s) before send
      **/
-    public function plain($view, array $data, $callback=null)
+    public function plain($resourceId, array $data=[], $callback=null)
     {
-        return $this->send(['text'=>$view], $data, $callback);
+        return $this->send(['text'=>$resourceId], $data, $callback);
     }
 
     /**
      * {@inheritdoc}
      *
-     * @param string $view The (blade) template name
-     * @param array $data The view vars
-     * @param callable $callback (optional) A closure to modify the mail before send
+     * @param string $resourceId A resource id like registrations.activate
+     * @param array $data (optional) The view vars (subject, body, ...)
+     * @param callable $callback (optional) A closure to modify the mail(s) before send
      **/
-    public function send($view, array $data, $callback=null)
+    public function send($resourceId, array $data, $callback=null)
     {
 
         $recipients = $this->finalRecipients($this->to);
@@ -144,10 +148,10 @@ class Mailer implements MailerContract
     /**
      * Returns only the overwritten recipients or if non set the passed ones
      *
-     * @param array $passedTo
+     * @param array|\Traversable $passedTo
      * @return array
      **/
-    protected function finalRecipients(array $passedTo)
+    protected function finalRecipients($passedTo)
     {
         if ($this->overwrittenTo) {
             return $overwrittenTo;
@@ -198,7 +202,34 @@ class Mailer implements MailerContract
         return new MessageBuilder($recipients, $data, $callback);
     }
 
-    protected function replicateForFluidApi(array $to)
+    /**
+     * Parses the recipients to something traversable
+     *
+     * @param array $toArgs
+     * @return \Traversable
+     **/
+    protected function parseRecipients($toArgs)
+    {
+        if (count($toArgs) > 1) {
+            return $toArgs;
+        }
+
+        if (is_array($toArgs[0])) {
+            return $toArgs[0];
+        }
+
+        if (is_string($toArgs[0])) {
+            return (array)$toArgs[0];
+        }
+
+        if ($toArgs[0] instanceof Traversable) {
+            return $toArgs[0];
+        }
+
+        throw new UnexpectedValueException('Unparsable $to parameter');
+    }
+
+    protected function replicateForFluidApi($to)
     {
         $copy = new static($this->laravelMailer);
 
