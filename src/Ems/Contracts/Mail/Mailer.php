@@ -34,16 +34,25 @@ interface Mailer
     public function to($recipient);
 
     /**
-     * Sends a message with plan text. $data has to contain the subject
+     * Create a message and set all parts manually.
      *
-     * @param string $resourceId A resource id like registrations.activate
-     * @param array $data (optional) The view vars (subject, body, ...)
-     * @param callable $callback (optional) A closure to modify the mail(s) before send
+     * @example Mailer::message()
+     *                ->to('foo@bar.de')
+     *                ->subject('Hello')
+     *                ->body('bye')
+     *                ->send()
+     *
+     * @example Mailer::message('foo@bar.de', 'Hello', 'bye')->send()
+     *
+     * @param string $to The recipient, email or something handled by ReciepientCaster
+     * @param string $subject
+     * @param string $body The text body
+     * @return \Ems\Contracts\Mail\Message
      **/
-    public function plain($resourceId, array $data=[], $callback=null);
+    public function message($to='', $subject='', $body='');
 
     /**
-     * Sends a html mail. $data has to contain the subject
+     * Sends one or more mails (Depends on count($to)).
      *
      * @param string $resourceId A resource id like registrations.activate
      * @param array $data (optional) The view vars (subject, body, ...)
@@ -52,21 +61,29 @@ interface Mailer
     public function send($resourceId, array $data=[], $callback=null);
 
     /**
-     * Do some processing with the passed $data in plain() and send(). Only one
-     * callable will be used. This callable will be called everytime a message
-     * is built.
+     * Send a message manually. This method is also called by messages created
+     * by self::message(). You can send only one mail at a time with this method
      *
-     * @param callable $processor
-     * @return self
+     * @param \Ems\Contracts\Mail $message
      **/
-    public function processDataWith(callable $processor);
+    public function sendMessage(Message $message);
 
     /**
-     * Do something with the view name. Change it, replace it...
+     * Assign a listener which will be informed when a message will be sent.
+     * Signature is: function(\Ems\Contracts\Mail\Message $message){}
      *
-     * @param callable $processor
+     * @param callable $listener
      * @return self
      **/
-    public function processViewNameWith(callable $processor);
+    public function beforeSending(callable $listener);
+
+    /**
+     * Assign a listener which will be informed when a message was sent.
+     * Signature is: function(\Ems\Contracts\Mail\Message $message){}
+     *
+     * @param callable $listener
+     * @return self
+     **/
+    public function afterSent(callable $listener);
 
 }

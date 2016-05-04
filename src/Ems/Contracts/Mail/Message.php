@@ -4,6 +4,7 @@ namespace Ems\Contracts\Mail;
 
 /**
  * A Message is the actual message object which will be sent to a recipient.
+ * Better said it is a proxy to the native message (like Swift_Message)
  */
 interface Message
 {
@@ -79,6 +80,22 @@ interface Message
     public function subject($subject);
 
     /**
+     * Set the html body of the message
+     *
+     * @param string $html
+     * @return self
+     **/
+    public function html($html);
+
+    /**
+     * Set the plain text part of the mail
+     *
+     * @param string $text
+     * @return self
+     **/
+    public function plainText($text);
+
+    /**
      * Set the message priority level.
      *
      * @param  int  $level
@@ -123,5 +140,31 @@ interface Message
      */
     public function embedData($data, $name, $contentType = null);
 
+    /**
+     * Return the mailer instance which allows a send() method on this mail
+     *
+     * @return \Ems\Contracts\Mail\Mailer
+     **/
+    public function mailer();
+
+    /**
+     * Add the mailer instance to allow send() method on this mail
+     *
+     * @param \Ems\Contracts\Mail\Mailer $mailer
+     * @return self
+     **/
+    public function setMailer(Mailer $mailer);
+
+    /**
+     * Send the mail through the attached mailer
+     *
+     * @see self::mailer()
+     * @return void
+     **/
+    public function send();
+
+    public function configuration();
+
+    public function setConfiguration(MailConfig $config);
 
 }

@@ -1,21 +1,33 @@
 <?php 
 
-namespace Ems\Mail\Laravel;
+namespace Ems\Mail;
 
 use UnexpectedValueException;
 use Traversable;
 
 use Ems\Contracts\Mail\Mailer as MailerContract;
-use Ems\Contracts\Mail\MailConfigBuilder;
-use Illuminate\Contracts\Mail\Mailer as LaravelMailer;
+use Ems\Contracts\Mail\MailConfigProvider;
+use Ems\Contracts\Mail\MailComposer;
+use Ems\Contracts\Mail\Transport;
+use Ems\Contracts\Mail\Message as MessageContract;
 
 class Mailer implements MailerContract
 {
 
     /**
-     * @var \Illuminate\Contracts\Mail\Mailer
+     * @var \Ems\Contracts\Mail\Transport
      **/
-    protected $laravelMailer;
+    protected $transport;
+
+    /**
+     * @var \Ems\Contracts\Mail\MailConfigBuilder
+     **/
+    protected $configProvider;
+
+    /**
+     * @var \Ems\Contracts\Mail\MailComposer
+     **/
+    protected $composer;
 
     /**
      * @var array
@@ -30,26 +42,34 @@ class Mailer implements MailerContract
     /**
      * @var callable
      **/
-    protected $dataProcessor;
+    protected $sendingListener;
 
     /**
      * @var callable
      **/
-    protected $viewNameProcessor;
+    protected $sentListener;
 
     /**
-     * @var \Ems\Contracts\Mail\MailConfigBuilder
+     * @param \Ems\Contracts\Mail\Transport $transport
+     * @param \Ems\Contracts\Mail\MailConfigProvider $configProvider
      **/
-    protected $configBuilder;
-
-    /**
-     * @param \Illuminate\Contracts\Mail\Mailer $laravelMailer
-     * @param \Ems\Contracts\Mail\MailConfigBuilder $configBuilder
-     **/
-    public function __construct(LaravelMailer $laravelMailer, MailConfigBuilder $configBuilder)
+    public function __construct(Transport $transport, MailConfigProvider $configProvider,
+                                MailComposer $composer)
     {
-        $this->laravelMailer = $laravelMailer;
-        $this->configBuilder = $configBuilder;
+        $this->transport = $transport;
+        $this->configProvider = $configProvider;
+        $this->composer = $composer;
+
+        $this->sendingListener = function($message){};
+        $this->sentListener = function($message){};
+
+        $this->transport->beforeSending(function(MessageContract $message){
+            call_user_func($this->sendingListener, $message);
+        });
+
+        $this->transport->afterSent(function(MessageContract $message){
+            call_user_func($this->sentListener, $message);
+        });
     }
 
     /**
@@ -66,13 +86,29 @@ class Mailer implements MailerContract
     /**
      * {@inheritdoc}
      *
-     * @param string $resourceId A resource id like registrations.activate
-     * @param array $data (optional) The view vars (subject, body, ...)
-     * @param callable $callback (optional) A closure to modify the mail(s) before send
+     * @param string $to The recipient, email or something handled by ReciepientCaster
+     * @param string $subject
+     * @param string $body The text body
+     * @return \Ems\Contracts\Mail\Message
      **/
-    public function plain($resourceId, array $data=[], $callback=null)
+    public function message($to='', $subject='', $body='')
     {
-        return $this->send(['text'=>$resourceId], $data, $callback);
+
+        $message = $this->transport->newMessage();
+
+        if ($to) {
+            $mail->to($to);
+        }
+        if ($subject) {
+            $mail->subject($subject);
+        }
+        if ($body) {
+            $mail->body($body);
+        }
+
+        $mail->setMailer($this);
+
+        return $mail;
     }
 
     /**
@@ -87,6 +123,21 @@ class Mailer implements MailerContract
 
         $recipients = $this->finalRecipients($this->to);
 
+        $config = $this->configProvider->configFor($resourceId, $data);
+
+        foreach ($recipients as $recipient) {
+
+            $message = $this->transport->newMessage();
+
+            $this->composer->fill($message, $config, $recipient, $data);
+
+            if (is_callable($callback)) {
+                call_user_func($callback, $message);
+            }
+        }
+
+        return $this->sendMessage($message);
+
         $view = $this->finalView($view);
 
         $data = $this->parseTexts($this->finalData($data));
@@ -95,6 +146,42 @@ class Mailer implements MailerContract
 
         return $this->laravelMailer->send($view, $data, $messageBuilder->builder());
 
+    }
+
+    /**
+     * Send a message manually. This method is also called by messages created
+     * by self::message(). You can send only one mail at a time with this method
+     *
+     * @param \Ems\Contracts\Mail $message
+     **/
+    public function sendMessage(MessageContract $message)
+    {
+        call_user_func($this->sendingListener, $message)
+        return $this->transport->send($message);
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @param callable $listener
+     * @return self
+     **/
+    public function beforeSending(callable $listener)
+    {
+        $this->sendingListener = $listener;
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @param callable $listener
+     * @return self
+     **/
+    public function afterSent(callable $listener)
+    {
+        $this->sentListener = $listener;
+        return $this;
     }
 
     /**

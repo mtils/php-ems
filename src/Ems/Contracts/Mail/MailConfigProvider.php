@@ -9,7 +9,7 @@ use DateTime;
  *
  * A simple example would be a 
  **/
-interface MailConfigBuilder
+interface MailConfigProvider
 {
 
     /**
@@ -21,7 +21,10 @@ interface MailConfigBuilder
      * @param \DateTime $plannedSendDate (optional)
      * @return \Ems\Contracts\Mail\MailConfig
      **/
-    public function buildFor($resourceId, array $data=[], DateTime $plannedSendDate=null);
+    public function configFor($resourceId, array $data=[], DateTime $plannedSendDate=null);
+
+
+    public function contentsFor(MailConfig $config, DateTime $plannedSendDate=null);
 
     /**
      * Determine if configured data will overwrite passed data. (A configugred
