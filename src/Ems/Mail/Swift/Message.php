@@ -18,7 +18,7 @@ class Message implements MessageContract
      *
      * @var \Swift_Message
      */
-    protected $swift;
+    protected $swiftMessage;
 
     /**
      * @var \Ems\Contracts\Mail\Mailer
@@ -30,9 +30,9 @@ class Message implements MessageContract
      **/
     protected $configuration;
 
-    public function __construct(Swift_Message $swift)
+    public function __construct(Swift_Message $swiftMessage)
     {
-        $this->swift = $swift;
+        $this->swiftMessage = $swiftMessage;
     }
 
     /**
@@ -44,7 +44,7 @@ class Message implements MessageContract
      */
     public function from($address, $name = null)
     {
-        $this->swift->setFrom($address, $name);
+        $this->swiftMessage->setFrom($address, $name);
         return $this;
     }
 
@@ -57,7 +57,7 @@ class Message implements MessageContract
      */
     public function sender($address, $name = null)
     {
-        $this->swift->setSender($address, $name);
+        $this->swiftMessage->setSender($address, $name);
         return $this;
     }
 
@@ -69,7 +69,7 @@ class Message implements MessageContract
      */
     public function returnPath($address)
     {
-        $this->swift->setReturnPath($address);
+        $this->swiftMessage->setReturnPath($address);
         return $this;
     }
 
@@ -82,7 +82,7 @@ class Message implements MessageContract
      */
     public function to($address, $name = null)
     {
-        return $this->swift->addAddresses($address, $name, 'To');
+        return $this->swiftMessage->addAddresses($address, $name, 'To');
     }
 
     /**
@@ -129,7 +129,7 @@ class Message implements MessageContract
      */
     public function subject($subject)
     {
-        $this->swift->setSubject($subject);
+        $this->swiftMessage->setSubject($subject);
         return $this;
     }
 
@@ -141,7 +141,7 @@ class Message implements MessageContract
      **/
     public function html($html)
     {
-        $this->swift->setBody($html, 'text/html');
+        $this->swiftMessage->setBody($html, 'text/html');
         return $this;
     }
 
@@ -153,7 +153,7 @@ class Message implements MessageContract
      **/
     public function plainText($text)
     {
-        $this->swift->addPart($text, 'text/plain');
+        $this->swiftMessage->addPart($text, 'text/plain');
         return $this;
     }
 
@@ -165,7 +165,7 @@ class Message implements MessageContract
      */
     public function priority($level)
     {
-        $this->swift->setPriority($level);
+        $this->swiftMessage->setPriority($level);
         return $this;
     }
 
@@ -204,7 +204,7 @@ class Message implements MessageContract
      */
     public function embed($file)
     {
-        return $this->swift->embed($this->createAttachmentFromPath($file));
+        return $this->swiftMessage->embed($this->createAttachmentFromPath($file));
     }
 
     /**
@@ -218,7 +218,7 @@ class Message implements MessageContract
     public function embedData($data, $name, $contentType = null)
     {
         $image = Swift_Image::newInstance($data, $name, $contentType);
-        return $this->swift->embed($image);
+        return $this->swiftMessage->embed($image);
     }
 
     /**
@@ -277,6 +277,15 @@ class Message implements MessageContract
     }
 
     /**
+     * @access protected
+     * @return \Swift_Message
+     **/
+    public function _swiftMessage()
+    {
+        return $this->swiftMessage;
+    }
+
+    /**
      * Add a recipient to the message.
      *
      * @param  string|array  $address
@@ -287,11 +296,11 @@ class Message implements MessageContract
     protected function addAddresses($address, $name, $type)
     {
         if (is_array($address)) {
-            $this->swift->{"set{$type}"}($address, $name);
+            $this->swiftMessage->{"set{$type}"}($address, $name);
             return $this;
         }
 
-        $this->swift->{"add{$type}"}($address, $name);
+        $this->swiftMessage->{"add{$type}"}($address, $name);
 
         return $this;
 
@@ -343,7 +352,7 @@ class Message implements MessageContract
                 $attachment->setFilename($options['as']);
         }
 
-        $this->swift->attach($attachment);
+        $this->swiftMessage->attach($attachment);
 
         return $this;
     }
