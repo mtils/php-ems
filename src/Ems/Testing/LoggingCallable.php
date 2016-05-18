@@ -4,6 +4,10 @@ namespace Ems\Testing;
 
 use Countable;
 
+/**
+ * The LoggingCallable allows to fast testing listener calls
+ * It logs all calls and their args.
+ **/
 class LoggingCallable implements Countable
 {
     /**
