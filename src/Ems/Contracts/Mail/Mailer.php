@@ -57,6 +57,7 @@ interface Mailer
      * @param string $resourceId A resource id like registrations.activate
      * @param array $data (optional) The view vars (subject, body, ...)
      * @param callable $callback (optional) A closure to modify the mail(s) before send
+     * @return \Ems\Contracts\Mail\SendResult
      **/
     public function send($resourceId, array $data=[], $callback=null);
 
@@ -65,6 +66,7 @@ interface Mailer
      * by self::message(). You can send only one mail at a time with this method
      *
      * @param \Ems\Contracts\Mail $message
+     * @return \Ems\Contracts\Mail\SendResult
      **/
     public function sendMessage(Message $message);
 

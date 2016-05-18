@@ -4,12 +4,18 @@ namespace Ems\Mail;
 
 use UnexpectedValueException;
 use Traversable;
+use UnderflowException;
+use InvalidArgumentException;
+use Countable;
 
 use Ems\Contracts\Mail\Mailer as MailerContract;
 use Ems\Contracts\Mail\MailConfigProvider;
-use Ems\Contracts\Mail\MailComposer;
+use Ems\Contracts\Mail\MessageComposer;
 use Ems\Contracts\Mail\Transport;
 use Ems\Contracts\Mail\Message as MessageContract;
+use Ems\Contracts\Mail\SendResult as ResultContract;
+use Ems\Mail\SendResult;
+
 
 class Mailer implements MailerContract
 {
@@ -54,7 +60,7 @@ class Mailer implements MailerContract
      * @param \Ems\Contracts\Mail\MailConfigProvider $configProvider
      **/
     public function __construct(Transport $transport, MailConfigProvider $configProvider,
-                                MailComposer $composer)
+                                MessageComposer $composer)
     {
         $this->transport = $transport;
         $this->configProvider = $configProvider;
@@ -97,18 +103,18 @@ class Mailer implements MailerContract
         $message = $this->transport->newMessage();
 
         if ($to) {
-            $mail->to($to);
+            $message->to($to);
         }
         if ($subject) {
-            $mail->subject($subject);
+            $message->subject($subject);
         }
         if ($body) {
-            $mail->body($body);
+            $message->body($body);
         }
 
-        $mail->setMailer($this);
+        $message->setMailer($this);
 
-        return $mail;
+        return $message;
     }
 
     /**
@@ -117,13 +123,16 @@ class Mailer implements MailerContract
      * @param string $resourceId A resource id like registrations.activate
      * @param array $data (optional) The view vars (subject, body, ...)
      * @param callable $callback (optional) A closure to modify the mail(s) before send
+     * @return \Ems\Contracts\Mail\SendResult
      **/
-    public function send($resourceId, array $data, $callback=null)
+    public function send($resourceId, array $data=[], $callback=null)
     {
 
         $recipients = $this->finalRecipients($this->to);
 
         $config = $this->configProvider->configFor($resourceId, $data);
+
+        $result = $this->newSendResult($this->transport);
 
         foreach ($recipients as $recipient) {
 
@@ -134,29 +143,28 @@ class Mailer implements MailerContract
             if (is_callable($callback)) {
                 call_user_func($callback, $message);
             }
+
+            $transportResult = $this->sendMessage($message);
+            $this->mergeTransportResult($transportResult, $result);
         }
 
-        return $this->sendMessage($message);
+        if (!isset($message)) {
+            throw new UnderflowException('No recipients found. Pass them via Mailer::to($reciepient)');
+        }
 
-        $view = $this->finalView($view);
-
-        $data = $this->parseTexts($this->finalData($data));
-
-        $messageBuilder = $this->createBuilder($recipients, $data, $callback);
-
-        return $this->laravelMailer->send($view, $data, $messageBuilder->builder());
+        return $result;
 
     }
 
     /**
-     * Send a message manually. This method is also called by messages created
-     * by self::message(). You can send only one mail at a time with this method
+     * {@inheritdoc}
      *
      * @param \Ems\Contracts\Mail $message
+     * @return \Ems\Contracts\Mail\SendResult
      **/
     public function sendMessage(MessageContract $message)
     {
-        call_user_func($this->sendingListener, $message)
+        call_user_func($this->sendingListener, $message);
         return $this->transport->send($message);
     }
 
@@ -193,36 +201,17 @@ class Mailer implements MailerContract
     }
 
     /**
+     * Always send all mails only to the passed address(es)
+     * This is only for testing purposes to not send mails to the outside
+     * while developing. One call of this method will affect all send()
+     * calls
+     *
      * @param string|array $to
      * @return self
      **/
-    public function overwriteTo($to)
+    public function alwaysSendTo($to)
     {
         $this->overwrittenTo = func_num_args() > 1 ? func_get_args() : (array)$to;
-        return $this;
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @param callable $processor
-     * @return self
-     **/
-    public function processDataWith(callable $processor)
-    {
-        $this->dataProcessor = $processor;
-        return $this;
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @param callable $processor
-     * @return self
-     **/
-    public function processViewNameWith(callable $processor)
-    {
-        $this->viewNameProcessor = $processor;
         return $this;
     }
 
@@ -241,52 +230,11 @@ class Mailer implements MailerContract
     protected function finalRecipients($passedTo)
     {
         if ($this->overwrittenTo) {
-            return $overwrittenTo;
+            return $this->overwrittenTo;
         }
 
         return $passedTo;
 
-    }
-
-    /**
-     * Ask the view processor for a new view name or return the passed
-     *
-     * @param string|array $passedView
-     * @return string|array
-     **/
-    protected function finalView($passedView)
-    {
-        if ($overWritten = call_user_func($this->viewNameProcessor, $passedView)) {
-            return $overWritten;
-        }
-        return $passedView;
-    }
-
-    /**
-     * Asks the data processor to process the data or return the passed
-     *
-     * @param array $passedData
-     * @return array
-     **/
-    protected function finalData(array $passedData)
-    {
-        if ($overWritten = call_user_func($this->dataProcessor, $passedData)) {
-            return $overWritten;
-        }
-        return $passedData;
-    }
-
-    /**
-     * Create the pseudo closure creator
-     *
-     * @param array $recipients
-     * @param array $data
-     * @param callable|null $callback
-     * @return \Cmsable\Mail\MessageBuilder
-     **/
-    protected function createBuilder(array $recipients, $data, $callback)
-    {
-        return new MessageBuilder($recipients, $data, $callback);
     }
 
     /**
@@ -316,11 +264,46 @@ class Mailer implements MailerContract
         throw new UnexpectedValueException('Unparsable $to parameter');
     }
 
+    /**
+     * Replicates the mailer for the fluid to() api.
+     *
+     * @param mixed $to
+     * @return self
+     **/
     protected function replicateForFluidApi($to)
     {
-        $copy = new static($this->laravelMailer);
+        $copy = new static($this->transport, $this->configProvider, $this->composer);
 
-        return $copy->_setTo($to)->overwriteTo($this->overwrittenTo);
+        $copy->beforeSending($this->sendingListener);
+        $copy->afterSent($this->sentListener);
+
+        return $copy->_setTo($to)->alwaysSendTo($this->overwrittenTo);
+    }
+
+    /**
+     * Creates a new SendResult. Overwrite this method for another class
+     *
+     * @return \Ems\Contracts\Mail\SendResult
+     **/
+    protected function newSendResult(Transport $transport)
+    {
+        return new SendResult($transport);
+    }
+
+    /**
+     * Merges the result of a transport send operation into a global one
+     *
+     * @param \Ems\Contracts\Mail\SendResult $transportResult
+     * @param \Ems\Contracts\Mail\SendResult $mailerResult
+     **/
+    protected function mergeTransportResult(ResultContract $transportResult, ResultContract $mailerResult)
+    {
+        if (!$mailerResult instanceof SendResult) {
+            throw new InvalidArgumentException('mergeTransportResult can only merge Ems\Mail\SendResult');
+        }
+
+        $mailerResult->addFailedRecipient($transportResult->failures());
+        $mailerResult->increment(count($transportResult));
     }
 
 }
