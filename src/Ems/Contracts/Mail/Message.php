@@ -159,12 +159,23 @@ interface Message
      * Send the mail through the attached mailer
      *
      * @see self::mailer()
-     * @return void
+     * @return \Ems\Contracts\Mail\SendResult
      **/
     public function send();
 
+    /**
+     * Return the configuration which build the message
+     *
+     * @return \Ems\Contracts\Mail\MailConfig
+     **/
     public function configuration();
 
+    /**
+     * Set the mail configuration which builds this mail
+     *
+     * @param \Ems\Contracts\Mail\MailConfig $config
+     * @return self
+     **/
     public function setConfiguration(MailConfig $config);
 
 }
