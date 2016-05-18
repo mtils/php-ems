@@ -163,6 +163,8 @@ class MailerTest extends TestCase
         $data = ['a'=>'b'];
         $recipients = ['foo@bar.de'];
 
+        $message->shouldReceive('setMailer');
+
         $configProvider->shouldReceive('configFor')
                        ->with($resourceId, $data)
                        ->atLeast()->once()
@@ -202,6 +204,8 @@ class MailerTest extends TestCase
         $resourceId = 'registrations.store';
         $data = ['a'=>'b'];
         $recipients = ['foo@bar.de', 'bar@foo.de', 'nobody@somewhere.de'];
+
+        $message->shouldReceive('setMailer');
 
         $configProvider->shouldReceive('configFor')
                        ->with($resourceId, $data)
