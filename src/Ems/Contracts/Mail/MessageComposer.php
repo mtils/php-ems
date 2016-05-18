@@ -14,17 +14,16 @@ interface MessageComposer
 {
 
     /**
-     * Build a config for $resourceId at $plannedSendDate and merge the passed
-     * $data into the config data
+     * Fill the message with contents for $plannedSendDate depending on $recipient
+     * on $recipient and $data.
      *
      * @param \Ems\Contracts\Mail\Message $message
-     * @param \Ems\Contracts\Mail\MailConfig $config
      * @param mixed $recipient
      * @param array $data (optional)
      * @param \DateTime $plannedSendDate (optional)
      * @return void
      **/
-    public function fill(Message $message, MailConfig $config, $recipient, array $data=[], DateTime $plannedSendDate=null);
+    public function fill(Message $message, $recipient, array $data=[], DateTime $plannedSendDate=null);
 
     /**
      * Determine if configured data will overwrite passed data. (A configugred

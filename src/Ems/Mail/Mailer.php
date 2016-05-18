@@ -139,8 +139,9 @@ class Mailer implements MailerContract
             $message = $this->transport->newMessage();
 
             $message->setMailer($this);
+            $message->setConfiguration($config);
 
-            $this->composer->fill($message, $config, $recipient, $data);
+            $this->composer->fill($message, $recipient, $data);
 
             if (is_callable($callback)) {
                 call_user_func($callback, $message);
