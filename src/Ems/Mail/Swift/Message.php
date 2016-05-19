@@ -6,12 +6,15 @@ namespace Ems\Mail\Swift;
 use Ems\Contracts\Mail\Message as MessageContract;
 use Ems\Contracts\Mail\Mailer;
 use Ems\Contracts\Mail\MailConfig;
+use Ems\Mail\MessageTrait;
 use Swift_Message;
 use Swift_Image;
 use Swift_Attachment;
 
 class Message implements MessageContract
 {
+
+    use MessageTrait;
 
     /**
      * The Swift Message instance.
@@ -21,15 +24,8 @@ class Message implements MessageContract
     protected $swiftMessage;
 
     /**
-     * @var \Ems\Contracts\Mail\Mailer
+     * @param \Swift_Message $swiftMessage
      **/
-    protected $mailer;
-
-    /**
-     * @var \Ems\Contracts\Mail\MailConfig
-     **/
-    protected $configuration;
-
     public function __construct(Swift_Message $swiftMessage)
     {
         $this->swiftMessage = $swiftMessage;
@@ -82,7 +78,7 @@ class Message implements MessageContract
      */
     public function to($address, $name = null)
     {
-        return $this->swiftMessage->addAddresses($address, $name, 'To');
+        return $this->addAddresses($address, $name, 'To');
     }
 
     /**
@@ -219,61 +215,6 @@ class Message implements MessageContract
     {
         $image = Swift_Image::newInstance($data, $name, $contentType);
         return $this->swiftMessage->embed($image);
-    }
-
-    /**
-     * Return the mailer instance which allows a send() method on this mail
-     *
-     * @return \Ems\Contracts\Mail\Mailer
-     **/
-    public function mailer()
-    {
-        return $this->mailer;
-    }
-
-    /**
-     * Add the mailer instance to allow send() method on this mail
-     *
-     * @param \Ems\Contracts\Mail\Mailer $mailer
-     * @return self
-     **/
-    public function setMailer(Mailer $mailer)
-    {
-        $this->mailer = $mailer;
-        return $this;
-    }
-
-    /**
-     * Send the mail through the attached mailer
-     *
-     * @see self::mailer()
-     * @return \Ems\Contracts\Mail\SendResult
-     **/
-    public function send()
-    {
-        $this->mailer->send($this);
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @return \Ems\Contracts\Mail\MailConfig
-     **/
-    public function configuration()
-    {
-        return $this->configuration;
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @param \Ems\Contracts\Mail\MailConfig $config
-     * @return self
-     **/
-    public function setConfiguration(MailConfig $config)
-    {
-        $this->configuration = $config;
-        return $this;
     }
 
     /**

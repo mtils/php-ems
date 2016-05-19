@@ -24,8 +24,15 @@ interface MessageContent extends Identifiable
     /**
      * Returns the configuration which will build the message
      *
-     * @return \Ems\Contracts\Mail\Configuration
+     * @return \Ems\Contracts\Mail\MailConfig
      **/
-    public function configuration();
+    public function config();
+
+    /**
+     * Return the person which wrote the content
+     *
+     * @return mixed
+     **/
+    public function originator();
 
 }

@@ -168,7 +168,7 @@ interface Message
      *
      * @return \Ems\Contracts\Mail\MailConfig
      **/
-    public function configuration();
+    public function config();
 
     /**
      * Set the mail configuration which builds this mail
@@ -176,6 +176,38 @@ interface Message
      * @param \Ems\Contracts\Mail\MailConfig $config
      * @return self
      **/
-    public function setConfiguration(MailConfig $config);
+    public function setConfig(MailConfig $config);
+
+    /**
+     * Return a recipient (object) or a string. The actual string will be returned
+     * by \Ems\Mail\AddressExtractor
+     *
+     * @return mixed
+     **/
+    public function recipient();
+
+    /**
+     * Set the recipient (object)
+     *
+     * @param mixed $recipient
+     * @return self
+     **/
+    public function setRecipient($recipient);
+
+    /**
+     * Return the originator (object). The string extracted by
+     * \Ems\Contracts\Mail\AddressExtractor will be used as from
+     *
+     * @return mixed
+     **/
+    public function originator();
+
+    /**
+     * Set a originator (object)
+     *
+     * @param mixed $originator
+     * @return self
+     **/
+    public function setOriginator($originator);
 
 }

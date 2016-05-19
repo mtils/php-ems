@@ -120,17 +120,17 @@ class Mailer implements MailerContract
     /**
      * {@inheritdoc}
      *
-     * @param string $resourceId A resource id like registrations.activate
+     * @param string $resourceName A resource id like registrations.activate
      * @param array $data (optional) The view vars (subject, body, ...)
      * @param callable $callback (optional) A closure to modify the mail(s) before send
      * @return \Ems\Contracts\Mail\SendResult
      **/
-    public function send($resourceId, array $data=[], $callback=null)
+    public function send($resourceName, array $data=[], $callback=null)
     {
 
         $recipients = $this->finalRecipients($this->to);
 
-        $config = $this->configProvider->configFor($resourceId, $data);
+        $config = $this->configProvider->configFor($resourceName);
 
         $result = $this->newSendResult($this->transport);
 
@@ -139,9 +139,9 @@ class Mailer implements MailerContract
             $message = $this->transport->newMessage();
 
             $message->setMailer($this);
-            $message->setConfiguration($config);
+            $message->setRecipient($recipient);
 
-            $this->composer->fill($message, $recipient, $data);
+            $this->composer->fill($config, $message, $data);
 
             if (is_callable($callback)) {
                 call_user_func($callback, $message);

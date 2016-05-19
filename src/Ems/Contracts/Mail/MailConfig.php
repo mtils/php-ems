@@ -8,10 +8,6 @@ use Ems\Contracts\Core\AppliesToResource;
 interface MailConfig extends Named, AppliesToResource
 {
 
-    const SUBJECT = 'subject';
-
-    const BODY = 'body';
-
     /**
      * Return a parent MailConfig
      *

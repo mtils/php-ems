@@ -164,10 +164,10 @@ class MailerTest extends TestCase
         $recipients = ['foo@bar.de'];
 
         $message->shouldReceive('setMailer')
-                ->shouldReceive('setConfiguration');
+                ->shouldReceive('setRecipient');
 
         $configProvider->shouldReceive('configFor')
-                       ->with($resourceId, $data)
+                       ->with($resourceId)
                        ->atLeast()->once()
                        ->andReturn($config);
 
@@ -176,7 +176,7 @@ class MailerTest extends TestCase
                   ->andReturn($message);
 
         $composer->shouldReceive('fill')
-                 ->with($message, $recipients[0], $data);
+                 ->with($config, $message, $data);
 
         $transport->shouldReceive('send')
                   ->with($message)
@@ -207,10 +207,11 @@ class MailerTest extends TestCase
         $recipients = ['foo@bar.de', 'bar@foo.de', 'nobody@somewhere.de'];
 
         $message->shouldReceive('setMailer')
-                ->shouldReceive('setConfiguration');
+                ->shouldReceive('setConfig')
+                ->shouldReceive('setRecipient');
 
         $configProvider->shouldReceive('configFor')
-                       ->with($resourceId, $data)
+                       ->with($resourceId)
                        ->atLeast()->once()
                        ->andReturn($config);
 

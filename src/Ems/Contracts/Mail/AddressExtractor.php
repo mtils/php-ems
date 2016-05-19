@@ -8,23 +8,23 @@ namespace Ems\Contracts\Mail;
  * object. This caster doesnt force your user class to implement another
  * interface.
  **/
-interface RecipientCaster
+interface AddressExtractor
 {
 
     /**
      * Extract the email address of the passed recipient
      *
-     * @param mixed $reciepient
+     * @param mixed $contact
      * @return string The email address
      **/
-    public function email($recipient);
+    public function email($contact);
 
     /**
      * Extract the name of the passed recipient. If there is no, return null
      *
-     * @param mixed $reciepient
+     * @param mixed $contact
      * @return string|null
      **/
-    public function name($recipient);
+    public function name($contact);
 
 }
