@@ -30,6 +30,8 @@ class NamedObject implements Named
      * {@inheritdoc}
      *
      * @return mixed (int|string)
+     *
+     * @see \Ems\Contracts\Core\Identifiable
      **/
     public function getId()
     {
@@ -40,6 +42,8 @@ class NamedObject implements Named
      * {@inheritdoc}
      *
      * @return string
+     *
+     * @see \Ems\Contracts\Core\Named
      **/
     public function getName()
     {
