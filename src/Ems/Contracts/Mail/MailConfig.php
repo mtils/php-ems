@@ -3,8 +3,9 @@
 namespace Ems\Contracts\Mail;
 
 use Ems\Contracts\Core\Named;
+use Ems\Contracts\Core\AppliesToResource;
 
-interface MailConfig extends Named
+interface MailConfig extends Named, AppliesToResource
 {
 
     const SUBJECT = 'subject';
@@ -26,10 +27,9 @@ interface MailConfig extends Named
     public function children();
 
     /**
-     * Return a list of recipients. You should consider to build an iterator
-     * for deferred loading of recipients
+     * Return the recipient list
      *
-     * @return \Traversable
+     * @return \Ems\Contracts\Mail\RecipientList
      **/
     public function recipientList();
 
