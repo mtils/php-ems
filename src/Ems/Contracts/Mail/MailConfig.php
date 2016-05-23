@@ -8,6 +8,29 @@ use Ems\Contracts\Core\AppliesToResource;
 interface MailConfig extends Named, AppliesToResource
 {
 
+
+    /**
+     * For mails managed by "the system". Activations, Registrations, ledgers
+     * Can be used at a category mark or something like that
+     *
+     * @var int
+     **/
+    const SYSTEM = 1;
+
+    /**
+     * For mails managed by a newsletter system.
+     *
+     * @var int
+     **/
+    const NEWSLETTER = 2;
+
+    /**
+     * Manually written mails
+     *
+     * @var int
+     **/
+    const USER = 3;
+
     /**
      * Return a parent MailConfig
      *
@@ -49,14 +72,6 @@ interface MailConfig extends Named, AppliesToResource
      * @return string
      **/
     public function sender();
-
-    /**
-     * Return the sender name for this email (its name)
-     *
-     * @return string
-     **/
-    public function senderName();
-
 
     /**
      * Return if mails of occurrences of the schedule will be moderated (written)
