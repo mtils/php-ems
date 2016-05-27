@@ -1,0 +1,22 @@
+{
+    "name": "ems/graphics",
+    "description": "Testing Helpers",
+    "type": "library",
+    "require": {
+        "php": ">=5.4.0",
+        "ems/contracts": "0.1.*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Ems\\Graphics\\": ""
+        }
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Michael Tils",
+            "email": "mtils@web-utils.de"
+        }
+    ],
+    "minimum-stability": "dev"
+}

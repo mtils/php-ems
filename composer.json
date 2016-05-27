@@ -14,7 +14,8 @@
         "ems/contracts": "self.version",
         "ems/core": "self.version",
         "ems/mail": "self.version",
-        "ems/testing": "self.version"
+        "ems/testing": "self.version",
+        "ems/graphics": "self.version"
     },
     "autoload": {
         "psr-4": {
