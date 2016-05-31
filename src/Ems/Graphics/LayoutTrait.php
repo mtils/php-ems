@@ -52,7 +52,7 @@ trait LayoutTrait
      **/
     public function rowCount()
     {
-        return max(array_keys($this->_layout));
+        return count($this->_layout);
     }
 
     /**
@@ -77,11 +77,11 @@ trait LayoutTrait
      **/
     public function setItem($row, $column, LayoutItem $item)
     {
-        if ($row >= $this->getMaxRows()) {
+        if ($this->rowExceedsMax($row)) {
             throw new OutOfBoundsException("You cannot add more than " . $this->getMaxRows() . ' rows');
         }
 
-        if ($column >= $this->getMaxColumns()) {
+        if ($this->columnExceedsMax($column)) {
             throw new OutOfBoundsException("You cannot add more than " . $this->getMaxColumns() . ' columns');
         }
 
@@ -206,12 +206,28 @@ trait LayoutTrait
 
         $items = [];
 
-        foreach ($this->_layout as $row) {
+        foreach ($this->_layout as $row=>$unused) {
             foreach ($this->_layout[$row] as $column=>$item) {
                 $items[] = $item;
             }
         }
 
         return $items;
+    }
+    
+    protected function rowExceedsMax($row)
+    {
+        if ($this->getMaxRows() == 0) {
+            return false;
+        }
+        return $row >= $this->getMaxRows();
+    }
+
+    protected function columnExceedsMax($column)
+    {
+        if ($this->getMaxColumns() == 0) {
+            return false;
+        }
+        return $column >= $this->getMaxColumns();
     }
 }
