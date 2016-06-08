@@ -4,13 +4,25 @@ namespace Ems\Model\Eloquent;
 
 use InvalidArgumentException;
 use Ems\Contracts\Core\Identifiable;
-use Ems\Contracts\Core\Repository as RepositoryContract;
+use Ems\Contracts\Core\ExtendableRepository;
+use Ems\Core\ExtendableRepositoryTrait;
 use Illuminate\Database\Eloquent\Model as EloquentModel;
+use Ems\Testing\Cheat;
+use DateTime;
 
-class Repository implements RepositoryContract
+class Repository implements ExtendableRepository
 {
 
+    use ExtendableRepositoryTrait;
+
     protected $model;
+
+    protected $jsonableAttributes = [];
+
+    /**
+     * @var callable
+     **/
+    protected $attributeFilter;
 
     public function __construct(EloquentModel $model)
     {
@@ -26,7 +38,19 @@ class Repository implements RepositoryContract
      **/
     public function get($id)
     {
-        return $this->model->find($id);
+
+        $query = $this->model->newQuery();
+
+        $this->publish('getting', $query);
+
+        if (!$model = $query->find($id)) {
+            return;
+        }
+
+        $this->publish('got', $model);
+
+        return $model;
+
     }
 
     /**
@@ -42,7 +66,7 @@ class Repository implements RepositoryContract
             return $model;
         }
 
-        throw new NotFoundException("No results for id $id");
+        throw (new NotFoundException("No results for id $id"))->setModel(get_class($this->model));
     }
 
     /**
@@ -53,7 +77,9 @@ class Repository implements RepositoryContract
      **/
     public function make(array $attributes=[])
     {
-        return $this->model->newInstance($attributes);
+        $model = $this->model->newInstance($attributes);
+        $this->publish('made', $model);
+        return $model;
     }
 
     /**
@@ -65,7 +91,18 @@ class Repository implements RepositoryContract
      **/
     public function store(array $attributes)
     {
-        return $this->model->create($attributes);
+
+        $model = $this->make([]);
+
+        $this->validate($attributes, 'store');
+
+        $this->fill($model, $attributes);
+
+        $this->publish('storing', $model, $attributes);
+        $this->save($model);
+        $this->publish('stored', $model, $attributes);
+
+        return $model;
     }
 
     /**
@@ -77,7 +114,10 @@ class Repository implements RepositoryContract
      **/
     public function fill(Identifiable $model, array $attributes)
     {
-        $model->fill($attributes);
+        $this->publish('filling', $model, $attributes);
+        $filtered = $this->toModelAttributes($model, $attributes);
+        $model->fill($filtered);
+        $this->publish('filled', $model, $attributes);
         return true;
     }
 
@@ -86,7 +126,7 @@ class Repository implements RepositoryContract
      * Return true if the model was saved, false if not. If an error did occur,
      * throw an exception. Never return false on errors. Return false if for
      * example the attributes did not change. Throw exceptions on errors.
-     * If the save action did alter other attributes that the passed, the have
+     * If the save action did alter other attributes then the passed, the have
      * to be updated inside the passed model. (Timestamps, autoincrements,...)
      * The passed model has to be full up to date after updating it
      *
@@ -99,11 +139,17 @@ class Repository implements RepositoryContract
 
         $this->checkIsModel($model);
 
+        $this->validate($newAttributes, 'update');
+
         if (!$this->fill($model, $newAttributes)) {
             return false;
         }
 
-        $model->save();
+        $this->publish('updating', $model, $newAttributes);
+
+        $this->save($model);
+
+        $this->publish('updated', $model, $newAttributes);
 
         return true;
 
@@ -121,7 +167,10 @@ class Repository implements RepositoryContract
     public function save(Identifiable $model)
     {
         $this->checkIsModel($model);
-        return $model->save();
+        $this->publish('saving', $model);
+        $result = $model->save();
+        $this->publish('saved', $model);
+        return $result;
     }
 
     /**
@@ -133,7 +182,112 @@ class Repository implements RepositoryContract
     public function delete(Identifiable $model)
     {
         $this->checkIsModel($model);
+        $this->publish('deleting', $model);
         $model->delete();
+        $this->publish('deleted', $model);
+    }
+
+    /**
+     * Assign a custim attributeFilter. A attributefilter is just a callable
+     * which gets key and value passed and returns true to apply the attribute
+     * and false to remove it
+     *
+     * @param callable $filter
+     * @return self
+     **/
+    public function filterAttributesBy(callable $filter)
+    {
+        $this->attributeFilter = $filter;
+        return $this;
+    }
+
+    /**
+     * Return the attributes which should also be stored even if they are not scalar
+     *
+     * @return array
+     **/
+    public function getJsonableAttributes()
+    {
+        if ($this->jsonableAttributes !== null) {
+            return $this->jsonableAttributes;
+        }
+
+        $this->jsonableAttributes = [];
+
+        foreach(Cheat::get($this->model, 'casts') as $key=>$cast) {
+            if (in_array($cast, ['array', 'json', 'object', 'collection'], true)) {
+                $this->jsonableAttributes[] = $key;
+            }
+        }
+        return $this->jsonableAttributes;
+
+    }
+
+    /**
+     * Set jsonable attributes so they get not filtered while saving
+     * attributes
+     *
+     * @param string|array $attributes
+     * @return self
+     **/
+    public function setJsonableAttributes($attributes) {
+        $this->jsonableAttributes = (array)$attributes;
+        return $this;
+    }
+
+    /**
+     * Return the internal attributefilter. If none is present, create one
+     *
+     * @return callable
+     * @see self::filterAttributesBy
+     **/
+    protected function getAttributeFilter()
+    {
+        if ($this->attributeFilter) {
+            return $this->attributeFilter;
+        }
+        return function($key, $value) {
+            if (in_array($key, $this->getJsonableAttributes())) {
+                return !is_scalar($value);
+            }
+            return is_scalar($value) || $value instanceof DateTime;
+        };
+    }
+
+    /**
+     * Hook into this method to do some special validation, even if the data
+     * have to be validated before passing it to the repository
+     *
+     * @param array $attributes
+     * @param string $action
+     * @return bool
+     * @throws \Illuminate\Contracts\Validation\ValidationException
+     **/
+    protected function validate(array $attributes, $action='update'){}
+
+    /**
+     * Cast an clean the incoming attributes so that this repository can
+     * savely pass them to the database
+     *
+     * @param mixed $model
+     * @param array $attributes
+     * @return array
+     **/
+    protected function toModelAttributes($model, $attributes)
+    {
+
+        $filtered = [];
+        $filter = $this->getAttributeFilter();
+
+        foreach ($attributes as $key=>$value) {
+
+            if (!$filter($key, $value)) {
+                continue;
+            }
+
+            $filtered[$key] = $value;
+        }
+        return $filtered;
     }
 
     /**
