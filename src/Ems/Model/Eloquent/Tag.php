@@ -14,6 +14,8 @@ class Tag extends EloquentModel implements TagWithGroups
 
     public static $nameKey = 'name';
 
+    protected $guarded = ['id', 'group_id'];
+
     /**
      * {@inheritdoc}
      *
