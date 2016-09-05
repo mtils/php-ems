@@ -3,8 +3,9 @@
 namespace Ems\Core;
 
 use Ems\Contracts\Core\Named;
+use Ems\Contracts\Core\AppliesToResource;
 
-class NamedObject implements Named
+class NamedObject implements Named, AppliesToResource
 {
     /**
      * @var mixed
@@ -17,13 +18,19 @@ class NamedObject implements Named
     protected $name = '';
 
     /**
+     * @var string
+     **/
+    protected $resourceName;
+
+    /**
      * @param mixed  $id   (optional)
      * @param string $name (optional)
      **/
-    public function __construct($id = null, $name = '')
+    public function __construct($id = null, $name = '', $resourceName='')
     {
         $this->id = $id;
         $this->name = $name;
+        $this->resourceName = $resourceName;
     }
 
     /**
@@ -51,6 +58,18 @@ class NamedObject implements Named
     }
 
     /**
+     * {@inheritdoc}
+     *
+     * @return string
+     *
+     * @see \Ems\Contracts\Core\AppliesToResource
+     **/
+    public function resourceName()
+    {
+        return $this->resourceName;
+    }
+
+    /**
      * Set the id.
      *
      * @param mixed $id
@@ -75,6 +94,19 @@ class NamedObject implements Named
     {
         $this->name = $name;
 
+        return $this;
+    }
+
+    /**
+     * Set the resource name.
+     *
+     * @param string $resourceName
+     *
+     * @return self
+     **/
+    public function setResourceName($resourceName)
+    {
+        $this->resourceName = $resourceName;
         return $this;
     }
 }
