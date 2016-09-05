@@ -28,7 +28,7 @@ class MessageComposer implements ComposerContract
                                 MessageContentProvider $contentProvider=null)
     {
         $this->extractor = $extractor ?: new GuessingAddressExtractor;
-        $this->bodyRenderer = $bodyRenderer ?: new PassedDataBodyRenderer;
+        $this->bodyRenderer = $renderer ?: new PassedDataBodyRenderer;
         $this->contentProvider = $contentProvider;
         $this->dataProcessor = function($config, &$data){};
     }
@@ -54,7 +54,9 @@ class MessageComposer implements ComposerContract
 
         $this->assureContentsInData($config, $viewData, $plannedSendDate);
 
-        call_user_func($this->dataProcessor, $config, $viewData);
+        // call_user_func does not support passing by reference
+        $processor = $this->dataProcessor;
+        $processor($config, $viewData);
 
         $toEmail = $this->extractor->email($recipient);
 
@@ -69,9 +71,9 @@ class MessageComposer implements ComposerContract
             $message->plainText($text);
         }
 
-        if (isset($viewData[self::ORIGINATOR])) {
-            $message->from($this->extractor->email($viewData[self::ORIGINATOR]));
-        }
+        $this->assureFrom($message, $viewData, $config);
+
+        $message->subject($viewData[self::SUBJECT]);
     }
 
     /**
@@ -102,6 +104,16 @@ class MessageComposer implements ComposerContract
         return $this;
     }
 
+    protected function assureFrom(Message $message, array $viewData, MailConfig $config)
+    {
+        if (isset($viewData[self::ORIGINATOR])) {
+            $message->from($this->extractor->email($viewData[self::ORIGINATOR]));
+            return;
+        }
+
+        $message->from($this->extractor->email($this->getSender($config, $message)));
+    }
+
     protected function assureContentsInData(MailConfig $config, array &$data, DateTime $plannedSendDate=null)
     {
 
@@ -115,14 +127,14 @@ class MessageComposer implements ComposerContract
 
     }
 
-    protected function assureFromContentProvider(MailConfig $config, array &$data, DateTime $plannedSendDate=null)
+    protected function assureContentsByProvider(MailConfig $config, array &$data, DateTime $plannedSendDate=null)
     {
 
         if ( isset($data[self::SUBJECT]) && isset($data[self::BODY]) && !$this->preferConfiguredData ) {
             return;
         }
 
-        $content = $this->contentProvider->contentFor($config, $plannedSendDate);
+        $content = $this->contentProvider->contentsFor($config, $plannedSendDate);
 
         if ( isset($data[self::SUBJECT]) && !$content ) {
             return;
@@ -130,6 +142,10 @@ class MessageComposer implements ComposerContract
 
         if ( !$config && !isset($data[self::SUBJECT]) ) {
             throw new UnderflowException('No subject passed and no contents found by provider');
+        }
+
+        if (!$content) {
+            throw new UnderflowException('No content found and nothing passed for config #' . $config->getId());
         }
 
         if ( $originator = $content->originator() ) {
@@ -160,5 +176,9 @@ class MessageComposer implements ComposerContract
             return array_merge($passedData, $configData);
         }
         return array_merge($configData, $passedData);
+    }
+
+    protected function isEmailAddress($contact) {
+        return (filter_var($contact, FILTER_VALIDATE_EMAIL) !== false);
     }
 }

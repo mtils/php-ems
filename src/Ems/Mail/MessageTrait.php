@@ -3,8 +3,8 @@
 
 namespace Ems\Mail;
 
-use Ems\Contracts\Mail\Mailer;
-use Ems\Contracts\Mail\MailConfig;
+use Ems\Contracts\Mail\Mailer as MailerContract;
+use Ems\Contracts\Mail\MailConfig as ConfigContract;
 
 trait MessageTrait
 {
@@ -45,7 +45,7 @@ trait MessageTrait
      * @param \Ems\Contracts\Mail\Mailer $mailer
      * @return self
      **/
-    public function setMailer(Mailer $mailer)
+    public function setMailer(MailerContract $mailer)
     {
         $this->_mailer = $mailer;
         return $this;
@@ -78,7 +78,7 @@ trait MessageTrait
      * @param \Ems\Contracts\Mail\MailConfig $config
      * @return self
      **/
-    public function setConfig(MailConfig $config)
+    public function setConfig(ConfigContract $config)
     {
         $this->_config = $config;
         return $this;

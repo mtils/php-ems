@@ -10,7 +10,7 @@ use Countable;
 
 use Ems\Contracts\Mail\Mailer as MailerContract;
 use Ems\Contracts\Mail\MailConfigProvider;
-use Ems\Contracts\Mail\MessageComposer;
+use Ems\Contracts\Mail\MessageComposer as ComposerContract;
 use Ems\Contracts\Mail\Transport;
 use Ems\Contracts\Mail\Message as MessageContract;
 use Ems\Contracts\Mail\SendResult as ResultContract;
@@ -60,7 +60,7 @@ class Mailer implements MailerContract
      * @param \Ems\Contracts\Mail\MailConfigProvider $configProvider
      **/
     public function __construct(Transport $transport, MailConfigProvider $configProvider,
-                                MessageComposer $composer)
+                                ComposerContract $composer)
     {
         $this->transport = $transport;
         $this->configProvider = $configProvider;
@@ -167,6 +167,7 @@ class Mailer implements MailerContract
      **/
     public function sendMessage(MessageContract $message)
     {
+        $this->overwriteRecipientsIfNeeded($message);
         call_user_func($this->sendingListener, $message);
         return $this->transport->send($message);
     }
@@ -232,12 +233,32 @@ class Mailer implements MailerContract
      **/
     protected function finalRecipients($passedTo)
     {
-        if ($this->overwrittenTo) {
-            return $this->overwrittenTo;
-        }
+//         if ($this->overwrittenTo) {
+//             return $this->overwrittenTo;
+//         }
 
         return $passedTo;
 
+    }
+
+    /**
+     * Clears all recipients of the mail and replaces them with
+     * overwrittenTo if it was set
+     *
+     * @param Ems\Contracts\Mail\Message $message
+     * @see self::alwaysSendTo
+     **/
+    protected function overwriteRecipientsIfNeeded(MessageContract $message)
+    {
+        if (!$overwrittenTo = $this->overwrittenTo()) {
+            return;
+        }
+
+        $message->clearRecipientHeaders();
+
+        foreach ($overwrittenTo as $to) {
+            $message->to($to);
+        }
     }
 
     /**
@@ -264,7 +285,13 @@ class Mailer implements MailerContract
             return $toArgs[0];
         }
 
-        throw new UnexpectedValueException('Unparsable $to parameter');
+        if (is_object($toArgs[0])) {
+            return $toArgs;
+        }
+
+        $typeName = is_object($toArgs[0]) ? get_class($toArgs[0]) : gettype($typeName);
+
+        throw new UnexpectedValueException('Unparsable $to parameter ' . $typeName);
     }
 
     /**
@@ -305,8 +332,11 @@ class Mailer implements MailerContract
             throw new InvalidArgumentException('mergeTransportResult can only merge Ems\Mail\SendResult');
         }
 
-        $mailerResult->addFailedRecipient($transportResult->failures());
         $mailerResult->increment(count($transportResult));
+
+        foreach ($transportResult->failures() as $i=>$failed) {
+            $mailerResult->addFailedRecipient($failed, $transportResult->error($i));
+        }
     }
 
 }

@@ -210,4 +210,25 @@ interface Message
      **/
     public function setOriginator($originator);
 
+    /**
+     * Remove all to, cc and bcc headers to that the target can be overwritten
+     *
+     * @return bool
+     **/
+    public function clearRecipientHeaders();
+
+    /**
+     * Return the subject
+     *
+     * @return string
+     **/
+    public function getSubject();
+
+    /**
+     * Return the (html) body
+     *
+     * @return string
+     **/
+    public function getBody();
+
 }

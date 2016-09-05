@@ -36,14 +36,14 @@ interface MailConfig extends Named, AppliesToResource
      *
      * @return \Ems\Contracts\Mail\MailConfig
      **/
-    public function parent();
+    public function getParent();
 
     /**
      * Return an iterable of children MailConfig objects
      *
      * @return \Traversable|array [\Ems\Contracts\Mail\MailConfig]
-     **\
-    public function children();
+     **/
+    public function getChildren();
 
     /**
      * Return the recipient list

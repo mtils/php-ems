@@ -24,4 +24,12 @@ interface SendResult extends Countable
      **/
     public function transport();
 
+    /**
+     * Return the occured exception whil sending to failedRecipient $i (if available)
+     *
+     * @param int $failedRecipientIndex
+     * @return \Exception
+     **/
+    public function error($failedRecipientIndex);
+
 }

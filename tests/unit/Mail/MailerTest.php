@@ -10,6 +10,7 @@ use Ems\Contracts\Mail\MailConfigProvider;
 use Ems\Contracts\Mail\MessageComposer;
 use Ems\Testing\LoggingCallable;
 use Ems\Testing\Cheat;
+use Ems\Mail\Swift\Message as SwiftMessage;
 
 
 class MailerTest extends TestCase
@@ -120,20 +121,50 @@ class MailerTest extends TestCase
         $this->assertSame($recipients, Cheat::get($replicated, 'to'));
     }
 
-    public function test_finalRecipients_returns_overwritten_to()
-    {
-        $mailer = $this->newMailer();
-        $mailer->alwaysSendTo('me@local');
-        $recipients = Cheat::call($mailer, 'finalRecipients', ['user@remote.de']);
-        $this->assertEquals(['me@local'], $recipients);
-    }
-
     public function test_to_copies_overwrittenTo()
     {
         $mailer = $this->newMailer();
         $mailer->alwaysSendTo('me@local');
         $replicated = $mailer->to('user@remote');
         $this->assertEquals(['me@local'], $replicated->overwrittenTo());
+    }
+
+    public function test_overwrittenTo_overwrites_all_recipient_headers_but_not_message_recipient()
+    {
+        $transport = $this->mockTransport();
+        $mailer = $this->newMailer($transport);
+        $mailer->alwaysSendTo('me@local');
+        $message = $this->mockMessage();
+
+        $transport->shouldReceive('newMessage')->andReturn($message);
+
+        // This one assures that the reciepient will never be overwritten
+        $message->shouldReceive('setRecipient')
+                ->never();
+
+        $message->shouldReceive('to')
+                ->with('user@remote')
+                ->andReturn($message);
+
+        $message->shouldReceive('setMailer')
+                ->with($mailer)
+                ->andReturn($message);
+
+        $message = $mailer->message('user@remote');
+
+        $message->shouldReceive('clearRecipientHeaders')
+                ->atLeast()->once()
+                ->andReturn($message);
+
+        $message->shouldReceive('to')
+                ->atLeast()->once()
+                ->with('me@local')
+                ->andReturn($message);
+
+        $transport->shouldReceive('send')->with($message);
+
+        $mailer->sendMessage($message);
+
     }
 
     /**
@@ -208,7 +239,7 @@ class MailerTest extends TestCase
 
         $message->shouldReceive('setMailer')
                 ->shouldReceive('setConfig')
-                ->shouldReceive('setRecipient');
+                ->shouldReceive('setRecipient')->atLeast()->once();
 
         $configProvider->shouldReceive('configFor')
                        ->with($resourceId)
@@ -267,6 +298,11 @@ class MailerTest extends TestCase
     protected function mockConfig()
     {
         return $this->mock('Ems\Contracts\Mail\MailConfig');
+    }
+
+    protected function swiftMessage()
+    {
+        return new SwiftMessage(new \Swift_Message);
     }
 
 }

@@ -64,7 +64,7 @@ class MailConfig extends NamedObject implements MailConfigContract
      *
      * @return \Ems\Contracts\Mail\MailConfig
      **/
-    public function parent()
+    public function getParent()
     {
         return $this->parent;
     }
@@ -82,8 +82,8 @@ class MailConfig extends NamedObject implements MailConfigContract
      * {@inheritdoc}
      *
      * @return \Traversable|array[\Ems\Contracts\Mail\MailConfig]
-     **\
-    public function children()
+     **/
+    public function getChildren()
     {
         return $this->children;
     }

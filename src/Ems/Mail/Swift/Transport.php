@@ -9,6 +9,7 @@ use Ems\Mail\TransportTrait;
 use Ems\Mail\SendResult;
 use Swift_Message;
 use Swift_Mailer;
+use Exception;
 
 class Transport implements TransportContract
 {
@@ -44,22 +45,26 @@ class Transport implements TransportContract
      **/
     public function send(MessageContract $message)
     {
-
-        $this->instanceCheck($message);
         $this->callSendingListener($message);
 
         $swiftMessage = $this->getSwiftMessage($message);
 
         $failedRecipients = [];
 
-        $this->swiftMailer->send($swiftMessage, $failedRecipients);
-
         $result = $this->newResult();
 
-        $result->increment();
-        $result->addFailedRecipient($failedRecipients);
+        try {
 
-        $this->callSentListener($message);
+            $this->swiftMailer->send($swiftMessage, $failedRecipients);
+
+            $result->increment();
+            $result->addFailedRecipient($failedRecipients);
+
+            $this->callSentListener($message);
+
+        } catch (Exception $e) {
+            $result->addFailedRecipient($this->guessRecipient($message), $e);
+        }
 
         return $result;
 
@@ -86,5 +91,31 @@ class Transport implements TransportContract
     protected function newResult()
     {
         return new SendResult($this);
+    }
+
+    /**
+     * Try to guess the reciepient of the message to add it to the failures
+     *
+     * @param \Ems\Contracts\Mail\Message $message
+     * @return mixed
+     **/
+    protected function guessRecipient(MessageContract $message)
+    {
+        if ($recipient = $message->recipient()) {
+            return $recipient;
+        }
+
+        $swiftMessage = $this->getSwiftMessage($message);
+
+        if (!$to = $swiftMessage->getTo()) {
+            return;
+        }
+
+        if (!count($to)) {
+            return;
+        }
+
+        return $to[0];
+
     }
 }

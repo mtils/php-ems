@@ -8,6 +8,7 @@ use Ems\Contracts\Mail\BodyRenderer;
 
 /**
  * This is a bogus renderer which just returns the passed body
+ **/
 class PassedDataBodyRenderer implements BodyRenderer
 {
     /**

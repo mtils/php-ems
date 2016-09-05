@@ -10,16 +10,18 @@ use Ems\Contracts\Mail\AddressExtractor;
 class GuessingAddressExtractor implements AddressExtractor
 {
 
-    $possibleEmailMethods = [
+    protected $possibleEmailMethods = [
         'getEmail',
         'getEmailForPasswordReset',
         'getAuthEmail'
     ];
 
-    $possibleEmailProperties = [
+    protected $possibleEmailProperties = [
         'email',
         'email2'
     ];
+
+    protected $nameToEmailMap = [];
 
     /**
      * {@inheritdoc}
@@ -29,6 +31,10 @@ class GuessingAddressExtractor implements AddressExtractor
      **/
     public function email($contact)
     {
+
+        if ($this->isStringLike($contact) && $this->isMapped($contact)) {
+            return $this->mappedEmail($contact);
+        }
 
         if ($this->isStringLike($contact) && $this->isEmailAddress($contact)) {
             return $contact;
@@ -63,13 +69,32 @@ class GuessingAddressExtractor implements AddressExtractor
     {
     }
 
+    public function isMapped($name)
+    {
+        return isset($this->nameToEmailMap["$name"]);
+    }
+
+    public function mappedEmail($name)
+    {
+        return isset($this->nameToEmailMap["$name"]) ? $this->nameToEmailMap["$name"] : '';
+    }
+
+    public function mapToEmail($name, $email)
+    {
+        $this->nameToEmailMap[$name] = $email;
+        return $this;
+    }
+
     protected function isStringLike($contact)
     {
-        return (is_string($contact) || method_exists($contact, '__toString'));
+        return (is_string($contact) || method_exists($contact, '__toString')) && !method_exists($contact, 'jsonSerialize');
     }
 
     protected function isEmailAddress($contact) {
-        return (filter_var($value, FILTER_VALIDATE_EMAIL) !== false);
+        if ($contact instanceof Illuminate\Database\Eloquent\Model) {
+            return false;
+        }
+        return (filter_var($contact, FILTER_VALIDATE_EMAIL) !== false);
     }
 
 }

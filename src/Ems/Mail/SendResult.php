@@ -2,6 +2,8 @@
 
 namespace Ems\Mail;
 
+use Exception;
+use InvalidArgumentException;
 use Ems\Contracts\Mail\SendResult as ResultContract;
 use Ems\Contracts\Mail\Transport;
 
@@ -9,6 +11,8 @@ class SendResult implements ResultContract
 {
 
     protected $failedRecipients = [];
+
+    protected $errors = [];
 
     protected $recipients = [];
 
@@ -42,6 +46,17 @@ class SendResult implements ResultContract
     }
 
     /**
+     * {@inheritdoc}
+     *
+     * @param int $failedRecipientIndex
+     * @return \Exception
+     **/
+    public function error($failedRecipientIndex)
+    {
+        return isset($this->errors[$failedRecipientIndex]) ? $this->errors[$failedRecipientIndex] : null;
+    }
+
+    /**
      * Returns the amount of sent messages
      *
      * @return int
@@ -67,13 +82,26 @@ class SendResult implements ResultContract
      * Add one (string) or multiple (array) failed recipients
      *
      * @param string|array $failedRecipient
+     * @patam \Exception $error (optional)
      * @return $this;
      **/
-    public function addFailedRecipient($failedRecipient)
+    public function addFailedRecipient($failedRecipient, Exception $e=null)
     {
-        foreach ((array)$failedRecipient as $recipient) {
+
+        $failedRecipients = (array)$failedRecipient;
+
+        if (count($failedRecipients) > 1 && $e) {
+            throw new InvalidArgumentException("If you pass an exception you can only pass one failed reciepient");
+        }
+
+        foreach ($failedRecipients as $recipient) {
             $this->failedRecipients[] = $recipient;
         }
+
+        if ($e) {
+            $this->errors[count($this->failedRecipients)-1] = $e;
+        }
+
         return $this;
     }
 

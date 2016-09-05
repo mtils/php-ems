@@ -10,11 +10,14 @@ use Ems\Mail\MessageTrait;
 use Swift_Message;
 use Swift_Image;
 use Swift_Attachment;
+use Swift_Mime_Headers_MailboxHeader;
 
 class Message implements MessageContract
 {
 
     use MessageTrait;
+
+    protected $recipientHeaderNames = ['to', 'cc', 'bcc'];
 
     /**
      * The Swift Message instance.
@@ -215,6 +218,46 @@ class Message implements MessageContract
     {
         $image = Swift_Image::newInstance($data, $name, $contentType);
         return $this->swiftMessage->embed($image);
+    }
+
+    /**
+     * Return the subject
+     *
+     * @return string
+     **/
+    public function getSubject()
+    {
+        return $this->swiftMessage->getSubject();
+    }
+
+    /**
+     * Return the (html) body
+     *
+     * @return string
+     **/
+    public function getBody()
+    {
+        return $this->swiftMessage->getBody();
+    }
+
+    /**
+     * Remove all to, cc and bcc headers to that the target can be overwritten
+     *
+     * @return bool
+     **/
+    public function clearRecipientHeaders()
+    {
+        $headers = $this->swiftMessage->getHeaders();
+
+        foreach ($headers->getAll() as $header) {
+
+            if (!$header instanceof Swift_Mime_Headers_MailboxHeader) {
+                continue;
+            }
+            if (in_array(strtolower($header->getFieldName()), $this->recipientHeaderNames)) {
+                $headers->removeAll($header->getFieldName());
+            }
+        }
     }
 
     /**
