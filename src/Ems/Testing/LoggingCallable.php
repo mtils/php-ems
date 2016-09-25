@@ -18,6 +18,21 @@ class LoggingCallable implements Countable
     protected $calls = [];
 
     /**
+     * @var callable
+     **/
+    protected $handler;
+
+    /**
+     * Optionally pass a callable to process the actual call
+     *
+     * @param callable $handler (optional)
+     **/
+    public function __construct(callable $handler=null)
+    {
+        $this->handler = $handler;
+    }
+
+    /**
      * The fake callable
      *
      * @return void
@@ -25,6 +40,9 @@ class LoggingCallable implements Countable
     public function __invoke()
     {
         $this->calls[] = func_get_args();
+        if ($this->handler) {
+            return call_user_func_array($this->handler, func_get_args());
+        }
     }
 
     /**
