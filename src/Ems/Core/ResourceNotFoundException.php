@@ -3,11 +3,11 @@
 
 namespace Ems\Core;
 
-use RuntimeException;
+use OutOfBoundsException;
 use Ems\Contracts\Core\NotFound;
 
 /**
  * Throw a ResourceNotFoundException if a resource like a database entry
  * or a file or a session wasnt found
  **/
-class ResourceNotFoundException extends RuntimeException implements NotFound{}
+class ResourceNotFoundException extends OutOfBoundsException implements NotFound{}
