@@ -10,14 +10,18 @@
         "phpunit/phpunit": "~4.0",
         "illuminate/mail": "5.*",
         "illuminate/database": "5.*",
-        "swiftmailer/swiftmailer": "~5.1"
+        "swiftmailer/swiftmailer": "~5.1",
+        "patchwork/jsqueeze": "~2.0",
+        "natxet/cssmin": "~3.0",
+        "tedivm/jshrink": "~1.1"
     },
     "replace": {
         "ems/contracts": "self.version",
         "ems/core": "self.version",
         "ems/mail": "self.version",
         "ems/testing": "self.version",
-        "ems/graphics": "self.version"
+        "ems/graphics": "self.version",
+        "ems/assets": "self.version"
     },
     "autoload": {
         "psr-4": {
