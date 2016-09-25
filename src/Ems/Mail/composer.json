@@ -4,7 +4,8 @@
     "type": "library",
     "require": {
         "php": ">=5.4.0",
-        "ems/contracts": "0.1.*"
+        "ems/contracts": "0.1.*",
+        "ems/core": "0.1.*"
     },
     "autoload": {
         "psr-4": {
