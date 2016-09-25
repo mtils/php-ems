@@ -81,7 +81,7 @@ interface Repository
      * Delete the passed model.
      *
      * @param \Ems\Contracts\Core\Identifiable $model
-     * @return boolean The deleted resource
+     * @return boolean
      **/
     public function delete(Identifiable $model);
 
