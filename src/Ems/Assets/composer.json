@@ -1,0 +1,28 @@
+{
+    "name": "ems/assets",
+    "description": "The ems asset queue",
+    "type": "library",
+    "require": {
+        "php": ">=5.4.0",
+        "ems/contracts": "0.1.*",
+        "ems/core": "0.1.*"
+    },
+    "suggest": {
+        "patchwork/jsqueeze": "Add support to compile minified javascript and replace its urls",
+        "natxet/cssmin": "Add support to compile minified css",
+        "tedivm/jshrink": "Add support to compile minified javascript as alternative to jqueeze"
+    },
+    "autoload": {
+        "psr-4": {
+            "Ems\\Assets\\": ""
+        }
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Michael Tils",
+            "email": "mtils@web-utils.de"
+        }
+    ],
+    "minimum-stability": "dev"
+}
