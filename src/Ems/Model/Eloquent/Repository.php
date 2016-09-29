@@ -250,6 +250,11 @@ class Repository implements ExtendableRepository
             if (in_array($key, $this->getJsonableAttributes())) {
                 return !is_scalar($value);
             }
+
+            if (ends_with($key, '_id') && trim($value) === '') {
+                return false;
+            }
+
             return is_scalar($value) || $value instanceof DateTime;
         };
     }
@@ -267,7 +272,8 @@ class Repository implements ExtendableRepository
 
     /**
      * Cast an clean the incoming attributes so that this repository can
-     * savely pass them to the database
+     * savely pass them to the database.
+     * The attributes have to be validated before passing them to this method.
      *
      * @param mixed $model
      * @param array $attributes
