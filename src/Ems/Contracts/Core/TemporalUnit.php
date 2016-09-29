@@ -1,0 +1,107 @@
+<?php
+
+
+namespace Ems\Contracts\Core;
+
+
+interface TemporalUnit
+{
+    const YEAR = 'Y';
+
+    const MONTH = 'm';
+
+    const DAY = 'd';
+
+    const HOUR = 'H';
+
+    const MINUTE = 'i';
+
+    const SECOND = 's';
+
+    /**
+     * Return the type pf unit (self::YEAR|self::MONTH...)
+     *
+     * @return string
+     * @see self::YEAR
+     **/
+    public function unit();
+
+    /**
+     * Return the timezone
+     *
+     * @return \DateTimeZone
+     **/
+    public function getTimeZone();
+
+    /**
+     * Return the timezone offset
+     *
+     * @return int
+     **/
+    public function getOffset();
+
+    /**
+     * Format the date to a string
+     *
+     * @param string
+     * @return string
+     **/
+    public function format($format);
+
+    /**
+     * Modify the date
+     *
+     * @param string
+     **/
+    public function modify($string);
+
+    /**
+     * Set year, month and day
+     *
+     * @param int $year
+     * @param int $month
+     * @param int $day
+     * @return self
+     **/
+    public function setDate($year, $month, $day);
+
+    /**
+     * Set hour, minute and second
+     *
+     * @param int $hour
+     * @param int $minute
+     * @param int $second (optional)
+     * @return self
+     **/
+    public function setTime($hour, $minute, $second=0);
+
+    /**
+     * Use properties for all units
+     * Must support year, month, day, hour, minute, second, timezone, timestamp,
+     * offset, unit
+     *
+     * @param mixed $property
+     * @return int
+     **/
+    public function __get($property);
+
+    /**
+     * Use properties for all units
+     * @see self::__get() for a list of supported names
+     *
+     * @param string $property
+     * @param mixed $value
+     * @return int
+     **/
+    public function __set($property, $value);
+
+    /**
+     * Return true on allowed properties
+     * @see self::__get() for a list of supported names
+     *
+     * @param string $property
+     * @return bool
+     **/
+    public function __isset($property);
+
+}
