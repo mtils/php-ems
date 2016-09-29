@@ -45,10 +45,12 @@ class GlobalTaggingRepository implements RepositoryContract
     public function all()
     {
         $query = $this->model->newQuery()
-                             ->orderBy($this->model->getNameKey());
+                             ->select($this->model->getTable().'.*')
+                             ->orderBy($this->model->getNameKey())
+                             ->distinct();
 
         if ($this->resourceName) {
-            $query->join($this->relationTable, $this->tagKeyName(), '=', $this->foreignKeyName());
+            $query->join($this->relationTable, $this->tagKeyName(), '=', $this->model->getTable().'.'.$this->model->getKeyName());
             $query->where($this->resourceNameKey, $this->resourceName);
         }
 
