@@ -21,7 +21,9 @@
         "ems/mail": "self.version",
         "ems/testing": "self.version",
         "ems/graphics": "self.version",
-        "ems/assets": "self.version"
+        "ems/assets": "self.version",
+        "ems/skeleton": "self.version",
+        "ems/model": "self.version"
     },
     "autoload": {
         "psr-4": {
