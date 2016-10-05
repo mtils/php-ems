@@ -44,6 +44,11 @@ class Manager implements ManagerContract
     protected $groupRenderers = [];
 
     /**
+     * @var bool
+     **/
+    protected $checkBuilds = true;
+
+    /**
      * @var array
      **/
     protected $defaultOptions = [
@@ -222,6 +227,20 @@ class Manager implements ManagerContract
     }
 
     /**
+     * Bypass any build configurations, useful for developing. If
+     * you pass true (or nothing) the manager will not look for compiled
+     * builds or files and always return the plain collection
+     *
+     * @param bool (optional)
+     * @return self
+     **/
+    public function bypassBuilds($check=true)
+    {
+        $this->checkBuilds = !$check;
+        return $this;
+    }
+
+    /**
      * Find out if a custom renderer for $group was assigned
      *
      * @param string
@@ -253,7 +272,7 @@ class Manager implements ManagerContract
     protected function getBuildConfig($group)
     {
 
-        if (!$this->buildRepository) {
+        if (!$this->buildRepository || !$this->checkBuilds) {
             return;
         }
 
