@@ -147,11 +147,11 @@ class CssUrlReplaceParser implements TextParser
     protected function inFileAndOutFile(array $config)
     {
 
-        if (!isset($config['file_path'])) {
-            throw new InvalidArgumentException('Config misses "file_path" key');
+        if (!isset($config['file_path']) || !$config['file_path']) {
+            throw new InvalidArgumentException('Config misses "file_path"');
         }
-        if (!isset($config['target_path'])) {
-            throw new InvalidArgumentException('Config misses "target_path" key');
+        if (!isset($config['target_path']) || !$config['target_path']) {
+            throw new InvalidArgumentException('Config misses "target_path"');
         }
 
         return [$config['file_path'], $config['target_path']];
