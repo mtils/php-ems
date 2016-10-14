@@ -32,7 +32,7 @@ interface Storage extends ArrayAccess
     public function persist();
 
     /**
-     * Persists all data, whatever the storage uses to store the data
+     * Clears all data, whatever the storage uses to store the data
      *
      * @return bool (if successfull)
      **/

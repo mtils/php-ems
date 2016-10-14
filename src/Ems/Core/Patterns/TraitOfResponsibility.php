@@ -52,6 +52,20 @@ trait TraitOfResponsibility
     }
 
     /**
+     * Add a candidate the none of this class was added
+     *
+     * @param object $canditate
+     * @return self
+     **/
+    public function addIfNoneOfClass($candidate)
+    {
+        if ($this->containsClass($candidate)) {
+            return $this;
+        }
+        return $this->add($candidate);
+    }
+
+    /**
      * Remove a candidate from the chain
      *
      * @param object $candidate

@@ -16,14 +16,17 @@
         "tedivm/jshrink": "~1.1"
     },
     "replace": {
+        "ems/assets": "self.version",
+        "ems/cache": "self.version",
         "ems/contracts": "self.version",
         "ems/core": "self.version",
-        "ems/mail": "self.version",
-        "ems/testing": "self.version",
         "ems/graphics": "self.version",
-        "ems/assets": "self.version",
+        "ems/mail": "self.version",
+        "ems/model": "self.version",
         "ems/skeleton": "self.version",
-        "ems/model": "self.version"
+        "ems/testing": "self.version",
+        "ems/view": "self.version",
+        "ems/xtype": "self.version"
     },
     "autoload": {
         "psr-4": {

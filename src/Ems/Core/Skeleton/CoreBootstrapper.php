@@ -29,6 +29,7 @@ class CoreBootstrapper extends Bootstrapper
 
     public function bind()
     {
+
         parent::bind();
 
         $this->app->resolving(PathFinder::class, function($paths){
@@ -38,6 +39,7 @@ class CoreBootstrapper extends Bootstrapper
         $this->app->resolving(StringConverterChain::class, function($chain){
             $this->addStringConverters($chain);
         });
+
     }
 
     protected function assignBaseAppPaths(PathFinder $paths)
@@ -88,4 +90,5 @@ class CoreBootstrapper extends Bootstrapper
 
         return '/';
     }
+
 }

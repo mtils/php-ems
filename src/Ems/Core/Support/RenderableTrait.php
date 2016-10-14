@@ -34,28 +34,7 @@ trait RenderableTrait
      **/
     public function __toString()
     {
-
-
-        try {
-
-            if (!$this->_renderer || !$this->_renderer->canRender($this)) {
-                return '';
-            }
-
-            $output = $this->_renderer->render($this);
-            $this->_lastRenderError = null;
-            return $output;
-
-        } catch (Exception $e) {
-            $this->_lastRenderError = $e;
-            return $e->getMessage();
-        }
-
-        if ($this->_errorListener) {
-            call_user_func($this->_errorListener, $e, $this);
-        }
-
-        return '';
+        return $this->renderString();
     }
 
     /**
@@ -100,5 +79,49 @@ trait RenderableTrait
     {
         $this->_renderer = $renderer;
         return $this;
+    }
+
+    /**
+     * Just a little hook which gets called before the renderer is called
+     *
+     * @return null
+     **/
+    protected function prepareForToString() {}
+
+    /**
+     * Renders the result. Is just inside its own method to allow easy
+     * overwriding __toString()
+     *
+     * @return string
+     **/
+    protected function renderString()
+    {
+        try {
+
+            if (!$this->_renderer || !$this->_renderer->canRender($this)) {
+                return '';
+            }
+
+            $this->prepareForToString();
+
+            $output = $this->_renderer->render($this);
+            $this->_lastRenderError = null;
+            return $output;
+
+        } catch (Exception $e) {
+            return $this->processException($e);
+        }
+
+    }
+
+    protected function processException(Exception $e)
+    {
+
+        $this->_lastRenderError = $e;
+
+        if ($this->_errorListener) {
+            call_user_func($this->_errorListener, $e, $this);
+        }
+        return '';
     }
 }
