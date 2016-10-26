@@ -8,7 +8,7 @@ namespace Ems\Contracts\Core;
  * translator.
  * 
  **/
-interface MultilingualTextProvider extends TextProvider
+interface Multilingual
 {
 
     /**

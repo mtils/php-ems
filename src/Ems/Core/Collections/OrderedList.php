@@ -7,7 +7,7 @@ use IteratorAggregate;
 use ArrayAccess;
 use OutOfRangeException;
 use OutOfBoundsException;
-use OverflowException;
+use InvalidArgumentException;
 use Traversable;
 use ArrayIterator;
 
@@ -39,9 +39,7 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
      **/
     public function append($value)
     {
-        $this->source[] = $value;
-
-        return $this;
+        return $this->extend(func_get_args());
     }
 
     /**
@@ -53,7 +51,7 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
      **/
     public function push($value)
     {
-        return $this->append($value);
+        return $this->extend(func_get_args());
     }
 
     /**
@@ -76,7 +74,7 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
     public function extend($values)
     {
         foreach ($values as $value) {
-            $this->append($value);
+            $this->addItem($value);
         }
 
         return $this;
@@ -96,9 +94,7 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
         $count = $this->count();
 
         if ($index == $count) {
-            $this->append($value);
-
-            return $this;
+            return $this->append($value);
         }
 
         if ($index < 0) {
@@ -106,25 +102,10 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
         }
 
         if ($index > $count) {
-            throw new OverflowException("Index $index overflows greatest index $count");
+            throw new OutOfRangeException("Index $index overflows greatest index $count");
         }
 
-        for ($i = 0; $i < $count; ++$i) {
-            if ($i == $index) {
-                $newArray[$index] = $value;
-                $newArray[$i + 1] = $this->source[$i];
-                $pastInsertPosition = true;
-            } else {
-                if (!$pastInsertPosition) {
-                    $newArray[$i] = $this->source[$i];
-                } else {
-                    $newArray[$i + 1] = $this->source[$i];
-                }
-            }
-        }
-        if ($pastInsertPosition) {
-            $this->source = $newArray;
-        }
+        array_splice($this->source, $index, 0, $value);
 
         return $this;
     }
@@ -154,7 +135,7 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
 
         $previousValue = $this->offsetGet($index);
 
-        $this->source = array_splice($this->source, $index, 1);
+        array_splice($this->source, $index, 1);
 
         return $previousValue;
 
@@ -262,6 +243,19 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
     }
 
     /**
+     * Remove duplicates
+     *
+     * @return self
+     **/
+    public function unique(callable $comparator=null)
+    {
+        if (!$comparator) {
+            $this->source = array_values(array_unique($this->source));
+        }
+        return $this;
+    }
+
+    /**
      * Apply a callable to all items of this list and return
      * every result as array
      *
@@ -281,7 +275,7 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
      **/
     public function filter(callable $callable)
     {
-        $this->source = array_filter($this->source, $callable);
+        $this->source = array_values(array_filter($this->source, $callable));
         return $this;
     }
 
@@ -404,43 +398,6 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
     }
 
     /**
-     * Casts the passed $source to array
-     *
-     * @param mixed $source
-     * @return array
-     **/
-    protected function castToArray($source)
-    {
-        if (is_array($source)) {
-            return array_values($source);
-        }
-
-        if (is_int($source)) {
-            return range(0, $source);
-        }
-
-        if (is_string($source) && strlen($source) > 1) {
-            return str_split($source);
-        }
-
-        if (is_string($source) && mb_strlen($source) == 1) {
-            return range(mb_strtoupper($source) == $source ? 'A' : 'a', $source);
-        }
-
-        if (!$source instanceof Traversable) {
-            throw new UnexpectedValueException('Source has to be \Traversable, array, string or int');
-        }
-
-        $array = [];
-
-        foreach ($source as $item) {
-            $array[] = $item;
-        }
-
-        return $array;
-    }
-
-    /**
      * Return the first item if exists
      *
      * @return mixed
@@ -484,4 +441,51 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
     {
         $this->source = $this->source;
     }
+
+    /**
+     * @param mixed $item
+     * @return void
+     **/
+    protected function addItem($item)
+    {
+        $this->source[] = $item;
+    }
+
+    /**
+     * Casts the passed $source to array
+     *
+     * @param mixed $source
+     * @return array
+     **/
+    protected function castToArray($source)
+    {
+        if (is_array($source)) {
+            return array_values($source);
+        }
+
+        if (is_int($source)) {
+            return range(0, $source);
+        }
+
+        if (is_string($source) && strlen($source) > 1) {
+            return str_split($source);
+        }
+
+        if (is_string($source) && mb_strlen($source) == 1) {
+            return range(mb_strtoupper($source) == $source ? 'A' : 'a', $source);
+        }
+
+        if (!$source instanceof Traversable) {
+            throw new InvalidArgumentException('Source has to be \Traversable, array, string or int');
+        }
+
+        $array = [];
+
+        foreach ($source as $item) {
+            $array[] = $item;
+        }
+
+        return $array;
+    }
+
 }

@@ -82,6 +82,19 @@ class CacheTest extends \Ems\TestCase
 
     }
 
+    public function test_get_returns_null_if_default_is_null_and_no_hit()
+    {
+        $categorizer = $this->mockCategorizer();
+        $cache = $this->newCache($categorizer);
+        $storage = $this->mockStorage();
+        $cache->addStorage('default', $storage);
+
+        $storage->shouldReceive('has')->with('a')->andReturn(false);
+
+        $this->assertNull($cache->get('a'));
+
+    }
+
     public function test_get_stores_value_and_returns_it_if_default_value_passed()
     {
         $categorizer = $this->mockCategorizer();

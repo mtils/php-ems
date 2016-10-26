@@ -23,8 +23,9 @@ class InputCorrector implements CorrectorContract
     {
         $corrected = $input;
 
-        foreach ($this->chain as $casterName) {
-            $result = call_user_func($this->casters[$casterName], $corrected, $metadata, $resourceName);
+        foreach ($this->buildChain() as $name=>$parameters) {
+            $corrector = $this->getExtension($name);
+            $result = $corrector($corrected, $metadata, $resourceName);
             $corrected = &$result;
         }
 

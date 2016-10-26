@@ -4,10 +4,13 @@
 namespace Ems\Core\Skeleton;
 
 use Ems\Contracts\Core\PathFinder;
+use Ems\Core\TextFormatter;
 use Ems\Core\StringConverterChain;
 use Ems\Core\StringConverter\MBStringConverter;
 use Ems\Core\StringConverter\IconvStringConverter;
 use Ems\Core\StringConverter\AsciiStringConverter;
+use Ems\Core\TextParserQueue;
+use Ems\Core\VariablesTextParser;
 
 
 class CoreBootstrapper extends Bootstrapper
@@ -20,7 +23,10 @@ class CoreBootstrapper extends Bootstrapper
         'Ems\Core\PathFinder'               => 'Ems\Contracts\Core\PathFinder',
         'Ems\Core\InputCorrector'           => 'Ems\Contracts\Core\InputCorrector',
         'Ems\Core\InputCaster'              => 'Ems\Contracts\Core\InputCaster',
-        'Ems\Core\StringConverterChain'     => 'Ems\Contracts\Core\StringConverter'
+        'Ems\Core\StringConverterChain'     => 'Ems\Contracts\Core\StringConverter',
+        'Ems\Core\ArrayLocalizer'           => 'Ems\Contracts\Core\Localizer',
+        'Ems\Core\TextFormatter'            => 'Ems\Contracts\Core\TextFormatter',
+        'Ems\Core\TextParserQueue'          => 'Ems\Contracts\Core\TextParser'
     ];
 
     protected $bindings = [
@@ -40,12 +46,21 @@ class CoreBootstrapper extends Bootstrapper
             $this->addStringConverters($chain);
         });
 
+        $this->app->resolving(TextFormatter::class, function($formatter, $app){
+            $formatter->setLocalizer($app('Ems\Contracts\Core\Localizer'));
+        });
+
+        $this->app->resolving(TextParserQueue::class, function($queue, $app){
+            $queue->add($app(VariablesTextParser::class));
+        });
+
     }
 
     protected function assignBaseAppPaths(PathFinder $paths)
     {
         $paths->map('app', $this->appPath(), $this->url());
         $paths->map('assets', $this->publicPath(), $this->url());
+        $paths->map('ems::resources', realpath(__DIR__.'/../../../../resources'), $this->url());
     }
 
     protected function addStringConverters(StringConverterChain $chain)

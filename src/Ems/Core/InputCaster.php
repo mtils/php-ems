@@ -23,8 +23,9 @@ class InputCaster implements CasterContract
     {
         $corrected = $input;
 
-        foreach ($this->chain as $casterName) {
-            $result = call_user_func($this->casters[$casterName], $corrected, $metadata, $resourceName);
+        foreach ($this->buildChain() as $casterName=>$parameters) {
+            $caster = $this->getExtension($casterName);
+            $result = $caster($corrected, $metadata, $resourceName);
             $corrected = &$result;
         }
 

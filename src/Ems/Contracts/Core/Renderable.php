@@ -4,7 +4,7 @@
 namespace Ems\Contracts\Core;
 
 
-interface Renderable
+interface Renderable extends Stringable
 {
 
     /**
@@ -13,30 +13,6 @@ interface Renderable
      * @return string
      **/
     public function mimeType();
-
-    /**
-     * Renders this object (through its renderer)
-     *
-     * @return string
-     **/
-    public function __toString();
-
-    /**
-     * Since __toString doesnt allow to throw exceptions
-     * get the last Exception by this method
-     *
-     * @return \Exception|null
-     **/
-    public function lastRenderError();
-
-    /**
-     * When an error occures call this handler
-     * The exception and this object will be passed
-     *
-     * @param callable $handler
-     * @return self
-     **/
-    public function onError(callable $handler);
 
     /**
      * Return the assigned Renderer

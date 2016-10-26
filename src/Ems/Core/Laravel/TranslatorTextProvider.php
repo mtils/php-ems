@@ -4,10 +4,11 @@
 namespace Ems\Core\Laravel;
 
 
-use Ems\Contracts\Core\MultilingualTextProvider;
+use Ems\Contracts\Core\Multilingual;
+use Ems\Contracts\Core\TextProvider;
 use Illuminate\Translation\Translator;
 
-class TranslatorTextProvider implements MultilingualTextProvider
+class TranslatorTextProvider implements TextProvider, Multilingual
 {
 
     /**

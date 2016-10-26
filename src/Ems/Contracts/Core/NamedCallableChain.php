@@ -46,6 +46,6 @@ interface NamedCallableChain
      * @param callable $callable
      * @return self (same instance)
      **/
-    public function add($name, callable $callable);
+    public function extend($name, callable $callable);
 
 }

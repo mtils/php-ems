@@ -12,52 +12,12 @@ use Exception;
 trait RenderableTrait
 {
 
+    use StringableTrait;
+
     /**
      * @var \Ems\Contracts\Core\Renderer
      **/
     protected $_renderer;
-
-    /**
-     * @var \Ecxeption|null
-     **/
-    protected $_lastRenderError;
-
-    /**
-     * @var callable
-     **/
-    protected $_errorListener;
-
-    /**
-     * {@inheritdoc}
-     *
-     * @return string
-     **/
-    public function __toString()
-    {
-        return $this->renderString();
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @return \Exception|null
-     **/
-    public function lastRenderError()
-    {
-        return $this->_lastRenderError;
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @param callable $handler
-     * @return self
-     **/
-    public function onError(callable $handler)
-    {
-        $this->_errorListener = $handler;
-        return $this;
-    }
 
     /**
      * {@inheritdoc}
@@ -82,13 +42,6 @@ trait RenderableTrait
     }
 
     /**
-     * Just a little hook which gets called before the renderer is called
-     *
-     * @return null
-     **/
-    protected function prepareForToString() {}
-
-    /**
      * Renders the result. Is just inside its own method to allow easy
      * overwriding __toString()
      *
@@ -96,32 +49,12 @@ trait RenderableTrait
      **/
     protected function renderString()
     {
-        try {
-
-            if (!$this->_renderer || !$this->_renderer->canRender($this)) {
-                return '';
-            }
-
-            $this->prepareForToString();
-
-            $output = $this->_renderer->render($this);
-            $this->_lastRenderError = null;
-            return $output;
-
-        } catch (Exception $e) {
-            return $this->processException($e);
+        if (!$this->_renderer || !$this->_renderer->canRender($this)) {
+            return '';
         }
+
+        return $this->_renderer->render($this);
 
     }
 
-    protected function processException(Exception $e)
-    {
-
-        $this->_lastRenderError = $e;
-
-        if ($this->_errorListener) {
-            call_user_func($this->_errorListener, $e, $this);
-        }
-        return '';
-    }
 }

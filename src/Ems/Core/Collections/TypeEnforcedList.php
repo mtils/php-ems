@@ -71,18 +71,6 @@ class TypeEnforcedList extends OrderedList
     }
 
     /**
-     * Append a value to the end of this list
-     *
-     * @param mixed $value
-     * @return self
-     **/
-    public function append($value)
-    {
-        $this->checkType($value);
-        return parent::append($value);
-    }
-
-    /**
      * Insert a value at position $index
      *
      * @param int $index
@@ -169,5 +157,17 @@ class TypeEnforcedList extends OrderedList
         if (!$this->canAdd($value)) {
             throw new InvalidArgumentException("You can only add values of '{$this->forceType}' to this list");
         }
+    }
+
+    /**
+     * Append a value to the end of this list
+     *
+     * @param mixed $value
+     * @return self
+     **/
+    protected function addItem($value)
+    {
+        $this->checkType($value);
+        return parent::addItem($value);
     }
 }
