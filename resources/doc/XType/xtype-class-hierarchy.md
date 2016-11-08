@@ -16,7 +16,7 @@ XType classes are basically data objects with a hierarchy. They store the inform
     * StringType
     * TemporalType
     * SequenceType
-    * NamedFieldType
+    * KeyValueType
         * ArrayAccessType
         * ObjectType
 
@@ -53,7 +53,7 @@ All properties should be self-describing. The only confusing is mustBeTouched, w
     * StringType (HasMinMax)
     * TemporalType
     * SequenceType (HasMinMax)
-    * NamedFieldType
+    * KeyValueType
         * ArrayAccessType
         * ObjectType
 
@@ -91,7 +91,7 @@ Now follows the whole type plan, not all classes have been implemented yet
             * RangeType (because there is one itemType for from/to)
                * NumberRangeType
                * TimeRangeType
-    * NamedFieldType
+    * KeyValueType
         * ArrayAccessType
         * ObjectType
 

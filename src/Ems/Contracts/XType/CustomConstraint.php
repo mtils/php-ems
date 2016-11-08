@@ -4,7 +4,7 @@
 namespace Ems\Contracts\XType;
 
 /**
- + @property string $constraint
+ * @property string $constraint
  **/
 interface CustomConstraint
 {
