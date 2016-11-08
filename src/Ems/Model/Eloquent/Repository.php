@@ -4,8 +4,8 @@ namespace Ems\Model\Eloquent;
 
 use InvalidArgumentException;
 use Ems\Contracts\Core\Identifiable;
-use Ems\Contracts\Core\ExtendableRepository;
-use Ems\Core\ExtendableRepositoryTrait;
+use Ems\Contracts\Model\ExtendableRepository;
+use Ems\Model\ExtendableRepositoryTrait;
 use Illuminate\Database\Eloquent\Model as EloquentModel;
 use Ems\Testing\Cheat;
 use DateTime;
@@ -34,9 +34,10 @@ class Repository implements ExtendableRepository
      * @inheritdoc
      *
      * @param mixed $id
+     * @param mixed $default (optional)
      * @return \Ems\Contracts\Core\Identifiable|null
      **/
-    public function get($id)
+    public function get($id, $default=null)
     {
 
         $query = $this->model->newQuery();
@@ -44,7 +45,7 @@ class Repository implements ExtendableRepository
         $this->publish('getting', $query);
 
         if (!$model = $query->find($id)) {
-            return;
+            return $default;
         }
 
         $this->publish('got', $model);

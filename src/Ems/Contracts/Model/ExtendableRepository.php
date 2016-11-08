@@ -1,6 +1,6 @@
 <?php
 
-namespace Ems\Contracts\Core;
+namespace Ems\Contracts\Model;
 
 /**
  * An extendable repository allows to hooks in every crud

@@ -1,29 +1,18 @@
 <?php
 
-namespace Ems\Contracts\Core;
+namespace Ems\Contracts\Model;
+
+
+use Ems\Contracts\Core\Identifiable;
+use Ems\Contracts\Core\Provider;
+
+
 
 /** 
  * A generic repository to work with models
  **/
-interface Repository
+interface Repository extends Provider
 {
-
-    /**
-     * Find a model by its id. Should return null if not found
-     *
-     * @param mixed $id
-     * @return \Ems\Contracts\Core\Identifiable|null
-     **/
-    public function get($id);
-
-    /**
-     * Find a model by its id. Throw a NotFoundException if not found
-     *
-     * @param mixed $id
-     * @return \Ems\Contracts\Core\Identifiable
-     * @throws \Ems\Contracts\Core\NotFound If no model was found by the id
-     **/
-    public function getOrFail($id);
 
     /**
      * Instantiate a new model and fill it with the attributes

@@ -1,17 +1,20 @@
 <?php
 
 
-namespace Ems\Core;
+namespace Ems\Model;
 
 use OutOfRangeException;
 use OutOfBoundsException;
 
 /**
- * @see \Ems\Contracts\Core\ExtendableRepository
+ * @see \Ems\Contracts\Model\ExtendableRepository
  **/
 trait ExtendableRepositoryTrait
 {
 
+    /**
+     * @var array
+     **/
     protected $_listeners = [
         'getting'       => [],
         'got'           => [],

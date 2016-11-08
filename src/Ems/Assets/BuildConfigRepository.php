@@ -72,14 +72,16 @@ class BuildConfigRepository implements RepositoryContract
      * {@inheritdoc}
      *
      * @param string|array $group (optional)
+     * @param mixed $default (optional)
      * @return \Ems\Contracts\Assets\BuildConfig
      **/
-    public function get($group)
+    public function get($group, $default=null)
     {
         $this->autoFillIfNotDone();
         if (isset($this->buildConfigs[$group])) {
             return $this->buildConfigs[$group];
         }
+        return $default;
     }
 
     /**
