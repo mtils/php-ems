@@ -9,16 +9,17 @@ namespace Ems\Contracts\Core;
  * show a list of Templates and its names in an admin interface. So you have an
  * id and a name.
  **/
-interface ResourceProvider
+interface Provider
 {
 
     /**
      * Get a named object by its id
      *
      * @param mixed $id
+     * @param mixed $default (optional)
      * @return \Ems\Contracts\Core\Identifiable|null
      **/
-    public function get($id);
+    public function get($id, $default=null);
 
     /**
      * Get a named object by its id or throw an exception if it cant be found
@@ -28,12 +29,5 @@ interface ResourceProvider
      * @throws \Ems\Contracts\NotFound
      **/
     public function getOrFail($id);
-
-    /**
-     * Return an iterable of all known named objects of this provider
-     *
-     * @return array|\Traversable<\Ems\Contracts\Core\Identifiable>
-     **/
-    public function all();
 
 }

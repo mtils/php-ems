@@ -3,13 +3,13 @@
 
 namespace Ems\Core;
 
-use Ems\Contracts\Core\ResourceProvider;
+use Ems\Contracts\Core\AllProvider;
 use Ems\Contracts\Core\TextProvider;
 use Ems\Contracts\Core\Named;
 use Ems\Contracts\Core\Identifiable;
 use Ems\Contracts\Core\AppliesToResource;
 
-class GenericResourceProvider implements ResourceProvider, AppliesToResource
+class GenericResourceProvider implements AllProvider, AppliesToResource
 {
 
     /**
@@ -49,13 +49,15 @@ class GenericResourceProvider implements ResourceProvider, AppliesToResource
      * {@inheritdoc}
      *
      * @param mixed $id
+     * @param mixed $default (optional)
      * @return \Ems\Contracts\Core\Identifiable|null
      **/
-    public function get($id)
+    public function get($id, $default=null)
     {
         if (isset($this->items[$id])) {
             return $this->items[$id];
         }
+        return $default;
     }
 
     /**
