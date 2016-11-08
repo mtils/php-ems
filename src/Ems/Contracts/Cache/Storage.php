@@ -27,7 +27,7 @@ interface Storage
 
     /**
      * Return the item with $id or all items with the passed
-     * ids
+     * ids. The result must be indexed by its cache id if an array was passed
      *
      * @param string|array $id
      * @return mixed
