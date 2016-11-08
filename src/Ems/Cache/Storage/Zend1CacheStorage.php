@@ -62,7 +62,17 @@ class Zend1CacheStorage implements Storage
      **/
     public function get($id)
     {
-        return $this->cache->load($id);
+        if (!is_array($id)) {
+            return $this->cache->load($id);
+        }
+
+        $results = [];
+
+        foreach ($id as $cacheId) {
+            $results[$cacheId] = $this->cache->load($id);
+        }
+
+        return $results;
     }
 
     /**

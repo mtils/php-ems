@@ -63,14 +63,14 @@ class CacheTest extends \Ems\TestCase
 
     }
 
-    public function test_get_asks_categorizer_if_key_is_array()
+    public function test_get_asks_categorizer_if_key_is_cacheable_array()
     {
         $categorizer = $this->mockCategorizer();
         $cache = $this->newCache($categorizer);
         $storage = $this->mockStorage();
         $cache->addStorage('default', $storage);
 
-        $key = ['a'];
+        $key = ['a'=>'b'];
 
         $categorizer->shouldReceive('key')->with($key)->andReturn('a_array');
         $storage->shouldReceive('escape')->with('a_array')->andReturn('a_array');
@@ -89,9 +89,24 @@ class CacheTest extends \Ems\TestCase
         $storage = $this->mockStorage();
         $cache->addStorage('default', $storage);
 
-        $storage->shouldReceive('has')->with('a')->andReturn(false);
+        $storage->shouldReceive('get')->with('a')->andReturn(null);
 
         $this->assertNull($cache->get('a'));
+
+    }
+
+    public function test_get_passes_array_of_strings_to_storage()
+    {
+        $categorizer = $this->mockCategorizer();
+        $cache = $this->newCache($categorizer);
+        $storage = $this->mockStorage();
+        $cache->addStorage('default', $storage);
+
+        $keys = ['a','b','c'];
+
+        $storage->shouldReceive('get')->with($keys)->andReturn(true);
+
+        $this->assertTrue($cache->get($keys));
 
     }
 
@@ -141,6 +156,37 @@ class CacheTest extends \Ems\TestCase
                 ->andReturn($storage);
 
         $this->assertEquals($result, $cache->get($key, $callable));
+
+    }
+
+    public function test_getOrFail_returns_value_on_cache_hit()
+    {
+        $categorizer = $this->mockCategorizer();
+        $cache = $this->newCache($categorizer);
+        $storage = $this->mockStorage();
+        $cache->addStorage('default', $storage);
+
+        $storage->shouldReceive('has')->with('a')->andReturn(true);
+        $storage->shouldReceive('get')->with('a')->andReturn('bar');
+
+        $this->assertEquals('bar', $cache->getOrFail('a'));
+
+    }
+
+    /**
+     * @expectedException Ems\Cache\Exception\CacheMissException
+     **/
+    public function test_getOrFail_throws_exception_if_value_not_found()
+    {
+
+        $categorizer = $this->mockCategorizer();
+        $cache = $this->newCache($categorizer);
+        $storage = $this->mockStorage();
+        $cache->addStorage('default', $storage);
+
+        $storage->shouldReceive('has')->with('a')->andReturn(false);
+
+        $cache->getOrFail('a');
 
     }
 

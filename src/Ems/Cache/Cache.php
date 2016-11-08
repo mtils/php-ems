@@ -6,6 +6,7 @@ namespace Ems\Cache;
 use Ems\Contracts\Cache\Cache as CacheContract;
 use Ems\Contracts\Cache\Storage;
 use Ems\Contracts\Cache\Categorizer;
+use Ems\Cache\Exception\CacheMissException;
 
 class Cache implements CacheContract
 {
@@ -52,7 +53,7 @@ class Cache implements CacheContract
     /**
      * {@inheritdoc}
      *
-     * @param $key
+     * @param string $key
      * @return bool
      **/
     public function has($key)
@@ -70,16 +71,22 @@ class Cache implements CacheContract
     public function get($key, $default=null)
     {
 
-        $isGuessedKey = (is_object($key) || is_array($key));
+        $isGuessedKey = (is_object($key) || $this->isCacheableArray($key));
 
         $cacheId = $isGuessedKey ? $this->key($key) : $key;
+
+        // Return without checking if no default passed
+        // $cacheId is string or an array of strings
+        if ($default === null) {
+            return $this->storage->get($cacheId);
+        }
 
         if ($this->has($cacheId)) {
             return $this->storage->get($cacheId);
         }
 
-        if ($default === null) {
-            return;
+        if ($default === null || $default instanceof CacheMiss) {
+            return $default;
         }
 
         $value = is_callable($default) ? call_user_func($default) : $default;
@@ -93,15 +100,34 @@ class Cache implements CacheContract
     /**
      * {@inheritdoc}
      *
+     * @param string $key
+     * @return mixed
+     * @throws \Ems\Cache\Exception\CacheMissException
+     **/
+    public function getOrFail($id)
+    {
+        $value = $this->get($id, new CacheMiss);
+
+        if ($value instanceof CacheMiss) {
+            throw new CacheMissException("Cache entry not found");
+        }
+
+        return $value;
+
+    }
+
+    /**
+     * {@inheritdoc}
+     *
      * @param mixed $value
      * @param string $key (optional)
+     * @param mixed $keySource (optional)
      * @return self
      **/
-    public function add($value, $key=null)
+    public function add($value, $key=null, $keySource=null)
     {
 
-        $args = func_get_args();
-        $keySource = count($args) === 3 ? $args[2] : $value;
+        $keySource = $keySource ?: $value;
 
         $key = $key ?: $this->key($keySource);
         $tags = $this->categorizer->tags($keySource);
@@ -285,9 +311,46 @@ class Cache implements CacheContract
         $this->forget($offset);
     }
 
+    /**
+     * Create a new proxy for a different storage
+     *
+     * @param self $parent
+     * @param \Ems\Contracts\Cache\Storage $storage
+     * @return \Ems\Cache\CacheProxy
+     **/
     protected function proxy($parent, Storage $storage)
     {
         return new CacheProxy($parent, $storage, $this->categorizer);
     }
 
+    /**
+     * Return if the value is a cacheable array
+     *
+     * @param mixed $value
+     * @return bool
+     **/
+    protected function isCacheableArray($value)
+    {
+        return (is_array($value) && !$this->isArrayOfStrings($value));
+    }
+
+    /**
+     * @param mixed $value
+     * @return bool
+     **/
+    protected function isArrayOfStrings($value)
+    {
+        if (!is_array($value)) {
+            return false;
+        }
+
+        if (isset($value[0]) && (is_string($value[0]) || method_exists($value[0], '__toString') )) {
+            return true;
+        }
+
+        return false;
+    }
+
 }
+
+class CacheMiss{}

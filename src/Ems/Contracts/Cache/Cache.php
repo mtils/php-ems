@@ -4,6 +4,7 @@
 namespace Ems\Contracts\Cache;
 
 use Ems\Contracts\Core\Storage as BaseStorage;
+use Ems\Contracts\Core\Provider;
 
 /**
  * In opposite to the most cache implementations the
@@ -11,7 +12,7 @@ use Ems\Contracts\Core\Storage as BaseStorage;
  * cache ids and tags. So the most methods have an optional
  * key argument
  **/
-interface Cache extends BaseStorage
+interface Cache extends BaseStorage, Provider
 {
 
     /**
@@ -32,16 +33,20 @@ interface Cache extends BaseStorage
     /**
      * Return if the cache has stored $key
      *
-     * @param $key
+     * @param string $key
      * @return bool
      **/
     public function has($key);
 
     /**
+     * @method mixed get(mixed $key, mixed $default=null)
+     *
      * Get the key from cache, if it is not in cache
      * cache $default and return it.
-     * if $default is callable call it for the result
-     * if $key is an object or array guess the key
+     * if $default is callable call it for the result. The cache
+     * then stores the result of your callable.
+     * if $key is an object or array of objects guess the key.
+     * If array is an array of strings return all entries, one per id
      *
      * It is obvious that from an outside call you have to have either
      * the object (and the cache was skipped) or must have the id to get it.
@@ -52,16 +57,16 @@ interface Cache extends BaseStorage
      * @param mixed $default (optional)
      * @return mixed
      **/
-    public function get($key, $default=null);
 
     /**
      * Store the value under $key. Guess the key if none passed
      *
      * @param mixed $value
      * @param string $key (optional)
+     * @param mixed $keySource (optional)
      * @return self
      **/
-    public function add($value, $key=null);
+    public function add($value, $key=null, $keySource=null);
 
     /**
      * Pass a date or DateTime->diff() string to manipulate the

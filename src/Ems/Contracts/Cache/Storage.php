@@ -26,9 +26,10 @@ interface Storage
     public function has($id);
 
     /**
-     * Return the item with $id
+     * Return the item with $id or all items with the passed
+     * ids
      *
-     * @param string $id
+     * @param string|array $id
      * @return mixed
      **/
     public function get($id);

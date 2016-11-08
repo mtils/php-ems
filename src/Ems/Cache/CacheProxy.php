@@ -47,9 +47,10 @@ class CacheProxy extends Cache implements CacheContract
      *
      * @param mixed $value
      * @param string $key (optional)
+     * @param mixed $keySource (optional)
      * @return self
      **/
-    public function add($value, $key=null)
+    public function add($value, $key=null, $keySource=null)
     {
 
         $key = $key ?: $this->categorizer->key($value);
