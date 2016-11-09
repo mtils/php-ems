@@ -1,6 +1,8 @@
 <?php 
 
-namespace Ems\Contracts\Core;
+namespace Ems\Contracts\Model;
+
+use Ems\Contracts\Core\Identifiable;
 
 interface HasFrontCover extends Identifiable
 {
