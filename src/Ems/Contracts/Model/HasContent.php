@@ -1,7 +1,8 @@
 <?php 
 
-namespace Ems\Contracts\Core;
+namespace Ems\Contracts\Model;
 
+use Ems\Contracts\Core\Identifiable;
 
 /**
  * A object which has content has on main text, html or binary content
