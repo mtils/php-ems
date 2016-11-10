@@ -5,7 +5,7 @@ namespace Ems\Core;
 use Ems\Contracts\Core\TemporalQuantity;
 use Ems\Contracts\Core\AppliesToResource;
 
-class GenericTemporalQuantity extends GenericTemporalUnit implements TemporalQuantity, AppliesToResource
+class GenericTemporalQuantity extends PointInTime implements TemporalQuantity, AppliesToResource
 {
 
     /**

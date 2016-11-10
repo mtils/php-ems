@@ -3,7 +3,7 @@
 
 namespace Ems\XType;
 
-use Ems\Contracts\Core\TemporalUnit;
+use Ems\Contracts\Core\PointInTime;
 
 
 class TemporalType extends AbstractType
@@ -11,11 +11,11 @@ class TemporalType extends AbstractType
 
     /**
      * Is this a year, a month and so on?
-     * TemporalUnit::SECOND would be a Timestamp
+     * PointInTime::SECOND would be a Timestamp
      *
      * @var string
      **/
-    public $precision = TemporalUnit::SECOND;
+    public $precision = PointInTime::SECOND;
 
     /**
      * Is this only a month without a year?

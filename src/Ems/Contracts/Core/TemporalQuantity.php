@@ -13,4 +13,4 @@ use Countable;
  * (id =timestamp, name=January name, coun(NamedQuantity) -> amount of entries
  *
  **/
-interface TemporalQuantity extends TemporalUnit, Countable {}
+interface TemporalQuantity extends PointInTime, Countable {}

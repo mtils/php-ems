@@ -4,7 +4,7 @@
 namespace Ems\Contracts\Core;
 
 
-interface TemporalUnit
+interface PointInTime
 {
     const YEAR = 'Y';
 
@@ -19,12 +19,12 @@ interface TemporalUnit
     const SECOND = 's';
 
     /**
-     * Return the type pf unit (self::YEAR|self::MONTH...)
+     * Return the precision (self::YEAR|self::MONTH...)
      *
      * @return string
      * @see self::YEAR
      **/
-    public function unit();
+    public function precision();
 
     /**
      * Return the timezone

@@ -6,15 +6,15 @@ namespace Ems\Core;
 
 use DateTime;
 use DateTimeZone;
-use Ems\Contracts\Core\TemporalUnit;
+use Ems\Contracts\Core\PointInTime as TemporalContract;
 
-class GenericTemporalUnit extends DateTime implements TemporalUnit
+class PointInTime extends DateTime implements TemporalContract
 {
 
     /**
      * @var string
      **/
-    protected $unit;
+    protected $precision;
 
     protected $properties = [
         'year'      => self::YEAR,
@@ -26,7 +26,7 @@ class GenericTemporalUnit extends DateTime implements TemporalUnit
         'timezone'  => 'getTimeZone',
         'timestamp' => 'getTimestamp',
         'offset'    => 'getOffset',
-        'unit'      => 'unit'
+        'precision'      => 'precision'
     ];
 
     protected $propertyAccess = [
@@ -39,7 +39,7 @@ class GenericTemporalUnit extends DateTime implements TemporalUnit
         'timezone'  => 'getTimeZone',
         'timestamp' => 'getTimestamp',
         'offset'    => 'getOffset',
-        'unit'      => 'unit'
+        'precision'      => 'precision'
     ];
 
     /**
@@ -57,22 +57,22 @@ class GenericTemporalUnit extends DateTime implements TemporalUnit
      * @return string
      * @see self::YEAR
      **/
-    public function unit()
+    public function precision()
     {
-        if ($this->unit) {
-            return $this->unit;
+        if ($this->precision) {
+            return $this->precision;
         }
         return self::SECOND;
     }
 
     /**
-     * Set what this unit is (self::SECOND)
+     * Set what this precision is (self::SECOND)
      *
-     * @param string $unit
+     * @param string $precision
      **/
-    public function setUnit($unit)
+    public function setPrecision($precision)
     {
-        $this->unit = $unit;
+        $this->precision = $precision;
         return $this;
     }
 
@@ -99,7 +99,7 @@ class GenericTemporalUnit extends DateTime implements TemporalUnit
             case 'timezone':
             case 'timestamp':
             case 'offset':
-            case 'unit':
+            case 'precision':
                     return call_user_func([$this, $this->properties[$property]]);
         }
     }
@@ -145,8 +145,8 @@ class GenericTemporalUnit extends DateTime implements TemporalUnit
             case 'offset':
                 throw new OutOfBoundsException("You cannot set an offset, assign a new DateTimeZone");
                 return;
-            case 'unit':
-                $this->setUnit($value);
+            case 'precision':
+                $this->setPrecision($value);
         }
 
     }
