@@ -45,15 +45,18 @@ class CacheProxy extends Cache implements CacheContract
     /**
      * {@inheritdoc}
      *
-     * @param mixed $value
-     * @param string $key (optional)
+     * @param mixed $keyOrValue
+     * @param mixed $value (optional)
      * @param mixed $keySource (optional)
      * @return self
      **/
-    public function add($value, $key=null, $keySource=null)
+    public function put($keyOrValue, $value=null, $keySource=null)
     {
 
+        $key = $value === null ? null : $keyOrValue;
+        $value = $value === null ? $keyOrValue : $value;
         $key = $key ?: $this->categorizer->key($value);
+
         $tags = $this->tags ? $this->tags : $this->categorizer->tags($value);
         $lifetime = $this->until ? $this->until : $this->categorizer->lifetime($value);
 

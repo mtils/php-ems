@@ -91,7 +91,7 @@ class Cache implements CacheContract
 
         $value = is_callable($default) ? call_user_func($default) : $default;
 
-        $isGuessedKey ? $this->add($value, $cacheId, $key) : $this->add($value, $cacheId);
+        $isGuessedKey ? $this->put($cacheId, $value, $key) : $this->put($cacheId, $value);
 
         return $value;
 
@@ -119,13 +119,16 @@ class Cache implements CacheContract
     /**
      * {@inheritdoc}
      *
-     * @param mixed $value
-     * @param string $key (optional)
+     * @param mixed $keyOrValue
+     * @param mixed $value (optional)
      * @param mixed $keySource (optional)
      * @return self
      **/
-    public function add($value, $key=null, $keySource=null)
+    public function put($keyOrValue, $value=null, $keySource=null)
     {
+
+        $key = $value === null ? null : $keyOrValue;
+        $value = $value === null ? $keyOrValue : $value;
 
         $keySource = $keySource ?: $value;
 
@@ -296,7 +299,7 @@ class Cache implements CacheContract
      **/
     public function offsetSet($offset, $value)
     {
-        $this->add($value, $offset);
+        $this->put($offset, $value);
     }
 
     /**

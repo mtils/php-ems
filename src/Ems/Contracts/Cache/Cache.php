@@ -9,8 +9,8 @@ use Ems\Contracts\Core\Provider;
 /**
  * In opposite to the most cache implementations the
  * ems cache system has a separate logic to guess the
- * cache ids and tags. So the most methods have an optional
- * key argument
+ * cache ids and tags. So the using code will not be full of cache id
+ * generation or lifetime, tags,.. code.
  **/
 interface Cache extends BaseStorage, Provider
 {
@@ -59,14 +59,18 @@ interface Cache extends BaseStorage, Provider
      **/
 
     /**
-     * Store the value under $key. Guess the key if none passed
+     * Store the value under $key.
+     * If no value was passed, guess the key of $keyOrValue and put
+     * $keyOrValue in the cache.
+     * If you pass a key but want to auto-tag and categorize the entry
+     * pass the original $keySource.
      *
-     * @param mixed $value
-     * @param string $key (optional)
+     * @param mixed $keyOrValue
+     * @param mixed $value (optional)
      * @param mixed $keySource (optional)
      * @return self
      **/
-    public function add($value, $key=null, $keySource=null);
+    public function put($keyOrValue, $value=null, $keySource=null);
 
     /**
      * Pass a date or DateTime->diff() string to manipulate the

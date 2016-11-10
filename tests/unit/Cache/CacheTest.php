@@ -212,7 +212,7 @@ class CacheTest extends \Ems\TestCase
                 ->with($key, $passed, $tags, $until)
                 ->andReturn($storage);
 
-        $this->assertInstanceOf(CacheContract::class, $cache->until($until)->add($passed, $key));
+        $this->assertInstanceOf(CacheContract::class, $cache->until($until)->put($key, $passed));
 
     }
 
@@ -264,7 +264,7 @@ class CacheTest extends \Ems\TestCase
                 ->with($key, $passed, $tags, $until)
                 ->andReturn($storage);
 
-        $this->assertInstanceOf(CacheContract::class, $cache->tag($tags)->add($passed, $key));
+        $this->assertInstanceOf(CacheContract::class, $cache->tag($tags)->put($key, $passed));
 
     }
 
@@ -292,7 +292,7 @@ class CacheTest extends \Ems\TestCase
                  ->with($key, $passed, $tags, $until)
                  ->andReturn($storage);
 
-        $this->assertInstanceOf(CacheContract::class, $cache->storage('storage1')->add($passed, $key));
+        $this->assertInstanceOf(CacheContract::class, $cache->storage('storage1')->put($key, $passed));
 
     }
 
@@ -385,7 +385,7 @@ class CacheTest extends \Ems\TestCase
                 ->with($key, $passed, $tags, $until)
                 ->andReturn($storage);
 
-        $this->assertInstanceOf(CacheContract::class, $cache->tag($tags)->until($until)->add($passed, $key));
+        $this->assertInstanceOf(CacheContract::class, $cache->tag($tags)->until($until)->put($key, $passed));
 
     }
 
@@ -414,7 +414,7 @@ class CacheTest extends \Ems\TestCase
                  ->with($key, $passed, $tags, m::type(get_class($until)))
                  ->andReturn($storage2);
 
-        $this->assertInstanceOf(CacheContract::class, $cache->storage('fast')->tag($tags)->until($lifetime)->add($passed, $key));
+        $this->assertInstanceOf(CacheContract::class, $cache->storage('fast')->tag($tags)->until($lifetime)->put($key, $passed));
 
     }
 
@@ -445,7 +445,7 @@ class CacheTest extends \Ems\TestCase
                  ->with($key, $passed, $tags, $until)
                  ->andReturn($storage3);
 
-        $this->assertInstanceOf(CacheContract::class, $cache->storage('fast')->storage('big')->tag($tags)->until($until)->add($passed, $key));
+        $this->assertInstanceOf(CacheContract::class, $cache->storage('fast')->storage('big')->tag($tags)->until($until)->put($key, $passed));
 
     }
 
