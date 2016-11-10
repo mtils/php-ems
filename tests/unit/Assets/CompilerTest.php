@@ -41,7 +41,7 @@ class CompilerTest extends \Ems\TestCase
     }
 
     /**
-     * @expectedException \Ems\Contracts\Core\NotFound
+     * @expectedException \Ems\Contracts\Core\Errors\NotFound
      **/
     public function test_parser_throws_exception_if_not_found()
     {
@@ -63,7 +63,7 @@ class CompilerTest extends \Ems\TestCase
         try {
             $compiler->parser('test');
             $this->fail('Removed parser is still in compiler');
-        } catch(\Ems\Contracts\Core\NotFound $e) {
+        } catch(\Ems\Contracts\Core\Errors\NotFound $e) {
 
         }
 

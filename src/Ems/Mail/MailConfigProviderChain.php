@@ -5,7 +5,7 @@ namespace Ems\Mail;
 
 use DateTime;
 use Countable;
-use Ems\Contracts\Core\NotFound;
+use Ems\Contracts\Core\Errors\NotFound;
 use Ems\Contracts\Mail\MailConfigProvider;
 use Ems\Core\ResourceNotFoundException;
 

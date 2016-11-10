@@ -4,7 +4,7 @@
 namespace Ems\Core;
 
 use OutOfBoundsException;
-use Ems\Contracts\Core\NotFound;
+use Ems\Contracts\Core\Errors\NotFound;
 
 /**
  * Throw a ResourceNotFoundException if a resource like a database entry

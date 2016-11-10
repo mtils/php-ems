@@ -91,7 +91,7 @@ class Compiler implements CompilerContract
      *
      * @param string $name
      * @return \Ems\Contracts\Core\TextParser
-     * @throws \Ems\Contracts\Core\NotFound
+     * @throws \Ems\Contracts\Core\Errors\NotFound
      **/
     public function parser($name)
     {
@@ -120,7 +120,7 @@ class Compiler implements CompilerContract
      *
      * @param string
      * @return self
-     * @throws \Ems\Contracts\Core\NotFound
+     * @throws \Ems\Contracts\Core\Errors\NotFound
      **/
     public function removeParser($name)
     {

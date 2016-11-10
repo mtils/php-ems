@@ -99,7 +99,7 @@ class TranslatorTextProvider implements TextProvider, Multilingual
      *
      * @param string $domain
      * @return self
-     * @throws \Ems\Core\NotFound
+     * @throws \Ems\Core\Errors\NotFound
      **/
     public function forDomain($domain)
     {

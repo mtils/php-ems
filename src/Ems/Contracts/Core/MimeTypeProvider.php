@@ -38,7 +38,7 @@ interface MimeTypeProvider
      * @param string $type The awaited type
      * @param bool $verbose (optional) Check with typeOfFile
      * @return bool
-     * @throws \Ems\Contracts\Core\NotFound
+     * @throws \Ems\Contracts\Core\Errors\NotFound
      **/
     public function isOfType($fileName, $type, $verbose=false);
 

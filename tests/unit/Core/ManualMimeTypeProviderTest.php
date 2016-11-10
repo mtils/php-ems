@@ -76,7 +76,7 @@ class ManualMimeTypeProviderTest extends \Ems\TestCase
     }
 
     /**
-     * @expectedException \Ems\Contracts\Core\NotFound
+     * @expectedException \Ems\Contracts\Core\Errors\NotFound
      **/
     public function test_isOfType_throws_not_found_if_mimetype_not_found()
     {

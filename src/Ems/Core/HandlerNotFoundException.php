@@ -4,7 +4,7 @@
 namespace Ems\Core;
 
 use RuntimeException;
-use Ems\Contracts\Core\NotFound;
+use Ems\Contracts\Core\Errors\NotFound;
 
 /**
  * Throw a HandlerNotFoundException if a handler, an object to handle

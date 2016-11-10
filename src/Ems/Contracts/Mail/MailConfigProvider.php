@@ -25,7 +25,7 @@ interface MailConfigProvider
      * @param string $resourceName
      * @param mixed $resourceId (optional)
      * @return \Ems\Contracts\Mail\MailConfig
-     * @throws \Ems\Contracts\Core\NotFound
+     * @throws \Ems\Contracts\Core\Errors\NotFound
      **/
     public function configFor($resourceName, $resourceId=null);
 

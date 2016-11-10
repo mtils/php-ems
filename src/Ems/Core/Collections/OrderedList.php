@@ -286,7 +286,7 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
      *
      * @param callable $callable
      * @return mixed
-     * @throws \Ems\Contracts\Core\NotFound
+     * @throws \Ems\Contracts\Core\Errors\NotFound
      **/
     public function find(callable $callable)
     {
@@ -301,7 +301,7 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
      *
      * @param callable $callable
      * @return int
-     * @throws \Ems\Contracts\Core\NotFound
+     * @throws \Ems\Contracts\Core\Errors\NotFound
      **/
     public function findIndex(callable $callable)
     {

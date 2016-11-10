@@ -6,7 +6,7 @@ namespace Ems\Assets;
 use Ems\Contracts\Assets\Registry as RegistryContract;
 use Ems\Contracts\Assets\NameAnalyser;
 use Ems\Contracts\Assets\Asset as AssetContract;
-use Ems\Contracts\Core\NotFound;
+use Ems\Contracts\Core\Errors\NotFound;
 use Ems\Contracts\Core\PathFinder;
 use Ems\Core\PathFinderProxy;
 use BadMethodCallException;

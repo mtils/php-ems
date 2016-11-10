@@ -59,7 +59,7 @@ class Repository implements ExtendableRepository
      *
      * @param mixed $id
      * @return \Ems\Contracts\Core\Identifiable
-     * @throws \Ems\Contracts\Core\NotFound If no model was found by the id
+     * @throws \Ems\Contracts\Core\Errors\NotFound If no model was found by the id
      **/
     public function getOrFail($id)
     {
