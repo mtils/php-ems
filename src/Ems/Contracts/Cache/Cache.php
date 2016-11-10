@@ -76,7 +76,7 @@ interface Cache extends BaseStorage, Provider
      * Pass a date or DateTime->diff() string to manipulate the
      * cache lifetime. No call to until means forever
      * Fluent interface:
-     * @example Cache::until('1 day')->add()
+     * @example Cache::until('1 day')->put()
      *
      * @param string|\DateTime $until
      * @return self
@@ -85,7 +85,7 @@ interface Cache extends BaseStorage, Provider
 
     /**
      * Add tags to the stored data to invalidate it by tags. Fluent API:
-     * @example Cache::tag('user-34', 'blog-category-12')->add($blogEntry)
+     * @example Cache::tag('user-34', 'blog-category-12')->put($blogEntry)
      *
      * @param string|array $tags
      * @return self
@@ -128,7 +128,7 @@ interface Cache extends BaseStorage, Provider
 
     /**
      * Pass a name for a different cache storage
-     * @example Cache::storage('fast')->add($value)
+     * @example Cache::storage('fast')->put($value)
      *
      * @param mixed $name
      * @return string

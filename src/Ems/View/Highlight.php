@@ -330,7 +330,7 @@ class Highlight extends View implements HighlightContract
 
         if (!$combinations = $this->_cache->get($cacheId)) {
             $combinations = $this->freshRandomSeed($limit, $max, $this->randomCombinations, $expires);
-            $this->_cache->add($combinations, $cacheId);
+            $this->_cache->put($cacheId, $combinations);
             $freshlyCreated = true;
         }
 
@@ -345,7 +345,7 @@ class Highlight extends View implements HighlightContract
         $lastSeed = count($combinations['seeds']) - 1;
         $combinations['current'] = $next <= $lastSeed ? $next : 0;
 
-        $this->_cache->until($expires)->add($combinations, $cacheId);
+        $this->_cache->until($expires)->put($cacheId, $combinations);
 
         return $combinations['seeds'][$combinations['current']];
 
