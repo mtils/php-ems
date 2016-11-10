@@ -7,7 +7,7 @@ namespace Ems\Assets;
 use Ems\Contracts\Assets\NameAnalyser;
 use Ems\Contracts\Core\Filesystem;
 use Ems\Contracts\Core\MimeTypeProvider;
-use Ems\Core\DetectionFailedException;
+use Ems\Core\Exceptions\DetectionFailedException;
 
 /**
  * The ExtensionAnalyser calculates the group and mimetype by the passed

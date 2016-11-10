@@ -44,7 +44,7 @@ class LocalFilesystemTest extends \Ems\IntegrationTest
     }
 
     /**
-     * @expectedException \Ems\Core\ResourceNotFoundException
+     * @expectedException \Ems\Core\Exceptions\ResourceNotFoundException
      **/
     public function test_contents_throws_NotFoundException_if_file_not_found()
     {

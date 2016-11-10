@@ -9,7 +9,7 @@ use Ems\Contracts\Assets\Compiler as CompilerContract;
 use Ems\Contracts\Core\TextParser;
 use Ems\Contracts\Assets\Collection as CollectionContract;
 use Ems\Contracts\Assets\Registry as RegistryContract;
-use Ems\Core\HandlerNotFoundException;
+use Ems\Core\Exceptions\HandlerNotFoundException;
 
 class Compiler implements CompilerContract
 {

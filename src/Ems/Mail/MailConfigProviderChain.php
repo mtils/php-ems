@@ -7,7 +7,7 @@ use DateTime;
 use Countable;
 use Ems\Contracts\Core\Errors\NotFound;
 use Ems\Contracts\Mail\MailConfigProvider;
-use Ems\Core\ResourceNotFoundException;
+use Ems\Core\Exceptions\ResourceNotFoundException;
 
 
 class MailConfigProviderChain implements MailConfigProvider, Countable

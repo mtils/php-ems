@@ -5,6 +5,7 @@ namespace Ems\Core;
 
 
 use Ems\Contracts\Core\MimeTypeProvider;
+use Ems\Core\Exceptions\ResourceNotFoundException;
 
 
 class ManualMimeTypeProvider implements MimeTypeProvider

@@ -6,7 +6,7 @@ namespace Ems\Cache;
 use Ems\Contracts\Cache\Categorizer;
 use Ems\Core\Patterns\TraitOfResponsibility;
 use DateTime;
-use Ems\Core\HandlerNotFoundException;
+use Ems\Core\Exceptions\HandlerNotFoundException;
 
 class CategorizerChain implements Categorizer
 {

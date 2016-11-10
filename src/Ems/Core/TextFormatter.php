@@ -8,7 +8,7 @@ use DateTime;
 use Ems\Contracts\Core\TextFormatter as FormatterContract;
 use Ems\Contracts\Core\Localizer;
 use Ems\Core\Support\ProvidesNamedCallableChain;
-use Ems\Core\HandlerNotFoundException;
+use Ems\Core\Exceptions\HandlerNotFoundException;
 use InvalidArgumentException;
 
 

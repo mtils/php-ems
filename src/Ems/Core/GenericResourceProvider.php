@@ -8,6 +8,7 @@ use Ems\Contracts\Core\TextProvider;
 use Ems\Contracts\Core\Named;
 use Ems\Contracts\Core\Identifiable;
 use Ems\Contracts\Core\AppliesToResource;
+use Ems\Core\Exceptions\ResourceNotFoundException;
 
 class GenericResourceProvider implements AllProvider, AppliesToResource
 {

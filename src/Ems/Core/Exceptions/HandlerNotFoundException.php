@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Ems\Core;
+namespace Ems\Core\Exceptions;
 
 use RuntimeException;
 use Ems\Contracts\Core\Errors\NotFound;

@@ -3,7 +3,7 @@
 
 namespace Ems\Core\Patterns;
 
-use Ems\Core\HandlerNotFoundException;
+use Ems\Core\Exceptions\HandlerNotFoundException;
 
 
 trait StaticExtendable

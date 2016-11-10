@@ -6,7 +6,7 @@ namespace Ems\Core\Patterns;
 use RuntimeException;
 use InvalidArgumentException;
 use ReflectionClass;
-use Ems\Core\HandlerNotFoundException;
+use Ems\Core\Exceptions\HandlerNotFoundException;
 
 trait TraitOfResponsibility
 {

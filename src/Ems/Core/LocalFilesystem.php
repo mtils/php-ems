@@ -4,6 +4,7 @@
 namespace Ems\Core;
 
 use Ems\Contracts\Core\Filesystem;
+use Ems\Core\Exceptions\ResourceNotFoundException;
 use ErrorException;
 
 

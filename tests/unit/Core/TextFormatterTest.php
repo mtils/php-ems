@@ -56,7 +56,7 @@ class TextFormatterTest extends \Ems\TestCase
     }
 
     /**
-     * @expectedException \Ems\Core\HandlerNotFoundException
+     * @expectedException \Ems\Core\Exceptions\HandlerNotFoundException
      **/
     public function test_call_throws_HandlerNotFoundException_if_filter_unknown()
     {

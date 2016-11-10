@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Ems\Core;
+namespace Ems\Core\Exceptions;
 
 use OutOfBoundsException;
 use Ems\Contracts\Core\Errors\NotFound;
