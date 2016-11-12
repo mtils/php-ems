@@ -1,13 +1,11 @@
 <?php
 
-
 namespace Ems\Model\Eloquent;
 
 use Illuminate\Database\Eloquent\Model;
 
 class TagQueryHelper
 {
-
     public $relationTable = 'tag_relations';
 
     public $tagIdKey = 'tag_id';
@@ -33,19 +31,19 @@ class TagQueryHelper
 
     public function addTagFilter(Model $model, $query, array $tags)
     {
-        $query->join($this->relationTable, $model->getTable() . '.' . $model->getKeyName(), '=', $this->foreignKeyName());
+        $query->join($this->relationTable, $model->getTable().'.'.$model->getKeyName(), '=', $this->foreignKeyName());
         $query->where($this->resourceNameKey, $model->resourceName());
         $query->whereIn($this->tagKeyName(), $this->tagIds($tags));
     }
 
     protected function tagKeyName()
     {
-        return $this->relationTable . '.' . $this->tagIdKey;
+        return $this->relationTable.'.'.$this->tagIdKey;
     }
 
     protected function foreignKeyName()
     {
-        return $this->relationTable. '.' . $this->foreignIdKey;
+        return $this->relationTable.'.'.$this->foreignIdKey;
     }
 
     protected function tagIds($tags)
@@ -53,11 +51,9 @@ class TagQueryHelper
         $tagIds = [];
 
         foreach ($tags as $tag) {
-            $tagIds[] = $tag instanceof Model ? $tag->getKey() : (int)$tag;
+            $tagIds[] = $tag instanceof Model ? $tag->getKey() : (int) $tag;
         }
 
         return $tagIds;
-
     }
-
 }

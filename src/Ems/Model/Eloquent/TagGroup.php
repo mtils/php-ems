@@ -1,10 +1,10 @@
-<?php 
+<?php
+
 
 namespace Ems\Model\Eloquent;
 
 use Illuminate\Database\Eloquent\Model as EloquentModel;
 use Ems\Contracts\Model\Relation\Tag\TagGroup as TagGroupContract;
-
 
 class TagGroup extends EloquentModel implements TagGroupContract
 {
@@ -23,5 +23,4 @@ class TagGroup extends EloquentModel implements TagGroupContract
     {
         return $this->getAttribute(static::$nameKey);
     }
-
 }

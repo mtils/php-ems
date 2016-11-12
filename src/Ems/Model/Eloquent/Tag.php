@@ -1,10 +1,10 @@
-<?php 
+<?php
+
 
 namespace Ems\Model\Eloquent;
 
 use Illuminate\Database\Eloquent\Model as EloquentModel;
 use Ems\Contracts\Model\Relation\Tag\TagWithGroups;
-
 use Ems\Model\Relation\Tag\HoldsGroupsTrait;
 
 class Tag extends EloquentModel implements TagWithGroups
@@ -29,7 +29,7 @@ class Tag extends EloquentModel implements TagWithGroups
     }
 
     /**
-     * Return the name of the name column
+     * Return the name of the name column.
      *
      * @return string
      **/
@@ -37,5 +37,4 @@ class Tag extends EloquentModel implements TagWithGroups
     {
         return static::$nameKey;
     }
-
 }

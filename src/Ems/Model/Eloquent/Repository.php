@@ -1,4 +1,5 @@
-<?php 
+<?php
+
 
 namespace Ems\Model\Eloquent;
 
@@ -12,7 +13,6 @@ use DateTime;
 
 class Repository implements ExtendableRepository
 {
-
     use ExtendableRepositoryTrait;
 
     protected $model;
@@ -31,15 +31,15 @@ class Repository implements ExtendableRepository
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      *
      * @param mixed $id
      * @param mixed $default (optional)
+     *
      * @return \Ems\Contracts\Core\Identifiable|null
      **/
-    public function get($id, $default=null)
+    public function get($id, $default = null)
     {
-
         $query = $this->model->newQuery();
 
         $this->publish('getting', $query);
@@ -51,14 +51,15 @@ class Repository implements ExtendableRepository
         $this->publish('got', $model);
 
         return $model;
-
     }
 
     /**
-     * Find a model by its id. Throw a NotFoundException if not found
+     * Find a model by its id. Throw a NotFoundException if not found.
      *
      * @param mixed $id
+     *
      * @return \Ems\Contracts\Core\Identifiable
+     *
      * @throws \Ems\Contracts\Core\Errors\NotFound If no model was found by the id
      **/
     public function getOrFail($id)
@@ -71,28 +72,30 @@ class Repository implements ExtendableRepository
     }
 
     /**
-     * Instantiate a new model and fill it with the attributes
+     * Instantiate a new model and fill it with the attributes.
      *
      * @param array $attributes
+     *
      * @return \Ems\Contracts\Core\Identifiable The instantiated resource
      **/
-    public function make(array $attributes=[])
+    public function make(array $attributes = [])
     {
         $model = $this->model->newInstance($attributes);
         $this->publish('made', $model);
+
         return $model;
     }
 
     /**
      * Create a new model by the given attributes and persist
-     * it
+     * it.
      *
      * @param array $attributes
+     *
      * @return \Ems\Contracts\Core\Identifiable The created resource
      **/
     public function store(array $attributes)
     {
-
         $model = $this->make([]);
 
         $this->validate($attributes, 'store');
@@ -107,10 +110,11 @@ class Repository implements ExtendableRepository
     }
 
     /**
-     * Fill the model with attributes $attributes
+     * Fill the model with attributes $attributes.
      *
      * @param \Ems\Contracts\Core\Identifiable $model
-     * @param array $attributes
+     * @param array                            $attributes
+     *
      * @return bool if attributes where changed after filling
      **/
     public function fill(Identifiable $model, array $attributes)
@@ -119,6 +123,7 @@ class Repository implements ExtendableRepository
         $filtered = $this->toModelAttributes($model, $attributes);
         $model->fill($filtered);
         $this->publish('filled', $model, $attributes);
+
         return true;
     }
 
@@ -129,15 +134,15 @@ class Repository implements ExtendableRepository
      * example the attributes did not change. Throw exceptions on errors.
      * If the save action did alter other attributes then the passed, the have
      * to be updated inside the passed model. (Timestamps, autoincrements,...)
-     * The passed model has to be full up to date after updating it
+     * The passed model has to be full up to date after updating it.
      *
      * @param \Ems\Contracts\Core\Identifiable $model
-     * @param array $newAttributes
-     * @return boolean true if it was actually saved, false if not. Look above!
+     * @param array                            $newAttributes
+     *
+     * @return bool true if it was actually saved, false if not. Look above!
      **/
     public function update(Identifiable $model, array $newAttributes)
     {
-
         $this->checkIsModel($model);
 
         $this->validate($newAttributes, 'update');
@@ -153,16 +158,16 @@ class Repository implements ExtendableRepository
         $this->publish('updated', $model, $newAttributes);
 
         return true;
-
     }
 
     /**
      * Persists the model $model. Always saves it without checks if the model
      * was actually changed before saving.
      * The model has to be filled (with auto attributes like autoincrements or
-     * timestamps)
+     * timestamps).
      *
      * @param \Ems\Contracts\Core\Identifiable $model
+     *
      * @return bool if the model was actually saved
      **/
     public function save(Identifiable $model)
@@ -171,6 +176,7 @@ class Repository implements ExtendableRepository
         $this->publish('saving', $model);
         $result = $model->save();
         $this->publish('saved', $model);
+
         return $result;
     }
 
@@ -178,7 +184,6 @@ class Repository implements ExtendableRepository
      * Delete the passed model.
      *
      * @param \Ems\Contracts\Core\Identifiable $model
-     * @return void
      **/
     public function delete(Identifiable $model)
     {
@@ -191,19 +196,21 @@ class Repository implements ExtendableRepository
     /**
      * Assign a custim attributeFilter. A attributefilter is just a callable
      * which gets key and value passed and returns true to apply the attribute
-     * and false to remove it
+     * and false to remove it.
      *
      * @param callable $filter
+     *
      * @return self
      **/
     public function filterAttributesBy(callable $filter)
     {
         $this->attributeFilter = $filter;
+
         return $this;
     }
 
     /**
-     * Return the attributes which should also be stored even if they are not scalar
+     * Return the attributes which should also be stored even if they are not scalar.
      *
      * @return array
      **/
@@ -215,31 +222,35 @@ class Repository implements ExtendableRepository
 
         $this->jsonableAttributes = [];
 
-        foreach(Cheat::get($this->model, 'casts') as $key=>$cast) {
+        foreach (Cheat::get($this->model, 'casts') as $key => $cast) {
             if (in_array($cast, ['array', 'json', 'object', 'collection'], true)) {
                 $this->jsonableAttributes[] = $key;
             }
         }
-        return $this->jsonableAttributes;
 
+        return $this->jsonableAttributes;
     }
 
     /**
      * Set jsonable attributes so they get not filtered while saving
-     * attributes
+     * attributes.
      *
      * @param string|array $attributes
+     *
      * @return self
      **/
-    public function setJsonableAttributes($attributes) {
-        $this->jsonableAttributes = (array)$attributes;
+    public function setJsonableAttributes($attributes)
+    {
+        $this->jsonableAttributes = (array) $attributes;
+
         return $this;
     }
 
     /**
-     * Return the internal attributefilter. If none is present, create one
+     * Return the internal attributefilter. If none is present, create one.
      *
      * @return callable
+     *
      * @see self::filterAttributesBy
      **/
     protected function getAttributeFilter()
@@ -247,7 +258,8 @@ class Repository implements ExtendableRepository
         if ($this->attributeFilter) {
             return $this->attributeFilter;
         }
-        return function($key, $value) {
+
+        return function ($key, $value) {
             if (in_array($key, $this->getJsonableAttributes())) {
                 return !is_scalar($value);
             }
@@ -262,14 +274,18 @@ class Repository implements ExtendableRepository
 
     /**
      * Hook into this method to do some special validation, even if the data
-     * have to be validated before passing it to the repository
+     * have to be validated before passing it to the repository.
      *
-     * @param array $attributes
+     * @param array  $attributes
      * @param string $action
+     *
      * @return bool
+     *
      * @throws \Illuminate\Contracts\Validation\ValidationException
      **/
-    protected function validate(array $attributes, $action='update'){}
+    protected function validate(array $attributes, $action = 'update')
+    {
+    }
 
     /**
      * Cast an clean the incoming attributes so that this repository can
@@ -278,29 +294,30 @@ class Repository implements ExtendableRepository
      *
      * @param mixed $model
      * @param array $attributes
+     *
      * @return array
      **/
     protected function toModelAttributes($model, $attributes)
     {
-
         $filtered = [];
         $filter = $this->getAttributeFilter();
 
-        foreach ($attributes as $key=>$value) {
-
+        foreach ($attributes as $key => $value) {
             if (!$filter($key, $value)) {
                 continue;
             }
 
             $filtered[$key] = $value;
         }
+
         return $filtered;
     }
 
     /**
-     * Checks a model for the Identifiable interface
+     * Checks a model for the Identifiable interface.
      *
      * @param mixed
+     *
      * @throws \InvalidArgumentException
      **/
     protected function checkIsIdentifiable($model)
@@ -311,9 +328,10 @@ class Repository implements ExtendableRepository
     }
 
     /**
-     * Checks a model for the Model class
+     * Checks a model for the Model class.
      *
      * @param mixed
+     *
      * @throws \InvalidArgumentException
      **/
     protected function checkIsModel($model)
@@ -322,5 +340,4 @@ class Repository implements ExtendableRepository
             throw new InvalidArgumentException('Identifiable has to be instanceof Eloquent Model');
         }
     }
-
 }

@@ -3,7 +3,6 @@
 namespace Ems\Model;
 
 use Ems\Contracts\Model\Result;
-
 use ArrayIterator;
 use Iterator;
 use Traversable;
@@ -11,7 +10,6 @@ use UnexpectedValueException;
 
 class GenericResult implements Result
 {
-
     /**
      * @var callable
      **/
@@ -22,14 +20,13 @@ class GenericResult implements Result
      **/
     protected $creator;
 
-
     /**
-     * Pass a callable which will return the complete result
+     * Pass a callable which will return the complete result.
      *
      * @param callable $getter
-     * @param object $creator (optional)
+     * @param object   $creator (optional)
      **/
-    public function __construct(callable $getter, $creator=null)
+    public function __construct(callable $getter, $creator = null)
     {
         $this->setGetter($getter);
         $this->creator = $creator ? $creator : $this->creator;
@@ -46,13 +43,12 @@ class GenericResult implements Result
     }
 
     /**
-     * Return an iterator to traverse over the result
+     * Return an iterator to traverse over the result.
      *
      * @return \Iterator
      **/
     public function getIterator()
     {
-
         if (!$result = call_user_func($this->getter)) {
             return new ArrayIterator([]);
         }
@@ -76,18 +72,17 @@ class GenericResult implements Result
         }
 
         return new ArrayIterator($array);
-
     }
 
     /**
-     * Set the getter to retrieve the results
+     * Set the getter to retrieve the results.
      *
      * @param callable $getter
+     *
      * @return self
      **/
     protected function setGetter(callable $getter)
     {
-
         $this->getter = $getter;
 
         if (is_array($getter) && is_object($getter[0])) {

@@ -1,14 +1,13 @@
-<?php 
+<?php
 
 
 namespace Ems\Model\Eloquent;
 
 /**
- * This trait helps to build a front cover object out of one ore more covers
+ * This trait helps to build a front cover object out of one ore more covers.
  **/
 trait FrontCoverByAttribute
 {
-
     /**
      * Return an image representing this object
      * Optionally pass a size int for the right icon
@@ -17,12 +16,13 @@ trait FrontCoverByAttribute
      * Uris could be:
      * http://example.org/avatar.png
      * icon://search
-     * fontawesome://fa-trash
+     * fontawesome://fa-trash.
      *
      * @param int $size (optional)
+     *
      * @return string
      **/
-    public function getFrontCover($size=0)
+    public function getFrontCover($size = 0)
     {
         return $this->buildUri(
             $this->getAttribute(
@@ -33,9 +33,10 @@ trait FrontCoverByAttribute
 
     /**
      * Return an attribute name for a front cover with size $size.
-     * The base implementation returns always the same name
+     * The base implementation returns always the same name.
      *
      * @param int $size
+     *
      * @return string
      **/
     public function getFrontCoverAttributeName($size)
@@ -44,14 +45,14 @@ trait FrontCoverByAttribute
     }
 
     /**
-     * Build an uri out of the database content
+     * Build an uri out of the database content.
      *
      * @param string $plainFrontCover
+     *
      * @return string
      **/
     public function buildUri($plainFrontCover)
     {
         return $plainFrontCover;
     }
-
 }

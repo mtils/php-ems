@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Model\Relation\Tag;
 
 use OutOfBoundsException;
@@ -11,7 +10,6 @@ use Ems\Contracts\Model\Relation\Tag\TagGroup;
  **/
 trait HoldsGroupsTrait
 {
-
     /**
      * @var array
      **/
@@ -28,14 +26,16 @@ trait HoldsGroupsTrait
     }
 
     /**
-     * Assign all TagGroups to this Tag
+     * Assign all TagGroups to this Tag.
      *
      * @param \Traversable<Ems\Contracts\Model\Relation\TagGroup> $groups
+     *
      * @return self
      **/
     public function setGroups($groups)
     {
-        $this->groups = (array)$groups;
+        $this->groups = (array) $groups;
+
         return $this;
     }
 
@@ -43,6 +43,7 @@ trait HoldsGroupsTrait
      * {@inheritdoc}
      *
      * @param \Ems\Contracts\Model\Relation\TagGroup $group
+     *
      * @return self
      */
     public function attachGroup(TagGroup $group)
@@ -50,6 +51,7 @@ trait HoldsGroupsTrait
         if (!$this->hasGroup($group)) {
             $this->_groups[] = $group;
         }
+
         return $this;
     }
 
@@ -57,17 +59,17 @@ trait HoldsGroupsTrait
      * {@inheritdoc}
      *
      * @param \Ems\Contracts\Model\Relation\TagGroup $group
+     *
      * @return self
      */
     public function detachGroup(TagGroup $group)
     {
-
         if (!$this->hasGroup($tag)) {
-            throw new OutOfBoundsException('Group ' . $group->getName() . ' is not attached');
+            throw new OutOfBoundsException('Group '.$group->getName().' is not attached');
         }
 
-        $this->_groups = array_filter($this->_groups, function($knownGroup) use ($group) {
-            return ($group->getId() != $knownGroup->getId());
+        $this->_groups = array_filter($this->_groups, function ($knownGroup) use ($group) {
+            return $group->getId() != $knownGroup->getId();
         });
 
         return $this;
@@ -77,6 +79,7 @@ trait HoldsGroupsTrait
      * {@inheritdoc}
      *
      * @param \Ems\Contracts\Model\Relation\TagGroup $group
+     *
      * @return bool
      **/
     public function hasGroup(TagGroup $group)

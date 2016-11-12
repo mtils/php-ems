@@ -1,12 +1,10 @@
-<?php 
+<?php
 
 
 namespace Ems\Model\Eloquent;
 
-
 trait IdentifiableByKeyTrait
 {
-
     /**
      * Return the unique identifier for this object.
      *
@@ -16,5 +14,4 @@ trait IdentifiableByKeyTrait
     {
         return $this->getKey();
     }
-
 }

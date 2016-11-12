@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Model\Relation\Tag;
 
 use OutOfBoundsException;
@@ -11,7 +10,6 @@ use Ems\Contracts\Model\Relation\Tag\Tag;
  **/
 trait HoldsTagsTrait
 {
-
     /**
      * @var array
      **/
@@ -31,11 +29,13 @@ trait HoldsTagsTrait
      * {@inheritdoc}
      *
      * @param \Traversable<Ems\Contracts\Model\Relation\Tag> $tags
+     *
      * @return self
      **/
     public function setTags($tags)
     {
-        $this->_tags = (array)$tags;
+        $this->_tags = (array) $tags;
+
         return $this;
     }
 
@@ -43,6 +43,7 @@ trait HoldsTagsTrait
      * {@inheritdoc}
      *
      * @param \Ems\Contracts\Model\Relation\Tag $tag
+     *
      * @return self
      */
     public function attachTag(Tag $tag)
@@ -50,6 +51,7 @@ trait HoldsTagsTrait
         if (!$this->hasTag($tag)) {
             $this->_tags[] = $tag;
         }
+
         return $this;
     }
 
@@ -57,31 +59,31 @@ trait HoldsTagsTrait
      * {@inheritdoc}
      *
      * @param \Ems\Contracts\Model\Relation\Tag $tag
+     *
      * @return self
      */
     public function detachTag(Tag $tag)
     {
         if (!$this->hasTag($tag)) {
-            throw new OutOfBoundsException('Tag ' . $tag->getName() . ' is not attached');
+            throw new OutOfBoundsException('Tag '.$tag->getName().' is not attached');
         }
 
-        $this->_tags = array_filter($this->_tags, function($knownTag) use ($tag) {
-            return ($tag->getId() != $knownTag->getId());
+        $this->_tags = array_filter($this->_tags, function ($knownTag) use ($tag) {
+            return $tag->getId() != $knownTag->getId();
         });
 
         return $this;
-
     }
 
     /**
      * {@inheritdoc}
      *
      * @param \Ems\Contracts\Model\Relation\Tag $tag
+     *
      * @return bool
      **/
     public function hasTag(Tag $tag)
     {
-
         foreach ($this->_tags as $knownTag) {
             if ($knownTag->getId() == $tag->getId()) {
                 return true;
@@ -89,7 +91,5 @@ trait HoldsTagsTrait
         }
 
         return false;
-
     }
-
 }

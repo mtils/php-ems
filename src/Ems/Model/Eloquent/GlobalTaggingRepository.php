@@ -1,18 +1,16 @@
-<?php 
+<?php
+
 
 namespace Ems\Model\Eloquent;
 
 use InvalidArgumentException;
-use Illuminate\Database\Eloquent\Model as EloquentModel;
 use Ems\Contracts\Model\Relation\Tag\GlobalTaggingRepository as RepositoryContract;
 use Ems\Contracts\Model\Relation\Tag\HoldsTags;
 use Ems\Contracts\Model\Relation\Tag\Tag as TagContract;
 use Ems\Contracts\Core\AppliesToResource;
-use Ems\Model\Relation\Tag\HoldsGroupsTrait;
 
 class GlobalTaggingRepository implements RepositoryContract
 {
-
     public $relationTable = 'tag_relations';
 
     public $tagIdKey = 'tag_id';
@@ -31,7 +29,7 @@ class GlobalTaggingRepository implements RepositoryContract
      **/
     protected $resourceName;
 
-    public function __construct(Tag $tag=null, $resourceName=null)
+    public function __construct(Tag $tag = null, $resourceName = null)
     {
         $this->model = $tag;
         $this->resourceName = $resourceName;
@@ -61,11 +59,11 @@ class GlobalTaggingRepository implements RepositoryContract
      * {@inheritdoc}
      *
      * @param \Ems\Contracts\Model\Relation\HoldsTags|\Traversable $holders
+     *
      * @return self
      **/
     public function attachTags(&$holders)
     {
-
         $tagHolders = $holders instanceof HoldsTags ? [$holders] : $holders;
 
         if (!$tags = $this->tagsByForeignId($this->collectIds($tagHolders))) {
@@ -87,15 +85,15 @@ class GlobalTaggingRepository implements RepositoryContract
      * {@inheritdoc}
      *
      * @param \Ems\Contracts\Model\Relation\HoldsTags $holder
+     *
      * @return self
      **/
     public function syncTags(HoldsTags $holder)
     {
-
         $holderRelations = [];
 
         if (!$holder instanceof AppliesToResource) {
-            throw new InvalidArgumentException("Holders have to be instanceof AppliesToResource for GlobalTaggingRepository");
+            throw new InvalidArgumentException('Holders have to be instanceof AppliesToResource for GlobalTaggingRepository');
         }
 
         $this->assureExistingTags($holder);
@@ -128,28 +126,31 @@ class GlobalTaggingRepository implements RepositoryContract
      * {@inheritdoc}
      *
      * @param string $name
+     *
      * @return \Ems\Contracts\Model\Relation\Tag
      **/
     public function make($name)
     {
-        return $this->model->newInstance([$this->model->getNameKey()=>$name]);
+        return $this->model->newInstance([$this->model->getNameKey() => $name]);
     }
 
     /**
      * {@inheritdoc}
      *
      * @param string $name
+     *
      * @return \Ems\Contracts\Model\Relation\Tag
      **/
     public function create($name)
     {
-        return $this->model->create([$this->model->getNameKey()=>$name]);
+        return $this->model->create([$this->model->getNameKey() => $name]);
     }
 
     /**
      * {@inheritdoc}
      *
      * @param string $name
+     *
      * @return \Ems\Contracts\Model\Relation\Tag
      **/
     public function getByNameOrCreate($name)
@@ -157,6 +158,7 @@ class GlobalTaggingRepository implements RepositoryContract
         if ($tag = $this->getByName($name)) {
             return $tag;
         }
+
         return $this->create($name);
     }
 
@@ -164,6 +166,7 @@ class GlobalTaggingRepository implements RepositoryContract
      * {@inheritdoc}
      *
      * @param int $id
+     *
      * @return \Ems\Contracts\Model\Relation\Tag
      **/
     public function getOrFail($id)
@@ -175,10 +178,13 @@ class GlobalTaggingRepository implements RepositoryContract
      * {@inheritdoc}
      *
      * @param \Ems\Contracts\Model\Relation\Tag
+     *
      * @return self
      **/
-    public function delete(TagContract $tag) {
+    public function delete(TagContract $tag)
+    {
         $tag->delete();
+
         return $this;
     }
 
@@ -186,11 +192,13 @@ class GlobalTaggingRepository implements RepositoryContract
      * {@inheritdoc}
      *
      * @param string|\Ems\Contracts\Core\AppliesToResource $resource
+     *
      * @return self
      **/
     public function by($resource)
     {
         $resourceName = $resource instanceof AppliesToResource ? $resource->resourceName() : $resource;
+
         return new static($this->model, $resourceName);
     }
 
@@ -212,7 +220,6 @@ class GlobalTaggingRepository implements RepositoryContract
         $query = $this->model->newQuery()
                       ->where($this->model->getNameKey(), $name)
                       ->first();
-
     }
 
     protected function createPivotValues(HoldsTags $holder, $tagId)
@@ -220,11 +227,12 @@ class GlobalTaggingRepository implements RepositoryContract
         return [
             $this->tagIdKey => $tagId,
             $this->foreignIdKey => $holder->getKey(),
-            $this->resourceNameKey => $holder->resourceName()
+            $this->resourceNameKey => $holder->resourceName(),
         ];
     }
 
-    protected function assureExistingTags(HoldsTags $holder) {
+    protected function assureExistingTags(HoldsTags $holder)
+    {
         foreach ($holder->getTags() as $tag) {
             if (!$tag->exists) {
                 $tag->save();
@@ -238,6 +246,7 @@ class GlobalTaggingRepository implements RepositoryContract
         foreach ($holders as $holder) {
             $ids[] = $holder->getKey();
         }
+
         return $ids;
     }
 
@@ -246,7 +255,7 @@ class GlobalTaggingRepository implements RepositoryContract
         return $this->model->newQuery()->getQuery()->from($this->relationTable);
     }
 
-    protected function tagsByForeignId(array $ids, $onlyFirst=false)
+    protected function tagsByForeignId(array $ids, $onlyFirst = false)
     {
         $query = $this->model->newQuery()
                       ->join($this->relationTable, $this->tagKeyName(), '=', $this->model->getTable().'.'.$this->model->getKeyName())
@@ -265,17 +274,17 @@ class GlobalTaggingRepository implements RepositoryContract
             return $byId;
         }
         reset($byId);
-        return $byId[key($byId)];
 
+        return $byId[key($byId)];
     }
 
     protected function sortByDifference(array $storedIds, array $passedIds)
     {
-
-        $attached = []; $unchanged = []; $detached = [];
+        $attached = [];
+        $unchanged = [];
+        $detached = [];
 
         foreach ($storedIds as $storedId) {
-
             if (!in_array($storedId, $passedIds)) {
                 $detached[] = $storedId;
                 continue;
@@ -294,12 +303,11 @@ class GlobalTaggingRepository implements RepositoryContract
 
     protected function tagKeyName()
     {
-        return $this->relationTable . '.' . $this->tagIdKey;
+        return $this->relationTable.'.'.$this->tagIdKey;
     }
 
     protected function foreignKeyName()
     {
-        return $this->relationTable . '.' . $this->foreignIdKey;
+        return $this->relationTable.'.'.$this->foreignIdKey;
     }
-
 }
