@@ -11,7 +11,7 @@ use Countable;
 class LoggingCallable implements Countable
 {
     /**
-     * Here all calls are logged
+     * Here all calls are logged.
      *
      * @var array
      **/
@@ -23,19 +23,17 @@ class LoggingCallable implements Countable
     protected $handler;
 
     /**
-     * Optionally pass a callable to process the actual call
+     * Optionally pass a callable to process the actual call.
      *
      * @param callable $handler (optional)
      **/
-    public function __construct(callable $handler=null)
+    public function __construct(callable $handler = null)
     {
         $this->handler = $handler;
     }
 
     /**
-     * The fake callable
-     *
-     * @return void
+     * The fake callable.
      **/
     public function __invoke()
     {
@@ -47,33 +45,37 @@ class LoggingCallable implements Countable
 
     /**
      * Returns the argument with idx from a call of this object.
-     * If no callIndex is given, the last one is used
+     * If no callIndex is given, the last one is used.
      *
-     * @param int $idx The idx of the arg
+     * @param int $idx       The idx of the arg
      * @param int $callIndex (optional) The index of the call (0 is the first call)
+     *
      * @return mixed
      **/
-    public function arg($idx, $callIndex=-1)
+    public function arg($idx, $callIndex = -1)
     {
         $args = $this->args($callIndex);
+
         return $args[$idx];
     }
 
     /**
      * Returns the arguments from a call of this object.
-     * If no callIndex is given, the last one is used
+     * If no callIndex is given, the last one is used.
      *
      * @param int $callIndex (optional) The index of the call (0 is the first call)
+     *
      * @return mixed
      **/
-    public function args($callIndex=-1)
+    public function args($callIndex = -1)
     {
         $callIndex = $callIndex == -1 ? count($this->calls) - 1 : $callIndex;
+
         return $this->calls[$callIndex];
     }
 
     /**
-     * Returns how many times it was invoked
+     * Returns how many times it was invoked.
      *
      * @return int
      **/
