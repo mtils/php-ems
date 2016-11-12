@@ -1,40 +1,37 @@
 <?php
 
-
 namespace Ems\Assets\Parser;
-
 
 use Ems\Contracts\Core\TextParser;
 use JShrink\Minifier;
 
 class JShrinkParser implements TextParser
 {
-
     /**
      * @var \JShrink\Minifier
      **/
     protected $minifier;
 
     protected $defaultOptions = [
-        'flaggedComments'       => true
+        'flaggedComments' => true,
     ];
 
-    public function __construct(Minifier $minifier=null)
+    public function __construct(Minifier $minifier = null)
     {
-        $this->minifier = $minifier ?: new Minifier;
+        $this->minifier = $minifier ?: new Minifier();
     }
 
     /**
      * {@inheritdoc}
      *
      * @param string $text
-     * @param array $config The configuration options
-     * @param bool $purgePlaceholders (optional)
+     * @param array  $config            The configuration options
+     * @param bool   $purgePlaceholders (optional)
+     *
      * @return string
      **/
-    public function parse($text, array $config, $purgePlaceholders=true)
+    public function parse($text, array $config, $purgePlaceholders = true)
     {
-
         $options = $this->mergeOptions($config);
 
         return $this->minifier->minify(
@@ -47,6 +44,7 @@ class JShrinkParser implements TextParser
      * {@inheritdoc}
      *
      * @param string $text
+     *
      * @return string The purged text
      **/
     public function purge($text)
@@ -55,9 +53,10 @@ class JShrinkParser implements TextParser
     }
 
     /**
-     * Merges the passed options with the default option
+     * Merges the passed options with the default option.
      *
      * @param array $passedOptions
+     *
      * @return arras
      **/
     protected function mergeOptions(array $passedOptions)
