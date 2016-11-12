@@ -1,27 +1,21 @@
 <?php
 
-
 namespace Ems\Assets;
 
 use Ems\Contracts\Assets\Asset as AssetContract;
 use Ems\Contracts\Assets\BuildConfigRepository as RepositoryContract;
 use Ems\Contracts\Assets\BuildConfig as BuildConfigContract;
 use Ems\Contracts\Assets\Collection as CollectionContract;
-use Ems\Contracts\Assets\Compiler as CompilerContract;
-use Ems\Contracts\Assets\NameAnalyser;
 use Ems\Contracts\Core\Filesystem;
-use Ems\Contracts\Assets\Manager as ManagerContract;
 use Ems\Contracts\Assets\Registry as RegistryContract;
 use UnderflowException;
 use Ems\Core\Exceptions\ResourceNotFoundException;
 use Ems\Core\Exceptions\DetectionFailedException;
 use InvalidArgumentException;
-use UnexpectedValueException;
 use Ems\Contracts\Core\Identifiable;
 
 class BuildConfigRepository implements RepositoryContract
 {
-
     /**
      * @var \Ems\Contracts\Assets\Registry
      **/
@@ -49,7 +43,7 @@ class BuildConfigRepository implements RepositoryContract
 
     /**
      * @param \Ems\Contracts\Assets\Registry $registry
-     * @param \Ems\Contrats\Core\Filesystem $files
+     * @param \Ems\Contrats\Core\Filesystem  $files
      **/
     public function __construct(RegistryContract $registry, Filesystem $files)
     {
@@ -65,22 +59,25 @@ class BuildConfigRepository implements RepositoryContract
     public function has($group)
     {
         $this->autoFillIfNotDone();
+
         return isset($this->buildConfigs[$group]);
     }
 
     /**
      * {@inheritdoc}
      *
-     * @param string|array $group (optional)
-     * @param mixed $default (optional)
+     * @param string|array $group   (optional)
+     * @param mixed        $default (optional)
+     *
      * @return \Ems\Contracts\Assets\BuildConfig
      **/
-    public function get($group, $default=null)
+    public function get($group, $default = null)
     {
         $this->autoFillIfNotDone();
         if (isset($this->buildConfigs[$group])) {
             return $this->buildConfigs[$group];
         }
+
         return $default;
     }
 
@@ -88,6 +85,7 @@ class BuildConfigRepository implements RepositoryContract
      * {@inheritdoc}
      *
      * @param string|array $group (optional)
+     *
      * @return \Ems\Contracts\Assets\BuildConfig
      **/
     public function getOrFail($group)
@@ -97,7 +95,6 @@ class BuildConfigRepository implements RepositoryContract
         }
 
         throw new ResourceNotFoundException("No config for group $group assigned");
-
     }
 
     /**
@@ -105,14 +102,13 @@ class BuildConfigRepository implements RepositoryContract
      *
      * @return \Ems\Contracts\Assets\BuildConfig
      **/
-    public function make(array $attributes=[])
+    public function make(array $attributes = [])
     {
-        $config = new BuildConfig;
+        $config = new BuildConfig();
 
         $this->fill($config, $attributes);
 
         return $config;
-
     }
 
     /**
@@ -124,15 +120,16 @@ class BuildConfigRepository implements RepositoryContract
      * usually used (more expensive) fill() method
      *
      * @param array $attributes
+     *
      * @return \Ems\Contracts\Core\Identifiable The created resource
      **/
     public function store(array $attributes)
     {
         if (!isset($attributes['group'])) {
-            throw new OutOfBoundsException("The config needs a group value to add it");
+            throw new OutOfBoundsException('The config needs a group value to add it');
         }
 
-        $config = (new BuildConfig)->setGroup($attributes['group'])
+        $config = (new BuildConfig())->setGroup($attributes['group'])
                                    ->lazyLoadBy($this, $attributes);
 
         $this->buildConfigs[$attributes['group']] = $config;
@@ -141,20 +138,20 @@ class BuildConfigRepository implements RepositoryContract
     }
 
     /**
-     * Fill the model with attributes $attributes
+     * Fill the model with attributes $attributes.
      *
      * @param \Ems\Contracts\Core\Identifiable $config
-     * @param array $attributes
+     * @param array                            $attributes
+     *
      * @return bool if attributes where changed after filling
      **/
     public function fill(Identifiable $config, array $attributes)
     {
-
         if (!$attributes) {
             return false;
         }
 
-        foreach ($attributes as $key=>$value) {
+        foreach ($attributes as $key => $value) {
             if (in_array($key, ['collection', 'assets', 'files'])) {
                 $this->addCollection($config, $value, $attributes);
                 continue;
@@ -163,20 +160,21 @@ class BuildConfigRepository implements RepositoryContract
         }
 
         return true;
-
     }
 
     /**
      * {@inheritdoc}
      *
      * @param \Ems\Contracts\Core\Identifiable $config
-     * @param array $newAttributes
-     * @return boolean true if it was actually saved, false if not. Look above!
+     * @param array                            $newAttributes
+     *
+     * @return bool true if it was actually saved, false if not. Look above!
      **/
     public function update(Identifiable $config, array $newAttributes)
     {
         $this->fill($config, $newAttributes);
         $this->save($config);
+
         return true;
     }
 
@@ -184,12 +182,14 @@ class BuildConfigRepository implements RepositoryContract
      * {@inheritdoc}
      *
      * @param \Ems\Contracts\Assets\BuildConfig $config
+     *
      * @return self
      **/
     public function save(Identifiable $config)
     {
         $group = $this->groupOfConfig($config);
         $this->buildConfigs[$group] = $config;
+
         return $this;
     }
 
@@ -197,15 +197,17 @@ class BuildConfigRepository implements RepositoryContract
      * {@inheritdoc}
      *
      * @param \Ems\Contracts\Core\Identifiable $model
-     * @return boolean
+     *
+     * @return bool
      **/
     public function delete(Identifiable $model)
     {
         // Trigger throw
-        $group =$this->groupOfConfig($config);
+        $group = $this->groupOfConfig($config);
 
         if (isset($this->buildConfigs[$group])) {
             unset($this->buildConfigs[$group]);
+
             return true;
         }
 
@@ -220,6 +222,7 @@ class BuildConfigRepository implements RepositoryContract
     public function groups()
     {
         $this->autoFillIfNotDone();
+
         return array_keys($this->buildConfigs);
     }
 
@@ -227,13 +230,14 @@ class BuildConfigRepository implements RepositoryContract
      * {@inheritdoc}
      *
      * @param \Ems\Contracts\Assets\BuildConfig $config
+     *
      * @return bool
      **/
     public function compiledFileExists(BuildConfigContract $config)
     {
         $absolutePath = $this->registry->to($config->group())
                                        ->absolute($config->target());
-//         var_dump($absolutePath);
+
         return $this->files->exists($absolutePath);
     }
 
@@ -241,11 +245,13 @@ class BuildConfigRepository implements RepositoryContract
      * {@inheritdoc}
      *
      * @param callable
+     *
      * @return self
      */
     public function fillRepositoryBy(callable $filler)
     {
         $this->fillers[] = $filler;
+
         return $this;
     }
 
@@ -271,34 +277,32 @@ class BuildConfigRepository implements RepositoryContract
         }
 
         throw new DetectionFailedException("Unknown config key $key");
-
     }
 
     protected function addParserOptions(BuildConfig $config, $options)
     {
-        foreach ($options as $parserName=>$options) {
+        foreach ($options as $parserName => $options) {
             $config->setParserOption($parserName, $options);
         }
     }
 
     protected function addCollection(BuildConfig $config, $items, array $all)
     {
-
         if ($items instanceof CollectionContract) {
             return $config->setCollection($items);
         }
 
         if (!is_array($items)) {
-            throw new InvalidArgumentException("Unknown collection type, only Collection and array is supported");
+            throw new InvalidArgumentException('Unknown collection type, only Collection and array is supported');
         }
 
         if (!isset($all['group'])) {
-            throw new InvalidArgumentException("If an array as collection is passed you need to pass a group");
+            throw new InvalidArgumentException('If an array as collection is passed you need to pass a group');
         }
 
         $group = $all['group'];
 
-        $collection = (new Collection)->setGroup($group);
+        $collection = (new Collection())->setGroup($group);
 
         foreach ($items as $item) {
             if ($item instanceof AssetContract) {
@@ -310,14 +314,14 @@ class BuildConfigRepository implements RepositoryContract
         }
 
         $config->setCollection($collection);
-
     }
 
     protected function groupOfConfig(BuildConfigContract $config)
     {
         if (!$group = $config->group()) {
-            throw new UnderflowException("Assign a group to the config before adding it to the builder");
+            throw new UnderflowException('Assign a group to the config before adding it to the builder');
         }
+
         return $group;
     }
 
@@ -333,7 +337,5 @@ class BuildConfigRepository implements RepositoryContract
         foreach ($this->fillers as $filler) {
             $filler($this);
         }
-
     }
-
 }
