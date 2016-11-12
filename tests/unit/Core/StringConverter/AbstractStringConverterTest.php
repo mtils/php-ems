@@ -15,6 +15,11 @@ abstract class AbstractStringConverterTest extends \Ems\TestCase
      **/
     protected $extension;
 
+    /**
+     * @var bool
+     **/
+    protected $testEveryEncoding = true;
+
     public function test_implements_interface()
     {
         $this->assertInstanceOf(StringConverter::class, $this->newConverter());
@@ -34,10 +39,30 @@ abstract class AbstractStringConverterTest extends \Ems\TestCase
 
         $testString = 'Trälä dös köstet 14 € son Driß';
 
+        $fails = 0;
+        $succeeded = 0;
+
         foreach ($converter->encodings() as $encoding) {
+
             $converted = $converter->convert($testString, $encoding);
             $awaited = $this->convert($testString, $encoding);
-            $this->assertEquals($awaited, $converted);
+
+            if ($this->testEveryEncoding) {
+                $this->assertEquals($awaited, $converted);
+                continue;
+            }
+
+            if ($awaited != $converted) {
+                $fails++;
+                continue;
+            }
+
+            $succeeded++;
+
+        }
+
+        if (!$this->testEveryEncoding && $fails >= $succeeded) {
+            $this->fail("Conversion of $fails failed, which is more a equal $succeeded succeeded");
         }
     }
 

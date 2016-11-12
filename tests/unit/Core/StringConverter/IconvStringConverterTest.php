@@ -15,6 +15,11 @@ class IconvStringConverterTest extends AbstractStringConverterTest
      **/
     protected $extension = 'iconv';
 
+    /**
+     * @var bool
+     **/
+    protected $testEveryEncoding = false;
+
     protected function convert($text, $toEncoding, $fromEncoding=null)
     {
         $fromEncoding = $fromEncoding ?: 'UTF-8';
