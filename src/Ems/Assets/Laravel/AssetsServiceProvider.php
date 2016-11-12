@@ -6,7 +6,6 @@ use Ems\Core\Laravel\BootstrapperAsServiceProvider;
 
 class AssetsServiceProvider extends BootstrapperAsServiceProvider
 {
-
     protected function bootClass()
     {
         return 'Ems\Assets\Skeleton\AssetsBootstrapper';
@@ -20,5 +19,4 @@ class AssetsServiceProvider extends BootstrapperAsServiceProvider
              'Ems\Assets\Symfony\CompileCommand',
         ]);
     }
-
 }
