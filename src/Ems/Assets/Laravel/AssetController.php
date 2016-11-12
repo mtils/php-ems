@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Assets\Laravel;
 
 use Illuminate\Routing\Controller;
@@ -13,7 +12,6 @@ use Illuminate\Http\Response;
 
 class AssetController extends Controller
 {
-
     protected $registry;
 
     protected $names;
@@ -37,7 +35,6 @@ class AssetController extends Controller
         $content = $this->files->contents($path);
 
         return new Response($content, 200, ['Content-Type' => $mimeType]);
-
     }
 
     protected function absolutePath($group, $file)
@@ -62,7 +59,7 @@ class AssetController extends Controller
         if (str_contains($file, '..')) {
             throw new BadRequestHttpException('Double dots are not allowed');
         }
-        return ltrim($file,'/');
-    }
 
+        return ltrim($file, '/');
+    }
 }
