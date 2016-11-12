@@ -1,12 +1,10 @@
 <?php
 
-
 namespace Ems\Assets;
 
 use Ems\Contracts\Assets\Registry as RegistryContract;
 use Ems\Contracts\Assets\NameAnalyser;
 use Ems\Contracts\Assets\Asset as AssetContract;
-use Ems\Contracts\Core\Errors\NotFound;
 use Ems\Contracts\Core\PathFinder;
 use Ems\Core\PathFinderProxy;
 use BadMethodCallException;
@@ -16,7 +14,6 @@ use ArrayIterator;
 
 class Registry extends PathFinderProxy implements RegistryContract
 {
-
     /**
      * @var \Ems\Contracts\Assets\NameAnalyser
      **/
@@ -74,33 +71,30 @@ class Registry extends PathFinderProxy implements RegistryContract
 
     /**
      * @param \Ems\Contracts\Assets\NameAnalyser $namer
-     * @param \Ems\Contracts\Core\PathFinder $pathFinder
-     * @param string $assetNamespace (optional)
+     * @param \Ems\Contracts\Core\PathFinder     $pathFinder
+     * @param string                             $assetNamespace (optional)
      **/
-    public function __construct(NameAnalyser $namer, PathFinder $pathFinder, $assetNamespace='assets')
+    public function __construct(NameAnalyser $namer, PathFinder $pathFinder, $assetNamespace = 'assets')
     {
         parent::__construct($pathFinder, $assetNamespace);
         $this->namer = $namer;
-
     }
 
     /**
      * {@inheritdoc}
      *
      * @param string|array $asset
-     * @param string $group (optional)
+     * @param string       $group (optional)
+     *
      * @return self
      **/
-    public function import($asset, $group=null)
+    public function import($asset, $group = null)
     {
-
         $assets = $this->isNumericArray($asset) ? $asset : [$asset];
-
 
         $assetNames = [];
 
         foreach ($assets as $asset) {
-
             list($name, $attributes) = $this->toNameAndAttributes($asset);
 
             // First iteration only
@@ -115,7 +109,6 @@ class Registry extends PathFinderProxy implements RegistryContract
             if ($attributes) {
                 $assertObject->setAttributes($attributes);
             }
-
         }
 
         $this->lastTouchedGroup = $group;
@@ -129,17 +122,18 @@ class Registry extends PathFinderProxy implements RegistryContract
      *
      * @param string $asset
      * @param string $content
-     * @param string $group (optional)
+     * @param string $group   (optional)
+     *
      * @return self
      **/
-    public function inline($asset, $content, $group=null)
+    public function inline($asset, $content, $group = null)
     {
-
         $group = $this->detectGroup($asset, $group);
         $this->lastTouchedAssets = [$asset];
         $this->lastTouchedGroup = $group;
 
         $this->addImportOrInline($asset, $group, $content);
+
         return $this;
     }
 
@@ -149,11 +143,12 @@ class Registry extends PathFinderProxy implements RegistryContract
      * Performs lazyloading of paths because this can be expensive
      *
      * @param string $asset
-     * @param string $group (optional)
+     * @param string $group   (optional)
      * @param string $content (optional) (make it a inline asset)
+     *
      * @return \Ems\Contracts\Assets\Asset
      **/
-    public function newAsset($name, $group=null, $content='')
+    public function newAsset($name, $group = null, $content = '')
     {
         $group = $this->detectGroup($name, $group);
 
@@ -178,13 +173,15 @@ class Registry extends PathFinderProxy implements RegistryContract
     /**
      * {@inheritdoc}
      *
-     * @param string $asset
+     * @param string   $asset
      * @param callable $handler
+     *
      * @return self
      **/
     public function on($asset, callable $handler)
     {
         $this->customHandlers[$asset] = $handler;
+
         return $this;
     }
 
@@ -194,14 +191,16 @@ class Registry extends PathFinderProxy implements RegistryContract
      * because only befores are working the right way.
      *
      * @param string $asset (optional)
+     *
      * @return self
      **/
-    public function after($asset=null)
+    public function after($asset = null)
     {
         $movedAssets = $this->lastTouchedAssetsOrFail();
 
         if ($asset === null) {
             $this->moveAssetsToAppendings($this->lastTouchedGroup, $movedAssets);
+
             return $this;
         }
 
@@ -220,15 +219,16 @@ class Registry extends PathFinderProxy implements RegistryContract
      * {@inheritdoc}
      *
      * @param string $asset (optional)
+     *
      * @return self
      **/
-    public function before($asset=null)
+    public function before($asset = null)
     {
-
         $movedAssets = $this->lastTouchedAssetsOrFail();
 
         if ($asset === null) {
             $this->moveAssetsToPrependings($this->lastTouchedGroup, $movedAssets);
+
             return $this;
         }
 
@@ -241,11 +241,10 @@ class Registry extends PathFinderProxy implements RegistryContract
         $this->moveAssetsToPassedArray($this->befores[$positionId], $movedAssets);
 
         return $this;
-
     }
 
     /**
-     * The total amount of assets
+     * The total amount of assets.
      *
      * @return int
      **/
@@ -255,9 +254,10 @@ class Registry extends PathFinderProxy implements RegistryContract
     }
 
     /**
-     * Return if a group named $offset exists
+     * Return if a group named $offset exists.
      *
      * @param string $offset
+     *
      * @return bool
      **/
     public function offsetExists($offset)
@@ -266,9 +266,10 @@ class Registry extends PathFinderProxy implements RegistryContract
     }
 
     /**
-     * Return all files of group $offset
+     * Return all files of group $offset.
      *
      * @param string $offset
+     *
      * @return array
      **/
     public function offsetGet($offset)
@@ -280,30 +281,32 @@ class Registry extends PathFinderProxy implements RegistryContract
     }
 
     /**
-     * Not allowed
+     * Not allowed.
      *
      * @param string $offset
-     * @param mixed $value
+     * @param mixed  $value
+     *
      * @throws \BadMethodCallException
      **/
     public function offsetSet($offset, $value)
     {
-        throw new BadMethodCallException('Cannot set values on ' . __CLASS__);
+        throw new BadMethodCallException('Cannot set values on '.__CLASS__);
     }
 
     /**
-     * Not allowed
+     * Not allowed.
      *
      * @param string $offset
+     *
      * @throws \BadMethodCallException
      **/
     public function offsetUnset($offset)
     {
-        throw new BadMethodCallException('Cannot unset values on ' . __CLASS__);
+        throw new BadMethodCallException('Cannot unset values on '.__CLASS__);
     }
 
     /**
-     * Iterate over the items by $group=>$assets
+     * Iterate over the items by $group=>$assets.
      *
      * @return ArrayIterator
      **/
@@ -313,18 +316,17 @@ class Registry extends PathFinderProxy implements RegistryContract
         foreach (array_keys($this->imports) as $group) {
             $array[$group] = $this->offsetGet($group);
         }
+
         return new ArrayIterator($array);
     }
 
     /**
-     * Fill the passed asset with the missing attributes. Handy for Asset::lazyLoadBy
+     * Fill the passed asset with the missing attributes. Handy for Asset::lazyLoadBy.
      *
      * @param \Ems\Assets\Asset
-     * @return null
      **/
     public function __invoke(Asset $asset)
     {
-
         $name = $asset->name();
         $group = $asset->group();
         $mapper = $this->to($group);
@@ -336,7 +338,6 @@ class Registry extends PathFinderProxy implements RegistryContract
 
     protected function toNameAndAttributes($asset)
     {
-
         if (!is_array($asset)) {
             return [$asset, []];
         }
@@ -345,12 +346,11 @@ class Registry extends PathFinderProxy implements RegistryContract
         unset($asset['name']);
 
         return [$name, $asset];
-
     }
 
     protected function newCollection($group)
     {
-        return (new Collection)->setGroup($group);
+        return (new Collection())->setGroup($group);
     }
 
     protected function isAlreadyAdded($asset, $group)
@@ -363,9 +363,8 @@ class Registry extends PathFinderProxy implements RegistryContract
         $this->addedAssets["group|$asset"] = true;
     }
 
-    protected function addImportOrInline($asset, $group, $content='')
+    protected function addImportOrInline($asset, $group, $content = '')
     {
-
         if ($this->isAlreadyAdded($asset, $group)) {
             return $this;
         }
@@ -377,9 +376,8 @@ class Registry extends PathFinderProxy implements RegistryContract
         return $this->addToImports($group, $asset, $content);
     }
 
-    protected function addToImports($group, $asset, $content='')
+    protected function addToImports($group, $asset, $content = '')
     {
-
         if (!isset($this->imports[$group])) {
             $this->imports[$group] = [];
         }
@@ -391,15 +389,15 @@ class Registry extends PathFinderProxy implements RegistryContract
         $this->markAsAdded($asset, $group);
 
         return $assetObject;
-
     }
 
     /**
      * Call a custom handler if one was assigned. Return true
-     * if a custom handler was found (and called), otherwise return false
+     * if a custom handler was found (and called), otherwise return false.
      *
      * @param string $group
      * @param string $asset
+     *
      * @return bool
      **/
     protected function callHandlerIfAssigned($group, $asset)
@@ -421,7 +419,6 @@ class Registry extends PathFinderProxy implements RegistryContract
 
     protected function sortedAssets($group)
     {
-
         $collection = $this->newCollection($group);
 
         $prepend = isset($this->prepend[$group]) ? $this->prepend[$group] : [];
@@ -466,7 +463,6 @@ class Registry extends PathFinderProxy implements RegistryContract
         foreach ($this->afters[$positionId] as $afterAsset) {
             $this->addSorted($collection, $afterAsset);
         }
-
     }
 
     protected function moveAssetsToAppendings($group, array $assetNames)
@@ -476,7 +472,6 @@ class Registry extends PathFinderProxy implements RegistryContract
         }
 
         $this->moveAssetsToPassedArray($this->append[$group], $assetNames);
-
     }
 
     protected function moveAssetsToPrependings($group, array $assetNames)
@@ -486,7 +481,6 @@ class Registry extends PathFinderProxy implements RegistryContract
         }
 
         $this->moveAssetsToPassedArray($this->prepend[$group], $assetNames);
-
     }
 
     protected function moveAssetsToPassedArray(array &$array, array $assetNames)
@@ -502,7 +496,7 @@ class Registry extends PathFinderProxy implements RegistryContract
         $group = $this->lastTouchedGroup;
 
         $foundIndex = null;
-        foreach ($this->imports[$group] as $i=>$asset) {
+        foreach ($this->imports[$group] as $i => $asset) {
             if ($asset->name() == $assetName) {
                 $foundIndex = $i;
                 break;
@@ -520,7 +514,6 @@ class Registry extends PathFinderProxy implements RegistryContract
         $this->imports[$group] = array_values($this->imports[$group]);
 
         return $asset;
-
     }
 
     protected function detectGroup($asset, $group)
@@ -531,29 +524,31 @@ class Registry extends PathFinderProxy implements RegistryContract
     protected function lastTouchedAssetsOrFail()
     {
         if (!$this->lastTouchedAssets) {
-            throw new RuntimeException("Last touched assets not found");
+            throw new RuntimeException('Last touched assets not found');
         }
+
         return $this->lastTouchedAssets;
     }
 
-    protected function positionId($asset, $group=null)
+    protected function positionId($asset, $group = null)
     {
         $group = $group ?: $this->lastTouchedGroup;
         if (!$group) {
-            throw new RuntimeException("Last touched group not found and group not passed");
+            throw new RuntimeException('Last touched group not found and group not passed');
         }
-        return $group . '|' . $asset;
+
+        return $group.'|'.$asset;
     }
 
     /**
-     * Superficial check if an array is numeric
+     * Superficial check if an array is numeric.
      *
      * @param mixed $value
+     *
      * @return bool
      **/
     protected function isNumericArray($value)
     {
         return is_array($value) && isset($value[0]);
     }
-
 }

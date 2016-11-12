@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Ems\Assets\Skeleton;
-
 
 use Ems\Core\Skeleton\Bootstrapper;
 use Ems\Contracts\Assets\Registry;
@@ -11,22 +9,20 @@ use Ems\Assets\Laravel\AssetsBladeDirectives;
 use Illuminate\Contracts\Routing\Registrar;
 use Ems\Contracts\Core\PathFinder;
 
-
 class AssetsBootstrapper extends Bootstrapper
 {
-
     protected $singletons = [
-        'Ems\Assets\ExtensionAnalyser'      => ['Ems\Contracts\Assets\NameAnalyser'],
-        'Ems\Assets\BuildConfigRepository'  => ['Ems\Contracts\Assets\BuildConfigRepository'],
-        'Ems\Assets\Builder'                => ['Ems\Contracts\Assets\Builder'],
-        'Ems\Assets\Compiler'               => ['Ems\Contracts\Assets\Compiler'],
-        'Ems\Assets\Registry'               => ['Ems\Contracts\Assets\Registry', 'Ems\Contracts\Assets\Registrar', 'ems.assets.registry'],
-        'Ems\Assets\Manager'                => ['Ems\Contracts\Assets\Manager', 'ems.assets']
+        'Ems\Assets\ExtensionAnalyser' => ['Ems\Contracts\Assets\NameAnalyser'],
+        'Ems\Assets\BuildConfigRepository' => ['Ems\Contracts\Assets\BuildConfigRepository'],
+        'Ems\Assets\Builder' => ['Ems\Contracts\Assets\Builder'],
+        'Ems\Assets\Compiler' => ['Ems\Contracts\Assets\Compiler'],
+        'Ems\Assets\Registry' => ['Ems\Contracts\Assets\Registry', 'Ems\Contracts\Assets\Registrar', 'ems.assets.registry'],
+        'Ems\Assets\Manager' => ['Ems\Contracts\Assets\Manager', 'ems.assets'],
     ];
 
     protected $bindings = [
-        'Ems\Assets\Asset'      => 'Ems\Contracts\Assets\Asset',
-        'Ems\Assets\Collection' => 'Ems\Contracts\Assets\Collection'
+        'Ems\Assets\Asset' => 'Ems\Contracts\Assets\Asset',
+        'Ems\Assets\Collection' => 'Ems\Contracts\Assets\Collection',
     ];
 
     public function bind()
@@ -51,11 +47,11 @@ class AssetsBootstrapper extends Bootstrapper
              AssetsBladeDirectives::injectOriginalViewData($factory);
         });
 
-        $this->app->afterResolving('blade.compiler', function($compiler, $app){
+        $this->app->afterResolving('blade.compiler', function ($compiler, $app) {
             $app('Ems\Assets\Laravel\AssetsBladeDirectives')->registerDirectives($compiler);
         });
 
-        $this->app->afterResolving('Illuminate\Contracts\Routing\Registrar', function($router, $app){
+        $this->app->afterResolving('Illuminate\Contracts\Routing\Registrar', function ($router, $app) {
             $this->addRoutes($router);
         });
 
@@ -63,17 +59,15 @@ class AssetsBootstrapper extends Bootstrapper
             $this->addInstalledParsers($compiler);
         });
 
-
 //         $this->commands([
 //             'Ems\Assets\Symfony\ListBuildConfigurationsCommand',
 //             'Ems\Assets\Symfony\CompileCommand',
 //         ]);
-
     }
 
     protected function registerViewExtensions()
     {
-        $this->app->bind('Ems\Assets\Laravel\AssetsBladeDirectives', function($app) {
+        $this->app->bind('Ems\Assets\Laravel\AssetsBladeDirectives', function ($app) {
             return new AssetsBladeDirectives($app('Ems\Contracts\Assets\Manager'));
         }, true);
     }
@@ -90,13 +84,15 @@ class AssetsBootstrapper extends Bootstrapper
         if (!$this->app->isLocal()) {
             return;
         }
-return;
+
+        return;
         $factory->createMapperBy(function ($group, $mapping) {
 
             if (in_array($group, ['css', 'js'])) {
                 $mapper = $this->app->__invoke('Ems\Contracts\Core\AppPath');
                 $mapper->setBasePath($mapping['path']);
                 $mapper->setBaseUrl($mapping['url']);
+
                 return $mapper;
             }
 
@@ -104,21 +100,19 @@ return;
 
             $mapper->setBasePath($mapping['path']);
 
-
             $url = route('_ems-assets.show');
             $url .= "?group=$group&file=";
             $mapper->setBaseUrl($url);
+
             return $mapper;
         });
-
     }
 
     /**
      * This method assumes that the CoreBootstrapper already has assigned
-     * a "assets" path and url
+     * a "assets" path and url.
      *
      * @param \Ems\Contracts\Assets\Registry
-     * @return null
      **/
     protected function registerPathMappings($factory)
     {
@@ -126,7 +120,6 @@ return;
 
         $factory->map('css', $assetPath->absolute('css'), $assetPath->url('css'));
         $factory->map('js', $assetPath->absolute('js'), $assetPath->url('js'));
-
     }
 
     protected function addCssRenderer(RendererChain $chain)
@@ -143,13 +136,12 @@ return;
     {
         $router->get('_ems/asset', [
             'uses' => '\Ems\Assets\Laravel\AssetController@show',
-            'as'     => '_ems-assets.show'
+            'as' => '_ems-assets.show',
         ]);
     }
 
     protected function addInstalledParsers($compiler)
     {
-
         if (class_exists('CssMin')) {
             $compiler->addParser('cssmin/cssmin', $this->app->__invoke('Ems\Assets\Parser\CssMinParser'));
             $compiler->addParser('ems/css-url-replace', $this->app->__invoke('Ems\Assets\Parser\CssUrlReplaceParser'));
@@ -162,30 +154,30 @@ return;
         if (class_exists('JShrink\Minifier')) {
             $compiler->addParser('tedivm/jshrink', $this->app->__invoke('Ems\Assets\Parser\JShrinkParser'));
         }
-
     }
 
     /**
-     * TODO: Implement URL Dispatcher
+     * TODO: Implement URL Dispatcher.
      **/
-    protected function publicPath($subPath='')
+    protected function publicPath($subPath = '')
     {
         if (function_exists('public_path')) {
             return public_path($subPath);
         }
 
-        $basePath = $this->app->__invoke('app')->path() . '/public';
+        $basePath = $this->app->__invoke('app')->path().'/public';
+
         return $subPath ? "$basePath/$subPath" : $basePath;
     }
 
-    protected function url($path='')
+    protected function url($path = '')
     {
         if (function_exists('url')) {
             return url($path);
         }
 
         $url = $this->app->__invoke('app')->url();
+
         return $path ? "$url/$path" : $url;
     }
-
 }

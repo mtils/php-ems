@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Ems\Assets\Renderer;
-
 
 use Ems\Contracts\Assets\Asset as AssetContract;
 use Ems\Contracts\Core\Renderer;
@@ -12,10 +10,9 @@ use Ems\Contracts\Assets\Asset;
 
 abstract class AbstractRenderer implements Renderer
 {
-
     /**
      * Fill this array to mark the contained mimeTypes as
-     * supported
+     * supported.
      *
      * @var array
      **/
@@ -30,11 +27,11 @@ abstract class AbstractRenderer implements Renderer
      * {@inheritdoc}
      *
      * @param \Ems\Contracts\Core\Renderable
+     *
      * @return bool
      **/
     public function canRender(Renderable $item)
     {
-
         if (!$item instanceof BaseAsset) {
             return false;
         }
@@ -50,13 +47,13 @@ abstract class AbstractRenderer implements Renderer
      * {@inheritdoc}
      *
      * @param \Ems\Contracts\Core\Renderable $item
+     *
      * @return string
      **/
     public function render(Renderable $item)
     {
-
         $output = '';
-        $nl = "";
+        $nl = '';
         $group = $item->group();
 
         if ($item instanceof AssetContract) {
@@ -64,7 +61,7 @@ abstract class AbstractRenderer implements Renderer
         }
 
         foreach ($item as $asset) {
-            $output .= $nl . $this->renderAsset($asset, $group);
+            $output .= $nl.$this->renderAsset($asset, $group);
             $nl = "\n";
         }
 
@@ -72,19 +69,21 @@ abstract class AbstractRenderer implements Renderer
     }
 
     /**
-     * Force this renderer to only render collections with group $group
+     * Force this renderer to only render collections with group $group.
      *
      * @param string $group
+     *
      * @return self
      **/
     public function forceGroup($group)
     {
         $this->forcedGroup = $group;
+
         return $this;
     }
 
     /**
-     * Return ths forced group (or an empty string if no specific group is forced)
+     * Return ths forced group (or an empty string if no specific group is forced).
      *
      * @return string
      **/
@@ -94,10 +93,11 @@ abstract class AbstractRenderer implements Renderer
     }
 
     /**
-     * Renders one asset
+     * Renders one asset.
      *
      * @param \Ems\Contracts\Assets\Asset $asset
-     * @param string $group
+     * @param string                      $group
+     *
      * @return string
      **/
     protected function renderAsset(Asset $asset, $group)
@@ -106,32 +106,33 @@ abstract class AbstractRenderer implements Renderer
     }
 
     /**
-     * Renders an external asset
+     * Renders an external asset.
      *
      * @param \Ems\Contracts\Assets\Asset $asset
-     * @param string $group
+     * @param string                      $group
+     *
      * @return string
      **/
     protected function renderExternal(Asset $asset, $group)
     {
-        return '<!-- asset external' . $this->renderAttributes(['href'=>$asset->uri()], $asset->attributes()) . ' -->';
+        return '<!-- asset external'.$this->renderAttributes(['href' => $asset->uri()], $asset->attributes()).' -->';
     }
 
     /**
-     * Renders an inline asset
+     * Renders an inline asset.
      *
      * @param \Ems\Contracts\Assets\Asset $asset
-     * @param string $group
+     * @param string                      $group
+     *
      * @return string
      **/
     protected function renderInline(Asset $asset, $group)
     {
-        return '<!-- asset inline content="' . $asset->content() . '" -->';
+        return '<!-- asset inline content="'.$asset->content().'" -->';
     }
 
-    protected function renderAttributes(array $attributes, array $additionalAttributes=[])
+    protected function renderAttributes(array $attributes, array $additionalAttributes = [])
     {
-
         $renderAttributes = array_merge($attributes, $additionalAttributes);
 
         if (!count($renderAttributes)) {
@@ -140,12 +141,10 @@ abstract class AbstractRenderer implements Renderer
 
         $rows = array();
 
-        foreach($renderAttributes as $key=>$value){
-            $rows[] = "{$key}=\"" . trim(strip_tags(htmlspecialchars("$value", ENT_QUOTES))) . '"';
+        foreach ($renderAttributes as $key => $value) {
+            $rows[] = "{$key}=\"".trim(strip_tags(htmlspecialchars("$value", ENT_QUOTES))).'"';
         }
 
-        return implode(" ", $rows);
-
+        return implode(' ', $rows);
     }
-
 }

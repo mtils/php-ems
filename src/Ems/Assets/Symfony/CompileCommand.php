@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Ems\Assets\Symfony;
-
 
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -13,12 +11,10 @@ use Ems\Contracts\Assets\BuildConfigRepository;
 use Ems\Contracts\Assets\BuildConfig;
 
 /**
- * This command lists all build configurations
- *
+ * This command lists all build configurations.
  **/
 class CompileCommand extends Command
 {
-
     protected $repo;
 
     protected $builder;
@@ -41,38 +37,35 @@ class CompileCommand extends Command
 
         // the full command description shown when running the command with
         // the "--help" option
-        ->setHelp("This command allows you to compile your assets You have to assign a config via BuildConfigRepository::store(\$config).")
-
+        ->setHelp('This command allows you to compile your assets You have to assign a config via BuildConfigRepository::store($config).')
 
         ->addArgument('group', InputArgument::OPTIONAL, 'The group of configuration.');
-
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         if (!$groupNames = $this->getGroupNames($input)) {
-            $output->writeln("<comment>No build configurations found");
+            $output->writeln('<comment>No build configurations found');
+
             return;
         }
 
         $output->writeln([
-        "Compiling groups: <comment>" . $this->groupString($groupNames) . '</comment>',
-        "===================================================================================="
+        'Compiling groups: <comment>'.$this->groupString($groupNames).'</comment>',
+        '====================================================================================',
         ]);
 
         foreach ($groupNames as $groupName) {
-
             $config = $this->repo->getOrFail($groupName);
             $this->printBuilding($config, $output);
             $compiledPath = $this->builder->build($config);
             $this->printBuilt($config, $compiledPath, $output);
         }
-
     }
 
     protected function groupString(array $groupNames)
     {
-        return implode(", ", $groupNames);
+        return implode(', ', $groupNames);
     }
 
     protected function getGroupNames(InputInterface $input)
@@ -81,20 +74,18 @@ class CompileCommand extends Command
             return $this->repo->groups();
         }
 
-        return array_map(function($group) {
+        return array_map(function ($group) {
             return trim($group);
-        },explode(',', $groups));
-
+        }, explode(',', $groups));
     }
 
     protected function printBuilding(BuildConfig $config, OutputInterface $output)
     {
-        $output->writeln("Compiling <comment>" . $config->group() . ' (' .  $config->target() . ")</comment>... ");
+        $output->writeln('Compiling <comment>'.$config->group().' ('.$config->target().')</comment>... ');
     }
 
     protected function printBuilt(BuildConfig $config, $compiledPath, OutputInterface $output)
     {
-        $output->writeln("<info>Successfully written to</info> " . $compiledPath);
+        $output->writeln('<info>Successfully written to</info> '.$compiledPath);
     }
-
 }
