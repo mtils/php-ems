@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Assets;
 
 use Ems\Contracts\Assets\Asset as AssetContract;
@@ -13,7 +12,6 @@ use Ems\Core\Exceptions\HandlerNotFoundException;
 
 class Compiler implements CompilerContract
 {
-
     /**
      * @var \Ems\Contracts\Assets\Registry
      **/
@@ -42,7 +40,7 @@ class Compiler implements CompilerContract
     {
         $this->files = $files;
         $this->registry = $registry;
-        $this->compiledListener = function($collection, $content, $parserNames, $parserOptions) {};
+        $this->compiledListener = function ($collection, $content, $parserNames, $parserOptions) {};
     }
 
     /**
@@ -51,33 +49,32 @@ class Compiler implements CompilerContract
      * If you pass $parserOptions['*'] = [] the vars will applied to all parsers
      *
      * @param \Ems\Contracts\Assets\Collection $collection
-     * @param array $parserNames (optional)
-     * @param array $parserOptions (optional)
+     * @param array                            $parserNames   (optional)
+     * @param array                            $parserOptions (optional)
+     *
      * @return string
      **/
-    public function compile(CollectionContract $collection, array $parserNames=[], array $parserOptions=[])
+    public function compile(CollectionContract $collection, array $parserNames = [], array $parserOptions = [])
     {
-
         if (!$parserNames) {
             return $this->callListenerAndReturnContent($collection, $this->readContents($collection), $parserNames, $parserOptions);
         }
 
         $parsers = $this->collectParsers($parserNames);
 
-        $allContent = "";
-        $nl = "";
+        $allContent = '';
+        $nl = '';
 
         foreach ($collection as $asset) {
-            $allContent .= $nl . $this->runParserQueue($asset, $collection, $parsers, $parserOptions);
+            $allContent .= $nl.$this->runParserQueue($asset, $collection, $parsers, $parserOptions);
             $nl = "\n";
         }
 
         return $this->callListenerAndReturnContent($collection, $allContent, $parserNames, $parserOptions);
-
     }
 
     /**
-     * Returns the names of all assigned parsers
+     * Returns the names of all assigned parsers.
      *
      * @return array
      **/
@@ -87,10 +84,12 @@ class Compiler implements CompilerContract
     }
 
     /**
-     * Returns the parser with name $name
+     * Returns the parser with name $name.
      *
      * @param string $name
+     *
      * @return \Ems\Contracts\Core\TextParser
+     *
      * @throws \Ems\Contracts\Core\Errors\NotFound
      **/
     public function parser($name)
@@ -103,23 +102,27 @@ class Compiler implements CompilerContract
     }
 
     /**
-     * Add a parser with name $name
+     * Add a parser with name $name.
      *
-     * @param string $name
+     * @param string                         $name
      * @param \Ems\Contracts\Core\TextParser $parser
+     *
      * @return self
      **/
     public function addParser($name, TextParser $parser)
     {
         $this->parsers[$name] = $parser;
+
         return $this;
     }
 
     /**
-     * Remove the parser with name $name
+     * Remove the parser with name $name.
      *
      * @param string
+     *
      * @return self
+     *
      * @throws \Ems\Contracts\Core\Errors\NotFound
      **/
     public function removeParser($name)
@@ -127,40 +130,41 @@ class Compiler implements CompilerContract
         // Trigger exception
         $parser = $this->parser($name);
         unset($this->parsers[$name]);
+
         return $this;
     }
 
     /**
      * Get informed when assets where compiled. The CompilerConfig will
-     * be passed
+     * be passed.
      *
      * @param callable $listener
+     *
      * @return self
      **/
     public function whenCompiled(callable $listener)
     {
         $this->compiledListener = $listener;
+
         return $this;
     }
 
     protected function runParserQueue(AssetContract $asset, CollectionContract $collection, $parsers, $parserOptions)
     {
-
         $file = $this->absolutePath($collection, $asset);
 
         $content = $this->files->contents($file);
 
-        foreach ($parsers as $name=>$parser) {
+        foreach ($parsers as $name => $parser) {
             $options = $this->parseOptions($collection, $name, $asset, $file, $parserOptions);
             $content = $parser->parse($content, $options, false);
         }
 
-        foreach ($parsers as $name=>$parser) {
+        foreach ($parsers as $name => $parser) {
             $content = $parser->purge($content);
         }
 
         return $content;
-
     }
 
     protected function callListenerAndReturnContent(CollectionContract $collection, $content, array $parserNames, array $parserOptions)
@@ -171,6 +175,7 @@ class Compiler implements CompilerContract
         if (is_string($newContent)) {
             return $newContent;
         }
+
         return $content;
     }
 
@@ -180,16 +185,17 @@ class Compiler implements CompilerContract
         foreach ($parserNames as $name) {
             $parsers[$name] = $this->parser($name);
         }
+
         return $parsers;
     }
 
     protected function readContents(CollectionContract $collection)
     {
-        $allContent = "";
-        $nl = "";
+        $allContent = '';
+        $nl = '';
 
         foreach ($collection as $asset) {
-            $allContent .= $nl . $this->files->contents($this->absolutePath($collection, $asset));
+            $allContent .= $nl.$this->files->contents($this->absolutePath($collection, $asset));
             $nl = "\n";
         }
 
@@ -211,7 +217,7 @@ class Compiler implements CompilerContract
             'collection' => $collection,
             'parser_name' => $parserName,
             'asset' => $asset,
-            'file_path' => $file
+            'file_path' => $file,
         ];
 
         if (!isset($parserOptions['*'])) {
@@ -219,7 +225,5 @@ class Compiler implements CompilerContract
         }
 
         return array_merge($baseOptions, $options, $parserOptions['*']);
-
     }
-
 }
