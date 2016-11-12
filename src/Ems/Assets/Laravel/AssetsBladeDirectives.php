@@ -1,9 +1,6 @@
 <?php
 
-
-
 namespace Ems\Assets\Laravel;
-
 
 use Illuminate\View\Compilers\BladeCompiler;
 use Illuminate\Contracts\View\View;
@@ -12,7 +9,6 @@ use Ems\Contracts\Assets\Manager;
 
 class AssetsBladeDirectives
 {
-
     /**
      * @var \Ems\Contracts\Assets\Manager
      **/
@@ -36,46 +32,49 @@ class AssetsBladeDirectives
     /**
      * Let this class inject a groupPrefix into every rendered template
      * which lies in directory $directory. For performance reasons only an
-     * absolute match (strpos === 0) will lead to a injection
+     * absolute match (strpos === 0) will lead to a injection.
      *
      * @param string $groupPrefix
-     * 
      **/
     public function mapDirectoryToGroupPrefix($directory, $groupPrefix)
     {
         $this->pathToPrefix[$directory] = $groupPrefix;
+
         return $this;
     }
 
     /**
-     * Return a manager with a group prefix for $viewPath
+     * Return a manager with a group prefix for $viewPath.
      *
      * @param string $viewPath
+     *
      * @return \Ems\Contracts\Assets\Manager
      **/
     public function manager($viewPath)
     {
-
         if (isset($this->managerByPath[$viewPath])) {
             return $this->managerByPath[$viewPath];
         }
         $this->managerByPath[$viewPath] = $this->createManagerForViewPath($viewPath);
+
         return $this->managerByPath[$viewPath];
     }
 
     /**
-     * Get the prefix for path $viewPath
+     * Get the prefix for path $viewPath.
      *
      * @param string
+     *
      * @return string
      **/
     public function groupPrefix($viewPath)
     {
-        foreach ($this->pathToPrefix as $directory=>$groupPrefix) {
+        foreach ($this->pathToPrefix as $directory => $groupPrefix) {
             if (strpos($viewPath, $directory) === 0) {
                 return $groupPrefix;
             }
         }
+
         return '';
     }
 
@@ -87,6 +86,7 @@ class AssetsBladeDirectives
 
             if (!method_exists($view, 'getPath')) {
                 $view->with('currentViewPath', '');
+
                 return;
             }
 
@@ -97,16 +97,18 @@ class AssetsBladeDirectives
 
     /**
      * Created a manager for $viewPath. If no groupPrefix found return
-     * the root manager ($this->manager)
+     * the root manager ($this->manager).
      *
      * @param string $viewPath
+     *
      * @return \Ems\Contracts\Assets\Manager
      **/
     protected function createManagerForViewPath($viewPath)
     {
         if ($groupPrefix = $this->groupPrefix($viewPath)) {
-            return $this->manager->replicate(['groupPrefix'=>$groupPrefix]);
+            return $this->manager->replicate(['groupPrefix' => $groupPrefix]);
         }
+
         return $this->manager;
     }
 
