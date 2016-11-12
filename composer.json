@@ -3,12 +3,12 @@
     "description": "A framework agnostic php library which provides the basics for cmsable and other frameworks",
     "type": "library",
     "require": {
-        "php": ">=5.4.0"
+        "php": ">=5.5.0"
     },
     "require-dev": {
         "mockery/mockery": "~0.9",
-        "illuminate/mail": "5.*",
-        "illuminate/database": "5.*",
+        "illuminate/mail": "5.1.*|5.2.*|5.3.*",
+        "illuminate/database": "5.1.*|5.2.*|5.3.*",
         "swiftmailer/swiftmailer": "~5.1",
         "patchwork/jsqueeze": "~2.0",
         "natxet/cssmin": "~3.0",
