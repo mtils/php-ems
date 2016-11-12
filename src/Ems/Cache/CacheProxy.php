@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Cache;
 
 use Ems\Contracts\Cache\Cache as CacheContract;
@@ -10,7 +9,6 @@ use DateTime;
 
 class CacheProxy extends Cache implements CacheContract
 {
-
     /**
      * @var \Ems\Cache\Cache
      **/
@@ -32,7 +30,7 @@ class CacheProxy extends Cache implements CacheContract
     protected $tags = [];
 
     /**
-     * @param \Ems\Cache\Cache $parent
+     * @param \Ems\Cache\Cache                 $parent
      * @param \Ems\Contracts\Cache\Categorizer $categorizer
      **/
     public function __construct(Cache $parent, Storage $storage, Categorizer $categorizer)
@@ -46,13 +44,13 @@ class CacheProxy extends Cache implements CacheContract
      * {@inheritdoc}
      *
      * @param mixed $keyOrValue
-     * @param mixed $value (optional)
-     * @param mixed $keySource (optional)
+     * @param mixed $value      (optional)
+     * @param mixed $keySource  (optional)
+     *
      * @return self
      **/
-    public function put($keyOrValue, $value=null, $keySource=null)
+    public function put($keyOrValue, $value = null, $keySource = null)
     {
-
         $key = $value === null ? null : $keyOrValue;
         $value = $value === null ? $keyOrValue : $value;
         $key = $key ?: $this->categorizer->key($value);
@@ -69,30 +67,33 @@ class CacheProxy extends Cache implements CacheContract
      * {@inheritdoc}
      *
      * @param string|\DateTime $until
+     *
      * @return self
      **/
-    public function until($until='+1 day')
+    public function until($until = '+1 day')
     {
         return $this->proxy($this->parent, $this->storage)
-                    ->with($this->attributes(['until'=>$until]));
+                    ->with($this->attributes(['until' => $until]));
     }
 
     /**
      * {@inheritdoc}
      *
      * @param string|array $tags
+     *
      * @return self
      **/
     public function tag($tags)
     {
         return $this->proxy($this->parent, $this->storage)
-                    ->with($this->attributes(['tag'=>$tags]));
+                    ->with($this->attributes(['tag' => $tags]));
     }
 
     /**
      * {@inheritdoc}
      *
      * @param mixed $name
+     *
      * @return string
      **/
     public function storage($name)
@@ -103,48 +104,46 @@ class CacheProxy extends Cache implements CacheContract
 
     /**
      * Add a different store under name to use it via
-     * self::store($name)
+     * self::store($name).
      *
-     * @param string $name
+     * @param string                       $name
      * @param \Ems\Contracts\Cache\Storage $store
+     *
      * @return self
      **/
     public function addStorage($name, Storage $store)
     {
         $this->parent->addStorage($name, $store);
+
         return $this;
     }
 
     public function with(array $attributes)
     {
-
         if (isset($attributes['until'])) {
             $this->setUntil($attributes['until']);
         }
 
         if (isset($attributes['tag'])) {
-            $this->tags = (array)$attributes['tag'];
+            $this->tags = (array) $attributes['tag'];
         }
 
         return $this;
-
     }
 
     protected function setUntil($until)
     {
-
         if ($until instanceof DateTime) {
             $this->until = $until;
+
             return;
         }
 
-        $this->until = (new DateTime)->modify('+' . ltrim($until, '+'));
-
+        $this->until = (new DateTime())->modify('+'.ltrim($until, '+'));
     }
 
-    protected function attributes(array $overwrite=[])
+    protected function attributes(array $overwrite = [])
     {
-        return array_merge(['until'=>$this->until,'tag'=>$this->tags], $overwrite);
+        return array_merge(['until' => $this->until, 'tag' => $this->tags], $overwrite);
     }
-
 }

@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Cache\Skeleton;
 
 use Ems\Core\Skeleton\Bootstrapper;
@@ -13,12 +12,11 @@ use Ems\Cache\Categorizer\DefaultCategorizer;
 
 class CacheBootstrapper extends Bootstrapper
 {
-
     protected $categorizersAdded = false;
 
     protected $singletons = [
-        Cache::class            => [CacheContract::class, 'ems::cache'],
-        CategorizerChain::class => [Categorizer::class, 'ems::cache.categorizer']
+        Cache::class => [CacheContract::class, 'ems::cache'],
+        CategorizerChain::class => [Categorizer::class, 'ems::cache.categorizer'],
     ];
 
     protected $bindings = [];
@@ -28,20 +26,19 @@ class CacheBootstrapper extends Bootstrapper
         parent::bind();
 
         // Binding the cache also to its own class name (without recursion)
-        $this->app->resolving(Cache::class, function(Cache $cache, $app) {
+        $this->app->resolving(Cache::class, function (Cache $cache, $app) {
             if (!$app->bound(Cache::class)) {
                 $app->instance(Cache::class, $cache);
             }
         });
 
-        $this->app->resolving(CategorizerChain::class, function(CategorizerChain $chain, $app) {
+        $this->app->resolving(CategorizerChain::class, function (CategorizerChain $chain, $app) {
             $this->addCategorizers($chain, $app);
         });
 
-        $this->app->resolving(Cacheable::class, function(Cacheable $cacheable, $app) {
+        $this->app->resolving(Cacheable::class, function (Cacheable $cacheable, $app) {
             $cacheable->setCache($app(CacheContract::class));
         });
-
     }
 
     protected function addCategorizers(CategorizerChain $chain, $app)
@@ -55,8 +52,5 @@ class CacheBootstrapper extends Bootstrapper
         $chain->add($app(DefaultCategorizer::class, [$chain]));
 
         $this->categorizersAdded = true;
-
     }
-
-
 }

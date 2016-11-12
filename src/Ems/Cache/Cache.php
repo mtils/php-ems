@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Cache;
 
 use Ems\Contracts\Cache\Cache as CacheContract;
@@ -10,7 +9,6 @@ use Ems\Cache\Exception\CacheMissException;
 
 class Cache implements CacheContract
 {
-
     const DEFAULT_STORAGE = 'default';
 
     /**
@@ -40,13 +38,15 @@ class Cache implements CacheContract
      * {@inheritdoc}
      *
      * @param mixed $value
+     *
      * @return string
      **/
     public function key($value)
     {
         if (is_scalar($value)) {
-            return $this->storage->escape((string)$value);
+            return $this->storage->escape((string) $value);
         }
+
         return $this->storage->escape($this->categorizer->key($value));
     }
 
@@ -54,6 +54,7 @@ class Cache implements CacheContract
      * {@inheritdoc}
      *
      * @param string $key
+     *
      * @return bool
      **/
     public function has($key)
@@ -65,12 +66,12 @@ class Cache implements CacheContract
      * {@inheritdoc}
      *
      * @param string $key
-     * @param mixed $default (optional)
+     * @param mixed  $default (optional)
+     *
      * @return mixed
      **/
-    public function get($key, $default=null)
+    public function get($key, $default = null)
     {
-
         $isGuessedKey = (is_object($key) || $this->isCacheableArray($key));
 
         $cacheId = $isGuessedKey ? $this->key($key) : $key;
@@ -94,39 +95,39 @@ class Cache implements CacheContract
         $isGuessedKey ? $this->put($cacheId, $value, $key) : $this->put($cacheId, $value);
 
         return $value;
-
     }
 
     /**
      * {@inheritdoc}
      *
      * @param string $key
+     *
      * @return mixed
+     *
      * @throws \Ems\Cache\Exception\CacheMissException
      **/
     public function getOrFail($id)
     {
-        $value = $this->get($id, new CacheMiss);
+        $value = $this->get($id, new CacheMiss());
 
         if ($value instanceof CacheMiss) {
-            throw new CacheMissException("Cache entry not found");
+            throw new CacheMissException('Cache entry not found');
         }
 
         return $value;
-
     }
 
     /**
      * {@inheritdoc}
      *
      * @param mixed $keyOrValue
-     * @param mixed $value (optional)
-     * @param mixed $keySource (optional)
+     * @param mixed $value      (optional)
+     * @param mixed $keySource  (optional)
+     *
      * @return self
      **/
-    public function put($keyOrValue, $value=null, $keySource=null)
+    public function put($keyOrValue, $value = null, $keySource = null)
     {
-
         $key = $value === null ? null : $keyOrValue;
         $value = $value === null ? $keyOrValue : $value;
 
@@ -145,28 +146,31 @@ class Cache implements CacheContract
      * {@inheritdoc}
      *
      * @param string|\DateTime $until
+     *
      * @return self
      **/
-    public function until($until='+1 day')
+    public function until($until = '+1 day')
     {
-        return $this->proxy($this, $this->storage)->with(['until'=>$until]);
+        return $this->proxy($this, $this->storage)->with(['until' => $until]);
     }
 
     /**
      * {@inheritdoc}
      *
      * @param string|array $tags
+     *
      * @return self
      **/
     public function tag($tags)
     {
-        return $this->proxy($this, $this->storage)->with(['tag'=>$tags]);
+        return $this->proxy($this, $this->storage)->with(['tag' => $tags]);
     }
 
     /**
      * {@inheritdoc}
      *
      * @param mixed $name
+     *
      * @return string
      **/
     public function storage($name)
@@ -177,26 +181,30 @@ class Cache implements CacheContract
     /**
      * {@inheritdoc}
      *
-     * @param  string  $key
-     * @param  mixed  $steps
+     * @param string $key
+     * @param mixed  $steps
+     *
      * @return int|bool
      */
     public function increment($key, $steps = 1)
     {
         $this->storage->increment($key, $steps);
+
         return $this;
     }
 
     /**
      * {@inheritdoc}
      *
-     * @param  string  $key
-     * @param  mixed  $steps
+     * @param string $key
+     * @param mixed  $steps
+     *
      * @return int|bool
      */
     public function decrement($key, $steps = 1)
     {
         $this->storage->decrement($key, $steps);
+
         return $this;
     }
 
@@ -204,11 +212,13 @@ class Cache implements CacheContract
      * {@inheritdoc}
      *
      * @param $key
+     *
      * @return self
      **/
     public function forget($key)
     {
         $this->storage->forget($key);
+
         return $this;
     }
 
@@ -216,24 +226,26 @@ class Cache implements CacheContract
      * {@inheritdoc}
      *
      * @param array|string $tags
+     *
      * @return self
      **/
     public function prune($tags)
     {
         $this->storage->prune($tags);
+
         return $this;
     }
 
     /**
      * {@inheritdoc}
      *
-     * @param string $name
+     * @param string                       $name
      * @param \Ems\Contracts\Cache\Storage $store
+     *
      * @return self
      **/
     public function addStorage($name, Storage $store)
     {
-
         if ($name == self::DEFAULT_STORAGE) {
             $this->storage = $store;
         }
@@ -241,13 +253,13 @@ class Cache implements CacheContract
         $this->storages[$name] = $store;
 
         return $this;
-
     }
 
     /**
      * {@inheritdoc}
      *
      * @see \Ems\Contracts\Core\Storage
+     *
      * @return bool (if successfull)
      **/
     public function persist()
@@ -259,6 +271,7 @@ class Cache implements CacheContract
      * {@inheritdoc}
      *
      * @see \Ems\Contracts\Core\Storage
+     *
      * @return bool (if successfull)
      **/
     public function purge()
@@ -267,9 +280,10 @@ class Cache implements CacheContract
     }
 
     /**
-     * Check if $offset exists
+     * Check if $offset exists.
      *
      * @param mixed $offset
+     *
      * @return bool
      **/
     public function offsetExists($offset)
@@ -278,10 +292,12 @@ class Cache implements CacheContract
     }
 
     /**
-     * Get value of $offset
+     * Get value of $offset.
      *
      * @see \Ems\Contracts\Core\Storage
+     *
      * @param mixed $offset
+     *
      * @return mixed
      **/
     public function offsetGet($offset)
@@ -290,12 +306,12 @@ class Cache implements CacheContract
     }
 
     /**
-     * Set the value of $offset
+     * Set the value of $offset.
      *
      * @see \Ems\Contracts\Core\Storage
+     *
      * @param mixed $offset
      * @param mixed $value
-     * @return null
      **/
     public function offsetSet($offset, $value)
     {
@@ -303,11 +319,11 @@ class Cache implements CacheContract
     }
 
     /**
-     * Unset $offset
+     * Unset $offset.
      *
      * @see \Ems\Contracts\Core\Storage
+     *
      * @param mixed $offset
-     * @return null
      **/
     public function offsetUnset($offset)
     {
@@ -315,10 +331,11 @@ class Cache implements CacheContract
     }
 
     /**
-     * Create a new proxy for a different storage
+     * Create a new proxy for a different storage.
      *
-     * @param self $parent
+     * @param self                         $parent
      * @param \Ems\Contracts\Cache\Storage $storage
+     *
      * @return \Ems\Cache\CacheProxy
      **/
     protected function proxy($parent, Storage $storage)
@@ -327,18 +344,20 @@ class Cache implements CacheContract
     }
 
     /**
-     * Return if the value is a cacheable array
+     * Return if the value is a cacheable array.
      *
      * @param mixed $value
+     *
      * @return bool
      **/
     protected function isCacheableArray($value)
     {
-        return (is_array($value) && !$this->isArrayOfStrings($value));
+        return is_array($value) && !$this->isArrayOfStrings($value);
     }
 
     /**
      * @param mixed $value
+     *
      * @return bool
      **/
     protected function isArrayOfStrings($value)
@@ -347,13 +366,14 @@ class Cache implements CacheContract
             return false;
         }
 
-        if (isset($value[0]) && (is_string($value[0]) || method_exists($value[0], '__toString') )) {
+        if (isset($value[0]) && (is_string($value[0]) || method_exists($value[0], '__toString'))) {
             return true;
         }
 
         return false;
     }
-
 }
 
-class CacheMiss{}
+class CacheMiss
+{
+}

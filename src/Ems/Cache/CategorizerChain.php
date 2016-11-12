@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Cache;
 
 use Ems\Contracts\Cache\Categorizer;
@@ -10,7 +9,6 @@ use Ems\Core\Exceptions\HandlerNotFoundException;
 
 class CategorizerChain implements Categorizer
 {
-
     use TraitOfResponsibility;
 
     /**
@@ -19,7 +17,7 @@ class CategorizerChain implements Categorizer
     protected $defaultLifetime = '1 day';
 
     /**
-     * @var  \DateTime
+     * @var \DateTime
      **/
     protected $defaultUntil;
 
@@ -27,6 +25,7 @@ class CategorizerChain implements Categorizer
      * {@inheritdoc}
      *
      * @param mixed $value
+     *
      * @return string|null $id
      **/
     public function key($value)
@@ -47,6 +46,7 @@ class CategorizerChain implements Categorizer
      * {@inheritdoc}
      *
      * @param mixed $value
+     *
      * @return array|null
      **/
     public function tags($value)
@@ -57,6 +57,7 @@ class CategorizerChain implements Categorizer
                 return $result;
             }
         }
+
         return [];
     }
 
@@ -64,11 +65,11 @@ class CategorizerChain implements Categorizer
      * {@inheritdoc}
      *
      * @param mixed $value
+     *
      * @return \DateTime|null
      **/
     public function lifetime($value)
     {
-
         foreach ($this->candidates as $categorizer) {
             $result = $categorizer->lifetime($value);
             if ($result !== null) {
@@ -89,7 +90,7 @@ class CategorizerChain implements Categorizer
     public function setDefaultLifetime($lifetime)
     {
         $this->defaultLifetime = $lifetime;
+
         return $this;
     }
-
 }

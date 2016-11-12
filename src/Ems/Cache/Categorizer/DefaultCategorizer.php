@@ -1,20 +1,16 @@
 <?php
 
-
 namespace Ems\Cache\Categorizer;
-
 
 use Ems\Contracts\Cache\Cacheable;
 use Ems\Contracts\Cache\Categorizer;
 use Ems\Contracts\Core\Identifiable;
 use Ems\Contracts\Core\AppliesToResource;
-use DateTime;
 use Exception;
 use InvalidArgumentException;
 
 class DefaultCategorizer implements Categorizer
 {
-
     /**
      * @var string
      **/
@@ -42,11 +38,11 @@ class DefaultCategorizer implements Categorizer
      * {@inheritdoc}
      *
      * @param mixed $value
+     *
      * @return string|null $id
      **/
     public function key($value)
     {
-
         if ($value instanceof Cacheable) {
             return $value->cacheId();
         }
@@ -62,13 +58,13 @@ class DefaultCategorizer implements Categorizer
         if (is_object($value)) {
             return $this->objectToKey($value);
         }
-
     }
 
     /**
      * {@inheritdoc}
      *
      * @param mixed $value
+     *
      * @return array|null
      **/
     public function tags($value)
@@ -82,6 +78,7 @@ class DefaultCategorizer implements Categorizer
      * {@inheritdoc}
      *
      * @param mixed $value
+     *
      * @return \DateTime|null
      **/
     public function lifetime($value)
@@ -92,14 +89,14 @@ class DefaultCategorizer implements Categorizer
     }
 
     /**
-     * Turns an array into a key
+     * Turns an array into a key.
      *
      * @param array $array
+     *
      * @return string
      **/
     protected function arrayToKey(array $array)
     {
-
         if ($this->isSequential($array)) {
             return $this->sequentialArrayToKey($array);
         }
@@ -115,18 +112,17 @@ class DefaultCategorizer implements Categorizer
         }
 
         return implode('_', $parts);
-
     }
 
     /**
-     * Turns an strictly sequential array into a key
+     * Turns an strictly sequential array into a key.
      *
      * @param array $array
+     *
      * @return string
      **/
     protected function sequentialArrayToKey(array $array)
     {
-
         $parts = [];
 
         foreach ($array as $value) {
@@ -137,9 +133,10 @@ class DefaultCategorizer implements Categorizer
     }
 
     /**
-     * Turns an object into a key
+     * Turns an object into a key.
      *
      * @param object $object
+     *
      * @return string
      **/
     protected function objectToKey($object)
@@ -147,21 +144,21 @@ class DefaultCategorizer implements Categorizer
         $typeName = $object instanceof AppliesToResource ? $object->resourceName() : get_class($object);
 
         if (!$object instanceof Identifiable) {
-            throw new InvalidArgumentException("Cannot generate cache id of unknown class " . get_class($object));
+            throw new InvalidArgumentException('Cannot generate cache id of unknown class '.get_class($object));
         }
 
-        return $typeName . '_' . $object->getId();
+        return $typeName.'_'.$object->getId();
     }
 
     /**
-     * Casts an array value. Is used different to avoid endless recursion
+     * Casts an array value. Is used different to avoid endless recursion.
      *
      * @param mixed $value
+     *
      * @return string
      **/
     protected function castArrayValue($value)
     {
-
         if (!is_object($value)) {
             return $this->key($value);
         }
@@ -170,19 +167,18 @@ class DefaultCategorizer implements Categorizer
             if ($key = $this->objectCategorizer->key($value)) {
                 return $this->hashIfToLong($key);
             }
-
         } catch (Exception $e) {
         }
 
         return $this->hashIfToLong($this->objectToKey($value));
-
     }
 
     /**
-     * Hashes a key if the key is too long
+     * Hashes a key if the key is too long.
      *
      * @param string $string
-     * @param int $maxlength
+     * @param int    $maxlength
+     *
      * @return string
      **/
     protected function hashIfToLong($string)
@@ -193,20 +189,18 @@ class DefaultCategorizer implements Categorizer
     }
 
     /**
-     * Strictly check if an array is sequential
+     * Strictly check if an array is sequential.
      *
      * @param array
+     *
      * @return bool
      **/
     protected function isSequential(array $array)
     {
-
         if ($array === []) {
             return true;
         }
 
-        return array_keys($array) === range(0, count($array)-1);
-
+        return array_keys($array) === range(0, count($array) - 1);
     }
-
 }
