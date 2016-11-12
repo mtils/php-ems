@@ -1,24 +1,21 @@
 <?php
 
-
 namespace Ems\Mail;
 
 use RuntimeException;
 use Ems\Contracts\Mail\AddressExtractor;
 
-
 class GuessingAddressExtractor implements AddressExtractor
 {
-
     protected $possibleEmailMethods = [
         'getEmail',
         'getEmailForPasswordReset',
-        'getAuthEmail'
+        'getAuthEmail',
     ];
 
     protected $possibleEmailProperties = [
         'email',
-        'email2'
+        'email2',
     ];
 
     protected $nameToEmailMap = [];
@@ -27,11 +24,11 @@ class GuessingAddressExtractor implements AddressExtractor
      * {@inheritdoc}
      *
      * @param mixed $contact
+     *
      * @return string The email address
      **/
     public function email($contact)
     {
-
         if ($this->isStringLike($contact) && $this->isMapped($contact)) {
             return $this->mappedEmail($contact);
         }
@@ -41,7 +38,7 @@ class GuessingAddressExtractor implements AddressExtractor
         }
 
         if (!is_object($contact)) {
-            throw new RuntimeException('No idea how to extract an email address of ' . gettype($contact));
+            throw new RuntimeException('No idea how to extract an email address of '.gettype($contact));
         }
 
         foreach ($this->possibleEmailMethods as $method) {
@@ -56,13 +53,14 @@ class GuessingAddressExtractor implements AddressExtractor
             }
         }
 
-        throw new RuntimeException('No idea how to extract an email address of ' . get_class($contact));
+        throw new RuntimeException('No idea how to extract an email address of '.get_class($contact));
     }
 
     /**
      * {@inheritdoc}
      *
      * @param mixed $contact
+     *
      * @return string|null
      **/
     public function name($contact)
@@ -82,6 +80,7 @@ class GuessingAddressExtractor implements AddressExtractor
     public function mapToEmail($name, $email)
     {
         $this->nameToEmailMap[$name] = $email;
+
         return $this;
     }
 
@@ -90,11 +89,12 @@ class GuessingAddressExtractor implements AddressExtractor
         return (is_string($contact) || method_exists($contact, '__toString')) && !method_exists($contact, 'jsonSerialize');
     }
 
-    protected function isEmailAddress($contact) {
+    protected function isEmailAddress($contact)
+    {
         if ($contact instanceof Illuminate\Database\Eloquent\Model) {
             return false;
         }
-        return (filter_var($contact, FILTER_VALIDATE_EMAIL) !== false);
-    }
 
+        return filter_var($contact, FILTER_VALIDATE_EMAIL) !== false;
+    }
 }

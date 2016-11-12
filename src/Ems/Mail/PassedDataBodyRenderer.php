@@ -5,9 +5,8 @@ namespace Ems\Mail;
 use UnderflowException;
 use Ems\Contracts\Mail\BodyRenderer;
 
-
 /**
- * This is a bogus renderer which just returns the passed body
+ * This is a bogus renderer which just returns the passed body.
  **/
 class PassedDataBodyRenderer implements BodyRenderer
 {
@@ -16,6 +15,7 @@ class PassedDataBodyRenderer implements BodyRenderer
      *
      * @param \Ems\Contracts\Mail\MailConfig
      * @param aray $data
+     *
      * @return string
      **/
     public function html(MailConfig $config, array $data)
@@ -27,12 +27,12 @@ class PassedDataBodyRenderer implements BodyRenderer
         throw new UnderflowException('No mail body was passed');
     }
 
-
     /**
      * {@inheritdoc}
      *
      * @param \Ems\Contracts\Mail\MailConfig
      * @param aray $data
+     *
      * @return string
      **/
     public function plainText(MailConfig $config, array $data)

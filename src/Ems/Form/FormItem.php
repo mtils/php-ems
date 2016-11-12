@@ -1,11 +1,9 @@
 <?php
 
-
 namespace Ems\Form;
 
 class FormItem
 {
-
     /**
      * @var string
      **/
@@ -17,14 +15,14 @@ class FormItem
     protected $name;
 
     /**
-    * The Tooltip (title attribute)
-    *
-    * @var string
-    */
+     * The Tooltip (title attribute).
+     *
+     * @var string
+     */
     protected $tooltip;
 
     /**
-     * The typical label of a field, not its html title
+     * The typical label of a field, not its html title.
      *
      * @var string
      **/
@@ -36,22 +34,21 @@ class FormItem
     protected $description;
 
     /**
-    * @var \Ems\Core\Collections\StringList
-    */
+     * @var \Ems\Core\Collections\StringList
+     */
     protected $cssClasses;
 
     /**
-    * (HTML) Attributes
-    *
-    * @var Attributes
-    */
-    protected $attributes = NULL;
+     * (HTML) Attributes.
+     *
+     * @var Attributes
+     */
+    protected $attributes = null;
 
     /**
-     * Classname for Templates
+     * Classname for Templates.
      *
      * @var string
      */
     protected $className = '';
-
 }

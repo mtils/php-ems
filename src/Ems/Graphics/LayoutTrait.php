@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Graphics;
 
 use ArrayIterator;
@@ -11,11 +10,10 @@ use Ems\Contracts\Graphics\LayoutItem;
  **/
 trait LayoutTrait
 {
-
     /**
      * @var array
      **/
-    protected $_layout=[];
+    protected $_layout = [];
 
     /**
      * @var int
@@ -28,20 +26,20 @@ trait LayoutTrait
     protected $_maxRows = 0;
 
     /**
-     * Returns the amount of columns
+     * Returns the amount of columns.
      *
      * @return int
      **/
     public function columnCount()
     {
-
         $maxCol = 0;
 
-        foreach ($this->_layout as $row=>$items) {
-            foreach ($items as $column=>$item) {
+        foreach ($this->_layout as $row => $items) {
+            foreach ($items as $column => $item) {
                 $maxCol = max($column, $maxCol);
             }
         }
+
         return $maxCol;
     }
 
@@ -70,19 +68,20 @@ trait LayoutTrait
     /**
      * {@inheritdoc}
      *
-     * @param int $row
-     * @param int $column
+     * @param int                                $row
+     * @param int                                $column
      * @param \Ems\Contracts\Graphics\LayoutItem $item
+     *
      * @return self
      **/
     public function setItem($row, $column, LayoutItem $item)
     {
         if ($this->rowExceedsMax($row)) {
-            throw new OutOfBoundsException("You cannot add more than " . $this->getMaxRows() . ' rows');
+            throw new OutOfBoundsException('You cannot add more than '.$this->getMaxRows().' rows');
         }
 
         if ($this->columnExceedsMax($column)) {
-            throw new OutOfBoundsException("You cannot add more than " . $this->getMaxColumns() . ' columns');
+            throw new OutOfBoundsException('You cannot add more than '.$this->getMaxColumns().' columns');
         }
 
         $rowCount = $this->rowCount();
@@ -103,6 +102,7 @@ trait LayoutTrait
      *
      * @param int $row
      * @param int $column
+     *
      * @return self
      **/
     public function remove($row, $column)
@@ -110,6 +110,7 @@ trait LayoutTrait
         if (isset($this->_layout[$row][$column])) {
             unset($this->_layout[$row][$column]);
         }
+
         return $this;
     }
 
@@ -117,11 +118,11 @@ trait LayoutTrait
      * {@inheritdoc}
      *
      * @param \Ems\Contracts\Graphics\LayoutItem $item
+     *
      * @return self
      **/
     public function removeItem(LayoutItem $item)
     {
-
         $itemId = spl_object_hash($item);
 
         foreach ($this as $myItem) {
@@ -129,6 +130,7 @@ trait LayoutTrait
                 return $this->remove($myItem->getRow(), $myItem->getColumn());
             }
         }
+
         return $this;
     }
 
@@ -146,11 +148,13 @@ trait LayoutTrait
      * {@inheritdoc}
      *
      * @param int $maxColumns
+     *
      * @return self
      **/
     public function setMaxColumns($maxColumns)
     {
         $this->_maxColumns = $maxColumns;
+
         return $this;
     }
 
@@ -168,16 +172,18 @@ trait LayoutTrait
      * {@inheritdoc}
      *
      * @param int $maxRows
+     *
      * @return self
      **/
     public function setMaxRows($maxRows)
     {
         $this->_maxRows = $maxRows;
+
         return $this;
     }
 
     /**
-     * Return the amount of items
+     * Return the amount of items.
      *
      * @return int
      **/
@@ -187,7 +193,7 @@ trait LayoutTrait
     }
 
     /**
-     * Return an iterator for all items
+     * Return an iterator for all items.
      *
      * @return \ArrayIterator
      **/
@@ -197,29 +203,29 @@ trait LayoutTrait
     }
 
     /**
-     * Collects all items
+     * Collects all items.
      *
      * @return array
      **/
     protected function collectItems()
     {
-
         $items = [];
 
-        foreach ($this->_layout as $row=>$unused) {
-            foreach ($this->_layout[$row] as $column=>$item) {
+        foreach ($this->_layout as $row => $unused) {
+            foreach ($this->_layout[$row] as $column => $item) {
                 $items[] = $item;
             }
         }
 
         return $items;
     }
-    
+
     protected function rowExceedsMax($row)
     {
         if ($this->getMaxRows() == 0) {
             return false;
         }
+
         return $row >= $this->getMaxRows();
     }
 
@@ -228,6 +234,7 @@ trait LayoutTrait
         if ($this->getMaxColumns() == 0) {
             return false;
         }
+
         return $column >= $this->getMaxColumns();
     }
 }

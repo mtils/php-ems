@@ -1,4 +1,5 @@
-<?php 
+<?php
+
 
 namespace Ems\Mail;
 
@@ -6,20 +7,15 @@ use UnexpectedValueException;
 use Traversable;
 use UnderflowException;
 use InvalidArgumentException;
-use Countable;
-
 use Ems\Contracts\Mail\Mailer as MailerContract;
 use Ems\Contracts\Mail\MailConfigProvider;
 use Ems\Contracts\Mail\MessageComposer as ComposerContract;
 use Ems\Contracts\Mail\Transport;
 use Ems\Contracts\Mail\Message as MessageContract;
 use Ems\Contracts\Mail\SendResult as ResultContract;
-use Ems\Mail\SendResult;
-
 
 class Mailer implements MailerContract
 {
-
     /**
      * @var \Ems\Contracts\Mail\Transport
      **/
@@ -56,7 +52,7 @@ class Mailer implements MailerContract
     protected $sentListener;
 
     /**
-     * @param \Ems\Contracts\Mail\Transport $transport
+     * @param \Ems\Contracts\Mail\Transport          $transport
      * @param \Ems\Contracts\Mail\MailConfigProvider $configProvider
      **/
     public function __construct(Transport $transport, MailConfigProvider $configProvider,
@@ -66,14 +62,14 @@ class Mailer implements MailerContract
         $this->configProvider = $configProvider;
         $this->composer = $composer;
 
-        $this->sendingListener = function($message){};
-        $this->sentListener = function($message){};
+        $this->sendingListener = function ($message) {};
+        $this->sentListener = function ($message) {};
 
-        $this->transport->beforeSending(function(MessageContract $message){
+        $this->transport->beforeSending(function (MessageContract $message) {
             call_user_func($this->sendingListener, $message);
         });
 
-        $this->transport->afterSent(function(MessageContract $message){
+        $this->transport->afterSent(function (MessageContract $message) {
             call_user_func($this->sentListener, $message);
         });
     }
@@ -82,6 +78,7 @@ class Mailer implements MailerContract
      * {@inheritdoc}
      * 
      * @param mixed $recipient string|array for more than one
+     *
      * @return self
      **/
     public function to($recipient)
@@ -92,14 +89,14 @@ class Mailer implements MailerContract
     /**
      * {@inheritdoc}
      *
-     * @param string $to The recipient, email or something handled by ReciepientCaster
+     * @param string $to      The recipient, email or something handled by ReciepientCaster
      * @param string $subject
-     * @param string $body The text body
+     * @param string $body    The text body
+     *
      * @return \Ems\Contracts\Mail\Message
      **/
-    public function message($to='', $subject='', $body='')
+    public function message($to = '', $subject = '', $body = '')
     {
-
         $message = $this->transport->newMessage();
 
         if ($to) {
@@ -120,14 +117,14 @@ class Mailer implements MailerContract
     /**
      * {@inheritdoc}
      *
-     * @param string $resourceName A resource id like registrations.activate
-     * @param array $data (optional) The view vars (subject, body, ...)
-     * @param callable $callback (optional) A closure to modify the mail(s) before send
+     * @param string   $resourceName A resource id like registrations.activate
+     * @param array    $data         (optional) The view vars (subject, body, ...)
+     * @param callable $callback     (optional) A closure to modify the mail(s) before send
+     *
      * @return \Ems\Contracts\Mail\SendResult
      **/
-    public function send($resourceName, array $data=[], $callback=null)
+    public function send($resourceName, array $data = [], $callback = null)
     {
-
         $recipients = $this->finalRecipients($this->to);
 
         $config = $this->configProvider->configFor($resourceName);
@@ -135,7 +132,6 @@ class Mailer implements MailerContract
         $result = $this->newSendResult($this->transport);
 
         foreach ($recipients as $recipient) {
-
             $message = $this->transport->newMessage();
 
             $message->setMailer($this);
@@ -156,19 +152,20 @@ class Mailer implements MailerContract
         }
 
         return $result;
-
     }
 
     /**
      * {@inheritdoc}
      *
      * @param \Ems\Contracts\Mail $message
+     *
      * @return \Ems\Contracts\Mail\SendResult
      **/
     public function sendMessage(MessageContract $message)
     {
         $this->overwriteRecipientsIfNeeded($message);
         call_user_func($this->sendingListener, $message);
+
         return $this->transport->send($message);
     }
 
@@ -176,11 +173,13 @@ class Mailer implements MailerContract
      * {@inheritdoc}
      *
      * @param callable $listener
+     *
      * @return self
      **/
     public function beforeSending(callable $listener)
     {
         $this->sendingListener = $listener;
+
         return $this;
     }
 
@@ -188,11 +187,13 @@ class Mailer implements MailerContract
      * {@inheritdoc}
      *
      * @param callable $listener
+     *
      * @return self
      **/
     public function afterSent(callable $listener)
     {
         $this->sentListener = $listener;
+
         return $this;
     }
 
@@ -208,44 +209,48 @@ class Mailer implements MailerContract
      * Always send all mails only to the passed address(es)
      * This is only for testing purposes to not send mails to the outside
      * while developing. One call of this method will affect all send()
-     * calls
+     * calls.
      *
      * @param string|array $to
+     *
      * @return self
      **/
     public function alwaysSendTo($to)
     {
-        $this->overwrittenTo = func_num_args() > 1 ? func_get_args() : (array)$to;
+        $this->overwrittenTo = func_num_args() > 1 ? func_get_args() : (array) $to;
+
         return $this;
     }
 
     public function _setTo($to)
     {
         $this->to = $to;
+
         return $this;
     }
 
     /**
-     * Returns only the overwritten recipients or if non set the passed ones
+     * Returns only the overwritten recipients or if non set the passed ones.
      *
      * @param array|\Traversable $passedTo
+     *
      * @return array
      **/
     protected function finalRecipients($passedTo)
     {
-//         if ($this->overwrittenTo) {
+        //         if ($this->overwrittenTo) {
 //             return $this->overwrittenTo;
 //         }
 
         return $passedTo;
-
     }
 
     /**
      * Clears all recipients of the mail and replaces them with
-     * overwrittenTo if it was set
+     * overwrittenTo if it was set.
      *
      * @param Ems\Contracts\Mail\Message $message
+     *
      * @see self::alwaysSendTo
      **/
     protected function overwriteRecipientsIfNeeded(MessageContract $message)
@@ -262,9 +267,10 @@ class Mailer implements MailerContract
     }
 
     /**
-     * Parses the recipients to something traversable
+     * Parses the recipients to something traversable.
      *
      * @param array $toArgs
+     *
      * @return \Traversable
      **/
     protected function parseRecipients($toArgs)
@@ -278,7 +284,7 @@ class Mailer implements MailerContract
         }
 
         if (is_string($toArgs[0])) {
-            return (array)$toArgs[0];
+            return (array) $toArgs[0];
         }
 
         if ($toArgs[0] instanceof Traversable) {
@@ -291,13 +297,14 @@ class Mailer implements MailerContract
 
         $typeName = is_object($toArgs[0]) ? get_class($toArgs[0]) : gettype($typeName);
 
-        throw new UnexpectedValueException('Unparsable $to parameter ' . $typeName);
+        throw new UnexpectedValueException('Unparsable $to parameter '.$typeName);
     }
 
     /**
      * Replicates the mailer for the fluid to() api.
      *
      * @param mixed $to
+     *
      * @return self
      **/
     protected function replicateForFluidApi($to)
@@ -311,7 +318,7 @@ class Mailer implements MailerContract
     }
 
     /**
-     * Creates a new SendResult. Overwrite this method for another class
+     * Creates a new SendResult. Overwrite this method for another class.
      *
      * @return \Ems\Contracts\Mail\SendResult
      **/
@@ -321,7 +328,7 @@ class Mailer implements MailerContract
     }
 
     /**
-     * Merges the result of a transport send operation into a global one
+     * Merges the result of a transport send operation into a global one.
      *
      * @param \Ems\Contracts\Mail\SendResult $transportResult
      * @param \Ems\Contracts\Mail\SendResult $mailerResult
@@ -334,9 +341,8 @@ class Mailer implements MailerContract
 
         $mailerResult->increment(count($transportResult));
 
-        foreach ($transportResult->failures() as $i=>$failed) {
+        foreach ($transportResult->failures() as $i => $failed) {
             $mailerResult->addFailedRecipient($failed, $transportResult->error($i));
         }
     }
-
 }

@@ -1,18 +1,16 @@
 <?php
 
-
 namespace Ems\Mail\Laravel;
-
 
 use Illuminate\Contracts\View\Factory;
 use Ems\Contracts\Mail\BodyRenderer;
 use Ems\Contracts\Mail\MailConfig;
 
-
 class ViewBodyRenderer implements BodyRenderer
 {
     /**
-     * Try to render plain text in mails with templates containing this suffix
+     * Try to render plain text in mails with templates containing this suffix.
+     *
      * @var string
      **/
     public $plainSuffix = '.plain';
@@ -40,6 +38,7 @@ class ViewBodyRenderer implements BodyRenderer
      *
      * @param \Ems\Contracts\Mail\MailConfig
      * @param aray $data
+     *
      * @return string
      **/
     public function html(MailConfig $config, array $data)
@@ -56,11 +55,12 @@ class ViewBodyRenderer implements BodyRenderer
      *
      * @param \Ems\Contracts\Mail\MailConfig
      * @param aray $data
+     *
      * @return string
      **/
     public function plainText(MailConfig $config, array $data)
     {
-        $plainTemplate = $config->template() . $this->plainSuffix;
+        $plainTemplate = $config->template().$this->plainSuffix;
 
         if ($this->views->exists($plainTemplate)) {
             return $this->views->make($plainTemplate, $data)->render();
@@ -71,7 +71,6 @@ class ViewBodyRenderer implements BodyRenderer
         }
 
         return call_user_func($this->htmlPlainConverter, $this->html($config, $data),  $data);
-
     }
 
     /**
@@ -79,12 +78,13 @@ class ViewBodyRenderer implements BodyRenderer
      * contents of the mail and the data.
      *
      * @param callable $converter
+     *
      * @return self
      **/
     public function convertToPlainTextBy(callable $converter)
     {
         $this->htmlPlainConverter = $converter;
+
         return $this;
     }
-
 }

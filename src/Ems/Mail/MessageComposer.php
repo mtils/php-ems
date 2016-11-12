@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Mail;
 
 use UnderflowException;
@@ -13,7 +12,6 @@ use Ems\Contracts\Mail\MessageContentProvider;
 
 class MessageComposer implements ComposerContract
 {
-
     protected $extractor;
 
     protected $bodyRenderer;
@@ -24,28 +22,26 @@ class MessageComposer implements ComposerContract
 
     protected $dataProcessor;
 
-    public function __construct(AddressExtractor $extractor=null, BodyRenderer $renderer=null,
-                                MessageContentProvider $contentProvider=null)
+    public function __construct(AddressExtractor $extractor = null, BodyRenderer $renderer = null,
+                                MessageContentProvider $contentProvider = null)
     {
-        $this->extractor = $extractor ?: new GuessingAddressExtractor;
-        $this->bodyRenderer = $renderer ?: new PassedDataBodyRenderer;
+        $this->extractor = $extractor ?: new GuessingAddressExtractor();
+        $this->bodyRenderer = $renderer ?: new PassedDataBodyRenderer();
         $this->contentProvider = $contentProvider;
-        $this->dataProcessor = function($config, &$data){};
+        $this->dataProcessor = function ($config, &$data) {};
     }
 
     /**
      * Fill the message with contents for $plannedSendDate depending on $recipient
      * on $recipient and $data.
      *
-      * @param \Ems\Contracts\Mail\MailConfig $config
-     * @param \Ems\Contracts\Mail\Message $message
-     * @param array $data (optional)
-     * @param \DateTime $plannedSendDate (optional)
-     * @return void
+     * @param \Ems\Contracts\Mail\MailConfig $config
+     * @param \Ems\Contracts\Mail\Message    $message
+     * @param array                          $data            (optional)
+     * @param \DateTime                      $plannedSendDate (optional)
      **/
-    public function fill(MailConfig $config, Message $message, array $data=[], DateTime $plannedSendDate=null)
+    public function fill(MailConfig $config, Message $message, array $data = [], DateTime $plannedSendDate = null)
     {
-
         $viewData = $this->mergePassedWithConfigData($config->data(), $data);
 
         $recipient = $message->recipient();
@@ -78,29 +74,33 @@ class MessageComposer implements ComposerContract
 
     /**
      * Determine if configured data will overwrite passed data. (A configured
-     * key will overwrite the passed key in the array)
+     * key will overwrite the passed key in the array).
      *
      * @param bool $prefer (default:true)
+     *
      * @return self
      **/
-    public function preferConfiguredData($prefer=true)
+    public function preferConfiguredData($prefer = true)
     {
         $this->preferConfiguredData = $prefer;
+
         return $this;
     }
 
     /**
      * Assign an additional callable which will process the data before passing
-     * it to the view
+     * it to the view.
      *
      * Signature is: function($resourceId, array &$data){}
      *
      * @param callable $processor
+     *
      * @return self
      **/
     public function processDataWith(callable $processor)
     {
         $this->dataProcessor = $processor;
+
         return $this;
     }
 
@@ -108,47 +108,45 @@ class MessageComposer implements ComposerContract
     {
         if (isset($viewData[self::ORIGINATOR])) {
             $message->from($this->extractor->email($viewData[self::ORIGINATOR]));
+
             return;
         }
 
         $message->from($this->extractor->email($this->getSender($config, $message)));
     }
 
-    protected function assureContentsInData(MailConfig $config, array &$data, DateTime $plannedSendDate=null)
+    protected function assureContentsInData(MailConfig $config, array &$data, DateTime $plannedSendDate = null)
     {
-
         if ($this->contentProvider) {
             return $this->assureContentsByProvider($config, $data, $plannedSendDate);
         }
 
-        if (!isset($data[self::SUBJECT])){
+        if (!isset($data[self::SUBJECT])) {
             throw new UnderflowException('You have to pass subject (and body) inside $data');
         }
-
     }
 
-    protected function assureContentsByProvider(MailConfig $config, array &$data, DateTime $plannedSendDate=null)
+    protected function assureContentsByProvider(MailConfig $config, array &$data, DateTime $plannedSendDate = null)
     {
-
-        if ( isset($data[self::SUBJECT]) && isset($data[self::BODY]) && !$this->preferConfiguredData ) {
+        if (isset($data[self::SUBJECT]) && isset($data[self::BODY]) && !$this->preferConfiguredData) {
             return;
         }
 
         $content = $this->contentProvider->contentsFor($config, $plannedSendDate);
 
-        if ( isset($data[self::SUBJECT]) && !$content ) {
+        if (isset($data[self::SUBJECT]) && !$content) {
             return;
         }
 
-        if ( !$config && !isset($data[self::SUBJECT]) ) {
+        if (!$config && !isset($data[self::SUBJECT])) {
             throw new UnderflowException('No subject passed and no contents found by provider');
         }
 
         if (!$content) {
-            throw new UnderflowException('No content found and nothing passed for config #' . $config->getId());
+            throw new UnderflowException('No content found and nothing passed for config #'.$config->getId());
         }
 
-        if ( $originator = $content->originator() ) {
+        if ($originator = $content->originator()) {
             $data[self::ORIGINATOR] = $originator;
         }
 
@@ -159,7 +157,6 @@ class MessageComposer implements ComposerContract
         if (!isset($data[self::BODY]) || $this->preferConfiguredData) {
             $data[self::BODY] = $content->body();
         }
-
     }
 
     protected function getSender(MailConfig $config, Message $message)
@@ -167,6 +164,7 @@ class MessageComposer implements ComposerContract
         if (!$message->originator() || $this->preferConfiguredData) {
             return $config->sender();
         }
+
         return $message->originator();
     }
 
@@ -175,10 +173,12 @@ class MessageComposer implements ComposerContract
         if ($this->preferConfiguredData) {
             return array_merge($passedData, $configData);
         }
+
         return array_merge($configData, $passedData);
     }
 
-    protected function isEmailAddress($contact) {
-        return (filter_var($contact, FILTER_VALIDATE_EMAIL) !== false);
+    protected function isEmailAddress($contact)
+    {
+        return filter_var($contact, FILTER_VALIDATE_EMAIL) !== false;
     }
 }

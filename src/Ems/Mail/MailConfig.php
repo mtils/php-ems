@@ -8,7 +8,6 @@ use Ems\Contracts\Mail\RecipientList as ListContract;
 
 class MailConfig extends NamedObject implements MailConfigContract
 {
-
     /**
      * @var string
      **/
@@ -75,6 +74,7 @@ class MailConfig extends NamedObject implements MailConfigContract
     public function setParent(MailConfigContract $config)
     {
         $this->parent = $config;
+
         return $this;
     }
 
@@ -100,11 +100,13 @@ class MailConfig extends NamedObject implements MailConfigContract
 
     /**
      * @param \Ems\Contracts\Mail\RecipientList $list
+     *
      * @return self
      **/
     public function setRecipientList(ListContract $list)
     {
         $this->recipientList = $list;
+
         return $this;
     }
 
@@ -120,12 +122,15 @@ class MailConfig extends NamedObject implements MailConfigContract
 
     /**
      * {@inheritdoc}
+     *
      * @param string $template
+     *
      * @return self
      **/
     public function setTemplate($template)
     {
         $this->template = $template;
+
         return $this;
     }
 
@@ -141,11 +146,13 @@ class MailConfig extends NamedObject implements MailConfigContract
 
     /**
      * @param array $data
+     *
      * @return self
      **/
     public function setData(array $data)
     {
         $this->data = $data;
+
         return $this;
     }
 
@@ -161,11 +168,13 @@ class MailConfig extends NamedObject implements MailConfigContract
 
     /**
      * @param string $sender
+     *
      * @return self
      **/
     public function setSender($sender)
     {
         $this->sender = $sender;
+
         return $this;
     }
 
@@ -181,11 +190,13 @@ class MailConfig extends NamedObject implements MailConfigContract
 
     /**
      * @param string $name
+     *
      * @return self
      **/
     public function setSenderName($name)
     {
         $this->senderName = $name;
+
         return $this;
     }
 
@@ -201,9 +212,10 @@ class MailConfig extends NamedObject implements MailConfigContract
 
     /**
      * @param bool $enabled (optional)
+     *
      * @return self
      **/
-    public function enableGeneratedOccurences($enabled=true)
+    public function enableGeneratedOccurences($enabled = true)
     {
         $this->generatedOccurences = $enabled;
     }
@@ -211,5 +223,4 @@ class MailConfig extends NamedObject implements MailConfigContract
     public function schedule()
     {
     }
-
 }

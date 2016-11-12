@@ -1,19 +1,16 @@
 <?php
 
-
 namespace Ems\Mail;
 
 use Ems\Contracts\Core\TextParser;
 use Ems\Contracts\Mail\MessageComposer as Composer;
 
-
 /**
  * This is a helper object to process the message contents (body and subject)
- * Assign it via Ems\Mail\MessageComposer::processDataWith($messageTextParser)
+ * Assign it via Ems\Mail\MessageComposer::processDataWith($messageTextParser).
  **/
 class MessageTextParser
 {
-
     /**
      * @var \Ems\Contracts\Core\TextParser
      **/
@@ -28,11 +25,10 @@ class MessageTextParser
     }
 
     /**
-     * Make it callable...changes the body and subject in $viewData
+     * Make it callable...changes the body and subject in $viewData.
      *
      * @param \Ems\Contracts\Mail\MailConfig $config
-     * @param array $viewData
-     * @return void
+     * @param array                          $viewData
      **/
     public function __invoke($config, &$viewData)
     {
@@ -49,6 +45,5 @@ class MessageTextParser
                 $viewData
             );
         }
-
     }
 }

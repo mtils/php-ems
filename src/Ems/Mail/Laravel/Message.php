@@ -1,4 +1,5 @@
-<?php 
+<?php
+
 
 namespace Ems\Mail\Laravel;
 
@@ -7,7 +8,6 @@ use Ems\Contracts\Mail\Message as MessageContract;
 
 class Message implements MessageContract
 {
-
     protected $laravelMessage;
 
     public function __construct(LaravelMessage $laravelMessage)
@@ -18,8 +18,9 @@ class Message implements MessageContract
     /**
      * Add a "from" address to the message.
      *
-     * @param  string  $address
-     * @param  string  $name
+     * @param string $address
+     * @param string $name
+     *
      * @return $this
      */
     public function from($address, $name = null)
@@ -30,8 +31,9 @@ class Message implements MessageContract
     /**
      * Set the "sender" of the message.
      *
-     * @param  string  $address
-     * @param  string  $name
+     * @param string $address
+     * @param string $name
+     *
      * @return $this
      */
     public function sender($address, $name = null)
@@ -42,7 +44,8 @@ class Message implements MessageContract
     /**
      * Set the "return path" of the message.
      *
-     * @param  string  $address
+     * @param string $address
+     *
      * @return $this
      */
     public function returnPath($address)
@@ -53,8 +56,9 @@ class Message implements MessageContract
     /**
      * Add a recipient to the message.
      *
-     * @param  string|array  $address
-     * @param  string  $name
+     * @param string|array $address
+     * @param string       $name
+     *
      * @return $this
      */
     public function to($address, $name = null)
@@ -65,8 +69,9 @@ class Message implements MessageContract
     /**
      * Add a carbon copy to the message.
      *
-     * @param  string  $address
-     * @param  string  $name
+     * @param string $address
+     * @param string $name
+     *
      * @return $this
      */
     public function cc($address, $name = null)
@@ -77,8 +82,9 @@ class Message implements MessageContract
     /**
      * Add a blind carbon copy to the message.
      *
-     * @param  string  $address
-     * @param  string  $name
+     * @param string $address
+     * @param string $name
+     *
      * @return $this
      */
     public function bcc($address, $name = null)
@@ -89,8 +95,9 @@ class Message implements MessageContract
     /**
      * Add a reply to address to the message.
      *
-     * @param  string  $address
-     * @param  string  $name
+     * @param string $address
+     * @param string $name
+     *
      * @return $this
      */
     public function replyTo($address, $name = null)
@@ -101,7 +108,8 @@ class Message implements MessageContract
     /**
      * Set the subject of the message.
      *
-     * @param  string  $subject
+     * @param string $subject
+     *
      * @return $this
      */
     public function subject($subject)
@@ -112,7 +120,8 @@ class Message implements MessageContract
     /**
      * Set the message priority level.
      *
-     * @param  int  $level
+     * @param int $level
+     *
      * @return $this
      */
     public function priority($level)
@@ -123,8 +132,9 @@ class Message implements MessageContract
     /**
      * Attach a file to the message.
      *
-     * @param  string  $file
-     * @param  array   $options
+     * @param string $file
+     * @param array  $options
+     *
      * @return $this
      */
     public function attach($file, array $options = [])
@@ -135,9 +145,10 @@ class Message implements MessageContract
     /**
      * Attach in-memory data as an attachment.
      *
-     * @param  string  $data
-     * @param  string  $name
-     * @param  array   $options
+     * @param string $data
+     * @param string $name
+     * @param array  $options
+     *
      * @return $this
      */
     public function attachData($data, $name, array $options = [])
@@ -148,7 +159,8 @@ class Message implements MessageContract
     /**
      * Embed a file in the message and get the CID.
      *
-     * @param  string  $file
+     * @param string $file
+     *
      * @return string
      */
     public function embed($file)
@@ -159,14 +171,14 @@ class Message implements MessageContract
     /**
      * Embed in-memory data in the message and get the CID.
      *
-     * @param  string  $data
-     * @param  string  $name
-     * @param  string  $contentType
+     * @param string $data
+     * @param string $name
+     * @param string $contentType
+     *
      * @return string
      */
     public function embedData($data, $name, $contentType = null)
     {
         return $this->laravelMessage->embedData($data, $name, $contentType);
     }
-
 }

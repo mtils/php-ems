@@ -1,11 +1,8 @@
 <?php
 
-
 namespace Ems\Mail\Swift;
 
 use Ems\Contracts\Mail\Message as MessageContract;
-use Ems\Contracts\Mail\Mailer;
-use Ems\Contracts\Mail\MailConfig;
 use Ems\Mail\MessageTrait;
 use Swift_Message;
 use Swift_Image;
@@ -14,7 +11,6 @@ use Swift_Mime_Headers_MailboxHeader;
 
 class Message implements MessageContract
 {
-
     use MessageTrait;
 
     protected $recipientHeaderNames = ['to', 'cc', 'bcc'];
@@ -37,46 +33,53 @@ class Message implements MessageContract
     /**
      * {@inheritdoc}
      *
-     * @param  string  $address
-     * @param  string  $name
+     * @param string $address
+     * @param string $name
+     *
      * @return $this
      */
     public function from($address, $name = null)
     {
         $this->swiftMessage->setFrom($address, $name);
+
         return $this;
     }
 
     /**
      * {@inheritdoc}
      *
-     * @param  string  $address
-     * @param  string  $name
+     * @param string $address
+     * @param string $name
+     *
      * @return $this
      */
     public function sender($address, $name = null)
     {
         $this->swiftMessage->setSender($address, $name);
+
         return $this;
     }
 
     /**
      * Set the "return path" of the message.
      *
-     * @param  string  $address
+     * @param string $address
+     *
      * @return $this
      */
     public function returnPath($address)
     {
         $this->swiftMessage->setReturnPath($address);
+
         return $this;
     }
 
     /**
      * Add a recipient to the message.
      *
-     * @param  string|array  $address
-     * @param  string  $name
+     * @param string|array $address
+     * @param string       $name
+     *
      * @return $this
      */
     public function to($address, $name = null)
@@ -87,8 +90,9 @@ class Message implements MessageContract
     /**
      * Add a carbon copy to the message.
      *
-     * @param  string  $address
-     * @param  string  $name
+     * @param string $address
+     * @param string $name
+     *
      * @return $this
      */
     public function cc($address, $name = null)
@@ -99,8 +103,9 @@ class Message implements MessageContract
     /**
      * Add a blind carbon copy to the message.
      *
-     * @param  string  $address
-     * @param  string  $name
+     * @param string $address
+     * @param string $name
+     *
      * @return $this
      */
     public function bcc($address, $name = null)
@@ -111,8 +116,9 @@ class Message implements MessageContract
     /**
      * Add a reply to address to the message.
      *
-     * @param  string  $address
-     * @param  string  $name
+     * @param string $address
+     * @param string $name
+     *
      * @return $this
      */
     public function replyTo($address, $name = null)
@@ -123,82 +129,95 @@ class Message implements MessageContract
     /**
      * Set the subject of the message.
      *
-     * @param  string  $subject
+     * @param string $subject
+     *
      * @return $this
      */
     public function subject($subject)
     {
         $this->swiftMessage->setSubject($subject);
+
         return $this;
     }
 
     /**
-     * Set the html body of the message
+     * Set the html body of the message.
      *
      * @param string $html
+     *
      * @return self
      **/
     public function html($html)
     {
         $this->swiftMessage->setBody($html, 'text/html');
+
         return $this;
     }
 
     /**
-     * Set the plain text part of the mail
+     * Set the plain text part of the mail.
      *
      * @param string $text
+     *
      * @return self
      **/
     public function plainText($text)
     {
         $this->swiftMessage->addPart($text, 'text/plain');
+
         return $this;
     }
 
     /**
      * Set the message priority level.
      *
-     * @param  int  $level
+     * @param int $level
+     *
      * @return $this
      */
     public function priority($level)
     {
         $this->swiftMessage->setPriority($level);
+
         return $this;
     }
 
     /**
      * Attach a file to the message.
      *
-     * @param  string  $file
-     * @param  array   $options
+     * @param string $file
+     * @param array  $options
+     *
      * @return $this
      */
     public function attach($file, array $options = [])
     {
         $attachment = $this->createAttachmentFromPath($file);
+
         return $this->prepAttachment($attachment, $options);
     }
 
     /**
      * Attach in-memory data as an attachment.
      *
-     * @param  string  $data
-     * @param  string  $name
-     * @param  array   $options
+     * @param string $data
+     * @param string $name
+     * @param array  $options
+     *
      * @return $this
      */
     public function attachData($data, $name, array $options = [])
     {
         $attachment = $this->createAttachmentFromData($data, $name);
+
         return $this->prepAttachment($attachment, $options);
     }
 
     /**
      * Embed a file in the message and get the CID.
      *
-     * @param  string  $file
+     * @param string $file
+     *
      * @return string
      */
     public function embed($file)
@@ -209,19 +228,21 @@ class Message implements MessageContract
     /**
      * Embed in-memory data in the message and get the CID.
      *
-     * @param  string  $data
-     * @param  string  $name
-     * @param  string  $contentType
+     * @param string $data
+     * @param string $name
+     * @param string $contentType
+     *
      * @return string
      */
     public function embedData($data, $name, $contentType = null)
     {
         $image = Swift_Image::newInstance($data, $name, $contentType);
+
         return $this->swiftMessage->embed($image);
     }
 
     /**
-     * Return the subject
+     * Return the subject.
      *
      * @return string
      **/
@@ -231,7 +252,7 @@ class Message implements MessageContract
     }
 
     /**
-     * Return the (html) body
+     * Return the (html) body.
      *
      * @return string
      **/
@@ -241,7 +262,7 @@ class Message implements MessageContract
     }
 
     /**
-     * Remove all to, cc and bcc headers to that the target can be overwritten
+     * Remove all to, cc and bcc headers to that the target can be overwritten.
      *
      * @return bool
      **/
@@ -250,7 +271,6 @@ class Message implements MessageContract
         $headers = $this->swiftMessage->getHeaders();
 
         foreach ($headers->getAll() as $header) {
-
             if (!$header instanceof Swift_Mime_Headers_MailboxHeader) {
                 continue;
             }
@@ -261,7 +281,6 @@ class Message implements MessageContract
     }
 
     /**
-     * @access protected
      * @return \Swift_Message
      **/
     public function _swiftMessage()
@@ -272,28 +291,30 @@ class Message implements MessageContract
     /**
      * Add a recipient to the message.
      *
-     * @param  string|array  $address
-     * @param  string  $name
-     * @param  string  $type
+     * @param string|array $address
+     * @param string       $name
+     * @param string       $type
+     *
      * @return $this
      */
     protected function addAddresses($address, $name, $type)
     {
         if (is_array($address)) {
             $this->swiftMessage->{"set{$type}"}($address, $name);
+
             return $this;
         }
 
         $this->swiftMessage->{"add{$type}"}($address, $name);
 
         return $this;
-
     }
 
     /**
      * Create a Swift Attachment instance.
      *
-     * @param  string  $file
+     * @param string $file
+     *
      * @return \Swift_Attachment
      */
     protected function createAttachmentFromPath($file)
@@ -304,8 +325,9 @@ class Message implements MessageContract
     /**
      * Create a Swift Attachment instance from data.
      *
-     * @param  string  $data
-     * @param  string  $name
+     * @param string $data
+     * @param string $name
+     *
      * @return \Swift_Attachment
      */
     protected function createAttachmentFromData($data, $name)
@@ -316,8 +338,9 @@ class Message implements MessageContract
     /**
      * Prepare and attach the given attachment.
      *
-     * @param  \Swift_Attachment  $attachment
-     * @param  array  $options
+     * @param \Swift_Attachment $attachment
+     * @param array             $options
+     *
      * @return $this
      */
     protected function prepAttachment($attachment, $options = [])
@@ -333,12 +356,11 @@ class Message implements MessageContract
         // attachment so that it will be downloaded with the desired names from
         // the developer, otherwise the default file names will get assigned.
         if (isset($options['as'])) {
-                $attachment->setFilename($options['as']);
+            $attachment->setFilename($options['as']);
         }
 
         $this->swiftMessage->attach($attachment);
 
         return $this;
     }
-
 };

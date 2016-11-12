@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Ems\Graphics;
-
 
 use Ems\Contracts\Graphics\Layout;
 
@@ -11,7 +9,6 @@ use Ems\Contracts\Graphics\Layout;
  **/
 trait LayoutItemTrait
 {
-
     /**
      * @var int
      **/
@@ -51,11 +48,13 @@ trait LayoutItemTrait
      * {@inheritdoc}
      *
      * @param int $row
+     *
      * @return self
      **/
     public function setRow($row)
     {
         $this->_row = $row;
+
         return $this;
     }
 
@@ -73,11 +72,13 @@ trait LayoutItemTrait
      * {@inheritdoc}
      *
      * @param int $column
+     *
      * @return self
      **/
     public function setColumn($column)
     {
         $this->_column = $column;
+
         return $this;
     }
 
@@ -95,11 +96,13 @@ trait LayoutItemTrait
      * {@inheritdoc}
      *
      * @param \Ems\Contracts\Graphics\Layout $layout
+     *
      * @return self
      **/
     public function setLayout(Layout $layout)
     {
         $this->_layout = $layout;
+
         return $this;
     }
 
@@ -117,11 +120,13 @@ trait LayoutItemTrait
      * {@inheritdoc}
      *
      * @param int $rowSpan
+     *
      * @return int
      **/
     public function setRowSpan($rowSpan)
     {
         $this->_rowSpan = $rowSpan;
+
         return $this;
     }
 
@@ -139,12 +144,13 @@ trait LayoutItemTrait
      * {@inheritdoc}
      *
      * @param int $columnSpan
+     *
      * @return int
      **/
     public function setColumnSpan($columnSpan)
     {
         $this->_columnSpan = $columnSpan;
+
         return $this;
     }
-
 }

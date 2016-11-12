@@ -30,17 +30,19 @@ class Transport implements TransportContract
 
     /**
      * {@inheritdoc}
+     *
      * @return \Ems\Mail\Swift\Message
      **/
     public function newMessage()
     {
-        return new Message(new Swift_Message);
+        return new Message(new Swift_Message());
     }
 
     /**
      * {@inheritdoc}
      *
      * @param \Ems\Contracts\Mail\Message $message
+     *
      * @return \Ems\Contracts\Mail\SendResult
      **/
     public function send(MessageContract $message)
@@ -54,26 +56,24 @@ class Transport implements TransportContract
         $result = $this->newResult();
 
         try {
-
             $this->swiftMailer->send($swiftMessage, $failedRecipients);
 
             $result->increment();
             $result->addFailedRecipient($failedRecipients);
 
             $this->callSentListener($message);
-
         } catch (Exception $e) {
             $result->addFailedRecipient($this->guessRecipient($message), $e);
         }
 
         return $result;
-
     }
 
     /**
-     * Get the swift message out of an message
+     * Get the swift message out of an message.
      *
      * @param \Ems\Contracts\Mail\Message $message
+     *
      * @return \Swift_Message
      **/
     protected function getSwiftMessage(MessageContract $message)
@@ -82,6 +82,7 @@ class Transport implements TransportContract
         if (!$swiftMessage instanceof Swift_Message) {
             throw new UnexpectedValueException('Swift\Transport can only send messages with swift messages');
         }
+
         return $swiftMessage;
     }
 
@@ -94,9 +95,10 @@ class Transport implements TransportContract
     }
 
     /**
-     * Try to guess the reciepient of the message to add it to the failures
+     * Try to guess the reciepient of the message to add it to the failures.
      *
      * @param \Ems\Contracts\Mail\Message $message
+     *
      * @return mixed
      **/
     protected function guessRecipient(MessageContract $message)
@@ -116,6 +118,5 @@ class Transport implements TransportContract
         }
 
         return $to[0];
-
     }
 }

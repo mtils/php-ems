@@ -1,14 +1,11 @@
 <?php
 
-
 namespace Ems\Mail;
 
 use Ems\Contracts\Mail\Message;
 
-
 trait TransportTrait
 {
-
     /**
      * @var callable
      **/
@@ -20,26 +17,30 @@ trait TransportTrait
     protected $_sentListener;
 
     /**
-     * Assign a listener to get informed before a message get send
+     * Assign a listener to get informed before a message get send.
      *
      * @param callable $listener
+     *
      * @return self
      **/
     public function beforeSending(callable $listener)
     {
         $this->_sendingListener = $listener;
+
         return $this;
     }
 
     /**
-     * Assign a listener to get informed after a message was sent
+     * Assign a listener to get informed after a message was sent.
      *
      * @param callable $listener
+     *
      * @return self
      **/
     public function afterSent(callable $listener)
     {
         $this->_sentListener = $listener;
+
         return $this;
     }
 
@@ -58,5 +59,4 @@ trait TransportTrait
     {
         call_user_func($this->_sentListener, $message);
     }
-
 }

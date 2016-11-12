@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 
 namespace Ems\Mail\Laravel;
@@ -10,7 +10,6 @@ use DateTime;
 
 class EloquentMessageContentProvider implements MessageContentProvider
 {
-
     public $configForeignKey = 'mail_configuration_id';
 
     /**
@@ -30,10 +29,11 @@ class EloquentMessageContentProvider implements MessageContentProvider
      * {@inheritdoc}
      *
      * @param \Ems\Contracts\Mail\MailConfig $config
-     * @param \DateTime $plannedSendDate (optional)
+     * @param \DateTime                      $plannedSendDate (optional)
+     *
      * @return \Ems\Contracts\Mail\MailContent
      **/
-    public function contentsFor(MailConfig $config, DateTime $plannedSendDate=null)
+    public function contentsFor(MailConfig $config, DateTime $plannedSendDate = null)
     {
         return $this->model->where($this->configForeignKey, $config->getId())->first();
     }

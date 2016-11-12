@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Mail;
 
 use Ems\Contracts\Mail\Mailer as MailerContract;
@@ -8,7 +7,6 @@ use Ems\Contracts\Mail\MailConfig as ConfigContract;
 
 trait MessageTrait
 {
-
     /**
      * @var \Ems\Contracts\Mail\Mailer
      **/
@@ -43,11 +41,13 @@ trait MessageTrait
      * {@inheritdoc}
      *
      * @param \Ems\Contracts\Mail\Mailer $mailer
+     *
      * @return self
      **/
     public function setMailer(MailerContract $mailer)
     {
         $this->_mailer = $mailer;
+
         return $this;
     }
 
@@ -55,6 +55,7 @@ trait MessageTrait
      * {@inheritdoc}
      *
      * @see self::mailer()
+     *
      * @return \Ems\Contracts\Mail\SendResult
      **/
     public function send()
@@ -76,11 +77,13 @@ trait MessageTrait
      * {@inheritdoc}
      *
      * @param \Ems\Contracts\Mail\MailConfig $config
+     *
      * @return self
      **/
     public function setConfig(ConfigContract $config)
     {
         $this->_config = $config;
+
         return $this;
     }
 
@@ -98,11 +101,13 @@ trait MessageTrait
      * {@inheritdoc}
      *
      * @param mixed $recipient
+     *
      * @return self
      **/
     public function setRecipient($recipient)
     {
         $this->_recipient = $recipient;
+
         return $this;
     }
 
@@ -120,12 +125,13 @@ trait MessageTrait
      * {@inheritdoc}
      *
      * @param mixed $originator
+     *
      * @return self
      **/
     public function setOriginator($originator)
     {
         $this->_originator = $originator;
+
         return $this;
     }
-
 }
