@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Assets;
 
 use Ems\Contracts\Assets\Manager as ManagerContract;
@@ -13,7 +12,6 @@ use Ems\Core\ConfigurableTrait;
 
 class Manager implements ManagerContract
 {
-
     use ConfigurableTrait;
 
     /**
@@ -27,7 +25,7 @@ class Manager implements ManagerContract
     protected $renderer;
 
     /**
-     * This is only needed for replicate()
+     * This is only needed for replicate().
      *
      * @var \Ems\Contracts\Assets\NameAnalyser
      **/
@@ -53,12 +51,12 @@ class Manager implements ManagerContract
      **/
     protected $defaultOptions = [
         self::MERGE_UNCOMPILED_FILES => true,
-        self::CHECK_COMPILED_FILE_EXISTS => true
+        self::CHECK_COMPILED_FILE_EXISTS => true,
     ];
 
     /**
-     * @param \Ems\Contracts\Assets\Registry $registry
-     * @param \Ems\Contracts\Core\Renderer $renderer
+     * @param \Ems\Contracts\Assets\Registry     $registry
+     * @param \Ems\Contracts\Core\Renderer       $renderer
      * @param \Ems\Contracts\Assets\NameAnalyser $namer
      **/
     public function __construct(RegistryContract $registry, Renderer $renderer, NameAnalyser $namer)
@@ -72,12 +70,14 @@ class Manager implements ManagerContract
      * {@inheritdoc}
      *
      * @param string|array $asset
-     * @param string $group (optional)
+     * @param string       $group (optional)
+     *
      * @return self
      **/
-    public function import($asset, $group=null)
+    public function import($asset, $group = null)
     {
         $this->registry->import($asset, $group);
+
         return $this;
     }
 
@@ -86,12 +86,14 @@ class Manager implements ManagerContract
      *
      * @param string $asset
      * @param string $content
-     * @param string $group (optional)
+     * @param string $group   (optional)
+     *
      * @return self
      **/
-    public function inline($asset, $content, $group=null)
+    public function inline($asset, $content, $group = null)
     {
         $this->registry->inline($asset, $content, $group);
+
         return $this;
     }
 
@@ -99,11 +101,12 @@ class Manager implements ManagerContract
      * {@inheritdoc}
      *
      * @param string $asset
-     * @param string $group (optional)
+     * @param string $group   (optional)
      * @param string $content (optional) (make it a inline asset)
+     *
      * @return \Ems\Contracts\Assets\Asset
      **/
-    public function newAsset($asset, $group=null, $content='')
+    public function newAsset($asset, $group = null, $content = '')
     {
         return $this->registry->newAsset($asset, $group, $content)
                               ->setRenderer($this->renderer);
@@ -112,13 +115,15 @@ class Manager implements ManagerContract
     /**
      * {@inheritdoc}
      *
-     * @param string $asset
+     * @param string   $asset
      * @param callable $handler
+     *
      * @return self
      **/
     public function on($asset, callable $handler)
     {
         $this->registry->on($asset, $handler);
+
         return $this;
     }
 
@@ -128,11 +133,13 @@ class Manager implements ManagerContract
      * because only befores are working the right way.
      *
      * @param string $asset (optional)
+     *
      * @return self
      **/
-    public function after($asset=null)
+    public function after($asset = null)
     {
         $this->registry->after($asset);
+
         return $this;
     }
 
@@ -140,11 +147,13 @@ class Manager implements ManagerContract
      * {@inheritdoc}
      *
      * @param string $asset (optional)
+     *
      * @return self
      **/
-    public function before($asset=null)
+    public function before($asset = null)
     {
         $this->registry->before($asset);
+
         return $this;
     }
 
@@ -152,6 +161,7 @@ class Manager implements ManagerContract
      * {@inheritdoc}
      *
      * @param string $group
+     *
      * @return \Ems\Contracts\Assets\Collection
      **/
     public function render($group)
@@ -170,41 +180,46 @@ class Manager implements ManagerContract
     /**
      * {@inheritdoc}
      *
-     * @param string $groupName
+     * @param string   $groupName
      * @param callable $renderer
+     *
      * @return self
      **/
     public function renderGroupWith($groupName, callable $renderer)
     {
         $this->groupRenderers[$groupName] = $renderer;
+
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     *
-     * @return string
-     **/
+     /**
+      * {@inheritdoc}
+      *
+      * @return string
+      **/
      public function groupPrefix()
      {
-        return '';
+         return '';
      }
 
     /**
      * {@inheritdoc}
      *
      * @param array $attributes
+     *
      * @return self
+     *
      * @see \Ems\Contracts\Core\Copyable
      **/
-    public function replicate(array $attributes=[])
+    public function replicate(array $attributes = [])
     {
         $groupPrefix = isset($attributes['groupPrefix']) ? $attributes['groupPrefix'] : '';
+
         return new ManagerProxy($this, $this->namer, $groupPrefix);
     }
 
     /**
-     * Return the assigned BuildConfigRepository
+     * Return the assigned BuildConfigRepository.
      *
      * @return Ems\Contracts\Assets\BuildConfigRepository $repository
      **/
@@ -215,35 +230,40 @@ class Manager implements ManagerContract
 
     /**
      * Set a BuildConfigRepository to skip renderering of compiled
-     * assets and instead render the compiled ones
+     * assets and instead render the compiled ones.
      *
      * @param Ems\Contracts\Assets\BuildConfigRepository $repository
+     *
      * @return self
      **/
     public function setBuildConfigRepository(BuildRepository $repository)
     {
         $this->buildRepository = $repository;
+
         return $this;
     }
 
     /**
      * Bypass any build configurations, useful for developing. If
      * you pass true (or nothing) the manager will not look for compiled
-     * builds or files and always return the plain collection
+     * builds or files and always return the plain collection.
      *
      * @param bool (optional)
+     *
      * @return self
      **/
-    public function bypassBuilds($check=true)
+    public function bypassBuilds($check = true)
     {
         $this->checkBuilds = !$check;
+
         return $this;
     }
 
     /**
-     * Find out if a custom renderer for $group was assigned
+     * Find out if a custom renderer for $group was assigned.
      *
      * @param string
+     *
      * @return bool
      **/
     protected function hasGroupRenderer($group)
@@ -252,9 +272,10 @@ class Manager implements ManagerContract
     }
 
     /**
-     * Call the custom Renderer
+     * Call the custom Renderer.
      *
      * @param string
+     *
      * @return \Ems\Contracts\Assets\Collection
      **/
     protected function callCustomRenderer($group)
@@ -264,14 +285,14 @@ class Manager implements ManagerContract
 
     /**
      * Return the buildconfig for $group if a repo is assigned and
-     * has one for $group
+     * has one for $group.
      *
      * @param string $group
+     *
      * @return \Ems\Contracts\Assets\BuildConfig
      **/
     protected function getBuildConfig($group)
     {
-
         if (!$this->buildRepository || !$this->checkBuilds) {
             return;
         }
@@ -296,15 +317,15 @@ class Manager implements ManagerContract
     }
 
     /**
-     * Renders the passed $group and merges it with compiled files
+     * Renders the passed $group and merges it with compiled files.
      *
      * @param \Ems\Contracts\Assets\BuildConfig $config
-     * @param string $group
+     * @param string                            $group
+     *
      * @return \Ems\Contracts\Assets\Collection
      **/
     protected function renderWithCompiled(BuildConfigContract $config, $group)
     {
-
         if (!$this->mergeOption(self::MERGE_UNCOMPILED_FILES, $config->managerOptions())) {
             return $config->collection()->setRenderer($this->renderer);
         }
@@ -315,23 +336,21 @@ class Manager implements ManagerContract
 
         return $this->mergeCollections($compiledAsset, $this->registry[$group])
                     ->setRenderer($this->renderer);
-
-
     }
 
     /**
-     * Merges the passed collection with the compiled in $compiledAsset
+     * Merges the passed collection with the compiled in $compiledAsset.
      *
      * @param \Ems\Contracts\Assets\BuildConfig $buildConfig
-     * @param string $group
+     * @param string                            $group
+     *
      * @return \Ems\Contracts\Assets\Collection
      **/
     protected function mergeCollections(Asset $compiledAsset, Collection $passedCollection)
     {
-
         $compiledNames = [];
 
-        $mergedCollection = (new Collection)->setGroup($compiledAsset->group());
+        $mergedCollection = (new Collection())->setGroup($compiledAsset->group());
 
         foreach ($compiledAsset->collection() as $asset) {
             $compiledNames[$asset->name()] = $asset;
@@ -354,10 +373,8 @@ class Manager implements ManagerContract
             $mergedCollection->append($compiledAsset);
 
             $compiledAssetAdded = true;
-
         }
 
         return $mergedCollection;
     }
-
 }
