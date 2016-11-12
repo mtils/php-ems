@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Assets\Laravel;
 
 use Illuminate\Support\Facades\Facade;
@@ -10,7 +9,6 @@ use Illuminate\Support\Facades\Facade;
  */
 class AssetsFacade extends Facade
 {
-
     /**
      * Get the registered name of the component.
      *
@@ -22,36 +20,35 @@ class AssetsFacade extends Facade
     }
 
     /**
-     * A readable alias for Assets::import()
+     * A readable alias for Assets::import().
      *
      * @param string $asset
      * @param string $groupName (optional)
      **/
-    public static function js($asset, $groupName=null)
+    public static function js($asset, $groupName = null)
     {
         return static::getFacadeRoot()->import($asset, $groupName);
     }
 
     /**
-     * A readable alias for Assets::import()
+     * A readable alias for Assets::import().
      *
      * @param string $asset
      * @param string $groupName (optional)
      **/
-    public static function css($asset, $groupName=null)
+    public static function css($asset, $groupName = null)
     {
         return static::getFacadeRoot()->import($asset, $groupName);
     }
 
     /**
-     * A readable alias for Assets::import()
+     * A readable alias for Assets::import().
      *
      * @param string $asset
      * @param string $groupName (optional)
      **/
-    public static function icon($asset, $groupName=null)
+    public static function icon($asset, $groupName = null)
     {
         return static::getFacadeRoot()->import($asset, $groupName);
     }
-
 }
