@@ -1,12 +1,9 @@
 <?php
 
-
 namespace Ems\XType;
-
 
 class BoolType extends AbstractType
 {
-
     /**
      * @var bool
      **/
@@ -21,5 +18,4 @@ class BoolType extends AbstractType
     {
         return self::BOOL;
     }
-
 }

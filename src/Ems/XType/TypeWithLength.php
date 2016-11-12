@@ -1,14 +1,12 @@
 <?php
 
-
 namespace Ems\XType;
-
 
 abstract class TypeWithLength extends AbstractType
 {
     /**
      * Describes the minimum length. Applies to strings, numbers and
-     * sequences
+     * sequences.
      *
      * @var int
      **/
@@ -16,10 +14,9 @@ abstract class TypeWithLength extends AbstractType
 
     /**
      * Describes the maximum length. Applies to strings, numbers and
-     * sequences
+     * sequences.
      *
      * @var int
      **/
     public $max = 10000000;
-
 }

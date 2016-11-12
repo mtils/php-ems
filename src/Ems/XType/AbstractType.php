@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\XType;
 
 use Ems\Contracts\XType\XType;
@@ -8,12 +7,9 @@ use Ems\Core\Exceptions\UnsupportedParameterException;
 use ReflectionObject;
 use ReflectionProperty;
 use Closure;
-use JsonSerializable;
-
 
 abstract class AbstractType implements XType
 {
-
     /**
      * @var bool
      **/
@@ -44,14 +40,11 @@ abstract class AbstractType implements XType
      **/
     protected static $aliases = [];
 
-
     /**
      * @param array $attributes (optional)
      **/
-    public function __construct(array $attributes=[])
+    public function __construct(array $attributes = [])
     {
-
-
         if (!isset(static::$propertyMap[static::class])) {
             static::$propertyMap[static::class] = $this->buildPropertyMap();
         }
@@ -61,7 +54,6 @@ abstract class AbstractType implements XType
         }
 
         $this->fill($attributes);
-
     }
 
     /**
@@ -75,21 +67,21 @@ abstract class AbstractType implements XType
      * {@inheritdoc}
      *
      * @param array $attributes
+     *
      * @return self
+     *
      * @throws \Ems\Contracts\Core\Unsupported
      **/
-    public function fill(array $attributes=[])
+    public function fill(array $attributes = [])
     {
-
-        foreach ($attributes as $property=>$value) {
-
+        foreach ($attributes as $property => $value) {
             if (isset(static::$propertyMap[static::class][$property])) {
                 $this->{$property} = $value;
                 continue;
             }
 
             if (!isset(static::$aliases[static::class][$property])) {
-                throw new UnsupportedParameterException("$property is not supported in " . static::class);
+                throw new UnsupportedParameterException("$property is not supported in ".static::class);
             }
 
             $alias = static::$aliases[static::class][$property];
@@ -100,27 +92,27 @@ abstract class AbstractType implements XType
             }
 
             $this->{$alias} = $value;
-
         }
 
         return $this;
-
     }
 
     /**
      * {@inheritdoc}
      *
      * @param array $attributes
+     *
      * @return self
+     *
      * @see \Ems\Contracts\Core\Copyable
      **/
-    public function replicate(array $attributes=[])
+    public function replicate(array $attributes = [])
     {
         return new static(array_merge($this->toArray(), $attributes));
     }
 
     /**
-     * Return if this is a complex type (array or class)
+     * Return if this is a complex type (array or class).
      *
      * @return bool
      **/
@@ -130,7 +122,7 @@ abstract class AbstractType implements XType
     }
 
     /**
-     * Return if this type is scalar
+     * Return if this type is scalar.
      *
      * @return bool
      **/
@@ -140,7 +132,7 @@ abstract class AbstractType implements XType
     }
 
     /**
-     * Return the xtype properties as an array
+     * Return the xtype properties as an array.
      *
      * @return array
      **/
@@ -148,7 +140,7 @@ abstract class AbstractType implements XType
     {
         $array = [];
 
-        foreach (static::$propertyMap[static::class] as $name=>$property) {
+        foreach (static::$propertyMap[static::class] as $name => $property) {
             $array[$name] = $this->{$name};
         }
 
@@ -157,13 +149,12 @@ abstract class AbstractType implements XType
 
     /**
      * Return a set of aliases to support shortcuts to some public properties.
-     * Dont forget to call parent::aliases
+     * Dont forget to call parent::aliases.
      *
      * @return array
      **/
     protected function aliases()
     {
-
         $cannotBeNull = function ($type, $property, $value) {
             $type->canBeNull = !$value;
         };
@@ -173,19 +164,19 @@ abstract class AbstractType implements XType
         };
 
         return [
-            'required'  => $cannotBeNull,
-            'null'      => 'canBeNull',
-            'optional'  => 'canBeNull',
-            'touched'   => 'mustBeTouched',
-            'ignore'    => $ignore,
-            'ignored'   => $ignore,
+            'required' => $cannotBeNull,
+            'null' => 'canBeNull',
+            'optional' => 'canBeNull',
+            'touched' => 'mustBeTouched',
+            'ignore' => $ignore,
+            'ignored' => $ignore,
             'protected' => 'readonly',
-            'forbidden' => 'readonly'
+            'forbidden' => 'readonly',
         ];
     }
 
     /**
-     * Returns a lookup array of all public properties as keys
+     * Returns a lookup array of all public properties as keys.
      *
      * @return array
      **/
@@ -199,7 +190,5 @@ abstract class AbstractType implements XType
         }
 
         return $map;
-
     }
-
 }

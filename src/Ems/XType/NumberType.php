@@ -1,19 +1,16 @@
 <?php
 
-
 namespace Ems\XType;
-
 
 class NumberType extends TypeWithLength
 {
-
     /**
      * @var float
      **/
     public $default = 0;
 
     /**
-     * The native php type (float|int)
+     * The native php type (float|int).
      *
      * @var string
      **/
@@ -28,5 +25,4 @@ class NumberType extends TypeWithLength
     {
         return self::NUMBER;
     }
-
 }

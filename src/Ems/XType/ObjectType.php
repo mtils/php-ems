@@ -1,14 +1,11 @@
 <?php
 
-
 namespace Ems\XType;
-
 
 class ObjectType extends NamedFieldType
 {
-
     /**
-     * The class of this object
+     * The class of this object.
      *
      * @var string
      **/
@@ -23,5 +20,4 @@ class ObjectType extends NamedFieldType
     {
         return self::CUSTOM;
     }
-
 }

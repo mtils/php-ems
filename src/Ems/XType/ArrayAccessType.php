@@ -1,12 +1,9 @@
 <?php
 
-
 namespace Ems\XType;
-
 
 class ArrayAccessType extends NamedFieldType
 {
-
     /**
      * {@inheritdoc}
      *
@@ -16,5 +13,4 @@ class ArrayAccessType extends NamedFieldType
     {
         return self::COMPLEX;
     }
-
 }

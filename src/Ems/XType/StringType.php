@@ -1,12 +1,9 @@
 <?php
 
-
 namespace Ems\XType;
-
 
 class StringType extends TypeWithLength
 {
-
     /**
      * @var string
      **/
@@ -31,5 +28,4 @@ class StringType extends TypeWithLength
     {
         return self::STRING;
     }
-
 }

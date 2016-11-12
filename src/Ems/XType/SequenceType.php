@@ -1,12 +1,9 @@
 <?php
 
-
 namespace Ems\XType;
-
 
 class SequenceType extends TypeWithLength
 {
-
     /**
      * @var \Ems\Contracts\XType\XType
      **/
@@ -21,5 +18,4 @@ class SequenceType extends TypeWithLength
     {
         return self::COMPLEX;
     }
-
 }
