@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Contracts\Assets;
 
 /**
@@ -9,26 +8,28 @@ namespace Ems\Contracts\Assets;
  **/
 interface NameAnalyser
 {
-
     /**
      * Guess the mimetype of the passed assetName and group
      * The standard was is to extract the file extension of assetName
-     * and return a mimetype of this extension
+     * and return a mimetype of this extension.
      *
      * @param string $assetName
      * @param string $groupName (optional)
+     *
      * @return string
+     *
      * @throws NotFound
      **/
-    public function guessMimeType($assetName, $groupName=null);
+    public function guessMimeType($assetName, $groupName = null);
 
     /**
-     * Guess the group of the passed asset and groupName
+     * Guess the group of the passed asset and groupName.
      *
      * @param string $assetName
+     *
      * @return string
+     *
      * @throws NotFound
      **/
     public function guessGroup($assetName);
-
 }

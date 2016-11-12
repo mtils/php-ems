@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Ems\Contracts\Core;
-
 
 interface PointInTime
 {
@@ -19,89 +17,97 @@ interface PointInTime
     const SECOND = 's';
 
     /**
-     * Return the precision (self::YEAR|self::MONTH...)
+     * Return the precision (self::YEAR|self::MONTH...).
      *
      * @return string
+     *
      * @see self::YEAR
      **/
     public function precision();
 
     /**
-     * Return the timezone
+     * Return the timezone.
      *
      * @return \DateTimeZone
      **/
     public function getTimeZone();
 
     /**
-     * Return the timezone offset
+     * Return the timezone offset.
      *
      * @return int
      **/
     public function getOffset();
 
     /**
-     * Format the date to a string
+     * Format the date to a string.
      *
      * @param string
+     *
      * @return string
      **/
     public function format($format);
 
     /**
-     * Modify the date
+     * Modify the date.
      *
      * @param string
      **/
     public function modify($string);
 
     /**
-     * Set year, month and day
+     * Set year, month and day.
      *
      * @param int $year
      * @param int $month
      * @param int $day
+     *
      * @return self
      **/
     public function setDate($year, $month, $day);
 
     /**
-     * Set hour, minute and second
+     * Set hour, minute and second.
      *
      * @param int $hour
      * @param int $minute
      * @param int $second (optional)
+     *
      * @return self
      **/
-    public function setTime($hour, $minute, $second=0);
+    public function setTime($hour, $minute, $second = 0);
 
     /**
      * Use properties for all units
      * Must support year, month, day, hour, minute, second, timezone, timestamp,
-     * offset, unit
+     * offset, unit.
      *
      * @param mixed $property
+     *
      * @return int
      **/
     public function __get($property);
 
     /**
-     * Use properties for all units
+     * Use properties for all units.
+     *
      * @see self::__get() for a list of supported names
      *
      * @param string $property
-     * @param mixed $value
+     * @param mixed  $value
+     *
      * @return int
      **/
     public function __set($property, $value);
 
     /**
-     * Return true on allowed properties
+     * Return true on allowed properties.
+     *
      * @see self::__get() for a list of supported names
      *
      * @param string $property
+     *
      * @return bool
      **/
     public function __isset($property);
-
 }

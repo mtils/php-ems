@@ -1,22 +1,16 @@
 <?php
 
-
 namespace Ems\Contracts\Assets;
 
-use Countable;
-use ArrayAccess;
-use IteratorAggregate;
-
 /**
- * The asset registrar is the place to go to import you assets
+ * The asset registrar is the place to go to import you assets.
  **/
 interface Registrar
 {
-
     /**
      * Import a file/lib/asset named $asset. Add it to the group named by its
      * file extension. If you want to add it to a different group, pass
-     * it manually by $group
+     * it manually by $group.
      *
      * you have three options for the $asset parameter: string, indexed array and
      * assoc array
@@ -32,36 +26,39 @@ interface Registrar
      * @example Registrar::import(['name' => 'print.css', 'media'=>'print'],'base') // adds print.css with media="print"
      *
      * @param string|array $asset
-     * @param string $group (optional)
+     * @param string       $group (optional)
+     *
      * @return self
      **/
-    public function import($asset, $group=null);
+    public function import($asset, $group = null);
 
     /**
-     * Shows inline content
+     * Shows inline content.
      *
      * @param string $asset
      * @param string $content
-     * @param string $group (optional)
+     * @param string $group   (optional)
+     *
      * @return self
      **/
-    public function inline($asset, $content, $group=null);
+    public function inline($asset, $content, $group = null);
 
     /**
-     * Create a new assert object. Automatically assign mimetype and uri
+     * Create a new assert object. Automatically assign mimetype and uri.
      *
      * @param string $asset
-     * @param string $group (optional)
+     * @param string $group   (optional)
      * @param string $content (optional) (make it a inline asset)
+     *
      * @return \Ems\Contracts\Assets\Asset
      **/
-    public function newAsset($asset, $group=null, $content='');
+    public function newAsset($asset, $group = null, $content = '');
 
     /**
      * Add a callable to manually process a distinct asset
      * If the registrar has a handler for asset $asset it will not
      * add it and instead call the handler.
-     * Signature is:
+     * Signature is:.
      *
      * function(Registrar $registrar, $asset) {}
      *
@@ -73,31 +70,34 @@ interface Registrar
      *      $registrar->import('jquery.contextMenu.js');
      * })
      *
-     * @param string $asset
+     * @param string   $asset
      * @param callable $handler
+     *
      * @return self
      **/
     public function on($asset, callable $handler);
 
     /**
      * Allows to force a position of this asset. No $asset means just "somewhere
-     * at the end"
+     * at the end".
+     *
      * @example $registrar->import('jquery.select.js')->after('jquery.js')
      *
      * @param string $asset (optional)
+     *
      * @return self
      **/
-    public function after($asset=null);
+    public function after($asset = null);
 
     /**
      * Allows to force a position of this asset. No $asset means before all
-     * others
+     * others.
      *
      * @example $registrar->import('jquery.select.js')->before('jquery.js')
      *
      * @param string $asset (optional)
+     *
      * @return self
      **/
-    public function before($asset=null);
-
+    public function before($asset = null);
 }

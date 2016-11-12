@@ -1,73 +1,76 @@
 <?php
 
-
 namespace Ems\Contracts\Model\Relation\Tag;
-
 
 interface TaggingRepository
 {
-
     /**
-     * Return all available tags
+     * Return all available tags.
      *
      * @return \Traversable
      **/
     public function all();
 
     /**
-     * Attach the tags to the passed holder(s)
+     * Attach the tags to the passed holder(s).
      *
      * @param \Ems\Contracts\Model\Relation\HoldsTags|\Traversable $holders
+     *
      * @return self
      **/
     public function attachTags(&$holders);
 
     /**
-     * Persist the attached tags (to database)
+     * Persist the attached tags (to database).
      *
      * @param \Ems\Contracts\Model\Relation\HoldsTags $holder
+     *
      * @return self
      **/
     public function syncTags(HoldsTags $holder);
 
     /**
-     * Create a new tag named $name without persisting it
+     * Create a new tag named $name without persisting it.
      *
      * @param string $name
+     *
      * @return \Ems\Contracts\Model\Relation\Tag
      **/
     public function make($name);
 
     /**
-     * Create a new tag in storage and return it
+     * Create a new tag in storage and return it.
      *
      * @param string $name
+     *
      * @return \Ems\Contracts\Model\Relation\Tag
      **/
     public function create($name);
 
     /**
-     * Get the tag with name $name or create it
+     * Get the tag with name $name or create it.
      *
      * @param string $name
+     *
      * @return \Ems\Contracts\Model\Relation\Tag
      **/
     public function getByNameOrCreate($name);
 
     /**
-     * Get the tag with id $id
+     * Get the tag with id $id.
      *
      * @param int $id
+     *
      * @return \Ems\Contracts\Model\Relation\Tag
      **/
     public function getOrFail($id);
 
     /**
-     * Delete a tag
+     * Delete a tag.
      *
      * @param \Ems\Contracts\Model\Relation\Tag
+     *
      * @return self
      **/
     public function delete(Tag $tag);
-
 }

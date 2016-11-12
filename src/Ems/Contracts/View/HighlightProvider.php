@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Contracts\View;
 
 /**
@@ -18,33 +17,34 @@ namespace Ems\Contracts\View;
  * The Highlight is Traversable so you get your items with:
  * foreach (News::latest(5) as $news)
  * The Highlight is Renderable so you can render the items:
- * echo News::latest(5)->render('news.latest')
+ * echo News::latest(5)->render('news.latest').
  **/
 interface HighlightProvider
 {
-
     /**
-     * Return the latest items
+     * Return the latest items.
      *
      * @param int $limit (optional)
+     *
      * @return \Ems\Contracts\View\Highlight
      **/
-    public function latest($limit=null);
+    public function latest($limit = null);
 
     /**
-     * Return the top items (whatever that means in your resource)
+     * Return the top items (whatever that means in your resource).
      *
      * @param int $limit (optional)
+     *
      * @return \Ems\Contracts\View\Highlight
      **/
-    public function top($limit=null);
+    public function top($limit = null);
 
     /**
-     * Return just some random $limit items
+     * Return just some random $limit items.
      *
      * @param int $limit (optional)
+     *
      * @return \Ems\Contracts\View\Highlight
      **/
-    public function some($limit=null);
-
+    public function some($limit = null);
 }

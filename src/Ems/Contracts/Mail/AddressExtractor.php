@@ -1,4 +1,5 @@
-<?php 
+<?php
+
 
 namespace Ems\Contracts\Mail;
 
@@ -10,21 +11,21 @@ namespace Ems\Contracts\Mail;
  **/
 interface AddressExtractor
 {
-
     /**
-     * Extract the email address of the passed recipient
+     * Extract the email address of the passed recipient.
      *
      * @param mixed $contact
+     *
      * @return string The email address
      **/
     public function email($contact);
 
     /**
-     * Extract the name of the passed recipient. If there is no, return null
+     * Extract the name of the passed recipient. If there is no, return null.
      *
      * @param mixed $contact
+     *
      * @return string|null
      **/
     public function name($contact);
-
 }

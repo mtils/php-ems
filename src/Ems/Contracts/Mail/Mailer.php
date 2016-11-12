@@ -1,4 +1,5 @@
-<?php 
+<?php
+
 
 namespace Ems\Contracts\Mail;
 
@@ -13,13 +14,13 @@ namespace Ems\Contracts\Mail;
  **/
 interface Mailer
 {
-
     /**
      * Sets the recipient or the recipients for the message. If more than one
      * Recipients are passed, the mail will be generated multiple times for
      * each recipient.
      *
      * Send one mail to one recipient:
+     *
      * @example Mailer::to('foo@somewhere.com')->send('template',$data)
      *
      * Send two separatly generated mails to two recipients
@@ -29,6 +30,7 @@ interface Mailer
      * @example $users = Users::all(); Mailer::to($users)->send(...)
      *
      * @param mixed $recipient string|array for more than one
+     *
      * @return self
      **/
     public function to($recipient);
@@ -41,51 +43,54 @@ interface Mailer
      *                ->subject('Hello')
      *                ->body('bye')
      *                ->send()
-     *
      * @example Mailer::message('foo@bar.de', 'Hello', 'bye')->send()
      *
-     * @param string $to The recipient, email or something handled by ReciepientCaster
+     * @param string $to      The recipient, email or something handled by ReciepientCaster
      * @param string $subject
-     * @param string $body The text body
+     * @param string $body    The text body
+     *
      * @return \Ems\Contracts\Mail\Message
      **/
-    public function message($to='', $subject='', $body='');
+    public function message($to = '', $subject = '', $body = '');
 
     /**
      * Sends one or more mails (Depends on count($to)).
      *
-     * @param string $resourceName A resource name like registrations.activate
-     * @param array $data (optional) The view vars (subject, body, ...)
-     * @param callable $callback (optional) A closure to modify the mail(s) before send
+     * @param string   $resourceName A resource name like registrations.activate
+     * @param array    $data         (optional) The view vars (subject, body, ...)
+     * @param callable $callback     (optional) A closure to modify the mail(s) before send
+     *
      * @return \Ems\Contracts\Mail\SendResult
      **/
-    public function send($resourceName, array $data=[], $callback=null);
+    public function send($resourceName, array $data = [], $callback = null);
 
     /**
      * Send a message manually. This method is also called by messages created
-     * by self::message(). You can send only one mail at a time with this method
+     * by self::message(). You can send only one mail at a time with this method.
      *
      * @param \Ems\Contracts\Mail $message
+     *
      * @return \Ems\Contracts\Mail\SendResult
      **/
     public function sendMessage(Message $message);
 
     /**
      * Assign a listener which will be informed when a message will be sent.
-     * Signature is: function(\Ems\Contracts\Mail\Message $message){}
+     * Signature is: function(\Ems\Contracts\Mail\Message $message){}.
      *
      * @param callable $listener
+     *
      * @return self
      **/
     public function beforeSending(callable $listener);
 
     /**
      * Assign a listener which will be informed when a message was sent.
-     * Signature is: function(\Ems\Contracts\Mail\Message $message){}
+     * Signature is: function(\Ems\Contracts\Mail\Message $message){}.
      *
      * @param callable $listener
+     *
      * @return self
      **/
     public function afterSent(callable $listener);
-
 }

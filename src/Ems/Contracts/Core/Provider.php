@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Contracts\Core;
 
 /**
@@ -11,23 +10,24 @@ namespace Ems\Contracts\Core;
  **/
 interface Provider
 {
-
     /**
-     * Get a named object by its id
+     * Get a named object by its id.
      *
      * @param mixed $id
      * @param mixed $default (optional)
+     *
      * @return \Ems\Contracts\Core\Identifiable|null
      **/
-    public function get($id, $default=null);
+    public function get($id, $default = null);
 
     /**
-     * Get a named object by its id or throw an exception if it cant be found
+     * Get a named object by its id or throw an exception if it cant be found.
      *
      * @param mixed $id
+     *
      * @return \Ems\Contracts\Core\Identifiable
+     *
      * @throws \Ems\Contracts\NotFound
      **/
     public function getOrFail($id);
-
 }

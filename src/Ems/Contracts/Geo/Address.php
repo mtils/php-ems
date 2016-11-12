@@ -1,21 +1,18 @@
 <?php
 
-
 namespace Ems\Contracts\Geo;
-
 
 interface Address
 {
-
     /**
-     * Returns the coutry name
+     * Returns the coutry name.
      *
      * @return string
      **/
     public function country();
 
     /**
-     * Returns the country code according to ISO 3166-1 alpha-3
+     * Returns the country code according to ISO 3166-1 alpha-3.
      *
      * @return string
      **/
@@ -53,7 +50,7 @@ interface Address
     public function district();
 
     /**
-     * Returns the street-level component of the address
+     * Returns the street-level component of the address.
      *
      * This typically includes a street number and street name
      * but may also contain things like a unit number, a building
@@ -70,5 +67,4 @@ interface Address
      * @return string
      **/
     public function postCode();
-
 }

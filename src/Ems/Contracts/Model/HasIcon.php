@@ -1,4 +1,5 @@
-<?php 
+<?php
+
 
 namespace Ems\Contracts\Model;
 
@@ -6,7 +7,6 @@ use Ems\Contracts\Core\Identifiable;
 
 interface HasIcon extends Identifiable
 {
-
     /**
      * Return an icon (image) representing this object
      * Optionally pass a size int for the right icon
@@ -15,11 +15,11 @@ interface HasIcon extends Identifiable
      * Uris could be:
      * http://example.org/avatar.png
      * icon://search
-     * fontawesome://fa-trash
+     * fontawesome://fa-trash.
      *
      * @param int $size (optional)
+     *
      * @return string
      **/
-    public function getIcon($size=0);
-
+    public function getIcon($size = 0);
 }

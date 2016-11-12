@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Contracts\Core;
 
 /**
@@ -13,7 +12,7 @@ namespace Ems\Contracts\Core;
  * set different variables which would apply on every route() call
  * to not have to copy the variables on every call.
  * (Laravel solves this different with a callable which is
- * handy for the routes.php file)
+ * handy for the routes.php file).
  *
  * Another example is Ems\Assets\Manager. You can pass a group
  * prefix and pass the altered Manager to all classes of a
@@ -24,7 +23,6 @@ namespace Ems\Contracts\Core;
  * use a Proxy which calls the parent attributes, others just
  * return a new object. Its up to you, this interface just
  * assures a common syntax for this pattern
- *
  **/
 interface Copyable
 {
@@ -34,11 +32,11 @@ interface Copyable
      * are the name of setters without "set" in lowercase
      * but dont have to.
      * A configurable object (Ems\Contracts\Core\Configurable)
-     * would possibly set their options
+     * would possibly set their options.
      *
      * @param array $attributes
+     *
      * @return self
      **/
-    public function replicate(array $attributes=[]);
-
+    public function replicate(array $attributes = []);
 }

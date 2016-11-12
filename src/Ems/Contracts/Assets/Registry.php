@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Contracts\Assets;
 
 use Countable;
@@ -9,9 +8,10 @@ use IteratorAggregate;
 use Ems\Contracts\Core\PathFinder;
 
 /**
- * The asset Registry is the place to go to import you assets
+ * The asset Registry is the place to go to import you assets.
  *
  * Countable:
+ *
  * @method     Registrar count() Return to amount of all assigned assets
  *
  * ArrayAccess:
@@ -26,10 +26,9 @@ use Ems\Contracts\Core\PathFinder;
 interface Registry extends Registrar, PathFinder, Countable, ArrayAccess, IteratorAggregate
 {
     /**
-     * Return all groups which where assigned by import()
+     * Return all groups which where assigned by import().
      *
      * @return array
      **/
     public function groups();
-
 }

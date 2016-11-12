@@ -1,10 +1,8 @@
 <?php
 
-
 namespace Ems\Contracts\XType;
 
 use Ems\Contracts\Core\Copyable;
-
 
 /**
  * XType is an extended type definition. Describe
@@ -21,81 +19,82 @@ use Ems\Contracts\Core\Copyable;
  * class instead of this interface. This may break SOLID but an xtype is data
  * not logic.
  * This interface is just for not putting the constants in the abstract class
- * and to remain as SOLID as possible
+ * and to remain as SOLID as possible.
  **/
 interface XType extends Copyable
 {
-
     /**
-     * A constant null type
+     * A constant null type.
      **/
     const NONE = 'null';
 
     /**
-     * A custom type. The only custom type in php is a class
+     * A custom type. The only custom type in php is a class.
      **/
     const CUSTOM = 'custom';
 
     /**
-     * A number type like float, int, double
+     * A number type like float, int, double.
      **/
     const NUMBER = 'number';
 
     /**
-     * A string
+     * A string.
      */
     const STRING = 'string';
 
     /**
-     * A bool type
+     * A bool type.
      **/
     const BOOL = 'boolean';
 
     /**
-     * A complex type like array, sequence, dictionary, collection
+     * A complex type like array, sequence, dictionary, collection.
      **/
     const COMPLEX = 'complex';
 
     /**
-     * A temporal type like DateTime, Date, Time, TimeRange
+     * A temporal type like DateTime, Date, Time, TimeRange.
      **/
     const TEMPORAL = 'temporal';
 
     /**
-     * A binary type (nativly mostly string)
+     * A binary type (nativly mostly string).
      **/
     const BINARY = 'binary';
 
     /**
-     * A resource (like the result of fopen())
+     * A resource (like the result of fopen()).
      **/
     const RESOURCE = 'resource';
 
     /**
-     * Return the group of this type (see self::NONE, self::CUSTOM
+     * Return the group of this type (see self::NONE, self::CUSTOM.
      *
      * @return string
      **/
     public function group();
 
     /**
-     * Fill this type with the passed attributes
+     * Fill this type with the passed attributes.
      *
      * @param array $attributes
+     *
      * @return self
+     *
      * @throws \Ems\Contracts\Core\Unsupported
      **/
-    public function fill(array $attributes=[]);
+    public function fill(array $attributes = []);
 
     /**
-     * Return if this is a complex type (array or class)
+     * Return if this is a complex type (array or class).
      *
      * @return bool
      **/
     public function isComplex();
 
     /**
-     * Return if this type is scalar
+     * Return if this type is scalar.
      *
      * @return bool
      **/

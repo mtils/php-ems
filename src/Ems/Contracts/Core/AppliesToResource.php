@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Ems\Contracts\Core;
-
 
 /**
  * This interface is one of the fundamentals of this framework.
@@ -23,7 +21,7 @@ interface AppliesToResource
      * A resource name is a resource endpoint with an action
      * with dots instead of (url) slashes.
      * For example: 'users.index' (url would be /users),
-     * 'mail.attachments.create' (url would be /mail/136/attachments/create)
+     * 'mail.attachments.create' (url would be /mail/136/attachments/create).
      *
      * @return string
      **/

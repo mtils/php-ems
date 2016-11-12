@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Contracts\Cache;
 
 use Ems\Contracts\Core\Storage as BaseStorage;
@@ -14,7 +13,6 @@ use Ems\Contracts\Core\Provider;
  **/
 interface Cache extends BaseStorage, Provider
 {
-
     /**
      * Turn the $value into a valid cache key.
      * If the value is scalar or null, replace any chars which are
@@ -26,14 +24,16 @@ interface Cache extends BaseStorage, Provider
      * to a key
      *
      * @param mixed $value
+     *
      * @return string
      **/
     public function key($value);
 
     /**
-     * Return if the cache has stored $key
+     * Return if the cache has stored $key.
      *
      * @param string $key
+     *
      * @return bool
      **/
     public function has($key);
@@ -54,7 +54,8 @@ interface Cache extends BaseStorage, Provider
      * it could call Cache::get($this) to get the assoziated data
      *
      * @param string|object|array $key
-     * @param mixed $default (optional)
+     * @param mixed               $default (optional)
+     *
      * @return mixed
      **/
 
@@ -66,28 +67,33 @@ interface Cache extends BaseStorage, Provider
      * pass the original $keySource.
      *
      * @param mixed $keyOrValue
-     * @param mixed $value (optional)
-     * @param mixed $keySource (optional)
+     * @param mixed $value      (optional)
+     * @param mixed $keySource  (optional)
+     *
      * @return self
      **/
-    public function put($keyOrValue, $value=null, $keySource=null);
+    public function put($keyOrValue, $value = null, $keySource = null);
 
     /**
      * Pass a date or DateTime->diff() string to manipulate the
      * cache lifetime. No call to until means forever
-     * Fluent interface:
+     * Fluent interface:.
+     *
      * @example Cache::until('1 day')->put()
      *
      * @param string|\DateTime $until
+     *
      * @return self
      **/
-    public function until($until='+1 day');
+    public function until($until = '+1 day');
 
     /**
-     * Add tags to the stored data to invalidate it by tags. Fluent API:
+     * Add tags to the stored data to invalidate it by tags. Fluent API:.
+     *
      * @example Cache::tag('user-34', 'blog-category-12')->put($blogEntry)
      *
      * @param string|array $tags
+     *
      * @return self
      **/
     public function tag($tags);
@@ -95,8 +101,9 @@ interface Cache extends BaseStorage, Provider
     /**
      * Increment the value of an item in the cache.
      *
-     * @param  string  $key
-     * @param  mixed  $steps
+     * @param string $key
+     * @param mixed  $steps
+     *
      * @return int|bool
      */
     public function increment($key, $steps = 1);
@@ -104,46 +111,50 @@ interface Cache extends BaseStorage, Provider
     /**
      * Decrement the value of an item in the cache.
      *
-     * @param  string  $key
-     * @param  mixed  $steps
+     * @param string $key
+     * @param mixed  $steps
+     *
      * @return int|bool
      */
     public function decrement($key, $steps = 1);
 
     /**
-     * Invalidate a value by its id
+     * Invalidate a value by its id.
      *
      * @param $key
+     *
      * @return self
      **/
     public function forget($key);
 
     /**
-     * Invalidate all cache entries with the passed tag(s)
+     * Invalidate all cache entries with the passed tag(s).
      *
      * @param array|string $tags
+     *
      * @return self
      **/
     public function prune($tags);
 
     /**
-     * Pass a name for a different cache storage
+     * Pass a name for a different cache storage.
+     *
      * @example Cache::storage('fast')->put($value)
      *
      * @param mixed $name
+     *
      * @return string
      **/
     public function storage($name);
 
     /**
      * Add a different store under name to use it via
-     * self::store($name)
+     * self::store($name).
      *
-     * @param string $name
+     * @param string                       $name
      * @param \Ems\Contracts\Cache\Storage $store
+     *
      * @return self
      **/
     public function addStorage($name, Storage $store);
-
-
 }

@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Contracts\XType;
 
 /**
@@ -8,5 +7,4 @@ namespace Ems\Contracts\XType;
  **/
 interface MustBeInList
 {
-    
 }

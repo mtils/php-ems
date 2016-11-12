@@ -1,4 +1,5 @@
-<?php 
+<?php
+
 
 namespace Ems\Contracts\Mail;
 
@@ -6,16 +7,15 @@ use DateTime;
 
 /**
  * The MessageComposer composes messages for a mailer and fills automatic some
- * data you want to configure outside the mailer call
+ * data you want to configure outside the mailer call.
  *
  * A simple example would be a 
  **/
 interface MessageComposer
 {
-
     /**
      * The following constants are used to assign different objects to the view.
-     * These are the keys
+     * These are the keys.
      **/
     const SUBJECT = 'subject';
 
@@ -30,31 +30,31 @@ interface MessageComposer
      * on $recipient and $data.
      *
      * @param \Ems\Contracts\Mail\MailConfig $config
-     * @param \Ems\Contracts\Mail\Message $message
-     * @param array $data (optional)
-     * @param \DateTime $plannedSendDate (optional)
-     * @return void
+     * @param \Ems\Contracts\Mail\Message    $message
+     * @param array                          $data            (optional)
+     * @param \DateTime                      $plannedSendDate (optional)
      **/
-    public function fill(MailConfig $config, Message $message, array $data=[], DateTime $plannedSendDate=null);
+    public function fill(MailConfig $config, Message $message, array $data = [], DateTime $plannedSendDate = null);
 
     /**
      * Determine if configured data will overwrite passed data. (A configugred
-     * key will overwrite the passed key in the array)
+     * key will overwrite the passed key in the array).
      *
      * @param bool $prefer (default:true)
+     *
      * @return self
      **/
-    public function preferConfiguredData($prefer=true);
+    public function preferConfiguredData($prefer = true);
 
     /**
      * Assign an additional callable which will process the data before passing
-     * it to the view
+     * it to the view.
      *
      * Signature is: function($resourceId, array &$data){}
      *
      * @param callable $processor
+     *
      * @return self
      **/
     public function processDataWith(callable $processor);
-
 }

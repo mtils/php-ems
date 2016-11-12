@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Contracts\Core;
 
 /**
@@ -9,10 +8,9 @@ namespace Ems\Contracts\Core;
 interface AllProvider extends Provider
 {
     /**
-     * Return an iterable of all known named objects of this provider
+     * Return an iterable of all known named objects of this provider.
      *
      * @return array|\Traversable<\Ems\Contracts\Core\Identifiable>
      **/
     public function all();
-
 }

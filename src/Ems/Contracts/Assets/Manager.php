@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Ems\Contracts\Assets;
-
 
 use Ems\Contracts\Core\Configurable;
 use Ems\Contracts\Core\Copyable;
@@ -16,9 +14,8 @@ use Ems\Contracts\Core\Copyable;
  **/
 interface Manager extends Registrar, Configurable, Copyable
 {
-
     /**
-     * This is an option for BuildConfig::setManagerOptions()
+     * This is an option for BuildConfig::setManagerOptions().
      *
      * this is bool and means that when it finds a compiled file for a group
      * it does not call the registry to get the assigned files and merges them
@@ -31,7 +28,7 @@ interface Manager extends Registrar, Configurable, Copyable
     const MERGE_UNCOMPILED_FILES = 'merge_uncompiled_files';
 
     /**
-     * This is an option for BuildConfig::setManagerOptions()
+     * This is an option for BuildConfig::setManagerOptions().
      *
      * This is bool and determines that the manager should check if a compiled
      * file exists before if deceides to use it.
@@ -42,15 +39,16 @@ interface Manager extends Registrar, Configurable, Copyable
     const CHECK_COMPILED_FILE_EXISTS = 'check_compiled_file_exists';
 
     /**
-     * Renders group $group
+     * Renders group $group.
      *
      * @param string $group
+     *
      * @return \Ems\Contracts\Assets\Collection
      **/
     public function render($group);
 
     /**
-     * Render a group with a custom callable. Signature is:
+     * Render a group with a custom callable. Signature is:.
      *
      * function (string $group, Registry $registry) {}
      *
@@ -63,8 +61,9 @@ interface Manager extends Registrar, Configurable, Copyable
      *
      * The custom renderer has to return \Ems\Contracts\Assets\Collection
      *
-     * @param string $groupName
+     * @param string   $groupName
      * @param callable $renderer
+     *
      * @return self
      **/
     public function renderGroupWith($groupName, callable $renderer);
@@ -87,5 +86,4 @@ interface Manager extends Registrar, Configurable, Copyable
      * @return string
      **/
     public function groupPrefix();
-
 }

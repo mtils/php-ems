@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Contracts\Core;
 
 /**
@@ -24,37 +23,39 @@ namespace Ems\Contracts\Core;
  **/
 interface TextProvider
 {
-
     /**
-     * Return if the TextProvider has an entry for $key
+     * Return if the TextProvider has an entry for $key.
      *
      * @param string $key
+     *
      * @return bool
      **/
     public function has($key);
 
     /**
-     * Return the text for messageId $key. Replace the vars in it with $replace
+     * Return the text for messageId $key. Replace the vars in it with $replace.
      *
      * @param string $key
-     * @param array $replace (optional)
+     * @param array  $replace (optional)
+     *
      * @return string
      **/
     public function get($key, array $replace = []);
 
     /**
      * Return the text for a choice depending on a number. Mostly used to get
-     * different texts for different quantities
+     * different texts for different quantities.
      *
      * @param string $key
-     * @param int $number
-     * @param array $replace (optional)
+     * @param int    $number
+     * @param array  $replace (optional)
+     *
      * @return string
      **/
     public function choice($key, $number, array $replace = []);
 
     /**
-     * Return the domain of this TextProvider
+     * Return the domain of this TextProvider.
      *
      * @return string
      **/
@@ -68,12 +69,13 @@ interface TextProvider
      * shorter keys to its translations.
      * You could for example pass a $texts->forDomain('messages') to a controller
      * or a $texts->forDomain('forms') to a form object.
-     * If the domain is not known an exception has to be thrown
+     * If the domain is not known an exception has to be thrown.
      *
      * @param string $domain
+     *
      * @return self
+     *
      * @throws \Ems\Core\Errors\NotFound
      **/
     public function forDomain($domain);
-
 }

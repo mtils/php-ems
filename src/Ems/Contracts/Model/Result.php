@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Ems\Contracts\Model;
-
 
 use IteratorAggregate;
 
@@ -21,17 +19,15 @@ use IteratorAggregate;
  * The result must create a new iterator on every call of getIterator() 
  * (foreach)
  * A DB Query object is a really good candidate for an Result
- * So you could write foreach (User::where('name', 'John') as $user)
+ * So you could write foreach (User::where('name', 'John') as $user).
  **/
 interface Result extends IteratorAggregate
 {
-
     /**
      * Return the creator of this result. This is not a must, but part of this
-     * interface
+     * interface.
      *
      * @return object
      **/
     public function creator();
-
 }
