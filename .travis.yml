@@ -8,4 +8,9 @@ php:
 
 before_script: composer update
 
-script: phpunit
+script:
+  - mkdir build/logs
+  - phpunit --coverage-clover build/logs/clover.xml
+
+after_success:
+  - travis_retry php vendor/bin/coveralls

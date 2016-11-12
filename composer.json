@@ -12,7 +12,8 @@
         "swiftmailer/swiftmailer": "~5.1",
         "patchwork/jsqueeze": "~2.0",
         "natxet/cssmin": "~3.0",
-        "tedivm/jshrink": "~1.1"
+        "tedivm/jshrink": "~1.1",
+        "satooshi/php-coveralls": "dev-master"
     },
     "replace": {
         "ems/assets": "self.version",
