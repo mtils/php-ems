@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Assets;
 
 use Ems\Contracts\Assets\Collection as CollectionContract;
@@ -12,7 +11,6 @@ use Exception;
 
 class Collection extends TypeEnforcedList implements CollectionContract
 {
-
     use RenderableTrait;
 
     /**
@@ -46,14 +44,16 @@ class Collection extends TypeEnforcedList implements CollectionContract
     }
 
     /**
-     * Set the group of this collection
+     * Set the group of this collection.
      *
      * @param string $group
+     *
      * @return self
      **/
     public function setGroup($group)
     {
         $this->group = $group;
+
         return $this;
     }
 
@@ -69,24 +69,23 @@ class Collection extends TypeEnforcedList implements CollectionContract
 
     /**
      * Checks the type of any added item and throws an exception
-     * if it does not match
+     * if it does not match.
      *
      * @param mixed $value
-     * @return null
      **/
     protected function checkType($value)
     {
-
         if (!$value instanceof AssetContract) {
             throw new InvalidArgumentException("You can only add values of '{$this->forceType}' to this list");
         }
 
         if (!$mimeType = $value->mimeType()) {
-            throw new InvalidArgumentException("The added asset must have a mimeType to add it to this collection");
+            throw new InvalidArgumentException('The added asset must have a mimeType to add it to this collection');
         }
 
         if (!$this->mimeType) {
             $this->mimeType = $mimeType;
+
             return;
         }
 
