@@ -1,17 +1,13 @@
 <?php
 
-
 namespace Ems\Assets;
-
 
 use Ems\Contracts\Assets\BuildConfig as BuildConfigContract;
 use Ems\Contracts\Assets\Collection as CollectionContract;
 use Ems\Contracts\Model\Repository;
 
-
 class BuildConfig implements BuildConfigContract
 {
-
     /**
      * @var \Ems\Contracts\Model\Repository
      **/
@@ -47,9 +43,9 @@ class BuildConfig implements BuildConfigContract
      **/
     protected $managerOptions = [];
 
-    /**
-     * @var array
-     **/
+     /**
+      * @var array
+      **/
      protected $compilerOptions = [];
 
     /**
@@ -69,6 +65,7 @@ class BuildConfig implements BuildConfigContract
 
     /**
      * @see \Ems\Contracts\Core\Identifiable
+     *
      * @return string
      **/
     public function getId()
@@ -88,11 +85,13 @@ class BuildConfig implements BuildConfigContract
 
     /**
      * @param string $group
+     *
      * @return self
      **/
     public function setGroup($group)
     {
         $this->group = $group;
+
         return $this;
     }
 
@@ -104,16 +103,19 @@ class BuildConfig implements BuildConfigContract
     public function target()
     {
         $this->fillIfNotFilled();
+
         return $this->target;
     }
 
     /**
      * @param string $group
+     *
      * @return self
      **/
     public function setTarget($target)
     {
         $this->target = $target;
+
         return $this;
     }
 
@@ -125,16 +127,19 @@ class BuildConfig implements BuildConfigContract
     public function collection()
     {
         $this->fillIfNotFilled();
+
         return $this->collection;
     }
 
     /**
      * @param \Ems\Contracts\Assets\Collection $collection
+     *
      * @return self
      **/
     public function setCollection(CollectionContract $collection)
     {
         $this->collection = $collection;
+
         return $this;
     }
 
@@ -146,16 +151,19 @@ class BuildConfig implements BuildConfigContract
     public function parserNames()
     {
         $this->fillIfNotFilled();
+
         return $this->parserNames;
     }
 
     /**
      * @param array|string $names
+     *
      * @return self
      **/
     public function setParserNames($names)
     {
-        $this->parserNames = (array)$names;
+        $this->parserNames = (array) $names;
+
         return $this;
     }
 
@@ -163,9 +171,10 @@ class BuildConfig implements BuildConfigContract
      * {@inheritdoc}
      *
      * @param string $parserName (optional)
+     *
      * @return array
      **/
-    public function parserOptions($parserName=null)
+    public function parserOptions($parserName = null)
     {
         $this->fillIfNotFilled();
         if (!$parserName) {
@@ -174,18 +183,20 @@ class BuildConfig implements BuildConfigContract
         if (isset($this->parserOptions[$parserName])) {
             return $this->parserOptions[$parserName];
         }
+
         return [];
     }
 
     /**
-     * Set a parser option
+     * Set a parser option.
      *
-     * @param string $parserName
+     * @param string       $parserName
      * @param string|array $key
-     * @param mixed $value
+     * @param mixed        $value
+     *
      * @return self
      **/
-    public function setParserOption($parserName, $key, $value=null)
+    public function setParserOption($parserName, $key, $value = null)
     {
         if (!isset($this->parserOptions[$parserName])) {
             $this->parserOptions[$parserName] = [];
@@ -193,10 +204,11 @@ class BuildConfig implements BuildConfigContract
 
         if (!is_array($key)) {
             $this->parserOptions[$parserName][$key] = $value;
+
             return $this;
         }
 
-        foreach ($key as $name=>$value) {
+        foreach ($key as $name => $value) {
             $this->setParserOption($parserName, $name, $value);
         }
 
@@ -204,9 +216,10 @@ class BuildConfig implements BuildConfigContract
     }
 
     /**
-     * Clears all parser options for $parserName
+     * Clears all parser options for $parserName.
      *
      * @param string $parserName
+     *
      * @return self
      **/
     public function resetParserOptions($parserName)
@@ -220,23 +233,27 @@ class BuildConfig implements BuildConfigContract
      * {@inheritdoc}
      *
      * @param string $parserName (optional)
+     *
      * @return array
      **/
     public function managerOptions()
     {
         $this->fillIfNotFilled();
+
         return $this->managerOptions;
     }
 
     /**
-     * Set the options for the asset manager
+     * Set the options for the asset manager.
      *
      * @param array $options
+     *
      * @return self
      **/
     public function setManagerOptions(array $options)
     {
         $this->managerOptions = $options;
+
         return $this;
     }
 
@@ -248,18 +265,21 @@ class BuildConfig implements BuildConfigContract
     public function compilerOptions()
     {
         $this->fillIfNotFilled();
+
         return $this->compilerOptions;
     }
 
     /**
-     * Set the options for the compiler
+     * Set the options for the compiler.
      *
      * @param array $options
+     *
      * @return self
      **/
     public function setCompilerOptions(array $options)
     {
         $this->compilerOptions = $options;
+
         return $this;
     }
 
@@ -267,10 +287,11 @@ class BuildConfig implements BuildConfigContract
      * Lazyload the attributes of this BuildConfig by passing some attributes
      * and let it later be filled by the passed repository
      * This is typehinted against the core repository because it only needs the
-     * fill method
+     * fill method.
      *
      * @param \Ems\Contracts\Model\Repository $repository
-     * @param array $attributes
+     * @param array                           $attributes
+     *
      * @return self
      **/
     public function lazyLoadBy(Repository $repository, array $attributes)
@@ -278,11 +299,12 @@ class BuildConfig implements BuildConfigContract
         $this->repository = $repository;
         $this->lazyLoadAttributes = $attributes;
         $this->lazyLoad = true;
+
         return $this;
     }
 
     /**
-     * Fills the config by the repository once
+     * Fills the config by the repository once.
      **/
     protected function fillIfNotFilled()
     {
@@ -294,5 +316,4 @@ class BuildConfig implements BuildConfigContract
 
         $this->lazyLoaded = true;
     }
-
 }
