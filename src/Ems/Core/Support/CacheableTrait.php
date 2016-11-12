@@ -1,13 +1,11 @@
 <?php
 
-
 namespace Ems\Core\Support;
 
 use Ems\Contracts\Cache\Cache;
 
 trait CacheableTrait
 {
-
     /**
      * @var bool
      **/
@@ -42,13 +40,15 @@ trait CacheableTrait
      * {@inheritdoc}
      * 
      * @param string|bool $id (optional)
+     *
      * @return self
      **/
-    public function cache($id=null, $tags=[])
+    public function cache($id = null, $tags = [])
     {
         $this->_shouldCache = $id === false ? false : true;
         $this->_cacheId = is_string($id) ? $id : $this->_cacheId;
-        $this->_cacheTags = $tags ? (array)$tags : $this->_cacheTags;
+        $this->_cacheTags = $tags ? (array) $tags : $this->_cacheTags;
+
         return $this;
     }
 
@@ -56,11 +56,13 @@ trait CacheableTrait
      * {@inheritdoc}
      *
      * @param string $storage
+     *
      * @return self
      **/
     public function inStorage($storage)
     {
         $this->_cacheStorage = $storage;
+
         return $this;
     }
 
@@ -68,11 +70,13 @@ trait CacheableTrait
      * {@inheritdoc}
      *
      * @param string|\DateTime $lifetime
+     *
      * @return self
      **/
     public function remember($lifetime)
     {
         $this->_lifetime = $lifetime;
+
         return $this;
     }
 
@@ -117,7 +121,7 @@ trait CacheableTrait
     }
 
     /**
-     * Return the setted lifetime (if setted)
+     * Return the setted lifetime (if setted).
      *
      * @return string|\DateTime|null
      **/
@@ -130,11 +134,13 @@ trait CacheableTrait
      * {@inheritdoc}
      *
      * @param \Ems\Contracts\Cache\Cache $cache
+     *
      * @return self
      **/
     public function setCache(Cache $cache)
     {
         $this->_cache = $cache;
+
         return $this;
     }
 }

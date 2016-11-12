@@ -1,15 +1,12 @@
 <?php
 
-
 namespace Ems\Core\Collections;
 
 use InvalidArgumentException;
-use Traversable;
 use BadMethodCallException;
 
 class TypeEnforcedList extends OrderedList
 {
-
     /**
      * @var string
      **/
@@ -21,7 +18,7 @@ class TypeEnforcedList extends OrderedList
     protected $typeIsFrozen = false;
 
     /**
-     * Return the forced type
+     * Return the forced type.
      *
      * @return string
      **/
@@ -31,12 +28,13 @@ class TypeEnforcedList extends OrderedList
     }
 
     /**
-     * Return the forced type of this list
+     * Return the forced type of this list.
      *
      * Allowed values are: bool,int,float,string,resource,array,object
      * All other strings will be treatet as class names
      *
      * @param string $type
+     *
      * @return self
      **/
     public function setForcedType($type)
@@ -45,23 +43,25 @@ class TypeEnforcedList extends OrderedList
             throw new BadMethodCallException("Cannot change frozen type {$this->forceType}");
         }
         $this->forceType = $type;
+
         return $this;
     }
 
     /**
      * Disallow any changes to the setted type
-     * (can not be reversed)
+     * (can not be reversed).
      *
      * @return self
      **/
     public function freezeType()
     {
         $this->typeIsFrozen = true;
+
         return $this;
     }
 
     /**
-     * Check if the type was frozen
+     * Check if the type was frozen.
      *
      * @return bool
      **/
@@ -71,15 +71,17 @@ class TypeEnforcedList extends OrderedList
     }
 
     /**
-     * Insert a value at position $index
+     * Insert a value at position $index.
      *
-     * @param int $index
+     * @param int   $index
      * @param mixed $value
+     *
      * @return self
      **/
     public function insert($index, $value)
     {
         $this->checkType($value);
+
         return parent::insert($index, $value);
     }
 
@@ -87,6 +89,7 @@ class TypeEnforcedList extends OrderedList
      * {@inheritdoc}
      *
      * @param array|\Traversable|int|string $source (optional)
+     *
      * @return self
      **/
     public function setSource($source)
@@ -101,14 +104,14 @@ class TypeEnforcedList extends OrderedList
     }
 
     /**
-     * Does the actual type checks
+     * Does the actual type checks.
      *
      * @param mixed $value
+     *
      * @return bool
      **/
     public function canAdd($value)
     {
-
         if (!$this->forceType) {
             return true;
         }
@@ -129,14 +132,13 @@ class TypeEnforcedList extends OrderedList
             case 'object':
                 return is_object($value);
             default:
-                return ($value instanceof $this->forceType);
+                return $value instanceof $this->forceType;
         }
-
     }
 
     /**
      * {@inheritdoc}
-     * Copies the type but not the freeze
+     * Copies the type but not the freeze.
      *
      * @return self
      */
@@ -147,10 +149,9 @@ class TypeEnforcedList extends OrderedList
 
     /**
      * Checks the type of any added item and throws an exception
-     * if it does not match
+     * if it does not match.
      *
      * @param mixed $value
-     * @return null
      **/
     protected function checkType($value)
     {
@@ -160,14 +161,16 @@ class TypeEnforcedList extends OrderedList
     }
 
     /**
-     * Append a value to the end of this list
+     * Append a value to the end of this list.
      *
      * @param mixed $value
+     *
      * @return self
      **/
     protected function addItem($value)
     {
         $this->checkType($value);
+
         return parent::addItem($value);
     }
 }

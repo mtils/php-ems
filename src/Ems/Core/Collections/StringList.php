@@ -1,7 +1,5 @@
 <?php
 
-
-
 namespace Ems\Core\Collections;
 
 use Ems\Contracts\Core\Stringable;
@@ -9,25 +7,24 @@ use Ems\Core\Support\StringableTrait;
 
 class StringList extends OrderedList implements Stringable
 {
-
     use StringableTrait;
 
     /**
-     * The delimiter
+     * The delimiter.
      *
      * @var string
      **/
     protected $glue = ' ';
 
     /**
-     * The string prefix for __toString
+     * The string prefix for __toString.
      *
      * @var string
      **/
     protected $prefix = '';
 
     /**
-     * The string suffix for __toString
+     * The string suffix for __toString.
      *
      * @var string
      **/
@@ -35,16 +32,17 @@ class StringList extends OrderedList implements Stringable
 
     /**
      * @param array|\Traversable|int|string $source (optional)
+     *
      * @see self::setSource
      **/
-    public function __construct($source = null, $glue=' ', $prefix='', $suffix='')
+    public function __construct($source = null, $glue = ' ', $prefix = '', $suffix = '')
     {
         $this->setGlue($glue)->setPrefix($prefix)->setSuffix($suffix);
         parent::__construct($source);
     }
 
     /**
-     * Return the glue (string bewteen items)
+     * Return the glue (string bewteen items).
      *
      * @return string
      **/
@@ -54,19 +52,21 @@ class StringList extends OrderedList implements Stringable
     }
 
     /**
-     * Set the glue (the string between the parts)
+     * Set the glue (the string between the parts).
      *
      * @param string $glue
+     *
      * @return self
      **/
     public function setGlue($glue)
     {
         $this->glue = $glue;
+
         return $this;
     }
 
     /**
-     * Return the string prefix
+     * Return the string prefix.
      *
      * @return string
      **/
@@ -76,19 +76,21 @@ class StringList extends OrderedList implements Stringable
     }
 
     /**
-     * Set the prefix
+     * Set the prefix.
      *
      * @param string $prefix
+     *
      * @return self
      **/
     public function setPrefix($prefix)
     {
         $this->prefix = $prefix;
+
         return $this;
     }
 
     /**
-     * Return the suffix
+     * Return the suffix.
      *
      * @return string
      **/
@@ -98,14 +100,16 @@ class StringList extends OrderedList implements Stringable
     }
 
     /**
-     * Set the suffix
+     * Set the suffix.
      *
      * @param string $suffix
+     *
      * @return self
      **/
     public function setSuffix($suffix)
     {
         $this->suffix = $suffix;
+
         return $this;
     }
 
@@ -113,11 +117,11 @@ class StringList extends OrderedList implements Stringable
      * {@inheritdoc}
      *
      * @param array|\Traversable|int|string $source (optional)
+     *
      * @return self
      **/
     public function setSource($source)
     {
-
         if (!is_string($source)) {
             return parent::setSource($source);
         }
@@ -128,13 +132,13 @@ class StringList extends OrderedList implements Stringable
 
         if (!$length = mb_strlen($string)) {
             $this->source = [];
+
             return $this;
         }
 
         $this->source = explode($this->glue, trim($string, $this->glue));
 
         return $this;
-
     }
 
     /**
@@ -149,12 +153,11 @@ class StringList extends OrderedList implements Stringable
                              ->setSuffix($this->suffix);
     }
 
-
     /**
      * @return string
      **/
     protected function renderString()
     {
-        return $this->prefix . implode($this->glue, $this->source) . $this->suffix;
+        return $this->prefix.implode($this->glue, $this->source).$this->suffix;
     }
 }

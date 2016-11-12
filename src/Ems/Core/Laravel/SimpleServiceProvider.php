@@ -6,11 +6,10 @@ use Illuminate\Support\ServiceProvider;
 
 /**
  * This is just a simple helper class to avoid code duplication of
- * app->bind($bla, function($app){}) Stuff
+ * app->bind($bla, function($app){}) Stuff.
  **/
 abstract class SimpleServiceProvider extends ServiceProvider
 {
-
     /**
      * Put your bindings here,
      * leads to $app->bind($value, $app->make($key)) !
@@ -25,15 +24,16 @@ abstract class SimpleServiceProvider extends ServiceProvider
     protected $bindings = [];
 
     /**
-     * Put your singletons here, leads to $app->singleton($val, $app->make($key))
+     * Put your singletons here, leads to $app->singleton($val, $app->make($key)).
      *
      * @see self::bindings
+     *
      * @var array
      **/
     protected $singletons = [];
 
     /**
-     * Put your aliases here ([$alias] => [$abstract,$abstract2]
+     * Put your aliases here ([$alias] => [$abstract,$abstract2].
      *
      * @var array
      **/
@@ -47,28 +47,23 @@ abstract class SimpleServiceProvider extends ServiceProvider
     }
 
     /**
-     * Registers all in $this->aliases
-     *
-     * @return null
+     * Registers all in $this->aliases.
      **/
     protected function registerAliases()
     {
-        foreach ($this->aliases as $abstract=>$aliases) {
-            foreach ((array)$aliases as $alias) {
+        foreach ($this->aliases as $abstract => $aliases) {
+            foreach ((array) $aliases as $alias) {
                 $this->app->alias($alias, $abstract);
             }
         }
     }
 
     /**
-     * Registers all in $this->bindings
-     *
-     * @return null
+     * Registers all in $this->bindings.
      **/
     protected function registerBindings()
     {
-        foreach ($this->bindings as $concrete=>$abstracts) {
-
+        foreach ($this->bindings as $concrete => $abstracts) {
             if (!is_array($abstracts)) {
                 $this->app->bind($abstracts, $concrete);
                 continue;
@@ -85,14 +80,11 @@ abstract class SimpleServiceProvider extends ServiceProvider
     }
 
     /**
-     * Registers all in $this->singletons
-     *
-     * @return null
+     * Registers all in $this->singletons.
      **/
     protected function registerSingletons()
     {
-        foreach ($this->singletons as $concrete=>$abstracts) {
-
+        foreach ($this->singletons as $concrete => $abstracts) {
             if (!is_array($abstracts)) {
                 $this->app->singleton($abstracts, $concrete);
                 continue;
@@ -106,7 +98,5 @@ abstract class SimpleServiceProvider extends ServiceProvider
                 $this->app->alias($first, $abstract);
             }
         }
-
     }
-
 }

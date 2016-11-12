@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Ems\Core\Laravel;
-
 
 use Ems\Contracts\Core\Multilingual;
 use Ems\Contracts\Core\TextProvider;
@@ -10,7 +8,6 @@ use Illuminate\Translation\Translator;
 
 class TranslatorTextProvider implements TextProvider, Multilingual
 {
-
     /**
      * @var \Illuminate\Translation\Translator
      **/
@@ -43,14 +40,14 @@ class TranslatorTextProvider implements TextProvider, Multilingual
 
     /**
      * @param \Illuminate\Translation\Translator $translator
-     * @param string $domain (optional)
-     * @param string $namespace (optional)
+     * @param string                             $domain     (optional)
+     * @param string                             $namespace  (optional)
      **/
-    public function __construct(Translator $translator, $domain='', $namespace='', $isRoot=true)
+    public function __construct(Translator $translator, $domain = '', $namespace = '', $isRoot = true)
     {
         $this->translator = $translator;
         $this->domain = trim($domain, '.');
-        $this->namespace = trim($namespace,':');
+        $this->namespace = trim($namespace, ':');
         $this->buildPrefix($this->namespace, $this->domain);
         $this->isRoot = $isRoot;
     }
@@ -60,6 +57,7 @@ class TranslatorTextProvider implements TextProvider, Multilingual
      *
      * @param string $key
      * @param string $locale (optional)
+     *
      * @return bool
      **/
     public function has($key)
@@ -71,8 +69,9 @@ class TranslatorTextProvider implements TextProvider, Multilingual
      * {@inheritdoc}
      *
      * @param string $key
-     * @param array $replace (optional)
-     * @param string $locale (optional)
+     * @param array  $replace (optional)
+     * @param string $locale  (optional)
+     *
      * @return string
      **/
     public function get($key, array $replace = [])
@@ -84,9 +83,10 @@ class TranslatorTextProvider implements TextProvider, Multilingual
      * {@inheritdoc}
      *
      * @param string $key
-     * @param int $number
-     * @param array $replace (optional)
-     * @param string $locale (optional)
+     * @param int    $number
+     * @param array  $replace (optional)
+     * @param string $locale  (optional)
+     *
      * @return string
      **/
     public function choice($key, $number, array $replace = [])
@@ -98,7 +98,9 @@ class TranslatorTextProvider implements TextProvider, Multilingual
      * {@inheritdoc}
      *
      * @param string $domain
+     *
      * @return self
+     *
      * @throws \Ems\Core\Errors\NotFound
      **/
     public function forDomain($domain)
@@ -117,9 +119,10 @@ class TranslatorTextProvider implements TextProvider, Multilingual
     }
 
     /**
-     * Return a new instance of this provider for locale $locale
+     * Return a new instance of this provider for locale $locale.
      *
      * @param string $locale
+     *
      * @return self
      **/
     public function forLocale($locale)
@@ -141,12 +144,14 @@ class TranslatorTextProvider implements TextProvider, Multilingual
      * {@inheritdoc}
      *
      * @param string $locale
+     *
      * @return self
      **/
     public function setLocale($locale)
     {
         if ($this->isRoot) {
             $this->translator->setlocale($locale);
+
             return $this;
         }
 
@@ -156,7 +161,7 @@ class TranslatorTextProvider implements TextProvider, Multilingual
     }
 
     /**
-     * Return the current namespace (if one set)
+     * Return the current namespace (if one set).
      *
      * @return string
      **/
@@ -166,9 +171,10 @@ class TranslatorTextProvider implements TextProvider, Multilingual
     }
 
     /**
-     * Return a new TextProvider with a predefinied namespace
+     * Return a new TextProvider with a predefinied namespace.
      *
      * @param string
+     *
      * @return self
      **/
     public function forNamespace($namespace)
@@ -181,6 +187,7 @@ class TranslatorTextProvider implements TextProvider, Multilingual
      *
      * @param string $domain
      * @param string $namespace
+     *
      * @return self
      **/
     protected function replicate($domain, $namespace)
@@ -189,19 +196,19 @@ class TranslatorTextProvider implements TextProvider, Multilingual
     }
 
     /**
-     * Build the key if a domain or namespace was set
+     * Build the key if a domain or namespace was set.
      *
      * @param string $key
-     * return string
+     *                    return string
      **/
     protected function composeKey($key)
     {
-        return !$this->keyPrefix ? $key : $this->keyPrefix . $key;
+        return !$this->keyPrefix ? $key : $this->keyPrefix.$key;
     }
 
     /**
      * Set the key prefix. This is a one timer and will only be done once at
-     * construction of this object
+     * construction of this object.
      *
      * @param string $namespace
      * @param string $domain

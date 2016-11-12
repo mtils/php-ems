@@ -1,12 +1,9 @@
 <?php
 
-
 namespace Ems\Core\Collections;
-
 
 class StringDictionary extends Dictionary
 {
-
     /**
      * @var string
      **/
@@ -27,28 +24,30 @@ class StringDictionary extends Dictionary
      **/
     public $suffix = '';
 
-
     public function getRowDelimiter()
     {
         return $this->rowDelimiter;
     }
 
     /**
-     * Set the delimiter between rows (\n)
+     * Set the delimiter between rows (\n).
      *
      * @param string $delimiter
+     *
      * @return self
      **/
     public function setRowDelimiter($delimiter)
     {
         $this->rowDelimiter = $delimiter;
+
         return $this;
     }
 
     /**
-     * Encode the key for string output
+     * Encode the key for string output.
      *
      * @param string $key
+     *
      * @return string
      **/
     public function encodeKey($key)
@@ -57,9 +56,10 @@ class StringDictionary extends Dictionary
     }
 
     /**
-     * Encode the value for string output
+     * Encode the value for string output.
      *
      * @param string $key
+     *
      * @return string
      **/
     public function encodeValue($value)
@@ -68,23 +68,22 @@ class StringDictionary extends Dictionary
     }
 
     /**
-     * Return the dictionary as string
+     * Return the dictionary as string.
      *
      * @return string
      **/
     public function __toString()
     {
-
         if (!count($this)) {
             return '';
         }
 
         $rows = [];
 
-        foreach($this as $key=>$value){
-            $rows[] = $this->encodeKey($key) . "{$this->keyValueDelimiter}\"" . $this>encodeValue("$value") . '"';
+        foreach ($this as $key => $value) {
+            $rows[] = $this->encodeKey($key)."{$this->keyValueDelimiter}\"".$this > encodeValue("$value").'"';
         }
 
-        return $this->prefix . implode($this->rowDelimiter, $rows) . $this->suffix;
+        return $this->prefix.implode($this->rowDelimiter, $rows).$this->suffix;
     }
 }

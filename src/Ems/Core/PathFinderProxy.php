@@ -1,16 +1,12 @@
 <?php
 
-
 namespace Ems\Core;
 
 use Ems\Contracts\Core\PathFinder as PathFinderContract;
-use Ems\Contracts\Core\AppPath as AppPathContract;
-use OutOfBoundsException;
 use Exception;
 
 class PathFinderProxy implements PathFinderContract
 {
-
     /**
      * @var \Ems\Contracts\Core\PathFinder
      **/
@@ -21,8 +17,7 @@ class PathFinderProxy implements PathFinderContract
      **/
     protected $namespace = '';
 
-
-    public function __construct(PathFinderContract $parent, $namespace='')
+    public function __construct(PathFinderContract $parent, $namespace = '')
     {
         $this->parent = $parent;
         $this->namespace = $namespace;
@@ -32,6 +27,7 @@ class PathFinderProxy implements PathFinderContract
      * {@inheritdoc}
      *
      * @param string
+     *
      * @return \Ems\Contracts\Core\AppPath
      **/
     public function to($scope)
@@ -42,12 +38,13 @@ class PathFinderProxy implements PathFinderContract
     /**
      * {@inheritdoc}
      *
-     * @param string $scope
+     * @param string                             $scope
      * @param string|\Ems\Contracts\Core\AppPath $path
-     * @param string $url (optional)
+     * @param string                             $url   (optional)
+     *
      * @return \Ems\Contracts\Core\AppPath
      **/
-    public function map($scope, $path, $url=null)
+    public function map($scope, $path, $url = null)
     {
         return $this->parent->map($this->translate($scope), $path, $url);
     }
@@ -62,8 +59,9 @@ class PathFinderProxy implements PathFinderContract
         if (!$this->namespace) {
             return $this->parent->scopes();
         }
-        return array_values(array_filter($this->parent->scopes(), function($scope) {
-            return strpos($scope, $this->namespace."::") === 0;
+
+        return array_values(array_filter($this->parent->scopes(), function ($scope) {
+            return strpos($scope, $this->namespace.'::') === 0;
         }));
     }
 
@@ -71,6 +69,7 @@ class PathFinderProxy implements PathFinderContract
      * {@inheritdoc}
      *
      * @param string
+     *
      * @return self
      **/
     public function namespaced($namespace)
@@ -82,6 +81,7 @@ class PathFinderProxy implements PathFinderContract
      * {@inheritdoc}
      *
      * @param string
+     *
      * @return string
      **/
     public function relative($url)
@@ -93,9 +93,10 @@ class PathFinderProxy implements PathFinderContract
      * {@inheritdoc}
      *
      * @param string $path (optional)
+     *
      * @return string
      **/
-    public function absolute($relativePath=null)
+    public function absolute($relativePath = null)
     {
         return $this->parent->absolute($relativePath);
     }
@@ -104,9 +105,10 @@ class PathFinderProxy implements PathFinderContract
      * {@inheritdoc}
      *
      * @param string $path (optional)
+     *
      * @return string
      **/
-    public function url($path=null)
+    public function url($path = null)
     {
         return $this->parent->url($path);
     }
@@ -126,14 +128,14 @@ class PathFinderProxy implements PathFinderContract
     }
 
     /**
-     * Translates the scope into the namespaced one
+     * Translates the scope into the namespaced one.
      *
      * @param string $scope
+     *
      * @return string
      **/
     protected function translate($scope)
     {
-        return $this->namespace ? $this->namespace . "::$scope" : $scope;
+        return $this->namespace ? $this->namespace."::$scope" : $scope;
     }
-
 }

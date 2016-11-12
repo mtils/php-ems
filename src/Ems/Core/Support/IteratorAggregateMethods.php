@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Core\Support;
 
 use ArrayIterator;
@@ -8,7 +7,7 @@ use ArrayIterator;
 trait IteratorAggregateMethods
 {
     /**
-     * Return the count of this array like object
+     * Return the count of this array like object.
      *
      * @return int
      **/
@@ -17,4 +16,3 @@ trait IteratorAggregateMethods
         return new ArrayIterator($this->_attributes);
     }
 }
-

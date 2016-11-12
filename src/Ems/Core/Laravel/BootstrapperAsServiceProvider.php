@@ -1,16 +1,12 @@
 <?php
 
-
 namespace Ems\Core\Laravel;
 
 use Illuminate\Support\ServiceProvider;
 use Ems\Contracts\Core\IOCContainer as Ems;
-use Ems\Core\Laravel\IOCContainer;
-
 
 abstract class BootstrapperAsServiceProvider extends ServiceProvider
 {
-
     /**
      * @var object
      **/
@@ -19,8 +15,7 @@ abstract class BootstrapperAsServiceProvider extends ServiceProvider
     /**
      * Create a new service provider instance.
      *
-     * @param  \Illuminate\Contracts\Foundation\Application  $app
-     * @return void
+     * @param \Illuminate\Contracts\Foundation\Application $app
      */
     public function __construct($app)
     {
@@ -32,14 +27,14 @@ abstract class BootstrapperAsServiceProvider extends ServiceProvider
     }
 
     /**
-     * Return the name of the bootstrapper class
+     * Return the name of the bootstrapper class.
      *
      * @return string
      **/
-    protected abstract function bootClass();
+    abstract protected function bootClass();
 
     /**
-     * Return the created bootstrapper
+     * Return the created bootstrapper.
      *
      * @return object
      **/
@@ -48,6 +43,7 @@ abstract class BootstrapperAsServiceProvider extends ServiceProvider
         if (!$this->bootstrapper) {
             $this->bootstrapper = $this->app->make($this->bootClass());
         }
+
         return $this->bootstrapper;
     }
 

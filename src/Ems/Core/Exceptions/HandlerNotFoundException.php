@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Core\Exceptions;
 
 use RuntimeException;
@@ -11,4 +10,6 @@ use Ems\Contracts\Core\Errors\NotFound;
  * something was not found. For example if you search a ZipFileReader
  * in an Repository of FileReaders.
  **/
-class HandlerNotFoundException extends RuntimeException implements NotFound{}
+class HandlerNotFoundException extends RuntimeException implements NotFound
+{
+}

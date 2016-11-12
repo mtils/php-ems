@@ -1,12 +1,9 @@
 <?php
 
-
 namespace Ems\Core\Support;
-
 
 trait ResolvingListenerTrait
 {
-
     /**
      * @var array
      **/
@@ -18,7 +15,7 @@ trait ResolvingListenerTrait
     protected $resolvedListeners = [];
 
     /**
-     * Calls all resolving and afterResolving listeners
+     * Calls all resolving and afterResolving listeners.
      *
      * @param string $abstract
      * @param object $instance
@@ -30,10 +27,11 @@ trait ResolvingListenerTrait
     }
 
     /**
-     * Stores a listener in the resolving array
+     * Stores a listener in the resolving array.
      *
-     * @param string $abstract
+     * @param string   $abstract
      * @param callable $listener
+     *
      * @return self
      **/
     protected function storeResolvingListener($abstract, $listener)
@@ -42,14 +40,16 @@ trait ResolvingListenerTrait
             $this->resolvingListeners[$abstract] = [];
         }
         $this->resolvingListeners[$abstract][] = $listener;
+
         return $this;
     }
 
     /**
-     * Stores a listener in the resolved array
+     * Stores a listener in the resolved array.
      *
-     * @param string $abstract
+     * @param string   $abstract
      * @param callable $listener
+     *
      * @return self
      **/
     public function storeAfterResolvingListener($abstract, $listener)
@@ -58,15 +58,16 @@ trait ResolvingListenerTrait
             $this->resolvedListeners[$abstract] = [];
         }
         $this->resolvedListeners[$abstract][] = $listener;
+
         return $this;
     }
 
     /**
-     * Calls the assigned listeners
+     * Calls the assigned listeners.
      *
      * @param string $abstract
      * @param object $result
-     * @param array $listeners
+     * @param array  $listeners
      **/
     protected function callListeners($abstract, $result, array $listeners)
     {
@@ -74,7 +75,7 @@ trait ResolvingListenerTrait
             $this->iterateListeners($listeners[$abstract], $result);
         }
 
-        foreach ($listeners as $classOrInterface=>$instanceListeners) {
+        foreach ($listeners as $classOrInterface => $instanceListeners) {
 
             // We already called them above
             if ($classOrInterface == $abstract) {
@@ -86,14 +87,13 @@ trait ResolvingListenerTrait
             }
 
             $this->iterateListeners($instanceListeners, $result);
-
         }
     }
 
     /**
-     * Remove one level of indention in callListeners ;-)
+     * Remove one level of indention in callListeners ;-).
      *
-     * @param array $listeners
+     * @param array  $listeners
      * @param object $result
      **/
     protected function iterateListeners(array $listeners, $result)
@@ -102,5 +102,4 @@ trait ResolvingListenerTrait
             call_user_func($listener, $result, $this);
         }
     }
-
 }

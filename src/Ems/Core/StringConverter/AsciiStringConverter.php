@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Ems\Core\StringConverter;
-
 
 use Ems\Contracts\Core\StringConverter;
 use RuntimeException;
@@ -10,57 +8,56 @@ use Ems\Core\Exceptions\NotImplementedException;
 
 class AsciiStringConverter implements StringConverter
 {
-
     /**
      * @var array
      **/
     protected $encodings = [
         'FILENAME',
-        'URL-SEGMENT'
+        'URL-SEGMENT',
     ];
 
     protected $specialChars = [
         'de' => [
-            ' '    => '_',
-            "&"    => '-and-',
-            "+"    => '-plus-',
-            "<"    => '-kleiner-',
-            ">"    => '-groesser-',
-            "?"    => '-fragezeichen-',
-            "'"    => '-anfuehrungszeichen-',
-            '"'    => '-anfuehrungszeichen-',
-            ":"    => '-doppelpunkt-',
-            "|"    => '-pipe-',
-            '\\'   => '-backslash-',
-            '/'    => '-pro-',
-            '*'    => '-stern-'
+            ' ' => '_',
+            '&' => '-and-',
+            '+' => '-plus-',
+            '<' => '-kleiner-',
+            '>' => '-groesser-',
+            '?' => '-fragezeichen-',
+            "'" => '-anfuehrungszeichen-',
+            '"' => '-anfuehrungszeichen-',
+            ':' => '-doppelpunkt-',
+            '|' => '-pipe-',
+            '\\' => '-backslash-',
+            '/' => '-pro-',
+            '*' => '-stern-',
         ],
         'en' => [
-            ' '    => '_',
-            "&"    => '-and-',
-            "+"    => '-plus-',
-            "<"    => '-smaller-',
-            ">"    => '-greater-',
-            "?"    => '-questionmark-',
-            "'"    => '-quotation-marks-',
-            '"'    => '-quotation-marks-',
-            ":"    => '-colon-',
-            "|"    => '-pipe-',
-            '\\'   => '-backslash-',
-            '/'    => '-slash-',
-            '*'    => '-stern-'
-        ]
+            ' ' => '_',
+            '&' => '-and-',
+            '+' => '-plus-',
+            '<' => '-smaller-',
+            '>' => '-greater-',
+            '?' => '-questionmark-',
+            "'" => '-quotation-marks-',
+            '"' => '-quotation-marks-',
+            ':' => '-colon-',
+            '|' => '-pipe-',
+            '\\' => '-backslash-',
+            '/' => '-slash-',
+            '*' => '-stern-',
+        ],
     ];
 
     protected $internationalSpecialChars = [
-        'ä'     =>  'ae',
-        'Ä'     =>  'Ae',
-        'ö'     =>  'oe',
-        'Ö'     =>  'Oe',
-        'ü'     =>  'ue',
-        'Ü'     =>  'Ue',
-        'ß'     =>  'ss',
-        '€'     =>  'Euro'
+        'ä' => 'ae',
+        'Ä' => 'Ae',
+        'ö' => 'oe',
+        'Ö' => 'Oe',
+        'ü' => 'ue',
+        'Ü' => 'Ue',
+        'ß' => 'ss',
+        '€' => 'Euro',
     ];
 
     /**
@@ -107,9 +104,10 @@ class AsciiStringConverter implements StringConverter
      * @param string $text
      * @param string $toEncoding
      * @param string $fromEncoding (optional)
+     *
      * @return string
      **/
-    public function convert($text, $toEncoding, $fromEncoding=null)
+    public function convert($text, $toEncoding, $fromEncoding = null)
     {
         $fromEncoding = $fromEncoding ?: $this->defaultEncoding;
 
@@ -128,13 +126,13 @@ class AsciiStringConverter implements StringConverter
         }
 
         return strtolower(str_replace('_', '-', $converted));
-
     }
 
     /**
      * {@inheritdoc}
      *
      * @param string $encoding
+     *
      * @return bool
      **/
     public function canConvert($encoding)
@@ -153,7 +151,7 @@ class AsciiStringConverter implements StringConverter
     }
 
     /**
-     * Return the current language
+     * Return the current language.
      *
      * @return string
      **/
@@ -162,30 +160,35 @@ class AsciiStringConverter implements StringConverter
         if ($this->currentLangProvider) {
             return call_user_func($this->currentLangProvider);
         }
+
         return $this->lang;
     }
 
     /**
-     * Set the current language
+     * Set the current language.
      *
      * @param string $lang
+     *
      * @return self
      **/
     public function setLang($lang)
     {
         $this->lang = $lang;
+
         return $this;
     }
 
     /**
-     * Assign a provider who realtime detection of lang
+     * Assign a provider who realtime detection of lang.
      *
      * @param callable $provider
+     *
      * @return self
      **/
     public function provideCurrentLang(callable $provider)
     {
         $this->currentLangProvider = $provider;
+
         return $this;
     }
 
@@ -198,14 +201,16 @@ class AsciiStringConverter implements StringConverter
     }
 
     /**
-     * Set a converter which can encode to ASCII//TRANSLIT for better umlaut encoding
+     * Set a converter which can encode to ASCII//TRANSLIT for better umlaut encoding.
      *
      * @param \Ems\Contracts\Core\TextConverter $converter
+     *
      * @return self
      **/
     public function setInternationalSpecialCharConverter(TextConverter $converter)
     {
         $this->internalSpecialCharConverter = $converter;
+
         return $this;
     }
 
@@ -222,9 +227,8 @@ class AsciiStringConverter implements StringConverter
         );
     }
 
-    protected function convertSpecialChars($text, $lang, $whitespace='-')
+    protected function convertSpecialChars($text, $lang, $whitespace = '-')
     {
-
         $replacements = isset($this->specialChars[$lang]) ? $this->specialChars[$lang] : $this->specialChars['en'];
 
         $replacements[' '] = $whitespace;
@@ -234,14 +238,12 @@ class AsciiStringConverter implements StringConverter
             array_values($replacements),
             $text
         );
-
     }
 
     protected function purgeRemainingChars($text)
     {
         $text = preg_replace("/[^a-zA-Z0-9\/_|+ -]/u", '', $text);
+
         return trim($text, '-_');
     }
-
 }
-

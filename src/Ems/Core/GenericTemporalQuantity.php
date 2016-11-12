@@ -7,7 +7,6 @@ use Ems\Contracts\Core\AppliesToResource;
 
 class GenericTemporalQuantity extends PointInTime implements TemporalQuantity, AppliesToResource
 {
-
     /**
      * @var string
      **/
@@ -40,13 +39,15 @@ class GenericTemporalQuantity extends PointInTime implements TemporalQuantity, A
     public function setResourceName($resourceName)
     {
         $this->resourceName = $resourceName;
+
         return $this;
     }
 
     /**
-     * Return the containing ItemCount
+     * Return the containing ItemCount.
      *
      * @return int
+     *
      * @see \Ems\Contracts\Core\NamedQuantity
      **/
     public function count()
@@ -55,15 +56,18 @@ class GenericTemporalQuantity extends PointInTime implements TemporalQuantity, A
     }
 
     /**
-     * Set the count (quantity) of this object
+     * Set the count (quantity) of this object.
      *
      * @param int $count
+     *
      * @return self
+     *
      * @see \Ems\Contracts\Core\NamedQuantity
      **/
     public function setCount($count)
     {
         $this->count = $count;
+
         return $this;
     }
 }

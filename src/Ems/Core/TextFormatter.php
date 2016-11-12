@@ -1,7 +1,5 @@
 <?php
 
-
-
 namespace Ems\Core;
 
 use DateTime;
@@ -11,10 +9,8 @@ use Ems\Core\Support\ProvidesNamedCallableChain;
 use Ems\Core\Exceptions\HandlerNotFoundException;
 use InvalidArgumentException;
 
-
 class TextFormatter implements FormatterContract
 {
-
     use ProvidesNamedCallableChain;
 
     /**
@@ -25,51 +21,51 @@ class TextFormatter implements FormatterContract
     /**
      * {@inheritdoc}
      *
-     * @param mixed $text
+     * @param mixed        $text
      * @param array|string $filters
+     *
      * @return string
      **/
-    public function format($text, $filters=[])
+    public function format($text, $filters = [])
     {
-
         $formatted = $text;
 
-        foreach ($this->buildChain($filters) as $name=>$data) {
-
+        foreach ($this->buildChain($filters) as $name => $data) {
             $parameters = $data['parameters'];
             array_unshift($parameters, $formatted);
 
             $formatted = $this->__call($name, $parameters);
-
         }
 
         return $formatted;
-
     }
 
     /**
-     * Converts html to plain text
+     * Converts html to plain text.
      *
-     * @param string $html
+     * @param string      $html
      * @param string|bool $nice (optional)
+     *
      * @return string
      **/
-    public function plain($html, $nice=false)
+    public function plain($html, $nice = false)
     {
         $plain = preg_replace('#<br\s*/?>#iu', "\n", $html);
         $plain = strip_tags($plain);
         $plain = html_entity_decode($plain, ENT_QUOTES | ENT_HTML5);
+
         return $plain;
     }
 
     /**
-     * Converts plain to html text
+     * Converts plain to html text.
      *
-     * @param string $plain
-     * @param string|bool $nice (optional)
+     * @param string      $plain
+     * @param string|bool $nice  (optional)
+     *
      * @return string
      **/
-    public function html($plain, $nice=false)
+    public function html($plain, $nice = false)
     {
         $paragraphs = explode("\n\n", trim($plain));
 
@@ -80,14 +76,14 @@ class TextFormatter implements FormatterContract
         }
 
         foreach ($paragraphs as $paragraph) {
-            $html .= '<p>' . nl2br(trim($paragraph)) . '</p>';
+            $html .= '<p>'.nl2br(trim($paragraph)).'</p>';
         }
 
         return $html;
     }
 
     /**
-     * Wraps the passed text in a html tag
+     * Wraps the passed text in a html tag.
      *
      * @param string $text
      * @param string $tagName
@@ -98,13 +94,14 @@ class TextFormatter implements FormatterContract
     }
 
     /**
-     * Format a date
+     * Format a date.
      *
-     * @param mixed $date
+     * @param mixed  $date
      * @param string $format (optional)
+     *
      * @return string
      **/
-    public function date($date, $format=null)
+    public function date($date, $format = null)
     {
         if ($this->isEmptyDate($date)) {
             return '';
@@ -121,17 +118,17 @@ class TextFormatter implements FormatterContract
         }
 
         return $this->localizer->date($date, $format ?: Localizer::SHORT);
-
     }
 
     /**
-     * Format time
+     * Format time.
      *
-     * @param mixed $date
+     * @param mixed  $date
      * @param string $format (optional)
+     *
      * @return string
      **/
-    public function time($date, $format=null)
+    public function time($date, $format = null)
     {
         if ($this->isEmptyDate($date)) {
             return '';
@@ -148,17 +145,17 @@ class TextFormatter implements FormatterContract
         }
 
         return $this->localizer->time($date, $format ?: Localizer::SHORT);
-
     }
 
     /**
-     * Format date and time
+     * Format date and time.
      *
-     * @param mixed $date
+     * @param mixed  $date
      * @param string $format (optional)
+     *
      * @return string
      **/
-    public function dateTime($date, $format=null)
+    public function dateTime($date, $format = null)
     {
         if ($this->isEmptyDate($date)) {
             return '';
@@ -175,18 +172,18 @@ class TextFormatter implements FormatterContract
         }
 
         return $this->localizer->dateTime($date, $format ?: Localizer::SHORT);
-
     }
 
     /**
-     * Display a nice number
+     * Display a nice number.
      *
      * @param string|int|float $number
-     * @param int $decimals (optional)
+     * @param int              $decimals (optional)
+     *
      * @return string
      **/
-    public function number($number, $decimals=0) {
-
+    public function number($number, $decimals = 0)
+    {
         if (!$this->localizer) {
             return number_format($number, $decimals);
         }
@@ -195,20 +192,21 @@ class TextFormatter implements FormatterContract
     }
 
     /**
-     * Display a nice area
+     * Display a nice area.
      *
      * @param string|int|float $number
-     * @param int $decimals (optional)
+     * @param int              $decimals (optional)
+     *
      * @return string
      **/
-    public function area($number, $decimals=0, $unit=null) {
-
+    public function area($number, $decimals = 0, $unit = null)
+    {
         if (!is_numeric($number) || !$number) {
             return '';
         }
 
         if (!$this->localizer) {
-            return $this->number($number, $decimals) . ' ' . ($unit ?: 'sqin');
+            return $this->number($number, $decimals).' '.($unit ?: 'sqin');
         }
 
         if (!$unit) {
@@ -219,14 +217,15 @@ class TextFormatter implements FormatterContract
     }
 
     /**
-     * Cut a text to n $chars
+     * Cut a text to n $chars.
      *
      * @param string $text
-     * @param int $decimals (optional)
+     * @param int    $decimals (optional)
+     *
      * @return string
      **/
-    public function chars($string, $chars=80, $elide='...', $splitBy=' ') {
-
+    public function chars($string, $chars = 80, $elide = '...', $splitBy = ' ')
+    {
         if (mb_strlen($string) <= $chars) {
             return $string;
         }
@@ -235,27 +234,25 @@ class TextFormatter implements FormatterContract
         $newString = '';
 
         foreach ($words as $word) {
-
             if (mb_strlen("$newString $word") <= $chars) {
                 $newString .= " $word";
             } else {
                 break;
             }
-
         }
 
-        return $newString . $elide;
-
+        return $newString.$elide;
     }
 
     /**
-     * Directly call a filter
+     * Directly call a filter.
      *
      * @param string $filter
-     * @param array $parameters
+     * @param array  $parameters
+     *
      * @return string
      **/
-    public function __call($filter, array $params=[])
+    public function __call($filter, array $params = [])
     {
         if ($this->hasExtension($filter)) {
             return $this->callExtension($filter, $params);
@@ -273,21 +270,24 @@ class TextFormatter implements FormatterContract
     }
 
     /**
-     * Set a localizer for some simple formatters
+     * Set a localizer for some simple formatters.
      *
      * @param \Ems\Contracts\Core\Localizer $localizer
+     *
      * @return self
      **/
     public function setLocalizer(Localizer $localizer)
     {
         $this->localizer = $localizer;
+
         return $this;
     }
 
     /**
-     * Turns an arbitary argument into a date
+     * Turns an arbitary argument into a date.
      *
      * @param mixed $date
+     *
      * @return \DateTime
      **/
     protected function toDateTime($date)
@@ -297,11 +297,11 @@ class TextFormatter implements FormatterContract
         }
 
         if (is_numeric($date)) {
-            return (new DateTime)->setTimestamp((int)$date);
+            return (new DateTime())->setTimestamp((int) $date);
         }
 
         if (is_object($date) && get_class($date) == 'Zend_Date') {
-            return (new DateTime)->setTimestamp($date->getTimestamp());
+            return (new DateTime())->setTimestamp($date->getTimestamp());
         }
 
         if (!is_string($date) && !method_exists($date, '__toString')) {
@@ -309,20 +309,20 @@ class TextFormatter implements FormatterContract
             throw new InvalidArgumentException("No idea how to cast $typeName to DateTime");
         }
 
-        $date = (string)$date;
+        $date = (string) $date;
 
         if ($dateTime = date_create($date)) {
             return $dateTime;
         }
 
         throw new InvalidArgumentException("No idea how to cast $date to DateTime");
-
     }
 
     /**
-     * Check if a date param is empty
+     * Check if a date param is empty.
      *
      * @param mixed $date
+     *
      * @return bool
      **/
     protected function isEmptyDate($date)
@@ -331,13 +331,14 @@ class TextFormatter implements FormatterContract
     }
 
     /**
-     * Call a method
+     * Call a method.
      *
      * @param string $name
-     * @param array $params (optional)
+     * @param array  $params (optional)
+     *
      * @return mixed
      **/
-    protected function callFast(callable $callable, array $params=[])
+    protected function callFast(callable $callable, array $params = [])
     {
 
         // call_user_func_array seems to be slow
@@ -353,8 +354,5 @@ class TextFormatter implements FormatterContract
             default:
                 return call_user_func_array($callable, $params);
         }
-
     }
-
-
 }

@@ -1,16 +1,13 @@
 <?php
 
-
 namespace Ems\Core\Patterns;
 
-use RuntimeException;
 use InvalidArgumentException;
 use ReflectionClass;
 use Ems\Core\Exceptions\HandlerNotFoundException;
 
 trait TraitOfResponsibility
 {
-
     /**
      * @var array
      **/
@@ -27,14 +24,14 @@ trait TraitOfResponsibility
     protected $detectedType;
 
     /**
-     * Add a candidate to the chain
+     * Add a candidate to the chain.
      *
      * @param object $candidate
+     *
      * @return self
      **/
     public function add($candidate)
     {
-
         $hash = $this->objectHash($candidate);
 
         if (isset($this->candidateIds[$hash])) {
@@ -48,13 +45,13 @@ trait TraitOfResponsibility
         $this->candidateIds[$hash] = true;
 
         return $this;
-
     }
 
     /**
-     * Add a candidate the none of this class was added
+     * Add a candidate the none of this class was added.
      *
      * @param object $canditate
+     *
      * @return self
      **/
     public function addIfNoneOfClass($candidate)
@@ -62,22 +59,23 @@ trait TraitOfResponsibility
         if ($this->containsClass($candidate)) {
             return $this;
         }
+
         return $this->add($candidate);
     }
 
     /**
-     * Remove a candidate from the chain
+     * Remove a candidate from the chain.
      *
      * @param object $candidate
+     *
      * @return self
      **/
     public function remove($candidate)
     {
-
         $hash = $this->objectHash($candidate);
 
-        $this->candidates = array_filter($this->candidates, function($known) use ($hash) {
-            return ($this->objectHash($known) != $hash);
+        $this->candidates = array_filter($this->candidates, function ($known) use ($hash) {
+            return $this->objectHash($known) != $hash;
         });
 
         if (isset($this->candidateIds[$hash])) {
@@ -85,18 +83,16 @@ trait TraitOfResponsibility
         }
 
         return $this;
-
     }
 
     protected function findReturningTrue($method)
     {
-
         $args = func_get_args();
 
         $method = array_shift($args);
 
         if (!is_string($method)) {
-            throw new InvalidArgumentException('method has to be a string not ' . gettype($method));
+            throw new InvalidArgumentException('method has to be a string not '.gettype($method));
         }
 
         foreach ($this->candidates as $candidate) {
@@ -109,8 +105,9 @@ trait TraitOfResponsibility
     protected function findReturningTrueOrFail($method)
     {
         if (!$candidate = call_user_func_array([$this, 'findReturningTrue'], func_get_args())) {
-            throw new HandlerNotFoundException("No matching handler by $method found in " . get_class($this));
+            throw new HandlerNotFoundException("No matching handler by $method found in ".get_class($this));
         }
+
         return $candidate;
     }
 
@@ -119,6 +116,7 @@ trait TraitOfResponsibility
         if (!$this->detectedType) {
             $this->detectedType = $this->detectType();
         }
+
         return $this->detectedType;
     }
 
@@ -129,9 +127,8 @@ trait TraitOfResponsibility
 
     protected function checkAndReturn($candidate)
     {
-
         if (!is_object($candidate)) {
-            throw new InvalidArgumentException('Only objects are supported not ' . gettype($candidate));
+            throw new InvalidArgumentException('Only objects are supported not '.gettype($candidate));
         }
 
         $type = $this->getCandidateType();
@@ -143,12 +140,10 @@ trait TraitOfResponsibility
         $thisClass = get_class($this);
 
         throw new InvalidArgumentException("You can only add $type objects to this object. Or define another class via an allow property in $thisClass");
-
-
     }
 
     /**
-     * For Countable interface
+     * For Countable interface.
      *
      * @return int
      **/
@@ -158,9 +153,10 @@ trait TraitOfResponsibility
     }
 
     /**
-     * Return if the passed object was added to this Chain
+     * Return if the passed object was added to this Chain.
      *
      * @param object
+     *
      * @return bool
      **/
     public function contains($candidate)
@@ -169,9 +165,10 @@ trait TraitOfResponsibility
     }
 
     /**
-     * Return if a object of $class was added to this chain
+     * Return if a object of $class was added to this chain.
      *
      * @param string|object $class
+     *
      * @return bool
      **/
     public function containsClass($class)
@@ -182,6 +179,7 @@ trait TraitOfResponsibility
                 return true;
             }
         }
+
         return false;
     }
 
@@ -205,18 +203,17 @@ trait TraitOfResponsibility
         }
 
         return get_class($this);
-
     }
 
     /**
-     * Return an id to intentify one instance of an object
+     * Return an id to intentify one instance of an object.
      *
      * @param object
+     *
      * @return string
      **/
     protected function objectHash($object)
     {
         return spl_object_hash($object);
     }
-
 }

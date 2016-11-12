@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Core\Support;
 
 trait IOCHelperMethods
@@ -9,11 +8,13 @@ trait IOCHelperMethods
      * {@inheritdoc}
      *
      * @param string $abstract
-     * @param array $parameters (optional)
+     * @param array  $parameters (optional)
+     *
      * @return object
+     *
      * @throws \OutOfBoundsException
      **/
-    public function make($abstract, array $parameters=[])
+    public function make($abstract, array $parameters = [])
     {
         return $this->__invoke($abstract, $parameters);
     }
@@ -22,12 +23,12 @@ trait IOCHelperMethods
      * {@inheritdoc}
      *
      * @param string $abstract
-     * @param bool $processParameters (optional)
+     * @param bool   $processParameters (optional)
+     *
      * @return \Closure
      **/
-    public function provide($abstract, $processParameters=false)
+    public function provide($abstract, $processParameters = false)
     {
-
         if (!$processParameters) {
             return function () use ($abstract) {
                 return $this->__invoke($abstract);
@@ -37,6 +38,5 @@ trait IOCHelperMethods
         return function () use ($abstract) {
             return $this->__invoke($abstract, func_get_args());
         };
-
     }
 }

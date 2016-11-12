@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Ems\Core;
-
 
 use DateTime;
 use DateTimeZone;
@@ -10,36 +8,35 @@ use Ems\Contracts\Core\PointInTime as TemporalContract;
 
 class PointInTime extends DateTime implements TemporalContract
 {
-
     /**
      * @var string
      **/
     protected $precision;
 
     protected $properties = [
-        'year'      => self::YEAR,
-        'month'     => self::MONTH,
-        'day'       => self::DAY,
-        'hour'      => self::HOUR,
-        'minute'    => self::MINUTE,
-        'second'    => self::SECOND,
-        'timezone'  => 'getTimeZone',
+        'year' => self::YEAR,
+        'month' => self::MONTH,
+        'day' => self::DAY,
+        'hour' => self::HOUR,
+        'minute' => self::MINUTE,
+        'second' => self::SECOND,
+        'timezone' => 'getTimeZone',
         'timestamp' => 'getTimestamp',
-        'offset'    => 'getOffset',
-        'precision'      => 'precision'
+        'offset' => 'getOffset',
+        'precision' => 'precision',
     ];
 
     protected $propertyAccess = [
-        'year'      => 'format',
-        'month'     => 'format',
-        'day'       => 'format',
-        'hour'      => 'format',
-        'minute'    => 'format',
-        'second'    => 'format',
-        'timezone'  => 'getTimeZone',
+        'year' => 'format',
+        'month' => 'format',
+        'day' => 'format',
+        'hour' => 'format',
+        'minute' => 'format',
+        'second' => 'format',
+        'timezone' => 'getTimeZone',
         'timestamp' => 'getTimestamp',
-        'offset'    => 'getOffset',
-        'precision'      => 'precision'
+        'offset' => 'getOffset',
+        'precision' => 'precision',
     ];
 
     /**
@@ -55,6 +52,7 @@ class PointInTime extends DateTime implements TemporalContract
      * {@inheritdoc}
      *
      * @return string
+     *
      * @see self::YEAR
      **/
     public function precision()
@@ -62,17 +60,19 @@ class PointInTime extends DateTime implements TemporalContract
         if ($this->precision) {
             return $this->precision;
         }
+
         return self::SECOND;
     }
 
     /**
-     * Set what this precision is (self::SECOND)
+     * Set what this precision is (self::SECOND).
      *
      * @param string $precision
      **/
     public function setPrecision($precision)
     {
         $this->precision = $precision;
+
         return $this;
     }
 
@@ -80,6 +80,7 @@ class PointInTime extends DateTime implements TemporalContract
      * {@inheritdoc}
      *
      * @param mixed $property
+     *
      * @return int
      **/
     public function __get($property)
@@ -95,7 +96,7 @@ class PointInTime extends DateTime implements TemporalContract
             case 'hour':
             case 'minute':
             case 'second':
-                    return (int)$this->format($this->properties[$property]);
+                    return (int) $this->format($this->properties[$property]);
             case 'timezone':
             case 'timestamp':
             case 'offset':
@@ -108,8 +109,7 @@ class PointInTime extends DateTime implements TemporalContract
      * {@inheritdoc}
      *
      * @param string $property
-     * @param mixed $value
-     * @return null
+     * @param mixed  $value
      **/
     public function __set($property, $value)
     {
@@ -120,41 +120,50 @@ class PointInTime extends DateTime implements TemporalContract
         switch ($property) {
             case 'year':
                 $this->setDate($value, $this->month, $this->day);
+
                 return;
             case 'month':
                 $this->setDate($this->year, $value, $this->day);
+
                 return;
             case 'day':
                 $this->setDate($this->year, $this->month, $value);
+
                 return;
             case 'hour':
                 $this->setTime($value, $this->minute, $this->second);
+
                 return;
             case 'minute':
                 $this->setTime($this->hour, $value, $this->second);
+
                 return;
             case 'second':
                 $this->setTime($this->hour, $this->minute, $value);
+
                 return;
             case 'timezone':
                 $this->setTimeZone($value);
+
                 return;
             case 'timestamp':
                 $this->setTimestamp($value);
+
                 return;
             case 'offset':
-                throw new OutOfBoundsException("You cannot set an offset, assign a new DateTimeZone");
+                throw new OutOfBoundsException('You cannot set an offset, assign a new DateTimeZone');
+
                 return;
             case 'precision':
                 $this->setPrecision($value);
         }
-
     }
 
     /**
      * {@inheritdoc}
      *
      * @param string $property
+     *
      * @return bool
      **/
     public function __isset($property)
@@ -162,13 +171,12 @@ class PointInTime extends DateTime implements TemporalContract
         return isset($this->properties[$property]);
     }
 
-
-    public static function createFromFormat($format, $string, $timezone=null)
+    public static function createFromFormat($format, $string, $timezone = null)
     {
         $timezone = $timezone ?: new DateTimeZone(date_default_timezone_get());
         $other = DateTime::createFromFormat($format, $string, $timezone);
-        return (new static)->setTimestamp($other->getTimestamp())
+
+        return (new static())->setTimestamp($other->getTimestamp())
                            ->setTimezone($other->getTimezone());
     }
-
 }

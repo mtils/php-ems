@@ -1,19 +1,15 @@
 <?php
 
-
 namespace Ems\Core;
 
 use Ems\Contracts\Core\IOCContainer as ContainerContract;
 use Ems\Core\Support\ResolvingListenerTrait;
 use Ems\Core\Support\IOCHelperMethods;
 use InvalidArgumentException;
-use Ems\Core\Exceptions\NotImplementedException;
 use ReflectionClass;
-
 
 class IOCContainer implements ContainerContract
 {
-
     use ResolvingListenerTrait;
     use IOCHelperMethods;
 
@@ -47,11 +43,13 @@ class IOCContainer implements ContainerContract
      * {@inheritdoc}
      *
      * @param string $abstract
-     * @param array $parameters (optional)
+     * @param array  $parameters (optional)
+     *
      * @return object
+     *
      * @throws \OutOfBoundsException
      **/
-    public function __invoke($abstract, array $parameters=[])
+    public function __invoke($abstract, array $parameters = [])
     {
         if (isset($this->sharedInstances[$abstract])) {
             return $this->sharedInstances[$abstract];
@@ -77,12 +75,13 @@ class IOCContainer implements ContainerContract
     /**
      * {@inheritdoc}
      *
-     * @param string $abstract
+     * @param string   $abstract
      * @param callable $callback
-     * @param bool $singleton (optional)
+     * @param bool     $singleton (optional)
+     *
      * @return self
      **/
-    public function bind($abstract, $callback, $singleton=false)
+    public function bind($abstract, $callback, $singleton = false)
     {
         return $this->storeBinding($abstract, $callback, $singleton);
     }
@@ -92,6 +91,7 @@ class IOCContainer implements ContainerContract
      *
      * @param string $abstract
      * @param object $instance
+     *
      * @return self
      **/
     public function instance($abstract, $instance)
@@ -99,21 +99,21 @@ class IOCContainer implements ContainerContract
         $this->sharedInstances[$abstract] = $instance;
 
         // This will never be called, but makes resolved, bound etc. easier
-        $this->storeBinding($abstract, function($container) use ($instance) {
+        $this->storeBinding($abstract, function ($container) use ($instance) {
             return $instance;
         }, true);
 
         $this->callAllListeners($abstract, $instance);
 
         return $this;
-
     }
 
     /**
      * {@inheritdoc}
      *
-     * @param string $abstract
+     * @param string   $abstract
      * @param callable $listener
+     *
      * @return self
      **/
     public function resolving($abstract, $listener)
@@ -124,8 +124,9 @@ class IOCContainer implements ContainerContract
     /**
      * {@inheritdoc}
      *
-     * @param string $abstract
+     * @param string   $abstract
      * @param callable $listener
+     *
      * @return self
      **/
     public function afterResolving($abstract, $listener)
@@ -137,6 +138,7 @@ class IOCContainer implements ContainerContract
      * {@inheritdoc}
      *
      * @param string $abstract
+     *
      * @return bool
      **/
     public function bound($abstract)
@@ -148,6 +150,7 @@ class IOCContainer implements ContainerContract
      * {@inheritdoc}
      *
      * @param string $abstract
+     *
      * @return bool
      **/
     public function resolved($abstract)
@@ -159,11 +162,11 @@ class IOCContainer implements ContainerContract
      * {@inheritdoc}
      *
      * @param callable $callback
+     *
      * @return mixed The method result
      **/
-    public function call($callback, array $parameters=[])
+    public function call($callback, array $parameters = [])
     {
-
         switch (count($parameters)) {
             case 0:
                 return call_user_func($callback);
@@ -178,7 +181,6 @@ class IOCContainer implements ContainerContract
         }
 
         return call_user_func_array($callback, $parameters);
-
     }
 
     /**
@@ -186,26 +188,29 @@ class IOCContainer implements ContainerContract
      *
      * @param string $abstract
      * @param string $alias
+     *
      * @return self
      **/
     public function alias($abstract, $alias)
     {
         $this->aliases[$alias] = $abstract;
+
         return $this;
     }
 
     /**
-     * Resolves the $abstract via assigned bindings
+     * Resolves the $abstract via assigned bindings.
      *
      * @param string $abstract
-     * @param array $parameters (optional)
+     * @param array  $parameters (optional)
+     *
      * @return object
      **/
-    protected function resolve($abstract, array $parameters=array())
+    protected function resolve($abstract, array $parameters = array())
     {
-
         if ($this->bound($abstract)) {
             array_unshift($parameters, $this);
+
             return call_user_func_array($this->bindings[$abstract]['concrete'], $parameters);
         }
 
@@ -225,36 +230,39 @@ class IOCContainer implements ContainerContract
             }
         }
 
-        foreach ($parameters as $key=>$value) {
+        foreach ($parameters as $key => $value) {
             $callParams[] = $value;
         }
 
         return $reflector->newInstanceArgs($callParams);
-
     }
 
     /**
-     * Stores the binding inside the bindings
+     * Stores the binding inside the bindings.
      *
      * @param string abstract
      * @param callable|object $concrete
-     * @param bool $shared
+     * @param bool            $shared
+     *
      * @return self
      **/
     protected function storeBinding($abstract, $concrete, $shared)
     {
         $this->bindings[$abstract] = array(
             'concrete' => $this->checkAndReturnCallable($concrete),
-            'shared' => $shared
+            'shared' => $shared,
         );
+
         return $this;
     }
 
     /**
-     * Throws an exception if the arg is not callable
+     * Throws an exception if the arg is not callable.
      *
      * @param callable $callback
+     *
      * @return callable
+     *
      * @throws InvalidArgumentException
      **/
     protected function checkAndReturnCallable($callback)
@@ -269,7 +277,7 @@ class IOCContainer implements ContainerContract
             $type = is_object($callback) ? get_class($callback) : gettype($callback);
             throw new InvalidArgumentException("Passed argument of type $type is not callable");
         }
+
         return $callback;
     }
-
 }

@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Core\Support;
 
 trait ArrayMethods
@@ -9,4 +8,3 @@ trait ArrayMethods
     use CountableMethods;
     use IteratorAggregateMethods;
 }
-

@@ -2,7 +2,6 @@
 
 namespace Ems\Core;
 
-use Ems\Contracts\Core\Named;
 use Ems\Contracts\Core\NamedQuantity;
 use Ems\Contracts\Core\AppliesToResource;
 
@@ -32,7 +31,7 @@ class NamedObject implements NamedQuantity, AppliesToResource
      * @param mixed  $id   (optional)
      * @param string $name (optional)
      **/
-    public function __construct($id = null, $name = '', $resourceName='')
+    public function __construct($id = null, $name = '', $resourceName = '')
     {
         $this->id = $id;
         $this->name = $name;
@@ -113,13 +112,15 @@ class NamedObject implements NamedQuantity, AppliesToResource
     public function setResourceName($resourceName)
     {
         $this->resourceName = $resourceName;
+
         return $this;
     }
 
     /**
-     * Return the containing ItemCount
+     * Return the containing ItemCount.
      *
      * @return int
+     *
      * @see \Ems\Contracts\Core\NamedQuantity
      **/
     public function count()
@@ -128,15 +129,18 @@ class NamedObject implements NamedQuantity, AppliesToResource
     }
 
     /**
-     * Set the count (quantity) of this object
+     * Set the count (quantity) of this object.
      *
      * @param int $count
+     *
      * @return self
+     *
      * @see \Ems\Contracts\Core\NamedQuantity
      **/
     public function setCount($count)
     {
         $this->count = $count;
+
         return $this;
     }
 }

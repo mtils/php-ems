@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Ems\Core\Support;
-
 
 trait ArrayAccessMethods
 {
@@ -17,35 +15,38 @@ trait ArrayAccessMethods
     protected $_autoFilled = false;
 
     /**
-     * Check if $offset exists
+     * Check if $offset exists.
      *
      * @param mixed $offset
+     *
      * @return bool
      **/
     public function offsetExists($offset)
     {
         $this->fillOnce();
+
         return isset($this->_attributes[$offset]);
     }
 
     /**
-     * Get value of $offset
+     * Get value of $offset.
      *
      * @param mixed $offset
+     *
      * @return mixed
      **/
     public function offsetGet($offset)
     {
         $this->fillOnce();
+
         return $this->_attributes[$offset];
     }
 
     /**
-     * Set the value of $offset
+     * Set the value of $offset.
      *
      * @param mixed $offset
      * @param mixed $value
-     * @return null
      **/
     public function offsetSet($offset, $value)
     {
@@ -53,10 +54,9 @@ trait ArrayAccessMethods
     }
 
     /**
-     * Unset $offset
+     * Unset $offset.
      *
      * @param mixed $offset
-     * @return null
      **/
     public function offsetUnset($offset)
     {

@@ -1,13 +1,11 @@
 <?php
 
-
 namespace Ems\Core\Support;
-
 
 trait CountableMethods
 {
     /**
-     * Return the count of this array like object
+     * Return the count of this array like object.
      *
      * @return int
      **/
@@ -16,4 +14,3 @@ trait CountableMethods
         return count($this->_attributes);
     }
 }
-

@@ -1,25 +1,22 @@
 <?php
 
-
 namespace Ems\Core;
 
 use Ems\Contracts\Core\Filesystem;
 use Ems\Core\Exceptions\ResourceNotFoundException;
 use ErrorException;
 
-
 class LocalFilesystem implements FileSystem
 {
-
     public function __construct()
     {
-
     }
-    
+
     /**
      * {@inheritdoc}
      *
      * @param string $path
+     *
      * @return bool
      **/
     public function exists($path)
@@ -31,12 +28,12 @@ class LocalFilesystem implements FileSystem
      * {@inheritdoc}
      *
      * @param string $path
-     * @param int $bytes (optional)
+     * @param int    $bytes (optional)
+     *
      * @return bool
      **/
-    public function contents($path, $bytes=0)
+    public function contents($path, $bytes = 0)
     {
-
         if (!$this->isFile($path)) {
             throw new ResourceNotFoundException("Path '$path' not found");
         }
@@ -50,7 +47,6 @@ class LocalFilesystem implements FileSystem
         fclose($res);
 
         return $part;
-
     }
 
     /**
@@ -58,22 +54,23 @@ class LocalFilesystem implements FileSystem
      *
      * @param string $path
      * @param string $contents
+     *
      * @return int written bytes
      **/
     public function write($path, $contents)
     {
-        return (int)file_put_contents($path, $contents);
+        return (int) file_put_contents($path, $contents);
     }
 
     /**
      * {@inheritdoc}
      *
      * @param string|array $path
+     *
      * @return bool
      **/
     public function delete($path)
     {
-
         $paths = is_array($path) ? $path : func_get_args();
 
         $success = true;
@@ -86,7 +83,7 @@ class LocalFilesystem implements FileSystem
                     }
                     continue;
                 }
-                if (! @unlink($path)) {
+                if (!@unlink($path)) {
                     $success = false;
                 }
             } catch (ErrorException $e) {
@@ -102,6 +99,7 @@ class LocalFilesystem implements FileSystem
      *
      * @param string $from
      * @param string $to
+     *
      * @return bool
      **/
     public function copy($from, $to)
@@ -114,6 +112,7 @@ class LocalFilesystem implements FileSystem
      *
      * @param string $from
      * @param string $to
+     *
      * @return bool
      **/
     public function move($from, $to)
@@ -126,6 +125,7 @@ class LocalFilesystem implements FileSystem
      *
      * @param string $from
      * @param string $to
+     *
      * @return bool
      **/
     public function link($from, $to)
@@ -137,6 +137,7 @@ class LocalFilesystem implements FileSystem
      * {@inheritdoc}
      *
      * @param string $path
+     *
      * @return int
      **/
     public function size($path)
@@ -148,60 +149,61 @@ class LocalFilesystem implements FileSystem
      * {@inheritdoc}
      *
      * @param string
+     *
      * @return \DateTime
      **/
     public function lastModified($path)
     {
-        return \DateTime::createFromFormat('U', (string)filemtime($path));
+        return \DateTime::createFromFormat('U', (string) filemtime($path));
     }
 
     /**
      * {@inheritdoc}
      *
      * @param string $path
-     * @param bool $recursive (optional)
-     * @param bool $withHidden (optional)
+     * @param bool   $recursive  (optional)
+     * @param bool   $withHidden (optional)
+     *
      * @return array
      **/
-    public function listDirectory($path, $recursive=false, $withHidden=true)
+    public function listDirectory($path, $recursive = false, $withHidden = true)
     {
-
         if ($recursive) {
             return $this->listDirectoryRecursive($path);
         }
 
-        $all = $withHidden ? glob($path . '/{,.}[!.,!..]*', GLOB_MARK|GLOB_BRACE) : glob("$path/*");
+        $all = $withHidden ? glob($path.'/{,.}[!.,!..]*', GLOB_MARK | GLOB_BRACE) : glob("$path/*");
 
-        $all = array_map(function($path){
+        $all = array_map(function ($path) {
             return rtrim($path, '/\\');
         }, $all);
 
         sort($all);
 
         return $all;
-
     }
 
     /**
      * {@inheritdoc}
      *
-     * @param string $directory
-     * @param string $pattern (optional)
+     * @param string       $directory
+     * @param string       $pattern    (optional)
      * @param string|array $extensions
+     *
      * @return array
      **/
-    public function files($directory, $pattern='*', $extensions='')
+    public function files($directory, $pattern = '*', $extensions = '')
     {
-        $all = array_filter($this->listDirectory($directory), function($path){
+        $all = array_filter($this->listDirectory($directory), function ($path) {
             return $this->type($path) == 'file';
         });
 
         $fs = $this; //PHP 5.3
 
         if ($pattern != '*') {
-
-            $all = array_filter($all, function($path) use ($fs, $pattern) {
+            $all = array_filter($all, function ($path) use ($fs, $pattern) {
                 $baseName = $fs->basename($path);
+
                 return fnmatch($pattern, $fs->basename($path));
             });
         }
@@ -210,25 +212,24 @@ class LocalFilesystem implements FileSystem
             return $all;
         }
 
-        $extensions = (array)$extensions;
+        $extensions = (array) $extensions;
 
-        return array_filter($all, function($path) use ($fs, $extensions) {
+        return array_filter($all, function ($path) use ($fs, $extensions) {
             return in_array(strtolower($fs->extension($path)), $extensions);
         });
-
     }
 
     /**
      * {@inheritdoc}
      *
      * @param string $directory
-     * @param string $pattern (optional)
+     * @param string $pattern   (optional)
+     *
      * @return array
      **/
-    public function directories($directory, $pattern='*')
+    public function directories($directory, $pattern = '*')
     {
-
-        $all = array_filter($this->listDirectory($directory), function($path) {
+        $all = array_filter($this->listDirectory($directory), function ($path) {
             return $this->type($path) == 'dir';
         });
 
@@ -238,27 +239,29 @@ class LocalFilesystem implements FileSystem
 
         $fs = $this; //PHP 5.3
 
-        return array_filter($all, function($path) use ($fs, $pattern) {
+        return array_filter($all, function ($path) use ($fs, $pattern) {
             $baseName = $fs->basename($path);
+
             return fnmatch($pattern, $fs->basename($path));
         });
-
     }
 
     /**
      * {@inheritdoc}
      *
-     * @param  string  $path
-     * @param  int     $mode
-     * @param  bool    $recursive
-     * @param  bool    $force
+     * @param string $path
+     * @param int    $mode
+     * @param bool   $recursive
+     * @param bool   $force
+     *
      * @return bool
      **/
-    public function makeDirectory($path, $mode=0755, $recursive=true, $force=false)
+    public function makeDirectory($path, $mode = 0755, $recursive = true, $force = false)
     {
         if ($force) {
             return @mkdir($path, $mode, $recursive);
         }
+
         return mkdir($path, $mode, $recursive);
     }
 
@@ -266,6 +269,7 @@ class LocalFilesystem implements FileSystem
      * {@inheritdoc}
      *
      * @param string $path
+     *
      * @return bool
      **/
     public function isDirectory($path)
@@ -277,6 +281,7 @@ class LocalFilesystem implements FileSystem
      * {@inheritdoc}
      *
      * @param string $path
+     *
      * @return bool
      **/
     public function isFile($path)
@@ -288,6 +293,7 @@ class LocalFilesystem implements FileSystem
      * {@inheritdoc}
      *
      * @param string $path
+     *
      * @return string
      **/
     public function name($path)
@@ -299,6 +305,7 @@ class LocalFilesystem implements FileSystem
      * {@inheritdoc}
      *
      * @param string $path
+     *
      * @return string
      **/
     public function basename($path)
@@ -310,6 +317,7 @@ class LocalFilesystem implements FileSystem
      * {@inheritdoc}
      *
      * @param string $path
+     *
      * @return string
      **/
     public function dirname($path)
@@ -321,6 +329,7 @@ class LocalFilesystem implements FileSystem
      * {@inheritdoc}
      *
      * @param string $path
+     *
      * @return string
      **/
     public function extension($path)
@@ -332,6 +341,7 @@ class LocalFilesystem implements FileSystem
      * {@inheritdoc}
      *
      * @param string $path
+     *
      * @return string
      **/
     public function type($path)
@@ -343,6 +353,7 @@ class LocalFilesystem implements FileSystem
      * {@inheritdoc}
      *
      * @param string $path
+     *
      * @return string
      **/
     public function mimeType($path)
@@ -359,14 +370,13 @@ class LocalFilesystem implements FileSystem
         $all = $this->listDirectory($path, true, true);
 
         // Sort by path length to resolve hierarchy conflicts
-        usort($all, function($a, $b){
+        usort($all, function ($a, $b) {
             return mb_strlen($b) - mb_strlen($a);
         });
 
         $success = true;
 
         foreach ($all as $nodePath) {
-
             if ($this->isDirectory($nodePath)) {
                 if (!$this->deleteDirectory($nodePath)) {
                     $success = false;
@@ -378,8 +388,6 @@ class LocalFilesystem implements FileSystem
             if (!$this->delete($nodePath)) {
                 $success = false;
             }
-
-
         }
 
         if (!$this->deleteDirectory($path)) {
@@ -387,7 +395,6 @@ class LocalFilesystem implements FileSystem
         }
 
         return $success;
-
     }
 
     protected function deleteDirectory($path)
@@ -395,11 +402,9 @@ class LocalFilesystem implements FileSystem
         return rmdir($path);
     }
 
-    protected function listDirectoryRecursive($path, &$results=array())
+    protected function listDirectoryRecursive($path, &$results = array())
     {
-
-        foreach ($this->listDirectory(rtrim($path,'/\\')) as $filename) {
-
+        foreach ($this->listDirectory(rtrim($path, '/\\')) as $filename) {
             $results[] = $filename;
 
             if (!$this->isDirectory($filename)) {
@@ -407,12 +412,10 @@ class LocalFilesystem implements FileSystem
             }
 
             $this->listDirectoryRecursive($filename, $results);
-
         }
 
         sort($results);
 
         return $results;
     }
-
 }

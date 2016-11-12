@@ -1,11 +1,8 @@
 <?php
 
-
 namespace Ems\Core\Patterns;
 
-
 use OutOfBoundsException;
-
 
 /**
  * The Extendable trait allows to extend objects.
@@ -21,20 +18,18 @@ use OutOfBoundsException;
  * $myObject = new MyObject;
  * $myObject->extend('myFunc', function($foo){});
  * $myObject->myFunc('fooContent');
- *
  **/
 trait Extendable
 {
-
     /**
-     * Here the callables are held
+     * Here the callables are held.
      *
      * @var array
      **/
     protected $_extensions = [];
 
     /**
-     * The callables stored here are always called, not matter of the $name
+     * The callables stored here are always called, not matter of the $name.
      *
      * @var array
      **/
@@ -42,22 +37,25 @@ trait Extendable
 
     /**
      * Add an "extension". A callable (array, closure,..) which You can call by
-     * YouClass->$name()
+     * YouClass->$name().
      *
-     * @param string $name
+     * @param string   $name
      * @param callable $callable
+     *
      * @return self
      **/
     public function extend($name, callable $callable)
     {
         $this->_extensions[$name] = $callable;
+
         return $this;
     }
 
     /**
-     * Return if an extension with name $name exists
+     * Return if an extension with name $name exists.
      *
      * @param string $name
+     *
      * @return bool
      **/
     public function hasExtension($name)
@@ -66,15 +64,15 @@ trait Extendable
     }
 
     /**
-     * Call the extension named $name with $params
+     * Call the extension named $name with $params.
      *
      * @param string $name
-     * @param array $params (optional)
+     * @param array  $params (optional)
+     *
      * @return mixed
      **/
-    public function callExtension($name, array $params=[])
+    public function callExtension($name, array $params = [])
     {
-
         $extension = $this->getExtension($name);
 
         // call_user_func_array seems to be slow
@@ -102,14 +100,13 @@ trait Extendable
         $this->callListeners($name, $result);
 
         return $result;
-
-
     }
 
     /**
-     * Return the extension named $name
+     * Return the extension named $name.
      *
      * @param string $name
+     *
      * @return mixed
      **/
     public function getExtension($name)
@@ -118,35 +115,36 @@ trait Extendable
             return $this->_extensions[$name];
         }
 
-        throw new OutOfBoundsException(get_class($this) . ": No extension named \"$name\" found");
+        throw new OutOfBoundsException(get_class($this).": No extension named \"$name\" found");
     }
 
     /**
      * Call this callable everytime an extension get called.
      * The callable will be called with the following params:
      * callable($name, $result)
-     * It will be called after the extension was called
+     * It will be called after the extension was called.
      *
      * @param callable $callable
+     *
      * @return self
      **/
     public function alwaysCall(callable $callable)
     {
         $this->_alwaysCalledExtensions[] = $callable;
+
         return $this;
     }
 
     /**
-     * Calls the listeners, which get informed on every call
+     * Calls the listeners, which get informed on every call.
      *
      * @param string $name
-     * @param mixed $result
-     * @return void
+     * @param mixed  $result
      **/
-    protected function callListeners($name, &$result) {
+    protected function callListeners($name, &$result)
+    {
         foreach ($this->_alwaysCalledExtensions as $listener) {
             call_user_func($listener, $name, $result);
         }
     }
-
 }

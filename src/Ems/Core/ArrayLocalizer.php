@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Core;
 
 use Ems\Contracts\Core\Localizer;
@@ -8,14 +7,12 @@ use InvalidArgumentException;
 use DateTime;
 use ArrayAccess;
 
-
 class ArrayLocalizer implements Localizer
 {
-
     /**
      * @param array|ArrayAccess $config (optional)
      **/
-    public function __construct($config=[])
+    public function __construct($config = [])
     {
         $config = $config ?: $this->defaultConfig();
         $this->setConfig($config);
@@ -25,13 +22,14 @@ class ArrayLocalizer implements Localizer
      * {@inheritdoc}
      *
      * @param string|int|float $number
-     * @param int $decimals
+     * @param int              $decimals
+     *
      * @return string
      **/
-    public function number($number, $decimals=0)
+    public function number($number, $decimals = 0)
     {
         return number_format(
-            (float)$number,
+            (float) $number,
             $decimals,
             $this->get('number')['decimal_separator'],
             $this->get('number')['thousands_separator']
@@ -41,11 +39,12 @@ class ArrayLocalizer implements Localizer
     /**
      * {@inheritdoc}
      *
-     * @param mixed $date
+     * @param mixed  $date
      * @param string $verbosity (optional)
+     *
      * @return string
      **/
-    public function date($date, $verbosity=self::SHORT)
+    public function date($date, $verbosity = self::SHORT)
     {
         return $this->toDateTime($date)->format($this->get('date')[$verbosity]);
     }
@@ -53,11 +52,12 @@ class ArrayLocalizer implements Localizer
     /**
      * {@inheritdoc}
      *
-     * @param mixed $date
+     * @param mixed  $date
      * @param string $verbosity (optional)
+     *
      * @return string
      **/
-    public function time($date, $verbosity=self::SHORT)
+    public function time($date, $verbosity = self::SHORT)
     {
         return $this->toDateTime($date)->format($this->get('time')[$verbosity]);
     }
@@ -65,11 +65,12 @@ class ArrayLocalizer implements Localizer
     /**
      * {@inheritdoc}
      *
-     * @param mixed $date
+     * @param mixed  $date
      * @param string $verbosity (optional)
+     *
      * @return string
      **/
-    public function dateTime($date, $verbosity=self::SHORT)
+    public function dateTime($date, $verbosity = self::SHORT)
     {
         return $this->toDateTime($date)->format($this->get('date_time')[$verbosity]);
     }
@@ -77,11 +78,12 @@ class ArrayLocalizer implements Localizer
     /**
      * {@inheritdoc}
      *
-     * @param int $number
+     * @param int    $number
      * @param string $verbosity (optional)
+     *
      * @return string
      **/
-    public function weekDay($number, $verbosity=self::VERBOSE)
+    public function weekDay($number, $verbosity = self::VERBOSE)
     {
         return $this->get('week_days')[$verbosity][$number];
     }
@@ -89,11 +91,12 @@ class ArrayLocalizer implements Localizer
     /**
      * {@inheritdoc}
      *
-     * @param int $number
+     * @param int    $number
      * @param string $verbosity (optional)
+     *
      * @return string
      **/
-    public function month($number, $verbosity=self::VERBOSE)
+    public function month($number, $verbosity = self::VERBOSE)
     {
         return $this->get('months')[$verbosity][$number];
     }
@@ -102,13 +105,14 @@ class ArrayLocalizer implements Localizer
      * {@inheritdoc}
      *
      * @param string|int|float $amount
+     *
      * @return string
      **/
-    public function money($amount, $decimals=2, $sourceCurrency=null)
+    public function money($amount, $decimals = 2, $sourceCurrency = null)
     {
         return str_replace(
             ['{number}', '{currency}'],
-            [$this->number($decimals), $this->currency() ],
+            [$this->number($decimals), $this->currency()],
             $this->get('money')['format']
         );
     }
@@ -117,9 +121,10 @@ class ArrayLocalizer implements Localizer
      * {@inheritdoc}
      *
      * @param string $verbosity (optional)
+     *
      * @return string
      **/
-    public function currency($verbosity=self::SHORT)
+    public function currency($verbosity = self::SHORT)
     {
         return $this->get('currency')[$verbosity];
     }
@@ -128,11 +133,12 @@ class ArrayLocalizer implements Localizer
      * {@inheritdoc}
      *
      * @param int|float $length
-     * @param int $decimals
-     * @param string $sourceUnit (optional)
+     * @param int       $decimals
+     * @param string    $sourceUnit (optional)
+     *
      * @return string
      **/
-    public function length($length, $decimals=0, $sourceUnit=null)
+    public function length($length, $decimals = 0, $sourceUnit = null)
     {
         $data = $this->get('length');
         $unit = $sourceUnit ?: $data['default_unit'];
@@ -156,9 +162,10 @@ class ArrayLocalizer implements Localizer
     }
 
     /**
-     * Set the config (array)
+     * Set the config (array).
      *
      * @param array|\ArrayAccess $config
+     *
      * @return self
      **/
     public function setConfig($config)
@@ -167,13 +174,15 @@ class ArrayLocalizer implements Localizer
             throw new InvalidArgumentException('Config has to be array or ArrayAccess');
         }
         $this->config = $config;
+
         return $this;
     }
 
     /**
-     * Gets a value from config
+     * Gets a value from config.
      *
      * @param string $key
+     *
      * @return mixed
      **/
     protected function get($key)
@@ -182,9 +191,10 @@ class ArrayLocalizer implements Localizer
     }
 
     /**
-     * Turns an arbitary argument into a date
+     * Turns an arbitary argument into a date.
      *
      * @param mixed $date
+     *
      * @return \DateTime
      **/
     protected function toDateTime($date)
@@ -194,11 +204,11 @@ class ArrayLocalizer implements Localizer
         }
 
         if (is_numeric($date)) {
-            return (new DateTime)->setTimestamp((int)$date);
+            return (new DateTime())->setTimestamp((int) $date);
         }
 
         if (is_object($date) && get_class($date) == 'Zend_Date') {
-            return (new DateTime)->setTimestamp($date->getTimestamp());
+            return (new DateTime())->setTimestamp($date->getTimestamp());
         }
 
         if (!is_string($date) && !method_exists($date, '__toString')) {
@@ -206,18 +216,17 @@ class ArrayLocalizer implements Localizer
             throw new InvalidArgumentException("No idea how to cast $typeName to DateTime");
         }
 
-        $date = (string)$date;
+        $date = (string) $date;
 
         if ($dateTime = date_create($date)) {
             return $dateTime;
         }
 
         throw new InvalidArgumentException("No idea how to cast $date to DateTime");
-
     }
 
     /**
-     * Return a default config
+     * Return a default config.
      *
      * @return array
      **/
@@ -225,23 +234,23 @@ class ArrayLocalizer implements Localizer
     {
         return [
             'number' => [
-                'decimal_separator'     => '.',
-                'thousands_separator'   => ','
+                'decimal_separator' => '.',
+                'thousands_separator' => ',',
             ],
             'date' => [
-                'short'     => 'm/d/Y',
-                'long'      => 'F d, Y',
-                'verbose'   => 'F D the d, Y'
+                'short' => 'm/d/Y',
+                'long' => 'F d, Y',
+                'verbose' => 'F D the d, Y',
             ],
             'time' => [
-                'short'     => 'h:i A',
-                'long'      => 'at h:i A',
-                'verbose'   => 'at h:i:s A'
+                'short' => 'h:i A',
+                'long' => 'at h:i A',
+                'verbose' => 'at h:i:s A',
             ],
             'date_time' => [
-                'short'     => 'm/d/Y h:i A',
-                'long'      => 'F d, Y at h:i A',
-                'verbose'   => 'F D the d, Y at h:i:s A'
+                'short' => 'm/d/Y h:i A',
+                'long' => 'F d, Y at h:i A',
+                'verbose' => 'F D the d, Y at h:i:s A',
             ],
             'week_days' => [
                 'short' => [
@@ -251,7 +260,7 @@ class ArrayLocalizer implements Localizer
                     4 => 'Th.',
                     5 => 'Fr.',
                     6 => 'Sa.',
-                    7 => 'Su.'
+                    7 => 'Su.',
                 ],
                 'long' => [
                     1 => 'Mon.',
@@ -260,7 +269,7 @@ class ArrayLocalizer implements Localizer
                     4 => 'Thu.',
                     5 => 'Fri.',
                     6 => 'Sat.',
-                    7 => 'Sun.'
+                    7 => 'Sun.',
                 ],
                 'verbose' => [
                     1 => 'Monday',
@@ -269,8 +278,8 @@ class ArrayLocalizer implements Localizer
                     4 => 'Thursday',
                     5 => 'Friday',
                     6 => 'Saturday',
-                    7 => 'Sunday'
-                ]
+                    7 => 'Sunday',
+                ],
             ],
             'months' => [
                 'short' => [
@@ -285,7 +294,7 @@ class ArrayLocalizer implements Localizer
                     9 => 'S',
                     10 => 'O',
                     11 => 'N',
-                    12 => 'D'
+                    12 => 'D',
                 ],
                 'long' => [
                     1 => 'Jan',
@@ -299,7 +308,7 @@ class ArrayLocalizer implements Localizer
                     9 => 'Sep',
                     10 => 'Oct',
                     11 => 'Nov',
-                    12 => 'Dec'
+                    12 => 'Dec',
                 ],
                 'verbose' => [
                     1 => 'January',
@@ -313,22 +322,22 @@ class ArrayLocalizer implements Localizer
                     9 => 'September',
                     10 => 'October',
                     11 => 'November',
-                    12 => 'December'
-                ]
+                    12 => 'December',
+                ],
             ],
             'money' => [
-                'format' => '{number} {currency}'
+                'format' => '{number} {currency}',
             ],
             'currency' => [
                 'short' => '$',
-                'long'  => 'Dollars',
-                'verbose' => 'American Dollars'
+                'long' => 'Dollars',
+                'verbose' => 'American Dollars',
             ],
             'length' => [
                 'measuring' => 'imperial',
-                'format'    => '{number} {unit}',
-                'default_unit' => 'inch'
-            ]
+                'format' => '{number} {unit}',
+                'default_unit' => 'inch',
+            ],
         ];
     }
 }

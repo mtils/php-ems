@@ -1,15 +1,13 @@
 <?php
 
-
 namespace Ems\Core;
 
 use Ems\Core\Exceptions\UnsupportedParameterException;
-
 use OutOfBoundsException;
 
-
 /**
- * This Trait if for easy implementation of
+ * This Trait if for easy implementation of.
+ *
  * @see \Ems\Contracts\Core\Configurable
  *
  * You just have to add an array of $defaultOptions
@@ -17,7 +15,6 @@ use OutOfBoundsException;
  **/
 trait ConfigurableTrait
 {
-
     /**
      * @var array
      **/
@@ -27,12 +24,15 @@ trait ConfigurableTrait
      * {@inheritdoc}
      *
      * @param string $key
+     *
      * @return mixed
+     *
      * @throws \Ems\Contracts\Core\Unsupported
      **/
     public function getOption($key)
     {
         $this->checkKey($key);
+
         return isset($this->_options[$key]) ? $this->_options[$key] : $this->defaultOptions[$key];
     }
 
@@ -40,13 +40,16 @@ trait ConfigurableTrait
      * {@inheritdoc}
      *
      * @param string $key
-     * @param mixed $value
+     * @param mixed  $value
+     *
      * @return self
+     *
      * @throws \Ems\Contracts\Core\Unsupported
      **/
     public function setOption($key, $value)
     {
         $this->_options[$this->checkKey($key)] = $value;
+
         return $this;
     }
 
@@ -64,27 +67,31 @@ trait ConfigurableTrait
      * {@inheritdoc}
      *
      * @param string|array $keys (optional)
+     *
      * @return self
+     *
      * @throws \Ems\Contracts\Core\Unsupported
      **/
-    public function resetOptions($keys=null)
+    public function resetOptions($keys = null)
     {
-        $keys = $keys ? (array)$keys : $this->supportedOptions();
+        $keys = $keys ? (array) $keys : $this->supportedOptions();
         foreach ($keys as $key) {
             $this->checkKey($key);
             if (isset($this->_options[$key])) {
                 unset($this->_options[$key]);
             }
         }
+
         return $this;
     }
 
     /**
      * This is a helper method for classes which support manual
-     * passed options to overwrite internal options
+     * passed options to overwrite internal options.
      *
      * @param string $key
-     * @param array $options
+     * @param array  $options
+     *
      * @return mixed
      **/
     protected function mergeOption($key, array $options)
@@ -94,10 +101,11 @@ trait ConfigurableTrait
 
     /**
      * This is a helper method for classes which support manual
-     * passed options to overwrite internal options
+     * passed options to overwrite internal options.
      *
      * @param string $key
-     * @param array $options
+     * @param array  $options
+     *
      * @return mixed
      **/
     protected function mergeOptions(array $options)
@@ -106,13 +114,15 @@ trait ConfigurableTrait
         foreach ($this->supportedOptions() as $option) {
             $merged[$option] = $this->mergeOption($option, $options);
         }
+
         return $merged;
     }
 
     /**
-     * Check if $key is supported, otherwise throw an Exception
+     * Check if $key is supported, otherwise throw an Exception.
      *
      * @param string $key
+     *
      * @return string
      **/
     protected function checkKey($key)
@@ -120,32 +130,35 @@ trait ConfigurableTrait
         if (!$this->optionExists($key)) {
             throw new UnsupportedParameterException("Option '$key' is not supported");
         }
+
         return $key;
     }
 
     /**
      * @param string $key
+     *
      * @return bool
      **/
     protected function optionExists($key)
     {
         $defaultOptions = $this->getDefaultOptions();
+
         return isset($defaultOptions[$key]);
     }
 
     /**
      * Get the default option. Throw an exception if the class
      * which uses this trait has implemented a $defaultOptions
-     * property
+     * property.
      *
      * @return array
      **/
     protected function getDefaultOptions()
     {
         if (!isset($this->defaultOptions)) {
-            throw new OutOfBoundsException(get_class($this) . ' has to define a property named $defaultOptions');
+            throw new OutOfBoundsException(get_class($this).' has to define a property named $defaultOptions');
         }
+
         return $this->defaultOptions;
     }
-
 }

@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Ems\Core;
-
 
 use Ems\Contracts\Core\Url as UrlContract;
 use InvalidArgumentException;
@@ -13,19 +11,18 @@ use RuntimeException;
 
 class Url implements UrlContract
 {
-
     use StringableTrait;
 
     /**
-     * An array of all flat schemes
+     * An array of all flat schemes.
      *
      * @var array
      **/
     public static $flatSchemes = [
-        'mailto'=> true,
-        'news'  => true,
-        'nntp'  => true,
-        'telnet'=> true
+        'mailto' => true,
+        'news' => true,
+        'nntp' => true,
+        'telnet' => true,
     ];
 
     /**
@@ -79,15 +76,14 @@ class Url implements UrlContract
         'port' => 0,
         'path' => [],
         'query' => [],
-        'fragment' => ''
+        'fragment' => '',
     ];
 
     /**
      * @param string|self|array $url
      **/
-    public function __construct($url=null)
+    public function __construct($url = null)
     {
-
         $this->path = new StringList([], '/');
 
         if ($url) {
@@ -99,33 +95,36 @@ class Url implements UrlContract
      * {@inheritdoc}
      *
      * @param string $scheme (optional)
+     *
      * @return self
      **/
     public function scheme($scheme)
     {
-        return $this->replicate(['scheme'=>$scheme]);
+        return $this->replicate(['scheme' => $scheme]);
     }
 
     /**
      * {@inheritdoc}
      *
      * @param string $user
+     *
      * @return self
      **/
     public function user($user)
     {
-        return $this->replicate(['user'=>$user]);
+        return $this->replicate(['user' => $user]);
     }
 
     /**
      * {@inheritdoc}
      *
      * @param string $password
+     *
      * @return self
      **/
     public function password($password)
     {
-        return $this->replicate(['password'=>$password]);
+        return $this->replicate(['password' => $password]);
     }
 
     /**
@@ -136,52 +135,56 @@ class Url implements UrlContract
      **/
     public function host($host)
     {
-        return $this->replicate(['host'=>$host]);
+        return $this->replicate(['host' => $host]);
     }
 
     /**
      * {@inheritdoc}
      *
      * @param int $port
+     *
      * @return self
      **/
     public function port($port)
     {
-        return $this->replicate(['port'=>$port]);
+        return $this->replicate(['port' => $port]);
     }
 
     /**
      * {@inheritdoc}
      *
      * @param string|array $path
+     *
      * @return self
      **/
     public function path($path)
     {
-        return $this->replicate(['path'=>$path]);
+        return $this->replicate(['path' => $path]);
     }
 
     /**
      * {@inheritdoc}
      *
      * @param string|array $segment
+     *
      * @return self
      **/
     public function append($segment)
     {
         $segments = is_array($segment) ? $segment : func_get_args();
-        return $this->replicate(['path'=>$this->path->copy()->extend($segments)]);
+
+        return $this->replicate(['path' => $this->path->copy()->extend($segments)]);
     }
 
     /**
-     * Prepend a segment to the path
+     * Prepend a segment to the path.
      *
      * @param string|array $segment
+     *
      * @return self
      **/
     public function prepend($segment)
     {
-
         $segments = is_array($segment) ? $segment : func_get_args();
 
         $newPath = $this->path->copy();
@@ -190,98 +193,99 @@ class Url implements UrlContract
             $newPath->prepend($segment);
         }
 
-        return $this->replicate(['path'=>$newPath]);
-
+        return $this->replicate(['path' => $newPath]);
     }
 
     /**
      * {@inheritdoc}
      *
      * @param int $count
+     *
      * @return self
      **/
-    public function pop($count=1)
+    public function pop($count = 1)
     {
         $newPath = $this->path->copy();
-        for ($i=0; $i<$count; $i++) {
+        for ($i = 0; $i < $count; ++$i) {
             $newPath->pop();
         }
-        return $this->replicate(['path'=>$newPath]);
+
+        return $this->replicate(['path' => $newPath]);
     }
 
     /**
      * {@inheritdoc}
      *
      * @param string|array $key
-     * @param mixed $value (optional)
+     * @param mixed        $value (optional)
+     *
      * @return self
      **/
-    public function query($key, $value=null)
+    public function query($key, $value = null)
     {
         if ($value) {
-            return $this->replicate(['query'=>[$key=>$value]]);
+            return $this->replicate(['query' => [$key => $value]]);
         }
 
-        return $this->replicate(['query'=>$key]);
-
+        return $this->replicate(['query' => $key]);
     }
 
     /**
      * {@inheritdoc}
      *
      * @param string $fragment
+     *
      * @return self
      **/
     public function fragment($fragment)
     {
-        return $this->replicate(['fragment'=>$fragment]);
+        return $this->replicate(['fragment' => $fragment]);
     }
 
     /**
      * {@inheritdoc}
      *
      * @param * @param string|array|self $url $url
+     *
      * @return self
      **/
     protected function fill($url)
     {
-
         $parts = $this->castToArray($url);
 
         if (isset($parts['scheme']) && $parts['scheme']) {
             $this->scheme = mb_strtolower($parts['scheme']);
         }
 
-        if(isset($parts['user']) && $parts['user']){
+        if (isset($parts['user']) && $parts['user']) {
             $this->user = $parts['user'];
         }
 
-        if(isset($parts['password']) && $parts['password']){
+        if (isset($parts['password']) && $parts['password']) {
             $this->password = $parts['password'];
         }
 
-        if(isset($parts['host']) && $parts['host']){
+        if (isset($parts['host']) && $parts['host']) {
             $this->host = $parts['host'];
         }
 
-        if(isset($parts['port']) && $parts['port']){
+        if (isset($parts['port']) && $parts['port']) {
             $this->port = $parts['port'];
         }
 
-        if(isset($parts['path'])){
+        if (isset($parts['path'])) {
             $this->setPath($parts['path']);
         }
 
-        if(isset($parts['query']) && $parts['query']){
+        if (isset($parts['query']) && $parts['query']) {
             $this->setQuery($parts['query']);
         }
 
-        if(isset($parts['fragment']) && $parts['fragment']){
+        if (isset($parts['fragment']) && $parts['fragment']) {
             $this->fragment = $parts['fragment'];
         }
 
         return $this;
-
     }
 
     /**
@@ -301,8 +305,7 @@ class Url implements UrlContract
      **/
     public function isEmpty()
     {
-        foreach ($this->properties as $property=>$default) {
-
+        foreach ($this->properties as $property => $default) {
             if ($property == 'path') {
                 if (count($this->path)) {
                     return false;
@@ -314,6 +317,7 @@ class Url implements UrlContract
                 return false;
             }
         }
+
         return true;
     }
 
@@ -321,11 +325,11 @@ class Url implements UrlContract
      * {@inheritdoc}
      *
      * @param $part
+     *
      * @return mixed
      **/
     public function __get($part)
     {
-
         if (!isset($this->properties[$part])) {
             throw new InvalidArgumentException("Property $part is unknown");
         }
@@ -336,7 +340,6 @@ class Url implements UrlContract
         }
 
         return $this->$part;
-
     }
 
     /**
@@ -346,11 +349,9 @@ class Url implements UrlContract
      **/
     public function renderString()
     {
-
         $string = '';
 
         if ($this->scheme) {
-
             $slashes = $this->isFlat() ? '' : '//';
 
             $string .= "{$this->scheme}:$slashes";
@@ -362,11 +363,11 @@ class Url implements UrlContract
 
         if ($this->path && !$this->isFlat()) {
             $prefix = $authority || $this->path->getPrefix() ? '/' : '';
-            $string .= $prefix . ltrim((string)$this->path, '/');
+            $string .= $prefix.ltrim((string) $this->path, '/');
         }
 
         if ($this->query) {
-            $string .= '?' . http_build_query($this->query);
+            $string .= '?'.http_build_query($this->query);
         }
 
         if ($this->fragment) {
@@ -374,13 +375,13 @@ class Url implements UrlContract
         }
 
         return $string;
-
     }
 
     /**
-     * Check if $offset exists
+     * Check if $offset exists.
      *
      * @param mixed $offset
+     *
      * @return bool
      **/
     public function offsetExists($offset)
@@ -389,9 +390,10 @@ class Url implements UrlContract
     }
 
     /**
-     * Get value of $offset
+     * Get value of $offset.
      *
      * @param mixed $offset
+     *
      * @return mixed
      **/
     public function offsetGet($offset)
@@ -400,22 +402,20 @@ class Url implements UrlContract
     }
 
     /**
-     * Set the value of $offset
+     * Set the value of $offset.
      *
      * @param mixed $offset
      * @param mixed $value
-     * @return null
      **/
     public function offsetSet($offset, $value)
     {
-        throw new RuntimeException("An url is immutable, you can only get its query values");
+        throw new RuntimeException('An url is immutable, you can only get its query values');
     }
 
     /**
-     * Unset $offset
+     * Unset $offset.
      *
      * @param mixed $offset
-     * @return null
      **/
     public function offsetUnset($offset)
     {
@@ -423,7 +423,7 @@ class Url implements UrlContract
     }
 
     /**
-     * Return the count of this array like object
+     * Return the count of this array like object.
      *
      * @return int
      **/
@@ -436,9 +436,10 @@ class Url implements UrlContract
      * {@inheritdoc}
      *
      * @param array $attributes
+     *
      * @return self
      **/
-    public function replicate(array $attributes=[])
+    public function replicate(array $attributes = [])
     {
         if (!isset($attributes['query'])) {
             return new static(array_merge($this->selfToArray(), $attributes));
@@ -452,7 +453,6 @@ class Url implements UrlContract
         $newAttributes['query'] = $this->mergeOrReplaceQuery($queryAttributes);
 
         return new static($newAttributes);
-
     }
 
     /**
@@ -460,11 +460,13 @@ class Url implements UrlContract
      * mailto: and news: are flat f.e.
      *
      * @see self::$flatSchemes
+     *
      * @param string $scheme
-     * @return boolean
+     *
+     * @return bool
      */
-    protected function isFlat(){
-
+    protected function isFlat()
+    {
         if (!$this->scheme) {
             return false;
         }
@@ -479,13 +481,12 @@ class Url implements UrlContract
      * |      |    |        |             | |                 |       |
      * |      |    |        host          | url-path          |       fragment
      * |      user password               port                query
-     * scheme
+     * scheme.
      *
      * @return string
      */
     protected function getAuthority()
     {
-
         if (!$this->host) {
             return '';
         }
@@ -507,6 +508,7 @@ class Url implements UrlContract
 
     /**
      * @see MDF_Url::setUserInfo($userinfo)
+     *
      * @return string
      */
     protected function getUserInfo()
@@ -521,14 +523,14 @@ class Url implements UrlContract
     }
 
     /**
-     * Casts the passed $url to an array
+     * Casts the passed $url to an array.
      *
      * @param mixed $url
+     *
      * @return array
      **/
     protected function castToArray($url)
     {
-
         if (is_array($url)) {
             return $url;
         }
@@ -544,7 +546,7 @@ class Url implements UrlContract
 
         $array = [];
 
-        foreach ($this->properties as $key=>$default) {
+        foreach ($this->properties as $key => $default) {
             $array[$key] = $url->__get($key);
         }
 
@@ -554,39 +556,40 @@ class Url implements UrlContract
         }
 
         return $array;
-
     }
 
     protected function selfToArray()
     {
         return [
-            'scheme'    => $this->scheme,
-            'user'      => $this->user,
-            'password'  => $this->password,
-            'host'      => $this->host,
-            'port'      => $this->port,
-            'path'      => $this->path->copy(),
-            'query'     => $this->query,
-            'fragment'  => $this->fragment
+            'scheme' => $this->scheme,
+            'user' => $this->user,
+            'password' => $this->password,
+            'host' => $this->host,
+            'port' => $this->port,
+            'path' => $this->path->copy(),
+            'query' => $this->query,
+            'fragment' => $this->fragment,
         ];
     }
 
     /**
-     * Set the path inline
+     * Set the path inline.
      *
      * @param mixed $path
+     *
      * @return self
      **/
     protected function setPath($path)
     {
-
         if ($path instanceof StringList) {
             $this->path = $path;
+
             return $this;
         }
 
         if ($path === '') {
             $this->path->setPrefix('')->setSource([]);
+
             return $this;
         }
 
@@ -598,23 +601,26 @@ class Url implements UrlContract
 
         if ($hasLeadingSlash || $this->scheme) {
             $this->path->setPrefix('/');
+
             return $this;
         }
 
         $this->path->setPrefix('');
-        return $this;
 
+        return $this;
     }
 
     /**
-     * Set the inline query
+     * Set the inline query.
      *
      * @param string|array $query
+     *
      * @return self
      **/
     protected function setQuery($query)
     {
         $this->query = $this->mergeOrReplaceQuery($query);
+
         return $this;
     }
 
@@ -623,17 +629,17 @@ class Url implements UrlContract
      * and starts with ?
      *
      * @param string|array $query
+     *
      * @return array
      **/
     protected function mergeOrReplaceQuery($query)
     {
-
         if (is_array($query)) {
             return array_merge($this->query, $query);
         }
 
         if (!is_string($query)) {
-            throw new InvalidArgumentException("Query has to be array or string not " . gettype($query));
+            throw new InvalidArgumentException('Query has to be array or string not '.gettype($query));
         }
 
         if ($query === '') {
@@ -651,13 +657,13 @@ class Url implements UrlContract
         }
 
         return array_merge($this->query, $items);
-
     }
 
     /**
-     * Parses the url
+     * Parses the url.
      *
      * @param string $url
+     *
      * @return array
      **/
     protected function parseUrl($url)
@@ -668,7 +674,7 @@ class Url implements UrlContract
         if (isset($parsed['pass'])) {
             $parsed['password'] = $parsed['pass'];
         }
+
         return $parsed;
     }
-
 }

@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Core;
 
 use Ems\Contracts\Core\PathFinder as PathFinderContract;
@@ -10,10 +9,9 @@ use Exception;
 
 class PathFinder implements PathFinderContract
 {
-
     /**
      * This is the root namespace, which will be used
-     * if you use the AppPath interface of this PathFinder
+     * if you use the AppPath interface of this PathFinder.
      **/
     const ROOT = 'app';
 
@@ -27,11 +25,10 @@ class PathFinder implements PathFinderContract
      **/
     protected $pathCreator;
 
-
     public function __construct()
     {
         $this->pathCreator = function ($path, $url) {
-            return (new AppPath)->setBasePath($path)
+            return (new AppPath())->setBasePath($path)
                                 ->setBaseUrl($url);
         };
     }
@@ -40,6 +37,7 @@ class PathFinder implements PathFinderContract
      * {@inheritdoc}
      *
      * @param string
+     *
      * @return \Ems\Contracts\Core\AppPath
      **/
     public function to($scope)
@@ -54,18 +52,21 @@ class PathFinder implements PathFinderContract
     /**
      * {@inheritdoc}
      *
-     * @param string $scope
+     * @param string                             $scope
      * @param string|\Ems\Contracts\Core\AppPath $path
-     * @param string $url (optional)
+     * @param string                             $url   (optional)
+     *
      * @return \Ems\Contracts\Core\AppPath
      **/
-    public function map($scope, $path, $url=null)
+    public function map($scope, $path, $url = null)
     {
         if ($path instanceof AppPathContract) {
             $this->paths[$scope] = $path;
+
             return $path;
         }
         $this->paths[$scope] = $this->createAppPath($path, $url);
+
         return $this->paths[$scope];
     }
 
@@ -83,6 +84,7 @@ class PathFinder implements PathFinderContract
      * {@inheritdoc}
      *
      * @param string
+     *
      * @return self
      **/
     public function namespaced($namespace)
@@ -94,6 +96,7 @@ class PathFinder implements PathFinderContract
      * {@inheritdoc}
      *
      * @param string
+     *
      * @return string
      **/
     public function relative($url)
@@ -105,9 +108,10 @@ class PathFinder implements PathFinderContract
      * {@inheritdoc}
      *
      * @param string $path (optional)
+     *
      * @return string
      **/
-    public function absolute($relativePath=null)
+    public function absolute($relativePath = null)
     {
         return $this->to(static::ROOT)->absolute($relativePath);
     }
@@ -116,9 +120,10 @@ class PathFinder implements PathFinderContract
      * {@inheritdoc}
      *
      * @param string $path (optional)
+     *
      * @return string
      **/
-    public function url($path=null)
+    public function url($path = null)
     {
         return $this->to(static::ROOT)->url($path);
     }
@@ -138,25 +143,27 @@ class PathFinder implements PathFinderContract
     }
 
     /**
-     * Set a custom AppPath creator
+     * Set a custom AppPath creator.
      *
      * @param callable
+     *
      * @return self
      **/
     public function createPathsBy(callable $creator)
     {
         $this->pathCreator = $creator;
+
         return $this;
     }
 
     /**
      * @param string $path
      * @param string $url
+     *
      * @return \Ems\Contracts\Core\AppPath
      **/
     protected function createAppPath($path, $url)
     {
         return call_user_func($this->pathCreator, $path, $url);
     }
-
 }

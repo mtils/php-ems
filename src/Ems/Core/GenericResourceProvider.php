@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Core;
 
 use Ems\Contracts\Core\AllProvider;
@@ -12,7 +11,6 @@ use Ems\Core\Exceptions\ResourceNotFoundException;
 
 class GenericResourceProvider implements AllProvider, AppliesToResource
 {
-
     /**
      * @var \Ems\Contracts\Core\TextProvider
      **/
@@ -41,7 +39,7 @@ class GenericResourceProvider implements AllProvider, AppliesToResource
     /**
      * @param \Ems\Contracts\Core\TextProvider $texts (optional)
      **/
-    public function __construct(TextProvider $texts=null)
+    public function __construct(TextProvider $texts = null)
     {
         $this->texts = $texts;
     }
@@ -51,13 +49,15 @@ class GenericResourceProvider implements AllProvider, AppliesToResource
      *
      * @param mixed $id
      * @param mixed $default (optional)
+     *
      * @return \Ems\Contracts\Core\Identifiable|null
      **/
-    public function get($id, $default=null)
+    public function get($id, $default = null)
     {
         if (isset($this->items[$id])) {
             return $this->items[$id];
         }
+
         return $default;
     }
 
@@ -65,7 +65,9 @@ class GenericResourceProvider implements AllProvider, AppliesToResource
      * {@inheritdoc}
      *
      * @param mixed $id
+     *
      * @return \Ems\Contracts\Core\Identifiable
+     *
      * @throws \Ems\Contracts\NotFound
      **/
     public function getOrFail($id)
@@ -87,9 +89,10 @@ class GenericResourceProvider implements AllProvider, AppliesToResource
     }
 
     /**
-     * Add a identifiable object or just an id
+     * Add a identifiable object or just an id.
      *
      * @param mixed $identifiable
+     *
      * @return self
      **/
     public function add($identifiable)
@@ -127,6 +130,7 @@ class GenericResourceProvider implements AllProvider, AppliesToResource
     public function setResourceName($resourceName)
     {
         $this->resourceName = $resourceName;
+
         return $this;
     }
 
@@ -138,32 +142,37 @@ class GenericResourceProvider implements AllProvider, AppliesToResource
      *
      * @param string $search
      * @param string $replace
+     *
      * @return self
      **/
     public function replaceInKeys($search, $replace)
     {
         $this->replace[$search] = $replace;
+
         return $this;
     }
 
     /**
-     * Add an item to the list
+     * Add an item to the list.
      *
      * @param \Ems\Contracts\Core\Named $item
+     *
      * @return self
      **/
     protected function addToItems(Named $item)
     {
         $this->items[$item->getId()] = $item;
+
         return $this;
     }
 
     /**
-     * Creat an item. Overwrite this method to create different items
+     * Creat an item. Overwrite this method to create different items.
      *
-     * @param mixed $id
+     * @param mixed  $id
      * @param string $title
      * @param string $resourceName
+     *
      * @return \Ems\Contracts\Core\Named
      **/
     protected function createItem($id, $title, $resourceName)
@@ -172,9 +181,10 @@ class GenericResourceProvider implements AllProvider, AppliesToResource
     }
 
     /**
-     * Get the title from TextProvider if one set
+     * Get the title from TextProvider if one set.
      *
      * @param mixed $itemId
+     *
      * @return string
      **/
     protected function getTitleFromProvider($itemId)
@@ -188,9 +198,10 @@ class GenericResourceProvider implements AllProvider, AppliesToResource
     }
 
     /**
-     * Escape the id for safe usage in translation keys
+     * Escape the id for safe usage in translation keys.
      *
      * @param string $id
+     *
      * @return string
      **/
     protected function escapeId($id)
@@ -198,6 +209,7 @@ class GenericResourceProvider implements AllProvider, AppliesToResource
         if (!$this->replace) {
             return $id;
         }
+
         return str_replace(array_keys($this->replace), array_values($this->replace), $id);
     }
 }

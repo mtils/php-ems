@@ -1,15 +1,11 @@
 <?php
 
-
 namespace Ems\Core;
-
 
 use Ems\Contracts\Core\TextParser;
 
-
 class VariablesTextParser implements TextParser
 {
-
     protected $preDelimiter = '{';
 
     protected $postDelimiter = '}';
@@ -19,14 +15,14 @@ class VariablesTextParser implements TextParser
     /**
      * {@inheritdoc}
      *
-    * @param string $text
-     * @param array $data The view variables
-     * @param bool $purgePlaceholders (optional)
+     * @param string $text
+     * @param array  $data              The view variables
+     * @param bool   $purgePlaceholders (optional)
+     *
      * @return string
      **/
-    public function parse($text, array $data, $purgePlaceholders=true)
+    public function parse($text, array $data, $purgePlaceholders = true)
     {
-
         if (!$matches = $this->getMatches($text)) {
             return $text;
         }
@@ -34,13 +30,13 @@ class VariablesTextParser implements TextParser
         $parsed = $this->replaceWithData($text, $matches, $data);
 
         return $purgePlaceholders ? $this->purge($parsed) : $parsed;
-
     }
 
     /**
      * {@inheritdoc}
      *
      * @param string $text
+     *
      * @return string The purged text
      **/
     public function purge($text)
@@ -53,9 +49,10 @@ class VariablesTextParser implements TextParser
     }
 
     /**
-     * Returns all matches of variables inside $text
+     * Returns all matches of variables inside $text.
      *
      * @param string
+     *
      * @return array
      **/
     protected function getMatches($text)
@@ -66,42 +63,40 @@ class VariablesTextParser implements TextParser
         }
 
         return $matches[0];
-
     }
 
     /**
-     * Replaces the matches $matches with data from $data inside $text
+     * Replaces the matches $matches with data from $data inside $text.
      *
      * @param string $text
-     * @param array $matches
-     * @param array $data
+     * @param array  $matches
+     * @param array  $data
+     *
      * @return string
      **/
     protected function replaceWithData($text, array $matches, array $data)
     {
-
         list($search, $replace) = $this->getSearchAndReplace($matches, $data);
 
         return str_replace($search, $replace, $text);
     }
 
     /**
-     * Get two arrays suitable for str_replace to replace all variables
+     * Get two arrays suitable for str_replace to replace all variables.
      *
      * @param array $matches
      * @param array $data
+     *
      * @return array
      **/
     protected function getSearchAndReplace(array $matches, array $data)
     {
-
         $count = count($matches);
         $alreadySetted = [];
         $search = [];
         $replace = [];
 
-        for ($i=0, $m=0; $i<$count; $i++) {
-
+        for ($i = 0, $m = 0; $i < $count; ++$i) {
             if (isset($alreadySetted[$matches[$i]])) {
                 continue;
             }
@@ -115,25 +110,23 @@ class VariablesTextParser implements TextParser
             $search[$m] = $matches[$i];
             $replace[$m] = $value;
             $alreadySetted[$matches[$i]] = true;
-            $m++;
-
+            ++$m;
         }
 
         return [$search, $replace];
-
     }
 
     /**
-     * Get the value from $data
+     * Get the value from $data.
      *
      * @param string $key
-     * @param array $data
+     * @param array  $data
+     *
      * @return mixed (scalar|null)
      **/
     protected function extractValue($key, $data)
     {
-
-        $real_varname = mb_substr($key, 1, mb_strlen($key)-2);
+        $real_varname = mb_substr($key, 1, mb_strlen($key) - 2);
 
         $key = $this->cleanKey($key);
 
@@ -145,21 +138,19 @@ class VariablesTextParser implements TextParser
             return;
         }
 
-
         $segments = explode($this->nestingSeparator, $key);
 
-        $last = count($segments)-1;
+        $last = count($segments) - 1;
         $varname = $segments[0];
 
         if (!isset($data[$varname])) {
             return;
         }
 
-
         $node = &$data[$varname];
 
         //$i=1 because view varname is still inside segments
-        for ($i=1; $i<=$last; $i++) {
+        for ($i = 1; $i <= $last; ++$i) {
             $node = @$this->getNode($node, $segments[$i]);
 
             if ($node === null) {
@@ -170,22 +161,22 @@ class VariablesTextParser implements TextParser
                 if ($i == $last) {
                     return $node;
                 }
+
                 return;
             }
         }
-
     }
 
     /**
-     * Returns an array key if node is an array else a property
+     * Returns an array key if node is an array else a property.
      *
-     * @param mixed $node (array|object)
+     * @param mixed  $node (array|object)
      * @param string $key
+     *
      * @return mixed
      **/
     protected function &getNode(&$node, $key)
     {
-
         if (is_object($node) && isset($node->$key)) {
             return $node->$key;
         }
@@ -197,11 +188,13 @@ class VariablesTextParser implements TextParser
         // Special handling of eloquent relations
         if (!$this->isEloquentModel($node)) {
             $result = null;
+
             return $result;
         }
 
         if (!method_exists($node, $key)) {
             $result = null;
+
             return $result;
         }
 
@@ -209,17 +202,18 @@ class VariablesTextParser implements TextParser
 
         if (!$this->isEloquentRelation($relation)) {
             $result = null;
+
             return $result;
         }
 
         return $relation->getResults();
-
     }
 
     /**
-     * Cleans the delimiters out of key
+     * Cleans the delimiters out of key.
      *
      * @param string $key
+     *
      * @return string
      **/
     protected function cleanKey($key)
@@ -233,11 +227,12 @@ class VariablesTextParser implements TextParser
 
     /**
      * @param string $key
+     *
      * @return bool
      **/
     protected function isNestedKey($key)
     {
-        return ((int)mb_strpos($key, $this->nestingSeparator) > 0);
+        return (int) mb_strpos($key, $this->nestingSeparator) > 0;
     }
 
     /**
@@ -245,16 +240,17 @@ class VariablesTextParser implements TextParser
      **/
     protected function buildRegex()
     {
-        return '/\\' . $this->preDelimiter .
-               '[a-zA-Z0-9\\' . $this->nestingSeparator .
-               '_]+\\' . $this->postDelimiter . '/';
+        return '/\\'.$this->preDelimiter.
+               '[a-zA-Z0-9\\'.$this->nestingSeparator.
+               '_]+\\'.$this->postDelimiter.'/';
     }
 
     /**
      * Return true if $node is an eloquent model (without needing 
-     * the actual classes)
+     * the actual classes).
      *
      * @param mixed $node
+     *
      * @return bool
      **/
     protected function isEloquentModel($node)
@@ -264,14 +260,14 @@ class VariablesTextParser implements TextParser
 
     /**
      * Return true if $node is an eloquent relation (without needing 
-     * the actual classes)
+     * the actual classes).
      *
      * @param mixed $relation
+     *
      * @return bool
      **/
     protected function isEloquentRelation($relation)
     {
         return is_object($node) && get_class($node) == 'Illuminate\Database\Eloquent\Relations\Relation';
     }
-
 }

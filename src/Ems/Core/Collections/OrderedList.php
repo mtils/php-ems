@@ -11,10 +11,8 @@ use InvalidArgumentException;
 use Traversable;
 use ArrayIterator;
 
-
 class OrderedList implements Countable, IteratorAggregate, ArrayAccess
 {
-
     /**
      * @var array
      **/
@@ -22,6 +20,7 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
 
     /**
      * @param array|\Traversable|int|string $source (optional)
+     *
      * @see self::setSource
      **/
     public function __construct($source = null)
@@ -32,9 +31,10 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
     }
 
     /**
-     * Append a value to the end of this list
+     * Append a value to the end of this list.
      *
      * @param mixed $value
+     *
      * @return self
      **/
     public function append($value)
@@ -43,10 +43,12 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
     }
 
     /**
-     * Alias for append()
+     * Alias for append().
      *
      * @see self::append()
+     *
      * @param mixed $value
+     *
      * @return self
      **/
     public function push($value)
@@ -55,9 +57,10 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
     }
 
     /**
-     * prepend a value to the beginning of this list
+     * prepend a value to the beginning of this list.
      *
      * @param mixed $value
+     *
      * @return self
      **/
     public function prepend($value)
@@ -66,9 +69,10 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
     }
 
     /**
-     * Extend the list by the passed item(s)
+     * Extend the list by the passed item(s).
      *
      * @param array|\Traversable
+     *
      * @return self
      **/
     public function extend($values)
@@ -81,10 +85,11 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
     }
 
     /**
-     * Insert a value at position $index
+     * Insert a value at position $index.
      *
-     * @param int $index
+     * @param int   $index
      * @param mixed $value
+     *
      * @return self
      **/
     public function insert($index, $value)
@@ -111,9 +116,10 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
     }
 
     /**
-     * Removes a value from this list and returns it
+     * Removes a value from this list and returns it.
      *
      * @param mixed $value
+     *
      * @return mixed
      **/
     public function remove($value)
@@ -122,9 +128,10 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
     }
 
     /**
-     * Removes item at index $index (or its last) and returns it
+     * Removes item at index $index (or its last) and returns it.
      *
      * @param int $index (optional)
+     *
      * @return mixed
      **/
     public function pop($index = null)
@@ -138,13 +145,13 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
         array_splice($this->source, $index, 1);
 
         return $previousValue;
-
     }
 
     /**
-     * Finds the index of value $value
+     * Finds the index of value $value.
      *
      * @param mixed $value
+     *
      * @return self
      **/
     public function indexOf($value)
@@ -160,9 +167,10 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
     }
 
     /**
-     * Return if this list contains $value
+     * Return if this list contains $value.
      *
      * @param mixed $value
+     *
      * @return bool
      **/
     public function contains($value)
@@ -179,6 +187,7 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
      * the occurrences of this value in this list.
      *
      * @param mixed $value (optional) 
+     *
      * @return int
      **/
     public function count()
@@ -191,9 +200,10 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
     }
 
     /**
-     * Count the occurrences of value in $this list
+     * Count the occurrences of value in $this list.
      *
      * @param $value
+     *
      * @return int
      **/
     public function countValue($value)
@@ -209,18 +219,20 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
     }
 
     /**
-     * Sort the list
+     * Sort the list.
      *
      * @param callable $sorter (optional)
+     *
      * @return self
      **/
-    public function sort(callable $sorter=null)
+    public function sort(callable $sorter = null)
     {
         if (!$sorter) {
             $sorter = function ($a, $b) {
                 if ($a == $b) {
                     return 0;
                 }
+
                 return ($a < $b) ? -1 : 1;
             };
         }
@@ -231,7 +243,7 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
     }
 
     /**
-     * Reverse sort the list
+     * Reverse sort the list.
      *
      * @return self
      **/
@@ -243,23 +255,25 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
     }
 
     /**
-     * Remove duplicates
+     * Remove duplicates.
      *
      * @return self
      **/
-    public function unique(callable $comparator=null)
+    public function unique(callable $comparator = null)
     {
         if (!$comparator) {
             $this->source = array_values(array_unique($this->source));
         }
+
         return $this;
     }
 
     /**
      * Apply a callable to all items of this list and return
-     * every result as array
+     * every result as array.
      *
      * @param callable $callable
+     *
      * @return array
      **/
     public function apply(callable $callable)
@@ -268,24 +282,28 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
     }
 
     /**
-     * Filter this list by the callable $callable
+     * Filter this list by the callable $callable.
      *
      * @param callable $callable
+     *
      * @return self
      **/
     public function filter(callable $callable)
     {
         $this->source = array_values(array_filter($this->source, $callable));
+
         return $this;
     }
 
     /**
      * Find a value by callback $callable. If the callback returns
      * true the index of the checked item is returned.
-     * If nothing was found it a NotFoundException will be thrown
+     * If nothing was found it a NotFoundException will be thrown.
      *
      * @param callable $callable
+     *
      * @return mixed
+     *
      * @throws \Ems\Contracts\Core\Errors\NotFound
      **/
     public function find(callable $callable)
@@ -297,15 +315,17 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
      * Find an index by callback $callable. If the callback returns
      * true the index of the checked item is returned.
      * If nothing was found it a NotFoundException will be thrown to avoid
-     * checks of 0 vs false
+     * checks of 0 vs false.
      *
      * @param callable $callable
+     *
      * @return int
+     *
      * @throws \Ems\Contracts\Core\Errors\NotFound
      **/
     public function findIndex(callable $callable)
     {
-        foreach ($this->source as $i=>$item) {
+        foreach ($this->source as $i => $item) {
             if ($callable($item) === true) {
                 return $i;
             }
@@ -314,7 +334,7 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
     }
 
     /**
-     * Allow foreach
+     * Allow foreach.
      *
      * @return \ArrayIterator
      **/
@@ -324,9 +344,10 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
     }
 
     /**
-     * Check if index $offset exists (< count()-1)
+     * Check if index $offset exists (< count()-1).
      *
      * @param int $offset
+     *
      * @return bool
      **/
     public function offsetExists($offset)
@@ -335,9 +356,10 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
     }
 
     /**
-     * Get the offset $offset or throw an OutOfRangeException
+     * Get the offset $offset or throw an OutOfRangeException.
      *
      * @param int $offset
+     *
      * @return mixed
      **/
     public function offsetGet($offset)
@@ -349,11 +371,10 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
     }
 
     /**
-     * Set the offset $offset
+     * Set the offset $offset.
      *
-     * @param int $offset
+     * @param int   $offset
      * @param mixed $value
-     * @return null
      **/
     public function offsetSet($offset, $value)
     {
@@ -361,10 +382,9 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
     }
 
     /**
-     * Remove the offset $offset
+     * Remove the offset $offset.
      *
      * @param int $offset
-     * @return null
      **/
     public function offsetUnset($offset)
     {
@@ -372,7 +392,7 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
     }
 
     /**
-     * Return the source array
+     * Return the source array.
      *
      * @return array
      **/
@@ -386,19 +406,21 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
      * Array or \Traversable results in array_values() or items
      * an int results in range($source)
      * a string with more than one char results in str_split($source)
-     * a string with one char results in range('a', $source)
+     * a string with one char results in range('a', $source).
      *
      * @param array|\Traversable|int|string $source (optional)
+     *
      * @return self
      **/
     public function setSource($source)
     {
         $this->source = $this->castToArray($source);
+
         return $this;
     }
 
     /**
-     * Return the first item if exists
+     * Return the first item if exists.
      *
      * @return mixed
      **/
@@ -410,7 +432,7 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
     }
 
     /**
-     * Return the last item
+     * Return the last item.
      *
      * @return mixed
      **/
@@ -444,7 +466,6 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
 
     /**
      * @param mixed $item
-     * @return void
      **/
     protected function addItem($item)
     {
@@ -452,9 +473,10 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
     }
 
     /**
-     * Casts the passed $source to array
+     * Casts the passed $source to array.
      *
      * @param mixed $source
+     *
      * @return array
      **/
     protected function castToArray($source)
@@ -487,5 +509,4 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
 
         return $array;
     }
-
 }

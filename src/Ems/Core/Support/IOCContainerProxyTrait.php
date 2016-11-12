@@ -1,13 +1,11 @@
 <?php
 
-
 namespace Ems\Core\Support;
 
 use Ems\Contracts\Core\IOCContainer;
 
 trait IOCContainerProxyTrait
 {
-
     use IOCHelperMethods;
 
     /**
@@ -19,11 +17,13 @@ trait IOCContainerProxyTrait
      * {@inheritdoc}
      *
      * @param string $abstract
-     * @param array $parameters (optional)
+     * @param array  $parameters (optional)
+     *
      * @return object
+     *
      * @throws \OutOfBoundsException
      **/
-    public function __invoke($abstract, array $parameters=[])
+    public function __invoke($abstract, array $parameters = [])
     {
         return $this->container->__invoke($abstract, $parameters);
     }
@@ -31,12 +31,13 @@ trait IOCContainerProxyTrait
     /**
      * {@inheritdoc}
      *
-     * @param string $abstract
+     * @param string   $abstract
      * @param callable $callback
-     * @param bool $singleton (optional)
+     * @param bool     $singleton (optional)
+     *
      * @return self
      **/
-    public function bind($abstract, $factory, $singleton=false)
+    public function bind($abstract, $factory, $singleton = false)
     {
         return $this->container->bind($abstract, $factory, $singleton);
     }
@@ -46,6 +47,7 @@ trait IOCContainerProxyTrait
      *
      * @param string $abstract
      * @param object $instance
+     *
      * @return self
      **/
     public function instance($abstract, $instance)
@@ -56,8 +58,9 @@ trait IOCContainerProxyTrait
     /**
      * {@inheritdoc}
      *
-     * @param string $abstract
+     * @param string   $abstract
      * @param callable $listener
+     *
      * @return self
      **/
     public function resolving($abstract, $listener)
@@ -68,8 +71,9 @@ trait IOCContainerProxyTrait
     /**
      * {@inheritdoc}
      *
-     * @param string $abstract
+     * @param string   $abstract
      * @param callable $listener
+     *
      * @return self
      **/
     public function afterResolving($abstract, $listener)
@@ -81,6 +85,7 @@ trait IOCContainerProxyTrait
      * {@inheritdoc}
      *
      * @param string $abstract
+     *
      * @return bool
      **/
     public function bound($abstract)
@@ -92,6 +97,7 @@ trait IOCContainerProxyTrait
      * {@inheritdoc}
      *
      * @param string $abstract
+     *
      * @return bool
      **/
     public function resolved($abstract)
@@ -103,10 +109,11 @@ trait IOCContainerProxyTrait
      * {@inheritdoc}
      *
      * @param callable $callback
-     * @param array $parameters
+     * @param array    $parameters
+     *
      * @return mixed The method result
      **/
-    public function call($callback, array $parameters=[])
+    public function call($callback, array $parameters = [])
     {
         return $this->container->call($callback, $parameters);
     }
@@ -116,6 +123,7 @@ trait IOCContainerProxyTrait
      *
      * @param string $abstract
      * @param string $alias
+     *
      * @return self
      **/
     public function alias($abstract, $alias)
@@ -124,7 +132,7 @@ trait IOCContainerProxyTrait
     }
 
     /**
-     * Get the assigned container
+     * Get the assigned container.
      *
      * @return \Ems\Contracts\Core\IOCContainer
      **/
@@ -134,14 +142,16 @@ trait IOCContainerProxyTrait
     }
 
     /**
-     * Set the container
+     * Set the container.
      *
      * @param \Ems\Contracts\Core\IOCContainer $container
+     *
      * @return self
      **/
     public function setContainer(IOCContainer $container)
     {
         $this->container = $container;
+
         return $this;
     }
 }

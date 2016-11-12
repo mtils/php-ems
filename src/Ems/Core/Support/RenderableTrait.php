@@ -1,17 +1,14 @@
 <?php
 
-
 namespace Ems\Core\Support;
 
 use Ems\Contracts\Core\Renderer;
-use Exception;
 
 /**
  * @see Ems\Contracts\Core\Renderable
  **/
 trait RenderableTrait
 {
-
     use StringableTrait;
 
     /**
@@ -33,17 +30,19 @@ trait RenderableTrait
      * {@inheritdoc}
      *
      * @param \Ems\Contracts\Core\Renderer $renderer
+     *
      * @return self
      **/
     public function setRenderer(Renderer $renderer)
     {
         $this->_renderer = $renderer;
+
         return $this;
     }
 
     /**
      * Renders the result. Is just inside its own method to allow easy
-     * overwriding __toString()
+     * overwriding __toString().
      *
      * @return string
      **/
@@ -54,7 +53,5 @@ trait RenderableTrait
         }
 
         return $this->_renderer->render($this);
-
     }
-
 }

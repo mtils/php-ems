@@ -1,15 +1,12 @@
 <?php
 
-
 namespace Ems\Core\StringConverter;
-
 
 use Ems\Contracts\Core\StringConverter;
 use RuntimeException;
 
 class IconvStringConverter implements StringConverter
 {
-
     /**
      * @var array
      **/
@@ -44,11 +41,13 @@ class IconvStringConverter implements StringConverter
      * @param string $text
      * @param string $toEncoding
      * @param string $fromEncoding (optional)
+     *
      * @return string
      **/
-    public function convert($text, $toEncoding, $fromEncoding=null)
+    public function convert($text, $toEncoding, $fromEncoding = null)
     {
         $fromEncoding = $fromEncoding ?: $this->defaultEncoding;
+
         return @iconv($fromEncoding, $toEncoding, $text);
     }
 
@@ -56,11 +55,13 @@ class IconvStringConverter implements StringConverter
      * {@inheritdoc}
      *
      * @param string $encoding
+     *
      * @return bool
      **/
     public function canConvert($encoding)
     {
         $this->fillEncodingsOnce();
+
         return isset($this->encodingLookup[strtoupper($encoding)]);
     }
 
@@ -72,13 +73,12 @@ class IconvStringConverter implements StringConverter
     public function encodings()
     {
         $this->fillEncodingsOnce();
+
         return $this->encodings;
     }
 
     /**
-     * Fill the encodings for faster lookups
-     *
-     * @return null
+     * Fill the encodings for faster lookups.
      **/
     protected function fillEncodingsOnce()
     {
@@ -87,11 +87,9 @@ class IconvStringConverter implements StringConverter
         }
 
         foreach ($this->loadEncodings() as $encoding) {
-
             $encoding = strtoupper($encoding);
             $this->encodings[] = $encoding;
             $this->encodingLookup[$encoding] = true;
-
         }
 
         $this->filled = true;

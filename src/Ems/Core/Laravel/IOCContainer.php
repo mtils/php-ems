@@ -1,19 +1,15 @@
 <?php
 
-
 namespace Ems\Core\Laravel;
 
-
-use \InvalidArgumentException;
+use InvalidArgumentException;
 use Illuminate\Container\Container as IlluminateContainer;
 use Ems\Contracts\Core\IOCContainer as ContainerContract;
 use Ems\Core\Support\ResolvingListenerTrait;
 use Ems\Core\Support\IOCHelperMethods;
 
-
 class IOCContainer implements ContainerContract
 {
-
     use ResolvingListenerTrait;
     use IOCHelperMethods;
 
@@ -25,9 +21,9 @@ class IOCContainer implements ContainerContract
     /**
      * @param \Illuminate\Container\Container $laravel
      **/
-    public function __construct(IlluminateContainer $laravel=null)
+    public function __construct(IlluminateContainer $laravel = null)
     {
-        $this->laravel = $laravel ? $laravel : new IlluminateContainer;
+        $this->laravel = $laravel ? $laravel : new IlluminateContainer();
         $this->instance('Illuminate\Contracts\Container\Container', $this->laravel);
         $this->instance('Illuminate\Container\Container', $this->laravel);
         $this->instance(ContainerContract::class, $this);
@@ -37,11 +33,13 @@ class IOCContainer implements ContainerContract
      * {@inheritdoc}
      *
      * @param string $abstract
-     * @param array $parameters (optional)
+     * @param array  $parameters (optional)
+     *
      * @return object
+     *
      * @throws \OutOfBoundsException
      **/
-    public function __invoke($abstract, array $parameters=[])
+    public function __invoke($abstract, array $parameters = [])
     {
         return $this->laravel->make($abstract, $parameters);
     }
@@ -49,30 +47,34 @@ class IOCContainer implements ContainerContract
     /**
      * {@inheritdoc}
      *
-     * @param string $abstract
+     * @param string   $abstract
      * @param callable $callback
-     * @param bool $singleton (optional)
+     * @param bool     $singleton (optional)
+     *
      * @return self
      **/
-    public function bind($abstract, $callback, $singleton=false)
+    public function bind($abstract, $callback, $singleton = false)
     {
         $this->laravel->bind($abstract, $this->buildBindingProxy($callback), $singleton);
+
         return $this;
     }
 
     /**
      * {@inheritdoc}
      * Laravel doesnt call its listeners on instance(), this class
-     * emulates it for full compatiblity with the IOC interface
+     * emulates it for full compatiblity with the IOC interface.
      *
      * @param string $abstract
      * @param object $instance
+     *
      * @return self
      **/
     public function instance($abstract, $instance)
     {
         $this->laravel->instance($abstract, $instance);
         $this->callAllListeners($abstract, $instance);
+
         return $this;
     }
 
@@ -81,13 +83,15 @@ class IOCContainer implements ContainerContract
      * Because laravel does not call listeners on instance() this
      * class has to store them too.
      *
-     * @param string $abstract
+     * @param string   $abstract
      * @param callable $listener
+     *
      * @return self
      **/
     public function resolving($abstract, $listener)
     {
         $this->laravel->resolving($abstract, $this->buildResolvingCallable($listener));
+
         return $this->storeResolvingListener($abstract, $listener);
     }
 
@@ -96,13 +100,15 @@ class IOCContainer implements ContainerContract
      * Because laravel does not call listeners on instance() this
      * class has to store them too.
      *
-     * @param string $abstract
+     * @param string   $abstract
      * @param callable $listener
+     *
      * @return self
      **/
     public function afterResolving($abstract, $listener)
     {
         $this->laravel->afterResolving($abstract, $this->buildResolvingCallable($listener));
+
         return $this->storeAfterResolvingListener($abstract, $listener);
     }
 
@@ -110,6 +116,7 @@ class IOCContainer implements ContainerContract
      * {@inheritdoc}
      *
      * @param string $abstract
+     *
      * @return bool
      **/
     public function bound($abstract)
@@ -121,6 +128,7 @@ class IOCContainer implements ContainerContract
      * {@inheritdoc}
      *
      * @param string $abstract
+     *
      * @return bool
      **/
     public function resolved($abstract)
@@ -132,9 +140,10 @@ class IOCContainer implements ContainerContract
      * {@inheritdoc}
      *
      * @param callable $callback
+     *
      * @return mixed The method result
      **/
-    public function call($callback, array $parameters=[])
+    public function call($callback, array $parameters = [])
     {
         return $this->laravel->call($callback, $parameters);
     }
@@ -144,11 +153,13 @@ class IOCContainer implements ContainerContract
      *
      * @param string $abstract
      * @param string $alias
+     *
      * @return self
      **/
     public function alias($abstract, $alias)
     {
         $this->laravel->alias($abstract, $alias);
+
         return $this;
     }
 
@@ -167,12 +178,14 @@ class IOCContainer implements ContainerContract
      * So every binding have to be proxies through a Closure
      *
      * @param callable $originalCallable
+     *
      * @return Closure
      **/
     protected function buildBindingProxy($originalCallable)
     {
         $originalCallable = $this->checkAndReturnCallable($originalCallable);
-        return function($laravel) use ($originalCallable) {
+
+        return function ($laravel) use ($originalCallable) {
             return call_user_func($originalCallable, $this);
         };
     }
@@ -184,21 +197,25 @@ class IOCContainer implements ContainerContract
      * So every resolving callback have to be proxies through a Closure
      *
      * @param callable $originalCallable
+     *
      * @return Closure
      **/
     protected function buildResolvingCallable($originalCallable)
     {
         $originalCallable = $this->checkAndReturnCallable($originalCallable);
-        return function($resolved, $laravel) use ($originalCallable) {
+
+        return function ($resolved, $laravel) use ($originalCallable) {
             call_user_func($originalCallable, $resolved, $this);
         };
     }
 
     /**
-     * Throws an exception if the arg is not callable
+     * Throws an exception if the arg is not callable.
      *
      * @param callable $callback
+     *
      * @return callable
+     *
      * @throws InvalidArgumentException
      **/
     protected function checkAndReturnCallable($callback)
@@ -213,7 +230,7 @@ class IOCContainer implements ContainerContract
             $type = is_object($callback) ? get_class($callback) : gettype($callback);
             throw new InvalidArgumentException("Passed argument of type $type is not callable");
         }
+
         return $callback;
     }
-
 }
