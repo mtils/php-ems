@@ -9,7 +9,7 @@ php:
 before_script: composer update
 
 script:
-  - mkdir build/logs
+  - mkdir -p build/logs
   - phpunit --coverage-clover build/logs/clover.xml
 
 after_success:
