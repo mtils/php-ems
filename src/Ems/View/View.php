@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\View;
 
 use Ems\Contracts\View\View as ViewContract;
@@ -10,7 +9,6 @@ use Ems\Contracts\Core\Renderer;
 
 class View implements ViewContract
 {
-
     use RenderableTrait;
     use ArrayMethods;
 
@@ -25,12 +23,12 @@ class View implements ViewContract
     protected $mimeType = 'text/html';
 
     /**
-     * Create a new view
+     * Create a new view.
      *
-     * @param string $name (optional)
+     * @param string                       $name     (optional)
      * @param \Ems\Contracts\Core\Renderer $renderer (optional)
      **/
-    public function __construct($name='', Renderer $renderer=null)
+    public function __construct($name = '', Renderer $renderer = null)
     {
         $this->name = $name;
         $this->_renderer = $renderer;
@@ -50,23 +48,23 @@ class View implements ViewContract
      * {@inheritdoc}
      *
      * @param array|\Traversable|string $name
-     * @param mixed $value (optional)
+     * @param mixed                     $value (optional)
+     *
      * @return self
      **/
-    public function assign($name, $value=null)
+    public function assign($name, $value = null)
     {
-
         if ($value !== null) {
             $this->_attributes[$name] = $value;
+
             return $this;
         }
 
-        foreach ($name as $key=>$value) {
+        foreach ($name as $key => $value) {
             $this->_attributes[$key] = $value;
         }
 
         return $this;
-
     }
 
     /**
@@ -90,15 +88,14 @@ class View implements ViewContract
     }
 
     /**
-     * Set the mimetype
+     * Set the mimetype.
      *
      * @param string $mimeType
+     *
      * @return self
      **/
     public function setMimeType($mimeType)
     {
         $this->mimeType = $mimeType;
     }
-
-
 }

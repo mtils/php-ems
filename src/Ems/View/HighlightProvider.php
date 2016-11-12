@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\View;
 
 use Ems\Contracts\View\Highlight as HighlightContract;
@@ -8,10 +7,8 @@ use Ems\Contracts\View\HighlightProvider as ProviderContract;
 use Ems\Contracts\View\HighlightItemProvider as itemProvider;
 use Ems\Contracts\Core\Renderer;
 
-
 class HighlightProvider implements ProviderContract
 {
-
     /**
      * @var \Ems\Contracts\Core\Renderer
      **/
@@ -41,9 +38,10 @@ class HighlightProvider implements ProviderContract
      * {@inheritdoc}
      *
      * @param int $limit (optional)
+     *
      * @return \Ems\Contracts\View\Highlight
      **/
-    public function latest($limit=null)
+    public function latest($limit = null)
     {
         return $this->createHighlight('latest', $limit);
     }
@@ -52,9 +50,10 @@ class HighlightProvider implements ProviderContract
      * {@inheritdoc}
      *
      * @param int $limit (optional)
+     *
      * @return \Ems\Contracts\View\Highlight
      **/
-    public function top($limit=null)
+    public function top($limit = null)
     {
         return $this->createHighlight('top', $limit);
     }
@@ -63,22 +62,25 @@ class HighlightProvider implements ProviderContract
      * {@inheritdoc}
      *
      * @param int $limit (optional)
+     *
      * @return \Ems\Contracts\View\Highlight
      **/
-    public function some($limit=null)
+    public function some($limit = null)
     {
         return $this->createHighlight('some', $limit);
     }
 
     /**
-     * Assign a custom callable to create the highlight objects
+     * Assign a custom callable to create the highlight objects.
      *
      * @param callable $factory
+     *
      * @return self
      **/
     public function createHighlightBy(callable $factory)
     {
         $this->highlightFactory = $factory;
+
         return $this;
     }
 
@@ -89,7 +91,6 @@ class HighlightProvider implements ProviderContract
                     ->setRenderer($this->renderer)
                     ->method($method)
                     ->limit($limit);
-
     }
 
     protected function newHighlight()
@@ -98,8 +99,6 @@ class HighlightProvider implements ProviderContract
             return call_user_func($this->highlightFactory, HighlightContract::class);
         }
 
-        return new Highlight;
+        return new Highlight();
     }
-
-
 }

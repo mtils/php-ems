@@ -1,11 +1,9 @@
 <?php
 
-
 namespace Ems\View;
 
 use Ems\Contracts\View\Highlight as HighlightContract;
 use Ems\Contracts\View\HighlightItemProvider;
-use Ems\Contracts\Core\Identifiable;
 use Ems\Core\Support\CacheableTrait;
 use ArrayIterator;
 use RuntimeException;
@@ -15,11 +13,10 @@ use DateTime;
 /**
  * Note: The Highlight caches its string output, to cache the
  * count() result you have to implement a cache in your
- * HighlightItemProvider
+ * HighlightItemProvider.
  **/
 class Highlight extends View implements HighlightContract
 {
-
     use CacheableTrait;
 
     /**
@@ -76,11 +73,13 @@ class Highlight extends View implements HighlightContract
      * {@inheritdoc}
      *
      * @param int $limit
+     *
      * @return self
      **/
     public function limit($limit)
     {
         $this->limit = $limit;
+
         return $this;
     }
 
@@ -88,11 +87,13 @@ class Highlight extends View implements HighlightContract
      * {@inheritdoc}
      *
      * @param int $combinations (optional)
+     *
      * @return self
      **/
-    public function randomize($combinations=5)
+    public function randomize($combinations = 5)
     {
         $this->randomCombinations = $combinations;
+
         return $this;
     }
 
@@ -100,11 +101,13 @@ class Highlight extends View implements HighlightContract
      * {@inheritdoc}
      *
      * @param string (latest|top|random)
+     *
      * @return self
      **/
     public function method($method)
     {
         $this->method = $method;
+
         return $this;
     }
 
@@ -113,16 +116,19 @@ class Highlight extends View implements HighlightContract
      *
      * @param mixed $criteria
      * @param array $parameters (optional)
+     *
      * @return self
      **/
-    public function __call($criteria, $parameters=[])
+    public function __call($criteria, $parameters = [])
     {
         if (!$parameters) {
             $this->criterias[$criteria] = true;
+
             return $this;
         }
 
         $this->criterias[$criteria] = count($parameters) > 1 ? $parameters : $parameters[0];
+
         return $this;
     }
 
@@ -140,28 +146,32 @@ class Highlight extends View implements HighlightContract
      * {@inheritdoc}
      *
      * @param string $template (optional)
+     *
      * @return self
      **/
-    public function render($template='')
+    public function render($template = '')
     {
         $this->name = $template;
+
         return $this;
     }
 
     /**
-     * Set the item provider to allow deferred loading
+     * Set the item provider to allow deferred loading.
      *
      * @param \Ems\Contracts\View\HighlightItemProvider $provider
+     *
      * @return self
      **/
     public function setItemProvider(HighlightItemProvider $provider)
     {
         $this->itemProvider = $provider;
+
         return $this;
     }
 
     /**
-     * Iterate over all items
+     * Iterate over all items.
      *
      * @return \ArrayIterator
      **/
@@ -182,7 +192,6 @@ class Highlight extends View implements HighlightContract
 
     public function cacheId()
     {
-
         if (!$this->randomCombinations) {
             return $this->baseCacheId();
         }
@@ -197,25 +206,24 @@ class Highlight extends View implements HighlightContract
         $cacheId[] = implode('_', $randomIntegers);
 
         return implode('_', $cacheId);
-
     }
 
     /**
      * {@inheritdoc}
      *
-     * @return null
+     * @return string
      **/
     public function __toString()
     {
         try {
-            return (string)$this->renderOrCache();
+            return (string) $this->renderOrCache();
         } catch (\Exception $e) {
             return $this->processException($e);
         }
     }
 
     /**
-     * Count all results
+     * Count all results.
      *
      * @return array
      **/
@@ -224,8 +232,8 @@ class Highlight extends View implements HighlightContract
         if ($this->count == null) {
             $this->count = $this->itemProvider->count($this->method, $this->criterias());
         }
-        return $this->count;
 
+        return $this->count;
     }
 
     protected function fillAttributes()
@@ -234,13 +242,12 @@ class Highlight extends View implements HighlightContract
     }
 
     /**
-     * Loads the result
+     * Loads the result.
      *
      * @return array
      **/
     protected function getResultOnce()
     {
-
         if ($this->result !== null) {
             return $this->result;
         }
@@ -249,7 +256,6 @@ class Highlight extends View implements HighlightContract
                                             : $this->getFromProvider($this->limit);
 
         return $this->result;
-
     }
 
     /**
@@ -257,7 +263,6 @@ class Highlight extends View implements HighlightContract
      **/
     protected function getRandomizedResult()
     {
-
         $ordered = $this->getFromProvider($this->providerLimit());
 
         $indexes = $this->randomIntegers();
@@ -271,7 +276,6 @@ class Highlight extends View implements HighlightContract
         }
 
         return $result;
-
     }
 
     /**
@@ -279,7 +283,6 @@ class Highlight extends View implements HighlightContract
      **/
     protected function getFromProvider($limit)
     {
-
         $items = [];
 
         foreach (call_user_func([$this->itemProvider, $this->method], $this->criterias(), $limit) as $item) {
@@ -287,7 +290,6 @@ class Highlight extends View implements HighlightContract
         }
 
         return $items;
-
     }
 
     /**
@@ -298,6 +300,7 @@ class Highlight extends View implements HighlightContract
         if ($this->randomIntegers === null) {
             $this->randomIntegers = $this->nextRandomSeed($this->limit, $this->providerLimit());
         }
+
         return $this->randomIntegers;
     }
 
@@ -310,21 +313,21 @@ class Highlight extends View implements HighlightContract
             return $this->limit;
         }
         if ($this->limit === null) {
-            throw new RuntimeException("For randomized results you habe to pass a limit");
+            throw new RuntimeException('For randomized results you habe to pass a limit');
         }
+
         return $this->limit * $this->randomCombinations;
     }
 
     protected function nextRandomSeed($limit, $max)
     {
-
         if (!$this->_cache) {
             return $this->buildRandomIntegers($limit, $max);
         }
 
         $cacheId = $this->randomSeedCacheId();
 
-        $expires = (new DateTime)->modify('+1 day');
+        $expires = (new DateTime())->modify('+1 day');
 
         $freshlyCreated = false;
 
@@ -334,21 +337,19 @@ class Highlight extends View implements HighlightContract
             $freshlyCreated = true;
         }
 
-
         if ($freshlyCreated) {
             return $combinations['seeds'][$combinations['current']];
         }
 
         //update $expires from cache
         $expires = DateTime::createFromFormat(DateTime::ATOM, $combinations['expires']);
-        $next = $combinations['current']+1;
+        $next = $combinations['current'] + 1;
         $lastSeed = count($combinations['seeds']) - 1;
         $combinations['current'] = $next <= $lastSeed ? $next : 0;
 
         $this->_cache->until($expires)->put($cacheId, $combinations);
 
         return $combinations['seeds'][$combinations['current']];
-
     }
 
     protected function freshRandomSeed($limit, $max, $combinations, DateTime $expires)
@@ -356,10 +357,10 @@ class Highlight extends View implements HighlightContract
         $structure = [
             'seeds' => [], // The index combinations
             'current' => 0, // the last shown index
-            'expires' => $expires->format(DateTime::ATOM)
+            'expires' => $expires->format(DateTime::ATOM),
         ];
 
-        for ($i=0,$exclude=[]; $i<$combinations; $i++) {
+        for ($i = 0, $exclude = []; $i < $combinations; ++$i) {
             $structure['seeds'][$i] = $this->buildRandomIntegers($limit, $max, $exclude);
             $exclude = array_unique(array_merge($exclude, $structure['seeds'][$i]));
         }
@@ -368,24 +369,25 @@ class Highlight extends View implements HighlightContract
     }
 
     /**
-     * Create some random integers
+     * Create some random integers.
      *
-     * @param int $count
-     * @param int $max (optional)
+     * @param int  $count
+     * @param int  $max    (optional)
      * @param bool $unique (optional)
+     *
      * @return array
      **/
-    protected function buildRandomIntegers($count, $max=null, $excludes=[], $unique=true)
+    protected function buildRandomIntegers($count, $max = null, $excludes = [], $unique = true)
     {
-
         $max = $max ?: $count;
 
         // If it should not be unique do the simple task
         if (!$unique) {
             $numbers = [];
-            for ($i=0; $i < $count; $i++) {
-                $numbers[] = rand(0, $max-1);
+            for ($i = 0; $i < $count; ++$i) {
+                $numbers[] = rand(0, $max - 1);
             }
+
             return $numbers;
         }
 
@@ -394,7 +396,7 @@ class Highlight extends View implements HighlightContract
         }
 
         // Generate numbers until max
-        $numbers = range(0, $max-1);
+        $numbers = range(0, $max - 1);
 
         // Remove all excludes from the numbers
         foreach ($excludes as $exclude) {
@@ -405,18 +407,17 @@ class Highlight extends View implements HighlightContract
 
         // If the numbers are less than count, add the excludes back until count
 
-        $i=0;
+        $i = 0;
         while (count($numbers) < $count) {
             $numbers[] = $excludes[$i];
-            $i++;
+            ++$i;
         }
-
 
         shuffle($numbers);
 
         $slice = [];
 
-        for ($i=0, $n=0; $i<$count; $i++) {
+        for ($i = 0, $n = 0; $i < $count; ++$i) {
             $slice[] = array_pop($numbers);
         }
 
@@ -424,13 +425,12 @@ class Highlight extends View implements HighlightContract
     }
 
     /**
-     * Generate the base id (without random)
+     * Generate the base id (without random).
      *
      * @return string
      **/
     protected function baseCacheId()
     {
-
         if ($this->_cacheId) {
             return $this->_cacheId;
         }
@@ -439,8 +439,8 @@ class Highlight extends View implements HighlightContract
             'highlight',
             $this->itemProvider->resourceName(),
             $this->method,
-            $this->limit ? (string)$this->limit : 'X',
-            $this->criterias()
+            $this->limit ? (string) $this->limit : 'X',
+            $this->criterias(),
         ];
 
         if ($this->name) {
@@ -448,17 +448,17 @@ class Highlight extends View implements HighlightContract
         }
 
         return $this->_cache->key($cacheId);
-
     }
 
     protected function randomSeedCacheId()
     {
-        return $this->baseCacheId() . '_seed';
+        return $this->baseCacheId().'_seed';
     }
 
     protected function renderHighlights()
     {
         $this->fillAttributes();
+
         return $this->renderString();
     }
 
@@ -468,10 +468,8 @@ class Highlight extends View implements HighlightContract
             return $this->renderHighlights();
         }
 
-        return $this->_cache->get($this, function() {
+        return $this->_cache->get($this, function () {
             return $this->renderHighlights();
         });
     }
-
 }
-
