@@ -1,15 +1,11 @@
 <?php
 
-
 namespace Ems\Assets\Parser;
-
 
 use Ems\Contracts\Core\TextParser;
 
-
 class CssMinParser implements TextParser
 {
-
     /**
      * @var \CssMin
      **/
@@ -18,10 +14,9 @@ class CssMinParser implements TextParser
     protected $defaultOptions = [
     ];
 
-    public function __construct(callable $minifier=null)
+    public function __construct(callable $minifier = null)
     {
-
-        $this->minifier = $minifier ?: function ($source, $filters=[], $plugins=[]) {
+        $this->minifier = $minifier ?: function ($source, $filters = [], $plugins = []) {
             return \CssMin::minify($source, $filters, $plugins);
         };
     }
@@ -30,25 +25,25 @@ class CssMinParser implements TextParser
      * {@inheritdoc}
      *
      * @param string $text
-     * @param array $config The configuration options
-     * @param bool $purgePlaceholders (optional)
+     * @param array  $config            The configuration options
+     * @param bool   $purgePlaceholders (optional)
+     *
      * @return string
      **/
-    public function parse($text, array $config, $purgePlaceholders=true)
+    public function parse($text, array $config, $purgePlaceholders = true)
     {
-
         return call_user_func($this->minifier,
             $text, [], []
         );
 
 //         $options = $this->mergeOptions($config);
-
     }
 
     /**
      * {@inheritdoc}
      *
      * @param string $text
+     *
      * @return string The purged text
      **/
     public function purge($text)
@@ -57,9 +52,10 @@ class CssMinParser implements TextParser
     }
 
     /**
-     * Merges the passed options with the default option
+     * Merges the passed options with the default option.
      *
      * @param array $passedOptions
+     *
      * @return arras
      **/
     protected function mergeOptions(array $passedOptions)
