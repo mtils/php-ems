@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Ems\Assets;
-
 
 use Ems\Contracts\Assets\NameAnalyser;
 use Ems\Contracts\Core\Filesystem;
@@ -15,7 +13,6 @@ use Ems\Core\Exceptions\DetectionFailedException;
  **/
 class ExtensionAnalyser implements NameAnalyser
 {
-
     /**
      * @var \Ems\Contracts\Core\Filesystem
      **/
@@ -27,7 +24,7 @@ class ExtensionAnalyser implements NameAnalyser
     protected $mimeTypes;
 
     /**
-     * @param \Ems\Contracts\Core\Filesystem $files
+     * @param \Ems\Contracts\Core\Filesystem       $files
      * @param \Ems\Contracts\Core\MimeTypeProvider $mimeTypes
      **/
     public function __construct(FileSystem $files, MimeTypeProvider $mimeTypes)
@@ -41,12 +38,13 @@ class ExtensionAnalyser implements NameAnalyser
      *
      * @param string $assetName
      * @param string $groupName (optional)
+     *
      * @return string
+     *
      * @throws NotFound
      **/
-    public function guessMimeType($assetName, $groupName=null)
+    public function guessMimeType($assetName, $groupName = null)
     {
-
         if ($mimeType = $this->mimeTypes->typeOfName($assetName)) {
             return $mimeType;
         }
@@ -60,25 +58,23 @@ class ExtensionAnalyser implements NameAnalyser
         }
 
         throw new DetectionFailedException("Cannot detect mimetype in asset $assetName and group $groupName");
-
     }
 
     /**
      * {@inheritdoc}
      *
      * @param string $assetName
+     *
      * @return string
+     *
      * @throws NotFound
      **/
     public function guessGroup($assetName)
     {
-
         if ($extension = $this->files->extension($assetName)) {
             return $extension;
         }
 
         throw new DetectionFailedException("Cannot detect group of asset $assetName");
-
     }
-
 }
