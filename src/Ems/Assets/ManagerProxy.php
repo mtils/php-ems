@@ -1,15 +1,12 @@
 <?php
 
-
 namespace Ems\Assets;
 
 use Ems\Contracts\Assets\Manager as ManagerContract;
-use Ems\Contracts\Assets\Registry as RegistryContract;
 use Ems\Contracts\Assets\NameAnalyser;
 
 class ManagerProxy implements ManagerContract
 {
-
     /**
      * @var \Ems\Contracts\Assets\Manager
      **/
@@ -26,11 +23,11 @@ class ManagerProxy implements ManagerContract
     protected $groupPrefix = '';
 
     /**
-     * @param \Ems\Contracts\Assets\Manager $parent
+     * @param \Ems\Contracts\Assets\Manager      $parent
      * @param \Ems\Contracts\Assets\NameAnalyser $namer
-     * @param string $groupPrefix
+     * @param string                             $groupPrefix
      **/
-    public function __construct(ManagerContract $parent, NameAnalyser $namer, $groupPrefix='')
+    public function __construct(ManagerContract $parent, NameAnalyser $namer, $groupPrefix = '')
     {
         $this->parent = $parent;
         $this->namer = $namer;
@@ -41,12 +38,14 @@ class ManagerProxy implements ManagerContract
      * {@inheritdoc}
      *
      * @param string|array $asset
-     * @param string $group (optional)
+     * @param string       $group (optional)
+     *
      * @return self
      **/
-    public function import($asset, $group=null)
+    public function import($asset, $group = null)
     {
-        $this->parent->import($asset,$this->mergePassedGroup($asset, $group));
+        $this->parent->import($asset, $this->mergePassedGroup($asset, $group));
+
         return $this;
     }
 
@@ -55,12 +54,14 @@ class ManagerProxy implements ManagerContract
      *
      * @param string $asset
      * @param string $content
-     * @param string $group (optional)
+     * @param string $group   (optional)
+     *
      * @return self
      **/
-    public function inline($asset, $content, $group=null)
+    public function inline($asset, $content, $group = null)
     {
         $this->parent->inline($asset, $content, $this->mergePassedGroup($asset, $group));
+
         return $this;
     }
 
@@ -68,11 +69,12 @@ class ManagerProxy implements ManagerContract
      * {@inheritdoc}
      *
      * @param string $asset
-     * @param string $group (optional)
+     * @param string $group   (optional)
      * @param string $content (optional) (make it a inline asset)
+     *
      * @return \Ems\Contracts\Assets\Asset
      **/
-    public function newAsset($asset, $group=null, $content='')
+    public function newAsset($asset, $group = null, $content = '')
     {
         return $this->parent->newAsset($asset, $this->mergePassedGroup($asset, $group), $content);
     }
@@ -80,13 +82,15 @@ class ManagerProxy implements ManagerContract
     /**
      * {@inheritdoc}
      *
-     * @param string $asset
+     * @param string   $asset
      * @param callable $handler
+     *
      * @return self
      **/
     public function on($asset, callable $handler)
     {
         $this->parent->on($asset, $handler);
+
         return $this;
     }
 
@@ -96,11 +100,13 @@ class ManagerProxy implements ManagerContract
      * because only befores are working the right way.
      *
      * @param string $asset (optional)
+     *
      * @return self
      **/
-    public function after($asset=null)
+    public function after($asset = null)
     {
         $this->parent->after($asset);
+
         return $this;
     }
 
@@ -108,11 +114,13 @@ class ManagerProxy implements ManagerContract
      * {@inheritdoc}
      *
      * @param string $asset (optional)
+     *
      * @return self
      **/
-    public function before($asset=null)
+    public function before($asset = null)
     {
         $this->parent->before($asset);
+
         return $this;
     }
 
@@ -120,6 +128,7 @@ class ManagerProxy implements ManagerContract
      * {@inheritdoc}
      *
      * @param string $group
+     *
      * @return \Ems\Contracts\Assets\Collection
      **/
     public function render($group)
@@ -130,36 +139,41 @@ class ManagerProxy implements ManagerContract
     /**
      * {@inheritdoc}
      *
-     * @param string $groupName
+     * @param string   $groupName
      * @param callable $renderer
+     *
      * @return self
      **/
     public function renderGroupWith($groupName, callable $renderer)
     {
         $this->parent->renderGroupWith($this->groupName($groupName), $renderer);
+
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     *
-     * @return string
-     **/
+     /**
+      * {@inheritdoc}
+      *
+      * @return string
+      **/
      public function groupPrefix()
      {
-        return $this->groupPrefix;
+         return $this->groupPrefix;
      }
 
     /**
      * {@inheritdoc}
      *
      * @param array $attributes
+     *
      * @return self
+     *
      * @see \Ems\Contracts\Core\Copyable
      **/
-    public function replicate(array $attributes=[])
+    public function replicate(array $attributes = [])
     {
         $groupPrefix = isset($attributes['groupPrefix']) ? $attributes['groupPrefix'] : '';
+
         return new static($this->parent, $this->namer, $this->groupName($groupPrefix));
     }
 
@@ -167,7 +181,9 @@ class ManagerProxy implements ManagerContract
      * {@inheritdoc}
      *
      * @param string $key
+     *
      * @return mixed
+     *
      * @throws \Ems\Contracts\Core\Unsupported
      **/
     public function getOption($key)
@@ -179,13 +195,16 @@ class ManagerProxy implements ManagerContract
      * {@inheritdoc}
      *
      * @param string $key
-     * @param mixed $value
+     * @param mixed  $value
+     *
      * @return self
+     *
      * @throws \Ems\Contracts\Core\Unsupported
      **/
     public function setOption($key, $value)
     {
         $this->parent->setOption($key, $value);
+
         return $this;
     }
 
@@ -203,35 +222,41 @@ class ManagerProxy implements ManagerContract
      * {@inheritdoc}
      *
      * @param string|array $keys (optional)
+     *
      * @return self
+     *
      * @throws \Ems\Contracts\Core\Unsupported
      **/
-    public function resetOptions($keys=null)
+    public function resetOptions($keys = null)
     {
         $this->parent->resetOptions($keys);
+
         return $this;
     }
 
     /**
-     * Merged the pased group with the namespace
+     * Merged the pased group with the namespace.
      *
      * @param string $asset
      * @param string $group (optional)
+     *
      * @return string
      **/
-    protected function mergePassedGroup($asset, $group=null)
+    protected function mergePassedGroup($asset, $group = null)
     {
         if (!$this->groupPrefix) {
             return $group;
         }
         $group = $group ? $group : $this->namer->guessGroup($asset);
+
         return $this->groupName($group);
     }
 
     /**
-     * Return the groupName for $group. If a prefix is set, prefix it
+     * Return the groupName for $group. If a prefix is set, prefix it.
      *
      * @param string $group
+     *
      * @return string
      **/
     protected function groupName($group)
@@ -239,7 +264,7 @@ class ManagerProxy implements ManagerContract
         if (!$this->groupPrefix) {
             return $group;
         }
+
         return "{$this->groupPrefix}.$group";
     }
-
 }
