@@ -2,7 +2,7 @@
 
 namespace Ems\XType;
 
-class ObjectType extends NamedFieldType
+class ObjectType extends KeyValueType
 {
     /**
      * The class of this object.

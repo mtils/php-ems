@@ -101,6 +101,18 @@ class AbstractTypeTest extends \Ems\TestCase
 
     }
 
+    /**
+     * @expectedException Ems\Core\Exceptions\UnsupportedParameterException
+     **/
+    public function test_fill_throws_exception_if_parameter_not_supported()
+    {
+
+        $type = $this->newType();
+
+        $type->fill(['foo_crap_bar'=>true]);
+
+    }
+
     public function test_isComplex_returns_expected()
     {
         $type = $this->newType();

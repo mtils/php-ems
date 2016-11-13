@@ -73,24 +73,11 @@ Now follows the whole type plan, not all classes have been implemented yet
                * LengthType
                * AreaType
             * TemporalUnitType
-               * YearType
-               * MonthType
-               * DayType
-               * HourType
-               * MinuteType
-               * SecondType
-               * TimezoneType
     * StringType (HasMinMax)
-       * CharType
     * TemporalType
-        * DateType
-        * TimeType
-        * DateTimeType
     * SequenceType (HasMinMax)
-        * PairType
-            * RangeType (because there is one itemType for from/to)
-               * NumberRangeType
-               * TimeRangeType
+    * PairType
+        * RangeType (because there is one itemType for from/to)
     * KeyValueType
         * ArrayAccessType
         * ObjectType

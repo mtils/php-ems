@@ -2,8 +2,12 @@
 
 namespace Ems\XType;
 
-class SequenceType extends TypeWithLength
+use Ems\Contracts\XType\HasMinMax;
+
+class SequenceType extends AbstractType implements HasMinMax
 {
+    use MinMaxProperties;
+
     /**
      * @var \Ems\Contracts\XType\XType
      **/

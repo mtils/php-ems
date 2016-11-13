@@ -16,6 +16,10 @@ interface PointInTime
 
     const SECOND = 's';
 
+    const TIMEZONE = 'e';
+
+    const WEEKDAY = 'l';
+
     /**
      * Return the precision (self::YEAR|self::MONTH...).
      *

@@ -2,7 +2,7 @@
 
 namespace Ems\XType;
 
-class ArrayAccessType extends NamedFieldType
+class ArrayAccessType extends KeyValueType
 {
     /**
      * {@inheritdoc}

@@ -2,8 +2,12 @@
 
 namespace Ems\XType;
 
-class NumberType extends TypeWithLength
+use Ems\Contracts\XType\HasMinMax;
+
+class NumberType extends AbstractType implements HasMinMax
 {
+    use MinMaxProperties;
+
     /**
      * @var float
      **/

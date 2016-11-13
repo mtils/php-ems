@@ -8,8 +8,9 @@ use Countable;
 use ArrayIterator;
 use OutOfBoundsException;
 use Ems\Contracts\XType\XType;
+use Ems\Core\Exceptions\UnsupportedParameterException;
 
-abstract class NamedFieldType extends AbstractType implements ArrayAccess, Countable, IteratorAggregate
+abstract class KeyValueType extends AbstractType implements ArrayAccess, Countable, IteratorAggregate
 {
     /**
      * @var array
@@ -145,6 +146,10 @@ abstract class NamedFieldType extends AbstractType implements ArrayAccess, Count
                 isset(static::$aliases[static::class][$name])) {
                 $filtered[$name] = $value;
                 continue;
+            }
+
+            if (!$value instanceof XType) {
+                throw new UnsupportedParameterException('The values have to be instanceof XType');
             }
 
             $this->set($name, $value);
