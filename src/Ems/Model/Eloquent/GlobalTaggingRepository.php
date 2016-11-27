@@ -66,7 +66,13 @@ class GlobalTaggingRepository implements RepositoryContract
     {
         $tagHolders = $holders instanceof HoldsTags ? [$holders] : $holders;
 
-        if (!$tags = $this->tagsByForeignId($this->collectIds($tagHolders))) {
+        if (!$holder = $this->findFirst($tagHolders)) {
+            return $this;
+        }
+
+        $resourceName = $holder->resourceName();
+
+        if (!$tags = $this->tagsByForeignId($this->collectIds($tagHolders), $resourceName)) {
             return;
         }
 
@@ -99,7 +105,7 @@ class GlobalTaggingRepository implements RepositoryContract
         $this->assureExistingTags($holder);
 
         $settedIds = $this->collectIds($holder->getTags());
-        $storedIds = $this->collectIds($this->tagsByForeignId([$holder->getId()], true));
+        $storedIds = $this->collectIds($this->tagsByForeignId([$holder->getId()], $holder->resourceName(), true));
 
         list($attach, $unchanged, $detach) = $this->sortByDifference($storedIds, $settedIds);
 
@@ -255,10 +261,11 @@ class GlobalTaggingRepository implements RepositoryContract
         return $this->model->newQuery()->getQuery()->from($this->relationTable);
     }
 
-    protected function tagsByForeignId(array $ids, $onlyFirst = false)
+    protected function tagsByForeignId(array $ids, $resourceName, $onlyFirst = false)
     {
         $query = $this->model->newQuery()
                       ->join($this->relationTable, $this->tagKeyName(), '=', $this->model->getTable().'.'.$this->model->getKeyName())
+                      ->where("{$this->relationTable}.{$this->resourceNameKey}", $resourceName)
                       ->whereIn($this->foreignKeyName(), $ids);
 
         $byId = [];
@@ -309,5 +316,12 @@ class GlobalTaggingRepository implements RepositoryContract
     protected function foreignKeyName()
     {
         return $this->relationTable.'.'.$this->foreignIdKey;
+    }
+
+    protected function findFirst($traversable)
+    {
+        foreach ($traversable as $item) {
+            return $item;
+        }
     }
 }
