@@ -14,7 +14,7 @@ EMS is build to be used on top of other frameworks like laravel, symfony or zend
 EMS ensures that you rely as little as possible on any external library, even on EMS itself. One principle is that only interface methods in EMS are public and no additional methods are visible.
 To ensure that, a lot of interfaces have planned hooks (like Cache::onAfter('invalidate', callable $do)) to ensure its extendability without the need for inheritance or code duplication.
 
-## The state of this packages
+## The state of its packages
 Currently this package could be seen as in beta phase. Almost all of my customer applications are based on cmsable, which is currently ported to ems. So the code works in big and stable applications. (Big means with for example 2 Million users/month)
 But the interfaces are currently changing. All features are developed in a predefined chain of actions:
 
