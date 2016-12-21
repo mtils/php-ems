@@ -3,10 +3,13 @@
 namespace Ems\Core;
 
 use Ems\Contracts\Core\Extractor as ExtractorContract;
+use Ems\Core\Patterns\ExtendableTrait;
 use InvalidArgumentException;
 
 class Extractor implements ExtractorContract
 {
+    use ExtendableTrait;
+
     /**
      * @var string
      **/
@@ -40,6 +43,13 @@ class Extractor implements ExtractorContract
 
     /**
      * {@inheritdoc}
+     * This class has no clue about getting the types of a class/object
+     * model. In eloquent you would read a relation and return its target
+     * class. In propel you would ask a mapbuilder. The extractor acts
+     * as a proxy for a callable you assign to read the relations. It just
+     * cares about the nesting stuff so that your callable can just handle
+     * typeOf($object, $key) without nested keys.
+     *
      *
      * @param mixed  $root
      * @param string $path (optional)
@@ -63,6 +73,31 @@ class Extractor implements ExtractorContract
         }
 
         $segments = explode($this->separator, $path);
+
+        $segmentCount = count($segments);
+
+        $currentObject = $rootObject;
+        $foundType = null;
+
+        $i = 1;
+        foreach ($segments as $segment) {
+            $type = $this->callUntilNotNull([$currentObject, $segment]);
+
+            if ($i == $segmentCount) {
+                $foundType = $type;
+                break;
+            }
+
+            $currentObject = $this->rootInstance($type);
+
+            ++$i;
+        }
+
+        if (!$foundType) {
+            return;
+        }
+
+        return $this->putIntoCache($rootObject, $path, $foundType);
     }
 
     /**
@@ -76,7 +111,7 @@ class Extractor implements ExtractorContract
     }
 
     /**
-     * Search inside an hierarchy by a nested key
+     * Search inside an hierarchy by a nested key.
      *
      * @param mixed  $root (object|array|classname)
      * @param string $path
@@ -85,7 +120,6 @@ class Extractor implements ExtractorContract
      **/
     protected function getNestedValue($root, $path)
     {
-
         $node = &$root;
 
         $segments = explode($this->separator, $path);
@@ -110,7 +144,6 @@ class Extractor implements ExtractorContract
 
             return;
         }
-
     }
 
     /**
@@ -131,58 +164,13 @@ class Extractor implements ExtractorContract
             return $node[$key];
         }
 
-        // Special handling of eloquent relations
-        if (!$this->isEloquentModel($node)) {
-            $result = null;
+        $result = null; //$this->callUntilNotNull($node, $key);
 
-            return $result;
-        }
-
-        if (!method_exists($node, $key)) {
-            $result = null;
-
-            return $result;
-        }
-
-        $relation = $node->{$key}();
-
-        if (!$this->isEloquentRelation($relation)) {
-            $result = null;
-
-            return $result;
-        }
-
-        return $relation->getResults();
+        return $result;
     }
 
     /**
-     * Return true if $node is an eloquent model (without needing 
-     * the actual classes).
-     *
-     * @param mixed $node
-     *
-     * @return bool
-     **/
-    protected function isEloquentModel($node)
-    {
-        return is_object($node) && is_subclass_of($node, 'Illuminate\Database\Eloquent\Model', false);
-    }
-
-    /**
-     * Return true if $node is an eloquent relation (without needing
-     * the actual classes).
-     *
-     * @param mixed $relation
-     *
-     * @return bool
-     **/
-    protected function isEloquentRelation($relation)
-    {
-        return is_object($relation) && is_subclass_of($relation, 'Illuminate\Database\Eloquent\Relations\Relation', false);
-    }
-
-    /**
-     * Return an object not a class
+     * Return an object not a class.
      *
      * @param string|object $root
      *
@@ -190,46 +178,63 @@ class Extractor implements ExtractorContract
      **/
     protected function rootInstance($root)
     {
-
         if (is_object($root)) {
             return $root;
         }
 
         if (!is_string($root)) {
-            throw new InvalidArgumentException("If you pass a path to type() it has to be array, object or a class not " . gettype($root));
+            throw new InvalidArgumentException('If you pass a path to type() it has to be array, object or a class not '.gettype($root));
         }
 
         if (!class_exists($root)) {
             throw new InvalidArgumentException("The passed class '$root' does not exist");
         }
 
-        return new $root;
-
+        return new $root();
     }
 
     /**
-     * Generate a cache id for a type query
+     * Get a type from cache.
      *
      * @param object $rootObject
      * @param string $path
+     *
      * @return string
      **/
     protected function getFromCache($rootObject, $path)
     {
         $cacheId = $this->cacheId($rootObject, $path);
+
         return isset($this->typeCache[$cacheId]) ? $this->typeCache[$cacheId] : null;
     }
 
     /**
-     * Generate a cache id for a type query
+     * Put a type into cache and return it.
      *
      * @param object $rootObject
      * @param string $path
+     * @param string $type
+     *
+     * @return string
+     **/
+    protected function putIntoCache($rootObject, $path, $type)
+    {
+        $cacheId = $this->cacheId($rootObject, $path);
+        $this->typeCache[$cacheId] = $type;
+
+        return $type;
+    }
+
+    /**
+     * Generate a cache id for a type query.
+     *
+     * @param object $rootObject
+     * @param string $path
+     *
      * @return string
      **/
     protected function cacheId($rootObject, $path)
     {
-        return get_class($rootObject) . "|$path";
+        return get_class($rootObject)."|$path";
     }
-
 }

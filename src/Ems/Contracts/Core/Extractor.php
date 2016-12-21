@@ -2,7 +2,13 @@
 
 namespace Ems\Contracts\Core;
 
-interface Extractor
+/**
+ * The Extractor is used to get object values and its type. The type must also
+ * be extracted if the object is not instantiated.
+ * The extendable interface is used to extend the object by callables to extract
+ * the type of a property. Your callable dont have to support nested paths.
+ **/
+interface Extractor extends Extendable
 {
     /**
      * Return the value of $path relative to $root.

@@ -12,8 +12,12 @@ class Helper
      * @param array    $args
      * @return mixed
      **/
-    public static function call(callable $callable, array $args=[])
+    public static function call(callable $callable, $args=[])
     {
+
+        if (!is_array($args)) {
+            $args = [$args];
+        }
 
         switch (count($args)) {
             case 0:
