@@ -6,9 +6,12 @@ use Ems\Contracts\Cache\Cache as CacheContract;
 use Ems\Contracts\Cache\Storage;
 use Ems\Contracts\Cache\Categorizer;
 use Ems\Cache\Exception\CacheMissException;
+use Ems\Core\Patterns\HookableTrait;
 
 class Cache implements CacheContract
 {
+    use HookableTrait;
+
     const DEFAULT_STORAGE = 'default';
 
     /**
@@ -137,7 +140,9 @@ class Cache implements CacheContract
         $tags = $this->categorizer->tags($keySource);
         $lifetime = $this->categorizer->lifetime($keySource);
 
+        $this->callBeforeListeners('put', [$key, $value, $tags, $lifetime]);
         $this->storage->put($key, $value, $tags, $lifetime);
+        $this->callAfterListeners('put', [$key, $value, $tags, $lifetime]);
 
         return $this;
     }
@@ -188,7 +193,9 @@ class Cache implements CacheContract
      */
     public function increment($key, $steps = 1)
     {
+        $this->callBeforeListeners('increment', [$key, $steps]);
         $this->storage->increment($key, $steps);
+        $this->callAfterListeners('increment', [$key, $steps]);
 
         return $this;
     }
@@ -203,7 +210,9 @@ class Cache implements CacheContract
      */
     public function decrement($key, $steps = 1)
     {
+        $this->callBeforeListeners('decrement', [$key, $steps]);
         $this->storage->decrement($key, $steps);
+        $this->callAfterListeners('decrement', [$key, $steps]);
 
         return $this;
     }
@@ -217,7 +226,9 @@ class Cache implements CacheContract
      **/
     public function forget($key)
     {
+        $this->callBeforeListeners('forget', [$key]);
         $this->storage->forget($key);
+        $this->callAfterListeners('forget', [$key]);
 
         return $this;
     }
@@ -231,7 +242,9 @@ class Cache implements CacheContract
      **/
     public function prune($tags)
     {
+        $this->callBeforeListeners('prune', [$tags]);
         $this->storage->prune($tags);
+        $this->callAfterListeners('prune', [$tags]);
 
         return $this;
     }
@@ -276,7 +289,11 @@ class Cache implements CacheContract
      **/
     public function purge()
     {
-        return $this->storage->clear();
+        $this->callBeforeListeners('purge');
+        $result = $this->storage->clear();
+        $this->callAfterListeners('purge');
+
+        return $result;
     }
 
     /**
@@ -328,6 +345,16 @@ class Cache implements CacheContract
     public function offsetUnset($offset)
     {
         $this->forget($offset);
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @return array
+     **/
+    public function methodHooks()
+    {
+        return ['put', 'increment', 'decrement', 'forget', 'prune', 'persist'];
     }
 
     /**

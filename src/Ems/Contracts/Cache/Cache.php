@@ -4,14 +4,19 @@ namespace Ems\Contracts\Cache;
 
 use Ems\Contracts\Core\Storage as BaseStorage;
 use Ems\Contracts\Core\Provider;
+use Ems\Contracts\Core\HasMethodHooks;
 
 /**
  * In opposite to the most cache implementations the
  * ems cache system has a separate logic to guess the
  * cache ids and tags. So the using code will not be full of cache id
  * generation or lifetime, tags,.. code.
+ * The HasMethodHooks interface is to ensure hooks when keys are
+ * invalidated, so at first in put, forget, prune, increment,
+ * decrement and purge. Listeners for read actions can be omitted
+ * for performance reasons.
  **/
-interface Cache extends BaseStorage, Provider
+interface Cache extends BaseStorage, Provider, HasMethodHooks
 {
     /**
      * Turn the $value into a valid cache key.
