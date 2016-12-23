@@ -15,11 +15,6 @@ class CacheProxy extends Cache implements CacheContract
     protected $parent;
 
     /**
-     * @var \Ems\Contracts\Cache\Categorizer
-     **/
-    protected $categorizer;
-
-    /**
      * @var \DateTime
      **/
     protected $until;
@@ -30,14 +25,19 @@ class CacheProxy extends Cache implements CacheContract
     protected $tags = [];
 
     /**
-     * @param \Ems\Cache\Cache                 $parent
+     * @param Cache                            $parent
+     * @param string                           $storageName
      * @param \Ems\Contracts\Cache\Categorizer $categorizer
+     * @param callable                         $listenerProvider
      **/
-    public function __construct(Cache $parent, Storage $storage, Categorizer $categorizer)
+    public function __construct(Cache $parent, $storageName, Categorizer $categorizer,
+                                callable $listenerProvider)
     {
         $this->parent = $parent;
-        $this->storage = $storage;
+        $this->storageName = $storageName;
+        $this->storage = $parent->getStorage($storageName);
         $this->categorizer = $categorizer;
+        $this->listenerProvider = $listenerProvider;
     }
 
     /**
@@ -58,7 +58,9 @@ class CacheProxy extends Cache implements CacheContract
         $tags = $this->tags ? $this->tags : $this->categorizer->tags($value);
         $lifetime = $this->until ? $this->until : $this->categorizer->lifetime($value);
 
+        $this->callBeforeListeners('put', [$this->storageName, $key, $value, $tags, $lifetime]);
         $this->storage->put($key, $value, $tags, $lifetime);
+        $this->callAfterListeners('put', [$this->storageName, $key, $value, $tags, $lifetime]);
 
         return $this;
     }
@@ -72,7 +74,7 @@ class CacheProxy extends Cache implements CacheContract
      **/
     public function until($until = '+1 day')
     {
-        return $this->proxy($this->parent, $this->storage)
+        return $this->proxy($this->parent, $this->storageName)
                     ->with($this->attributes(['until' => $until]));
     }
 
@@ -85,7 +87,7 @@ class CacheProxy extends Cache implements CacheContract
      **/
     public function tag($tags)
     {
-        return $this->proxy($this->parent, $this->storage)
+        return $this->proxy($this->parent, $this->storageName)
                     ->with($this->attributes(['tag' => $tags]));
     }
 
@@ -118,6 +120,49 @@ class CacheProxy extends Cache implements CacheContract
         return $this;
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @param string|object   $event
+     * @param callable        $listener
+     *
+     * @return self
+     **/
+    public function onBefore($event, callable $listener)
+    {
+        $this->parent->onBefore($event, $listener);
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @param string|object   $event
+     * @param callable        $listener
+     *
+     * @return self
+     **/
+    public function onAfter($event, callable $listener)
+    {
+        $this->parent->onAfter($event, $listener);
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @param string|object $event
+     * @param string $position ('after'|'before'|'')
+     *
+     * @return array
+     **/
+    public function getListeners($event, $position = '')
+    {
+        return call_user_func($this->listenerProvider, $event, $position);
+    }
+
     public function with(array $attributes)
     {
         if (isset($attributes['until'])) {
@@ -131,6 +176,11 @@ class CacheProxy extends Cache implements CacheContract
         return $this;
     }
 
+    /**
+     * Set inline until
+     *
+     * @param string|DateTime $until
+     **/
     protected function setUntil($until)
     {
         if ($until instanceof DateTime) {
@@ -142,6 +192,13 @@ class CacheProxy extends Cache implements CacheContract
         $this->until = (new DateTime())->modify('+'.ltrim($until, '+'));
     }
 
+    /**
+     * Build attributes for a fork
+     *
+     * @param array $overwrite
+     *
+     * @return array
+     **/
     protected function attributes(array $overwrite = [])
     {
         return array_merge(['until' => $this->until, 'tag' => $this->tags], $overwrite);

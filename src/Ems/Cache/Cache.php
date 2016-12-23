@@ -31,11 +31,20 @@ class Cache implements CacheContract
     protected $categorizer;
 
     /**
+     * @var string
+     **/
+    protected $storageName;
+
+    /**
      * @param \Ems\Contracts\Cache\Categorizer $categorizer
      **/
     public function __construct(Categorizer $categorizer)
     {
         $this->categorizer = $categorizer;
+        $this->listenerProvider = function ($event, $position='') {
+            return $this->getListeners($event, $position);
+        };
+        $this->storageName = self::DEFAULT_STORAGE;
     }
 
     /**
@@ -141,9 +150,9 @@ class Cache implements CacheContract
         $tags = $this->categorizer->tags($keySource);
         $lifetime = $this->categorizer->lifetime($keySource);
 
-        $this->callBeforeListeners('put', [$key, $value, $tags, $lifetime]);
+        $this->callBeforeListeners('put', [$this->storageName, $key, $value, $tags, $lifetime]);
         $this->storage->put($key, $value, $tags, $lifetime);
-        $this->callAfterListeners('put', [$key, $value, $tags, $lifetime]);
+        $this->callAfterListeners('put', [$this->storageName, $key, $value, $tags, $lifetime]);
 
         return $this;
     }
@@ -157,7 +166,7 @@ class Cache implements CacheContract
      **/
     public function until($until = '+1 day')
     {
-        return $this->proxy($this, $this->storage)->with(['until' => $until]);
+        return $this->proxy($this, $this->storageName)->with(['until' => $until]);
     }
 
     /**
@@ -169,7 +178,7 @@ class Cache implements CacheContract
      **/
     public function tag($tags)
     {
-        return $this->proxy($this, $this->storage)->with(['tag' => $tags]);
+        return $this->proxy($this, $this->storageName)->with(['tag' => $tags]);
     }
 
     /**
@@ -181,7 +190,7 @@ class Cache implements CacheContract
      **/
     public function storage($name)
     {
-        return $this->proxy($this, $this->storages[$name]);
+        return $this->proxy($this, $name);
     }
 
     /**
@@ -194,9 +203,9 @@ class Cache implements CacheContract
      */
     public function increment($key, $steps = 1)
     {
-        $this->callBeforeListeners('increment', [$key, $steps]);
+        $this->callBeforeListeners('increment', [$this->storageName, $key, $steps]);
         $this->storage->increment($key, $steps);
-        $this->callAfterListeners('increment', [$key, $steps]);
+        $this->callAfterListeners('increment', [$this->storageName, $key, $steps]);
 
         return $this;
     }
@@ -211,9 +220,9 @@ class Cache implements CacheContract
      */
     public function decrement($key, $steps = 1)
     {
-        $this->callBeforeListeners('decrement', [$key, $steps]);
+        $this->callBeforeListeners('decrement', [$this->storageName, $key, $steps]);
         $this->storage->decrement($key, $steps);
-        $this->callAfterListeners('decrement', [$key, $steps]);
+        $this->callAfterListeners('decrement', [$this->storageName, $key, $steps]);
 
         return $this;
     }
@@ -227,9 +236,9 @@ class Cache implements CacheContract
      **/
     public function forget($key)
     {
-        $this->callBeforeListeners('forget', [$key]);
+        $this->callBeforeListeners('forget', [$this->storageName, $key]);
         $this->storage->forget($key);
-        $this->callAfterListeners('forget', [$key]);
+        $this->callAfterListeners('forget', [$this->storageName, $key]);
 
         return $this;
     }
@@ -243,9 +252,9 @@ class Cache implements CacheContract
      **/
     public function prune($tags)
     {
-        $this->callBeforeListeners('prune', [$tags]);
+        $this->callBeforeListeners('prune', [$this->storageName, $tags]);
         $this->storage->prune($tags);
-        $this->callAfterListeners('prune', [$tags]);
+        $this->callAfterListeners('prune', [$this->storageName, $tags]);
 
         return $this;
     }
@@ -310,9 +319,9 @@ class Cache implements CacheContract
      **/
     public function purge()
     {
-        $this->callBeforeListeners('purge');
+        $this->callBeforeListeners('purge', [$this->storageName]);
         $result = $this->storage->clear();
-        $this->callAfterListeners('purge');
+        $this->callAfterListeners('purge', [$this->storageName]);
 
         return $result;
     }
@@ -375,20 +384,25 @@ class Cache implements CacheContract
      **/
     public function methodHooks()
     {
-        return ['put', 'increment', 'decrement', 'forget', 'prune', 'persist'];
+        return ['put', 'increment', 'decrement', 'forget', 'prune', 'purge'];
     }
 
     /**
      * Create a new proxy for a different storage.
      *
      * @param self    $parent
-     * @param Storage $storage
+     * @param string  $storageName
      *
      * @return CacheProxy
      **/
-    protected function proxy($parent, Storage $storage)
+    protected function proxy($parent, $storageName)
     {
-        return new CacheProxy($parent, $storage, $this->categorizer);
+        return new CacheProxy(
+            $parent,
+            $storageName,
+            $this->categorizer,
+            $this->listenerProvider
+        );
     }
 
     /**

@@ -2,9 +2,11 @@
 
 namespace Ems\Cache;
 
+use Ems\Testing\Cheat;
 use Ems\Contracts\Cache\Cache as CacheContract;
 use Ems\Contracts\Cache\Categorizer;
 use Ems\Contracts\Cache\Storage;
+use Ems\Cache\Storage\NullStorage;
 use DateTime;
 use Ems\Testing\LoggingCallable;
 use Mockery as m;
@@ -458,7 +460,7 @@ class CacheTest extends \Ems\TestCase
     public function test_methodHooks_returns_hooks_for_all_altering_methods()
     {
         $cache = $this->newCache();
-        $alteringMethods = ['put', 'increment', 'decrement', 'forget', 'prune', 'persist'];
+        $alteringMethods = ['put', 'increment', 'decrement', 'forget', 'prune', 'purge'];
 
         $hooks = $cache->methodHooks();
 
@@ -467,10 +469,160 @@ class CacheTest extends \Ems\TestCase
         }
     }
 
-    protected function newCache(Categorizer $categorizer=null)
+    public function test_put_hook_is_called()
+    {
+        $cache = $this->newCache(null, $this->newStorage());
+        $listener = new LoggingCallable();
+
+        $cache->onBefore('put', $listener)->onAfter('put', $listener);
+
+
+        $id = 'foo';
+        $value = 'bar';
+        $tags = ['a', 'b'];
+        $until = new DateTime();
+
+        $cache->until($until)->tag($tags)->put($id, $value);
+
+        $this->assertCount(2, $listener);
+        $this->assertEquals('default', $listener->arg(0));
+        $this->assertEquals($id, $listener->arg(1));
+        $this->assertEquals($value, $listener->arg(2));
+        $this->assertEquals($tags, $listener->arg(3));
+        $this->assertEquals($until, $listener->arg(4));
+    }
+
+    public function test_increment_hook_is_called()
+    {
+        $cache = $this->newCache(null, $this->newStorage());
+        $listener = new LoggingCallable();
+
+        $cache->onBefore('increment', $listener)->onAfter('increment', $listener);
+
+
+        $id = 'foo';
+        $value = 2;
+
+        $cache->increment($id, $value);
+
+        $this->assertCount(2, $listener);
+        $this->assertEquals('default', $listener->arg(0));
+        $this->assertEquals($id, $listener->arg(1));
+        $this->assertEquals($value, $listener->arg(2));
+    }
+
+    public function test_decrement_hook_is_called()
+    {
+        $cache = $this->newCache(null, $this->newStorage());
+        $listener = new LoggingCallable();
+
+        $cache->onBefore('decrement', $listener)->onAfter('decrement', $listener);
+
+
+        $id = 'foo';
+        $value = 2;
+
+        $cache->decrement($id, $value);
+
+        $this->assertCount(2, $listener);
+        $this->assertEquals('default', $listener->arg(0));
+        $this->assertEquals($id, $listener->arg(1));
+        $this->assertEquals($value, $listener->arg(2));
+    }
+
+    public function test_forget_hook_is_called()
+    {
+        $cache = $this->newCache(null, $this->newStorage());
+        $listener = new LoggingCallable();
+
+        $cache->onBefore('forget', $listener)->onAfter('forget', $listener);
+
+
+        $id = 'foo';
+
+        $cache->forget($id);
+
+        $this->assertCount(2, $listener);
+        $this->assertEquals('default', $listener->arg(0));
+        $this->assertEquals($id, $listener->arg(1));
+    }
+
+    public function test_prune_hook_is_called()
+    {
+        $cache = $this->newCache(null, $this->newStorage());
+        $listener = new LoggingCallable();
+
+        $cache->onBefore('prune', $listener)->onAfter('prune', $listener);
+
+
+        $tags = ['a','b'];
+
+        $cache->prune($tags);
+
+        $this->assertCount(2, $listener);
+        $this->assertEquals('default', $listener->arg(0));
+        $this->assertEquals($tags, $listener->arg(1));
+    }
+
+    public function test_purge_hook_is_called()
+    {
+        $cache = $this->newCache(null, $this->newStorage());
+        $listener = new LoggingCallable();
+
+        $cache->onBefore('purge', $listener)->onAfter('purge', $listener);
+
+
+        $cache->purge();
+
+        $this->assertCount(2, $listener);
+        $this->assertEquals('default', $listener->arg(0));
+    }
+
+    public function test_hook_on_proxy_is_called()
+    {
+        $cache = $this->newCache(null, $this->newStorage());
+        $fastStorage = $this->newStorage();
+        $cache->addStorage('fast', $fastStorage);
+
+        $listener = new LoggingCallable();
+
+        $proxy = $cache->storage('fast');
+
+        $proxy->onBefore('purge', $listener)->onAfter('purge', $listener);
+
+        $this->assertInstanceOf(CacheProxy::class, $proxy);
+
+
+        $proxy->purge();
+
+        $this->assertCount(2, $listener);
+        $this->assertEquals('fast', $listener->arg(0));
+    }
+
+    public function test_isArrayOfStrings_return_false_if_no_array_posing_for_test_coverage()
+    {
+        $cache = $this->newCache();
+
+        $this->assertFalse(Cheat::call($cache, 'isArrayOfStrings', ['foo']));
+    }
+
+    public function test_some_NullStorage_methods_posing_for_test_coverage()
+    {
+        $storage = $this->newStorage();
+        $this->assertEquals('foo', $storage->escape('foo'));
+        $this->assertFalse($storage->has('foo'));
+        $this->assertNull($storage->get('foo'));
+    }
+
+
+    protected function newCache(Categorizer $categorizer=null, Storage $storage=null)
     {
         $categorizer = $categorizer ?: $this->mockCategorizer();
-        return new Cache($categorizer);
+        $cache = new Cache($categorizer);
+        if ($storage) {
+            $cache->addStorage('default', $storage);
+        }
+        return $cache;
     }
 
     protected function mockCategorizer()
@@ -481,5 +633,10 @@ class CacheTest extends \Ems\TestCase
     protected function mockStorage()
     {
         return $this->mock(Storage::class);
+    }
+
+    protected function newStorage()
+    {
+        return new NullStorage();
     }
 }
