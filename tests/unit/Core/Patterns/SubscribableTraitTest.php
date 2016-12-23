@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Core\Patterns;
 
 use Ems\Contracts\Core\Subscribable;
@@ -8,7 +7,6 @@ use Ems\Testing\LoggingCallable;
 
 class SubscribableTraitTest extends \Ems\TestCase
 {
-
     public function test_implements_interface()
     {
         $this->assertInstanceOf(
@@ -21,12 +19,11 @@ class SubscribableTraitTest extends \Ems\TestCase
     {
         $hookable = $this->newSubscribable();
 
-        $listener = function(){};
+        $listener = function () {};
 
         $hookable->on('get', $listener);
 
         $this->assertSame($listener, $hookable->getListeners('get')[0]);
-
     }
 
     /**
@@ -36,12 +33,11 @@ class SubscribableTraitTest extends \Ems\TestCase
     {
         $hookable = $this->newSubscribable();
 
-        $listener = function(){};
+        $listener = function () {};
 
         $hookable->on('get', $listener);
 
         $this->assertSame($listener, $hookable->getListeners('get', 'before')[0]);
-
     }
 
     public function test_getListeners_return_empty_array_if_no_listeners_assigned()
@@ -49,18 +45,17 @@ class SubscribableTraitTest extends \Ems\TestCase
         $hookable = $this->newSubscribable();
 
         $this->assertEquals([], $hookable->getListeners('get'));
-
     }
 
     public function test_call_before_listeners()
     {
         $hookable = $this->newSubscribable();
 
-        $listener = new LoggingCallable;
+        $listener = new LoggingCallable();
 
         $hookable->on('get', $listener);
 
-        $hookable->fire('get',[]);
+        $hookable->fire('get', []);
 
         $hookable->fire('get', ['a']);
 
@@ -76,11 +71,10 @@ class SubscribableTraitTest extends \Ems\TestCase
 
         $this->assertEquals([], $listener->args(0));
         $this->assertEquals(['a'], $listener->args(1));
-        $this->assertEquals(['a','b'], $listener->args(2));
-        $this->assertEquals(['a','b','c'], $listener->args(3));
-        $this->assertEquals(['a','b','c','d'], $listener->args(4));
-        $this->assertEquals(['a','b','c','d','e'], $listener->args(5));
-
+        $this->assertEquals(['a', 'b'], $listener->args(2));
+        $this->assertEquals(['a', 'b', 'c'], $listener->args(3));
+        $this->assertEquals(['a', 'b', 'c', 'd'], $listener->args(4));
+        $this->assertEquals(['a', 'b', 'c', 'd', 'e'], $listener->args(5));
     }
 
     /**
@@ -90,9 +84,9 @@ class SubscribableTraitTest extends \Ems\TestCase
     {
         $hookable = $this->newSubscribable();
 
-        $listener = new LoggingCallable;
+        $listener = new LoggingCallable();
 
-        $hookable->on(new \stdClass, $listener);
+        $hookable->on(new \stdClass(), $listener);
     }
 
     /**
@@ -102,20 +96,20 @@ class SubscribableTraitTest extends \Ems\TestCase
     {
         $hookable = $this->newHookableWithoutMethodHooks();
 
-        $listener = new LoggingCallable;
+        $listener = new LoggingCallable();
 
         $hookable->onAfter(get_class($this), $listener);
     }
 
     protected function newSubscribable()
     {
-        $object = new SubscribableObject;
+        $object = new SubscribableObject();
         return $object;
     }
 
     protected function newHookableWithoutMethodHooks()
     {
-        return new WithoutMethodHooks;
+        return new WithoutMethodHooks();
     }
 }
 
@@ -127,5 +121,4 @@ class SubscribableObject implements Subscribable
     {
         return $this->callOnListeners($event, $args);
     }
-
 }

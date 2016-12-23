@@ -1,11 +1,10 @@
 <?php
 
-
 namespace Ems\Core\Laravel;
 
 use Ems\Core\IOCContainerTest as BaseContainerTest;
 
-require_once(__DIR__ . '/../IOCContainerTest.php');
+require_once __DIR__.'/../IOCContainerTest.php';
 
 use Ems\Core\ContainerTest_Interface;
 use Ems\Core\ContainerTest_Class;
@@ -14,11 +13,10 @@ use Ems\Core\ContainerTest_ClassDependencies;
 
 class IOCContainerTest extends BaseContainerTest
 {
-
     protected function newContainer()
     {
         $this->preLoadUnloadableClasses();
-        return new IOCContainer;
+        return new IOCContainer();
     }
 
     protected function preLoadUnloadableClasses()
@@ -34,5 +32,4 @@ class IOCContainerTest extends BaseContainerTest
             class_exists("Ems\\Core\\$class", true);
         }
     }
-
 }

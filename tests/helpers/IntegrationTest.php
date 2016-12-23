@@ -6,10 +6,8 @@ namespace Ems;
 use Ems\Core\LocalFilesystem;
 use Ems\Core\Application;
 
-
 class IntegrationTest extends TestCase
 {
-
     protected $purgeTempFiles = true;
 
     protected $_app;
@@ -24,7 +22,7 @@ class IntegrationTest extends TestCase
 
     protected function newFilesystem()
     {
-        return new LocalFilesystem;
+        return new LocalFilesystem();
     }
 
     protected function tempFile()
@@ -37,7 +35,7 @@ class IntegrationTest extends TestCase
     {
         $tempDir = sys_get_temp_dir();
         $prefix = basename(str_replace('\\', '/', get_class($this)));
-        return $tempDir . '/' . uniqid("$prefix-") . $extension;
+        return $tempDir.'/'.uniqid("$prefix-").$extension;
     }
 
     protected function tempDirName()
@@ -54,15 +52,13 @@ class IntegrationTest extends TestCase
         return $tempDirName;
     }
 
-    protected function createNestedDirectories(array $structure, &$pathStructure=array(), $tempDir=null)
+    protected function createNestedDirectories(array $structure, &$pathStructure=[], $tempDir=null)
     {
-
         $tempDir = $tempDir ? $tempDir : $this->tempDirName();
         $fs = $this->newFilesystem();
         $fs->makeDirectory($tempDir, 0755, true, true);
 
         foreach ($structure as $name=>$node) {
-
             $path = "$tempDir/$name";
 
             if (!is_array($node)) {
@@ -81,7 +77,6 @@ class IntegrationTest extends TestCase
 
     public function app($binding=null, array $parameters=[])
     {
-
         if (!$this->_app) {
             $this->_app = new Application(realpath(__DIR__.'/../../'));
         }
@@ -96,15 +91,14 @@ class IntegrationTest extends TestCase
         }
 
         if (!$this->purgeTempFiles) {
-            $this->_createdDirectories = array();
+            $this->_createdDirectories = [];
             return;
         }
 
         $fs = $this->newFilesystem();
 
-        foreach($this->_createdDirectories as $dir) {
+        foreach ($this->_createdDirectories as $dir) {
             $fs->delete($dir);
         }
     }
-
 }

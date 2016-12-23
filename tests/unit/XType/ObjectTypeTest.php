@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\XType;
 
 
@@ -11,10 +10,8 @@ require_once __DIR__.'/AbstractTypeTest.php';
 
 class ObjectTypeTest extends ArrayAccessTest
 {
-
     protected function newType()
     {
-        return new ObjectType;
+        return new ObjectType();
     }
-
 }

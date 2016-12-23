@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Contracts\Mail;
 
 /**
@@ -23,9 +22,9 @@ interface MailConfigProvider
      * @param string $resourceName
      * @param mixed  $resourceId   (optional)
      *
-     * @return \Ems\Contracts\Mail\MailConfig
-     *
      * @throws \Ems\Contracts\Core\Errors\NotFound
+     *
+     * @return \Ems\Contracts\Mail\MailConfig
      **/
     public function configFor($resourceName, $resourceId = null);
 }

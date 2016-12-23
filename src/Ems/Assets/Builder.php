@@ -59,7 +59,7 @@ class Builder implements BuilderContract
         $parserOptions = array_merge($config->parserOptions(), [
             '*' => [
                 'build_config' => $config,
-                'target_path' => $absolutePath,
+                'target_path'  => $absolutePath,
             ],
         ]);
 

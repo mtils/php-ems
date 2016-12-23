@@ -355,7 +355,7 @@ class Highlight extends View implements HighlightContract
     protected function freshRandomSeed($limit, $max, $combinations, DateTime $expires)
     {
         $structure = [
-            'seeds' => [], // The index combinations
+            'seeds'   => [], // The index combinations
             'current' => 0, // the last shown index
             'expires' => $expires->format(DateTime::ATOM),
         ];

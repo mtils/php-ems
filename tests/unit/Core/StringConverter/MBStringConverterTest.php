@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Core\StringConverter;
 
 
@@ -9,7 +8,6 @@ require_once __DIR__.'/AbstractStringConverterTest.php';
 
 class MBStringConverterTest extends AbstractStringConverterTest
 {
-
     /**
      * @var string
      **/
@@ -22,7 +20,6 @@ class MBStringConverterTest extends AbstractStringConverterTest
 
     protected function newConverter()
     {
-        return new MBStringConverter;
+        return new MBStringConverter();
     }
-
 }

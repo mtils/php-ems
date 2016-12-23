@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Mail\Laravel;
 
 use Ems\Contracts\Mail\MessageContentProvider;

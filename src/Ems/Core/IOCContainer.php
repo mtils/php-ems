@@ -45,9 +45,9 @@ class IOCContainer implements ContainerContract
      * @param string $abstract
      * @param array  $parameters (optional)
      *
-     * @return object
-     *
      * @throws \OutOfBoundsException
+     *
+     * @return object
      **/
     public function __invoke($abstract, array $parameters = [])
     {
@@ -206,7 +206,7 @@ class IOCContainer implements ContainerContract
      *
      * @return object
      **/
-    protected function resolve($abstract, array $parameters = array())
+    protected function resolve($abstract, array $parameters = [])
     {
         if ($this->bound($abstract)) {
             array_unshift($parameters, $this);
@@ -222,7 +222,7 @@ class IOCContainer implements ContainerContract
 
         $constructorParams = $constructor->getParameters();
 
-        $callParams = array();
+        $callParams = [];
 
         foreach ($constructorParams as $param) {
             if ($param->getClass()) {
@@ -248,10 +248,10 @@ class IOCContainer implements ContainerContract
      **/
     protected function storeBinding($abstract, $concrete, $shared)
     {
-        $this->bindings[$abstract] = array(
+        $this->bindings[$abstract] = [
             'concrete' => $this->checkAndReturnCallable($concrete),
-            'shared' => $shared,
-        );
+            'shared'   => $shared,
+        ];
 
         return $this;
     }
@@ -261,9 +261,9 @@ class IOCContainer implements ContainerContract
      *
      * @param callable $callback
      *
-     * @return callable
-     *
      * @throws InvalidArgumentException
+     *
+     * @return callable
      **/
     protected function checkAndReturnCallable($callback)
     {

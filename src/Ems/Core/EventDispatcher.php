@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Core;
 
 
@@ -10,7 +9,6 @@ use Ems\Core\Patterns\HookableTrait;
 use Ems\Core\Patterns\SubscribableTrait;
 use Ems\Core\Helper;
 
-
 /**
  * This event dispatcher supports only events by string
  * comparison. You can fire objects but it will compare
@@ -18,7 +16,6 @@ use Ems\Core\Helper;
  **/
 class EventDispatcher implements DispatcherContract
 {
-
     use HookableTrait;
     use SubscribableTrait;
 
@@ -38,7 +35,6 @@ class EventDispatcher implements DispatcherContract
      **/
     public function fire($event, $payload = [], $halt = false)
     {
-
         if (!is_array($payload)) {
             $payload = [$payload];
         }
@@ -46,7 +42,6 @@ class EventDispatcher implements DispatcherContract
         $returnValues = [];
 
         foreach ($this->collectListeners($event) as $listener) {
-
             $returnValue = Helper::call($listener, $payload);
 
             if ($returnValue !== null && $halt) {
@@ -59,11 +54,9 @@ class EventDispatcher implements DispatcherContract
             }
 
             $returnValues[] = $returnValue;
-
         }
 
         return $returnValues;
-
     }
 
     /**
@@ -93,10 +86,9 @@ class EventDispatcher implements DispatcherContract
      **/
     public function getListeners($event, $position = '')
     {
-
         $event = $this->eventToString($event);
 
-        if (!in_array($position, ['','before','after'], true)) {
+        if (!in_array($position, ['', 'before', 'after'], true)) {
             throw new UnsupportedParameterException('EventDispatcher only supports position "","before","after"');
         }
 
@@ -109,13 +101,13 @@ class EventDispatcher implements DispatcherContract
         }
 
         return $this->getAfterOrBeforeListeners($event, $position);
-
     }
 
     /**
      * {@inheritdoc}
      *
      * @param callable $listener
+     *
      * @return self
      **/
     public function onAll(callable $listener)
@@ -133,13 +125,12 @@ class EventDispatcher implements DispatcherContract
      **/
     protected function collectListeners($event)
     {
-
         $event = $this->eventToString($event);
 
         $listeners = [];
 
         foreach ($this->allListeners as $listener) {
-            $listeners[] = function() use ($event, $listener) {
+            $listeners[] = function () use ($event, $listener) {
                 $args = func_get_args();
                 array_unshift($args, $event);
                 return Helper::call($listener, $args);
@@ -165,6 +156,7 @@ class EventDispatcher implements DispatcherContract
      * Make a string out of an event
      *
      * @param object|string $event
+     *
      * @return string
      **/
     protected function eventToString($event)
@@ -177,10 +169,10 @@ class EventDispatcher implements DispatcherContract
      * events
      *
      * @param string $event
+     *
      * @throws \Ems\Contracts\Core\Errors\UnSupported
      **/
     protected function checkEvent($event)
     {
     }
-
 }

@@ -32,7 +32,6 @@ trait HookableTrait
      **/
     public function onBefore($event, callable $listener)
     {
-
         $this->checkEvent($event);
 
         if (!isset($this->beforeListeners[$event])) {
@@ -86,7 +85,7 @@ trait HookableTrait
      **/
     protected function getAfterOrBeforeListeners($event, $position)
     {
-        if (!in_array($position, ['before','after'])) {
+        if (!in_array($position, ['before', 'after'])) {
             throw new UnsupportedParameterException("Unsupported event position '$position'");
         }
 
@@ -151,12 +150,12 @@ trait HookableTrait
      * has method hooks
      *
      * @param string $event
+     *
      * @throws \Ems\Contracts\Core\Errors\UnSupported
      **/
     protected function checkEvent($event)
     {
-
-        if (is_object($event) || strpos($event,'\\')) { // looks like a class
+        if (is_object($event) || strpos($event, '\\')) { // looks like a class
             throw new UnsupportedParameterException('Only string based events are supported');
         }
 
@@ -168,5 +167,4 @@ trait HookableTrait
             throw new NotImplementedException("Event or method '$event' is not hookable");
         }
     }
-
 }

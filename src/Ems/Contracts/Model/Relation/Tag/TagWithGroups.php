@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Contracts\Model\Relation\Tag;
 
 interface TagWithGroups extends Tag

@@ -6,7 +6,6 @@ use JShrink\Minifier;
 
 class JShrinkParserTest extends \Ems\TestCase
 {
-
     public function test_implements_interface()
     {
         $this->assertInstanceOf(
@@ -27,13 +26,11 @@ class JShrinkParserTest extends \Ems\TestCase
         $this->assertLessThan(strlen($fatJs), strlen($minified));
         $this->assertContains('_blank', $minified);
         $this->assertContains('bold', $minified);
-
     }
 
     protected function newParser(Minifier $minifier=null)
     {
         return new JShrinkParser($minifier);
     }
-
 }
 

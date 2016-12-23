@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Model\Eloquent;
 
 use InvalidArgumentException;
@@ -231,8 +230,8 @@ class GlobalTaggingRepository implements RepositoryContract
     protected function createPivotValues(HoldsTags $holder, $tagId)
     {
         return [
-            $this->tagIdKey => $tagId,
-            $this->foreignIdKey => $holder->getKey(),
+            $this->tagIdKey        => $tagId,
+            $this->foreignIdKey    => $holder->getKey(),
             $this->resourceNameKey => $holder->resourceName(),
         ];
     }

@@ -12,10 +12,8 @@ use Ems\Testing\LoggingCallable;
 use Ems\Testing\Cheat;
 use Swift_Message;
 
-
 class MessageTest extends TestCase
 {
-
     public function test_implements_interface()
     {
         $this->assertInstanceOf('Ems\Contracts\Mail\Message', $this->newMessage());
@@ -23,7 +21,6 @@ class MessageTest extends TestCase
 
     public function test_clearRecipientHeaders_removes_all_to_addresses()
     {
-
         $message = $this->newMessage();
 
         $message->to('foo@bar.de');
@@ -45,12 +42,10 @@ class MessageTest extends TestCase
         $message->clearRecipientHeaders();
 
         $this->assertFalse(address_exists($swift, 'to'));
-
     }
 
     public function test_clearRecipientHeaders_removes_all_cc_addresses()
     {
-
         $message = $this->newMessage();
 
         $message->cc('foo@bar.de');
@@ -76,7 +71,6 @@ class MessageTest extends TestCase
 
     public function test_clearRecipientHeaders_removes_all_bcc_addresses()
     {
-
         $message = $this->newMessage();
 
         $message->bcc('foo@bar.de');
@@ -102,7 +96,6 @@ class MessageTest extends TestCase
 
     public function test_clearRecipientHeaders_removes_all_addresses()
     {
-
         $message = $this->newMessage();
 
         $message->to('somebody@bar.de');
@@ -127,7 +120,7 @@ class MessageTest extends TestCase
 
     protected function newMessage(Swift_Message $message = null)
     {
-        $message = $message ?: new Swift_Message;
+        $message = $message ?: new Swift_Message();
         return new Message($message);
     }
 
@@ -155,11 +148,10 @@ class MessageTest extends TestCase
     {
         return $this->mock('Ems\Contracts\Mail\MailConfig');
     }
-
 }
 
-function address_exists(Swift_Message $message, $name) {
-
+function address_exists(Swift_Message $message, $name)
+{
     foreach ($message->getHeaders()->listAll() as $header) {
         if (strtolower($header) == strtolower($name)) {
             return true;
@@ -167,5 +159,4 @@ function address_exists(Swift_Message $message, $name) {
     }
 
     return false;
-
 }

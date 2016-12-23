@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Cache;
 
 use Ems\Contracts\Cache\Cache as CacheContract;
@@ -12,7 +11,6 @@ use Mockery as m;
 
 class CacheTest extends \Ems\TestCase
 {
-
     public function test_implements_interface()
     {
         $this->assertInstanceOf(CacheContract::class, $this->newCache());
@@ -28,7 +26,6 @@ class CacheTest extends \Ems\TestCase
         $storage->shouldReceive('escape')->with('foo')->andReturn('bar');
 
         $this->assertEquals('bar', $cache->key('foo'));
-
     }
 
     public function test_has_forwards_to_storage()
@@ -60,7 +57,6 @@ class CacheTest extends \Ems\TestCase
 
         $this->assertEquals('bar', $cache->get('foo'));
         $this->assertEquals('bar', $cache['foo']);
-
     }
 
     public function test_get_asks_categorizer_if_key_is_cacheable_array()
@@ -70,7 +66,7 @@ class CacheTest extends \Ems\TestCase
         $storage = $this->mockStorage();
         $cache->addStorage('default', $storage);
 
-        $key = ['a'=>'b'];
+        $key = ['a'=> 'b'];
 
         $categorizer->shouldReceive('key')->with($key)->andReturn('a_array');
         $storage->shouldReceive('escape')->with('a_array')->andReturn('a_array');
@@ -79,7 +75,6 @@ class CacheTest extends \Ems\TestCase
         $storage->shouldReceive('get')->with('a_array')->andReturn('bar');
 
         $this->assertEquals('bar', $cache->get($key));
-
     }
 
     public function test_get_returns_null_if_default_is_null_and_no_hit()
@@ -92,7 +87,6 @@ class CacheTest extends \Ems\TestCase
         $storage->shouldReceive('get')->with('a')->andReturn(null);
 
         $this->assertNull($cache->get('a'));
-
     }
 
     public function test_get_passes_array_of_strings_to_storage()
@@ -107,7 +101,6 @@ class CacheTest extends \Ems\TestCase
         $storage->shouldReceive('get')->with($keys)->andReturn(true);
 
         $this->assertTrue($cache->get($keys));
-
     }
 
     public function test_get_stores_value_and_returns_it_if_default_value_passed()
@@ -120,7 +113,7 @@ class CacheTest extends \Ems\TestCase
         $key = 'foo';
         $passed = 'bar';
         $tags = ['a','b'];
-        $lifetime = new DateTime;
+        $lifetime = new DateTime();
 
         $categorizer->shouldReceive('tags')->andReturn($tags);
         $categorizer->shouldReceive('lifetime')->andReturn($lifetime);
@@ -131,7 +124,6 @@ class CacheTest extends \Ems\TestCase
                 ->andReturn($storage);
 
         $this->assertEquals($passed, $cache->get($key, $passed));
-
     }
 
     public function test_get_stores_value_and_returns_it_if_callable_default_passed()
@@ -143,9 +135,9 @@ class CacheTest extends \Ems\TestCase
 
         $key = 'foo';
         $result = 'cache_result';
-        $callable = new LoggingCallable(function() use ($result) { return $result; });
+        $callable = new LoggingCallable(function () use ($result) { return $result; });
         $tags = ['a','b'];
-        $lifetime = new DateTime;
+        $lifetime = new DateTime();
 
         $categorizer->shouldReceive('tags')->andReturn($tags);
         $categorizer->shouldReceive('lifetime')->andReturn($lifetime);
@@ -156,7 +148,6 @@ class CacheTest extends \Ems\TestCase
                 ->andReturn($storage);
 
         $this->assertEquals($result, $cache->get($key, $callable));
-
     }
 
     public function test_getOrFail_returns_value_on_cache_hit()
@@ -170,7 +161,6 @@ class CacheTest extends \Ems\TestCase
         $storage->shouldReceive('get')->with('a')->andReturn('bar');
 
         $this->assertEquals('bar', $cache->getOrFail('a'));
-
     }
 
     /**
@@ -178,7 +168,6 @@ class CacheTest extends \Ems\TestCase
      **/
     public function test_getOrFail_throws_exception_if_value_not_found()
     {
-
         $categorizer = $this->mockCategorizer();
         $cache = $this->newCache($categorizer);
         $storage = $this->mockStorage();
@@ -187,7 +176,6 @@ class CacheTest extends \Ems\TestCase
         $storage->shouldReceive('has')->with('a')->andReturn(false);
 
         $cache->getOrFail('a');
-
     }
 
     public function test_until_passes_lifetime_to_storage()
@@ -201,7 +189,7 @@ class CacheTest extends \Ems\TestCase
         $passed = 'bar';
         $tags = ['a','b'];
         $lifetime = '3 days';
-        $until = (new DateTime)->modify("+$lifetime");
+        $until = (new DateTime())->modify("+$lifetime");
         $wrongLifeTime = new DateTime('2014-08-01 00:00:00');
 
         $categorizer->shouldReceive('tags')->andReturn($tags);
@@ -213,7 +201,6 @@ class CacheTest extends \Ems\TestCase
                 ->andReturn($storage);
 
         $this->assertInstanceOf(CacheContract::class, $cache->until($until)->put($key, $passed));
-
     }
 
     public function test_offsetSet_passes_put_to_storage()
@@ -227,7 +214,7 @@ class CacheTest extends \Ems\TestCase
         $passed = 'bar';
         $tags = ['a','b'];
         $lifetime = '3 days';
-        $until = (new DateTime)->modify("+$lifetime");
+        $until = (new DateTime())->modify("+$lifetime");
         $wrongLifeTime = new DateTime('2014-08-01 00:00:00');
 
         $categorizer->shouldReceive('tags')->andReturn($tags);
@@ -239,7 +226,6 @@ class CacheTest extends \Ems\TestCase
                 ->andReturn($storage);
 
         $cache[$key] = $passed;
-
     }
 
     public function test_until_passes_tags_to_storage()
@@ -254,7 +240,7 @@ class CacheTest extends \Ems\TestCase
         $tags = ['a','b'];
         $wrongTags = [];
         $lifetime = '3 days';
-        $until = (new DateTime)->modify("+$lifetime");
+        $until = (new DateTime())->modify("+$lifetime");
 
         $categorizer->shouldReceive('tags')->andReturn($wrongTags);
         $categorizer->shouldReceive('lifetime')->andReturn($until);
@@ -265,7 +251,6 @@ class CacheTest extends \Ems\TestCase
                 ->andReturn($storage);
 
         $this->assertInstanceOf(CacheContract::class, $cache->tag($tags)->put($key, $passed));
-
     }
 
     public function test_storage_passes_add_to_different_storage()
@@ -282,7 +267,7 @@ class CacheTest extends \Ems\TestCase
         $tags = ['a','b'];
         $wrongTags = [];
         $lifetime = '3 days';
-        $until = (new DateTime)->modify("+$lifetime");
+        $until = (new DateTime())->modify("+$lifetime");
 
         $categorizer->shouldReceive('tags')->andReturn($tags);
         $categorizer->shouldReceive('lifetime')->andReturn($until);
@@ -293,7 +278,6 @@ class CacheTest extends \Ems\TestCase
                  ->andReturn($storage);
 
         $this->assertInstanceOf(CacheContract::class, $cache->storage('storage1')->put($key, $passed));
-
     }
 
     public function test_increment_forwards_to_storage()
@@ -304,7 +288,7 @@ class CacheTest extends \Ems\TestCase
 
         $storage->shouldReceive('increment')->with('foo', 2)->atLeast()->once();
 
-        $this->assertSame($cache, $cache->increment('foo',2));
+        $this->assertSame($cache, $cache->increment('foo', 2));
     }
 
     public function test_decrement_forwards_to_storage()
@@ -315,7 +299,7 @@ class CacheTest extends \Ems\TestCase
 
         $storage->shouldReceive('decrement')->with('foo', 2)->atLeast()->once();
 
-        $this->assertSame($cache, $cache->decrement('foo',2));
+        $this->assertSame($cache, $cache->decrement('foo', 2));
     }
 
     public function test_persist_does_nothing()
@@ -374,7 +358,7 @@ class CacheTest extends \Ems\TestCase
         $tags = ['a','b'];
         $wrongTags = [];
         $lifetime = '3 days';
-        $until = (new DateTime)->modify("+$lifetime");
+        $until = (new DateTime())->modify("+$lifetime");
         $wrongLifeTime = new DateTime('2014-08-01 00:00:00');
 
         $categorizer->shouldReceive('tags')->andReturn($wrongTags);
@@ -386,7 +370,6 @@ class CacheTest extends \Ems\TestCase
                 ->andReturn($storage);
 
         $this->assertInstanceOf(CacheContract::class, $cache->tag($tags)->until($until)->put($key, $passed));
-
     }
 
     public function test_storage_until_and_tags_forwards_to_storage()
@@ -403,7 +386,7 @@ class CacheTest extends \Ems\TestCase
         $tags = ['a','b'];
         $wrongTags = [];
         $lifetime = '3 days';
-        $until = (new DateTime)->modify("+$lifetime");
+        $until = (new DateTime())->modify("+$lifetime");
         $wrongLifeTime = new DateTime('2014-08-01 00:00:00');
 
         $categorizer->shouldReceive('tags')->andReturn($wrongTags);
@@ -415,7 +398,6 @@ class CacheTest extends \Ems\TestCase
                  ->andReturn($storage2);
 
         $this->assertInstanceOf(CacheContract::class, $cache->storage('fast')->tag($tags)->until($lifetime)->put($key, $passed));
-
     }
 
     public function test_addStorage_on_proxy_until_and_tags_forwards_to_storage()
@@ -434,7 +416,7 @@ class CacheTest extends \Ems\TestCase
         $tags = ['a','b'];
         $wrongTags = [];
         $lifetime = '3 days';
-        $until = (new DateTime)->modify("+$lifetime");
+        $until = (new DateTime())->modify("+$lifetime");
         $wrongLifeTime = new DateTime('2014-08-01 00:00:00');
 
         $categorizer->shouldReceive('tags')->andReturn($wrongTags);
@@ -446,7 +428,6 @@ class CacheTest extends \Ems\TestCase
                  ->andReturn($storage3);
 
         $this->assertInstanceOf(CacheContract::class, $cache->storage('fast')->storage('big')->tag($tags)->until($until)->put($key, $passed));
-
     }
 
     public function test_getStorage_returns_assigned_storage()
@@ -460,7 +441,6 @@ class CacheTest extends \Ems\TestCase
         $this->assertSame($storage, $cache->getStorage('default'));
         $this->assertSame($storage, $cache->getStorage());
         $this->assertSame($storage2, $cache->getStorage('fast'));
-
     }
 
     /**
@@ -473,12 +453,10 @@ class CacheTest extends \Ems\TestCase
 
         $cache->addStorage('default', $storage);
         $cache->getStorage('foo');
-
     }
 
     public function test_methodHooks_returns_hooks_for_all_altering_methods()
     {
-
         $cache = $this->newCache();
         $alteringMethods = ['put', 'increment', 'decrement', 'forget', 'prune', 'persist'];
 

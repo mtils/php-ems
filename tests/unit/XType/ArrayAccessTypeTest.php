@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\XType;
 
 
@@ -11,34 +10,31 @@ require_once __DIR__.'/AbstractTypeTest.php';
 
 class ArrayAccessTest extends AbstractTypeTest
 {
-
     public function test_names_returns_added_names()
     {
         $type = $this->newType();
 
-        $type->set('old', new BoolType);
-        $type->set('selled', new BoolType);
+        $type->set('old', new BoolType());
+        $type->set('selled', new BoolType());
 
         $this->assertEquals(['old', 'selled'], $type->names());
-
     }
 
     public function test_get_returns_added_type()
     {
         $type = $this->newType();
 
-        $sub = new BoolType;
+        $sub = new BoolType();
         $type['old'] = $sub;
 
         $this->assertSame($sub, $type->get('old'));
-
     }
 
     public function test_unset_removes_added_type()
     {
         $type = $this->newType();
 
-        $sub = new BoolType;
+        $sub = new BoolType();
         $type['old'] = $sub;
 
         $this->assertSame($sub, $type->get('old'));
@@ -50,22 +46,20 @@ class ArrayAccessTest extends AbstractTypeTest
         $this->assertFalse($type->offsetExists('old'));
 
         $this->assertCount(0, $type);
-
     }
 
     public function test_iteration_over_type_returns_names_and_types()
     {
-
         $type = $this->newType();
 
-        $old = new BoolType;
-        $selled = new BoolType;
+        $old = new BoolType();
+        $selled = new BoolType();
 
         $type->set('old', $old);
         $type->set('selled', $selled);
 
         $awaited = [
-            'old' => $old,
+            'old'    => $old,
             'selled' => $selled
         ];
 
@@ -76,7 +70,6 @@ class ArrayAccessTest extends AbstractTypeTest
         }
 
         $this->assertEquals($awaited, $output);
-
     }
 
     /**
@@ -92,8 +85,8 @@ class ArrayAccessTest extends AbstractTypeTest
     {
         $type = $this->newType();
 
-        $old = new BoolType;
-        $selled = new BoolType;
+        $old = new BoolType();
+        $selled = new BoolType();
 
         $fill = [
             'old'       => $old,
@@ -106,12 +99,10 @@ class ArrayAccessTest extends AbstractTypeTest
         $this->assertFalse($type->canBeNull);
         $this->assertSame($old, $type['old']);
         $this->assertSame($selled, $type['selled']);
-
     }
 
     protected function newType()
     {
-        return new ArrayAccessType;
+        return new ArrayAccessType();
     }
-
 }

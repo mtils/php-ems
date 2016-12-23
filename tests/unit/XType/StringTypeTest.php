@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\XType;
 
 
@@ -11,10 +10,8 @@ require_once __DIR__.'/AbstractTypeTest.php';
 
 class StringTypeTest extends AbstractTypeTest
 {
-
     protected function newType()
     {
-        return new StringType;
+        return new StringType();
     }
-
 }

@@ -84,9 +84,9 @@ abstract class KeyValueType extends AbstractType implements ArrayAccess, Countab
      *
      * @param string $name
      *
-     * @return \Ems\Contracts\XType\XType
-     *
      * @throws \OutOfBoundsException
+     *
+     * @return \Ems\Contracts\XType\XType
      **/
     public function get($name)
     {
@@ -133,9 +133,9 @@ abstract class KeyValueType extends AbstractType implements ArrayAccess, Countab
      *
      * @param array $attributes
      *
-     * @return self
-     *
      * @throws \Ems\Contracts\Core\Unsupported
+     *
+     * @return self
      **/
     public function fill(array $attributes = [])
     {

@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Core;
 
 
@@ -24,7 +23,6 @@ class AppPathTest extends \Ems\TestCase
         $appPath = $this->newAppPath($basePath, $baseUrl);
 
         $this->assertEquals($relative, $appPath->relative("$basePath/$relative"));
-
     }
 
     public function test_relative_returns_relative_on_relative_path()
@@ -37,7 +35,6 @@ class AppPathTest extends \Ems\TestCase
         $appPath = $this->newAppPath($basePath, $baseUrl);
 
         $this->assertEquals($relative, $appPath->relative($relative));
-
     }
 
     public function test_relative_returns_relative_on_url()
@@ -50,7 +47,6 @@ class AppPathTest extends \Ems\TestCase
         $appPath = $this->newAppPath($basePath, $baseUrl);
 
         $this->assertEquals($relative, $appPath->relative("$baseUrl/$relative"));
-
     }
 
     public function test_relative_returns_dot_on_empty_path_or_single_slash()
@@ -62,9 +58,8 @@ class AppPathTest extends \Ems\TestCase
 
         $appPath = $this->newAppPath($basePath, $baseUrl);
 
-        $this->assertEquals('.', $appPath->relative(""));
-        $this->assertEquals('.', $appPath->relative("/"));
-
+        $this->assertEquals('.', $appPath->relative(''));
+        $this->assertEquals('.', $appPath->relative('/'));
     }
 
     /**
@@ -79,8 +74,7 @@ class AppPathTest extends \Ems\TestCase
 
         $appPath = $this->newAppPath($basePath, $baseUrl);
 
-        $appPath->relative("../");
-
+        $appPath->relative('../');
     }
 
     public function test_absolute_returns_absolute_on_absolute_path()
@@ -93,7 +87,6 @@ class AppPathTest extends \Ems\TestCase
         $appPath = $this->newAppPath($basePath, $baseUrl);
 
         $this->assertEquals("$basePath/$relative", $appPath->absolute("$basePath/$relative"));
-
     }
 
     public function test_toString_returns_basePath()
@@ -106,7 +99,6 @@ class AppPathTest extends \Ems\TestCase
         $appPath = $this->newAppPath($basePath, $baseUrl);
 
         $this->assertEquals($basePath, "$appPath");
-
     }
 
     public function test_absolute_returns_absolute_on_relative_path()
@@ -119,7 +111,6 @@ class AppPathTest extends \Ems\TestCase
         $appPath = $this->newAppPath($basePath, $baseUrl);
 
         $this->assertEquals("$basePath/$relative", $appPath->absolute("$relative"));
-
     }
 
     public function test_absolute_returns_basePath_if_empty_path_passed()
@@ -132,10 +123,9 @@ class AppPathTest extends \Ems\TestCase
 
         $appPath = $this->newAppPath($basePath, $baseUrl);
 
-        foreach (['.','/','',null] as $test) {
+        foreach (['.', '/', '', null] as $test) {
             $this->assertEquals($basePath, $appPath->absolute($test));
         }
-
     }
 
     public function test_absolute_returns_absolute_if_url_passed()
@@ -149,7 +139,6 @@ class AppPathTest extends \Ems\TestCase
         $appPath = $this->newAppPath($basePath, $baseUrl);
 
         $this->assertEquals($absolutePath, $appPath->absolute("$baseUrl/$relative"));
-
     }
 
     public function test_getBasePath_getBaseUrl()
@@ -161,7 +150,6 @@ class AppPathTest extends \Ems\TestCase
 
         $this->assertEquals($basePath, $appPath->getBasePath());
         $this->assertEquals($baseUrl, $appPath->getBaseUrl());
-
     }
 
     /**
@@ -172,7 +160,6 @@ class AppPathTest extends \Ems\TestCase
         $basePath = '/srv/www/htdocs/app/public';
 
         $appPath = $this->newAppPath($basePath, '');
-
     }
 
     public function test_setBaseUrl_with_single_slash_doesnt_get_trimmed()
@@ -184,7 +171,6 @@ class AppPathTest extends \Ems\TestCase
         $this->assertEquals('/css', $appPath->url('css'));
         $this->assertEquals('/', $appPath->url());
         $this->assertEquals('.', $appPath->relative('/'));
-
     }
 
     public function test_url_returns_absolute_if_absolute_url_passed()
@@ -200,7 +186,6 @@ class AppPathTest extends \Ems\TestCase
 
         $this->assertEquals($url, $appPath->url($url));
         $this->assertEquals("$urlAlias/$relative", $appPath->url("$urlAlias/$relative"));
-
     }
 
     public function test_url_returns_absolute_if_relative_url_passed()
@@ -214,7 +199,6 @@ class AppPathTest extends \Ems\TestCase
         $appPath = $this->newAppPath($basePath, $baseUrl);
 
         $this->assertEquals($url, $appPath->url($relative));
-
     }
 
     public function test_url_returns_baseUrl_if_empty_path_passed()
@@ -227,16 +211,14 @@ class AppPathTest extends \Ems\TestCase
 
         $appPath = $this->newAppPath($basePath, $baseUrl);
 
-        foreach (['.','/','',null] as $test) {
+        foreach (['.', '/', '', null] as $test) {
             $this->assertEquals($baseUrl, $appPath->url($test));
         }
-
     }
 
     public function newAppPath($basePath='/srv', $baseUrl='http://localhost')
     {
-        return (new AppPath)->setBasePath($basePath)
+        return (new AppPath())->setBasePath($basePath)
                             ->setBaseUrl($baseUrl);
     }
-
 }

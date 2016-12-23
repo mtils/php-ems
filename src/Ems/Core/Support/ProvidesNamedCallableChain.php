@@ -262,7 +262,7 @@ trait ProvidesNamedCallableChain
             list($key, $parameters) = $dotPos ? explode(':', $key, 2) : [$key, ''];
 
             $parsed[$key] = [
-                'operator' => $operator,
+                'operator'   => $operator,
                 'parameters' => $parameters ? explode(',', $parameters) : [],
             ];
         }

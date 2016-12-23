@@ -1,17 +1,15 @@
 <?php
 
-
 namespace Ems\Skeleton;
 use Ems\Testing\LoggingCallable;
 use Ems\Testing\Cheat;
 
 class BootManagerTest extends \Ems\IntegrationTest
 {
-
     public function test_it_calls_configurators_once_before_adding()
     {
         $manager = $this->newBootManager();
-        $booter = new LoggingCallable;
+        $booter = new LoggingCallable();
         BootManager::configureBy($booter);
 
         $this->assertCount(0, $booter);
@@ -19,7 +17,6 @@ class BootManagerTest extends \Ems\IntegrationTest
         $this->assertCount(1, $booter);
         $manager->add('stdClass');
         $this->assertCount(1, $booter);
-
     }
 
     public function test_it_hooks_into_boot_process()
@@ -30,9 +27,9 @@ class BootManagerTest extends \Ems\IntegrationTest
         $manager->setApplication($app);
         $this->assertSame($app, $manager->getApplication());
 
-        $packageBinder = new LoggingCallable;
-        $binder = new LoggingCallable;
-        $booter = new LoggingCallable;
+        $packageBinder = new LoggingCallable();
+        $binder = new LoggingCallable();
+        $booter = new LoggingCallable();
         $callables = [$packageBinder, $binder, $booter];
 
         $manager->add(BootManagerTestBooter::class);
@@ -51,7 +48,6 @@ class BootManagerTest extends \Ems\IntegrationTest
         $this->assertEquals(1, $object->packageCalled);
         $this->assertEquals(1, $object->bindCalled);
         $this->assertEquals(1, $object->bootCalled);
-
     }
 
     public function test_it_boots_passed_object()
@@ -63,7 +59,7 @@ class BootManagerTest extends \Ems\IntegrationTest
         $this->assertSame($app, $manager->getApplication());
 
 
-        $booter = new BootManagerTestBooter;
+        $booter = new BootManagerTestBooter();
         $manager->add($booter);
 
         $app->boot();
@@ -73,7 +69,6 @@ class BootManagerTest extends \Ems\IntegrationTest
         $this->assertEquals(1, $booter->bootCalled);
 
         $this->assertSame($booter, Cheat::call($manager, 'resolveOnce', [BootManagerTestBooter::class]));
-
     }
 
     protected function assertAllCount($count, $countables)
@@ -91,7 +86,6 @@ class BootManagerTest extends \Ems\IntegrationTest
 
 class BootManagerTestBooter
 {
-
     public $packageCalled = 0;
 
     public $bindCalled = 0;

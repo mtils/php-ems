@@ -35,9 +35,9 @@ class IOCContainer implements ContainerContract
      * @param string $abstract
      * @param array  $parameters (optional)
      *
-     * @return object
-     *
      * @throws \OutOfBoundsException
+     *
+     * @return object
      **/
     public function __invoke($abstract, array $parameters = [])
     {
@@ -214,9 +214,9 @@ class IOCContainer implements ContainerContract
      *
      * @param callable $callback
      *
-     * @return callable
-     *
      * @throws InvalidArgumentException
+     *
+     * @return callable
      **/
     protected function checkAndReturnCallable($callback)
     {

@@ -20,8 +20,8 @@ class Url implements UrlContract
      **/
     public static $flatSchemes = [
         'mailto' => true,
-        'news' => true,
-        'nntp' => true,
+        'news'   => true,
+        'nntp'   => true,
         'telnet' => true,
     ];
 
@@ -69,13 +69,13 @@ class Url implements UrlContract
      * @var array
      **/
     protected $properties = [
-        'scheme' => '',
-        'user' => '',
+        'scheme'   => '',
+        'user'     => '',
         'password' => '',
-        'host' => '',
-        'port' => 0,
-        'path' => [],
-        'query' => [],
+        'host'     => '',
+        'port'     => 0,
+        'path'     => [],
+        'query'    => [],
         'fragment' => '',
     ];
 
@@ -561,13 +561,13 @@ class Url implements UrlContract
     protected function selfToArray()
     {
         return [
-            'scheme' => $this->scheme,
-            'user' => $this->user,
+            'scheme'   => $this->scheme,
+            'user'     => $this->user,
             'password' => $this->password,
-            'host' => $this->host,
-            'port' => $this->port,
-            'path' => $this->path->copy(),
-            'query' => $this->query,
+            'host'     => $this->host,
+            'port'     => $this->port,
+            'path'     => $this->path->copy(),
+            'query'    => $this->query,
             'fragment' => $this->fragment,
         ];
     }

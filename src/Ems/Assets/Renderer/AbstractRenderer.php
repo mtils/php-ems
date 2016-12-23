@@ -139,7 +139,7 @@ abstract class AbstractRenderer implements Renderer
             return '';
         }
 
-        $rows = array();
+        $rows = [];
 
         foreach ($renderAttributes as $key => $value) {
             $rows[] = "{$key}=\"".trim(strip_tags(htmlspecialchars("$value", ENT_QUOTES))).'"';

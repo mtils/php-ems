@@ -73,9 +73,9 @@ interface TextProvider
      *
      * @param string $domain
      *
-     * @return self
-     *
      * @throws \Ems\Core\Errors\NotFound
+     *
+     * @return self
      **/
     public function forDomain($domain);
 }

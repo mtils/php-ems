@@ -39,9 +39,9 @@ class ExtensionAnalyser implements NameAnalyser
      * @param string $assetName
      * @param string $groupName (optional)
      *
-     * @return string
-     *
      * @throws NotFound
+     *
+     * @return string
      **/
     public function guessMimeType($assetName, $groupName = null)
     {
@@ -65,9 +65,9 @@ class ExtensionAnalyser implements NameAnalyser
      *
      * @param string $assetName
      *
-     * @return string
-     *
      * @throws NotFound
+     *
+     * @return string
      **/
     public function guessGroup($assetName)
     {

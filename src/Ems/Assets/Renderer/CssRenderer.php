@@ -19,7 +19,7 @@ class CssRenderer extends AbstractRenderer
     protected function renderExternal(Asset $asset, $group)
     {
         $attributes = [
-            'rel' => 'stylesheet',
+            'rel'  => 'stylesheet',
             'type' => $asset->mimeType(),
             'href' => $asset->uri(),
         ];

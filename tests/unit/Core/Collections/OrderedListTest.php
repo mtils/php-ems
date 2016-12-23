@@ -4,10 +4,8 @@ namespace Ems\Core\Collections;
 
 use Ems\Testing\LoggingCallable;
 
-
 class OrderedListTest extends \Ems\TestCase
 {
-
     public function test_implements_interface()
     {
         $this->assertInstanceof('ArrayAccess', $this->newList());
@@ -22,35 +20,29 @@ class OrderedListTest extends \Ems\TestCase
 
     public function test_append_appends_a_value()
     {
-
         $list = $this->newList()->append('a');
         $this->assertEquals(['a'], $list->getSource());
         $list->append('b')->append('c');
         $this->assertEquals(['a', 'b', 'c'], $list->getSource());
-
     }
 
     public function test_push_appends_a_value()
     {
-
         $list = $this->newList()->push('a');
         $this->assertEquals(['a'], $list->getSource());
-
     }
 
     public function test_prepend_prepends_a_value()
     {
-
-        $list = $this->newList(['c','d','e']);
-        $this->assertEquals(['b','c','d','e'], $list->prepend('b')->getSource());
-        $this->assertEquals(['a','b','c','d','e'], $list->prepend('a')->getSource());
-
+        $list = $this->newList(['c', 'd', 'e']);
+        $this->assertEquals(['b', 'c', 'd', 'e'], $list->prepend('b')->getSource());
+        $this->assertEquals(['a', 'b', 'c', 'd', 'e'], $list->prepend('a')->getSource());
     }
 
     public function test_insert_appends_a_value()
     {
-        $list = $this->newList(['c','d','e']);
-        $this->assertEquals(['c','d','e','f'], $list->insert(count($list),'f')->getSource());
+        $list = $this->newList(['c', 'd', 'e']);
+        $this->assertEquals(['c', 'd', 'e', 'f'], $list->insert(count($list), 'f')->getSource());
     }
 
     /**
@@ -58,8 +50,8 @@ class OrderedListTest extends \Ems\TestCase
      **/
     public function test_insert_before_zero_throws_exception()
     {
-        $list = $this->newList(['c','d','e']);
-        $list->insert(-1,'f');
+        $list = $this->newList(['c', 'd', 'e']);
+        $list->insert(-1, 'f');
     }
 
     /**
@@ -67,13 +59,13 @@ class OrderedListTest extends \Ems\TestCase
      **/
     public function test_insert_after_count_throws_exception()
     {
-        $list = $this->newList(['c','d','e']);
+        $list = $this->newList(['c', 'd', 'e']);
         $list->insert(5, 'h');
     }
 
     public function test_indexOf_finds_index_on_string()
     {
-        $list = $this->newList(['c','d','e']);
+        $list = $this->newList(['c', 'd', 'e']);
         $this->assertEquals(0, $list->indexOf('c'));
         $this->assertEquals(1, $list->indexOf('d'));
         $this->assertEquals(2, $list->indexOf('e'));
@@ -81,7 +73,7 @@ class OrderedListTest extends \Ems\TestCase
 
     public function test_contains_returns_bool_and_doesnt_throw_exceptions()
     {
-        $list = $this->newList(['c','d','e']);
+        $list = $this->newList(['c', 'd', 'e']);
         $this->assertTrue($list->contains('c'));
         $this->assertFalse($list->contains('i'));
         $this->assertTrue($list->contains('e'));
@@ -89,18 +81,18 @@ class OrderedListTest extends \Ems\TestCase
 
     public function test_pop_removes_last_value()
     {
-        $list = $this->newList(['c','d','e']);
-        $this->assertEquals(['c','d','e'], $list->getSource());
+        $list = $this->newList(['c', 'd', 'e']);
+        $this->assertEquals(['c', 'd', 'e'], $list->getSource());
         $this->assertEquals('e', $list->pop());
-        $this->assertEquals(['c','d'], $list->getSource());
+        $this->assertEquals(['c', 'd'], $list->getSource());
     }
 
     public function test_pop_removes_value_in_middle()
     {
-        $list = $this->newList(['c','d','e']);
-        $this->assertEquals(['c','d','e'], $list->getSource());
+        $list = $this->newList(['c', 'd', 'e']);
+        $this->assertEquals(['c', 'd', 'e'], $list->getSource());
         $this->assertEquals('d', $list->pop(1));
-        $this->assertEquals(['c','e'], $list->getSource());
+        $this->assertEquals(['c', 'e'], $list->getSource());
     }
 
     /**
@@ -108,21 +100,20 @@ class OrderedListTest extends \Ems\TestCase
      **/
     public function test_indexOf_throws_exception_if_value_not_found()
     {
-        $list = $this->newList(['c','d','e']);
+        $list = $this->newList(['c', 'd', 'e']);
         $list->indexOf('h');
     }
 
     public function test_remove_removes_string()
     {
-        $list = $this->newList(['c','d','e']);
-        $this->assertEquals(['c','d','e'], $list->getSource());
+        $list = $this->newList(['c', 'd', 'e']);
+        $this->assertEquals(['c', 'd', 'e'], $list->getSource());
         $this->assertEquals('d', $list->remove('d'));
-        $this->assertEquals(['c','e'], $list->getSource());
+        $this->assertEquals(['c', 'e'], $list->getSource());
     }
 
     public function test_count_with_params_counts_values()
     {
-
         $list = $this->newList(str_split('abbcccdeeeee'));
 
         $this->assertEquals(1, $list->count('a'));
@@ -130,7 +121,6 @@ class OrderedListTest extends \Ems\TestCase
         $this->assertEquals(3, $list->count('c'));
         $this->assertEquals(1, $list->count('d'));
         $this->assertEquals(5, $list->count('e'));
-
     }
 
     public function test_sort_sorts_array_alphabetical()
@@ -154,7 +144,7 @@ class OrderedListTest extends \Ems\TestCase
     public function test_apply_calls_on_every_item()
     {
         $list = $this->newList(str_split('abcdef'));
-        $callable = new LoggingCallable;
+        $callable = new LoggingCallable();
 
         $list->apply($callable);
         $this->assertCount(count($list), $callable);
@@ -162,12 +152,10 @@ class OrderedListTest extends \Ems\TestCase
         foreach ($list as $i=>$value) {
             $this->assertEquals($value, $callable->arg(0, $i));
         }
-
     }
 
     public function test_filter_filters_items()
     {
-
         $list = $this->newList(str_split('abcdef'));
 
         $filter = function ($item) {
@@ -175,12 +163,10 @@ class OrderedListTest extends \Ems\TestCase
         };
 
         $this->assertEquals(str_split('abdef'), $list->filter($filter)->getSource());
-
     }
 
     public function test_find_finds_item()
     {
-
         $list = $this->newList(str_split('abcdef'));
 
         $filter = function ($item) {
@@ -188,7 +174,6 @@ class OrderedListTest extends \Ems\TestCase
         };
 
         $this->assertEquals('c', $list->find($filter));
-
     }
 
     /**
@@ -196,7 +181,6 @@ class OrderedListTest extends \Ems\TestCase
      **/
     public function test_find_throws_exception_on_miss()
     {
-
         $list = $this->newList(str_split('abcdef'));
 
         $filter = function ($item) {
@@ -204,7 +188,6 @@ class OrderedListTest extends \Ems\TestCase
         };
 
         $list->find($filter);
-
     }
 
     /**
@@ -221,7 +204,6 @@ class OrderedListTest extends \Ems\TestCase
         $list = $this->newList(str_split('abcdef'));
         $list[6] = 'g';
         $this->assertEquals(str_split('abcdefg'), $list->getSource());
-
     }
 
     public function test_offsetExists()
@@ -230,7 +212,6 @@ class OrderedListTest extends \Ems\TestCase
         $this->assertTrue(isset($list[0]));
         $this->assertTrue(isset($list[3]));
         $this->assertFalse(isset($list[53]));
-
     }
 
     public function test_offsetUnset()
@@ -238,7 +219,6 @@ class OrderedListTest extends \Ems\TestCase
         $list = $this->newList(str_split('abcdef'));
         unset($list[5]);
         $this->assertEquals(str_split('abcde'), $list->getSource());
-
     }
 
     public function test_construct_with_string_splits()
@@ -269,7 +249,7 @@ class OrderedListTest extends \Ems\TestCase
      **/
     public function test_construct_with_unteraversable_object_throws_exception()
     {
-        $list1 = $this->newList(new \stdClass);
+        $list1 = $this->newList(new \stdClass());
     }
 
     public function test_first_returns_first_item()
@@ -295,7 +275,6 @@ class OrderedListTest extends \Ems\TestCase
 
         $this->assertEquals(str_split('bcdefg'), $list->getSource());
         $this->assertEquals(str_split('abcdef'), $copy->getSource());
-
     }
 
     public function test_clone_returns_new_instance()
@@ -309,7 +288,6 @@ class OrderedListTest extends \Ems\TestCase
 
         $this->assertEquals(str_split('bcdefg'), $list->getSource());
         $this->assertEquals(str_split('abcdef'), $copy->getSource());
-
     }
 
     protected function newList($params=null)

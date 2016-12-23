@@ -8,6 +8,8 @@ vendor/
 *.kdev4
 **/.directory
 tests/coverage
+.php_cs.cache
+tmp*
 .kateproject*
 .DS_Store
 Thumbs.db

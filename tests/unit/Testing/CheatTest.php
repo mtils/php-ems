@@ -4,34 +4,32 @@ namespace Ems\Testing;
 
 use Ems\TestCase;
 
-
 class CheatTest extends TestCase
 {
-
     public function test_get_returns_public_value()
     {
-        $tester = new VisibilityTester;
+        $tester = new VisibilityTester();
         $tester->public = 'a';
-        $this->assertEquals('a', Cheat::get($tester,'public'));
+        $this->assertEquals('a', Cheat::get($tester, 'public'));
     }
 
     public function test_get_returns_protected_value()
     {
-        $tester = new VisibilityTester;
+        $tester = new VisibilityTester();
         $tester->setProtected('a');
-        $this->assertEquals('a', Cheat::get($tester,'protected'));
+        $this->assertEquals('a', Cheat::get($tester, 'protected'));
     }
 
     public function test_get_returns_private_value()
     {
-        $tester = new VisibilityTester;
+        $tester = new VisibilityTester();
         $tester->setPrivate('a');
-        $this->assertEquals('a', Cheat::get($tester,'private'));
+        $this->assertEquals('a', Cheat::get($tester, 'private'));
     }
 
     public function test_call_calls_public_method()
     {
-        $tester = new VisibilityTester;
+        $tester = new VisibilityTester();
         $args = ['a','b','c'];
         $this->assertEquals('public', Cheat::call($tester, 'publicMethod', $args));
         $this->assertEquals($args, $tester->publicMethodArgs);
@@ -39,7 +37,7 @@ class CheatTest extends TestCase
 
     public function test_call_calls_protected_method()
     {
-        $tester = new VisibilityTester;
+        $tester = new VisibilityTester();
         $args = ['a','b','c'];
         $this->assertEquals('protected', Cheat::call($tester, 'protectedMethod', $args));
         $this->assertEquals($args, $tester->protectedMethodArgs);
@@ -47,17 +45,15 @@ class CheatTest extends TestCase
 
     public function test_call_calls_private_method()
     {
-        $tester = new VisibilityTester;
+        $tester = new VisibilityTester();
         $args = ['a','b','c'];
         $this->assertEquals('private', Cheat::call($tester, 'privateMethod', $args));
         $this->assertEquals($args, $tester->privateMethodArgs);
     }
-
 }
 
 class VisibilityTester
 {
-
     public $public;
 
     protected $protected;

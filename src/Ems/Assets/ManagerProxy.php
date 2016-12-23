@@ -182,9 +182,9 @@ class ManagerProxy implements ManagerContract
      *
      * @param string $key
      *
-     * @return mixed
-     *
      * @throws \Ems\Contracts\Core\Unsupported
+     *
+     * @return mixed
      **/
     public function getOption($key)
     {
@@ -197,9 +197,9 @@ class ManagerProxy implements ManagerContract
      * @param string $key
      * @param mixed  $value
      *
-     * @return self
-     *
      * @throws \Ems\Contracts\Core\Unsupported
+     *
+     * @return self
      **/
     public function setOption($key, $value)
     {
@@ -223,9 +223,9 @@ class ManagerProxy implements ManagerContract
      *
      * @param string|array $keys (optional)
      *
-     * @return self
-     *
      * @throws \Ems\Contracts\Core\Unsupported
+     *
+     * @return self
      **/
     public function resetOptions($keys = null)
     {

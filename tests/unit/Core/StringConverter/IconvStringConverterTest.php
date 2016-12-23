@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Core\StringConverter;
 
 
@@ -9,7 +8,6 @@ require_once __DIR__.'/AbstractStringConverterTest.php';
 
 class IconvStringConverterTest extends AbstractStringConverterTest
 {
-
     /**
      * @var string
      **/
@@ -28,7 +26,6 @@ class IconvStringConverterTest extends AbstractStringConverterTest
 
     protected function newConverter()
     {
-        return new IconvStringConverter;
+        return new IconvStringConverter();
     }
-
 }

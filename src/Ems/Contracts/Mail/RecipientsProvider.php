@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Contracts\Mail;
 
 interface RecipientsProvider

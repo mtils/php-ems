@@ -1,24 +1,20 @@
 <?php
 
-
 namespace Ems\Core\StringConverter;
 
 use Ems\Core\StringConverterChain;
-
 
 require_once __DIR__.'/AbstractStringConverterTest.php';
 
 
 class StringConverterChainTest extends AbstractStringConverterTest
 {
-
     protected $mbString;
 
     protected $iconvString;
 
     protected function convert($text, $toEncoding, $fromEncoding=null)
     {
-
         try {
             $mbStringConverter = $this->mbStringConverter();
             if ($mbStringConverter->canConvert($toEncoding)) {
@@ -32,8 +28,7 @@ class StringConverterChainTest extends AbstractStringConverterTest
 
     protected function newConverter()
     {
-
-        $chain = new StringConverterChain;
+        $chain = new StringConverterChain();
 
         try {
             $chain->add($this->iconvStringConverter());
@@ -51,7 +46,7 @@ class StringConverterChainTest extends AbstractStringConverterTest
     protected function mbStringConverter()
     {
         if (!$this->mbString) {
-            $this->mbString = new MBStringConverter;
+            $this->mbString = new MBStringConverter();
         }
         return $this->mbString;
     }
@@ -59,10 +54,8 @@ class StringConverterChainTest extends AbstractStringConverterTest
     protected function iconvStringConverter()
     {
         if (!$this->iconvString) {
-            $this->iconvString = new IconvStringConverter;
+            $this->iconvString = new IconvStringConverter();
         }
         return $this->iconvString;
     }
-
-
 }

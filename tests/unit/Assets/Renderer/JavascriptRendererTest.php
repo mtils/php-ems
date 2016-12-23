@@ -10,7 +10,6 @@ use Ems\Assets\AssetsFactoryMethods;
 
 class JavascriptRendererTest extends \Ems\TestCase
 {
-
     use AssetsFactoryMethods;
 
     public function test_implements_interface()
@@ -69,7 +68,6 @@ class JavascriptRendererTest extends \Ems\TestCase
 
     protected function newRenderer()
     {
-        return new JavascriptRenderer;
+        return new JavascriptRenderer();
     }
-
 }

@@ -1,15 +1,12 @@
 <?php
 
-
 namespace Ems\Core\StringConverter;
 
 
 use Ems\Contracts\Core\StringConverter;
 
-
 class AsciiStringConverterTest extends \Ems\TestCase
 {
-
     public function test_implements_interface()
     {
         $this->assertInstanceOf(StringConverter::class, $this->newConverter());
@@ -43,7 +40,6 @@ class AsciiStringConverterTest extends \Ems\TestCase
 
     protected function newConverter()
     {
-        return new AsciiStringConverter;
+        return new AsciiStringConverter();
     }
-
 }

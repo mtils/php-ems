@@ -15,9 +15,9 @@ interface IOCContainer
      * @param string $abstract
      * @param array  $parameters (optional)
      *
-     * @return object
-     *
      * @throws \OutOfBoundsException
+     *
+     * @return object
      **/
     public function __invoke($abstract, array $parameters = []);
 
@@ -27,9 +27,9 @@ interface IOCContainer
      * @param string $abstract
      * @param array  $parameters (optional)
      *
-     * @return object
-     *
      * @throws \OutOfBoundsException
+     *
+     * @return object
      **/
     public function make($abstract, array $parameters = []);
 

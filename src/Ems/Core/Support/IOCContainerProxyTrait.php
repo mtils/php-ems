@@ -19,9 +19,9 @@ trait IOCContainerProxyTrait
      * @param string $abstract
      * @param array  $parameters (optional)
      *
-     * @return object
-     *
      * @throws \OutOfBoundsException
+     *
+     * @return object
      **/
     public function __invoke($abstract, array $parameters = [])
     {

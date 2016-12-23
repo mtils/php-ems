@@ -34,9 +34,9 @@ interface Compiler
      *
      * @param string $name
      *
-     * @return \Ems\Contracts\Core\TextParser
-     *
      * @throws \Ems\Contracts\Core\Errors\NotFound
+     *
+     * @return \Ems\Contracts\Core\TextParser
      **/
     public function parser($name);
 
@@ -55,9 +55,9 @@ interface Compiler
      *
      * @param string
      *
-     * @return self
-     *
      * @throws \Ems\Contracts\Core\Errors\NotFound
+     *
+     * @return self
      **/
     public function removeParser($name);
 

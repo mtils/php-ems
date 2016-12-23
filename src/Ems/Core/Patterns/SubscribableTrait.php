@@ -25,8 +25,7 @@ trait SubscribableTrait
      **/
     public function on($event, callable $listener)
     {
-
-        if (is_object($event) || strpos($event,'\\')) { // looks like a class
+        if (is_object($event) || strpos($event, '\\')) { // looks like a class
             throw new UnsupportedParameterException('Only string based events are supported');
         }
 
@@ -89,5 +88,4 @@ trait SubscribableTrait
         }
         return $result;
     }
-
 }

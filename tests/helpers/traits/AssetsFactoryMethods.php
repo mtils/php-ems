@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Assets;
 
 use Ems\Contracts\Core\Filesystem;
@@ -13,13 +12,10 @@ use Ems\Contracts\Assets\Registry as RegistryContract;
 use Ems\Contracts\Core\Renderer;
 use Ems\Core\Support\RendererChain;
 
-
 trait AssetsFactoryMethods
 {
-
     protected function newCollection($assets)
     {
-
         $registry = $this->newRegistry();
 
         foreach ((array)$assets as $asset) {
@@ -80,10 +76,10 @@ trait AssetsFactoryMethods
         return new Registry($namer, $this->newPathFinder());
     }
 
-    protected function newNamer(Filesystem $files=null, MimeTypeProvider $mimeTypes=null )
+    protected function newNamer(Filesystem $files=null, MimeTypeProvider $mimeTypes=null)
     {
-        $files = $files ?: new LocalFilesystem;
-        $mimeTypes = $mimeTypes ?: new ManualMimeTypeProvider;
+        $files = $files ?: new LocalFilesystem();
+        $mimeTypes = $mimeTypes ?: new ManualMimeTypeProvider();
         return new ExtensionAnalyser($files, $mimeTypes);
     }
 
@@ -109,7 +105,7 @@ trait AssetsFactoryMethods
 
     protected function newPathFinder()
     {
-        $finder = new PathFinder;
+        $finder = new PathFinder();
 
         $finder->map('assets::js', '/srv/js', 'http://localhost/js');
         $finder->map('assets::css', '/srv/css', 'http://localhost/css');
@@ -120,7 +116,7 @@ trait AssetsFactoryMethods
 
     protected function newBuildConfigRepository(array $configs = [])
     {
-        $repo = new BuildConfigRepository($this->newRegistry(), new LocalFilesystem);
+        $repo = new BuildConfigRepository($this->newRegistry(), new LocalFilesystem());
 
         foreach ($configs as $config) {
             $repo->store($config);

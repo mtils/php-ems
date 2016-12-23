@@ -80,9 +80,9 @@ interface XType extends Copyable
      *
      * @param array $attributes
      *
-     * @return self
-     *
      * @throws \Ems\Contracts\Core\Unsupported
+     *
+     * @return self
      **/
     public function fill(array $attributes = []);
 

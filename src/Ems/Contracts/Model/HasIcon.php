@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Contracts\Model;
 
 use Ems\Contracts\Core\Identifiable;

@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\XType;
 
 
@@ -11,7 +10,6 @@ require_once __DIR__.'/AbstractTypeTest.php';
 
 class PairTypeTest extends AbstractTypeTest
 {
-
     public function test_min_and_max_is_2()
     {
         $type = $this->newType();
@@ -47,7 +45,6 @@ class PairTypeTest extends AbstractTypeTest
 
     protected function newType()
     {
-        return new PairType;
+        return new PairType();
     }
-
 }

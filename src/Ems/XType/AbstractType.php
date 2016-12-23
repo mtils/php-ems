@@ -68,9 +68,9 @@ abstract class AbstractType implements XType
      *
      * @param array $attributes
      *
-     * @return self
-     *
      * @throws \Ems\Contracts\Core\Unsupported
+     *
+     * @return self
      **/
     public function fill(array $attributes = [])
     {
@@ -164,12 +164,12 @@ abstract class AbstractType implements XType
         };
 
         return [
-            'required' => $cannotBeNull,
-            'null' => 'canBeNull',
-            'optional' => 'canBeNull',
-            'touched' => 'mustBeTouched',
-            'ignore' => $ignore,
-            'ignored' => $ignore,
+            'required'  => $cannotBeNull,
+            'null'      => 'canBeNull',
+            'optional'  => 'canBeNull',
+            'touched'   => 'mustBeTouched',
+            'ignore'    => $ignore,
+            'ignored'   => $ignore,
             'protected' => 'readonly',
             'forbidden' => 'readonly',
         ];

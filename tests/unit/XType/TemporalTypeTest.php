@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\XType;
 
 
@@ -11,10 +10,8 @@ require_once __DIR__.'/AbstractTypeTest.php';
 
 class TemporalTypeTest extends AbstractTypeTest
 {
-
     protected function newType()
     {
-        return new TemporalType;
+        return new TemporalType();
     }
-
 }

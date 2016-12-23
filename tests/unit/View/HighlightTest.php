@@ -6,7 +6,6 @@ use Ems\Contracts\View\Highlight as HighlightContract;
 
 class HighlightTest extends \Ems\TestCase
 {
-
     public function test_implements_interface()
     {
         $this->assertInstanceOf(HighlightContract::class, $this->newHighlight());
@@ -16,6 +15,6 @@ class HighlightTest extends \Ems\TestCase
 
     protected function newHighlight()
     {
-        return new Highlight;
+        return new Highlight();
     }
 }

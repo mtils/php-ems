@@ -402,7 +402,7 @@ class LocalFilesystem implements FileSystem
         return rmdir($path);
     }
 
-    protected function listDirectoryRecursive($path, &$results = array())
+    protected function listDirectoryRecursive($path, &$results = [])
     {
         foreach ($this->listDirectory(rtrim($path, '/\\')) as $filename) {
             $results[] = $filename;

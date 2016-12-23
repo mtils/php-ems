@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Model\Eloquent;
 
 use InvalidArgumentException;
@@ -58,9 +57,9 @@ class Repository implements ExtendableRepository
      *
      * @param mixed $id
      *
-     * @return \Ems\Contracts\Core\Identifiable
-     *
      * @throws \Ems\Contracts\Core\Errors\NotFound If no model was found by the id
+     *
+     * @return \Ems\Contracts\Core\Identifiable
      **/
     public function getOrFail($id)
     {
@@ -279,9 +278,9 @@ class Repository implements ExtendableRepository
      * @param array  $attributes
      * @param string $action
      *
-     * @return bool
-     *
      * @throws \Illuminate\Contracts\Validation\ValidationException
+     *
+     * @return bool
      **/
     protected function validate(array $attributes, $action = 'update')
     {

@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Assets;
 
 use Ems\Core\LocalFilesystem;
@@ -12,7 +11,6 @@ use Ems\Testing\Cheat;
 
 class ManagerTest extends \Ems\TestCase
 {
-
     use AssetsFactoryMethods;
 
     public function test_implements_interface()
@@ -78,7 +76,7 @@ class ManagerTest extends \Ems\TestCase
         $registry = $this->mockRegistry();
         $manager = $this->newManager($registry);
         $asset = 'asset.js';
-        $handler = function(){};
+        $handler = function () {};
 
         $registry->shouldReceive('on')
                  ->with($asset, $handler)
@@ -120,7 +118,7 @@ class ManagerTest extends \Ems\TestCase
 
         $group = 'js';
 
-        $listener = new LoggingCallable(function($group, $registry){
+        $listener = new LoggingCallable(function ($group, $registry) {
             return 'hello';
         });
 
@@ -130,7 +128,6 @@ class ManagerTest extends \Ems\TestCase
 
         $this->assertEquals($group, $listener->arg(0));
         $this->assertSame($registry, $listener->arg(1));
-
     }
 
     public function test_render_assigns_renderer_to_collection()
@@ -145,20 +142,18 @@ class ManagerTest extends \Ems\TestCase
         $manager->import($asset);
 
         $this->assertSame($renderer, $manager->render($group)->getRenderer());
-
     }
 
     public function test_compiled_asset_replaces_collection_assets()
     {
-
         $compiledFiles = ['reset.css', 'layout.css', 'typo.css'];
         $importedFiles = ['reset.css', 'layout.css', 'typo.css','fixes.css'];
 
         $buildConfig = [
-            'group' => 'css',
-            'target' => 'app.css',
-            'files' => $compiledFiles,
-            'managerOptions' => [Manager::CHECK_COMPILED_FILE_EXISTS=>false]
+            'group'          => 'css',
+            'target'         => 'app.css',
+            'files'          => $compiledFiles,
+            'managerOptions' => [Manager::CHECK_COMPILED_FILE_EXISTS=> false]
         ];
 
         $buildRepo = $this->newBuildConfigRepository([$buildConfig]);
@@ -179,20 +174,17 @@ class ManagerTest extends \Ems\TestCase
 
         $this->assertEquals($awaited, $this->assetNames($collection));
         $this->assertEquals($awaitedUris, $this->assetUris($collection));
-
-
     }
 
     public function test_not_found_BuildConfig_leads_to_normal_rendering()
     {
-
         $compiledFiles = ['reset.css', 'layout.css', 'typo.css'];
         $importedFiles = ['reset.css', 'layout.css', 'typo.css','fixes.css'];
 
         $buildConfig = [
-            'group' => 'js',
+            'group'  => 'js',
             'target' => 'app.js',
-            'files' => ['some.js']
+            'files'  => ['some.js']
         ];
 
         $buildRepo = $this->newBuildConfigRepository([$buildConfig]);
@@ -209,8 +201,6 @@ class ManagerTest extends \Ems\TestCase
         $collection = $manager->render('css');
 
         $this->assertEquals($importedFiles, $this->assetNames($collection));
-
-
     }
 
     public function test_replicate_returns_prefixed_manager()
@@ -221,12 +211,10 @@ class ManagerTest extends \Ems\TestCase
 
         $group = 'ems';
 
-        $copy = $manager->replicate(['groupPrefix'=>$group]);
+        $copy = $manager->replicate(['groupPrefix'=> $group]);
 
         $this->assertInstanceOf('Ems\Contracts\Assets\Manager', $copy);
         $this->assertNotSame($manager, $copy);
         $this->assertEquals($group, $copy->groupPrefix());
-
     }
-
 }

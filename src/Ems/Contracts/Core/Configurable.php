@@ -15,9 +15,9 @@ interface Configurable
      *
      * @param string $key
      *
-     * @return mixed
-     *
      * @throws \Ems\Contracts\Core\Unsupported
+     *
+     * @return mixed
      **/
     public function getOption($key);
 
@@ -28,9 +28,9 @@ interface Configurable
      * @param string $key
      * @param mixed  $value
      *
-     * @return self
-     *
      * @throws \Ems\Contracts\Core\Unsupported
+     *
+     * @return self
      **/
     public function setOption($key, $value);
 
@@ -49,9 +49,9 @@ interface Configurable
      *
      * @param string|array $keys (optional)
      *
-     * @return self
-     *
      * @throws \Ems\Contracts\Core\Unsupported
+     *
+     * @return self
      **/
     public function resetOptions($keys = null);
 }

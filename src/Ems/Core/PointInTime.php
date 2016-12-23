@@ -14,28 +14,28 @@ class PointInTime extends DateTime implements TemporalContract
     protected $precision;
 
     protected $properties = [
-        'year' => self::YEAR,
-        'month' => self::MONTH,
-        'day' => self::DAY,
-        'hour' => self::HOUR,
-        'minute' => self::MINUTE,
-        'second' => self::SECOND,
-        'timezone' => 'getTimeZone',
+        'year'      => self::YEAR,
+        'month'     => self::MONTH,
+        'day'       => self::DAY,
+        'hour'      => self::HOUR,
+        'minute'    => self::MINUTE,
+        'second'    => self::SECOND,
+        'timezone'  => 'getTimeZone',
         'timestamp' => 'getTimestamp',
-        'offset' => 'getOffset',
+        'offset'    => 'getOffset',
         'precision' => 'precision',
     ];
 
     protected $propertyAccess = [
-        'year' => 'format',
-        'month' => 'format',
-        'day' => 'format',
-        'hour' => 'format',
-        'minute' => 'format',
-        'second' => 'format',
-        'timezone' => 'getTimeZone',
+        'year'      => 'format',
+        'month'     => 'format',
+        'day'       => 'format',
+        'hour'      => 'format',
+        'minute'    => 'format',
+        'second'    => 'format',
+        'timezone'  => 'getTimeZone',
         'timestamp' => 'getTimestamp',
-        'offset' => 'getOffset',
+        'offset'    => 'getOffset',
         'precision' => 'precision',
     ];
 

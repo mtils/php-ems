@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Assets;
 
 use Ems\Core\LocalFilesystem;
@@ -12,7 +11,6 @@ use Ems\Testing\Cheat;
 
 class RegistryTest extends \Ems\TestCase
 {
-
     use AssetsFactoryMethods;
 
     public function test_implements_interface()
@@ -36,27 +34,27 @@ class RegistryTest extends \Ems\TestCase
         $registry->import('jquery.js');
         $registry->import('bootstrap.css');
 
-        $this->assertEquals(['js','css'], $registry->groups());
+        $this->assertEquals(['js', 'css'], $registry->groups());
     }
 
     public function test_groups_with_same_suffix_returns_separate_groups()
     {
         $registry = $this->newRegistry();
 
-        $registry->import('jquery.css','base.css');
-        $registry->import('bootstrap.css','extended.css');
+        $registry->import('jquery.css', 'base.css');
+        $registry->import('bootstrap.css', 'extended.css');
 
-        $this->assertEquals(['base.css','extended.css'], $registry->groups());
+        $this->assertEquals(['base.css', 'extended.css'], $registry->groups());
     }
 
     public function test_assets_with_same_name_from_different_groups_are_not_assumed_as_already_added()
     {
         $registry = $this->newRegistry();
 
-        $registry->import('jquery.css','base.css');
-        $registry->import('jquery.css','extended.css');
+        $registry->import('jquery.css', 'base.css');
+        $registry->import('jquery.css', 'extended.css');
 
-        $this->assertEquals(['base.css','extended.css'], $registry->groups());
+        $this->assertEquals(['base.css', 'extended.css'], $registry->groups());
     }
 
     public function test_count_returns_count_of_assigned_assets()
@@ -96,9 +94,8 @@ class RegistryTest extends \Ems\TestCase
 
     public function test_customHandler_is_called_and_skips_add()
     {
-
         $registry = $this->newRegistry();
-        $handler = new LoggingCallable;
+        $handler = new LoggingCallable();
 
         $registry->on('jquery.js', $handler);
 
@@ -111,15 +108,13 @@ class RegistryTest extends \Ems\TestCase
         $this->assertInstanceOf(get_class($registry), $handler->arg(0));
         $this->assertEquals('jquery.js', $handler->arg(1));
         $this->assertEquals('js', $handler->arg(2));
-
     }
 
     public function test_import_from_customHandler_dont_lead_to_endless_recursion()
     {
-
         $registry = $this->newRegistry();
 
-        $registry->on('jquery.contextMenu.js', function ($registry, $asset, $group){
+        $registry->on('jquery.contextMenu.js', function ($registry, $asset, $group) {
             $registry->import('jquery.js');
             $registry->import('jquery.contextMenu.js');
         });
@@ -129,12 +124,10 @@ class RegistryTest extends \Ems\TestCase
         $this->assertCount(2, $registry);
 
         $this->assertEmpty(Cheat::get($registry, 'skipHandler'));
-
     }
 
     public function test_inline_adds_import()
     {
-
         $registry = $this->newRegistry();
 
         $registry->import('jquery.js');
@@ -146,30 +139,26 @@ class RegistryTest extends \Ems\TestCase
 
         $this->assertCount(2, $registry);
         $this->assertEquals(['js'], $registry->groups());
-
     }
 
     public function test_import_multiple_asserts_at_once()
     {
-
         $registry = $this->newRegistry();
 
 
-        $registry->import(['jquery.js', 'jquery.select2.js' ]);
+        $registry->import(['jquery.js', 'jquery.select2.js']);
 
         $js = $registry['js'];
         $this->assertEquals(0, $this->index($js, 'jquery.js'));
         $this->assertEquals(1, $this->index($js, 'jquery.select2.js'));
-
     }
 
     public function test_import_assert_with_attributes()
     {
-
         $registry = $this->newRegistry();
 
 
-        $registry->import(['name'=>'print.css', 'media'=>'print' ]);
+        $registry->import(['name'=> 'print.css', 'media'=>'print']);
 
         $assert = $registry['css']->first();
 
@@ -178,12 +167,10 @@ class RegistryTest extends \Ems\TestCase
 
 //         $this->assertEquals(0, $this->index($js, 'jquery.js'));
 //         $this->assertEquals(1, $this->index($js, 'jquery.select2.js'));
-
     }
 
     public function test_offsetExists_returns_true_if_group_exists_and_false_if_not()
     {
-
         $registry = $this->newRegistry();
 
         $registry->import('jquery.js');
@@ -191,7 +178,6 @@ class RegistryTest extends \Ems\TestCase
 
         $this->assertTrue(isset($registry['js']));
         $this->assertFalse(isset($registry['less']));
-
     }
 
     /**
@@ -199,11 +185,9 @@ class RegistryTest extends \Ems\TestCase
      **/
     public function test_offsetSet_throws_BadMethodCallException()
     {
-
         $registry = $this->newRegistry();
 
         $registry['js'] = 'Crash';
-
     }
 
     /**
@@ -211,11 +195,9 @@ class RegistryTest extends \Ems\TestCase
      **/
     public function test_offsetUnset_throws_BadMethodCallException()
     {
-
         $registry = $this->newRegistry();
 
         unset($registry['js']);
-
     }
 
     /**
@@ -223,11 +205,9 @@ class RegistryTest extends \Ems\TestCase
      **/
     public function test_before_without_previous_import_throws_RuntimeException()
     {
-
         $registry = $this->newRegistry();
 
         $registry->before('jquery.js');
-
     }
 
     /**
@@ -235,11 +215,9 @@ class RegistryTest extends \Ems\TestCase
      **/
     public function test_after_without_previous_import_throws_RuntimeException()
     {
-
         $registry = $this->newRegistry();
 
         $registry->after('jquery.js');
-
     }
 
     public function test_offsetGet_returns_assigned_collection()
@@ -257,7 +235,6 @@ class RegistryTest extends \Ems\TestCase
         $css = $registry['css'];
         $this->assertInstanceOf('Ems\Contracts\Assets\Collection', $css);
         $this->assertCount(1, $css);
-
     }
 
     /**
@@ -272,7 +249,6 @@ class RegistryTest extends \Ems\TestCase
         $registry->import('bootstrap.css');
 
         $less = $registry['less'];
-
     }
 
     /**
@@ -284,7 +260,6 @@ class RegistryTest extends \Ems\TestCase
 
         $registry->import('jquery.foo');
 //         $foo= $registry['foo'];
-
     }
 
     public function test_offsetGet_assigns_mimeType()
@@ -293,7 +268,6 @@ class RegistryTest extends \Ems\TestCase
 
         $registry->import('bootstrap.css');
         $this->assertEquals('text/css', $registry['css']->mimeType());
-
     }
 
     public function test_offsetGet_assigns_mimeType_by_group_if_not_found_in_name()
@@ -302,7 +276,6 @@ class RegistryTest extends \Ems\TestCase
 
         $registry->import('http://fonts.googleapis.com/css?family=Roboto:400,300', 'css');
         $this->assertEquals('text/css', $registry['css']->mimeType());
-
     }
 
     public function test_before_returns_registry()
@@ -319,7 +292,6 @@ class RegistryTest extends \Ems\TestCase
 
     public function test_before_forces_asset_to_be_sorted_before()
     {
-
         $registry = $this->newRegistry();
 
 
@@ -331,12 +303,10 @@ class RegistryTest extends \Ems\TestCase
         $this->assertEquals(0, $this->index($js, 'jquery.js'));
         $this->assertEquals(1, $this->index($js, 'jquery.contextMenu.js'));
         $this->assertEquals(2, $this->index($js, 'jquery.select2.js'));
-
     }
 
     public function test_after_forces_asset_to_be_sorted_after()
     {
-
         $registry = $this->newRegistry();
 
 
@@ -349,12 +319,10 @@ class RegistryTest extends \Ems\TestCase
         $this->assertEquals(0, $this->index($js, 'jquery.js'));
         $this->assertEquals(1, $this->index($js, 'jquery.select2.js'));
         $this->assertEquals(2, $this->index($js, 'jquery.contextMenu.js'));
-
     }
 
     public function test_before_in_same_order_as_assigned_dont_change_ordering()
     {
-
         $registry = $this->newRegistry();
 
         $registry->import('jquery.js')->before('jquery.select2.js');
@@ -365,12 +333,10 @@ class RegistryTest extends \Ems\TestCase
         $this->assertEquals(0, $this->index($js, 'jquery.js'));
         $this->assertEquals(1, $this->index($js, 'jquery.contextMenu.js'));
         $this->assertEquals(2, $this->index($js, 'jquery.select2.js'));
-
     }
 
     public function test_after_in_same_order_as_assigned_dont_change_ordering()
     {
-
         $registry = $this->newRegistry();
 
 
@@ -382,12 +348,10 @@ class RegistryTest extends \Ems\TestCase
         $this->assertEquals(0, $this->index($js, 'jquery.js'));
         $this->assertEquals(1, $this->index($js, 'jquery.select2.js'));
         $this->assertEquals(2, $this->index($js, 'jquery.contextMenu.js'));
-
     }
 
     public function test_after_dont_add_to_all_collections_when_same_names_in_multiple_groups()
     {
-
         $registry = $this->newRegistry();
 
 
@@ -407,13 +371,10 @@ class RegistryTest extends \Ems\TestCase
         $secondJs = $registry['second.js'];
         $this->assertEquals(0, $this->index($secondJs, 'jquery.js'));
         $this->assertCount(1, $secondJs); // If count is 2 contextMenu is also added to this collection
-
-
     }
 
     public function test_before_dont_add_to_all_collections_when_same_names_in_multiple_groups()
     {
-
         $registry = $this->newRegistry();
 
 
@@ -434,13 +395,10 @@ class RegistryTest extends \Ems\TestCase
         $secondJs = $registry['second.js'];
         $this->assertEquals(0, $this->index($secondJs, 'jquery.js'));
         $this->assertCount(1, $secondJs); // If count is 2 contextMenu is also added to this collection
-
-
     }
 
     public function test_after_adds_to_collection_with_same_group()
     {
-
         $registry = $this->newRegistry();
 
 
@@ -461,13 +419,10 @@ class RegistryTest extends \Ems\TestCase
         $css = $registry['css'];
 
         $this->assertEquals(0, $this->index($css, 'jquery.css'));
-
-
     }
 
     public function test_before_adds_to_collection_with_same_group()
     {
-
         $registry = $this->newRegistry();
 
 
@@ -488,14 +443,10 @@ class RegistryTest extends \Ems\TestCase
 
         $this->assertEquals(0, $this->index($css, 'jquery.contextMenu.css'));
         $this->assertEquals(1, $this->index($css, 'jquery.css'));
-
-
-
     }
 
     public function test_insert_order_has_higher_priority_than_after()
     {
-
         $registry = $this->newRegistry();
 
         $registry->import('fastclick.js')->after('jquery.contextMenu.js');
@@ -510,29 +461,25 @@ class RegistryTest extends \Ems\TestCase
         $this->assertEquals(1, $this->index($js, 'jquery.select2.js'));
         $this->assertEquals(2, $this->index($js, 'jquery.contextMenu.js'));
         $this->assertEquals(3, $this->index($js, 'fastclick.js'));
-
     }
 
     public function test_import_multiple_assets_at_once_in_one_group()
     {
-
         $registry = $this->newRegistry();
 
-        $registry->import(['jquery.js','jquery.select2.js','jquery.contextMenu.js'], 'base');
+        $registry->import(['jquery.js', 'jquery.select2.js', 'jquery.contextMenu.js'], 'base');
 
         $js = $registry['base'];
         $this->assertEquals(0, $this->index($js, 'jquery.js'));
         $this->assertEquals(1, $this->index($js, 'jquery.select2.js'));
         $this->assertEquals(2, $this->index($js, 'jquery.contextMenu.js'));
-
     }
 
     public function test_import_multiple_assets_after_adds_in_right_order()
     {
-
         $registry = $this->newRegistry();
 
-        $registry->import(['fastclick.js','scrollwheel.js','waypoints.js'])
+        $registry->import(['fastclick.js', 'scrollwheel.js', 'waypoints.js'])
                  ->after('jquery.contextMenu.js');
 
         $registry->import('jquery.js');
@@ -547,15 +494,13 @@ class RegistryTest extends \Ems\TestCase
         $this->assertEquals(3, $this->index($js, 'fastclick.js'));
         $this->assertEquals(4, $this->index($js, 'scrollwheel.js'));
         $this->assertEquals(5, $this->index($js, 'waypoints.js'));
-
     }
 
     public function test_import_multiple_assets_before_adds_in_right_order()
     {
-
         $registry = $this->newRegistry();
 
-        $registry->import(['fastclick.js','scrollwheel.js','waypoints.js'])
+        $registry->import(['fastclick.js', 'scrollwheel.js', 'waypoints.js'])
                  ->before('jquery.select2.js');
 
         $registry->import('jquery.js');
@@ -570,13 +515,10 @@ class RegistryTest extends \Ems\TestCase
         $this->assertEquals(3, $this->index($js, 'waypoints.js'));
         $this->assertEquals(4, $this->index($js, 'jquery.select2.js'));
         $this->assertEquals(5, $this->index($js, 'jquery.contextMenu.js'));
-
-
     }
 
     public function test_import_multiple_assets_before_any_adds_in_right_order()
     {
-
         $registry = $this->newRegistry();
 
 
@@ -584,7 +526,7 @@ class RegistryTest extends \Ems\TestCase
         $registry->import('jquery.select2.js');
         $registry->import('jquery.contextMenu.js');
 
-        $registry->import(['fastclick.js','scrollwheel.js','waypoints.js'])
+        $registry->import(['fastclick.js', 'scrollwheel.js', 'waypoints.js'])
                  ->before();
 
 
@@ -595,16 +537,13 @@ class RegistryTest extends \Ems\TestCase
         $this->assertEquals(3, $this->index($js, 'jquery.js'));
         $this->assertEquals(4, $this->index($js, 'jquery.select2.js'));
         $this->assertEquals(5, $this->index($js, 'jquery.contextMenu.js'));
-
-
     }
 
     public function test_import_multiple_assets_after_any_adds_in_right_order()
     {
-
         $registry = $this->newRegistry();
 
-        $registry->import(['fastclick.js','scrollwheel.js','waypoints.js'])
+        $registry->import(['fastclick.js', 'scrollwheel.js', 'waypoints.js'])
                  ->after();
 
         $registry->import('jquery.js');
@@ -619,13 +558,10 @@ class RegistryTest extends \Ems\TestCase
         $this->assertEquals(3, $this->index($js, 'fastclick.js'));
         $this->assertEquals(4, $this->index($js, 'scrollwheel.js'));
         $this->assertEquals(5, $this->index($js, 'waypoints.js'));
-
-
     }
 
     public function test_getIterator_returns_groups_and_collections()
     {
-
         $registry = $this->newRegistry();
 
 
@@ -639,7 +575,7 @@ class RegistryTest extends \Ems\TestCase
 
         $all = $this->all($registry);
 
-        $this->assertEquals(['js','less','css'], array_keys($all));
+        $this->assertEquals(['js', 'less', 'css'], array_keys($all));
 
         $this->assertCount(3, $all['js']);
         $this->assertCount(1, $all['less']);
@@ -648,7 +584,5 @@ class RegistryTest extends \Ems\TestCase
         foreach ($all as $group=>$collection) {
             $this->assertInstanceOf('Ems\Contracts\Assets\Collection', $collection);
         }
-
     }
-
 }

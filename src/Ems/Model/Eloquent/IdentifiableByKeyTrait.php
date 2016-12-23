@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Model\Eloquent;
 
 trait IdentifiableByKeyTrait

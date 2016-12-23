@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Core;
 
 class Helper
@@ -10,11 +9,11 @@ class Helper
      *
      * @param callable $callable
      * @param array    $args
+     *
      * @return mixed
      **/
     public static function call(callable $callable, $args=[])
     {
-
         if (!is_array($args)) {
             $args = [$args];
         }
@@ -33,6 +32,5 @@ class Helper
         }
 
         return call_user_func_array($callable, $args);
-
     }
 }

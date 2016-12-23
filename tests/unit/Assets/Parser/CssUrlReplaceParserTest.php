@@ -4,7 +4,6 @@ namespace Ems\Assets\Parser;
 
 class CssUrlReplaceParserTest extends \Ems\IntegrationTest
 {
-
     public function test_implements_interface()
     {
         $this->assertInstanceOf(
@@ -35,7 +34,6 @@ class CssUrlReplaceParserTest extends \Ems\IntegrationTest
 
     public function test_parse_replaces_background_url()
     {
-
         $testLayout = [
             'lib' => [
                 'infile.css' => ''
@@ -49,7 +47,7 @@ class CssUrlReplaceParserTest extends \Ems\IntegrationTest
         list($tempDir, $structure) = $this->createNestedDirectories($testLayout);
 
         $config = [
-            'file_path' => "$tempDir/lib/infile.css",
+            'file_path'   => "$tempDir/lib/infile.css",
             'target_path' => "$tempDir/outfile.css",
 
         ];
@@ -64,14 +62,13 @@ class CssUrlReplaceParserTest extends \Ems\IntegrationTest
 
     public function test_parse_replaces_background_url_and_background_image()
     {
-
         $testLayout = [
             'lib' => [
                 'infile.css' => ''
             ],
             'images' => [
                 'blank.gif' => '',
-                'bg.png' => ''
+                'bg.png'    => ''
             ],
             'outfile.css' => ''
         ];
@@ -79,7 +76,7 @@ class CssUrlReplaceParserTest extends \Ems\IntegrationTest
         list($tempDir, $structure) = $this->createNestedDirectories($testLayout);
 
         $config = [
-            'file_path' => "$tempDir/lib/infile.css",
+            'file_path'   => "$tempDir/lib/infile.css",
             'target_path' => "$tempDir/outfile.css",
 
         ];
@@ -92,19 +89,17 @@ class CssUrlReplaceParserTest extends \Ems\IntegrationTest
         $this->assertNotContains('url(../images/blank.gif)', $result);
         $this->assertContains('url(images/bg.png)', $result);
         $this->assertNotContains('url(../images/bg.png)', $result);
-
     }
 
     public function test_parse_replaces_background_url_and_retains_other_directives()
     {
-
         $testLayout = [
             'lib' => [
                 'infile.css' => ''
             ],
             'images' => [
                 'blank.gif' => '',
-                'bg.png' => ''
+                'bg.png'    => ''
             ],
             'outfile.css' => ''
         ];
@@ -112,7 +107,7 @@ class CssUrlReplaceParserTest extends \Ems\IntegrationTest
         list($tempDir, $structure) = $this->createNestedDirectories($testLayout);
 
         $config = [
-            'file_path' => "$tempDir/lib/infile.css",
+            'file_path'   => "$tempDir/lib/infile.css",
             'target_path' => "$tempDir/outfile.css",
 
         ];
@@ -128,7 +123,6 @@ class CssUrlReplaceParserTest extends \Ems\IntegrationTest
         $this->assertNotContains('url(../images/blank.gif)', $result);
         $this->assertContains('url(images/bg.png)', $result);
         $this->assertNotContains('url(../images/bg.png)', $result);
-
     }
 
     /**
@@ -136,7 +130,6 @@ class CssUrlReplaceParserTest extends \Ems\IntegrationTest
      **/
     public function test_parse_throws_exception_if_referenced_file_does_not_exist()
     {
-
         $testLayout = [
             'lib' => [
                 'infile.css' => ''
@@ -150,7 +143,7 @@ class CssUrlReplaceParserTest extends \Ems\IntegrationTest
         list($tempDir, $structure) = $this->createNestedDirectories($testLayout);
 
         $config = [
-            'file_path' => "$tempDir/lib/infile.css",
+            'file_path'   => "$tempDir/lib/infile.css",
             'target_path' => "$tempDir/outfile.css",
 
         ];
@@ -158,19 +151,17 @@ class CssUrlReplaceParserTest extends \Ems\IntegrationTest
         $testString = 'table {background: url(../images/blank.gif);}';
 
         $result = $this->newParser()->parse($testString, $config);
-
     }
 
     public function test_parse_does_not_replace_absolute_urls()
     {
-
         $testLayout = [
             'lib' => [
                 'infile.css' => ''
             ],
             'images' => [
                 'blank.gif' => '',
-                'bg.png' => ''
+                'bg.png'    => ''
             ],
             'outfile.css' => ''
         ];
@@ -178,7 +169,7 @@ class CssUrlReplaceParserTest extends \Ems\IntegrationTest
         list($tempDir, $structure) = $this->createNestedDirectories($testLayout);
 
         $config = [
-            'file_path' => "$tempDir/lib/infile.css",
+            'file_path'   => "$tempDir/lib/infile.css",
             'target_path' => "$tempDir/outfile.css",
 
         ];
@@ -211,19 +202,17 @@ class CssUrlReplaceParserTest extends \Ems\IntegrationTest
 
         $this->assertContains('url(/images/blank.gif)', $result);
         $this->assertNotContains('url(images/blank.gif)', $result);
-
     }
 
     public function test_parse_does_not_replace_data_urls()
     {
-
         $testLayout = [
             'lib' => [
                 'infile.css' => ''
             ],
             'images' => [
                 'blank.gif' => '',
-                'bg.png' => ''
+                'bg.png'    => ''
             ],
             'outfile.css' => ''
         ];
@@ -231,7 +220,7 @@ class CssUrlReplaceParserTest extends \Ems\IntegrationTest
         list($tempDir, $structure) = $this->createNestedDirectories($testLayout);
 
         $config = [
-            'file_path' => "$tempDir/lib/infile.css",
+            'file_path'   => "$tempDir/lib/infile.css",
             'target_path' => "$tempDir/outfile.css",
 
         ];
@@ -241,16 +230,14 @@ class CssUrlReplaceParserTest extends \Ems\IntegrationTest
         $result = $this->newParser()->parse($testString, $config);
 
         $this->assertContains('url(data:foo)', $result);
-
     }
 
     public function test_parse_replaces_relative_paths_without_dots()
     {
-
         $testLayout = [
             'lib' => [
                 'infile.css' => '',
-                'blank.gif' => ''
+                'blank.gif'  => ''
             ],
             'outfile.css' => ''
         ];
@@ -258,7 +245,7 @@ class CssUrlReplaceParserTest extends \Ems\IntegrationTest
         list($tempDir, $structure) = $this->createNestedDirectories($testLayout);
 
         $config = [
-            'file_path' => "$tempDir/lib/infile.css",
+            'file_path'   => "$tempDir/lib/infile.css",
             'target_path' => "$tempDir/outfile.css",
 
         ];
@@ -269,16 +256,14 @@ class CssUrlReplaceParserTest extends \Ems\IntegrationTest
 
         $this->assertContains('url(lib/blank.gif)', $result);
         $this->assertNotContains('url(blank.gif)', $result);
-
     }
 
     public function test_parse_replaces_relative_paths_with_tick_marks()
     {
-
         $testLayout = [
             'lib' => [
                 'infile.css' => '',
-                'blank.gif' => ''
+                'blank.gif'  => ''
             ],
             'outfile.css' => ''
         ];
@@ -286,7 +271,7 @@ class CssUrlReplaceParserTest extends \Ems\IntegrationTest
         list($tempDir, $structure) = $this->createNestedDirectories($testLayout);
 
         $config = [
-            'file_path' => "$tempDir/lib/infile.css",
+            'file_path'   => "$tempDir/lib/infile.css",
             'target_path' => "$tempDir/outfile.css",
 
         ];
@@ -304,17 +289,15 @@ class CssUrlReplaceParserTest extends \Ems\IntegrationTest
 
         $this->assertContains('url(\'lib/blank.gif\')', $result);
         $this->assertNotContains('url(\'blank.gif\')', $result);
-
     }
 
     public function test_parse_replaces_relative_paths_in_deeper_hierarchy()
     {
-
         $testLayout = [
             'plugins' => [
                 'jquery-ui' => [
                     'jquery-ui.css' => '',
-                    'images' => [
+                    'images'        => [
                         'bullet.gif' => ''
                     ]
                 ]
@@ -325,7 +308,7 @@ class CssUrlReplaceParserTest extends \Ems\IntegrationTest
         list($tempDir, $structure) = $this->createNestedDirectories($testLayout);
 
         $config = [
-            'file_path' => "$tempDir/plugins/jquery-ui/jquery-ui.css",
+            'file_path'   => "$tempDir/plugins/jquery-ui/jquery-ui.css",
             'target_path' => "$tempDir/outfile.css",
 
         ];
@@ -336,7 +319,6 @@ class CssUrlReplaceParserTest extends \Ems\IntegrationTest
 
         $this->assertContains('url(plugins/jquery-ui/images/bullet.gif)', $result);
         $this->assertNotContains('url(images/bullet.gif)', $result);
-
     }
 
 
@@ -344,6 +326,5 @@ class CssUrlReplaceParserTest extends \Ems\IntegrationTest
     {
         return new CssUrlReplaceParser($this->newFilesystem());
     }
-
 }
 

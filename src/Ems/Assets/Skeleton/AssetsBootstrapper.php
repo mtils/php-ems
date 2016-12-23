@@ -12,16 +12,16 @@ use Ems\Contracts\Core\PathFinder;
 class AssetsBootstrapper extends Bootstrapper
 {
     protected $singletons = [
-        'Ems\Assets\ExtensionAnalyser' => ['Ems\Contracts\Assets\NameAnalyser'],
+        'Ems\Assets\ExtensionAnalyser'     => ['Ems\Contracts\Assets\NameAnalyser'],
         'Ems\Assets\BuildConfigRepository' => ['Ems\Contracts\Assets\BuildConfigRepository'],
-        'Ems\Assets\Builder' => ['Ems\Contracts\Assets\Builder'],
-        'Ems\Assets\Compiler' => ['Ems\Contracts\Assets\Compiler'],
-        'Ems\Assets\Registry' => ['Ems\Contracts\Assets\Registry', 'Ems\Contracts\Assets\Registrar', 'ems.assets.registry'],
-        'Ems\Assets\Manager' => ['Ems\Contracts\Assets\Manager', 'ems.assets'],
+        'Ems\Assets\Builder'               => ['Ems\Contracts\Assets\Builder'],
+        'Ems\Assets\Compiler'              => ['Ems\Contracts\Assets\Compiler'],
+        'Ems\Assets\Registry'              => ['Ems\Contracts\Assets\Registry', 'Ems\Contracts\Assets\Registrar', 'ems.assets.registry'],
+        'Ems\Assets\Manager'               => ['Ems\Contracts\Assets\Manager', 'ems.assets'],
     ];
 
     protected $bindings = [
-        'Ems\Assets\Asset' => 'Ems\Contracts\Assets\Asset',
+        'Ems\Assets\Asset'      => 'Ems\Contracts\Assets\Asset',
         'Ems\Assets\Collection' => 'Ems\Contracts\Assets\Collection',
     ];
 
@@ -136,7 +136,7 @@ class AssetsBootstrapper extends Bootstrapper
     {
         $router->get('_ems/asset', [
             'uses' => '\Ems\Assets\Laravel\AssetController@show',
-            'as' => '_ems-assets.show',
+            'as'   => '_ems-assets.show',
         ]);
     }
 

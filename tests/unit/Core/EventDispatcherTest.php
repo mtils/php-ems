@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Core;
 
 use Ems\Contracts\Core\Subscribable;
@@ -8,7 +7,6 @@ use Ems\Testing\LoggingCallable;
 
 class EventDispatcherTest extends \Ems\TestCase
 {
-
     public function test_implements_interface()
     {
         $this->assertInstanceOf(
@@ -19,29 +17,27 @@ class EventDispatcherTest extends \Ems\TestCase
 
     public function test_getListener_returns_all_listener()
     {
-
         $dispatcher = $this->newDispatcher();
-        $listener = function(){};
+        $listener = function () {};
 
         $dispatcher->onAll($listener);
 
         $this->assertSame($listener, $dispatcher->getListeners('*')[0]);
-
     }
 
     public function test_fire_calls_onAll_listener()
     {
         $dispatcher = $this->newDispatcher();
-        $listener = new LoggingCallable;
+        $listener = new LoggingCallable();
 
         $dispatcher->onAll($listener);
 
-        $dispatcher('some-event','a');
-        $dispatcher('some-event',['a','b']);
+        $dispatcher('some-event', 'a');
+        $dispatcher('some-event', ['a', 'b']);
         $dispatcher('some-event');
 
-        $this->assertEquals(['some-event','a'], $listener->args(0));
-        $this->assertEquals(['some-event','a','b'], $listener->args(1));
+        $this->assertEquals(['some-event', 'a'], $listener->args(0));
+        $this->assertEquals(['some-event', 'a', 'b'], $listener->args(1));
         $this->assertEquals(['some-event'], $listener->args(2));
     }
 
@@ -105,8 +101,7 @@ class EventDispatcherTest extends \Ems\TestCase
         $dispatcher->on('foo', $onListener);
         $dispatcher->onAfter('foo', $afterListener);
 
-        $this->assertEquals(['a','b','c','d'], $dispatcher->fire('foo', 'e'));
-
+        $this->assertEquals(['a', 'b', 'c', 'd'], $dispatcher->fire('foo', 'e'));
     }
 
     public function test_fire_breaks_on_first_not_null_if_halt_is_true()
@@ -168,7 +163,6 @@ class EventDispatcherTest extends \Ems\TestCase
         $dispatcher->onAfter('foo', $afterListener);
 
         $this->assertEquals('b', $dispatcher->fire('foo', 'e', true));
-
     }
 
     public function test_fire_stops_propagating_if_listener_returns_false()
@@ -231,8 +225,7 @@ class EventDispatcherTest extends \Ems\TestCase
         $dispatcher->on('foo', $onListener);
         $dispatcher->onAfter('foo', $afterListener);
 
-        $this->assertEquals(['a','b',false], $dispatcher->fire('foo', 'e'));
-
+        $this->assertEquals(['a', 'b', false], $dispatcher->fire('foo', 'e'));
     }
 
     /**
@@ -246,8 +239,7 @@ class EventDispatcherTest extends \Ems\TestCase
 
     protected function newDispatcher()
     {
-        $object = new EventDispatcher;
+        $object = new EventDispatcher();
         return $object;
     }
-
 }

@@ -14,19 +14,19 @@ trait ExtendableRepositoryTrait
      * @var array
      **/
     protected $_listeners = [
-        'getting' => [],
-        'got' => [],
-        'made' => [],
-        'storing' => [],
-        'stored' => [],
-        'filling' => [],
-        'filled' => [],
+        'getting'  => [],
+        'got'      => [],
+        'made'     => [],
+        'storing'  => [],
+        'stored'   => [],
+        'filling'  => [],
+        'filled'   => [],
         'updating' => [],
-        'updated' => [],
-        'saving' => [],
-        'saved' => [],
+        'updated'  => [],
+        'saving'   => [],
+        'saved'    => [],
         'deleting' => [],
-        'deleted' => [],
+        'deleted'  => [],
     ];
 
     /**

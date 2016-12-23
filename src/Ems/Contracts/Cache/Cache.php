@@ -168,9 +168,9 @@ interface Cache extends BaseStorage, Provider, HasMethodHooks
      *
      * @param string $name (optional)
      *
-     * @return \Ems\Contracts\Cache\Storage
-     *
      * @throws \Ems\Contracts\NotFound
+     *
+     * @return \Ems\Contracts\Cache\Storage
      **/
     public function getStorage($name=null);
 }

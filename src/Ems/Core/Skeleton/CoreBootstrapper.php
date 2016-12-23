@@ -14,16 +14,16 @@ use Ems\Core\VariablesTextParser;
 class CoreBootstrapper extends Bootstrapper
 {
     protected $singletons = [
-        'Ems\Core\LocalFilesystem' => 'Ems\Contracts\Core\Filesystem',
+        'Ems\Core\LocalFilesystem'        => 'Ems\Contracts\Core\Filesystem',
         'Ems\Core\ManualMimeTypeProvider' => 'Ems\Contracts\Core\MimeTypeProvider',
-        'Ems\Core\Support\RendererChain' => 'Ems\Contracts\Core\Renderer',
-        'Ems\Core\PathFinder' => 'Ems\Contracts\Core\PathFinder',
-        'Ems\Core\InputCorrector' => 'Ems\Contracts\Core\InputCorrector',
-        'Ems\Core\InputCaster' => 'Ems\Contracts\Core\InputCaster',
-        'Ems\Core\StringConverterChain' => 'Ems\Contracts\Core\StringConverter',
-        'Ems\Core\ArrayLocalizer' => 'Ems\Contracts\Core\Localizer',
-        'Ems\Core\TextFormatter' => 'Ems\Contracts\Core\TextFormatter',
-        'Ems\Core\TextParserQueue' => 'Ems\Contracts\Core\TextParser',
+        'Ems\Core\Support\RendererChain'  => 'Ems\Contracts\Core\Renderer',
+        'Ems\Core\PathFinder'             => 'Ems\Contracts\Core\PathFinder',
+        'Ems\Core\InputCorrector'         => 'Ems\Contracts\Core\InputCorrector',
+        'Ems\Core\InputCaster'            => 'Ems\Contracts\Core\InputCaster',
+        'Ems\Core\StringConverterChain'   => 'Ems\Contracts\Core\StringConverter',
+        'Ems\Core\ArrayLocalizer'         => 'Ems\Contracts\Core\Localizer',
+        'Ems\Core\TextFormatter'          => 'Ems\Contracts\Core\TextFormatter',
+        'Ems\Core\TextParserQueue'        => 'Ems\Contracts\Core\TextParser',
     ];
 
     protected $bindings = [

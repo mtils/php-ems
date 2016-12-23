@@ -5,10 +5,11 @@ namespace Ems\Contracts\Core;
 interface Subscribable
 {
     /**
-     * Subscribe to event $event
+     * Subscribe to event $event.
      *
      * @param string|object $event
-     * @param callable $listener
+     * @param callable      $listener
+     *
      * @return self
      **/
     public function on($event, callable $listener);
@@ -18,7 +19,7 @@ interface Subscribable
      * 'after' or 'before'.
      *
      * @param string|object $event
-     * @param string $position ('after'|'before'|'')
+     * @param string        $position ('after'|'before'|'')
      *
      * @return array
      **/

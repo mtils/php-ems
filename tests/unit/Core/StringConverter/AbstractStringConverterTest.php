@@ -1,15 +1,12 @@
 <?php
 
-
 namespace Ems\Core\StringConverter;
 
 
 use Ems\Contracts\Core\StringConverter;
 
-
 abstract class AbstractStringConverterTest extends \Ems\TestCase
 {
-
     /**
      * @var string
      **/
@@ -43,7 +40,6 @@ abstract class AbstractStringConverterTest extends \Ems\TestCase
         $succeeded = 0;
 
         foreach ($converter->encodings() as $encoding) {
-
             $converted = $converter->convert($testString, $encoding);
             $awaited = $this->convert($testString, $encoding);
 
@@ -58,7 +54,6 @@ abstract class AbstractStringConverterTest extends \Ems\TestCase
             }
 
             $succeeded++;
-
         }
 
         if (!$this->testEveryEncoding && $fails >= $succeeded) {
@@ -84,5 +79,4 @@ abstract class AbstractStringConverterTest extends \Ems\TestCase
             );
         }
     }
-
 }

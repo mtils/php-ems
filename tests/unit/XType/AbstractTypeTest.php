@@ -1,14 +1,11 @@
 <?php
 
-
 namespace Ems\XType;
 
 use Ems\Contracts\XType\XType;
 
-
 class AbstractTypeTest extends \Ems\TestCase
 {
-
     public function test_implements_interface()
     {
         $this->assertInstanceOf(XType::class, self::newType());
@@ -16,89 +13,83 @@ class AbstractTypeTest extends \Ems\TestCase
 
     public function test_fill_fills_canBeNull_with_all_aliases()
     {
-
         $type = $this->newType();
 
-        $type->fill(['canBeNull'=>false]);
+        $type->fill(['canBeNull'=> false]);
 
         $this->assertFalse($type->canBeNull);
 
-        $type->fill(['canBeNull'=>true]);
+        $type->fill(['canBeNull'=> true]);
 
         $this->assertTrue($type->canBeNull);
 
-        $type->fill(['required'=>true]);
+        $type->fill(['required'=> true]);
 
         $this->assertFalse($type->canBeNull);
 
-        $type->fill(['required'=>false]);
+        $type->fill(['required'=> false]);
 
         $this->assertTrue($type->canBeNull);
 
-        $type->fill(['null'=>false]);
+        $type->fill(['null'=> false]);
 
         $this->assertFalse($type->canBeNull);
 
-        $type->fill(['null'=>true]);
+        $type->fill(['null'=> true]);
 
         $this->assertTrue($type->canBeNull);
 
-        $type->fill(['optional'=>false]);
+        $type->fill(['optional'=> false]);
 
         $this->assertFalse($type->canBeNull);
-
     }
 
     public function test_fill_fills_mustBeTouched_with_all_aliases()
     {
-
         $type = $this->newType();
 
-        $type->fill(['mustBeTouched'=>true]);
+        $type->fill(['mustBeTouched'=> true]);
 
         $this->assertTrue($type->mustBeTouched);
 
-        $type->fill(['mustBeTouched'=>false]);
+        $type->fill(['mustBeTouched'=> false]);
 
         $this->assertFalse($type->mustBeTouched);
 
-        $type->fill(['touched'=>true]);
+        $type->fill(['touched'=> true]);
 
         $this->assertTrue($type->mustBeTouched);
 
-        $type->fill(['touched'=>false]);
+        $type->fill(['touched'=> false]);
 
         $this->assertFalse($type->mustBeTouched);
 
-        foreach (['ignore','ignored'] as $name) {
-            $type->fill([$name=>false]);
+        foreach (['ignore', 'ignored'] as $name) {
+            $type->fill([$name=> false]);
             $this->assertTrue($type->mustBeTouched);
-            $type->fill([$name=>true]);
+            $type->fill([$name=> true]);
             $this->assertFalse($type->mustBeTouched);
         }
-
     }
 
     public function test_fill_fills_readonly_with_all_aliases()
     {
-
         $type = $this->newType();
 
-        $type->fill(['readonly'=>true]);
+        $type->fill(['readonly'=> true]);
 
         $this->assertTrue($type->readonly);
 
-        $type->fill(['readonly'=>false]);
+        $type->fill(['readonly'=> false]);
 
         $this->assertFalse($type->readonly);
 
-        foreach (['protected','forbidden'] as $name) {
-            $type->fill([$name=>false]);
+        foreach (['protected', 'forbidden'] as $name) {
+            $type->fill([$name=> false]);
             $this->assertFalse($type->readonly);
-            $type->fill([$name=>true]);
+            $type->fill([$name=> true]);
             $this->assertTrue($type->readonly);
         }
-
     }
 
     /**
@@ -106,11 +97,9 @@ class AbstractTypeTest extends \Ems\TestCase
      **/
     public function test_fill_throws_exception_if_parameter_not_supported()
     {
-
         $type = $this->newType();
 
-        $type->fill(['foo_crap_bar'=>true]);
-
+        $type->fill(['foo_crap_bar'=> true]);
     }
 
     public function test_isComplex_returns_expected()
@@ -120,7 +109,6 @@ class AbstractTypeTest extends \Ems\TestCase
         $awaited = in_array($type->group(), [XType::CUSTOM, XType::COMPLEX]);
 
         $this->assertEquals($awaited, $type->isComplex());
-
     }
 
     public function test_isScalar_returns_expected()
@@ -130,7 +118,6 @@ class AbstractTypeTest extends \Ems\TestCase
         $awaited = in_array($type->group(), [XType::NUMBER, XType::STRING, XType::BOOL]);
 
         $this->assertEquals($awaited, $type->isScalar());
-
     }
 
     public function test_replicate_returns_identical_copy()
@@ -148,7 +135,7 @@ class AbstractTypeTest extends \Ems\TestCase
 
     protected function newType()
     {
-        return new TestAbstractType_Type;
+        return new TestAbstractType_Type();
     }
 }
 

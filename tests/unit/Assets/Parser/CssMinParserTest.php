@@ -4,7 +4,6 @@ namespace Ems\Assets\Parser;
 
 class CssMinParserTest extends \Ems\TestCase
 {
-
     public function test_implements_interface()
     {
         $this->assertInstanceOf(
@@ -32,6 +31,5 @@ class CssMinParserTest extends \Ems\TestCase
     {
         return new CssMinParser($minifier);
     }
-
 }
 

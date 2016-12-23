@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Model\Eloquent;
 
 use Ems\Contracts\Core\Errors\NotFound;

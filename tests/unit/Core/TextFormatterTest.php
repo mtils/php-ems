@@ -1,16 +1,13 @@
 <?php
 
-
 namespace Ems\Core;
 
 use Ems\Contracts\Core\TextFormatter as FormatterContract;
 use Ems\Contracts\Core\NamedCallableChain as ChainContract;
 use Ems\Testing\LoggingCallable;
 
-
 class TextFormatterTest extends \Ems\TestCase
 {
-
     public function test_implements_interface()
     {
         $this->assertInstanceOf(FormatterContract::class, $this->newFormatter());
@@ -24,13 +21,12 @@ class TextFormatterTest extends \Ems\TestCase
         $input = 'foo';
         $result = 'bar';
 
-        $extension = new LoggingCallable(function($text) use ($result) { return $result; });
+        $extension = new LoggingCallable(function ($text) use ($result) { return $result; });
 
         $formatter->extend('foo', $extension);
 
         $this->assertEquals($result, $formatter->foo($input));
         $this->assertEquals($input, $extension->arg(0));
-
     }
 
     public function test_call_method()
@@ -41,7 +37,6 @@ class TextFormatterTest extends \Ems\TestCase
         $result = "Immer Ärger mit Umlauten\nÜbel";
 
         $this->assertEquals($result, $formatter->__call('plain', [$input]));
-
     }
 
     public function test_standard_function()
@@ -49,10 +44,9 @@ class TextFormatterTest extends \Ems\TestCase
         $formatter = $this->newFormatter();
 
         $input = ' whitespace ';
-        $result = "whitespace";
+        $result = 'whitespace';
 
         $this->assertEquals($result, $formatter->__call('trim', [$input]));
-
     }
 
     /**
@@ -63,10 +57,9 @@ class TextFormatterTest extends \Ems\TestCase
         $formatter = $this->newFormatter();
 
         $input = ' whitespace ';
-        $result = "whitespace";
+        $result = 'whitespace';
 
         $this->assertEquals($result, $formatter->__call('trimi', [$input]));
-
     }
 
     public function test_chain_of_filters_with_parameters()
@@ -79,7 +72,7 @@ class TextFormatterTest extends \Ems\TestCase
         $filterParams = 'a,0,22,x';
         $result = "<em>$filterOutput</em>";
 
-        $extension = new LoggingCallable(function($text) use ($filterOutput) { return $filterOutput; });
+        $extension = new LoggingCallable(function ($text) use ($filterOutput) { return $filterOutput; });
         $formatter->extend('foo', $extension);
 
         $this->assertEquals($result, $formatter->format($input, "trim|foo:$filterParams|tag:em"));
@@ -93,7 +86,6 @@ class TextFormatterTest extends \Ems\TestCase
 
     protected function newFormatter()
     {
-        return new TextFormatter;
+        return new TextFormatter();
     }
-
 }

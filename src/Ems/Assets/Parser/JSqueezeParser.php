@@ -13,9 +13,9 @@ class JSqueezeParser implements TextParser
     protected $minifier;
 
     protected $defaultOptions = [
-        'singleLine' => true,
+        'singleLine'            => true,
         'keepImportantComments' => true,
-        'specialVarRx' => false,
+        'specialVarRx'          => false,
     ];
 
     public function __construct(JSqueeze $minifier = null)

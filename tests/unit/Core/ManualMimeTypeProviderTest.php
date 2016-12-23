@@ -1,14 +1,11 @@
 <?php
 
-
 namespace Ems\Core;
 
 use Ems\Testing\LoggingCallable;
 
-
 class ManualMimeTypeProviderTest extends \Ems\TestCase
 {
-
     public function test_implements_interface()
     {
         $this->assertInstanceOf(
@@ -45,7 +42,7 @@ class ManualMimeTypeProviderTest extends \Ems\TestCase
     public function test_first_hit_on_unknown_extension_triggers_callable()
     {
         $provider = $this->newProvider();
-        $loader = new LoggingCallable;
+        $loader = new LoggingCallable();
 
         $provider->provideExtendedSet($loader);
 
@@ -62,7 +59,6 @@ class ManualMimeTypeProviderTest extends \Ems\TestCase
         $this->assertEquals('', $provider->typeOfName('foo'));
 
         $this->assertCount(1, $loader);
-
     }
 
     public function test_isOfType_returns_true_on_direct_hit()
@@ -92,7 +88,7 @@ class ManualMimeTypeProviderTest extends \Ems\TestCase
     public function test_plus_sign_types_matches_to_non_plus_sign()
     {
         $provider = $this->newProvider();
-        $provider->fillByArray(['application/vnd.api+json' =>['json-api']]);
+        $provider->fillByArray(['application/vnd.api+json' => ['json-api']]);
         $this->assertTrue($provider->isOfType('users.json-api', 'application/json'));
     }
 
@@ -122,7 +118,6 @@ class ManualMimeTypeProviderTest extends \Ems\TestCase
 
     protected function newProvider()
     {
-        return new ManualMimeTypeProvider;
+        return new ManualMimeTypeProvider();
     }
-
 }

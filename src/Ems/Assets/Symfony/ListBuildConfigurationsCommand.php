@@ -25,8 +25,8 @@ class ListBuildConfigurationsCommand extends Command
         'group' => 'Group',
         'files' => 'Includes',
 //         'base_path'     => 'Base path',
-        'target' => 'Compiled File',
-        'parserNames' => 'Parsers',
+        'target'        => 'Compiled File',
+        'parserNames'   => 'Parsers',
         'target_exists' => 'Compiled?',
     ];
 

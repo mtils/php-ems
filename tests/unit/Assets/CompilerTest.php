@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Assets;
 
 use Ems\Core\LocalFilesystem;
@@ -13,7 +12,6 @@ use Ems\Contracts\Core\Filesystem;
 
 class CompilerTest extends \Ems\TestCase
 {
-
     use AssetsFactoryMethods;
 
     public function test_implements_interface()
@@ -37,7 +35,6 @@ class CompilerTest extends \Ems\TestCase
         $parser = $this->mockParser();
         $compiler->addParser('test', $parser);
         $this->assertSame($parser, $compiler->parser('test'));
-
     }
 
     /**
@@ -49,7 +46,6 @@ class CompilerTest extends \Ems\TestCase
         $parser = $this->mockParser();
         $compiler->addParser('test', $parser);
         $compiler->parser('testi');
-
     }
 
     public function test_removeParser_removes_parser()
@@ -63,10 +59,8 @@ class CompilerTest extends \Ems\TestCase
         try {
             $compiler->parser('test');
             $this->fail('Removed parser is still in compiler');
-        } catch(\Ems\Contracts\Core\Errors\NotFound $e) {
-
+        } catch (\Ems\Contracts\Core\Errors\NotFound $e) {
         }
-
     }
 
     public function test_parserNames_returns_assigned_parserNames()
@@ -76,15 +70,13 @@ class CompilerTest extends \Ems\TestCase
         $compiler->addParser('test', $parser);
         $this->assertEquals(['test'], $compiler->parserNames());
         $compiler->addParser('test2', $parser);
-        $this->assertEquals(['test','test2'], $compiler->parserNames());
+        $this->assertEquals(['test', 'test2'], $compiler->parserNames());
         $compiler->removeParser('test');
         $this->assertEquals(['test2'], $compiler->parserNames());
-
     }
 
     public function test_compile_collects_file_contents()
     {
-
         $registry = $this->mockRegistry();
         $files = $this->mockFilesystem();
 
@@ -115,12 +107,10 @@ class CompilerTest extends \Ems\TestCase
         $awaited = $this->contentFromFiles($pathProvider, $assets);
 
         $this->assertEquals($awaited,  $compiler->compile($collection));
-
     }
 
     public function test_compile_calls_passed_parsers()
     {
-
         $registry = $this->mockRegistry();
         $files = $this->mockFilesystem();
 
@@ -155,17 +145,17 @@ class CompilerTest extends \Ems\TestCase
         $compiler->addParser('test2', $parser2);
 
         $parserOptions = [
-            'collection' => $collection,
+            'collection'  => $collection,
             'parser_name' => 'test1',
-            'asset' => $collection[$this->index($collection,'reset.css')],
-            'file_path' => '/var/www/reset.css'
+            'asset'       => $collection[$this->index($collection, 'reset.css')],
+            'file_path'   => '/var/www/reset.css'
         ];
 
         $parserOptions2 = [
-            'collection' => $collection,
+            'collection'  => $collection,
             'parser_name' => 'test2',
-            'asset' => $parserOptions['asset'],
-            'file_path' => $parserOptions['file_path']
+            'asset'       => $parserOptions['asset'],
+            'file_path'   => $parserOptions['file_path']
         ];
 
 
@@ -193,12 +183,10 @@ class CompilerTest extends \Ems\TestCase
 
 
         $this->assertEquals('test2-parsed',  $compiler->compile($collection, ['test1', 'test2']));
-
     }
 
     public function test_compile_calls_passed_parsers_with_parser_options()
     {
-
         $registry = $this->mockRegistry();
         $files = $this->mockFilesystem();
 
@@ -242,18 +230,18 @@ class CompilerTest extends \Ems\TestCase
         ];
 
         $parserOptions1 = [
-            'collection' => $collection,
+            'collection'  => $collection,
             'parser_name' => 'test1',
-            'asset' => $collection[$this->index($collection,'reset.css')],
-            'file_path' => '/var/www/reset.css',
-            'allow-html' => true
+            'asset'       => $collection[$this->index($collection, 'reset.css')],
+            'file_path'   => '/var/www/reset.css',
+            'allow-html'  => true
         ];
 
         $parserOptions2 = [
-            'collection' => $collection,
+            'collection'  => $collection,
             'parser_name' => 'test2',
-            'asset' => $parserOptions1['asset'],
-            'file_path' => $parserOptions1['file_path']
+            'asset'       => $parserOptions1['asset'],
+            'file_path'   => $parserOptions1['file_path']
         ];
 
         $parser1->shouldReceive('parse')
@@ -279,12 +267,10 @@ class CompilerTest extends \Ems\TestCase
         
 
         $this->assertEquals('test2-parsed',  $compiler->compile($collection, ['test1', 'test2'], $parserOptions));
-
     }
     
     public function test_compile_calls_passed_parsers_with_parser_options_assigned_with_wildcard()
     {
-
         $registry = $this->mockRegistry();
         $files = $this->mockFilesystem();
 
@@ -328,19 +314,19 @@ class CompilerTest extends \Ems\TestCase
         ];
 
         $parserOptions1 = [
-            'collection' => $collection,
+            'collection'  => $collection,
             'parser_name' => 'test1',
-            'asset' => $collection[$this->index($collection,'reset.css')],
-            'file_path' => '/var/www/reset.css',
-            'allow-html' => true
+            'asset'       => $collection[$this->index($collection, 'reset.css')],
+            'file_path'   => '/var/www/reset.css',
+            'allow-html'  => true
         ];
 
         $parserOptions2 = [
-            'collection' => $collection,
+            'collection'  => $collection,
             'parser_name' => 'test2',
-            'asset' => $parserOptions1['asset'],
-            'file_path' => $parserOptions1['file_path'],
-            'allow-html' => true
+            'asset'       => $parserOptions1['asset'],
+            'file_path'   => $parserOptions1['file_path'],
+            'allow-html'  => true
         ];
 
         $parser1->shouldReceive('parse')
@@ -366,18 +352,16 @@ class CompilerTest extends \Ems\TestCase
         
 
         $this->assertEquals('test2-parsed',  $compiler->compile($collection, ['test1', 'test2'], $parserOptions));
-
     }
 
     public function test_compile_calls_listener()
     {
-
         $registry = $this->mockRegistry();
         $files = $this->mockFilesystem();
 
         $compiler = $this->newCompiler($files, $registry);
 
-        $listener = new LoggingCallable;
+        $listener = new LoggingCallable();
 
         $compiler->whenCompiled($listener);
 
@@ -412,18 +396,16 @@ class CompilerTest extends \Ems\TestCase
         $this->assertEquals([], $listener->arg(2));
         $this->assertEquals([], $listener->arg(3));
         $this->assertCount(1, $listener);
-
     }
 
     public function test_compile_uses_listener_output_if_it_returned_an_nonempty_string()
     {
-
         $registry = $this->mockRegistry();
         $files = $this->mockFilesystem();
 
         $compiler = $this->newCompiler($files, $registry);
 
-        $compiler->whenCompiled(function($collection, $content) {
+        $compiler->whenCompiled(function ($collection, $content) {
             return 'foo';
         });
 
@@ -452,19 +434,16 @@ class CompilerTest extends \Ems\TestCase
         $awaited = $this->contentFromFiles($pathProvider, $assets);
 
         $this->assertEquals('foo',  $compiler->compile($collection));
-
-
     }
 
     public function test_compile_uses_original_output_if_it_returned_a_trueish_nonstring()
     {
-
         $registry = $this->mockRegistry();
         $files = $this->mockFilesystem();
 
         $compiler = $this->newCompiler($files, $registry);
 
-        $compiler->whenCompiled(function($collection, $content) {
+        $compiler->whenCompiled(function ($collection, $content) {
             return true;
         });
 
@@ -493,8 +472,6 @@ class CompilerTest extends \Ems\TestCase
         $awaited = $this->contentFromFiles($pathProvider, $assets);
 
         $this->assertEquals($awaited,  $compiler->compile($collection));
-
-
     }
 
     protected function newCompiler(FileSystem $fileSystem=null, RegistryContract $registry=null)
@@ -506,7 +483,7 @@ class CompilerTest extends \Ems\TestCase
 
     protected function newCollection($files, $group, $mimeType='text/css')
     {
-        $collection = new Collection;
+        $collection = new Collection();
         $collection->setGroup($group);
         foreach ((array)$files as $file) {
             $collection->append($this->newAsset($file, $group, $mimeType));
@@ -524,7 +501,7 @@ class CompilerTest extends \Ems\TestCase
 
     protected function newFilesystem()
     {
-        return new LocalFilesystem;
+        return new LocalFilesystem();
     }
 
     protected function mockFilesystem()
@@ -547,7 +524,7 @@ class CompilerTest extends \Ems\TestCase
         $contents = '';
         $nl = '';
         foreach ($assets as $asset) {
-            $contents .= $nl . $contentsProvider($asset);
+            $contents .= $nl.$contentsProvider($asset);
             $nl = "\n";
         }
         return $contents;

@@ -5,7 +5,6 @@ namespace Ems\Core\Collections;
 
 class NestedArrayTest extends \Ems\TestCase
 {
-
     public function testOffsetGetOnOneLevel()
     {
         $array = [
@@ -16,11 +15,9 @@ class NestedArrayTest extends \Ems\TestCase
 
         $grouper = $this->newGrouper($array);
 
-        foreach($array as $key=>$value)
-        {
+        foreach ($array as $key=>$value) {
             $this->assertEquals($value, $grouper[$key]);
         }
-
     }
 
     public function testOffsetGetOnTwoLevels()
@@ -35,11 +32,9 @@ class NestedArrayTest extends \Ems\TestCase
 
         $grouper = $this->newGrouper($array);
 
-        foreach($array as $key=>$value)
-        {
+        foreach ($array as $key=>$value) {
             $this->assertEquals($value, $grouper[$key]);
         }
-
     }
 
     public function testOffsetGetGroupOnTwoLevels()
@@ -60,7 +55,6 @@ class NestedArrayTest extends \Ems\TestCase
         $grouper = $this->newGrouper($array);
 
         $this->assertEquals($addressArray, $grouper['address']);
-
     }
 
     public function testLeadingSeparatorDoesntProduceChildren()
@@ -80,13 +74,12 @@ class NestedArrayTest extends \Ems\TestCase
             'name'          => 'Michael',
             'surname'       => 'Tils',
             '.id'           => 578,
-            'address' => [
+            'address'       => [
                 'street' => 'Elmstreet 13'
             ]
         ];
 
         $this->assertEquals($resultArray, $grouper->nested());
-
     }
 
     public function testTrailingSeparatorDoesntProduceChildren()
@@ -106,13 +99,12 @@ class NestedArrayTest extends \Ems\TestCase
             'name'          => 'Michael',
             'surname'       => 'Tils',
             'id.'           => 578,
-            'address' => [
+            'address'       => [
                 'street' => 'Elmstreet 13'
             ]
         ];
 
         $this->assertEquals($resultArray, $grouper->nested());
-
     }
 
     public function testLeadingAndTrailingSeparatorsDontProduceChildren()
@@ -132,13 +124,12 @@ class NestedArrayTest extends \Ems\TestCase
             'name'          => 'Michael',
             'surname'       => 'Tils',
             '.id.'          => 578,
-            'address' => [
+            'address'       => [
                 'street' => 'Elmstreet 13'
             ]
         ];
 
         $this->assertEquals($resultArray, $grouper->nested());
-
     }
 
     public function testOffsetGetGroupOnThreeLevels()
@@ -155,14 +146,13 @@ class NestedArrayTest extends \Ems\TestCase
         ];
 
         $categoryArray = [
-            'id'     =>  27,
-            'name' => 'worker'
+            'id'     => 27,
+            'name'   => 'worker'
         ];
 
         $grouper = $this->newGrouper($array);
 
         $this->assertEquals($categoryArray, $grouper['category.parent']);
-
     }
 
     public function testToNestedRemovesDirectLeaf()
@@ -200,7 +190,6 @@ class NestedArrayTest extends \Ems\TestCase
         $nested2 = $grouper2->nested();
 
         $this->assertEquals($nested, $nested2);
-
     }
 
     public function testRootReturnsOnlyDirectKeys()
@@ -228,7 +217,6 @@ class NestedArrayTest extends \Ems\TestCase
         $this->assertEquals($root, $grouper->root());
 
         $this->assertEquals($root, $grouper['.']);
-
     }
 
     public function testLeadingQuerySeparatorReturnsRootOfResult()
@@ -248,13 +236,12 @@ class NestedArrayTest extends \Ems\TestCase
 
         $categoryRoot = [
             'id'                    => 83,
-            'name'                => 'delivery'
+            'name'                  => 'delivery'
         ];
 
         $grouper = $this->newGrouper($array);
 
         $this->assertEquals($categoryRoot, $grouper['category.'] );
-
     }
 
     public function testOffsetGetWithDifferentQuerySeparator()
@@ -271,35 +258,34 @@ class NestedArrayTest extends \Ems\TestCase
         ];
 
         $addressArray = [
-            'id'       =>  578,
+            'id'       => 578,
             'street'   => 'Elmstreet 13'
         ];
 
         $categoryArray = [
-            'id'     =>  27,
+            'id'     => 27,
             'name'   => 'worker'
         ];
 
         $typeArray = [
-            'name'     =>  'job'
+            'name'     => 'job'
         ];
 
-        $grouper = $this->newGrouper($array,'__');
+        $grouper = $this->newGrouper($array, '__');
 
         $this->assertEquals($addressArray, $grouper['address']);
         $this->assertEquals($categoryArray, $grouper['category.parent']);
         $this->assertEquals($typeArray, $grouper['category.type']);
-
     }
 
     public function testOffsetExistsWorksWithNested()
     {
         $array = [
-            'id'            => 13,
-            'name'          => 'Michael',
-            'surname'       => 'Tils',
-            'address.id'    => 578,
-            'address.street'=> 'Elmstreet 13',
+            'id'                    => 13,
+            'name'                  => 'Michael',
+            'surname'               => 'Tils',
+            'address.id'            => 578,
+            'address.street'        => 'Elmstreet 13',
             'category.parent.id'    => 27,
             'category.parent.name'  => 'worker',
             'age'                   => 86,
@@ -307,8 +293,7 @@ class NestedArrayTest extends \Ems\TestCase
 
         $grouper = $this->newGrouper($array);
 
-        foreach($array as $key=>$value)
-        {
+        foreach ($array as $key=>$value) {
             $this->assertTrue(isset($grouper[$key]));
         }
 
@@ -318,7 +303,6 @@ class NestedArrayTest extends \Ems\TestCase
         $this->assertTrue(isset($grouper['category']));
         $this->assertFalse(isset($grouper['category']['id']));
         $this->assertTrue(isset($grouper['category']['parent']));
-
     }
 
     public function testOffsetExistsWithDotReturnsTrueOnNestedArray()
@@ -328,17 +312,16 @@ class NestedArrayTest extends \Ems\TestCase
         $grouper = $this->newGrouper($array);
 
         $this->assertTrue(isset($grouper['.']));
-
     }
 
     public function testCountReturnsRootCount()
     {
         $array = [
-            'id'            => 13,
-            'name'          => 'Michael',
-            'surname'       => 'Tils',
-            'address.id'    => 578,
-            'address.street'=> 'Elmstreet 13',
+            'id'                    => 13,
+            'name'                  => 'Michael',
+            'surname'               => 'Tils',
+            'address.id'            => 578,
+            'address.street'        => 'Elmstreet 13',
             'category.parent.id'    => 27,
             'category.parent.name'  => 'worker',
             'age'                   => 86,
@@ -347,7 +330,6 @@ class NestedArrayTest extends \Ems\TestCase
         $grouper = $this->newGrouper($array);
 
         $this->assertEquals(4, count($grouper));
-
     }
 
     /**
@@ -371,11 +353,11 @@ class NestedArrayTest extends \Ems\TestCase
     public function testIterateReturnsSameValues()
     {
         $array = [
-            'id'            => 13,
-            'name'          => 'Michael',
-            'surname'       => 'Tils',
-            'address.id'    => 578,
-            'address.street'=> 'Elmstreet 13',
+            'id'                    => 13,
+            'name'                  => 'Michael',
+            'surname'               => 'Tils',
+            'address.id'            => 578,
+            'address.street'        => 'Elmstreet 13',
             'category.parent.id'    => 27,
             'category.parent.name'  => 'worker',
             'age'                   => 86,
@@ -385,21 +367,19 @@ class NestedArrayTest extends \Ems\TestCase
 
         $nested = NestedArray::toNested($array);
 
-        foreach($grouper as $key=>$value)
-        {
+        foreach ($grouper as $key=>$value) {
             $this->assertEquals($nested[$key], $value);
         }
-
     }
 
     public function testSubReturnsInstanceWithSubArray()
     {
         $array = [
-            'id'            => 13,
-            'name'          => 'Michael',
-            'surname'       => 'Tils',
-            'address.id'    => 578,
-            'address.street'=> 'Elmstreet 13',
+            'id'                    => 13,
+            'name'                  => 'Michael',
+            'surname'               => 'Tils',
+            'address.id'            => 578,
+            'address.street'        => 'Elmstreet 13',
             'category.parent.id'    => 27,
             'category.parent.name'  => 'worker',
             'age'                   => 86,
@@ -412,17 +392,16 @@ class NestedArrayTest extends \Ems\TestCase
         $this->assertCount(2, $grouper);
         $this->assertEquals($array['address.id'], $grouper['id']);
         $this->assertEquals($array['address.street'], $grouper['street']);
-
     }
 
     public function testInvokeReturnsSameAsSub()
     {
         $array = [
-            'id'            => 13,
-            'name'          => 'Michael',
-            'surname'       => 'Tils',
-            'address.id'    => 578,
-            'address.street'=> 'Elmstreet 13',
+            'id'                    => 13,
+            'name'                  => 'Michael',
+            'surname'               => 'Tils',
+            'address.id'            => 578,
+            'address.street'        => 'Elmstreet 13',
             'category.parent.id'    => 27,
             'category.parent.name'  => 'worker',
             'age'                   => 86,
@@ -435,7 +414,6 @@ class NestedArrayTest extends \Ems\TestCase
         $this->assertCount(2, $grouper);
         $this->assertEquals($root('category.parent')->root(), $grouper->root());
         $this->assertEquals($root('.')->root(), $root->root());
-
     }
 
     public function testSubReturnsEmptyInstanceIfEmptyArray()
@@ -448,7 +426,6 @@ class NestedArrayTest extends \Ems\TestCase
 
         $this->assertEquals(0, count($grouper));
         $this->assertEquals([], $grouper->getSrc());
-
     }
 
     public function testEmptyArray()
@@ -460,12 +437,10 @@ class NestedArrayTest extends \Ems\TestCase
         $this->assertNull($grouper['address']);
         $this->assertFalse(isset($grouper['address']));
         $this->assertEquals([], $grouper['.']);
-
     }
 
     protected function newGrouper($array=[], $sep='.')
     {
         return new NestedArray($array, $sep);
     }
-
 }

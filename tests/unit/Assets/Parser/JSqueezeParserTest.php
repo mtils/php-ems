@@ -6,7 +6,6 @@ use Patchwork\JSqueeze;
 
 class JSqueezeParserTest extends \Ems\TestCase
 {
-
     public function test_implements_interface()
     {
         $this->assertInstanceOf(
@@ -33,6 +32,5 @@ class JSqueezeParserTest extends \Ems\TestCase
     {
         return new JSqueezeParser($minifier);
     }
-
 }
 

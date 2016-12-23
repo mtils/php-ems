@@ -50,7 +50,7 @@ class Manager implements ManagerContract
      * @var array
      **/
     protected $defaultOptions = [
-        self::MERGE_UNCOMPILED_FILES => true,
+        self::MERGE_UNCOMPILED_FILES     => true,
         self::CHECK_COMPILED_FILE_EXISTS => true,
     ];
 

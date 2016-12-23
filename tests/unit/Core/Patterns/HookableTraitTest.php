@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Core\Patterns;
 
 use Ems\Contracts\Core\HasMethodHooks;
@@ -9,7 +8,6 @@ use Ems\Testing\LoggingCallable;
 
 class HookableTraitTest extends \Ems\TestCase
 {
-
     public function test_implements_interface()
     {
         $this->assertInstanceOf(
@@ -22,24 +20,22 @@ class HookableTraitTest extends \Ems\TestCase
     {
         $hookable = $this->newHookable(['get']);
 
-        $listener = function(){};
+        $listener = function () {};
 
         $hookable->onBefore('get', $listener);
 
         $this->assertSame($listener, $hookable->getListeners('get', 'before')[0]);
-
     }
 
     public function test_getListeners_returns_after_listener()
     {
         $hookable = $this->newHookable(['get']);
 
-        $listener = function(){};
+        $listener = function () {};
 
         $hookable->onAfter('get', $listener);
 
         $this->assertSame($listener, $hookable->getListeners('get', 'after')[0]);
-
     }
 
     /**
@@ -49,12 +45,11 @@ class HookableTraitTest extends \Ems\TestCase
     {
         $hookable = $this->newHookable(['get']);
 
-        $listener = function(){};
+        $listener = function () {};
 
         $hookable->onAfter('get', $listener);
 
         $this->assertSame($listener, $hookable->getListeners('get', 'foo')[0]);
-
     }
 
     public function test_getListeners_return_empty_array_if_no_listeners_assigned()
@@ -62,18 +57,17 @@ class HookableTraitTest extends \Ems\TestCase
         $hookable = $this->newHookable(['get']);
 
         $this->assertEquals([], $hookable->getListeners('get', 'before'));
-
     }
 
     public function test_call_before_listeners()
     {
         $hookable = $this->newHookable(['get']);
 
-        $listener = new LoggingCallable;
+        $listener = new LoggingCallable();
 
         $hookable->onBefore('get', $listener);
 
-        $hookable->fireBefore('get',[]);
+        $hookable->fireBefore('get', []);
 
         $hookable->fireBefore('get', ['a']);
 
@@ -89,22 +83,21 @@ class HookableTraitTest extends \Ems\TestCase
 
         $this->assertEquals([], $listener->args(0));
         $this->assertEquals(['a'], $listener->args(1));
-        $this->assertEquals(['a','b'], $listener->args(2));
-        $this->assertEquals(['a','b','c'], $listener->args(3));
-        $this->assertEquals(['a','b','c','d'], $listener->args(4));
-        $this->assertEquals(['a','b','c','d','e'], $listener->args(5));
-
+        $this->assertEquals(['a', 'b'], $listener->args(2));
+        $this->assertEquals(['a', 'b', 'c'], $listener->args(3));
+        $this->assertEquals(['a', 'b', 'c', 'd'], $listener->args(4));
+        $this->assertEquals(['a', 'b', 'c', 'd', 'e'], $listener->args(5));
     }
 
     public function test_call_after_listeners()
     {
         $hookable = $this->newHookable(['get']);
 
-        $listener = new LoggingCallable;
+        $listener = new LoggingCallable();
 
         $hookable->onAfter('get', $listener);
 
-        $hookable->fireAfter('get',[]);
+        $hookable->fireAfter('get', []);
 
         $hookable->fireAfter('get', ['a']);
 
@@ -120,21 +113,20 @@ class HookableTraitTest extends \Ems\TestCase
 
         $this->assertEquals([], $listener->args(0));
         $this->assertEquals(['a'], $listener->args(1));
-        $this->assertEquals(['a','b'], $listener->args(2));
-        $this->assertEquals(['a','b','c'], $listener->args(3));
-        $this->assertEquals(['a','b','c','d'], $listener->args(4));
-        $this->assertEquals(['a','b','c','d','e'], $listener->args(5));
-
+        $this->assertEquals(['a', 'b'], $listener->args(2));
+        $this->assertEquals(['a', 'b', 'c'], $listener->args(3));
+        $this->assertEquals(['a', 'b', 'c', 'd'], $listener->args(4));
+        $this->assertEquals(['a', 'b', 'c', 'd', 'e'], $listener->args(5));
     }
 
     public function test_it_calls_multiple_listeners()
     {
-        $hookable = $this->newHookable(['get','delete']);
+        $hookable = $this->newHookable(['get', 'delete']);
 
-        $listener1 = new LoggingCallable;
-        $listener2 = new LoggingCallable;
-        $listener3 = new LoggingCallable;
-        $listener4 = new LoggingCallable;
+        $listener1 = new LoggingCallable();
+        $listener2 = new LoggingCallable();
+        $listener3 = new LoggingCallable();
+        $listener4 = new LoggingCallable();
 
         $hookable->onAfter('get', $listener1);
         $hookable->onAfter('get', $listener2);
@@ -154,7 +146,6 @@ class HookableTraitTest extends \Ems\TestCase
         $this->assertEquals([], $listener2->args(0));
         $this->assertEquals(['a'], $listener3->args(0));
         $this->assertEquals(['a'], $listener4->args(0));
-
     }
 
     /**
@@ -164,7 +155,7 @@ class HookableTraitTest extends \Ems\TestCase
     {
         $hookable = $this->newHookable(['get']);
 
-        $listener = new LoggingCallable;
+        $listener = new LoggingCallable();
 
         $hookable->onAfter('save', $listener);
     }
@@ -173,14 +164,14 @@ class HookableTraitTest extends \Ems\TestCase
     {
         $hookable = $this->newHookableWithoutMethodHooks();
 
-        $listener = new LoggingCallable;
+        $listener = new LoggingCallable();
 
         $hookable->onAfter('save', $listener);
     }
 
     protected function newHookable($hooks=[])
     {
-        $object = new WithMethodHooks;
+        $object = new WithMethodHooks();
         $object->hooks = $hooks;
         return $object;
     }
@@ -192,9 +183,9 @@ class HookableTraitTest extends \Ems\TestCase
     {
         $hookable = $this->newHookableWithoutMethodHooks();
 
-        $listener = new LoggingCallable;
+        $listener = new LoggingCallable();
 
-        $hookable->onAfter(new \stdClass, $listener);
+        $hookable->onAfter(new \stdClass(), $listener);
     }
 
     /**
@@ -204,14 +195,14 @@ class HookableTraitTest extends \Ems\TestCase
     {
         $hookable = $this->newHookableWithoutMethodHooks();
 
-        $listener = new LoggingCallable;
+        $listener = new LoggingCallable();
 
         $hookable->onAfter(get_class($this), $listener);
     }
 
     protected function newHookableWithoutMethodHooks()
     {
-        return new WithoutMethodHooks;
+        return new WithoutMethodHooks();
     }
 }
 
@@ -232,7 +223,6 @@ class WithoutMethodHooks implements Hookable
 
 class WithMethodHooks extends WithoutMethodHooks implements HasMethodHooks
 {
-
     public $hooks = [];
 
     /**
@@ -245,5 +235,4 @@ class WithMethodHooks extends WithoutMethodHooks implements HasMethodHooks
     {
         return $this->hooks;
     }
-
 }

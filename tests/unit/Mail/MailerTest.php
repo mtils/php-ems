@@ -12,10 +12,8 @@ use Ems\Testing\LoggingCallable;
 use Ems\Testing\Cheat;
 use Ems\Mail\Swift\Message as SwiftMessage;
 
-
 class MailerTest extends TestCase
 {
-
     public function test_implements_interface()
     {
         $this->assertInstanceOf('Ems\Contracts\Mail\Mailer', $this->newMailer());
@@ -43,7 +41,6 @@ class MailerTest extends TestCase
 
     public function test_message_sets_to_subject_and_body()
     {
-
         $message = $this->mockMessage();
         $transport = $this->mockTransport();
 
@@ -67,8 +64,7 @@ class MailerTest extends TestCase
                 ->atLeast()->times(1)
                 ->with('body');
 
-        $this->assertSame($message, $mailer->message('to','subject','body'));
-
+        $this->assertSame($message, $mailer->message('to', 'subject', 'body'));
     }
 
     public function test_to_returns_other_instance()
@@ -81,8 +77,8 @@ class MailerTest extends TestCase
     public function test_to_copies_listeners()
     {
         $mailer = $this->newMailer();
-        $sendingListener = new LoggingCallable;
-        $sentListener = new LoggingCallable;
+        $sendingListener = new LoggingCallable();
+        $sentListener = new LoggingCallable();
         $mailer->beforeSending($sendingListener);
         $mailer->afterSent($sentListener);
 
@@ -99,9 +95,8 @@ class MailerTest extends TestCase
         $this->assertEquals(['foo@bar.de'], Cheat::get($replicated, 'to'));
 
         $mailer = $this->newMailer();
-        $replicated = $mailer->to('foo@bar.de','bar@foo.de');
-        $this->assertEquals(['foo@bar.de','bar@foo.de'], Cheat::get($replicated, 'to'));
-
+        $replicated = $mailer->to('foo@bar.de', 'bar@foo.de');
+        $this->assertEquals(['foo@bar.de', 'bar@foo.de'], Cheat::get($replicated, 'to'));
     }
 
     public function test_to_takes_array()
@@ -164,7 +159,6 @@ class MailerTest extends TestCase
         $transport->shouldReceive('send')->with($message);
 
         $mailer->sendMessage($message);
-
     }
 
     /**
@@ -180,18 +174,17 @@ class MailerTest extends TestCase
 
     public function test_send_calls_configProvider_composer_and_transport_and_callable()
     {
-
         $transport = $this->mockTransport();
         $configProvider = $this->mockConfigProvider();
         $composer = $this->mockComposer();
-        $callable = new LoggingCallable;
+        $callable = new LoggingCallable();
         $config = $this->mockConfig();
         $message = $this->mockMessage();
         $mailer = $this->newMailer($transport, $configProvider, $composer);
         $sendResult = new SendResult($transport);
 
         $resourceId = 'registrations.store';
-        $data = ['a'=>'b'];
+        $data = ['a'=> 'b'];
         $recipients = ['foo@bar.de'];
 
         $message->shouldReceive('setMailer')
@@ -218,23 +211,21 @@ class MailerTest extends TestCase
         $this->assertInstanceOf(SendResult::class, $result);
         $this->assertEquals(1, count($callable));
         $this->assertSame($message, $callable->arg(0));
-
     }
 
     public function test_send_creates_messages_per_recipient()
     {
-
         $transport = $this->mockTransport();
         $configProvider = $this->mockConfigProvider();
         $composer = $this->mockComposer();
-        $callable = new LoggingCallable;
+        $callable = new LoggingCallable();
         $config = $this->mockConfig();
         $message = $this->mockMessage();
         $mailer = $this->newMailer($transport, $configProvider, $composer);
         $sendResult = new SendResult($transport);
 
         $resourceId = 'registrations.store';
-        $data = ['a'=>'b'];
+        $data = ['a'=> 'b'];
         $recipients = ['foo@bar.de', 'bar@foo.de', 'nobody@somewhere.de'];
 
         $message->shouldReceive('setMailer')
@@ -262,7 +253,6 @@ class MailerTest extends TestCase
 
         $this->assertEquals(count($recipients), count($callable));
         $this->assertSame($message, $callable->arg(0));
-
     }
 
     protected function newMailer(Transport $transport=null, MailConfigProvider $configProvider=null,
@@ -302,7 +292,6 @@ class MailerTest extends TestCase
 
     protected function swiftMessage()
     {
-        return new SwiftMessage(new \Swift_Message);
+        return new SwiftMessage(new \Swift_Message());
     }
-
 }

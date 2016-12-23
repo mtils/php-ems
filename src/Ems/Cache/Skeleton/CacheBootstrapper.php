@@ -15,7 +15,7 @@ class CacheBootstrapper extends Bootstrapper
     protected $categorizersAdded = false;
 
     protected $singletons = [
-        Cache::class => [CacheContract::class, 'ems::cache'],
+        Cache::class            => [CacheContract::class, 'ems::cache'],
         CategorizerChain::class => [Categorizer::class, 'ems::cache.categorizer'],
     ];
 

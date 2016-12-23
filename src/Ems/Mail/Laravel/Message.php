@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Mail\Laravel;
 
 use Illuminate\Mail\Message as LaravelMessage;

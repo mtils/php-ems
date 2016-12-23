@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Core;
 
 
@@ -57,7 +56,7 @@ class LocalFilesystemTest extends \Ems\IntegrationTest
         $testString = 'Foo is a buddy of bar';
         $fs = $this->newFilesystem();
 
-        $fileName = sys_get_temp_dir() . '/' . basename(__FILE__) . '.tmp';
+        $fileName = sys_get_temp_dir().'/'.basename(__FILE__).'.tmp';
 
         $this->assertEquals(strlen($testString), $fs->write($fileName, $testString));
         $this->assertTrue(file_exists($fileName));
@@ -78,10 +77,9 @@ class LocalFilesystemTest extends \Ems\IntegrationTest
 
     public function test_delete_deletes_many_files()
     {
-
         $fs = $this->newFilesystem();
         $count = 4;
-        $tempFiles = array();
+        $tempFiles = [];
 
         for ($i=0; $i<$count; $i++) {
             $tempFiles[] = $this->tempFile();
@@ -100,7 +98,6 @@ class LocalFilesystemTest extends \Ems\IntegrationTest
 
     public function test_delete_deletes_one_directory()
     {
-
         $dirName = $this->tempDirName();
 
         $fs = $this->newFilesystem();
@@ -113,18 +110,18 @@ class LocalFilesystemTest extends \Ems\IntegrationTest
 
     public function test_delete_deletes_nested_directory()
     {
-        $structure = array(
-            'foo.txt' => '',
-            'bar.txt' => '',
-            'directory' => array(
-                'baz.xml' => '',
+        $structure = [
+            'foo.txt'   => '',
+            'bar.txt'   => '',
+            'directory' => [
+                'baz.xml'    => '',
                 'users.json' => '',
-                '2016' => array(
+                '2016'       => [
                     'gung.doc' => '',
-                    'ho.odt' => ''
-                )
-            )
-        );
+                    'ho.odt'   => ''
+                ]
+            ]
+        ];
 
         list($tempDir, $dirs) = $this->createNestedDirectories($structure);
         $fs = $this->newFilesystem();
@@ -132,18 +129,16 @@ class LocalFilesystemTest extends \Ems\IntegrationTest
         $this->assertTrue($fs->exists($tempDir));
         $this->assertTrue($fs->delete($tempDir));
         $this->assertFalse($fs->exists($tempDir));
-
     }
 
     public function test_list_directory_lists_paths()
     {
-
         $fs = $this->newFilesystem();
-        $structure = array(
+        $structure = [
             'foo.txt' => '',
             'bar.txt' => '',
             'baz.txt' => ''
-        );
+        ];
 
         list($tmpDir, $dirs) = $this->createNestedDirectories($structure);
         $listedDirs = $fs->listDirectory($tmpDir);
@@ -151,25 +146,23 @@ class LocalFilesystemTest extends \Ems\IntegrationTest
         sort($listedDirs);
         sort($dirs);
         $this->assertEquals($dirs, $listedDirs);
-
     }
 
     public function test_list_directory_lists_path_recursive()
     {
-
         $fs = $this->newFilesystem();
-        $structure = array(
-            'foo.txt' => '',
-            'bar.txt' => '',
-            'directory' => array(
-                'baz.xml' => '',
+        $structure = [
+            'foo.txt'   => '',
+            'bar.txt'   => '',
+            'directory' => [
+                'baz.xml'    => '',
                 'users.json' => '',
-                '2016' => array(
+                '2016'       => [
                     'gung.doc' => '',
-                    'ho.odt' => ''
-                )
-            )
-        );
+                    'ho.odt'   => ''
+                ]
+            ]
+        ];
 
         list($tmpDir, $dirs) = $this->createNestedDirectories($structure);
         $listedDirs = $fs->listDirectory($tmpDir, true);
@@ -178,23 +171,22 @@ class LocalFilesystemTest extends \Ems\IntegrationTest
         sort($dirs);
 
         $this->assertEquals($dirs, $listedDirs);
-
     }
 
     public function test_files_returns_only_files()
     {
         $fs = $this->newFilesystem();
 
-        $structure = array(
-            'foo.txt' => '',
-            'bar.txt' => '',
-            'baz.txt' => '',
-            'directory' => array()
-        );
+        $structure = [
+            'foo.txt'   => '',
+            'bar.txt'   => '',
+            'baz.txt'   => '',
+            'directory' => []
+        ];
 
         list($tmpDir, $dirs) = $this->createNestedDirectories($structure);
 
-        $shouldBe = array_filter($dirs, function($path){
+        $shouldBe = array_filter($dirs, function ($path) {
             return strpos($path, 'directory') === false;
         });
 
@@ -205,23 +197,22 @@ class LocalFilesystemTest extends \Ems\IntegrationTest
         sort($files);
 
         $this->assertEquals($shouldBe, $files);
-
     }
 
     public function test_files_returns_only_files_matching_pattern()
     {
         $fs = $this->newFilesystem();
 
-        $structure = array(
-            'foo.txt' => '',
-            'bar.doc' => '',
-            'baz.txt' => '',
-            'directory' => array()
-        );
+        $structure = [
+            'foo.txt'   => '',
+            'bar.doc'   => '',
+            'baz.txt'   => '',
+            'directory' => []
+        ];
 
         list($tmpDir, $dirs) = $this->createNestedDirectories($structure);
 
-        $shouldBe = array_filter($dirs, function($path){
+        $shouldBe = array_filter($dirs, function ($path) {
             return strpos($path, 'bar.doc') !== false;
         });
 
@@ -232,25 +223,24 @@ class LocalFilesystemTest extends \Ems\IntegrationTest
         sort($files);
 
         $this->assertEquals($shouldBe, $files);
-
     }
 
     public function test_files_returns_only_files_matching_extensions()
     {
         $fs = $this->newFilesystem();
 
-        $structure = array(
-            'foo.txt' => '',
-            'bar.doc' => '',
-            'baz.txt' => '',
-            'hello.gif' => '',
-            'bye.PNG' => '',
+        $structure = [
+            'foo.txt'     => '',
+            'bar.doc'     => '',
+            'baz.txt'     => '',
+            'hello.gif'   => '',
+            'bye.PNG'     => '',
             'doc.doc.pdf' => ''
-        );
+        ];
 
         list($tmpDir, $dirs) = $this->createNestedDirectories($structure);
 
-        $shouldBe = array_filter($dirs, function($path){
+        $shouldBe = array_filter($dirs, function ($path) {
             return strpos($path, 'bar.doc') !== false;
         });
 
@@ -262,35 +252,34 @@ class LocalFilesystemTest extends \Ems\IntegrationTest
 
         $this->assertEquals($shouldBe, $files);
 
-        $shouldBe = array_filter($dirs, function($path){
+        $shouldBe = array_filter($dirs, function ($path) {
             return strpos($path, 'hello.gif') !== false || strpos($path, 'bye.PNG') !== false;
         });
 
         sort($shouldBe);
 
-        $files = $fs->files($tmpDir, '*', array('gif','png'));
+        $files = $fs->files($tmpDir, '*', ['gif', 'png']);
 
         sort($files);
 
         $this->assertEquals($shouldBe, $files);
-
     }
 
     public function test_directories_returns_only_directories_matching_pattern()
     {
         $fs = $this->newFilesystem();
 
-        $structure = array(
-            'foo' => array(),
-            'bar' => array(),
-            'bar.txt' => '',
-            'directory' => array(),
-            'barely' => array()
-        );
+        $structure = [
+            'foo'       => [],
+            'bar'       => [],
+            'bar.txt'   => '',
+            'directory' => [],
+            'barely'    => []
+        ];
 
         list($tmpDir, $dirs) = $this->createNestedDirectories($structure);
 
-        $shouldBe = array_filter($dirs, function($path){
+        $shouldBe = array_filter($dirs, function ($path) {
             return strpos($path, 'bar') !== false && strpos($path, 'bar.txt') === false;
         });
 
@@ -301,23 +290,22 @@ class LocalFilesystemTest extends \Ems\IntegrationTest
         sort($directories);
 
         $this->assertEquals($shouldBe, $directories);
-
     }
 
     public function test_directories_returns_only_directories()
     {
         $fs = $this->newFilesystem();
 
-        $structure = array(
-            'foo' => array(),
-            'bar' => array(),
-            'baz.txt' => '',
-            'directory' => array()
-        );
+        $structure = [
+            'foo'       => [],
+            'bar'       => [],
+            'baz.txt'   => '',
+            'directory' => []
+        ];
 
         list($tmpDir, $dirs) = $this->createNestedDirectories($structure);
 
-        $shouldBe = array_filter($dirs, function($path){
+        $shouldBe = array_filter($dirs, function ($path) {
             return strpos($path, 'baz.txt') === false;
         });
 
@@ -328,8 +316,6 @@ class LocalFilesystemTest extends \Ems\IntegrationTest
         sort($directories);
 
         $this->assertEquals($shouldBe, $directories);
-
-
     }
 
     public function test_lastModified_returns_filemtime()
@@ -337,5 +323,4 @@ class LocalFilesystemTest extends \Ems\IntegrationTest
         $fs = $this->newFilesystem();
         $this->assertEquals(filemtime(__FILE__), (int)$fs->lastModified(__FILE__)->format('U'));
     }
-
 }

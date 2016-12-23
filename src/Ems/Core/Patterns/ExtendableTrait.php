@@ -80,13 +80,11 @@ trait ExtendableTrait
     protected function callUntilNotNull($args=[])
     {
         foreach ($this->extensions() as $name) {
-
             $result = $this->callExtension($name, $args);
 
             if ($result !== null) {
                 return $result;
             }
-
         }
     }
 
@@ -102,5 +100,4 @@ trait ExtendableTrait
     {
         return Helper::call($this->getExtension($name), $params);
     }
-
 }

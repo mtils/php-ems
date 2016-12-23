@@ -23,16 +23,17 @@ interface Extendable
     /**
      * Return the extension stored under $name.
      *
-     * @throws \Ems\Contracts\Core\Errors\NotFound If extension not found
      *
      * @param string $name
+     *
+     * @throws \Ems\Contracts\Core\Errors\NotFound If extension not found
      *
      * @return callable
      **/
     public function getExtension($name);
 
     /**
-     * Return the NAMES of all extensions
+     * Return the NAMES of all extensions.
      *
      * @return array
      **/

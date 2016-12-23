@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Core;
 
 use Illuminate\Database\Eloquent\Model;
@@ -9,7 +8,6 @@ use stdClass;
 
 class VariablesTextParserTest extends \Ems\TestCase
 {
-
     public function testImplementsInterface()
     {
         $this->assertInstanceOf(
@@ -50,38 +48,34 @@ class VariablesTextParserTest extends \Ems\TestCase
 
         $parser = $this->newParser();
 
-        $text = "Hallöö {name} schön daß Du in der {address.street.name} in {address.location} wohnst";
+        $text = 'Hallöö {name} schön daß Du in der {address.street.name} in {address.location} wohnst';
 
-        $expected = "Hallöö Wärner schön daß Du in der Bängnösestraße in Bangkok wohnst";
+        $expected = 'Hallöö Wärner schön daß Du in der Bängnösestraße in Bangkok wohnst';
 
         $this->assertEquals($expected, $parser->parse($text, $data));
-
     }
 
     public function testReplacesNestedStdClassObjects()
     {
-
         $data = [];
 
-        $data['address']                  = new stdClass();
-        $data['address']->street          = new stdclass();
-        $data['address']->street->name    = 'Bängnösestraße';
-        $data['address']->location        = 'Bangkok';
-        $data['name']                     = 'Wärner';
+        $data['address'] = new stdClass();
+        $data['address']->street = new stdclass();
+        $data['address']->street->name = 'Bängnösestraße';
+        $data['address']->location = 'Bangkok';
+        $data['name'] = 'Wärner';
 
         $parser = $this->newParser();
 
-        $text = "Hallöö {name} schön daß Du in der {address.street.name} in {address.location} wohnst";
+        $text = 'Hallöö {name} schön daß Du in der {address.street.name} in {address.location} wohnst';
 
-        $expected = "Hallöö Wärner schön daß Du in der Bängnösestraße in Bangkok wohnst";
+        $expected = 'Hallöö Wärner schön daß Du in der Bängnösestraße in Bangkok wohnst';
 
         $this->assertEquals($expected, $parser->parse($text, $data));
-
     }
 
     public function testReplacesNestedEloquentObjects()
     {
-
         $data = [];
 
         $address = $this->newTestModel();
@@ -98,12 +92,11 @@ class VariablesTextParserTest extends \Ems\TestCase
 
         $parser = $this->newParser();
 
-        $text = "Hallöö {name} schön daß Du in der {address.street.name} in {address.location} wohnst";
+        $text = 'Hallöö {name} schön daß Du in der {address.street.name} in {address.location} wohnst';
 
-        $expected = "Hallöö Wärner schön daß Du in der Bängnösestraße in Bangkok wohnst";
+        $expected = 'Hallöö Wärner schön daß Du in der Bängnösestraße in Bangkok wohnst';
 
         $this->assertEquals($expected, $parser->parse($text, $data));
-
     }
 
     protected function newTestModel()
@@ -113,9 +106,8 @@ class VariablesTextParserTest extends \Ems\TestCase
 
     protected function newParser()
     {
-        return new VariablesTextParser;
+        return new VariablesTextParser();
     }
-
 }
 
 class TestModel extends Model

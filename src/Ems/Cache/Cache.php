@@ -106,9 +106,9 @@ class Cache implements CacheContract
      *
      * @param string $key
      *
-     * @return mixed
-     *
      * @throws CacheMissException
+     *
+     * @return mixed
      **/
     public function getOrFail($id)
     {
@@ -274,9 +274,9 @@ class Cache implements CacheContract
      *
      * @param string $name (optional)
      *
-     * @return Storage
-     *
      * @throws \Ems\Contracts\NotFound
+     *
+     * @return Storage
      **/
     public function getStorage($name=null)
     {

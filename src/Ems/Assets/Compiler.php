@@ -88,9 +88,9 @@ class Compiler implements CompilerContract
      *
      * @param string $name
      *
-     * @return \Ems\Contracts\Core\TextParser
-     *
      * @throws \Ems\Contracts\Core\Errors\NotFound
+     *
+     * @return \Ems\Contracts\Core\TextParser
      **/
     public function parser($name)
     {
@@ -121,9 +121,9 @@ class Compiler implements CompilerContract
      *
      * @param string
      *
-     * @return self
-     *
      * @throws \Ems\Contracts\Core\Errors\NotFound
+     *
+     * @return self
      **/
     public function removeParser($name)
     {
@@ -214,10 +214,10 @@ class Compiler implements CompilerContract
         $options = isset($parserOptions[$parserName]) ? $parserOptions[$parserName] : [];
 
         $baseOptions = [
-            'collection' => $collection,
+            'collection'  => $collection,
             'parser_name' => $parserName,
-            'asset' => $asset,
-            'file_path' => $file,
+            'asset'       => $asset,
+            'file_path'   => $file,
         ];
 
         if (!isset($parserOptions['*'])) {

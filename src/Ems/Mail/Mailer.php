@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Mail;
 
 use UnexpectedValueException;
