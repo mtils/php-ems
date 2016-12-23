@@ -7,6 +7,7 @@ use Ems\Contracts\Cache\Storage;
 use Ems\Contracts\Cache\Categorizer;
 use Ems\Cache\Exception\CacheMissException;
 use Ems\Core\Patterns\HookableTrait;
+use Ems\Core\Exceptions\HandlerNotFoundException;
 
 class Cache implements CacheContract
 {
@@ -89,7 +90,7 @@ class Cache implements CacheContract
             return $this->storage->get($cacheId);
         }
 
-        if ($default === null || $default instanceof CacheMiss) {
+        if ($default === null || $default instanceof _CacheMiss) {
             return $default;
         }
 
@@ -107,13 +108,13 @@ class Cache implements CacheContract
      *
      * @return mixed
      *
-     * @throws \Ems\Cache\Exception\CacheMissException
+     * @throws CacheMissException
      **/
     public function getOrFail($id)
     {
-        $value = $this->get($id, new CacheMiss());
+        $value = $this->get($id, new _CacheMiss());
 
-        if ($value instanceof CacheMiss) {
+        if ($value instanceof _CacheMiss) {
             throw new CacheMissException('Cache entry not found');
         }
 
@@ -252,8 +253,8 @@ class Cache implements CacheContract
     /**
      * {@inheritdoc}
      *
-     * @param string                       $name
-     * @param \Ems\Contracts\Cache\Storage $store
+     * @param string  $name
+     * @param Storage $store
      *
      * @return self
      **/
@@ -266,6 +267,26 @@ class Cache implements CacheContract
         $this->storages[$name] = $store;
 
         return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @param string $name (optional)
+     *
+     * @return Storage
+     *
+     * @throws \Ems\Contracts\NotFound
+     **/
+    public function getStorage($name=null)
+    {
+        $name = $name ?: self::DEFAULT_STORAGE;
+
+        if (isset($this->storages[$name])) {
+            return $this->storages[$name];
+        }
+
+        throw new HandlerNotFoundException("No Storage saved under $name");
     }
 
     /**
@@ -360,10 +381,10 @@ class Cache implements CacheContract
     /**
      * Create a new proxy for a different storage.
      *
-     * @param self                         $parent
-     * @param \Ems\Contracts\Cache\Storage $storage
+     * @param self    $parent
+     * @param Storage $storage
      *
-     * @return \Ems\Cache\CacheProxy
+     * @return CacheProxy
      **/
     protected function proxy($parent, Storage $storage)
     {
@@ -401,6 +422,6 @@ class Cache implements CacheContract
     }
 }
 
-class CacheMiss
+class _CacheMiss
 {
 }

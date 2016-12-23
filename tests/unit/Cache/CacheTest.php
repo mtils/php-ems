@@ -449,6 +449,46 @@ class CacheTest extends \Ems\TestCase
 
     }
 
+    public function test_getStorage_returns_assigned_storage()
+    {
+        $cache = $this->newCache();
+        $storage = $this->mockStorage();
+        $storage2 = $this->mockStorage();
+        $cache->addStorage('default', $storage);
+        $cache->addStorage('fast', $storage2);
+
+        $this->assertSame($storage, $cache->getStorage('default'));
+        $this->assertSame($storage, $cache->getStorage());
+        $this->assertSame($storage2, $cache->getStorage('fast'));
+
+    }
+
+    /**
+     * @expectedException Ems\Contracts\Core\Errors\NotFound
+     **/
+    public function test_getStorage_throws_NotFound_if_storage_not_assigned()
+    {
+        $cache = $this->newCache();
+        $storage = $this->mockStorage();
+
+        $cache->addStorage('default', $storage);
+        $cache->getStorage('foo');
+
+    }
+
+    public function test_methodHooks_returns_hooks_for_all_altering_methods()
+    {
+
+        $cache = $this->newCache();
+        $alteringMethods = ['put', 'increment', 'decrement', 'forget', 'prune', 'persist'];
+
+        $hooks = $cache->methodHooks();
+
+        foreach ($alteringMethods as $method) {
+            $this->assertTrue(in_array($method, $hooks));
+        }
+    }
+
     protected function newCache(Categorizer $categorizer=null)
     {
         $categorizer = $categorizer ?: $this->mockCategorizer();

@@ -153,8 +153,8 @@ interface Cache extends BaseStorage, Provider, HasMethodHooks
     public function storage($name);
 
     /**
-     * Add a different store under name to use it via
-     * self::store($name).
+     * Add a different storage under $name to use it via
+     * self::storage($name)->get($key).
      *
      * @param string                       $name
      * @param \Ems\Contracts\Cache\Storage $store
@@ -162,4 +162,15 @@ interface Cache extends BaseStorage, Provider, HasMethodHooks
      * @return self
      **/
     public function addStorage($name, Storage $store);
+
+    /**
+     * Return the storage for $name.
+     *
+     * @param string $name (optional)
+     *
+     * @return \Ems\Contracts\Cache\Storage
+     *
+     * @throws \Ems\Contracts\NotFound
+     **/
+    public function getStorage($name=null);
 }
