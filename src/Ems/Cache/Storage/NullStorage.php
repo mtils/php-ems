@@ -110,11 +110,11 @@ class NullStorage implements Storage
     /**
      * {@inheritdoc}
      *
-     * @param array|string $tags
+     * @param array $tags
      *
      * @return self
      **/
-    public function prune($tags)
+    public function prune(array $tags)
     {
         return $this;
     }

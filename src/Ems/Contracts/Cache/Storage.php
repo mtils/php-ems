@@ -85,9 +85,9 @@ interface Storage
     /**
      * Invalidate all cache entries with the passed tag(s).
      *
-     * @param array|string $tags
+     * @param array $tags
      *
      * @return self
      **/
-    public function prune($tags);
+    public function prune(array $tags);
 }

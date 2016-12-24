@@ -148,11 +148,11 @@ class Zend1CacheStorage implements Storage
     /**
      * {@inheritdoc}
      *
-     * @param array|string $tags
+     * @param array $tags
      *
      * @return self
      **/
-    public function prune($tags)
+    public function prune(array $tags)
     {
         $this->cache->clean(Zend_Cache::CLEANING_MODE_MATCHING_TAG, $tags);
 

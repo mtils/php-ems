@@ -252,6 +252,7 @@ class Cache implements CacheContract
      **/
     public function prune($tags)
     {
+        $tags = is_array($tags) ? $tags : func_get_args();
         $this->callBeforeListeners('prune', [$this->storageName, $tags]);
         $this->storage->prune($tags);
         $this->callAfterListeners('prune', [$this->storageName, $tags]);
