@@ -2,8 +2,12 @@
 
 namespace Ems\Assets\Parser;
 
+use Ems\Testing\FilesystemMethods;
+
 class CssUrlReplaceParserTest extends \Ems\IntegrationTest
 {
+    use FilesystemMethods;
+
     public function test_implements_interface()
     {
         $this->assertInstanceOf(

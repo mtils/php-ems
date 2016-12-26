@@ -2,10 +2,12 @@
 
 namespace Ems\Core;
 
-
+use Ems\Testing\FilesystemMethods;
 
 class LocalFilesystemTest extends \Ems\IntegrationTest
 {
+    use FilesystemMethods;
+
     public function test_implements_Interface()
     {
         $this->assertInstanceOf(
