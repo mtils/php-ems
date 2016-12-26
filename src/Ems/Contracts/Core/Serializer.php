@@ -9,6 +9,14 @@ namespace Ems\Contracts\Core;
  **/
 interface Serializer
 {
+
+    /**
+     * Return a mimetype for the serialized data
+     *
+     * @return string
+     **/
+    public function mimeType();
+
     /**
      * Serializer artbitary data into a string. Throw an exception if
      * you cant serialize the data. (gettype(x) == 'resource', objects, ..)

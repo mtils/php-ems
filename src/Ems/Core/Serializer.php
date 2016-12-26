@@ -13,14 +13,26 @@ class Serializer implements SerializerContract
      **/
     protected $useOptions = false;
 
-    public function __construct()
+    public function __construct(callable $errorGetter=null)
     {
         $this->useOptions = (version_compare(PHP_VERSION, '7.0.0') >= 0);
+        $this->errorGetter = $errorGetter ?: function () { return error_get_last(); };
     }
 
     /**
-     * Serializer artbitary data into a string. Throw an exception if
-     * you cant serialize the data. (gettype(x) == 'resource', objects, ..)
+     * {@inheritdoc}
+     *
+     * @return string
+     **/
+    public function mimeType()
+    {
+        return 'application/vnd.php.serialized';
+    }
+
+    /**
+     * {@inheritdoc}
+     * This serializer cant handle false values because php returns false when
+     * tryin to deserializing malformed serialized data.
      *
      * @param mixed $value
      * @param array $options (optional)
@@ -40,8 +52,7 @@ class Serializer implements SerializerContract
     }
 
     /**
-     * Deserializer artbitary data from a string. Throw an exception
-     * of you cant deserialize the data.
+     * {@inheritdoc}
      *
      * @param string $string
      * @param array $options (optional)
@@ -64,9 +75,14 @@ class Serializer implements SerializerContract
         throw new UnsupportedParameterException('Unable to deserialize data');
     }
 
+    /**
+     * Return the error that did occur when unserialize was called
+     *
+     * @return string|bool
+     **/
     protected function unserializeError()
     {
-        if (!$error = error_get_last()) {
+        if (!$error = call_user_func($this->errorGetter)) {
             return false;
         }
 
