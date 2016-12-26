@@ -32,6 +32,10 @@ class Serializer implements SerializerContract
         if (is_resource($value)) {
             throw new UnsupportedParameterException('You cant serialize a resource');
         }
+
+        if ($value === false) {
+            throw new UnsupportedParameterException('You cant serialize false with that serializer');
+        }
         return serialize($value);
     }
 
@@ -52,11 +56,12 @@ class Serializer implements SerializerContract
             return $value;
         }
 
+        // This does not work on hhvm
         if ($error = $this->unserializeError()) {
             throw new UnsupportedParameterException('Malformed serialized data: '.$error);
         }
 
-        return $value;
+        throw new UnsupportedParameterException('Unable to deserialize data');
     }
 
     protected function unserializeError()

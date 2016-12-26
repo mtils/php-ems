@@ -19,7 +19,7 @@ class SerializerTest extends \Ems\TestCase
         $tests = [
             1,
             0,
-            false,
+            true,
             4.5,
             'abcdeöäüüpouioß'
         ];
@@ -39,6 +39,15 @@ class SerializerTest extends \Ems\TestCase
         $serializer = $this->newSerializer();
         $res = opendir(sys_get_temp_dir());
         $serializer->serialize($res);
+    }
+
+    /**
+     * @expectedException Ems\Contracts\Core\Errors\UnSupported
+     **/
+    public function test_serializing_of_false_throws_exception()
+    {
+        $serializer = $this->newSerializer();
+        $serializer->serialize(false);
     }
 
     /**
