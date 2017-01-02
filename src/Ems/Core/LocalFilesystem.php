@@ -3,14 +3,24 @@
 namespace Ems\Core;
 
 use Ems\Contracts\Core\Filesystem;
+use Ems\Contracts\Core\MimeTypeProvider;
 use Ems\Core\Exceptions\ResourceNotFoundException;
 use Ems\Core\Exceptions\ResourceLockedException;
 use ErrorException;
 
 class LocalFilesystem implements FileSystem
 {
-    public function __construct()
+    /**
+     * @var MimeTypeProvider
+     **/
+    protected $mimeTypes;
+
+    /**
+     * @param MimeTypeProvider $mimeTypes (optional)
+     **/
+    public function __construct(MimeTypeProvider $mimeTypes=null)
     {
+        $this->mimeTypes = $mimeTypes ? $mimeTypes : new ManualMimeTypeProvider();
     }
 
     /**
@@ -375,7 +385,7 @@ class LocalFilesystem implements FileSystem
      **/
     public function mimeType($path)
     {
-        return finfo_file(finfo_open(FILEINFO_MIME_TYPE), $path);
+        return $this->mimeTypes->typeOfFile($path);
     }
 
     /**
