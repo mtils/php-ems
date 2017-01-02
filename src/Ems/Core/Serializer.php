@@ -13,6 +13,11 @@ class Serializer implements SerializerContract
      **/
     protected $useOptions = false;
 
+     /**
+      * @var string
+      **/
+     protected $serializeFalseAs = '--|false-serialized|--';
+
     public function __construct(callable $errorGetter=null)
     {
         $this->useOptions = (version_compare(PHP_VERSION, '7.0.0') >= 0);
@@ -45,9 +50,14 @@ class Serializer implements SerializerContract
             throw new UnsupportedParameterException('You cant serialize a resource');
         }
 
-        if ($value === false) {
-            throw new UnsupportedParameterException('You cant serialize false with that serializer');
+        if ($value === $this->serializeFalseAs) {
+            throw new UnsupportedParameterException('You cant serialize '.$this->serializeFalseAs.' cause its internally used to encode false');
         }
+
+        if ($value === false) {
+            $value = $this->serializeFalseAs;
+        }
+
         return serialize($value);
     }
 
@@ -64,7 +74,7 @@ class Serializer implements SerializerContract
         $value = $this->useOptions? @unserialize($string, $options) : @unserialize($string);
 
         if ($value !== false) {
-            return $value;
+            return $value === $this->serializeFalseAs ? false : $value;
         }
 
         // This does not work on hhvm

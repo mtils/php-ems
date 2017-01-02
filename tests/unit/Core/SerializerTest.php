@@ -52,10 +52,18 @@ class SerializerTest extends \Ems\TestCase
     /**
      * @expectedException Ems\Contracts\Core\Errors\UnSupported
      **/
-    public function test_serializing_of_false_throws_exception()
+    public function test_serializing_of_special_false_string_throws_exception()
     {
         $serializer = $this->newSerializer();
-        $serializer->serialize(false);
+        $res = opendir(sys_get_temp_dir());
+        $falseString = Cheat::get($serializer, 'serializeFalseAs');
+        $serializer->serialize($falseString);
+    }
+
+    public function test_serializing_of_false_throws_no_exception()
+    {
+        $serializer = $this->newSerializer();
+        $this->assertSame(false, $serializer->deserialize($serializer->serialize(false)));
     }
 
     /**
