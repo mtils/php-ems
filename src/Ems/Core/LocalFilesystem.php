@@ -4,6 +4,7 @@ namespace Ems\Core;
 
 use Ems\Contracts\Core\Filesystem;
 use Ems\Core\Exceptions\ResourceNotFoundException;
+use Ems\Core\Exceptions\ResourceLockedException;
 use ErrorException;
 
 class LocalFilesystem implements FileSystem
@@ -27,39 +28,55 @@ class LocalFilesystem implements FileSystem
     /**
      * {@inheritdoc}
      *
-     * @param string $path
-     * @param int    $bytes (optional)
+     * @param string   $path
+     * @param int      $bytes (optional)
+     * @param bool|int $lock (default:false) Enable locking or directly set the mode (LOCK_SH,...)
      *
      * @return bool
      **/
-    public function contents($path, $bytes = 0)
+    public function contents($path, $bytes = 0, $lock = false)
     {
         if (!$this->isFile($path)) {
             throw new ResourceNotFoundException("Path '$path' not found");
         }
 
-        if (!$bytes) {
-            return file_get_contents($path);
+        if (!$lock) {
+            return $this->getFileContents($path, $bytes);
         }
 
-        $res = fopen($path, 'r');
-        $part = fread($res, $bytes);
-        fclose($res);
+        $handle = $this->fileHandleOrFail($path);
 
-        return $part;
+        try {
+            $lock = is_bool($lock) ? LOCK_SH : $lock;
+
+            if (!flock($handle, $lock)) {
+                throw new ResourceLockedException("Path '$path' is read locked by another process");
+            }
+
+            $contents = $this->getFileContents($path, $bytes, $handle);
+            flock($handle, LOCK_UN);
+        } finally {
+            fclose($handle);
+        }
+
+        return $contents;
     }
 
     /**
      * {@inheritdoc}
      *
-     * @param string $path
-     * @param string $contents
+     * @param string   $path
+     * @param string   $contents
+     * @param bool|int $lock (default:false) Enable locking or directly set the mode (LOCK_EX,...)
      *
      * @return int written bytes
      **/
-    public function write($path, $contents)
+    public function write($path, $contents, $lock = false)
     {
-        return (int) file_put_contents($path, $contents);
+        if (is_bool($lock)) {
+            $lock = $lock ? LOCK_EX : 0;
+        }
+        return (int) file_put_contents($path, $contents, $lock);
     }
 
     /**
@@ -359,6 +376,52 @@ class LocalFilesystem implements FileSystem
     public function mimeType($path)
     {
         return finfo_file(finfo_open(FILEINFO_MIME_TYPE), $path);
+    }
+
+    /**
+     * Read a whole file or just a few bytes of a file
+     *
+     * @param string   $path
+     * @param int      $bytes
+     * @param resource $handle (optional)
+     *
+     * @return string
+     **/
+    protected function getFileContents($path, $bytes, $handle = null)
+    {
+        if (!$bytes) {
+            return file_get_contents($path);
+        }
+
+        list($handle, $handlePassed) = $handle ? [$handle, true]
+                                               : [$this->fileHandleOrFail($path), false];
+
+        clearstatcache(true, $path);
+
+        $part = fread($handle, $bytes);
+
+        if (!$handlePassed) {
+            fclose($handle);
+        }
+        return $part;
+    }
+
+    /**
+     * Get a file handle or throw an exception.
+     *
+     * @param string $path
+     * @param string $mode (default: 'rb')
+     *
+     * @throws ResourceNotFoundException
+     *
+     * @return resource
+     **/
+    protected function fileHandleOrFail($path, $mode = 'rb')
+    {
+        if (!$handle = fopen($path, $mode)) {
+            throw new ResourceNotFoundException("Path '$path' cannot be opened");
+        }
+        return $handle;
     }
 
     protected function deleteDirectoryRecursive($path)

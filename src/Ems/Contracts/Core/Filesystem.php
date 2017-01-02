@@ -16,22 +16,24 @@ interface Filesystem
     /**
      * Return the contents of a file.
      *
-     * @param string $path
-     * @param int    $bytes (optional)
+     * @param string   $path
+     * @param int      $bytes (optional)
+     * @param bool|int $lock (default:false) Enable locking or directly set the mode (LOCK_SH,...)
      *
      * @return bool
      **/
-    public function contents($path, $bytes = 0);
+    public function contents($path, $bytes = 0, $lock = false);
 
     /**
      * Write the contents $contents to the file in $path.
      *
-     * @param string $path
-     * @param string $contents
+     * @param string   $path
+     * @param string   $contents
+     * @param bool|int $lock (default:false) Enable locking or directly set the mode (LOCK_EX,...)
      *
      * @return int written bytes
      **/
-    public function write($path, $contents);
+    public function write($path, $contents, $lock = false);
 
     /**
      * Delete the path $path. Deletes directories, links and files.

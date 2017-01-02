@@ -53,6 +53,30 @@ class LocalFilesystemTest extends \Ems\IntegrationTest
         $fs->contents('some-not-existing-file.txt');
     }
 
+    public function test_contents_returns_contents_with_file_locking()
+    {
+        $fs = $this->newFilesystem();
+        $contentsOfThisFile = file_get_contents(__FILE__);
+        $this->assertEquals($contentsOfThisFile, $fs->contents(__FILE__, 0, true));
+    }
+
+    /**
+     * @expectedException Ems\Contracts\Core\Errors\ConcurrentAccess
+     **/
+    public function test_contents_throws_exception_when_trying_to_read_a_locked_file()
+    {
+        $fs = $this->newFilesystem();
+        $fileName = $this->tempFileName();
+        $testString = 'Foo is a buddy of bar';
+
+        $this->assertEquals(strlen($testString), $fs->write($fileName, $testString, LOCK_EX | LOCK_NB));
+        $resource = fopen($fileName, 'w');
+        flock($resource, LOCK_EX | LOCK_NB);
+        $this->assertEquals($testString, $fs->contents($fileName, 0, LOCK_SH | LOCK_NB));
+
+//         $this->assertEquals($contentsOfThisFile, $fs->contents(__FILE__, 0, true));
+    }
+
     public function test_write_writes_contents_to_file()
     {
         $testString = 'Foo is a buddy of bar';
