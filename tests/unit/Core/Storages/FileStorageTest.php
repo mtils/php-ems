@@ -44,6 +44,47 @@ class FileStorageTest extends \Ems\TestCase
         $this->assertEquals('b', $storage2['a']);
     }
 
+    public function test_persist_and_return_value_without_checksum()
+    {
+        $storage = $this->newStorage();
+        $storage->setOption('checksum_method', '');
+        $url = new Url($this->tempFileName());
+        $storage->setUrl($url);
+        $storage['foo'] = 'bar';
+        $storage['a'] = 'b';
+        $storage->persist();
+        unset($storage);
+
+        $storage2 = $this->newStorage();
+        $storage2->setUrl($url);
+        $this->assertEquals('bar', $storage2['foo']);
+        $this->assertEquals('b', $storage2['a']);
+    }
+
+    /**
+     * @expectedException Ems\Contracts\Core\Errors\DataCorruption
+     **/
+    public function test_persist_throws_exception_if_checksum_failed()
+    {
+        $storage = $this->newStorage();
+
+        $storage->createChecksumBy(function ($method, $data) {
+            return substr(md5(microtime()), rand(0, 26), 5);
+        });
+
+        $url = new Url($this->tempFileName());
+        $storage->setUrl($url);
+        $storage['foo'] = 'bar';
+        $storage['a'] = 'b';
+        $storage->persist();
+        unset($storage);
+
+        $storage2 = $this->newStorage();
+        $storage2->setUrl($url);
+        $this->assertEquals('bar', $storage2['foo']);
+        $this->assertEquals('b', $storage2['a']);
+    }
+
     public function test_purge_empties_storage()
     {
         $storage = $this->newStorage();
