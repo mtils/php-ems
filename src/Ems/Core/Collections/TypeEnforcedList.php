@@ -4,9 +4,12 @@ namespace Ems\Core\Collections;
 
 use InvalidArgumentException;
 use BadMethodCallException;
+use Ems\Core\Support\TypeCheckMethods;
 
 class TypeEnforcedList extends OrderedList
 {
+    use TypeCheckMethods;
+
     /**
      * @var string
      **/
@@ -16,59 +19,6 @@ class TypeEnforcedList extends OrderedList
      * @var bool
      **/
     protected $typeIsFrozen = false;
-
-    /**
-     * Return the forced type.
-     *
-     * @return string
-     **/
-    public function getForcedType()
-    {
-        return $this->forceType;
-    }
-
-    /**
-     * Return the forced type of this list.
-     *
-     * Allowed values are: bool,int,float,string,resource,array,object
-     * All other strings will be treatet as class names
-     *
-     * @param string $type
-     *
-     * @return self
-     **/
-    public function setForcedType($type)
-    {
-        if ($this->typeIsFrozen()) {
-            throw new BadMethodCallException("Cannot change frozen type {$this->forceType}");
-        }
-        $this->forceType = $type;
-
-        return $this;
-    }
-
-    /**
-     * Disallow any changes to the setted type
-     * (can not be reversed).
-     *
-     * @return self
-     **/
-    public function freezeType()
-    {
-        $this->typeIsFrozen = true;
-
-        return $this;
-    }
-
-    /**
-     * Check if the type was frozen.
-     *
-     * @return bool
-     **/
-    public function typeIsFrozen()
-    {
-        return $this->typeIsFrozen;
-    }
 
     /**
      * Insert a value at position $index.
@@ -104,39 +54,6 @@ class TypeEnforcedList extends OrderedList
     }
 
     /**
-     * Does the actual type checks.
-     *
-     * @param mixed $value
-     *
-     * @return bool
-     **/
-    public function canAdd($value)
-    {
-        if (!$this->forceType) {
-            return true;
-        }
-
-        switch ($this->forceType) {
-            case 'bool':
-                return is_bool($value);
-            case 'int':
-                return is_int($value);
-            case 'float':
-                return is_float($value);
-            case 'string':
-                return is_string($value);
-            case 'resource':
-                return is_resource($value);
-            case 'array':
-                return is_array($value);
-            case 'object':
-                return is_object($value);
-            default:
-                return $value instanceof $this->forceType;
-        }
-    }
-
-    /**
      * {@inheritdoc}
      * Copies the type but not the freeze.
      *
@@ -145,19 +62,6 @@ class TypeEnforcedList extends OrderedList
     public function copy()
     {
         return (new static($this->source))->setForcedType($this->forceType);
-    }
-
-    /**
-     * Checks the type of any added item and throws an exception
-     * if it does not match.
-     *
-     * @param mixed $value
-     **/
-    protected function checkType($value)
-    {
-        if (!$this->canAdd($value)) {
-            throw new InvalidArgumentException("You can only add values of '{$this->forceType}' to this list");
-        }
     }
 
     /**

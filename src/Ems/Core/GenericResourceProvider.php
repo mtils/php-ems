@@ -9,22 +9,19 @@ use Ems\Contracts\Core\Identifiable;
 use Ems\Contracts\Core\AppliesToResource;
 use Ems\Core\Exceptions\ResourceNotFoundException;
 
-class GenericResourceProvider implements AllProvider, AppliesToResource
+class GenericResourceProvider extends AnythingProvider implements AppliesToResource
 {
     /**
-     * @var \Ems\Contracts\Core\TextProvider
+     * Change this to a class or interface name
+     *
+     * @var string
+     **/
+    protected $forceType = Named::class;
+
+    /**
+     * @var TextProvider
      **/
     protected $texts;
-
-    /**
-     * @var object
-     **/
-    protected $prototype;
-
-    /**
-     * @var array
-     */
-    protected $items = [];
 
     /**
      * @var string
@@ -37,55 +34,11 @@ class GenericResourceProvider implements AllProvider, AppliesToResource
     protected $replace = [];
 
     /**
-     * @param \Ems\Contracts\Core\TextProvider $texts (optional)
+     * @param TextProvider $texts (optional)
      **/
     public function __construct(TextProvider $texts = null)
     {
         $this->texts = $texts;
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @param mixed $id
-     * @param mixed $default (optional)
-     *
-     * @return \Ems\Contracts\Core\Identifiable|null
-     **/
-    public function get($id, $default = null)
-    {
-        if (isset($this->items[$id])) {
-            return $this->items[$id];
-        }
-
-        return $default;
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @param mixed $id
-     *
-     * @throws \Ems\Contracts\NotFound
-     *
-     * @return \Ems\Contracts\Core\Identifiable
-     **/
-    public function getOrFail($id)
-    {
-        if ($item = $this->get($id)) {
-            return $item;
-        }
-        throw new ResourceNotFoundException("Resource with id $id not found");
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @return array|\Traversable<\Ems\Contracts\Core\Identifiable>
-     **/
-    public function all()
-    {
-        return array_values($this->items);
     }
 
     /**
@@ -98,14 +51,14 @@ class GenericResourceProvider implements AllProvider, AppliesToResource
     public function add($identifiable)
     {
         if ($identifiable instanceof Named) {
-            return $this->addToItems($identifiable);
+            return $this->set($identifiable->getId(), $identifiable);
         }
 
         $id = $identifiable instanceof Identifiable ? $identifiable->getId() : $identifiable;
         $title = $this->getTitleFromProvider($id);
         $resourceName = $identifiable instanceof AppliesToResource ? $identifiable->resourceName : $this->resourceName;
 
-        return $this->addToItems($this->createItem($id, $title, $resourceName));
+        return $this->set($id, $this->createItem($id, $title, $resourceName));
     }
 
     /**
@@ -113,7 +66,7 @@ class GenericResourceProvider implements AllProvider, AppliesToResource
      *
      * @return string
      *
-     * @see \Ems\Contracts\Core\AppliesToResource
+     * @see AppliesToResource
      **/
     public function resourceName()
     {
@@ -153,27 +106,13 @@ class GenericResourceProvider implements AllProvider, AppliesToResource
     }
 
     /**
-     * Add an item to the list.
-     *
-     * @param \Ems\Contracts\Core\Named $item
-     *
-     * @return self
-     **/
-    protected function addToItems(Named $item)
-    {
-        $this->items[$item->getId()] = $item;
-
-        return $this;
-    }
-
-    /**
      * Creat an item. Overwrite this method to create different items.
      *
      * @param mixed  $id
      * @param string $title
      * @param string $resourceName
      *
-     * @return \Ems\Contracts\Core\Named
+     * @return Named
      **/
     protected function createItem($id, $title, $resourceName)
     {

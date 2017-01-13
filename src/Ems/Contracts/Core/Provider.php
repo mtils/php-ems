@@ -16,7 +16,7 @@ interface Provider
      * @param mixed $id
      * @param mixed $default (optional)
      *
-     * @return \Ems\Contracts\Core\Identifiable|null
+     * @return mixed
      **/
     public function get($id, $default = null);
 
@@ -27,7 +27,7 @@ interface Provider
      *
      * @throws \Ems\Contracts\NotFound
      *
-     * @return \Ems\Contracts\Core\Identifiable
+     * @return mixed
      **/
     public function getOrFail($id);
 }
