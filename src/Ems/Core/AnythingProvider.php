@@ -31,6 +31,21 @@ class AnythingProvider implements AllProvider
      */
     protected $items = [];
 
+    /**
+     * @var array
+     */
+    protected $classes = [];
+
+    /**
+     * @var callable
+     **/
+    protected $objectCreator;
+
+    /**
+     * @var bool
+     **/
+    protected $allCreated = false;
+
 
     /**
      * {@inheritdoc}
@@ -44,6 +59,12 @@ class AnythingProvider implements AllProvider
     {
         if (isset($this->items[$id])) {
             return $this->items[$id];
+        }
+
+        if (isset($this->classes[$id])) {
+            $object = $this->createObject($this->classes[$id]);
+            $this->set($id, $object);
+            return $object;
         }
 
         return $default;
@@ -73,6 +94,7 @@ class AnythingProvider implements AllProvider
      **/
     public function all()
     {
+        $this->createAllIfNotDone();
         return array_values($this->items);
     }
 
@@ -105,5 +127,99 @@ class AnythingProvider implements AllProvider
         $item = $this->getOrFail($id);
         unset($this->items[$id]);
         return $item;
+    }
+
+    /**
+     * Return an assigned class for $id
+     *
+     * @param mixed $id
+     *
+     * @return string|null
+     **/
+    public function getClass($id)
+    {
+        return isset($this->classes[$id]) ? $this->classes[$id] : null;
+    }
+
+    /**
+     * Set a class for an item for deferred loading of items.
+     *
+     * @param mixed $id
+     * @param string $class
+     *
+     * @return self
+     **/
+    public function setClass($id, $class)
+    {
+        $this->classes[$id] = $class;
+        if (isset($this->items[$id])) {
+            unset($this->items[$id]);
+        }
+        $this->allCreated = false;
+        return $this;
+    }
+
+    /**
+     * Remove the assigned class $class
+     *
+     * @param mixed $id
+     *
+     * @return self
+     **/
+    public function removeClass($id)
+    {
+        if (isset($this->classes[$id])) {
+            unset($this->classes[$id]);
+        }
+        if (isset($this->items[$id])) {
+            unset($this->items[$id]);
+        }
+        return $this;
+    }
+
+    /**
+     * Assign a factory (or an ioc container method) to create objects of the
+     * setted classes via setClass()
+     *
+     * @param callable $creator
+     *
+     * @return self
+     **/
+    public function createObjectsWith(callable $creator)
+    {
+        $this->objectCreator = $creator;
+        return $this;
+    }
+
+    /**
+     * Create an object of $class
+     *
+     * @param string $class
+     *
+     * @return object
+     **/
+    protected function createObject($class)
+    {
+        if ($this->objectCreator) {
+            return call_user_func($this->objectCreator, $class);
+        }
+        return new $class();
+    }
+
+    /**
+     * Create all objects of all assigned classes
+     **/
+    protected function createAllIfNotDone()
+    {
+        if ($this->allCreated) {
+            return;
+        }
+
+        foreach ($this->classes as $id=>$class) {
+            if (!isset($this->items[$id])) {
+                $this->get($id);
+            }
+        }
+        $this->allCreated = true;
     }
 }
