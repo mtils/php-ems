@@ -10,6 +10,7 @@ use Ems\Core\StringConverter\IconvStringConverter;
 use Ems\Core\StringConverter\AsciiStringConverter;
 use Ems\Core\TextParserQueue;
 use Ems\Core\VariablesTextParser;
+use Ems\Core\AnythingProvider;
 
 class CoreBootstrapper extends Bootstrapper
 {
@@ -48,6 +49,10 @@ class CoreBootstrapper extends Bootstrapper
 
         $this->app->resolving(TextParserQueue::class, function ($queue, $app) {
             $queue->add($app(VariablesTextParser::class));
+        });
+
+        $this->app->resolving(AnythingProvider::class, function ($provider, $app) {
+            $provider->createObjectsWith($app);
         });
     }
 
