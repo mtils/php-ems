@@ -4,6 +4,7 @@ namespace Ems\XType;
 
 use Ems\Contracts\XType\XType;
 use Ems\Core\Exceptions\UnsupportedParameterException;
+use Ems\Core\Helper;
 use ReflectionObject;
 use ReflectionProperty;
 use Closure;
@@ -29,6 +30,11 @@ abstract class AbstractType implements XType
      * @var bool
      **/
     public $readonly = false;
+
+    /**
+     * @var string
+     **/
+    protected $_name = '';
 
     /**
      * @var array
@@ -145,6 +151,35 @@ abstract class AbstractType implements XType
         }
 
         return $array;
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @return string
+     **/
+    public function getName()
+    {
+        if (!$this->_name) {
+            $class = Helper::withoutNamespace($this);
+            $this->_name = Helper::rtrimWord(Helper::snake_case($class, '-'), '-type');
+        }
+
+        return $this->_name;
+
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @param string $name
+     *
+     * @return self
+     **/
+    public function setName($name)
+    {
+        $this->_name = $name;
+        return $this;
     }
 
     /**

@@ -11,6 +11,19 @@ class AbstractTypeTest extends \Ems\TestCase
         $this->assertInstanceOf(XType::class, self::newType());
     }
 
+    public function test_getName_returns_calculated_name()
+    {
+        $type = $this->newType();
+        $this->assertNotEmpty($type->getName());
+    }
+
+    public function test_getName_returns_setted_name()
+    {
+        $type = $this->newType();
+        $type->setName('foo');
+        $this->assertEquals('foo', $type->getName());
+    }
+
     public function test_fill_fills_canBeNull_with_all_aliases()
     {
         $type = $this->newType();
@@ -135,11 +148,11 @@ class AbstractTypeTest extends \Ems\TestCase
 
     protected function newType()
     {
-        return new TestAbstractType_Type();
+        return new AbstractTypeTestType();
     }
 }
 
-class TestAbstractType_Type extends AbstractType
+class AbstractTypeTestType extends AbstractType
 {
     public function group()
     {

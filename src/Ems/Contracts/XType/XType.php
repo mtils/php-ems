@@ -99,4 +99,22 @@ interface XType extends Copyable
      * @return bool
      **/
     public function isScalar();
+
+    /**
+     * Get the name of this type
+     *
+     * @return string
+     **/
+    public function getName();
+
+    /**
+     * Set a name for this type. This is used to distinguish types and not
+     * to write classes for every little type. (e.g. email for a string type...)
+     *
+     * @param string $name
+     *
+     * @return self
+     **/
+    public function setName($name);
+
 }
