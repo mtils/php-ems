@@ -44,4 +44,31 @@ class Cheat
 
         return $reflection->invokeArgs($object, $args);
     }
+
+    /**
+     * Nice shortcut for self::call(). Call Cheat::a($parser)->foo or
+     * Cheat::a($parser)->foo($args) to have a shorter syntax or use the
+     * proxy to call it multiple times.
+     *
+     * @param object $object
+     *
+     * @return CheatProxy
+     **/
+    public static function a($object)
+    {
+        return new CheatProxy($object);
+    }
+
+    /**
+     * Alias for self::a() to allow more correct english wordings:
+     * Cheat::a($parser)->parseInternal() vs. Cheat::an($object)->parse()
+     *
+     * @param object $object
+     *
+     * @return CheatProxy
+     **/
+    public static function an($object)
+    {
+        return static::a($object);
+    }
 }
