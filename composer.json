@@ -9,6 +9,7 @@
         "mockery/mockery": "~0.9",
         "illuminate/mail": "5.1.*|5.2.*|5.3.*",
         "illuminate/database": "5.1.*|5.2.*|5.3.*",
+        "illuminate/filesystem": "5.1.*|5.2.*|5.3.*",
         "swiftmailer/swiftmailer": "~5.1",
         "patchwork/jsqueeze": "~2.0",
         "natxet/cssmin": "~3.0",
