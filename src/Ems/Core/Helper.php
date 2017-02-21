@@ -2,6 +2,10 @@
 
 namespace Ems\Core;
 
+use Traversable;
+use ArrayAccess;
+use Countable;
+
 class Helper
 {
 
@@ -63,7 +67,9 @@ class Helper
             return static::$camelCache[$value];
         }
 
-        static::$camelCache[$value] = lcfirst();
+        static::$camelCache[$value] = lcfirst(static::studlyCaps($value));
+
+        return static::$camelCache[$value];
     }
 
     /**
@@ -138,6 +144,126 @@ class Helper
             return $string;
         }
         return mb_substr($string, 0, mb_strlen($string)-mb_strlen($word));
+    }
+
+    /**
+     * Return true if the passed object or array is a sequence
+     *
+     * @param mixed $value
+     * @param bool  $strict (default:true)
+     *
+     * @return bool
+     **/
+    public static function isSequential($value, $strict=false)
+    {
+
+        if ($value === []) {
+            return true;
+        }
+
+        if (!is_object($value) && !is_array($value)) {
+            return false;
+        }
+
+        $hasArrayAccess = is_array($value) || $value instanceof ArrayAccess;
+        $isTraversable = is_array($value) || $value instanceof Traversable;
+
+        // An object which you cant traverse shouldnt be sequential
+        if (!$isTraversable) {
+            return false;
+        }
+
+        if ($strict && $hasArrayAccess) {
+            $keys = static::keys($value);
+            return $keys === range(0, count($keys) - 1);
+        }
+
+        foreach ($value as $key=>$unused) {
+            return $key === 0;
+        }
+
+        // Traversable and empty
+        return true;
+
+    }
+
+    /**
+     * Return the name of the passed values type
+     *
+     * @param mixed $value
+     *
+     * @return string
+     **/
+    public static function typeName($value)
+    {
+        return is_object($value) ? get_class($value) : strtolower(gettype($value)); //NULL is uppercase
+    }
+
+    /**
+     * Return the first item fo the passed value. (First array item, first letter,
+     * first object item.
+     *
+     * @param mixed $value
+     *
+     * @return mixed
+     **/
+    public static function first($value)
+    {
+
+        if (is_array($value) && $value) {
+            reset($value);
+            return current($value);
+        }
+
+        if (!$value) {
+            return;
+        }
+
+        if (is_string($value)) {
+            return $value[0];
+        }
+
+        if (!is_object($value)) {
+            return;
+        }
+
+        if ($value instanceof ArrayAccess && isset($value[0])) {
+            return $value[0];
+        }
+
+        if (!$value instanceof Traversable) {
+            return;
+        }
+
+        foreach ($value as $key=>$item) {
+            return $item;
+        }
+    }
+
+    /**
+     * Return the keys of the passed array or object
+     *
+     * @param mixed $value
+     *
+     * @return array
+     **/
+    public static function keys($value)
+    {
+
+        if (is_array($value)) {
+            return array_keys($value);
+        }
+
+        if (!is_object($value)) {
+            return [];
+        }
+
+        if (!$value instanceof Traversable) {
+            return array_keys(get_object_vars($value));
+        }
+
+        return array_keys(iterator_to_array($value, true));
+
     }
 
 }
