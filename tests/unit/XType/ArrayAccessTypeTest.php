@@ -4,6 +4,7 @@ namespace Ems\XType;
 
 
 use Ems\XType\AbstractTypeTest;
+use Ems\Testing\LoggingCallable;
 
 require_once __DIR__.'/AbstractTypeTest.php';
 
@@ -99,6 +100,23 @@ class ArrayAccessTest extends AbstractTypeTest
         $this->assertFalse($type->canBeNull);
         $this->assertSame($old, $type['old']);
         $this->assertSame($selled, $type['selled']);
+    }
+
+    public function test_provideKeysBy_assigns_keyProvider_and_calls_it()
+    {
+        $type = $this->newType();
+
+        $provider = new LoggingCallable(function() {
+            return [
+                'id' => new NumberType,
+                'name' => new StringType
+            ];
+        });
+
+        $this->assertSame($type, $type->provideKeysBy($provider));
+
+        $this->assertInstanceOf(NumberType::class, $type->get('id'));
+        $this->assertInstanceOf(StringType::class, $type->get('name'));
     }
 
     protected function newType()

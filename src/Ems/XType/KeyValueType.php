@@ -25,12 +25,23 @@ abstract class KeyValueType extends AbstractType implements ArrayAccess, Countab
     protected $namedTypes = [];
 
     /**
+     * @var callable
+     **/
+    protected $keyProvider;
+
+    /**
+     * @var bool
+     **/
+    protected $keysLoaded = false;
+
+    /**
      * Return all type keys/properties/names.
      *
      * @return array
      **/
     public function names()
     {
+        $this->loadKeysIfNotLoaded();
         return array_keys($this->namedTypes);
     }
 
@@ -43,6 +54,7 @@ abstract class KeyValueType extends AbstractType implements ArrayAccess, Countab
      **/
     public function offsetGet($name)
     {
+        $this->loadKeysIfNotLoaded();
         return $this->namedTypes[$name];
     }
 
@@ -66,6 +78,7 @@ abstract class KeyValueType extends AbstractType implements ArrayAccess, Countab
      **/
     public function offsetExists($name)
     {
+        $this->loadKeysIfNotLoaded();
         return isset($this->namedTypes[$name]);
     }
 
@@ -76,6 +89,7 @@ abstract class KeyValueType extends AbstractType implements ArrayAccess, Countab
      **/
     public function offsetUnset($name)
     {
+        $this->loadKeysIfNotLoaded();
         unset($this->namedTypes[$name]);
     }
 
@@ -107,6 +121,7 @@ abstract class KeyValueType extends AbstractType implements ArrayAccess, Countab
      **/
     public function set($name, XType $type)
     {
+        $this->loadKeysIfNotLoaded();
         $this->namedTypes[$name] = $type;
 
         return $this;
@@ -117,6 +132,7 @@ abstract class KeyValueType extends AbstractType implements ArrayAccess, Countab
      **/
     public function count()
     {
+        $this->loadKeysIfNotLoaded();
         return count($this->namedTypes);
     }
 
@@ -125,6 +141,7 @@ abstract class KeyValueType extends AbstractType implements ArrayAccess, Countab
      **/
     public function getIterator()
     {
+        $this->loadKeysIfNotLoaded();
         return new ArrayIterator($this->namedTypes);
     }
 
@@ -156,5 +173,40 @@ abstract class KeyValueType extends AbstractType implements ArrayAccess, Countab
         }
 
         return parent::fill($filtered);
+    }
+
+    /**
+     * To allow a deferred loading of the keys assign a callable which provides
+     * the keys once an access to the keys is performed.
+     * Use this to not loading your complete ORM/Models if the first model is
+     * loaded.
+     *
+     * @param callable $keyProvider
+     *
+     * @return self
+     **/
+    public function provideKeysBy(callable $keyProvider)
+    {
+        $this->keyProvider = $keyProvider;
+        return $this;
+    }
+
+    /**
+     * Loads the keys if not done before
+     *
+     * @see self::provideKeysBy()
+     *
+     */
+    protected function loadKeysIfNotLoaded()
+    {
+        if (!$this->keyProvider || $this->keysLoaded) {
+            return;
+        }
+
+        $this->keysLoaded = true;
+
+        foreach (call_user_func($this->keyProvider) as $key=>$xType) {
+            $this->namedTypes[$key] = $xType;
+        }
     }
 }
