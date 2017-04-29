@@ -88,7 +88,7 @@ class Extractor implements ExtractorContract
                 break;
             }
 
-            $currentObject = $this->rootInstance($type);
+            $currentObject = $type == 'stdClass' ? $this->value($currentObject, $segment) : $this->rootInstance($type);
 
             ++$i;
         }
