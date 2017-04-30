@@ -165,6 +165,30 @@ class TypeProviderTest extends \Ems\TestCase
 
     }
 
+    public function test_xtype_returns_SelfExplanatory_type_when_class_passed()
+    {
+
+        $user = TypeFactoryTest_User::class;
+
+        $provider = $this->newProvider();
+
+        $userType = $provider->xType($user);
+
+        $this->assertInstanceOf(ObjectType::class, $userType);
+
+        $this->assertInstanceOf(NumberType::class, $userType['id']);
+
+        $loginType = $provider->xType($user, 'login');
+
+        $this->assertInstanceOf(StringType::class, $loginType);
+        $this->assertEquals(5, $loginType->min);
+        $this->assertEquals(255, $loginType->max);
+
+        // Check caching
+        $this->assertSame($provider->xType($user, 'login'), $provider->xType($user)['login']);
+
+    }
+
     public function test_xtype_returns_SelfExplanatory_type_with_nested_path()
     {
 

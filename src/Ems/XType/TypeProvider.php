@@ -108,6 +108,8 @@ class TypeProvider implements TypeProviderContract
             return $type;
         }
 
+        $root = is_object($root) ? $root : new $root;
+
         // If the class is in cache but not the specific path
         if (isset($this->classCache[$class])) {
             return;
