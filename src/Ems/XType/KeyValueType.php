@@ -209,4 +209,5 @@ abstract class KeyValueType extends AbstractType implements ArrayAccess, Countab
             $this->namedTypes[$key] = $xType;
         }
     }
+
 }

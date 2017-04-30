@@ -5,11 +5,15 @@ namespace Ems\XType;
 
 
 use Ems\Contracts\XType\TypeFactory as TypeFactoryContract;
+use Ems\Contracts\XType\SelfExplanatory;
+use Ems\Contracts\XType\HasTypedItems;
+use Ems\Contracts\XType\XType;
 use Ems\Contracts\Core\Extendable;
 use Ems\Core\Helper;
 use Ems\Core\Patterns\ExtendableTrait;
 use InvalidArgumentException;
 use Ems\Core\Exceptions\ResourceNotFoundException;
+use UnexpectedValueException;
 
 
 /**
@@ -35,7 +39,7 @@ class TypeFactory implements TypeFactoryContract, Extendable
      **/
     public function canCreate($config)
     {
-        return is_string($config) || $this->isArrayWithNonNumericKeys($config);
+        return is_string($config) || $this->isArrayWithNonNumericKeys($config) || $config instanceof SelfExplanatory;
     }
 
     /**
@@ -55,14 +59,57 @@ class TypeFactory implements TypeFactoryContract, Extendable
             return $this->stringToType($config);
         }
 
-        $type = new ArrayAccessType;
+        if (!$config instanceof SelfExplanatory) {
+            return $this->fillType(new ArrayAccessType, $config);
+        }
 
-        foreach ($config as $key=>$value) {
-            $type[$key] = $this->stringToType($value);
+        $typeInfo = $config->myXType();
+
+        if ($typeInfo instanceof ObjectType) {
+            return $typeInfo;
+        }
+
+        $type = new ObjectType();
+        $type->class = get_class($config);
+
+        return $this->fillType($type, $typeInfo);
+
+    }
+
+    /**
+     * Fill the passed type with the types inside $config
+     *
+     * @param KeyValueType $type
+     * @param array        $config
+     *
+     * @return KeyValueType
+     **/
+    protected function fillType(KeyValueType $type, $config)
+    {
+        $parsed = $this->parseConfig($config);
+        foreach ($parsed as $key=>$value) {
+            $type[$key] = $parsed[$key];
         }
 
         return $type;
+    }
 
+    /**
+     * Parses each array value to a type
+     *
+     * @param array|\Traversable $config
+     *
+     * @return array
+     **/
+    protected function parseConfig($config)
+    {
+        $parsed = [];
+
+        foreach ($config as $key=>$value) {
+            $parsed[$key] = $this->stringToType($value);
+        }
+
+        return $parsed;
     }
 
     /**
@@ -82,8 +129,32 @@ class TypeFactory implements TypeFactoryContract, Extendable
             $type->fill($this->parseProperties($properties));
         }
 
+        if ($type instanceof ObjectType) {
+            $type->provideKeysBy($this->buildKeyProvider($type));
+        }
+
         return $type;
 
+    }
+
+    /**
+     * Creates a deferred key provider to avoid loading the complete object
+     * on first access
+     *
+     * @param ObjectType $type
+     *
+     * @return \Closure
+     **/
+    protected function buildKeyProvider(ObjectType $type)
+    {
+        $keyClass = $type->class;
+
+        return function() use ($keyClass, &$type) {
+            $root = new $keyClass;
+            $config = $root->myXType();
+            return $this->parseConfig($config);
+
+        };
     }
 
     /**
@@ -104,12 +175,12 @@ class TypeFactory implements TypeFactoryContract, Extendable
         if (!$this->hasExtension($typeName)) {
             $class = $this->typeToClassName($typeName);
             $this->typeCache[$typeName] = new $class;
-            return $this->typeCache[$typeName];
+            return clone $this->typeCache[$typeName];
         }
 
         $this->typeCache[$typeName] = $this->callExtension($typeName, [$typeName, $this]);
 
-        return $this->typeCache[$typeName]->setName($typeName);
+        return clone $this->typeCache[$typeName]->setName($typeName);
     }
 
     /**
@@ -126,21 +197,24 @@ class TypeFactory implements TypeFactoryContract, Extendable
 
         foreach ($properties as $propertyString) {
 
-            if (mb_strpos($propertyString, ':')) {
-                list($key, $value) = explode(':', $propertyString, 2);
+            if (!mb_strpos($propertyString, ':')) {
+                list($key, $value) = $this->parseBooleanShortcut($propertyString);
                 $parsed[$key] = $value;
                 continue;
             }
 
-            $value = true;
-            $key = $propertyString;
 
-            if ($propertyString[0] == '!') {
-                $value = false;
-                $key = mb_substr($propertyString, 1);
+            list($key, $value) = explode(':', $propertyString, 2);
+
+
+            if (!$this->isNestedShortCut($value)) {
+                $parsed[$key] = $value;
+                continue;
             }
 
-            $parsed[$key] = $value;
+            $type = $this->stringToType(trim($value, '[]'));
+
+            $parsed[$key] = $type;
 
         }
 
@@ -156,9 +230,86 @@ class TypeFactory implements TypeFactoryContract, Extendable
      **/
     protected function splitTypeAndProperties($rule)
     {
-        $parts = explode('|', $rule);
-        $typeName = array_shift($parts);
+        // A nested rule
+        if (!mb_strpos($rule, ':[')) {
+            $parts = explode('|', $rule);
+            $typeName = array_shift($parts);
+            return [$typeName, $parts];
+        }
+
+        $levels = [];
+
+        $chars = Helper::stringSplit($rule);
+
+        $level = 0;
+        $isFirst = true;
+        $typeName = '';
+        $parts = [];
+        $currentPart = -1;
+
+        foreach ($chars as $char) {
+
+            if ($char == '[') {
+                $level++;
+            }
+
+            if ($char == ']') {
+                $level--;
+            }
+
+            if ($char == '|' && $level == 0) {
+                $isFirst = false;
+                $currentPart++;
+                continue;
+            }
+
+            if ($isFirst) {
+                $typeName .= $char;
+                continue;
+            }
+
+
+            if (!isset($parts[$currentPart])) {
+                $parts[$currentPart] = '';
+            }
+
+            $parts[$currentPart] .= $char;
+
+        }
+
         return [$typeName, $parts];
+    }
+
+    /**
+     * Determine if the passed rule is a nested one
+     *
+     * @param string $propertyString
+     *
+     * @return bool
+     **/
+    protected function isNestedShortCut($propertyString)
+    {
+        return strpos($propertyString, '[') === 0;
+    }
+
+    /**
+     * Parse a boolean shortcut (property without :)
+     *
+     * @param string $propertyString
+     *
+     * @return array
+     **/
+    protected function parseBooleanShortcut($propertyString)
+    {
+        $value = true;
+        $key = $propertyString;
+
+        if ($propertyString[0] == '!') {
+            $value = false;
+            $key = mb_substr($propertyString, 1);
+        }
+
+        return [$key, $value];
     }
 
     /**
