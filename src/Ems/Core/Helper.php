@@ -266,4 +266,32 @@ class Helper
 
     }
 
+    /**
+     * Split a (multibyte string)
+     *
+     * @param string $string
+     * @param string $charset (default='UTF-8')
+     *
+     * @return array
+     **/
+    public static function stringSplit($string, $chunkLength=0, $charset='UTF-8')
+    {
+
+        if ($chunkLength < 1) {
+            return preg_split("//u", $string, -1, PREG_SPLIT_NO_EMPTY);
+        }
+
+
+        $split = [];
+
+        $len = mb_strlen($string, $charset);
+
+        for ($i = 0; $i < $len; $i += $chunkLength) {
+            $split[] = mb_substr($string, $i, $chunkLength, $charset);
+        }
+
+        return $split;
+
+    }
+
 }

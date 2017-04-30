@@ -296,6 +296,29 @@ class HelperTest extends \Ems\TestCase
         $this->assertNull(Helper::first((object)['first'=>'foo']));
     }
 
+    public function test_stringSplit_splits_normal_string()
+    {
+        $test = 'Hello my name is michael';
+        $this->assertEquals(str_split($test), Helper::stringSplit($test));
+        $this->assertEquals(str_split($test,3), Helper::stringSplit($test,3));
+    }
+
+    public function test_stringSplit_splits_unicode_string()
+    {
+        $test = 'Süße Möhrchen';
+
+        $result = [
+            'S','ü','ß','e',' ','M','ö','h','r','c','h','e','n'
+        ];
+
+        $result3 = [
+            'Süß','e M','öhr','che','n'
+        ];
+
+        $this->assertEquals($result, Helper::stringSplit($test));
+        $this->assertEquals($result3, Helper::stringSplit($test,3));
+    }
+
 }
 
 class HelperTestArrayAccess implements ArrayAccess
