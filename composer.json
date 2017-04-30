@@ -6,6 +6,7 @@
         "php": ">=5.5.0"
     },
     "require-dev": {
+        "phpunit/phpunit": "5.*",
         "mockery/mockery": "~0.9",
         "illuminate/mail": "5.1.*|5.2.*|5.3.*",
         "illuminate/database": "5.1.*|5.2.*|5.3.*",
@@ -41,6 +42,5 @@
             "name": "Michael Tils",
             "email": "mtils@web-utils.de"
         }
-    ],
-    "minimum-stability": "dev"
+    ]
 }
