@@ -14,6 +14,9 @@ use Ems\Core\AnythingProvider;
 
 class CoreBootstrapper extends Bootstrapper
 {
+    /**
+     * @var array
+     **/
     protected $singletons = [
         'Ems\Core\LocalFilesystem'        => 'Ems\Contracts\Core\Filesystem',
         'Ems\Core\ManualMimeTypeProvider' => 'Ems\Contracts\Core\MimeTypeProvider',
@@ -25,12 +28,19 @@ class CoreBootstrapper extends Bootstrapper
         'Ems\Core\ArrayLocalizer'         => 'Ems\Contracts\Core\Localizer',
         'Ems\Core\TextFormatter'          => 'Ems\Contracts\Core\TextFormatter',
         'Ems\Core\TextParserQueue'        => 'Ems\Contracts\Core\TextParser',
+        'Ems\Core\Extractor'              => 'Ems\Contracts\Core\Extractor'
     ];
 
+    /**
+     * @var array
+     **/
     protected $bindings = [
         'Ems\Core\AppPath' => 'Ems\Contracts\Core\AppPath',
     ];
 
+    /**
+     * Perform resolving hooks
+     **/
     public function bind()
     {
         parent::bind();
@@ -56,6 +66,11 @@ class CoreBootstrapper extends Bootstrapper
         });
     }
 
+    /**
+     * Assign the base application paths
+     *
+     * @param PathFinder $paths
+     **/
     protected function assignBaseAppPaths(PathFinder $paths)
     {
         $paths->map('app', $this->appPath(), $this->url());
@@ -63,6 +78,11 @@ class CoreBootstrapper extends Bootstrapper
         $paths->map('ems::resources', realpath(__DIR__.'/../../../../resources'), $this->url());
     }
 
+    /**
+     * Dynamically assign all StringConverters (based on installment)
+     *
+     * @param StringConverterChain
+     */
     protected function addStringConverters(StringConverterChain $chain)
     {
         $classes = [
@@ -79,6 +99,11 @@ class CoreBootstrapper extends Bootstrapper
         }
     }
 
+    /**
+     * Return the applications public path (containing the serving index.php)
+     *
+     * @return string
+     **/
     protected function publicPath()
     {
         if (function_exists('public_path')) {
@@ -88,6 +113,11 @@ class CoreBootstrapper extends Bootstrapper
         return $this->appPath().'/public';
     }
 
+    /**
+     * Return the applications base path (the vcs root directory)
+     *
+     * @return string
+     **/
     protected function appPath()
     {
         if (function_exists('app_path')) {
@@ -97,6 +127,11 @@ class CoreBootstrapper extends Bootstrapper
         return $this->app->__invoke('app')->path();
     }
 
+    /**
+     * Return the application url
+     *
+     * @return string
+     **/
     protected function url()
     {
         if (function_exists('url')) {
