@@ -256,7 +256,7 @@ class TypeFactoryTest extends \Ems\TestCase
 abstract class TypeFactoryTest_Model implements SelfExplanatory
 {
 
-    public function myXType()
+    public function xTypeConfig()
     {
 
         $translated = [];
@@ -343,7 +343,7 @@ class TypeFactoryTest_Tag extends TypeFactoryTest_Model
 class TypeFactoryTest_Manual implements SelfExplanatory
 {
 
-    public function myXType()
+    public function xTypeConfig()
     {
         return new ObjectType;
     }

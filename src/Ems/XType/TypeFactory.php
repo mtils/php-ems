@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\XType;
 
 
@@ -15,14 +14,12 @@ use InvalidArgumentException;
 use Ems\Core\Exceptions\ResourceNotFoundException;
 use UnexpectedValueException;
 
-
 /**
  * This is the default xtype factory. Create types by a string or an
  * assoziative array containing the shortcut keys of an xtype.
  **/
 class TypeFactory implements TypeFactoryContract, Extendable
 {
-
     use ExtendableTrait;
 
     /**
@@ -52,7 +49,7 @@ class TypeFactory implements TypeFactoryContract, Extendable
     public function toType($config)
     {
         if (!$this->canCreate($config)) {
-            throw new InvalidArgumentException('Cannot create an xtype out of parameter. Please check with canCreate first.');
+            throw new InvalidArgumentException('Cannot create an xtype out of parameter. Please check with canCreate first. Received '.Helper::typeName($config));
         }
 
         if (is_string($config)) {
@@ -60,10 +57,10 @@ class TypeFactory implements TypeFactoryContract, Extendable
         }
 
         if (!$config instanceof SelfExplanatory) {
-            return $this->fillType(new ArrayAccessType, $config);
+            return $this->fillType(new ArrayAccessType(), $config);
         }
 
-        $typeInfo = $config->myXType();
+        $typeInfo = $config->xTypeConfig();
 
         if ($typeInfo instanceof ObjectType) {
             return $typeInfo;
@@ -73,7 +70,6 @@ class TypeFactory implements TypeFactoryContract, Extendable
         $type->class = get_class($config);
 
         return $this->fillType($type, $typeInfo);
-
     }
 
     /**
@@ -106,6 +102,11 @@ class TypeFactory implements TypeFactoryContract, Extendable
         $parsed = [];
 
         foreach ($config as $key=>$value) {
+            if ($value instanceof XType) {
+                $parsed[$key] = $value;
+                continue;
+            }
+
             $parsed[$key] = $this->stringToType($value);
         }
 
@@ -121,7 +122,6 @@ class TypeFactory implements TypeFactoryContract, Extendable
      **/
     protected function stringToType($config)
     {
-
         list($typeName, $properties) = $this->splitTypeAndProperties($config);
         $type = $this->createType($typeName);
 
@@ -129,12 +129,15 @@ class TypeFactory implements TypeFactoryContract, Extendable
             $type->fill($this->parseProperties($properties));
         }
 
-        if ($type instanceof ObjectType) {
+        if (!$type instanceof ObjectType) {
+            return $type;
+        }
+
+        if (!$type->hasKeyProvider()) {
             $type->provideKeysBy($this->buildKeyProvider($type));
         }
 
         return $type;
-
     }
 
     /**
@@ -149,9 +152,9 @@ class TypeFactory implements TypeFactoryContract, Extendable
     {
         $keyClass = $type->class;
 
-        return function() use ($keyClass, &$type) {
-            $root = new $keyClass;
-            $config = $root->myXType();
+        return function () use ($keyClass, &$type) {
+            $root = new $keyClass();
+            $config = $root->xTypeConfig();
             return $this->parseConfig($config);
 
         };
@@ -166,7 +169,6 @@ class TypeFactory implements TypeFactoryContract, Extendable
      **/
     protected function createType($typeName)
     {
-
         if (isset($this->typeCache[$typeName])) {
             return clone $this->typeCache[$typeName];
         }
@@ -174,7 +176,7 @@ class TypeFactory implements TypeFactoryContract, Extendable
 
         if (!$this->hasExtension($typeName)) {
             $class = $this->typeToClassName($typeName);
-            $this->typeCache[$typeName] = new $class;
+            $this->typeCache[$typeName] = new $class();
             return clone $this->typeCache[$typeName];
         }
 
@@ -192,11 +194,9 @@ class TypeFactory implements TypeFactoryContract, Extendable
      **/
     protected function parseProperties(array $properties)
     {
-
         $parsed = [];
 
         foreach ($properties as $propertyString) {
-
             if (!mb_strpos($propertyString, ':')) {
                 list($key, $value) = $this->parseBooleanShortcut($propertyString);
                 $parsed[$key] = $value;
@@ -215,7 +215,6 @@ class TypeFactory implements TypeFactoryContract, Extendable
             $type = $this->stringToType(trim($value, '[]'));
 
             $parsed[$key] = $type;
-
         }
 
         return $parsed;
@@ -248,7 +247,6 @@ class TypeFactory implements TypeFactoryContract, Extendable
         $currentPart = -1;
 
         foreach ($chars as $char) {
-
             if ($char == '[') {
                 $level++;
             }
@@ -274,7 +272,6 @@ class TypeFactory implements TypeFactoryContract, Extendable
             }
 
             $parts[$currentPart] .= $char;
-
         }
 
         return [$typeName, $parts];
@@ -321,23 +318,21 @@ class TypeFactory implements TypeFactoryContract, Extendable
      **/
     protected function typeToClassName($typeName)
     {
+        $classBase = Helper::studlyCaps($typeName).'Type';
 
-        $classBase = Helper::studlyCaps($typeName) . 'Type';
-
-        $class = __NAMESPACE__ . "\\$classBase";
+        $class = __NAMESPACE__."\\$classBase";
 
         if (class_exists($class)) {
             return $class;
         }
 
-        $class = __NAMESPACE__ . "\UnitTypes\\$classBase";
+        $class = __NAMESPACE__."\UnitTypes\\$classBase";
 
         if (class_exists($class)) {
             return $class;
         }
 
         throw new ResourceNotFoundException("XType class for $typeName not found");
-
     }
 
     /**
@@ -359,5 +354,4 @@ class TypeFactory implements TypeFactoryContract, Extendable
 
         return true;
     }
-
 }

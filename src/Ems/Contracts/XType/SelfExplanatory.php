@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Contracts\XType;
 
 
@@ -19,5 +18,5 @@ interface SelfExplanatory
      *
      * @return array|\Ems\XType\ObjectType
      **/
-    public function myXType();
+    public function xTypeConfig();
 }
