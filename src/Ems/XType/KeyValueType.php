@@ -192,10 +192,19 @@ abstract class KeyValueType extends AbstractType implements ArrayAccess, Countab
     }
 
     /**
+     * Return true if this KeyValueType has a key provider
+     *
+     * @return bool
+     **/
+    public function hasKeyProvider()
+    {
+        return (bool)$this->keyProvider;
+    }
+
+    /**
      * Loads the keys if not done before
      *
      * @see self::provideKeysBy()
-     *
      */
     protected function loadKeysIfNotLoaded()
     {
@@ -209,5 +218,4 @@ abstract class KeyValueType extends AbstractType implements ArrayAccess, Countab
             $this->namedTypes[$key] = $xType;
         }
     }
-
 }
