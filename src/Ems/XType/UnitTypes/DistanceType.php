@@ -3,8 +3,8 @@
 namespace Ems\XType\UnitTypes;
 
 /**
- * Length is a physical length like inches, millimeters...
+ * Distance is a physical length like inches, millimeters...
  **/
-class LengthType extends SpacialType
+class DistanceType extends SpacialType
 {
 }
