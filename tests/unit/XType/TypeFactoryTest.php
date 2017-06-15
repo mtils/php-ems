@@ -175,6 +175,37 @@ class TypeFactoryTest extends \Ems\TestCase
 
         $this->assertInstanceOf(UnitTypes\AreaType::class, $type);
         $this->assertEquals('area', $type->getName());
+
+        $type = $factory->toType('distance');
+
+        $this->assertInstanceOf(UnitTypes\DistanceType::class, $type);
+        $this->assertEquals('distance', $type->getName());
+
+        $type = $factory->toType('memory');
+
+        $this->assertInstanceOf(UnitTypes\MemoryType::class, $type);
+        $this->assertEquals('memory', $type->getName());
+
+        $type = $factory->toType('money');
+
+        $this->assertInstanceOf(UnitTypes\MoneyType::class, $type);
+        $this->assertEquals('money', $type->getName());
+
+        $type = $factory->toType('position');
+
+        $this->assertInstanceOf(UnitTypes\PositionType::class, $type);
+        $this->assertEquals('position', $type->getName());
+
+        $type = $factory->toType('temporal-unit');
+
+        $this->assertInstanceOf(UnitTypes\TemporalUnitType::class, $type);
+        $this->assertEquals('temporal-unit', $type->getName());
+
+        $type = $factory->toType('volume');
+
+        $this->assertInstanceOf(UnitTypes\VolumeType::class, $type);
+        $this->assertEquals('volume', $type->getName());
+
     }
 
     public function test_factory_overwrites_properties_from_extension_type()
