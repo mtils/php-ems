@@ -38,7 +38,7 @@ class Cheat
      *
      * @return void
      **/
-    public function set($object, $property, $value)
+    public static function set($object, $property, $value)
     {
         $reflection = new ReflectionProperty($object, $property);
         $reflection->setAccessible(true);
