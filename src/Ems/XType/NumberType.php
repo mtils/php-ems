@@ -21,6 +21,20 @@ class NumberType extends AbstractType implements HasMinMax
     public $nativeType = 'int';
 
     /**
+     * With how many decimal places are the values STORED (money:4)?
+     *
+     * @var int
+     **/
+    public $precision = 0;
+
+    /**
+     * With how many decimal places are the values typically displayed (money:2)?
+     *
+     * @var int
+     **/
+    public $decimalPlaces = 0;
+
+    /**
      * {@inheritdoc}
      *
      * @return string
