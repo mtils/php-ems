@@ -2,7 +2,6 @@
 
 namespace Ems\Contracts\Foundation;
 
-
 use Ems\Contracts\Core\NamedCallableChain;
 use Ems\Contracts\Core\AppliesToResource;
 
@@ -14,12 +13,12 @@ use Ems\Contracts\Core\AppliesToResource;
 interface InputProcessor extends NamedCallableChain
 {
     /**
-     * Sort. rearrange, cast, whatever do with the input array
+     * Sort. rearrange, cast, whatever do with the input array.
      *
      * @param array             $input
      * @param AppliesToResource $resource (optional)
      *
      * @return array
      **/
-    public function process(array $input, AppliesToResource $resource=null);
+    public function process(array $input, AppliesToResource $resource = null);
 }

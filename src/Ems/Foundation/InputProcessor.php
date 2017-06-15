@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Foundation;
 
 use Ems\Contracts\Core\AppliesToResource;
@@ -19,7 +18,7 @@ class InputProcessor implements InputProcessorContract
      *
      * @return array
      **/
-    public function process(array $input, AppliesToResource $resource=null)
+    public function process(array $input, AppliesToResource $resource = null)
     {
         $corrected = $input;
 
@@ -31,5 +30,4 @@ class InputProcessor implements InputProcessorContract
 
         return $corrected;
     }
-
 }
