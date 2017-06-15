@@ -123,6 +123,7 @@ class TypeFactory implements TypeFactoryContract, Extendable
     protected function stringToType($config)
     {
         list($typeName, $properties) = $this->splitTypeAndProperties($config);
+
         $type = $this->createType($typeName);
 
         if ($properties) {
@@ -199,7 +200,7 @@ class TypeFactory implements TypeFactoryContract, Extendable
         foreach ($properties as $propertyString) {
             if (!mb_strpos($propertyString, ':')) {
                 list($key, $value) = $this->parseBooleanShortcut($propertyString);
-                $parsed[$key] = $value;
+                $parsed[Helper::camelCase($key)] = $value;
                 continue;
             }
 
@@ -208,13 +209,13 @@ class TypeFactory implements TypeFactoryContract, Extendable
 
 
             if (!$this->isNestedShortCut($value)) {
-                $parsed[$key] = $value;
+                $parsed[Helper::camelCase($key)] = $value;
                 continue;
             }
 
             $type = $this->stringToType(trim($value, '[]'));
 
-            $parsed[$key] = $type;
+            $parsed[Helper::camelCase($key)] = $type;
         }
 
         return $parsed;
