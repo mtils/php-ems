@@ -2,11 +2,15 @@
 
 namespace Ems\Core\Laravel;
 
+use Closure;
 use InvalidArgumentException;
 use Illuminate\Container\Container as IlluminateContainer;
 use Ems\Contracts\Core\IOCContainer as ContainerContract;
 use Ems\Core\Support\ResolvingListenerTrait;
 use Ems\Core\Support\IOCHelperMethods;
+use Ems\Testing\Cheat;
+use ReflectionClass;
+use ReflectionParameter;
 
 class IOCContainer implements ContainerContract
 {
@@ -41,6 +45,15 @@ class IOCContainer implements ContainerContract
      **/
     public function __invoke($abstract, array $parameters = [])
     {
+        if (!$parameters) {
+            return $this->laravel->make($abstract);
+        }
+
+        // Laravel 5.4
+        if (method_exists($this->laravel, 'makeWith')) {
+            return $this->laravel->makeWith($abstract, $this->convertParameters($abstract, $parameters));
+        }
+
         return $this->laravel->make($abstract, $parameters);
     }
 
@@ -232,5 +245,33 @@ class IOCContainer implements ContainerContract
         }
 
         return $callback;
+    }
+
+    /**
+     * @param mixed $abstract
+     * @param array $parameters
+     **/
+    protected function convertParameters($abstract, array $parameters)
+    {
+
+        // TODO Ugly hack to get the concrete class in laravel
+        $concrete = Cheat::call($this->laravel, 'getConcrete', [$abstract]);
+
+        if ($concrete instanceof Closure) {
+            return $parameters;
+        }
+
+        $constructor = (new ReflectionClass($concrete))->getConstructor();
+
+        $named = [];
+
+        foreach ($constructor->getParameters() as $i=>$parameter) {
+            if (isset($parameters[$i])) {
+                $named[$parameter->getName()] = $parameters[$i];
+            }
+        }
+
+        return $named;
+
     }
 }

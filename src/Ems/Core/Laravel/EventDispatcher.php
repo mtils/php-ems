@@ -140,6 +140,19 @@ class EventDispatcher implements Dispatcher
     /**
      * {@inheritdoc}
      *
+     * @param  string|object  $event
+     * @param  mixed  $payload
+     * @param  bool  $halt
+     * @return array|null
+     */
+    public function dispatch($event, $payload = [], $halt = false)
+    {
+        return $this->events->fire($event, $payload, $halt);
+    }
+
+    /**
+     * {@inheritdoc}
+     *
      * @return string
      */
     public function firing()

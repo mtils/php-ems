@@ -70,7 +70,7 @@ class RelationReflector
         $other = $relation->getRelated();
         return [
             'type'         => 'object|class:'.get_class($other),
-            'foreign_keys' => [$relation->getForeignKey()]
+            'foreign_keys' => [$this->getForeignKey($relation)]
         ];
     }
 
@@ -115,7 +115,7 @@ class RelationReflector
         $other = $relation->getRelated();
         return [
             'type'         => 'sequence|itemType:[object|class:'.get_class($other).']',
-            'foreign_keys' => [$relation->getForeignKey()]
+            'foreign_keys' => [$this->getForeignKey($relation)]
         ];
     }
 
@@ -162,5 +162,19 @@ class RelationReflector
             'type'         => 'sequence|itemType:[object|class:'.get_class($other).']',
             'foreign_keys' => []
         ];
+    }
+
+    /**
+     * @param Relation $relation
+     *
+     * @return string
+     **/
+    protected function getForeignKey(Relation $relation)
+    {
+        // Renamed in Laravel 5.4
+        if (method_exists($relation, 'getQualifiedForeignKeyName')) {
+            return $relation->getQualifiedForeignKeyName();
+        }
+        return $relation->getForeignKey();
     }
 }
