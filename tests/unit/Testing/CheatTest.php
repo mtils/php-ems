@@ -27,6 +27,15 @@ class CheatTest extends TestCase
         $this->assertEquals('a', Cheat::get($tester, 'private'));
     }
 
+    public function test_set_changes_private_value()
+    {
+        $tester = new VisibilityTester();
+
+        Cheat::set($tester, 'private', 'foobar');
+
+        $this->assertEquals('foobar', $tester->getPrivate());
+    }
+
     public function test_call_calls_public_method()
     {
         $tester = new VisibilityTester();
@@ -50,6 +59,21 @@ class CheatTest extends TestCase
         $this->assertEquals('private', Cheat::call($tester, 'privateMethod', $args));
         $this->assertEquals($args, $tester->privateMethodArgs);
     }
+
+    public function test_a_returns_CheatProxy()
+    {
+        $tester = new VisibilityTester();
+        $proxy = Cheat::a($tester);
+        $this->assertInstanceOf(CheatProxy::class, $proxy);
+    }
+
+    public function test_an_returns_CheatProxy()
+    {
+        $tester = new VisibilityTester();
+        $proxy = Cheat::an($tester);
+        $this->assertInstanceOf(CheatProxy::class, $proxy);
+    }
+
 }
 
 class VisibilityTester

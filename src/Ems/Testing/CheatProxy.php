@@ -4,6 +4,11 @@ namespace Ems\Testing;
 
 use InvalidArgumentException;
 
+/**
+ * The CheatProxy allows a nice syntax when cheating an object
+ * Just create new proxy and use its properties and methods to fake
+ * its source.
+ **/
 class CheatProxy
 {
 
@@ -26,13 +31,25 @@ class CheatProxy
     /**
      * Get the value of a property (even if it is protected or private)
      *
-     * @param string $key+++++++++++++
+     * @param string $key
      *
      * @return mixed
      **/
     public function __get($key)
     {
         return Cheat::get($this->source, $key);
+    }
+
+    /**
+     * Set the value of a property (even if it is protected or private)
+     *
+     * @param string $key
+     *
+     * @return mixed
+     **/
+    public function __set($key, $value)
+    {
+        return Cheat::set($this->source, $key, $value);
     }
 
     /**

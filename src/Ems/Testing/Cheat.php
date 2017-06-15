@@ -30,6 +30,23 @@ class Cheat
     }
 
     /**
+     * Set the value of a property, even if it is protected or private.
+     *
+     * @param object $object
+     * @param string $property
+     * @param mixed  $value
+     *
+     * @return void
+     **/
+    public function set($object, $property, $value)
+    {
+        $reflection = new ReflectionProperty($object, $property);
+        $reflection->setAccessible(true);
+
+        return $reflection->setValue($object, $value);
+    }
+
+    /**
      * Call a method of an object, even if it is protected or private.
      *
      * @param object $object

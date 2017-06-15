@@ -77,4 +77,18 @@ class LoggingCallableTest extends TestCase
 
         $this->assertEquals('c', $callable->arg(1, 1));
     }
+
+    public function test_custom_handler_is_called()
+    {
+
+        $handler = function () {
+            return 'something';
+        };
+
+        $callable = new LoggingCallable($handler);
+
+        $this->assertEquals('something', $callable());
+
+    }
+
 }
