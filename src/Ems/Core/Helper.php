@@ -5,6 +5,7 @@ namespace Ems\Core;
 use Traversable;
 use ArrayAccess;
 use Countable;
+use Ems\Contracts\Core\Extractor as ExtractorContract;
 
 class Helper
 {
@@ -23,6 +24,11 @@ class Helper
      * @var array
      **/
     protected static $snakeCache = [];
+
+    /**
+     * @var ExtractorContract
+     **/
+    protected static $extractor;
 
     /**
      * Call a callable (faster)
@@ -294,4 +300,50 @@ class Helper
 
     }
 
+    /**
+     * Return if $value starts with $start
+     *
+     * @param array|string $value (objects with __toString() are also allowed)
+     * @param mixed $start
+     *
+     * @return bool
+     **/
+    public static function startsWith($value, $start)
+    {
+
+        if (is_array($value)) {
+            return self::first($value) == $start;
+        }
+
+        return mb_strpos("$value", "$start") === 0;
+
+    }
+
+    /**
+     * Return an array or object value of path $path
+     *
+     * @param object|array $root
+     * @param string $path
+     *
+     * @return mixed
+     *
+     * @see Extractor::value()
+     **/
+    public static function value($root, $path)
+    {
+        if (!static::$extractor) {
+            static::$extractor = new Extractor;
+        }
+        return static::$extractor->value($root, $path);
+    }
+
+    /**
+     * Set a custom extractor (for testing)
+     *
+     * @param ExtractorContract $extractor
+     **/
+    public static function setExtractor(ExtractorContract $extractor)
+    {
+        static::$extractor = $extractor;
+    }
 }

@@ -319,6 +319,60 @@ class HelperTest extends \Ems\TestCase
         $this->assertEquals($result3, Helper::stringSplit($test,3));
     }
 
+    public function test_startsWith_works_with_strings()
+    {
+        $this->assertTrue(Helper::startsWith('Hello', 'H'));
+        $this->assertTrue(Helper::startsWith('Hello', 'Hell'));
+        $this->assertTrue(Helper::startsWith('Hello', 'Hello'));
+        $this->assertFalse(Helper::startsWith('Hello', 'e'));
+
+        $this->assertTrue(Helper::startsWith('Ährenöbst', 'Ä'));
+        $this->assertTrue(Helper::startsWith('Ährenöbst', 'Ährenö'));
+        $this->assertFalse(Helper::startsWith('Ährenöbst', 'Ühr'));
+
+    }
+
+    public function test_startsWith_works_with_numbers()
+    {
+        $this->assertTrue(Helper::startsWith(1, 1));
+        $this->assertTrue(Helper::startsWith(1.53, 1));
+        $this->assertTrue(Helper::startsWith(3529, 35));
+        $this->assertFalse(Helper::startsWith(3529, 36));
+
+    }
+
+    public function test_startsWith_works_with_arrays()
+    {
+        $this->assertTrue(Helper::startsWith(['a','b','c'], 'a'));
+        $this->assertTrue(Helper::startsWith(['bananas','apples','melon'], 'bananas'));
+        $this->assertFalse(Helper::startsWith(['bananas','apples','melon'], 'apples'));
+    }
+
+    public function test_value_uses_extractor()
+    {
+        $test = ['a'=>['b'=>'c']];
+        $this->assertEquals('c', Helper::value($test, 'a.b'));
+    }
+
+    public function test_setExtractor()
+    {
+
+        $extractor = new Extractor;
+
+        $mock = $this->mock(Extractor::class);
+
+        Helper::setExtractor($mock);
+
+        $mock->shouldReceive('value')
+             ->with('a', 'b')
+             ->atLeast()->once()
+             ->andReturn('c');
+
+        $this->assertEquals('c', Helper::value('a', 'b'));
+
+        // Better reset it, its static
+        Helper::setExtractor($extractor);
+    }
 }
 
 class HelperTestArrayAccess implements ArrayAccess
