@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ems\Contracts\Validation;
 
 use ArrayAccess;
@@ -21,7 +20,7 @@ interface Validation extends ArrayAccess, IteratorAggregate, Countable
      * parameters.
      * On a rule like:
      * [ 'login' => 'min:3']
-     * It would be: $validation->addFailure('login', 'min', [3])
+     * It would be: $validation->addFailure('login', 'min', [3]).
      *
      * @param string $key
      * @param string $rule
@@ -29,10 +28,10 @@ interface Validation extends ArrayAccess, IteratorAggregate, Countable
      *
      * @return self
      **/
-    public function addFailure($key, $ruleName, array $parameters=[]);
+    public function addFailure($key, $ruleName, array $parameters = []);
 
     /**
-     * Return the complete object data as an array:
+     * Return the complete object data as an array:.
      *
      * [
      *     $key => [
@@ -45,7 +44,7 @@ interface Validation extends ArrayAccess, IteratorAggregate, Countable
     public function failures();
 
     /**
-     * Quick access to parameters
+     * Quick access to parameters.
      *
      * @param string $key
      * @param string $rule
@@ -56,17 +55,16 @@ interface Validation extends ArrayAccess, IteratorAggregate, Countable
 
     /**
      * Return the validation rules the validator used
-     * to create this validation
+     * to create this validation.
      *
      * @return array
      **/
     public function rules();
 
     /**
-     * Return the validator class that created this validation
+     * Return the validator class that created this validation.
      *
      * @return string
      **/
     public function validatorClass();
-
 }
