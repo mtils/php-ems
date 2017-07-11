@@ -45,7 +45,7 @@ trait ExtendableTrait
             return $this->_extensions[$name];
         }
 
-        throw new OutOfBoundsException(get_class($this).": No extension named \"$name\" found");
+        throw new HandlerNotFoundException(get_class($this).": No extension named \"$name\" found");
     }
 
     /**
