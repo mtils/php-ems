@@ -2,11 +2,12 @@
 
 namespace Ems\Validation;
 
+use Ems\Contracts\Core\Extendable;
 use Ems\Contracts\Validation\Validation;
 use Ems\Contracts\Validation\ValidationConverter as ConverterContract;
 use Ems\Core\Patterns\ExtendableTrait;
 
-class ValidationConverter implements ConverterContract
+class ValidationConverter implements ConverterContract, Extendable
 {
     use ExtendableTrait;
 
@@ -20,6 +21,6 @@ class ValidationConverter implements ConverterContract
      **/
     public function convert(Validation $validation, $format)
     {
-        return $this->callExtension($format, [$validation]);
+        return $this->callExtension($format, [$validation, $format]);
     }
 }
