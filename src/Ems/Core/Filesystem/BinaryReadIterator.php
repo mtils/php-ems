@@ -3,6 +3,7 @@
 namespace Ems\Core\Filesystem;
 
 use Ems\Contracts\Core\Filesystem;
+use Ems\Contracts\Core\ContentIterator;
 use Ems\Core\LocalFilesystem;
 use Iterator;
 
@@ -12,37 +13,9 @@ use Iterator;
  *
  * @sample foreach (new ReadIterator($file) as $chunk) ...
  **/
-class BinaryReadIterator implements Iterator
+class BinaryReadIterator implements ContentIterator
 {
-    /**
-     * @var string
-     **/
-    protected $filePath = '';
-
-    /**
-     * @var Filesystem
-     **/
-    protected $filesystem;
-
-    /**
-     * @var string
-     **/
-    protected $currentBytes;
-
-    /**
-     * @var int
-     **/
-    protected $chunkSize = 4096;
-
-    /**
-     * @var int
-     **/
-    private $position = 0;
-
-    /**
-     * @var resource
-     **/
-    protected $handle;
+    use ReadIteratorTrait;
 
     /**
      * @param string     $filePath   (optional)
@@ -53,140 +26,6 @@ class BinaryReadIterator implements Iterator
         $this->position = 0;
         $this->filePath = $filePath;
         $this->setFilesystem($filesystem ?: new LocalFilesystem());
-    }
-
-    /**
-     * Return the bytes which will be readed in one iteration.
-     *
-     * @return int
-     **/
-    public function getChunkSize()
-    {
-        return $this->chunkSize;
-    }
-
-    /**
-     * @see self::getChunkSize()
-     *
-     * @param int $chunkSize
-     *
-     * @return self
-     **/
-    public function setChunkSize($chunkSize)
-    {
-        $this->chunkSize = $chunkSize;
-
-        return $this;
-    }
-
-    /**
-     * @return string
-     **/
-    public function getFilePath()
-    {
-        return $this->filePath;
-    }
-
-    /**
-     * @param string $filePath
-     *
-     * @return self
-     **/
-    public function setFilePath($filePath)
-    {
-        $this->filePath = $filePath;
-        $this->releaseHandle();
-
-        return $this;
-    }
-
-    /**
-     * @return Filesystem
-     **/
-    public function getFilesystem()
-    {
-        return $this->filesystem;
-    }
-
-    /**
-     * @param Filesystem $filesystem
-     *
-     * @return self
-     **/
-    public function setFilesystem(Filesystem $filesystem)
-    {
-        $this->filesystem = $filesystem;
-
-        return $this;
-    }
-
-    /**
-     * Reset the internal pointer to the beginning.
-     **/
-    public function rewind()
-    {
-        $this->currentBytes = $this->readNext(
-            $this->initHandle($this->getFilePath()),
-            $this->chunkSize
-        );
-        $this->position = $this->currentBytes === null ? -1 : 0;
-    }
-
-    /**
-     * @return string
-     **/
-    public function current()
-    {
-        return $this->currentBytes;
-    }
-
-    /**
-     * @return int
-     **/
-    public function key()
-    {
-        return $this->position;
-    }
-
-    public function next()
-    {
-        $this->currentBytes = $this->readNext($this->handle, $this->chunkSize);
-        $this->position = $this->currentBytes === null ? -1 : $this->position + 1;
-    }
-
-    /**
-     * @return bool
-     **/
-    public function valid()
-    {
-        return is_resource($this->handle) && $this->position !== -1;
-    }
-
-    /**
-     * Release file handle on destruction.
-     **/
-    public function __destruct()
-    {
-        $this->releaseHandle();
-    }
-
-    /**
-     * Close the handle if opened.
-     **/
-    protected function releaseHandle()
-    {
-        if (is_resource($this->handle)) {
-            fclose($this->handle);
-        }
-        $this->handle = null;
-    }
-
-    /**
-     * @return bool
-     **/
-    protected function hasHandle()
-    {
-        return is_resource($this->handle);
     }
 
     /**
@@ -207,22 +46,12 @@ class BinaryReadIterator implements Iterator
     }
 
     /**
-     * Create or rewind the handle.
+     * Return the amount of bytes
      *
-     * @param string $filePath
-     *
-     * @return resource
+     * @return int
      **/
-    protected function initHandle($filePath)
+    public function count()
     {
-        if ($this->hasHandle()) {
-            rewind($this->handle);
-
-            return $this->handle;
-        }
-
-        $this->handle = $this->filesystem->handle($filePath);
-
-        return $this->handle;
+        return $this->filesystem->size($this->getFilePath());
     }
 }

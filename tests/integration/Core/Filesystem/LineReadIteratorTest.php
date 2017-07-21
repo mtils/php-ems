@@ -8,7 +8,7 @@ use Ems\Testing\FilesystemMethods;
 
 use Iterator;
 
-class LocalFilesystemTest extends \Ems\IntegrationTest
+class LineReadIteratorTest extends \Ems\IntegrationTest
 {
 
     public function test_implements_interface()
@@ -50,42 +50,81 @@ class LocalFilesystemTest extends \Ems\IntegrationTest
 
         $reader = $this->newReader($file)->setChunkSize(1024);
 
-        $chunks = [];
+        $lines = [];
 
         $fileContent = file_get_contents($file);
 
         $readContent = '';
 
-        foreach ($reader as $i=>$chunk) {
-            $chunks[$i] = $chunk;
-            $readContent .= $chunk;
+        foreach ($reader as $i=>$line) {
+            $lines[$i] = $line;
         }
 
-        $this->assertEquals($fileContent, $readContent);
-        $this->assertCount(6, $chunks);
+        $this->assertCount(11, $lines);
+        $this->assertEquals(rtrim($fileContent, "\n"), implode("\n", $lines));
         $this->assertFalse($reader->valid());
         $this->assertEquals(-1, $reader->key());
 
         // A second time to test reading without re-opening
-        $chunks2 = [];
-        $readContent2 = '';
+        $lines2 = [];
 
         foreach ($reader as $i=>$chunk) {
-            $chunks2[$i] = $chunk;
-            $readContent2 .= $chunk;
+            $lines2[$i] = $chunk;
         }
 
-        $this->assertEquals($fileContent, $readContent2);
-        $this->assertCount(6, $chunks2);
+        $this->assertCount(11, $lines2);
+        $this->assertEquals(rtrim($fileContent, "\n"), implode("\n", $lines2));
         $this->assertFalse($reader->valid());
         $this->assertEquals(-1, $reader->key());
+
+    }
+
+    public function test_count_returns_same_count_as_lines()
+    {
+        $file = $this->dataFile('ascii-data-eol-l.txt');
+
+        $reader = $this->newReader($file)->setChunkSize(1024);
+
+        $lines = [];
+
+        $fileContent = file_get_contents($file);
+
+        $readContent = '';
+
+        foreach ($reader as $i=>$line) {
+            $lines[$i] = $line;
+        }
+
+        $this->assertCount(11, $lines);
+        $this->assertCount(11, $reader);
+
 
     }
 
     protected function newReader($path='', FSContract $filesystem=null)
     {
-        return new BinaryReadIterator($path, $filesystem);
+        return new LineReadIterator($path, $filesystem);
     }
 
-    
+    public function test_reads_filled_windows_txt_file()
+    {
+        $file = $this->dataFile('ascii-data-eol-w.txt');
+
+        $reader = $this->newReader($file);
+
+        $lines = [];
+
+        $fileContent = file_get_contents($file);
+
+        $readContent = '';
+
+        foreach ($reader as $i=>$line) {
+            $lines[$i] = $line;
+        }
+
+        $this->assertCount(11, $lines);
+        $this->assertEquals(rtrim($fileContent, "\r\n"), implode("\r\n", $lines));
+
+    }
+
 }
