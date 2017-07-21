@@ -12,4 +12,10 @@ use Ems\Core\Application;
 class IntegrationTest extends TestCase
 {
     use AppTrait;
+
+    protected function dataFile($file)
+    {
+        return realpath(__DIR__."/../data/$file");
+    }
+
 }

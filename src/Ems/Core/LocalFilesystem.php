@@ -51,10 +51,10 @@ class LocalFilesystem implements FileSystem
         }
 
         if (!$lock) {
-            return $this->getFileContents($path, $bytes);
+            return $this->read($path, $bytes);
         }
 
-        $handle = $this->fileHandleOrFail($path);
+        $handle = $this->handle($path);
 
         try {
             $lock = is_bool($lock) ? LOCK_SH : $lock;
@@ -63,7 +63,7 @@ class LocalFilesystem implements FileSystem
                 throw new ResourceLockedException("Path '$path' is read locked by another process");
             }
 
-            $contents = $this->getFileContents($path, $bytes, $handle);
+            $contents = $this->read($path, $bytes, $handle);
             flock($handle, LOCK_UN);
         } finally {
             fclose($handle);
@@ -389,22 +389,22 @@ class LocalFilesystem implements FileSystem
     }
 
     /**
-     * Read a whole file or just a few bytes of a file
+     * {@inheritdoc}
      *
      * @param string   $path
-     * @param int      $bytes
+     * @param int      $bytes  (optional)
      * @param resource $handle (optional)
      *
      * @return string
      **/
-    protected function getFileContents($path, $bytes, $handle = null)
+    public function read($path, $bytes = 0, $handle = null)
     {
         if (!$bytes) {
             return file_get_contents($path);
         }
 
         list($handle, $handlePassed) = $handle ? [$handle, true]
-                                               : [$this->fileHandleOrFail($path), false];
+                                               : [$this->handle($path), false];
 
         clearstatcache(true, $path);
 
@@ -417,7 +417,7 @@ class LocalFilesystem implements FileSystem
     }
 
     /**
-     * Get a file handle or throw an exception.
+     * {@inheritdoc}
      *
      * @param string $path
      * @param string $mode (default: 'rb')
@@ -426,9 +426,9 @@ class LocalFilesystem implements FileSystem
      *
      * @return resource
      **/
-    protected function fileHandleOrFail($path, $mode = 'rb')
+    public function handle($path, $mode = 'rb')
     {
-        if (!$handle = fopen($path, $mode)) {
+        if (!$handle = @fopen($path, $mode)) {
             throw new ResourceNotFoundException("Path '$path' cannot be opened");
         }
         return $handle;

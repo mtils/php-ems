@@ -36,6 +36,25 @@ interface Filesystem
     public function write($path, $contents, $lock = false);
 
     /**
+     * Read a whole file or just a few bytes of a file
+     *
+     * @param string   $path
+     * @param int      $bytes (optional)
+     * @param resource $handle (optional)
+     **/
+    public function read($path, $bytes = 0, $handle = null);
+
+    /**
+     * Return a file handle or throw an exception. (Mostly the same as fopen())
+     *
+     * @param string $path
+     * @param string $mode
+     *
+     * @return resource
+     **/
+    public function handle($path, $mode='rb');
+
+    /**
      * Delete the path $path. Deletes directories, links and files.
      *
      * @param string|array $path
