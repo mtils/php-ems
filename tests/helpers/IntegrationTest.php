@@ -18,4 +18,8 @@ class IntegrationTest extends TestCase
         return realpath(__DIR__."/../data/$file");
     }
 
+    protected function dataFileContent($file)
+    {
+        return file_get_contents($this->dataFile($file));
+    }
 }
