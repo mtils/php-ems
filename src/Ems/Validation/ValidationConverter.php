@@ -16,11 +16,13 @@ class ValidationConverter implements ConverterContract, Extendable
      *
      * @param Validation $validation
      * @param string     $format
+     * @param array      $keyTitles (optional)
+     * @param array      $customMessages (optional)
      *
      * @return mixed
      **/
-    public function convert(Validation $validation, $format)
+    public function convert(Validation $validation, $format, array $keyTitles = [], array $customMessages = [])
     {
-        return $this->callExtension($format, [$validation, $format]);
+        return $this->callExtension($format, [$validation, $format, $keyTitles, $customMessages]);
     }
 }
