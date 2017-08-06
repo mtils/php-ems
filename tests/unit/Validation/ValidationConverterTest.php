@@ -42,6 +42,6 @@ class ValidationConverterTest extends \Ems\TestCase
 
     protected function newConverter()
     {
-        return new ValidationConverter($failures, $rules, $validatorClass);
+        return new ValidationConverter();
     }
 }
