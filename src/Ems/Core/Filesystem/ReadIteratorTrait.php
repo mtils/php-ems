@@ -88,6 +88,7 @@ trait ReadIteratorTrait
     {
         $this->filePath = $filePath;
         $this->releaseHandle();
+        $this->onFileChanged();
 
         return $this;
     }
@@ -117,6 +118,7 @@ trait ReadIteratorTrait
      **/
     public function rewind()
     {
+        $this->onRewind();
         $this->currentValue = $this->readNext(
             $this->initHandle($this->getFilePath()),
             $this->chunkSize
@@ -165,12 +167,26 @@ trait ReadIteratorTrait
     /**
      * Close the handle if opened.
      **/
-    protected function releaseHandle()
+    public function releaseHandle()
     {
         if (is_resource($this->handle)) {
             fclose($this->handle);
         }
         $this->handle = null;
+    }
+
+    /**
+     * Hook into a file change.
+     **/
+    protected function onFileChanged()
+    {
+    }
+
+    /**
+     * Hook into the rewind call.
+     **/
+    protected function onRewind()
+    {
     }
 
     /**
@@ -209,5 +225,19 @@ trait ReadIteratorTrait
     protected function createHandle($filePath)
     {
         return $this->filesystem->handle($filePath);
+    }
+
+    /**
+     * Clean the line (remove line breaks).
+     *
+     * @param string $line
+     *
+     * @return string
+     **/
+    protected function readLine($handle, $chunkSize)
+    {
+        $line = $chunkSize ? fgets($handle, $chunkSize) : fgets($handle);
+
+        return rtrim($line, "\n\r");
     }
 }

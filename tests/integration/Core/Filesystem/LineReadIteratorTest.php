@@ -3,10 +3,9 @@
 namespace Ems\Core\Filesystem;
 
 use Ems\Contracts\Core\Filesystem as FSContract;
+use Ems\Contracts\Core\ContentIterator;
 use Ems\Core\LocalFilesystem;
 use Ems\Testing\FilesystemMethods;
-
-use Iterator;
 
 class LineReadIteratorTest extends \Ems\IntegrationTest
 {
@@ -14,7 +13,7 @@ class LineReadIteratorTest extends \Ems\IntegrationTest
     public function test_implements_interface()
     {
         $this->assertInstanceOf(
-            Iterator::class,
+            ContentIterator::class,
             $this->newReader()
         );
     }

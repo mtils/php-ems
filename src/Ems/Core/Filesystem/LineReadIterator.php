@@ -8,7 +8,7 @@ use Ems\Core\LocalFilesystem;
 use Iterator;
 
 /**
- * The LineReadIterator is a iterator which allows to read
+ * The LineReadIterator is an iterator which allows to read
  * ascii files line by line.
  *
  * @sample foreach (new LineReadIterator($file) as $line) ...
@@ -81,17 +81,4 @@ class LineReadIterator implements ContentIterator
         return $this->filesystem->handle($filePath, 'r');
     }
 
-    /**
-     * Clean the line (remove line breaks).
-     *
-     * @param string $line
-     *
-     * @return string
-     **/
-    protected function readLine($handle, $chunkSize)
-    {
-        $line = $chunkSize ? fgets($handle, $chunkSize) : fgets($handle);
-
-        return rtrim($line, "\n\r");
-    }
 }
