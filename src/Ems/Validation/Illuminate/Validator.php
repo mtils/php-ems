@@ -8,6 +8,7 @@ use Ems\Core\Patterns\HookableTrait;
 use Illuminate\Contracts\Validation\Factory as IlluminateFactory;
 use Ems\Contracts\Validation\Validation;
 use Ems\Validation\ValidationException;
+use Ems\Validation\RuleParseMethods;
 use Ems\Core\Helper;
 use Ems\Core\Exceptions\KeyNotFoundException;
 use ReflectionMethod;
@@ -15,6 +16,7 @@ use ReflectionMethod;
 class Validator implements EmsValidatorContract
 {
     use HookableTrait;
+    use RuleParseMethods;
 
     /**
      * Put your rules here to extend this validator
@@ -389,45 +391,4 @@ class Validator implements EmsValidatorContract
         return Helper::snake_case(substr($methodName, 8));
     }
 
-    /**
-     * Split the rules in an array
-     *
-     * @param array|string $keyRules
-     *
-     * @return array
-     **/
-    protected function explodeRules($keyRules)
-    {
-        return is_string($keyRules) ? explode('|', $keyRules) : (array)$keyRules;
-    }
-
-    /**
-     * Split a rule into its name and an array of parameters
-     *
-     * @param string $rule
-     *
-     * @return array
-     **/
-    protected function ruleAndParameters($rule)
-    {
-        if (!strpos($rule, ':')) {
-            return [$this->normalizeRuleName($rule), []];
-        }
-
-        list($ruleName, $parameters) = explode(':', $rule, 2);
-
-        return [$this->normalizeRuleName($ruleName), explode(',', $parameters)];
-    }
-
-    /**
-     * Ensure underscores
-     *
-     * @param string
-     *
-     * @return string
-     **/
-    protected function normalizeRuleName($ruleName)
-    {
-        return str_replace('-', '_', mb_strtolower($ruleName));
-    }
 }
