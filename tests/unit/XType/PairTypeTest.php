@@ -15,7 +15,7 @@ class PairTypeTest extends AbstractTypeTest
         $type = $this->newType();
         $this->assertEquals(2, $type->min);
         $this->assertEquals(2, $type->max);
-        $this->assertNull($type->foo);
+//         $this->assertEquals(2, $type->constraints->min);
     }
 
     /**
@@ -41,6 +41,28 @@ class PairTypeTest extends AbstractTypeTest
         $type = $this->newType();
         $type->min = 2;
         $type->max = 2;
+    }
+
+    /**
+     * Overwritten to check the min/max access
+     *
+     * @expectedException InvalidArgumentException
+     **/
+    public function test_unset_removes_constraint()
+    {
+        $type = $this->newType();
+        $type->min = 15;
+    }
+
+    /**
+     * Overwritten to check the min/max access
+     *
+     * @expectedException InvalidArgumentException
+     **/
+    public function test_throws_exception_when_setting_max()
+    {
+        $type = $this->newType();
+        $type->max = 15;
     }
 
     protected function newType()

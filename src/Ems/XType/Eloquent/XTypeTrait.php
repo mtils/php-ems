@@ -30,12 +30,15 @@ trait XTypeTrait
      **/
     public function xTypeConfig()
     {
-        if (!isset($this->_xTypeConfigCache)) {
+        $class = get_class($this);
+
+        if (!isset(_XTypeTraitStorage::$typeCache[$class])) {
             $config = isset($this->xType) ? $this->xType : [];
-            $this->_xTypeConfigCache = $this->bootXTypeConfig($config);
+            _XTypeTraitStorage::$typeCache[$class] = $this->bootXTypeConfig($config);
         }
 
-        return $this->_xTypeConfigCache;
+        return _XTypeTraitStorage::$typeCache[$class];
+
     }
 
     /**
@@ -49,4 +52,9 @@ trait XTypeTrait
     {
         return $config;
     }
+}
+
+final class _XTypeTraitStorage
+{
+    public static $typeCache = [];
 }

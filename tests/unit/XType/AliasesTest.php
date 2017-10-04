@@ -24,7 +24,7 @@ class AliasesTest extends \Ems\TestCase
         $this->assertEquals('int', $type->nativeType);
         $this->assertEquals(0, $type->decimalPlaces);
         $this->assertEquals(0, $type->precision);
-        $this->assertTrue($type->readonly);
+        $this->assertFalse($type->readonly);
     }
 
     public function test_weight_returns_correct_type()

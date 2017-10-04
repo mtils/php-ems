@@ -6,6 +6,7 @@ namespace Ems\Foundation;
 use Ems\Contracts\Foundation\InputProcessor as InputProcessorContract;
 use Ems\Contracts\Core\AppliesToResource;
 use Ems\Contracts\Core\NamedCallableChain as ChainContract;
+use Ems\Core\NamedObject;
 
 
 class InputProcessorTest extends \Ems\TestCase
@@ -126,6 +127,85 @@ class InputProcessorTest extends \Ems\TestCase
         $this->assertSame($caster, $fork->getParent());
         $this->assertCount(2, $caster->getChain());
         $this->assertCount(3, $fork->getChain());
+    }
+
+
+    public function test_chain_parameters_are_used()
+    {
+        $caster = $this->newSample();
+
+        $extensions = [
+            'convert_encoding' => function ($input, $encoding, $internalEncoding='utf-8') {
+                                    $input['encoding'] = $encoding;
+                                    return $input;
+                                  },
+            'trim'             => function ($input, $resource=null) {
+                                    $input['resource'] = $resource;
+                                    return $input;
+                                  },
+            'xtype_adjust'     => function ($input, $resource=null, $locale=null) {
+                                    $input['locale'] = $locale;
+                                    return $input;
+                                  },
+        ];
+
+        foreach ($extensions as $name=>$callable) {
+            $caster->extend($name, $callable);
+        }
+
+        $input = ['foo'=> 'bar'];
+
+        $awaited = [
+            'foo'     => 'bar',
+            'encoding'=> 'iso-8859-1',
+            'resource'=> new NamedObject,
+            'locale'=> 'cz'
+        ];
+
+        $caster->setChain('trim|convert_encoding:iso-8859-1|xtype_adjust');
+
+        $this->assertEquals($awaited, $caster->process($input, $awaited['resource'], $awaited['locale']));
+
+    }
+
+    public function test_chain_parameters_are_replaced()
+    {
+        $caster = $this->newSample();
+
+        $extensions = [
+            'convert_encoding' => function ($input, $encoding, $internalEncoding='utf-8') {
+                                    $input['encoding'] = $encoding;
+                                    return $input;
+                                  },
+            'trim'             => function ($input, $resource=null) {
+                                    $input['resource'] = $resource;
+                                    return $input;
+                                  },
+            'xtype_adjust'     => function ($input, $resource=null, $locale=null) {
+                                    $input['locale'] = $locale;
+                                    return $input;
+                                  },
+        ];
+
+        foreach ($extensions as $name=>$callable) {
+            $caster->extend($name, $callable);
+        }
+
+        $input = ['foo'=> 'bar'];
+
+        $awaited = [
+            'foo'     => 'bar',
+            'encoding'=> 'utf-16',
+            'resource'=> new NamedObject,
+            'locale'=> 'cz'
+        ];
+
+        $caster->setChain('trim|convert_encoding:iso-8859-1|xtype_adjust');
+
+        $caster = $caster->with('trim|convert_encoding:utf-16|xtype_adjust');
+
+        $this->assertEquals($awaited, $caster->process($input, $awaited['resource'], $awaited['locale']));
+
     }
 
     protected function trigger($caster, array $input, AppliesToResource $r=null)

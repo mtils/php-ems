@@ -2,10 +2,9 @@
 
 namespace Ems\XType;
 
-use Ems\Contracts\XType\HasMinMax;
 use InvalidArgumentException;
 
-class PairType extends AbstractType implements HasMinMax
+class PairType extends AbstractType
 {
     /**
      * @var \Ems\Contracts\XType\XType
@@ -38,6 +37,7 @@ class PairType extends AbstractType implements HasMinMax
         if ($name == 'max') {
             return 2;
         }
+        return parent::__get($name);
     }
 
     /**
@@ -51,5 +51,6 @@ class PairType extends AbstractType implements HasMinMax
         if (in_array($name, ['min', 'max']) && $value != 2) {
             throw new InvalidArgumentException('A pair can only have exactly a length of 2');
         }
+        return parent::__set($name, $value);
     }
 }

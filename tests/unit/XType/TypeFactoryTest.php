@@ -87,7 +87,7 @@ class TypeFactoryTest extends \Ems\TestCase
         $this->assertInstanceOf(NumberType::class, $type);
         $this->assertEquals(15, $type->min);
         $this->assertEquals(2000, $type->max);
-        $this->assertFalse($type->canBeNull);
+        $this->assertTrue($type->notNull);
     }
 
     public function test_factory_creates_NumberType_with_valueless_inversed_properties()
@@ -96,7 +96,7 @@ class TypeFactoryTest extends \Ems\TestCase
         $this->assertInstanceOf(NumberType::class, $type);
         $this->assertEquals(15, $type->min);
         $this->assertEquals(2000, $type->max);
-        $this->assertTrue($type->canBeNull);
+        $this->assertFalse(isset($type->notNull));
     }
 
     public function test_factory_creates_ArrayAccessType()
@@ -116,14 +116,14 @@ class TypeFactoryTest extends \Ems\TestCase
         $this->assertInstanceOf(NumberType::class, $idType);
         $this->assertEquals(15, $idType->min);
         $this->assertEquals(2000, $idType->max);
-        $this->assertTrue($idType->canBeNull);
+        $this->assertFalse(isset($idType->canBeNull));
 
         $loginType = $type['login'];
 
         $this->assertInstanceOf(StringType::class, $loginType);
         $this->assertEquals(3, $loginType->min);
         $this->assertEquals(255, $loginType->max);
-        $this->assertFalse($loginType->canBeNull);
+        $this->assertTrue($loginType->notNull);
 
     }
 
@@ -148,7 +148,7 @@ class TypeFactoryTest extends \Ems\TestCase
         $this->assertInstanceOf(NumberType::class, $itemType);
         $this->assertEquals(1990, $itemType->min);
         $this->assertEquals(2017, $itemType->max);
-        $this->assertFalse($itemType->canBeNull);
+        $this->assertTrue($itemType->notNull);
 
     }
 

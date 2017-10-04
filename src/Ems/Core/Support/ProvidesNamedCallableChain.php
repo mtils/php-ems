@@ -3,12 +3,13 @@
 namespace Ems\Core\Support;
 
 use Ems\Contracts\Core\NamedCallableChain;
+use Ems\Core\Lambda;
 use Closure;
 
 trait ProvidesNamedCallableChain
 {
     /**
-     * @var \Ems\Contracts\Core\NamedCallableChain
+     * @var NamedCallableChain
      **/
     protected $parent;
 
@@ -29,7 +30,7 @@ trait ProvidesNamedCallableChain
      **/
     public function getChain()
     {
-        return $this->chain;
+        return array_keys($this->buildChain());
     }
 
     /**
@@ -57,9 +58,7 @@ trait ProvidesNamedCallableChain
     public function with($names)
     {
         $newChain = func_num_args() > 1 ? func_get_args() : $names;
-
-        return (new static())->setNativeChain($this->buildChain($newChain))
-                             ->setParent($this->parent ? $this->parent : $this);
+        return $this->forkChain()->setNativeChain($this->buildChain($newChain));
     }
 
     /**
@@ -161,23 +160,7 @@ trait ProvidesNamedCallableChain
      **/
     public function callExtension($name, array $params = [])
     {
-        $extension = $this->getExtension($name);
-
-        // call_user_func_array seems to be slow
-        switch (count($params)) {
-            case 0:
-                return call_user_func($extension);
-            case 1:
-                return call_user_func($extension, $params[0]);
-            case 2:
-                return call_user_func($extension, $params[0], $params[1]);
-            case 3:
-                return call_user_func($extension, $params[0], $params[1], $params[2]);
-            case 4:
-                return call_user_func($extension, $params[0], $params[1], $params[2], $params[3]);
-            default:
-                return call_user_func_array($extension, $params);
-        }
+        return Lambda::callFast($this->getExtension($name), $params);
     }
 
     /**
@@ -194,6 +177,29 @@ trait ProvidesNamedCallableChain
         return $this;
     }
 
+    /**
+     * @return self
+     **/
+    protected function forkChain()
+    {
+        $fork = new static();
+        $this->configureFork($fork);
+        return $fork;
+    }
+
+    /**
+     * @param NamedCallableChain $fork
+     **/
+    protected function configureFork(NamedCallableChain $fork)
+    {
+        $fork->setParent($this->parent ? $this->parent : $this);
+    }
+
+    /**
+     * @param array $merge
+     *
+     * @return array
+     **/
     protected function buildChain($merge = [])
     {
         $newChain = $merge ? $this->parseChain($merge) : [];

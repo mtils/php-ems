@@ -159,6 +159,12 @@ abstract class KeyValueType extends AbstractType implements ArrayAccess, Countab
         $filtered = [];
 
         foreach ($attributes as $name => $value) {
+
+            // This is done by the parent
+            if (in_array($name, ['name', 'constraints'])) {
+                continue;
+            }
+
             if (isset(static::$propertyMap[static::class][$name]) ||
                 isset(static::$aliases[static::class][$name])) {
                 $filtered[$name] = $value;
@@ -166,13 +172,24 @@ abstract class KeyValueType extends AbstractType implements ArrayAccess, Countab
             }
 
             if (!$value instanceof XType) {
-                throw new UnsupportedParameterException('The values have to be instanceof XType');
+                throw new UnsupportedParameterException("The value of $name has to be instanceof XType");
             }
 
             $this->set($name, $value);
         }
 
         return parent::fill($filtered);
+    }
+
+    /**
+     * Return the xtype properties as an array.
+     *
+     * @return array
+     **/
+    public function toArray()
+    {
+//         $this->loadKeysIfNotLoaded();
+        return parent::toArray();
     }
 
     /**

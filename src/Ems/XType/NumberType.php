@@ -2,16 +2,12 @@
 
 namespace Ems\XType;
 
-use Ems\Contracts\XType\HasMinMax;
-
-class NumberType extends AbstractType implements HasMinMax
+class NumberType extends AbstractType
 {
-    use MinMaxProperties;
-
     /**
      * @var float
      **/
-    public $default = 0;
+    public $defaultValue = 0;
 
     /**
      * The native php type (float|int).

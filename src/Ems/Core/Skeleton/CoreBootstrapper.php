@@ -3,6 +3,8 @@
 namespace Ems\Core\Skeleton;
 
 use Ems\Contracts\Core\PathFinder;
+use Ems\Contracts\Core\HasInjectMethods;
+use Ems\Contracts\Core\SupportsCustomFactory;
 use Ems\Core\TextFormatter;
 use Ems\Core\StringConverterChain;
 use Ems\Core\StringConverter\MBStringConverter;
@@ -11,6 +13,8 @@ use Ems\Core\StringConverter\AsciiStringConverter;
 use Ems\Core\TextParserQueue;
 use Ems\Core\VariablesTextParser;
 use Ems\Core\AnythingProvider;
+use ReflectionClass;
+use ReflectionMethod;
 
 class CoreBootstrapper extends Bootstrapper
 {
@@ -63,6 +67,14 @@ class CoreBootstrapper extends Bootstrapper
 
         $this->app->resolving(AnythingProvider::class, function ($provider, $app) {
             $provider->createObjectsWith($app);
+        });
+
+        $this->app->resolving(SupportsCustomFactory::class, function ($object) {
+            $object->createObjectsBy($this->app);
+        });
+
+        $this->app->resolving(HasInjectMethods::class, function (HasInjectMethods $object) {
+            $this->autoInjectDependendies($object);
         });
     }
 
@@ -139,5 +151,44 @@ class CoreBootstrapper extends Bootstrapper
         }
 
         return '/';
+    }
+
+    /**
+     * Auto Inject all dependencies
+     *
+     * @param HasInjectMethods $object
+     **/
+    protected function autoInjectDependendies(HasInjectMethods $object)
+    {
+
+        $reflection = new ReflectionClass($object);
+
+        foreach ($reflection->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
+
+            // Method has to start with 'inject'
+            if (strpos($method->getName(), 'inject') !== 0) {
+                continue;
+            }
+
+            // All parameters has to be some sort of class and bound
+            $parameters = $method->getParameters();
+
+            foreach ($method->getParameters() as $parameter) {
+
+                // No class|interface typehint, skip the method
+                if (!$class = $parameter->getClass()) {
+                    continue 2;
+                }
+
+                // class|interface typehint not bound, skip the method
+                if (!$this->app->bound($class->getName())) {
+                    continue 2;
+                }
+            }
+
+            $this->app->call([$object, $method->getName()]);
+
+        }
+
     }
 }

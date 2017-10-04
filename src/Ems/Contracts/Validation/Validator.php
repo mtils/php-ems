@@ -16,7 +16,7 @@ use Ems\Contracts\Core\AppliesToResource;
  * HasMethodHooks has to provide onBefore('validate'), onAfter('validate')
  * onBefore('parseRules') and onAfter('parseRules') to manipulate the array
  **/
-interface Validator extends HasMethodHooks
+interface Validator extends HasMethodHooks, AppliesToResource
 {
     /**
      * An array of string names rules. Like in laravels validation. The rules
@@ -32,8 +32,16 @@ interface Validator extends HasMethodHooks
      *
      * @param array             $input
      * @param AppliesToResource $resource (optional)
+     * @param string            $locale (optional)
      *
      * @return bool (always true)
      **/
-    public function validate(array $input, AppliesToResource $resource=null);
+    public function validate(array $input, AppliesToResource $resource=null, $locale=null);
+
+    /**
+     * Return the resource itself (if available)
+     *
+     * @return AppliesToResource|null
+     **/
+    public function resource();
 }

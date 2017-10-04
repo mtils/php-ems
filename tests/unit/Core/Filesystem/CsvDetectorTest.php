@@ -141,6 +141,18 @@ class CsvDetectorTest extends \Ems\IntegrationTest
         $this->assertEquals(range(0,4), $detector->header("$firstLine\n$secondLine", ','));
     }
 
+    // Sometimes I hate spreadsheet programs...
+    public function test_header_returns_correct_header_if_empty_column_found_at_end()
+    {
+        $detector = $this->newDetector();
+        $firstLine = 'id,e-Mail,Ärmelgröße,Vermählt,telefon geschäftlich,';
+        $secondLine = '42,me@to.de,45.67,Nein,0721 187744657,';
+
+        $awaited = explode(',', $firstLine);
+
+        $this->assertEquals($awaited, $detector->header("$firstLine\n$secondLine", ','));
+    }
+
     public function test_header_returns_empty_header_if_columns_without_letters_found()
     {
         $detector = $this->newDetector();
@@ -161,6 +173,28 @@ class CsvDetectorTest extends \Ems\IntegrationTest
         $csv .= "\n" . 'a,b,c,d,e,f';
 
         $detector->header($csv, ',');
+    }
+
+    /**
+     * @expectedException Ems\Core\Exceptions\DetectionFailedException
+     **/
+    public function test_header_throws_exception_if_header_is_forced_and_file_contains_doubled_columns()
+    {
+        $detector = $this->newDetector()->setOption(CsvDetector::FORCE_HEADER_LINE, true);
+        $csv = $this->csvContent('simple-pipe-placeholder.csv');
+        $csv = str_replace(',street', ',name', $csv);
+        $header = $detector->header($csv, ',');
+    }
+
+    /**
+     * @expectedException Ems\Core\Exceptions\DetectionFailedException
+     **/
+    public function test_header_throws_exception_if_header_is_forced_and_file_contains_invalid_columns()
+    {
+        $detector = $this->newDetector()->setOption(CsvDetector::FORCE_HEADER_LINE, true);
+        $csv = $this->csvContent('simple-pipe-placeholder.csv');
+        $csv = str_replace(',street', ',17', $csv);
+        $header = $detector->header($csv, ',');
     }
 
     protected function csvContent($file, $separator=',')

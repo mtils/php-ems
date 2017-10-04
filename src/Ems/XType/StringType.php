@@ -2,12 +2,8 @@
 
 namespace Ems\XType;
 
-use Ems\Contracts\XType\HasMinMax;
-
-class StringType extends AbstractType implements HasMinMax
+class StringType extends AbstractType
 {
-    use MinMaxProperties;
-
     /**
      * @var string
      **/

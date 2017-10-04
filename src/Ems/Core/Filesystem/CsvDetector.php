@@ -2,15 +2,33 @@
 
 namespace Ems\Core\Filesystem;
 
+use Ems\Contracts\Core\Configurable;
 use Ems\Core\Exceptions\DetectionFailedException;
+use Ems\Core\ConfigurableTrait;
+
 
 /**
  * The CSV Detector tries to guess the csv format. Even if the most people
  * will say that this cannot be done exactly, I would say exactly enough
  * to justify an implementation
  **/
-class CsvDetector
+class CsvDetector implements Configurable
 {
+
+    use ConfigurableTrait;
+
+    /**
+     * @var string
+     **/
+    const FORCE_HEADER_LINE = 'force_header_LINE';
+
+    /**
+     * @var array
+     **/
+    protected $defaultOptions = [
+        self::FORCE_HEADER_LINE => false
+    ];
+
     /**
      * @var array
      **/
@@ -73,6 +91,7 @@ class CsvDetector
      **/
     public function header($firstLines, $separator, $delimiter='"')
     {
+
         $lines = $this->toCheckableLines($firstLines);
         $row = str_getcsv($lines[0], $separator, $delimiter);
 
@@ -182,6 +201,7 @@ class CsvDetector
      **/
     protected function toCheckableLines($firstLines)
     {
+
         $lines = explode("\n", $firstLines);
 
         if (count($lines) < 2) {
@@ -200,8 +220,10 @@ class CsvDetector
      **/
     protected function containsOnlyColumnNames(array $row)
     {
-        foreach ($row as $column) {
-            if (!$this->isColumnName($column)) {
+        $last = count($row)-1;
+
+        foreach ($row as $i=>$column) {
+            if (!$this->isColumnName($column, $i == $last)) {
                 return false;
             }
         }
@@ -212,17 +234,18 @@ class CsvDetector
      * Check if a supposed column name is really one
      *
      * @param string $column
+     * @param bool   $allowEmpty (default:false)
      *
      * @return bool
      **/
-    protected function isColumnName($column)
+    protected function isColumnName($column, $allowEmpty=false)
     {
         if (is_numeric($column)) {
             return false;
         }
 
         if (trim($column) === '') {
-            return false;
+            return $allowEmpty ? true : false;
         }
 
         return preg_match('/\w*[a-zA-Z]\w*/u', $column) > 0;
@@ -247,11 +270,68 @@ class CsvDetector
      **/
     protected function guessHeader(array $row)
     {
-        if (!$this->containsOnlyColumnNames($row) || !$this->columnsAreUnique($row)) {
+        $containsOnlyColumnNames = $this->containsOnlyColumnNames($row);
+        $columnsAreUnique = $this->columnsAreUnique($row);
+
+        if ($containsOnlyColumnNames && $columnsAreUnique) {
+            return $row;
+        }
+
+        if (!$this->getOption(self::FORCE_HEADER_LINE)) {
             return range(0, count($row)-1);
         }
 
-        return $row;
+        if (!$containsOnlyColumnNames) {
+            $hint = implode(', ', $this->collectInvalidColumns($row));
+            throw new DetectionFailedException("No header found because the following columns do not like a column name: [$hint]");
+        }
+
+        // !$columnsAreUnique)
+        $hint = implode(', ', $this->collectDoubledColumns($row));
+        throw new DetectionFailedException("No header found because the following columns occurs more than once: [$hint]");
+
+    }
+
+    /**
+     * Collects invalid column names for better error messages
+     *
+     * @param array $row
+     *
+     * @return array
+     **/
+    protected function collectInvalidColumns(array $row)
+    {
+        $invalidColumns = [];
+
+        foreach ($row as $column) {
+            if (!$this->isColumnName($column)) {
+                $invalidColumns[] = $column;
+            }
+        }
+        return $invalidColumns;
+    }
+
+    /**
+     * Collects double column names for better error messages
+     *
+     * @param array $row
+     *
+     * @return array
+     **/
+    protected function collectDoubledColumns(array $row)
+    {
+        $foundNames = [];
+        $doubledColumns = [];
+
+        foreach ($row as $column) {
+
+            if (isset($foundNames[$column])) {
+                $doubledColumns[] = $column;
+            }
+            $foundNames[$column] = true;
+        }
+
+        return $doubledColumns;
     }
 
     /**

@@ -6,6 +6,7 @@ namespace Ems\XType\Skeleton;
 use Ems\Core\Skeleton\Bootstrapper;
 use Ems\Contracts\XType\TypeFactory as TypeFactoryContract;
 use Ems\Contracts\XType\TypeProvider as TypeProviderContract;
+use Ems\XType\Aliases;
 use Ems\XType\Eloquent\ModelTypeFactory;
 use Ems\XType\Eloquent\ModelReflector;
 use Ems\XType\Eloquent\RelationReflector;
@@ -31,6 +32,10 @@ class XTypeBootstrapper extends Bootstrapper
 
         $this->app->resolving(TypeProvider::class, function ($provider) {
             $this->addEloquentExtensionsIfInstalled($provider);
+        });
+
+        $this->app->resolving(TypeFactory::class, function (TypeFactory $factory) {
+            $this->app->make(Aliases::class)->addTo($factory);
         });
     }
 
@@ -60,7 +65,7 @@ class XTypeBootstrapper extends Bootstrapper
                 $app(ModelReflector::class),
                 $app(RelationReflector::class)
             );
-        });
+        }, true);
 
         $provider->extend(Model::class, function ($model) {
             return $this->app->make(ModelTypeFactory::class)->toType($model);

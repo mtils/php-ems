@@ -134,7 +134,8 @@ trait TextProviderTrait
      **/
     protected function composeKey($key)
     {
-        return !$this->keyPrefix ? $key : $this->keyPrefix.$key;
+        $key = !$this->keyPrefix ? $key : $this->keyPrefix.$key;
+        return $key;
     }
 
     /**

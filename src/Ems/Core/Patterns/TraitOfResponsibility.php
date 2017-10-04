@@ -6,6 +6,7 @@ use InvalidArgumentException;
 use ReflectionClass;
 use Ems\Core\Exceptions\HandlerNotFoundException;
 
+
 trait TraitOfResponsibility
 {
     /**
@@ -85,15 +86,20 @@ trait TraitOfResponsibility
         return $this;
     }
 
+    /**
+     * Find a handler by a method returning true. This is
+     * for chains which have separate "supports($parameter)" or
+     * "can($parameter) method.
+     *
+     * @param string $method
+     *
+     * @return self|null
+     **/
     protected function findReturningTrue($method)
     {
         $args = func_get_args();
 
         $method = array_shift($args);
-
-        if (!is_string($method)) {
-            throw new InvalidArgumentException('method has to be a string not '.gettype($method));
-        }
 
         foreach ($this->candidates as $candidate) {
             if (call_user_func_array([$candidate, $method], $args)) {
@@ -102,6 +108,16 @@ trait TraitOfResponsibility
         }
     }
 
+    /**
+     * Same as self::findReturningTrue but throw an exception
+     * if none found.
+     *
+     * @param string $method
+     *
+     * @return self
+     *
+     * @throws Ems\Core\Exceptions\HandlerNotFoundException
+     **/
     protected function findReturningTrueOrFail($method)
     {
         if (!$candidate = call_user_func_array([$this, 'findReturningTrue'], func_get_args())) {
@@ -111,6 +127,53 @@ trait TraitOfResponsibility
         return $candidate;
     }
 
+    /**
+     * Call $method on every extension. Return the first not null
+     * result. this is 
+     *
+     * @param string $method
+     *
+     * @return self|null
+     **/
+    protected function firstNotNullResult($method)
+    {
+        $args = func_get_args();
+
+        $method = array_shift($args);
+
+        foreach ($this->candidates as $candidate) {
+
+            $result = call_user_func_array([$candidate, $method], $args);
+
+            if ($result !== null) {
+                return $result;
+            }
+
+        }
+    }
+
+    /**
+     * Call $method on every extension. Return the first not null
+     * result. Throw exception if no result was returned.
+     *
+     * @param string $method
+     *
+     * @return self|null
+     **/
+    protected function firstNotNullResultOrFail($method)
+    {
+        $result = call_user_func_array([$this, 'firstNotNullResult'], func_get_args());
+        if ($result === null) {
+            throw new HandlerNotFoundException("No handler returned a value by $method");
+        }
+        return $result;
+    }
+
+    /**
+     * Detected the forced type to add to this chain.
+     *
+     * @return string
+     **/
     protected function getCandidateType()
     {
         if (!$this->detectedType) {
@@ -120,11 +183,24 @@ trait TraitOfResponsibility
         return $this->detectedType;
     }
 
+    /**
+     * Find out if the last added extension should be called
+     * at first or at end.
+     *
+     * @return bool
+     **/
     protected function shouldCallReversed()
     {
         return property_exists($this, 'callReversed') ? $this->callReversed : true;
     }
 
+    /**
+     * Check the type of the extension and return it.
+     *
+     * @param mixed $candidate
+     *
+     * @return mixed
+     **/
     protected function checkAndReturn($candidate)
     {
         if (!is_object($candidate)) {
@@ -214,6 +290,6 @@ trait TraitOfResponsibility
      **/
     protected function objectHash($object)
     {
-        return spl_object_hash($object);
+        return is_object($object) ? spl_object_hash($object) : var_export($object, true);
     }
 }

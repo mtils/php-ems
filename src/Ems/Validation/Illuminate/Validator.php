@@ -4,44 +4,22 @@ namespace Ems\Validation\Illuminate;
 
 use Ems\Contracts\Validation\Validator as EmsValidatorContract;
 use Ems\Contracts\Core\AppliesToResource;
-use Ems\Core\Patterns\HookableTrait;
+use Ems\Contracts\Core\Entity;
 use Illuminate\Contracts\Validation\Factory as IlluminateFactory;
+use Illuminate\Database\Eloquent\Model as EloquentModel;
 use Ems\Contracts\Validation\Validation;
+use Ems\Validation\Validator as AbstractValidator;
 use Ems\Validation\ValidationException;
 use Ems\Validation\RuleParseMethods;
 use Ems\Core\Helper;
 use Ems\Core\Exceptions\KeyNotFoundException;
-use ReflectionMethod;
+use Ems\Core\Exceptions\UnConfiguredException;
+use Ems\Core\Lambda;
+use Ems\Core\Collections\NestedArray;
 
-class Validator implements EmsValidatorContract
+
+abstract class Validator extends AbstractValidator
 {
-    use HookableTrait;
-    use RuleParseMethods;
-
-    /**
-     * Put your rules here to extend this validator
-     *
-     * @var array
-     **/
-    protected $rules = [];
-
-    /**
-     * Here the extended (added by hook) rules
-     *
-     * @var array
-     **/
-    protected $extendedRules = [];
-
-    /**
-     * @var array
-     **/
-    protected $parsedRules;
-
-    /**
-     * @var array
-     **/
-    protected $ownValidationMethods;
-
     /**
      * @var IlluminateFactory
      **/
@@ -53,156 +31,15 @@ class Validator implements EmsValidatorContract
     protected $illuminateValidator;
 
     /**
-     * @param IlluminateFactory $illuminateFactory
-     **/
-    public function __construct(IlluminateFactory $illuminateFactory)
-    {
-        $this->validatorFactory = $illuminateFactory;
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @return array
-     **/
-    public final function rules()
-    {
-        if ($this->parsedRules !== null) {
-            return $this->parsedRules;
-        }
-
-        $rules = $this->rules;
-
-        $this->callBeforeListeners('parseRules', [&$rules]);
-        $rules = $this->parseRules($rules);
-        $this->callAfterListeners('parseRules', [&$rules]);
-
-        $this->parsedRules = $rules;
-
-        return $this->parsedRules;
-    }
-
-    /**
-     * Validates to true or fails by an exception (with unparsed messages)
-     *
-     * @param array             $input
-     * @param AppliesToResource $resource (optional)
-     *
-     * @return bool (always true)
-     **/
-    public final function validate(array $input, AppliesToResource $resource=null)
-    {
-        $rules = $this->rules();
-
-        $this->callBeforeListeners('validate', [$input, $rules, $resource]);
-
-
-        $validation = $this->performValidation($input, $rules, $resource);
-
-        $this->callAfterListeners('validate', [$input, $rules, $resource, $validation]);
-
-        if (count($validation)) {
-            throw $validation;
-        }
-
-        return true;
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @return array
-     **/
-    public function methodHooks()
-    {
-        return ['validate', 'parseRules'];
-    }
-
-    /**
-     * @param array $rules
-     *
-     * @return self
-     **/
-    public function setRules(array $rules)
-    {
-        $this->rules = $rules;
-        $this->extendedRules = [];
-        $this->parsedRules = null;
-        return $this;
-    }
-
-    /**
-     * Overwrite this method to do some processing on the rules before
-     * using them
-     *
-     * @param array $rules
-     *
-     * @return array
-     **/
-    protected function parseRules(array $rules)
-    {
-        $parsedRules = [];
-
-        foreach ($rules as $key=>$keyRules) {
-            $keyRuleArray = $this->explodeRules($keyRules);
-
-            $parsedRules[$key] = [];
-
-            foreach ($keyRuleArray as $keyRule) {
-                list($ruleName, $parameters) = $this->ruleAndParameters($keyRule);
-                $parsedRules[$key][$ruleName] = $parameters;
-            }
-        }
-
-        return $parsedRules;
-    }
-
-    /**
-     * @param array $input
-     * @param array $rules
-     *
-     * @return \Illuminate\Contracts\Validation\Validator
-     **/
-    protected function buildValidator(array $input, array $rules)
-    {
-        return $this->validatorFactory->make($input, $rules);
-    }
-
-    /**
-     * @param array             $input
-     * @param array             $parsedRules
-     * @param AppliesToResource $resource (optional)
-     *
-     * @return Validation
-     **/
-    protected function performValidation(array $input, array $parsedRules, AppliesToResource $resource=null)
-    {
-
-        // First split rules into base rules and the custom rules of this class
-        list($baseRules, $ownRules) = $this->toBaseAndOwnRules($parsedRules);
-
-        $validation = new ValidationException();
-        $validation->setRules($parsedRules);
-
-        if ($baseRules) {
-            $this->validateByLaravel($validation, $input, $baseRules, $resource);
-        }
-
-        if ($ownRules) {
-            $this->validateByOwnMethods($validation, $input, $ownRules, $resource);
-        }
-        return $validation;
-    }
-
-    /**
      * Perform all validation by the the base validator
      *
      * @param Validation        $validation
      * @param array             $input
      * @param array             $baseRules
      * @param AppliesToResource $resource (optional)
+     * @param string            $locale (optional)
      **/
-    protected function validateByLaravel(Validation $validation, array $input, array $baseRules, AppliesToResource $resource=null)
+    protected function validateByBaseValidator(Validation $validation, array $input, array $baseRules, AppliesToResource $resource=null, $locale=null)
     {
         $laravelRules = $this->toLaravelRules($baseRules);
 
@@ -220,59 +57,125 @@ class Validator implements EmsValidatorContract
     }
 
     /**
-     * Perform all validation by the custom methods of this class
+     * {@inheritdoc}
      *
-     * @param Validation        $validation
+     * @param array             $rules
      * @param array             $input
-     * @param array             $ownRules
      * @param AppliesToResource $resource (optional)
-     **/
-    protected function validateByOwnMethods(Validation $validation, array $input, array $ownRules, AppliesToResource $resource=null)
-    {
-        foreach ($ownRules as $key=>$keyRules) {
-            $vars = [
-                'input'    => $input,
-                'key'      => $key,
-                'value'    => Helper::value($input, $key),
-                'resource' => $resource
-            ];
-
-            foreach ($keyRules as $ruleName=>$parameters) {
-                if ($this->validateByOwnMethod($ruleName, $vars, $parameters)) {
-                    continue;
-                }
-
-                $validation->addFailure($key, $ruleName, $parameters);
-            }
-        }
-    }
-
-    /**
-     * Split the rules into rules of this class and other rules.
-     *
-     * @param array
+     * @param string            $locale (optional)
      *
      * @return array
      **/
-    protected function toBaseAndOwnRules(array $parsedRules)
+    protected function prepareRulesForValidation(array $rules, array $input, AppliesToResource $resource=null, $locale=null)
     {
-        $ownRules = [];
-        $baseRules = [];
 
-        $own = $this->getOwnValidationMethods();
+        $preparedRules = [];
+        $rules = parent::prepareRulesForValidation($rules, $input, $resource, $locale);
 
-        foreach ($parsedRules as $key=>$keyRules) {
-            foreach ($keyRules as $ruleName=>$parameters) {
-                if (isset($own[$ruleName])) {
-                    (array)$ownRules[$key][$ruleName] = $parameters;
+        $dateConstraints = ['after', 'before', 'date'];
+
+        // Flatify to allow nested checks
+        $input = NestedArray::flat($input);
+
+        foreach ($rules as $key=>$constraints) {
+
+            $preparedRules[$key] = [];
+
+            foreach ($constraints as $constraint=>$parameters) {
+
+//                 if (in_array($constraint, $dateConstraints)) {
+                    // Handle that later, we need complete localized formats
+                    // to make this work (next EMS version)
+
+//                 }
+
+                if ($constraint == 'unique') {
+                    $preparedRules[$key][$constraint] = $this->parametersOfUniqueContraint($key, $parameters, $resource);
                     continue;
                 }
 
-                (array)$baseRules[$key][$ruleName] = $parameters;
+                // required on an existing model should mean:
+                // If the key isset, it should not contain any empty values
+                // if not, the request is valid.
+                // So just remove it if it shouldnt be updated
+                if ($resource instanceof Entity && !$resource->isNew() && $constraint == 'required') {
+                    if (!array_key_exists($key, $input)) {
+                        continue;
+                    }
+                }
+
+                $preparedRules[$key][$constraint] = $parameters;
+
+
             }
+
         }
 
-        return [$baseRules, $ownRules];
+        return $preparedRules;
+
+    }
+
+    /**
+     * Calculate the unique parameters for the uniqueParameters.
+     *
+     * @param string            $key
+     * @param array             $originalParameters
+     * @param AppliesToResource $resource (optional)
+     **/
+    protected function parametersOfUniqueContraint($key, array $originalParameters, AppliesToResource $resource=null)
+    {
+        if (!$resource instanceof Entity) {
+            return $originalParameters;
+        }
+
+        if (!$resource instanceof EloquentModel) {
+            return $originalParameters;
+        }
+
+        // No support for nested keys currently
+        if (strpos($key, '.') !== false) {
+            return $originalParameters;
+        }
+
+        $table = $resource->getTable();
+        $uniqueKey = $key;
+
+        if ($resource->isNew()) {
+            return [$table, $uniqueKey];
+        }
+
+        $id = $resource->getId();
+        $primaryKey = $resource->getKeyName();
+
+        return [$table, $uniqueKey, $id, $primaryKey];
+    }
+
+    /**
+     * Assign the laravel factory. This has been removed from the
+     * constructor to allow your own constructor.
+     *
+     * @param IlluminateFactory $validatorFactory
+     *
+     * @return self
+     **/
+    public function injectIlluminateFactory(IlluminateFactory $validatorFactory)
+    {
+        $this->validatorFactory = $validatorFactory;
+        return $this;
+    }
+
+    /**
+     * @param array $input
+     * @param array $rules
+     *
+     * @return \Illuminate\Contracts\Validation\Validator
+     **/
+    protected function buildValidator(array $input, array $rules)
+    {
+        if (!$this->validatorFactory) {
+            throw new UnConfiguredException("You have to assign the Illuminate Validation\Factory or this validator does not work.");
+        }
+        return $this->validatorFactory->make($input, $rules);
     }
 
     /**
@@ -296,99 +199,6 @@ class Validator implements EmsValidatorContract
         }
 
         return $laravelRules;
-    }
-
-    /**
-     * Perform the validation by an own validator method.
-     *
-     * @param string $ruleName
-     * @param array  $vars       The validation variables (input, value, key, resource)
-     * @param array  $parameters The rule parameters (in rules array)
-     *
-     * @return bool
-     **/
-    protected function validateByOwnMethod($ruleName, array $vars, array $parameters)
-    {
-        $own = $this->getOwnValidationMethods()[$ruleName];
-
-        $method = $own['method'];
-
-        $methodParams = [];
-
-        foreach ($own['parameters'] as $paramName=>$isOptional) {
-            if (isset($vars[$paramName])) {
-                $methodParams[] = $vars[$paramName];
-                continue;
-            }
-
-            $methodParams[] = array_shift($parameters);
-        }
-
-        return call_user_func_array([$this, $method], $methodParams);
-    }
-
-    /**
-     * Collect all methods which should be used as validation rules. Also
-     * information about parameter names and if they are optional
-     *
-     * @return array
-     **/
-    protected function getOwnValidationMethods()
-    {
-        if ($this->ownValidationMethods !== null) {
-            return $this->ownValidationMethods;
-        }
-
-        $this->ownValidationMethods = [];
-
-        foreach (get_class_methods($this) as $method) {
-            if (!$this->isRuleMethod($method)) {
-                continue;
-            }
-
-            $methodData = [
-                'method'     => $method,
-                'rule_name'  => $this->methodNameToRule($method),
-                'parameters' => []
-            ];
-
-            $reflection = new ReflectionMethod($this, $method);
-
-            foreach ($reflection->getParameters() as $parameter) {
-                $methodData['parameters'][$parameter->getName()] = $parameter->isOptional();
-            }
-
-            $this->ownValidationMethods[$methodData['rule_name']] = $methodData;
-        }
-
-        return $this->ownValidationMethods;
-    }
-
-    /**
-     * Test if a method name is a validation rule method
-     *
-     * @param string $methodName
-     *
-     * @return bool
-     **/
-    protected function isRuleMethod($methodName)
-    {
-        if (in_array($methodName, ['validateByLaravel', 'validateByOwnMethods'])) {
-            return false;
-        }
-        return ($methodName != 'validate') && Helper::startsWith($methodName, 'validate');
-    }
-
-    /**
-     * Converts a validation method name to a rule name
-     *
-     * @param string $methodName
-     *
-     * @return string
-     **/
-    protected function methodNameToRule($methodName)
-    {
-        return Helper::snake_case(substr($methodName, 8));
     }
 
 }

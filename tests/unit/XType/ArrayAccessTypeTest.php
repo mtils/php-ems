@@ -9,7 +9,7 @@ use Ems\Testing\LoggingCallable;
 require_once __DIR__.'/AbstractTypeTest.php';
 
 
-class ArrayAccessTest extends AbstractTypeTest
+class ArrayAccessTypeTest extends AbstractTypeTest
 {
     public function test_names_returns_added_names()
     {
@@ -76,7 +76,7 @@ class ArrayAccessTest extends AbstractTypeTest
     /**
      * @expectedException \OutOfBoundsException
      **/
-    public function test_get_throws_OutOfBoundsException_id_name_not_assigned()
+    public function test_get_throws_OutOfBoundsException_if_name_not_assigned()
     {
         $type = $this->newType();
         $type->get('foo');
@@ -97,7 +97,31 @@ class ArrayAccessTest extends AbstractTypeTest
 
         $type->fill($fill);
 
-        $this->assertFalse($type->canBeNull);
+        $this->assertTrue($type->notNull);
+        $this->assertSame($old, $type['old']);
+        $this->assertSame($selled, $type['selled']);
+    }
+
+    /**
+     * @expectedException Ems\Contracts\Core\Errors\Unsupported
+     **/
+    public function test_fill_with_unknown_not_xtype_values_throws_exception()
+    {
+        $type = $this->newType();
+
+        $old = new BoolType();
+        $selled = new BoolType();
+
+        $fill = [
+            'old'       => $old,
+            'selled'    => $selled,
+            'required'  => true,
+            'test' => new \stdClass
+        ];
+
+        $type->fill($fill);
+
+        $this->assertTrue($type->notNull);
         $this->assertSame($old, $type['old']);
         $this->assertSame($selled, $type['selled']);
     }

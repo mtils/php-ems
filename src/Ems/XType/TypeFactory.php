@@ -83,6 +83,7 @@ class TypeFactory implements TypeFactoryContract, Extendable
     protected function fillType(KeyValueType $type, $config)
     {
         $parsed = $this->parseConfig($config);
+
         foreach ($parsed as $key=>$value) {
             $type[$key] = $parsed[$key];
         }
@@ -106,7 +107,6 @@ class TypeFactory implements TypeFactoryContract, Extendable
                 $parsed[$key] = $value;
                 continue;
             }
-
             $parsed[$key] = $this->stringToType($value);
         }
 

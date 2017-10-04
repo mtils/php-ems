@@ -17,8 +17,10 @@ interface InputProcessor extends NamedCallableChain
      *
      * @param array             $input
      * @param AppliesToResource $resource (optional)
+     * @param string $locale (optional)
      *
      * @return array
      **/
-    public function process(array $input, AppliesToResource $resource = null);
+    public function process(array $input, AppliesToResource $resource = null, $locale=null);
+
 }

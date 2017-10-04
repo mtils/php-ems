@@ -3,6 +3,7 @@
 namespace Ems\Contracts\XType;
 
 use Ems\Contracts\Core\Copyable;
+use Ems\Contracts\Validation\Rule;
 
 /**
  * XType is an extended type definition. Describe
@@ -116,5 +117,62 @@ interface XType extends Copyable
      * @return self
      **/
     public function setName($name);
+
+    /**
+     * Return a constraint (definition). A constraint can return
+     * a list of allowed values or a way to retrieve them.
+     *
+     * @return Rule
+     **/
+    public function getConstraints();
+
+    /**
+     * Set a constraint to this xType object.
+     *
+     * @see self::getConstraints()
+     *
+     * @param Rule $constraint
+     *
+     * @return self
+     **/
+    public function setConstraints(Rule $constraint);
+
+    /**
+     * Because xtype objects are basically data objects there has to be
+     * property access for all public getters and setters and the constraints.
+     *
+     * @param string $property
+     *
+     * @return mixed
+     **/
+    public function __get($property);
+
+    /**
+     * @see self::__get()
+     *
+     * @param string $property
+     * @param mixed  $value
+     *
+     * @return void
+     **/
+    public function __set($property, $value);
+
+    /**
+     * @see self::__get()
+     *
+     * @param string $property
+     *
+     * @return bool
+     **/
+    public function __isset($property);
+
+    /**
+     * @see self::__get()
+     *
+     * @param string $property
+     *
+     * @return void
+     **/
+    public function __unset($property);
 
 }

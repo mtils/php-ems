@@ -8,7 +8,7 @@ use Ems\XType\AbstractTypeTest;
 require_once __DIR__.'/AbstractTypeTest.php';
 
 
-class ObjectTypeTest extends ArrayAccessTest
+class ObjectTypeTest extends ArrayAccessTypeTest
 {
     protected function newType()
     {

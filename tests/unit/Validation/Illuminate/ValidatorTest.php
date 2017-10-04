@@ -3,6 +3,7 @@
 
 namespace Ems\Validation\Illuminate;
 
+use Ems\Contracts\Core\Entity;
 use Ems\Contracts\Validation\Validation;
 use Ems\Contracts\Validation\Validator as ValidatorContract;
 use Illuminate\Validation\Factory as IlluminateFactory;
@@ -14,6 +15,10 @@ use Ems\Testing\LoggingCallable;
 use Ems\Core\Helper;
 use Ems\Core\NamedObject;
 use Ems\Contracts\Core\AppliesToResource;
+use Ems\XType\Eloquent\UniqueCountry;
+
+require_once realpath(__DIR__ . '/../../../integration/XType/Eloquent/test_models.php');
+
 
 class ValidatorTest extends \Ems\TestCase
 {
@@ -25,97 +30,17 @@ class ValidatorTest extends \Ems\TestCase
         );
     }
 
-    public function test_rules_returns_parsedRules()
+    /**
+     * @expectedException Ems\Core\Exceptions\UnConfiguredException
+     **/
+    public function test_buildValidator_throws_exception_if_no_factory_assigned()
     {
-        $validator = $this->newValidator();
+        $validator = $this->newCustomValidator();
+        $detector = $this->mock(XTypeProviderValidatorFactory::class);
 
-        $rules = [
-            'login'     => 'required|min:5|max:64',
-            'email'     => 'required|email',
-            'signature' => 'min:3|max:255',
-            'type_id'   => 'in:1,2,3|in-between:1,3'
-        ];
+        $resource = new NamedObject;
 
-        $parsed = [
-            'login' => [
-                'required' => [],
-                'min'      => [5],
-                'max'      => [64]
-            ],
-            'email' => [
-                'required' => [],
-                'email'    => []
-            ],
-            'signature' => [
-                'min'      => [3],
-                'max'      => [255]
-            ],
-            'type_id'   => [
-                'in'       => [1,2,3],
-                'in_between' => [1,3]
-            ]
-        ];
-
-        $this->assertSame($validator, $validator->setRules($rules));
-
-        $this->assertEquals($parsed, $validator->rules());
-
-
-    }
-
-    public function test_rules_fires_hooks_once_when_parsing_rules()
-    {
-
-        $validator = $this->newValidator();
-
-        $before = new LoggingCallable;
-        $after = new LoggingCallable;
-
-        $validator->onBefore('parseRules', $before);
-        $validator->onAfter('parseRules', $after);
-
-        $rules = [
-            'login'     => 'required|min:5|max:64',
-            'email'     => 'required|email',
-            'signature' => 'min:3|max:255',
-            'type_id'   => 'in:1,2,3|in-between:1,3'
-        ];
-
-        $parsed = [
-            'login' => [
-                'required' => [],
-                'min'      => [5],
-                'max'      => [64]
-            ],
-            'email' => [
-                'required' => [],
-                'email'    => []
-            ],
-            'signature' => [
-                'min'      => [3],
-                'max'      => [255]
-            ],
-            'type_id'   => [
-                'in'       => [1,2,3],
-                'in_between' => [1,3]
-            ]
-        ];
-
-        $validator->setRules($rules);
-
-        $this->assertEquals($parsed, $validator->rules());
-
-        // before receives the unparsed rules
-        $this->assertEquals($rules, $before->arg(0));
-
-        // after receives the parsed rules
-        $this->assertEquals($parsed, $after->arg(0));
-
-        // Trigger it once again to test the ONCE
-        $this->assertEquals($parsed, $validator->rules());
-
-        $this->assertCount(1, $before);
-        $this->assertCount(1, $after);
+        $this->assertTrue($validator->validate([], $resource));
 
     }
 
@@ -266,7 +191,7 @@ class ValidatorTest extends \Ems\TestCase
 
         try {
 
-            $validator = new CustomValidator($this->newFactory());
+            $validator = $this->newCustomValidator();
             $validator->setRules($rules);
             $validator->validate($input, $resource);
 
@@ -319,7 +244,7 @@ class ValidatorTest extends \Ems\TestCase
                 'exactly' => ['/home/michael/.profile']
             ],
             'address.street' => [
-                'min' => [2],
+                'min' => [2],            
                 'max' => [5]
             ]
         ];
@@ -347,7 +272,7 @@ class ValidatorTest extends \Ems\TestCase
 
         try {
 
-            $validator = new CustomValidator($this->newFactory());
+            $validator = $this->newCustomValidator();
             $validator->setRules($rules);
             $validator->validate($input, $resource);
             $this->fail('validate() does not throw an exception even if data is invalid');
@@ -359,9 +284,251 @@ class ValidatorTest extends \Ems\TestCase
 
     }
 
+    public function test_prepareRulesForValidation_unique_constraint_in_new_resource()
+    {
+
+        $rules = [
+            'name'      => 'min:2|max:255',
+            'iso_code'  => 'min:2|max:2|unique'
+        ];
+
+        $input = [
+            'name'      => 'France',
+            'iso_code'  => 'fr'
+        ];
+
+        $country = new UniqueCountry;
+
+        $breaker = new LoggingCallable(function () {
+            throw new TestFinishedException;
+        });
+
+        $awaitedRules = [
+            'name' => [
+                'min' => [2],
+                'max' => [255]
+            ],
+            'iso_code' => [
+                'min' => [2],
+                'max' => [2],
+                'unique' => ['countries', 'iso_code']
+            ]
+        ];
+
+        try {
+
+            $validator = $this->newValidator();
+            $validator->setRules($rules);
+
+            $validator->onBefore('validate', $breaker);
+
+            $validator->validate($input, $country);
+
+            $this->fail('The injected exception throw was not performed');
+
+        } catch (TestFinishedException $e) {
+            $this->assertEquals($awaitedRules, $breaker->arg(1));
+        }
+    }
+
+    public function test_prepareRulesForValidation_unique_constraint_in_existing_resource()
+    {
+
+        $rules = [
+            'name'      => 'min:2|max:255',
+            'iso_code'  => 'min:2|max:2|unique'
+        ];
+
+        $input = [
+            'name'      => 'France',
+            'iso_code'  => 'fr'
+        ];
+
+        $country = new UniqueCountry;
+        $country->id = 45;
+        $country->exists = true;
+
+        $breaker = new LoggingCallable(function () {
+            throw new TestFinishedException;
+        });
+
+        $awaitedRules = [
+            'name' => [
+                'min' => [2],
+                'max' => [255]
+            ],
+            'iso_code' => [
+                'min' => [2],
+                'max' => [2],
+                'unique' => ['countries', 'iso_code', 45, 'id']
+            ]
+        ];
+
+        try {
+
+            $validator = $this->newValidator();
+            $validator->setRules($rules);
+
+            $validator->onBefore('validate', $breaker);
+
+            $validator->validate($input, $country);
+
+            $this->fail('The injected exception throw was not performed');
+
+        } catch (TestFinishedException $e) {
+            $this->assertEquals($awaitedRules, $breaker->arg(1));
+        }
+    }
+
+    public function test_prepareRulesForValidation_unique_constraint_in_non_entity()
+    {
+
+        $rules = [
+            'name'      => 'min:2|max:255',
+            'iso_code'  => 'min:2|max:2|unique'
+        ];
+
+        $input = [
+            'name'      => 'France',
+            'iso_code'  => 'fr'
+        ];
+
+        $country = new NamedObject;
+
+        $breaker = new LoggingCallable(function () {
+            throw new TestFinishedException;
+        });
+
+        $awaitedRules = [
+            'name' => [
+                'min' => [2],
+                'max' => [255]
+            ],
+            'iso_code' => [
+                'min' => [2],
+                'max' => [2],
+                'unique' => []
+            ]
+        ];
+
+        try {
+
+            $validator = $this->newValidator();
+            $validator->setRules($rules);
+
+            $validator->onBefore('validate', $breaker);
+
+            $validator->validate($input, $country);
+
+            $this->fail('The injected exception throw was not performed');
+
+        } catch (TestFinishedException $e) {
+            $this->assertEquals($awaitedRules, $breaker->arg(1));
+        }
+    }
+
+    public function test_prepareRulesForValidation_unique_constraint_in_non_eloquent_entity()
+    {
+
+        $rules = [
+            'name'      => 'min:2|max:255',
+            'iso_code'  => 'min:2|max:2|unique'
+        ];
+
+        $input = [
+            'name'      => 'France',
+            'iso_code'  => 'fr'
+        ];
+
+        $country = new NamedEntity;
+
+        $breaker = new LoggingCallable(function () {
+            throw new TestFinishedException;
+        });
+
+        $awaitedRules = [
+            'name' => [
+                'min' => [2],
+                'max' => [255]
+            ],
+            'iso_code' => [
+                'min' => [2],
+                'max' => [2],
+                'unique' => []
+            ]
+        ];
+
+        try {
+
+            $validator = $this->newValidator();
+            $validator->setRules($rules);
+
+            $validator->onBefore('validate', $breaker);
+
+            $validator->validate($input, $country);
+
+            $this->fail('The injected exception throw was not performed');
+
+        } catch (TestFinishedException $e) {
+            $this->assertEquals($awaitedRules, $breaker->arg(1));
+        }
+    }
+
+    public function test_prepareRulesForValidation_unique_constraint_nested_keys()
+    {
+
+        $rules = [
+            'name'      => 'min:2|max:255',
+            'address.iso_code'  => 'min:2|max:2|unique'
+        ];
+
+        $input = [
+            'name'      => 'France',
+            'iso_code'  => 'fr'
+        ];
+
+        $country = new UniqueCountry;
+
+        $breaker = new LoggingCallable(function () {
+            throw new TestFinishedException;
+        });
+
+        $awaitedRules = [
+            'name' => [
+                'min' => [2],
+                'max' => [255]
+            ],
+            'address.iso_code' => [
+                'min' => [2],
+                'max' => [2],
+                'unique' => []
+            ]
+        ];
+
+        try {
+
+            $validator = $this->newValidator();
+            $validator->setRules($rules);
+
+            $validator->onBefore('validate', $breaker);
+
+            $validator->validate($input, $country);
+
+            $this->fail('The injected exception throw was not performed');
+
+        } catch (TestFinishedException $e) {
+            $this->assertEquals($awaitedRules, $breaker->arg(1));
+        }
+    }
+
     protected function newValidator(IlluminateFactory $factory=null)
     {
-        return new Validator($factory ?: $this->newFactory());
+        return (new GenericValidator())->injectIlluminateFactory($factory ?: $this->newFactory());
+    }
+
+    protected function newCustomValidator(IlluminateFactory $factory=null)
+    {
+        return (new CustomValidator())->injectIlluminateFactory($factory ?: $this->newFactory());
     }
 
     protected function newFactory(TranslatorContract $lang=null)
@@ -380,7 +547,7 @@ class ValidatorTest extends \Ems\TestCase
     }
 }
 
-class CustomValidator extends Validator
+class CustomValidator extends GenericValidator
 {
 
     /**
@@ -470,4 +637,27 @@ class CustomValidator extends Validator
         return $value == $target;
     }
 
+}
+
+class TestFinishedException extends \Exception{};
+
+class NamedEntity extends NamedObject implements Entity
+{
+    /**
+     * @return bool
+     **/
+    public function isNew()
+    {
+        return true;
+    }
+
+    /**
+     *  @param string|array $attributes (optional)
+     *
+     * @return bool
+     **/
+    public function wasModified($attributes=null)
+    {
+        return true;
+    }
 }

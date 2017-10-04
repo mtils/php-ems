@@ -38,7 +38,8 @@ class Aliases
             'postcode' => 'min:2|max:16',
             'location' => 'min:1|max:85',
             'street' => 'min:1|max:72',
-            'house_number' => 'min:1|max:6',
+            'house_number' => 'min:1|max:15', // for the range postcodes: 6 + ' - ' + 6
+            'phone_number' => 'min:3|max:32', // for format; 20 + some _,+,/...
             'epsg_code' => 'min:4|max:5',
             'credit_card_number' => 'min:13|max:22',
             'hash' => 'min:16|max:255',
@@ -52,7 +53,7 @@ class Aliases
             'double' => 'native_type:float|precision:8|decimal_places:1',
             'real' => 'native_type:float|precision:8|decimal_places:1',
             'database_id' => 'native_type:int|precision:0|decimal_places:0|readonly',
-            'foreign_key' => 'native_type:int|precision:0|decimal_places:0|readonly',
+            'foreign_key' => 'native_type:int|precision:0|decimal_places:0',
         ],
         'unit' => [
             'temperature' => 'native_type:float|precision:4|decimal_places:1|unit:°',
@@ -84,6 +85,7 @@ class Aliases
             'past_date' => 'precision:d|point_in_time:past',
             'today' => 'precision:d|point_in_time:now',
             'time' => 'precision:s|!absolute',
+            'timestamp' => 'precision:s|readonly'
         ],
     ];
 

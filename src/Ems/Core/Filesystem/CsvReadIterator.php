@@ -4,8 +4,13 @@ namespace Ems\Core\Filesystem;
 
 use Ems\Contracts\Core\Filesystem;
 use Ems\Contracts\Core\ContentIterator;
+use Ems\Contracts\Core\Configurable;
+use Ems\Contracts\Core\StringConverter;
+use Ems\Core\StringConverter\MBStringConverter;
+use Ems\Core\ConfigurableTrait;
 use Ems\Core\LocalFilesystem;
 use Ems\Core\Helper;
+
 
 /**
  * The CsvReadIterator is an iterator which allows to read
@@ -25,6 +30,12 @@ use Ems\Core\Helper;
 class CsvReadIterator implements ContentIterator
 {
     use ReadIteratorTrait;
+    use ConfigurableTrait;
+
+    /**
+     * @var string
+     **/
+    const ENCODING = 'encoding';
 
     /**
      * @var string
@@ -89,6 +100,23 @@ class CsvReadIterator implements ContentIterator
     protected $countInstance;
 
     /**
+     * @var array
+     **/
+    protected $defaultOptions = [
+        self::ENCODING => 'utf-8'
+    ];
+
+    /**
+     * @var StringConverter
+     **/
+    protected $stringConverter;
+
+    /**
+     * @var bool
+     **/
+    protected $shouldConvert = false;
+
+    /**
      * @param string     $filePath   (optional)
      * @param Filesystem $filesystem (optional)
      **/
@@ -100,6 +128,7 @@ class CsvReadIterator implements ContentIterator
         $this->setFilesystem($filesystem ?: new LocalFilesystem());
         $this->setDetector($detector ?: new CsvDetector());
         $this->setLineReader($lineReader ?: new LineReadIterator());
+        $this->stringConverter = new MBStringConverter;
     }
 
     /**
@@ -198,6 +227,11 @@ class CsvReadIterator implements ContentIterator
             $this->lineReader->setFilePath($this->filePath);
         }
         return $this;
+    }
+
+    public function getStringConverter()
+    {
+        return $this->stringConverter;
     }
 
     /**
@@ -300,13 +334,13 @@ class CsvReadIterator implements ContentIterator
         }
 
         if (!$this->hasHeader) {
-            return $row;
+            return $this->convertEncoding($row);
         }
 
         $namedRow = [];
 
         foreach ($this->header as $i=>$column) {
-            $namedRow[$column] = $row[$i];
+            $namedRow[$column] = $this->convertEncoding($row[$i]);
         }
 
         return $namedRow;
@@ -360,6 +394,8 @@ class CsvReadIterator implements ContentIterator
     protected function onRewind()
     {
         $this->headerRowSkipped = false;
+        $this->shouldConvert = strtolower($this->getOption(self::ENCODING)) != 'utf-8';
+
         // Trigger detection once
         $this->getHeader();
     }
@@ -391,9 +427,10 @@ class CsvReadIterator implements ContentIterator
 
         $this->lineReader->releaseHandle();
 
-        $this->firstLines = implode("\n", $lines);
+        $this->firstLines = $this->convertEncoding(implode("\n", $lines));
 
         return $this->firstLines;
+
     }
 
     /**
@@ -425,5 +462,32 @@ class CsvReadIterator implements ContentIterator
         return $instance->setDelimiter($this->getDelimiter())
                         ->setSeparator($this->getSeparator())
                         ->setHeader($this->getHeader());
+    }
+
+    /**
+     * Converts encoding if needed.
+     *
+     * @param array|string $data
+     *
+     * @return array|string
+     **/
+    protected function convertEncoding($data)
+    {
+
+        if (!$this->shouldConvert) {
+            return $data;
+        }
+
+        if (!is_array($data)) {
+            return $this->stringConverter->convert("$data", 'utf-8', $this->getOption(self::ENCODING));
+        }
+dd('Issoch array');
+        $converted = [];
+
+        foreach ($data as $key=>$value) {
+            $converted[$key] = $this->convert($data);
+        }
+
+        return $converted;
     }
 }

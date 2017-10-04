@@ -6,6 +6,33 @@ namespace Ems\Validation;
 
 trait RuleParseMethods
 {
+
+    /**
+     * Overwrite this method to do some processing on the rules before
+     * using them
+     *
+     * @param array $rules
+     *
+     * @return array
+     **/
+    protected function parseRules(array $rules)
+    {
+        $parsedRules = [];
+
+        foreach ($rules as $key=>$keyRules) {
+            $keyRuleArray = $this->explodeRules($keyRules);
+
+            $parsedRules[$key] = [];
+
+            foreach ($keyRuleArray as $keyRule) {
+                list($ruleName, $parameters) = $this->ruleAndParameters($keyRule);
+                $parsedRules[$key][$ruleName] = $parameters;
+            }
+        }
+
+        return $parsedRules;
+    }
+
     /**
      * Split the rules in an array
      *

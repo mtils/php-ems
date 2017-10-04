@@ -13,6 +13,11 @@ abstract class BootstrapperAsServiceProvider extends ServiceProvider
     protected $bootstrapper;
 
     /**
+     * @var Ems
+     **/
+    protected $ems;
+
+    /**
      * Create a new service provider instance.
      *
      * @param \Illuminate\Contracts\Foundation\Application $app
@@ -24,6 +29,7 @@ abstract class BootstrapperAsServiceProvider extends ServiceProvider
         if (!$app->bound(Ems::class)) {
             $app->instance(Ems::class, new IOCContainer($app));
         }
+        $this->ems = $app->make(Ems::class);
     }
 
     /**

@@ -237,6 +237,46 @@ class TypeProviderTest extends \Ems\TestCase
 
     }
 
+    public function test_xtype_returns_cached_entry_when_asked_for_same_class()
+    {
+
+        $user = new TypeFactoryTest_User;
+
+        $provider = $this->newProvider();
+
+        $type1 = $provider->xType($user);
+        $type2 = $provider->xType($user);
+        $type3 = $provider->xType(get_class($user));
+
+        $this->assertSame($type1, $type2);
+        $this->assertSame($type1, $type3);
+        //$this->assertNull($provider->xType($user, 'tags.foo'));
+
+    }
+
+    public function test_xtype_returns_cached_entry_when_asked_for_non_selfExplanatory_class()
+    {
+
+        $user = new TypeProviderTest_Sample;
+
+        $provider = $this->newProvider();
+
+        $provider->extend(TypeProviderTest_Sample::class, function ($object) {
+            $type = new ObjectType();
+            $type->class = TypeProviderTest_Sample::class;
+            return $type;
+        });
+
+        $type1 = $provider->xType($user);
+        $type2 = $provider->xType($user);
+        $type3 = $provider->xType(get_class($user));
+
+        $this->assertSame($type1, $type2);
+        $this->assertSame($type1, $type3);
+        //$this->assertNull($provider->xType($user, 'tags.foo'));
+
+    }
+
     protected function newProvider(ExtractorContract $extractor=null, TemplateTypeFactory $templateFactory=null, TypeFactory $typeFactory=null)
     {
         $extractor = $extractor ?: $this->newExtractor();

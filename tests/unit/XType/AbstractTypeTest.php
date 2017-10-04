@@ -3,6 +3,7 @@
 namespace Ems\XType;
 
 use Ems\Contracts\XType\XType;
+use Ems\Validation\Rule;
 
 class AbstractTypeTest extends \Ems\TestCase
 {
@@ -24,65 +25,60 @@ class AbstractTypeTest extends \Ems\TestCase
         $this->assertEquals('foo', $type->getName());
     }
 
+    public function test_name_property_returns_setted_name()
+    {
+        $type = $this->newType();
+        $type->name = 'foo';
+        $this->assertEquals('foo', $type->name);
+    }
+
+    public function test_getConstraint_and_setConstraints()
+    {
+        $constraint = new Rule;
+        $type = $this->newType();
+        $this->assertSame($type, $type->setConstraints($constraint));
+        $this->assertSame($constraint, $type->getConstraints());
+    }
+
     public function test_fill_fills_canBeNull_with_all_aliases()
     {
         $type = $this->newType();
 
+        $this->assertFalse(isset($type->notNull));
+
         $type->fill(['canBeNull'=> false]);
 
-        $this->assertFalse($type->canBeNull);
+        $this->assertTrue($type->notNull);
+        $this->assertTrue($type->constraints->notNull);
 
         $type->fill(['canBeNull'=> true]);
 
-        $this->assertTrue($type->canBeNull);
+        $this->assertFalse(isset($type->notNull));
+
 
         $type->fill(['required'=> true]);
 
-        $this->assertFalse($type->canBeNull);
+        $this->assertTrue($type->notNull);
+        $this->assertTrue($type->not_null);
 
         $type->fill(['required'=> false]);
 
-        $this->assertTrue($type->canBeNull);
+        $this->assertFalse(isset($type->notNull));
 
         $type->fill(['null'=> false]);
 
-        $this->assertFalse($type->canBeNull);
+        $this->assertTrue($type->notNull);
+        $this->assertTrue($type->not_null);
+
 
         $type->fill(['null'=> true]);
 
-        $this->assertTrue($type->canBeNull);
+        $this->assertFalse(isset($type->notNull));
 
         $type->fill(['optional'=> false]);
 
-        $this->assertFalse($type->canBeNull);
-    }
-
-    public function test_fill_fills_mustBeTouched_with_all_aliases()
-    {
-        $type = $this->newType();
-
-        $type->fill(['mustBeTouched'=> true]);
-
-        $this->assertTrue($type->mustBeTouched);
-
-        $type->fill(['mustBeTouched'=> false]);
-
-        $this->assertFalse($type->mustBeTouched);
-
-        $type->fill(['touched'=> true]);
-
-        $this->assertTrue($type->mustBeTouched);
-
-        $type->fill(['touched'=> false]);
-
-        $this->assertFalse($type->mustBeTouched);
-
-        foreach (['ignore', 'ignored'] as $name) {
-            $type->fill([$name=> false]);
-            $this->assertTrue($type->mustBeTouched);
-            $type->fill([$name=> true]);
-            $this->assertFalse($type->mustBeTouched);
-        }
+        $this->assertTrue($type->notNull);
+        $this->assertTrue($type->not_null);
     }
 
     public function test_fill_fills_readonly_with_all_aliases()
@@ -103,16 +99,6 @@ class AbstractTypeTest extends \Ems\TestCase
             $type->fill([$name=> true]);
             $this->assertTrue($type->readonly);
         }
-    }
-
-    /**
-     * @expectedException Ems\Core\Exceptions\UnsupportedParameterException
-     **/
-    public function test_fill_throws_exception_if_parameter_not_supported()
-    {
-        $type = $this->newType();
-
-        $type->fill(['foo_crap_bar'=> true]);
     }
 
     public function test_isComplex_returns_expected()
@@ -138,12 +124,88 @@ class AbstractTypeTest extends \Ems\TestCase
         $type = $this->newType();
         $type->canBeNull = false;
         $type->defaultValue = 'X';
-        $type->mustBeTouched = true;
         $type->readonly = true;
 
         $copy = $type->replicate();
         $this->assertNotSame($type, $copy);
         $this->assertEquals($type->toArray(), $copy->toArray());
+        $this->assertNotSame($type->getConstraints(), $copy->getConstraints());
+        $this->assertEquals((string)$type->getConstraints(), (string)$copy->getConstraints());
+    }
+
+    public function test_toArray_without_constraints()
+    {
+        if (self::class != static::class) {
+            return;
+        }
+
+        $type = $this->newType();
+        $type->defaultValue = 'X';
+        $type->readonly = true;
+
+        $awaited = [
+            'name' => 'abstract-type-test',
+            'defaultValue' => 'X',
+            'readonly' => true
+        ];
+        $this->assertEquals($awaited, $type->toArray());
+    }
+
+    /**
+     * @expectedException Ems\Contracts\Core\Errors\NotFound
+     **/
+    public function test_get_throws_exception_if_key_not_found()
+    {
+        $this->newType()->foo;
+    }
+
+    public function test_isset_returns_right_value_on_existing_properties()
+    {
+        $type = $this->newType();
+        $this->assertFalse(isset($type->foo));
+        $this->assertTrue(isset($type->readonly));
+    }
+
+    public function test_isset_returns_right_value_on_existing_getters()
+    {
+        $type = $this->newType();
+        $this->assertFalse(isset($type->meNotAsAGetter));
+        $this->assertTrue(isset($type->name));
+        $this->assertTrue(isset($type->constraints));
+    }
+
+    public function test_isset_returns_right_value_on_setted_constraints()
+    {
+        $type = $this->newType();
+        $this->assertFalse(isset($type->min));
+        $type->constraints->min = 3;
+        $this->assertTrue(isset($type->min));
+        $this->assertTrue(isset($type->constraints->min));
+    }
+
+    /**
+     * @expectedException BadMethodCallException
+     **/
+    public function test_unset_throws_exception_if_trying_to_delete_a_getter_managed_property()
+    {
+        $type = $this->newType();
+        unset($type->name);
+    }
+
+    /**
+     * @_expectedException BadMethodCallException
+     **/
+    public function test_unset_removes_constraint()
+    {
+        $type = $this->newType();
+        $this->assertFalse(isset($type->min));
+        $type->min = 15;
+        $this->assertTrue(isset($type->min));
+        $this->assertTrue(isset($type->constraints->min));
+        unset($type->min);
+        $this->assertFalse(isset($type->constraints->min));
+        $this->assertFalse(isset($type->min));
+
     }
 
     protected function newType()
@@ -157,5 +219,15 @@ class AbstractTypeTestType extends AbstractType
     public function group()
     {
         return self::NONE;
+    }
+
+    public static function getMeNotAsAGetter()
+    {
+        
+    }
+    
+    public static function setMeNotAsASetter($value)
+    {
+        
     }
 }

@@ -100,4 +100,56 @@ trait ExtendableTrait
     {
         return Helper::call($this->getExtension($name), $params);
     }
+
+    /**
+     * This method is for collecting extensions WHICH NAMES are patterns.
+     *
+     * @param string $name
+     *
+     * @return array
+     **/
+    protected function collectExtensions($name)
+    {
+
+        $extensions = [];
+
+        foreach ($this->extensions() as $pattern) {
+            if ($this->patternMatches($pattern, $name)) {
+                $extensions[] = $this->getExtension($pattern);
+            }
+        }
+
+        return $extensions;
+
+    }
+
+    /**
+     * Select extensions WHICH NAMES are pattern. If none found throw an exception.
+     *
+     * @see self:collectExtensionsOrFail()
+     *
+     * @param string $name
+     *
+     * @return array
+     **/
+    protected function collectExtensionsOrFail($name)
+    {
+        if (!$extensions = $this->collectExtensions($name)) {
+            throw new HandlerNotFoundException("No extensions found matching the name '$name'.");
+        }
+        return $extensions;
+    }
+
+    /**
+     * Match a string on a pattern
+     *
+     * @param string
+     * @param pattern
+     *
+     * @return bool
+     **/
+    protected function patternMatches($pattern, $string)
+    {
+        return fnmatch($pattern, $string, FNM_NOESCAPE);
+    }
 }
