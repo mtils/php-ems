@@ -12,6 +12,9 @@ use Ems\Contracts\Validation\AlterableValidator as AlterableValidatorContract;
 use Ems\Contracts\Validation\ResourceRuleDetector;
 use Ems\Testing\LoggingCallable;
 
+/**
+ * @group validation
+ **/
 class GenericValidatorTest extends \Ems\TestCase
 {
     public function test_implements_interface()
@@ -91,6 +94,18 @@ class GenericValidatorTest extends \Ems\TestCase
         $validator = $this->newValidator(['password' => 'min:3']);
 
         $validator->validate([]);
+
+    }
+
+    /**
+     * @expectedException Ems\Core\Exceptions\UnConfiguredException
+     **/
+    public function test_buildValidator_throws_exception_if_no_resource_assigned_and_resourceName_is_called()
+    {
+        $validator = $this->newValidator();
+        $detector = $this->mock(XTypeProviderValidatorFactory::class);
+
+        $validator->resourceName();
 
     }
 
@@ -491,6 +506,36 @@ class GenericValidatorTest extends \Ems\TestCase
             $this->assertEquals($awaitedRules, $breaker->arg(1));
         }
     }
+
+    public function test_validateForbidden()
+    {
+
+        $handler = new LoggingCallable(function (Validation $validation, array $input, array $rules, AppliesToResource $resource, $locale) {
+            return true;
+        });
+
+        $rules = ['created_at' => 'forbidden'];
+        $input = ['password' => 'blabla'];
+        $resource = new NamedObject(15, 'king', 'category');
+        $locale = 'cz';
+
+        $validator = $this->newValidator($rules, $handler);
+
+        $this->assertTrue($validator->validate($input, $resource, $locale));
+
+        try {
+            $validator->validate(['created_at'=>new \DateTime], $resource, $locale);
+            $this->fail('Validation should fail with forbidden attributes');
+        } catch (Validation $e) {
+
+            $this->assertEquals([
+                'created_at' => ['forbidden'=>[]]
+            ],
+            $e->failures());
+
+        }
+    }
+
 
     protected function newValidator($rules=[], callable $validator=null)
     {

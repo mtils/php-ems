@@ -144,6 +144,7 @@ abstract class Validator implements ValidatorContract, HasInjectMethods
         if ($resource = $this->resource()) {
             return $resource->resourceName();
         }
+        throw new UnConfiguredException("No Resource provided to get the resource name");
     }
 
     /**
