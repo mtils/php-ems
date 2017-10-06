@@ -15,6 +15,8 @@ require_once realpath(__DIR__ . '/../../XType/Eloquent/test_models.php');
 /**
  * This test mainly assures that the service providers and bootstappers do
  * work in a laravel application.
+ *
+ * @group validation
  **/
 class ValidatorFactoryIntegrationTest extends \Ems\LaravelIntegrationTest
 {

@@ -14,6 +14,9 @@ use Ems\Skeleton\Application;
 use Ems\Core\Helper;
 use Ems\Validation\ValidationException;
 
+/**
+ * @group validation
+ **/
 class ValidationConverterIntegrationTest extends \Ems\LaravelIntegrationTest
 {
 

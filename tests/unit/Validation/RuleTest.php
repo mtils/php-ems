@@ -6,6 +6,9 @@ namespace Ems\Validation;
 use Ems\Contracts\Validation\Rule as RuleContract;
 use Ems\Contracts\Validation\Validator as ValidatorContract;
 
+/**
+ * @group validation
+ **/
 class RuleTest extends \Ems\TestCase
 {
     public function test_implements_interface()

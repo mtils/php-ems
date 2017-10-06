@@ -19,7 +19,9 @@ use Ems\XType\Eloquent\UniqueCountry;
 
 require_once realpath(__DIR__ . '/../../../integration/XType/Eloquent/test_models.php');
 
-
+/**
+ * @group validation
+ **/
 class ValidatorTest extends \Ems\TestCase
 {
     public function test_implements_interface()

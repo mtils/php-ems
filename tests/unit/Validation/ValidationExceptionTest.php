@@ -6,6 +6,9 @@ namespace Ems\Validation;
 use Ems\Contracts\Validation\Validation;
 use Ems\Contracts\Validation\Validator as ValidatorContract;
 
+/**
+ * @group validation
+ **/
 class ValidationExceptionTest extends \Ems\TestCase
 {
     public function test_implements_interface()

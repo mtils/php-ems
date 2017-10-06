@@ -7,6 +7,9 @@ use Ems\Contracts\Core\Extendable;
 use Ems\Contracts\Validation\ValidationConverter as ConverterContract;
 use Ems\Validation\ValidationException;
 
+/**
+ * @group validation
+ **/
 class ValidationConverterTest extends \Ems\TestCase
 {
     public function test_implements_interface()

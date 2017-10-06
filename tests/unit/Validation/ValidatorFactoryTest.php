@@ -13,6 +13,9 @@ use Ems\Validation\ValidationException;
 
 use Ems\Core\NamedObject;
 
+/**
+ * @group validation
+ **/
 class ValidatorFactoryTest extends \Ems\TestCase
 {
     public function test_implements_interface()

@@ -18,6 +18,9 @@ use Ems\Core\NamedObject;
 use Ems\Core\Laravel\TranslatorTextProvider;
 use Ems\Contracts\Core\AppliesToResource;
 
+/**
+ * @group validation
+ **/
 class ValidationConverterTest extends \Ems\TestCase
 {
     public function test_implements_interface()
