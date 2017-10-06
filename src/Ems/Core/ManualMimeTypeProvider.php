@@ -123,6 +123,36 @@ class ManualMimeTypeProvider implements MimeTypeProvider
     }
 
     /**
+     * Return an array of allowed extensions for $mimeType
+     *
+     * @param string $mimeType
+     *
+     * @return array
+     **/
+    public function fileExtensions($mimeType)
+    {
+
+        $mimeType = mb_strtolower($mimeType);
+
+        $this->loadBaseSetIfNotLoaded();
+
+        if (isset($this->extensionsByType[$mimeType])) {
+            return $this->extensionsByType[$mimeType];
+        }
+
+        if ($this->extendedSetLoaded) {
+            throw new ResourceNotFoundException("Mimetype '$mimeType' not found");
+        }
+
+        $this->loadExtendedSet();
+
+        $this->extendedSetLoaded = true;
+
+        return $this->fileExtensions($mimeType);
+
+    }
+
+    /**
      * Fill the types by the passed ([$type] => ['ext1','ext2'].
      *
      * @param array
