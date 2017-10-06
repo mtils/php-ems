@@ -92,6 +92,40 @@ class ManualMimeTypeProviderTest extends \Ems\TestCase
         $this->assertTrue($provider->isOfType('users.json-api', 'application/json'));
     }
 
+    public function test_fileExtensions_returns_mimeTypes_extensions()
+    {
+
+        $provider = $this->newProvider();
+//         $provider->fillByArray(['image/jpeg' => ['json-api']]);
+        $this->assertEquals(['jpeg', 'jpg', 'jpe'], $provider->fileExtensions('image/jpeg'));
+
+    }
+
+    public function test_fileExtensions_returns_mimeTypes_extensions_of_extended_set()
+    {
+
+        $provider = $this->newProvider();
+        $provider->provideExtendedSet(function ($provider) {
+            $provider->fillByArray([
+                'application/script' => ['py', 'c', 'cpp']
+            ]);
+        });
+//         $provider->fillByArray(['image/jpeg' => ['json-api']]);
+        $this->assertEquals(['py', 'c', 'cpp'], $provider->fileExtensions('application/script'));
+
+    }
+
+    /**
+     * @expectedException Ems\Contracts\Core\Errors\NotFound
+     **/
+    public function test_fileExtensions_throws_exception_if_mimetype_unknown()
+    {
+
+        $provider = $this->newProvider();
+        $provider->fileExtensions('application/bitmap');
+
+    }
+
     protected function assertIsOfType($fileName, $type)
     {
         $provider = $this->newProvider();

@@ -42,4 +42,13 @@ interface MimeTypeProvider
      * @return bool
      **/
     public function isOfType($fileName, $type, $verbose = false);
+
+    /**
+     * Return an array of allowed extensions for $mimeType
+     *
+     * @param string $mimeType
+     *
+     * @return array
+     **/
+    public function fileExtensions($mimeType);
 }
