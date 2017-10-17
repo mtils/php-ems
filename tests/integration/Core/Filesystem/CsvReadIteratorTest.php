@@ -4,6 +4,7 @@ namespace Ems\Core\Filesystem;
 
 use Ems\Contracts\Core\Filesystem as FSContract;
 use Ems\Contracts\Core\ContentIterator;
+use Ems\Contracts\Core\StringConverter;
 use Ems\Core\LocalFilesystem;
 use Ems\Testing\FilesystemMethods;
 
@@ -68,6 +69,12 @@ class CsvReadIteratorTest extends \Ems\IntegrationTest
     {
         $reader = $this->newReader();
         $this->assertEquals([], $reader->getHeader());
+    }
+
+    public function test_getStringConverter_returns_converter()
+    {
+        $reader = $this->newReader();
+        $this->assertInstanceOf(StringConverter::class, $reader->getStringConverter());
     }
 
     public function test_read_simple_csv_file()
@@ -310,6 +317,98 @@ class CsvReadIteratorTest extends \Ems\IntegrationTest
             ]
         ];
         $this->assertEquals($awaited, $result);
+
+    }
+
+    public function test_read_with_different_encoding()
+    {
+        $reader = $this->newReader($this->dataFile('simple-semicolon-placeholder-iso.csv'));
+
+        $reader->setOption('encoding', 'iso-8859-1');
+
+        $this->assertEquals(
+            ['id', 'Völlig bekloppte Spalte (nur so)', 'last_name', 'age', 'street'],
+            $reader->getHeader()
+        );
+
+        $awaited = [
+            [
+                'id'                               => '42',
+                'Völlig bekloppte Spalte (nur so)' => 'Talent',
+                'last_name'                        => 'Ängelbärt',
+                'age'                              => '35',
+                'street'                           => 'Elm Street'
+            ],
+            [
+                'id'                               => '52',
+                'Völlig bekloppte Spalte (nur so)' => 'Duck',
+                'last_name'                        => 'Tönjes',
+                'age'                              => '8',
+                'street'                           => 'Duckcity'
+            ]
+        ];
+
+        $result = [];
+
+        foreach ($reader as $row) {
+            $result[] = $row;
+        }
+
+        $this->assertEquals($awaited, $result);
+
+    }
+
+    /**
+     * @expectedException Ems\Core\Exceptions\InvalidCharsetException
+     **/
+    public function test_read_with_wrong_encoding_throws_InvalidCharsetException()
+    {
+
+        $reader = $this->newReader($this->dataFile('simple-semicolon-placeholder-iso.csv'));
+        $reader->setDetector((new CsvDetector)->setOption(CsvDetector::FORCE_HEADER_LINE, true));
+
+        $this->assertEquals(
+            ['id', 'Völlig bekloppte Spalte (nur so)', 'last_name', 'age', 'street'],
+            $reader->getHeader()
+        );
+
+        $awaited = [
+            [
+                'id'                               => '42',
+                'Völlig bekloppte Spalte (nur so)' => 'Talent',
+                'last_name'                        => 'Ängelbärt',
+                'age'                              => '35',
+                'street'                           => 'Elm Street'
+            ],
+            [
+                'id'                               => '52',
+                'Völlig bekloppte Spalte (nur so)' => 'Duck',
+                'last_name'                        => 'Tönjes',
+                'age'                              => '8',
+                'street'                           => 'Duckcity'
+            ]
+        ];
+
+        $result = [];
+
+        foreach ($reader as $row) {
+            $result[] = $row;
+        }
+
+        $this->assertEquals($awaited, $result);
+
+    }
+
+    /**
+     * @expectedException Ems\Core\Exceptions\DetectionFailedException
+     **/
+    public function test_read_undetectable_header_throws_DetectionFailedException()
+    {
+
+        $reader = $this->newReader($this->dataFile('simple-pipe-placeholder-no-header.csv'));
+        $reader->setDetector((new CsvDetector)->setOption(CsvDetector::FORCE_HEADER_LINE, true));
+
+        $reader->getHeader();
 
     }
 

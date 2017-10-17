@@ -5,7 +5,7 @@ namespace Ems\Core\Filesystem;
 use Ems\Contracts\Core\Configurable;
 use Ems\Core\Exceptions\DetectionFailedException;
 use Ems\Core\ConfigurableTrait;
-
+use Ems\Core\StringConverter\CharsetGuard;
 
 /**
  * The CSV Detector tries to guess the csv format. Even if the most people
@@ -35,6 +35,19 @@ class CsvDetector implements Configurable
     protected $separators = [
         ',', ';', "\t", '|', '^'
     ];
+
+    /**
+     * @var CharsetGuard
+     **/
+    protected $charsetGuard;
+
+    /**
+     * @param CharsetGuard $charsetGuard (optional)
+     **/
+    public function __construct(CharsetGuard $charsetGuard = null)
+    {
+        $this->charsetGuard = $charsetGuard ?: new CharsetGuard;
+    }
 
     /**
      * Detect the separator char. CSV Files with one line are invalid by
@@ -93,6 +106,11 @@ class CsvDetector implements Configurable
     {
 
         $lines = $this->toCheckableLines($firstLines);
+        if (strpos($firstLines, 'id;')) {
+            echo "\nLINES:";
+            var_dump($lines);
+            echo "\n$firstLines";
+        }
         $row = str_getcsv($lines[0], $separator, $delimiter);
 
         $header = $this->guessHeader($row);
@@ -202,7 +220,7 @@ class CsvDetector implements Configurable
     protected function toCheckableLines($firstLines)
     {
 
-        $lines = explode("\n", $firstLines);
+        $lines = explode("\n", $this->charsetGuard->withoutBOM($firstLines));
 
         if (count($lines) < 2) {
             throw new DetectionFailedException('No lines found to detect separator');

@@ -197,6 +197,20 @@ class CsvDetectorTest extends \Ems\IntegrationTest
         $header = $detector->header($csv, ',');
     }
 
+    public function test_header_returns_header_of_file_with_bom()
+    {
+        $detector = $this->newDetector();
+        $csv = $this->csvContent('simple-pipe-placeholder-utf8-bom.csv');
+        $header = ['id', 'name', 'last_name', 'age', 'street'];
+
+        $detected = $detector->header($csv, ',');
+        // Be very verbose here...
+        foreach ($header as $i=>$key) {
+            $this->assertTrue($key === $detected[$i], 'Header returns string with bom and shouldnt');
+            $this->assertTrue(strlen($key) == strlen($detected[$i]));
+        }
+    }
+
     protected function csvContent($file, $separator=',')
     {
         $csvContent = isset($this->csvContents[$file]) ?

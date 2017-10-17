@@ -6,7 +6,9 @@ use Ems\Contracts\Core\Filesystem;
 use Ems\Contracts\Core\ContentIterator;
 use Ems\Contracts\Core\Configurable;
 use Ems\Contracts\Core\StringConverter;
+use Ems\Core\Exceptions\DetectionFailedException;
 use Ems\Core\StringConverter\MBStringConverter;
+use Ems\Core\StringConverter\CharsetGuard;
 use Ems\Core\ConfigurableTrait;
 use Ems\Core\LocalFilesystem;
 use Ems\Core\Helper;
@@ -95,6 +97,11 @@ class CsvReadIterator implements ContentIterator
     protected $firstLines;
 
     /**
+     * @var string
+     **/
+    protected $firstLinesRaw;
+
+    /**
      * @var self
      **/
     protected $countInstance;
@@ -117,8 +124,20 @@ class CsvReadIterator implements ContentIterator
     protected $shouldConvert = false;
 
     /**
-     * @param string     $filePath   (optional)
-     * @param Filesystem $filesystem (optional)
+     * @var string
+     **/
+    protected $convertFrom = '';
+
+    /**
+     * @var CharsetGuard
+     **/
+    protected $charsetGuard;
+
+    /**
+     * @param string           $filePath   (optional)
+     * @param Filesystem       $filesystem (optional)
+     * @param CsvDetector      $detector   (optional)
+     * @param LineReadIterator $lineReader (optional)
      **/
     public function __construct($filePath = '', Filesystem $filesystem = null, CsvDetector $detector = null, LineReadIterator $lineReader = null)
     {
@@ -229,9 +248,36 @@ class CsvReadIterator implements ContentIterator
         return $this;
     }
 
+    /**
+     * @return StringConverter
+     **/
     public function getStringConverter()
     {
         return $this->stringConverter;
+    }
+
+    /**
+     * @return CharsetGuard
+     **/
+    public function getCharsetGuard()
+    {
+        if (!$this->charsetGuard) {
+            $this->setCharsetGuard(new CharsetGuard);
+        }
+        return $this->charsetGuard;
+    }
+
+    /**
+     * Set the charset guard to better handle encoding errors.
+     *
+     * @param CharsetGuard $guard
+     *
+     * @return self
+     **/
+    public function setCharsetGuard(CharsetGuard $guard)
+    {
+        $this->charsetGuard = $guard;
+        return $this;
     }
 
     /**
@@ -245,19 +291,42 @@ class CsvReadIterator implements ContentIterator
             return $this->header;
         }
 
+        $this->updateConversion();
+
         if (!$this->getFilePath()) {
             return $this->header;
         }
 
-        $header = $this->detector->header(
-            $this->firstLines(),
-            $this->getSeparator(),
-            $this->getDelimiter()
-        );
+        $detectorException = null;
 
-        $this->headerWasDetected = !$this->isNumericHeader($header);
+        try {
+            $header = $this->detector->header(
+                $this->firstLines(),
+                $this->getSeparator(),
+                $this->getDelimiter()
+            );
+        } catch (DetectionFailedException $detectorException) {
+            $header = [];
+        }
 
-        $this->setHeader($this->headerWasDetected ? $header : []);
+        $this->headerWasDetected = $header && !$this->isNumericHeader($header);
+
+
+        if ($this->headerWasDetected) {
+            $this->setHeader($header);
+            return $this->header;
+        }
+
+        // If the header could not be detected, check for encoding errors
+        // These will be thrown also if the header is not forced
+        $this->getCharsetGuard()->forceCharset($this->firstLinesRaw(), $this->convertFrom);
+
+        // If we can get here the charsetGuard did not throw an exception
+        if ($detectorException) {
+            throw $detectorException;
+        }
+
+        $this->setHeader([]);
 
         return $this->header;
     }
@@ -334,7 +403,7 @@ class CsvReadIterator implements ContentIterator
         }
 
         if (!$this->hasHeader) {
-            return $this->convertEncoding($row);
+            return array_map( function ($value) { return $this->convertEncoding($value); }, $row);
         }
 
         $namedRow = [];
@@ -377,6 +446,7 @@ class CsvReadIterator implements ContentIterator
      **/
     protected function onFileChanged()
     {
+        $this->firstLinesRaw = null;
         $this->firstLines = null;
         if ($this->separatorWasDetected) {
             $this->separator = '';
@@ -394,8 +464,6 @@ class CsvReadIterator implements ContentIterator
     protected function onRewind()
     {
         $this->headerRowSkipped = false;
-        $this->shouldConvert = strtolower($this->getOption(self::ENCODING)) != 'utf-8';
-
         // Trigger detection once
         $this->getHeader();
     }
@@ -413,6 +481,25 @@ class CsvReadIterator implements ContentIterator
             return $this->firstLines;
         }
 
+        $this->firstLines = $this->convertEncoding($this->firstLinesRaw($lineCount));
+
+        return $this->firstLines;
+
+    }
+
+    /**
+     * Return the first lines of the input file
+     *
+     * @param int $lineCount
+     *
+     * @return string
+     **/
+    protected function firstLinesRaw($lineCount=20)
+    {
+        if ($this->firstLinesRaw !== null) {
+            return $this->firstLinesRaw;
+        }
+
         $this->lineReader->setFilePath($this->filePath);
 
         $lines = [];
@@ -427,10 +514,9 @@ class CsvReadIterator implements ContentIterator
 
         $this->lineReader->releaseHandle();
 
-        $this->firstLines = $this->convertEncoding(implode("\n", $lines));
+        $this->firstLinesRaw = implode("\n", $lines);
 
-        return $this->firstLines;
-
+        return $this->firstLinesRaw;
     }
 
     /**
@@ -467,27 +553,25 @@ class CsvReadIterator implements ContentIterator
     /**
      * Converts encoding if needed.
      *
-     * @param array|string $data
+     * @param string $data
      *
-     * @return array|string
+     * @return string
      **/
     protected function convertEncoding($data)
     {
-
         if (!$this->shouldConvert) {
             return $data;
         }
+        return $this->stringConverter->convert("$data", 'utf-8', $this->getOption(self::ENCODING));
+    }
 
-        if (!is_array($data)) {
-            return $this->stringConverter->convert("$data", 'utf-8', $this->getOption(self::ENCODING));
-        }
-dd('Issoch array');
-        $converted = [];
-
-        foreach ($data as $key=>$value) {
-            $converted[$key] = $this->convert($data);
-        }
-
-        return $converted;
+    /**
+     * Update the convertion options. This is handled like this for performance
+     * reasons.
+     **/
+    protected function updateConversion()
+    {
+        $this->convertFrom = strtoupper($this->getOption(self::ENCODING));
+        $this->shouldConvert = $this->convertFrom != 'UTF-8';
     }
 }
