@@ -11,8 +11,10 @@ use ArrayAccess;
  * with the has_array_access() and force_array_access() function
  * you can accept array and ArrayAccess in your classes.
  *
- * You can deceide yourself if the storage always stores if a value is changed
- * or just on persist(). That is mostly a performance concern.
+ * This is like an abstract interface. Your Storage should either implement
+ * UnbufferedStorage or BufferedStorage to mark it the right way.
+ * You can, by the way, use proxy storages to make any storage
+ * buffered or unbuffered.
  *
  * ArrayAccess:
  *
@@ -21,21 +23,62 @@ use ArrayAccess;
  * @method     Storage offsetSet($offset, $value) Set data under key $offset. No objects are allowed
  * @method     Storage offsetUnset($offset) Remove the data under key $offset
  **/
-interface Storage extends ArrayAccess
+interface Storage extends ArrayData
 {
-    /**
-     * Persists all data, whatever the storage uses to store the data
-     * If the whole data is stored as json the Storage would save
-     * the json file here.
-     *
-     * @return bool (if successfull)
-     **/
-    public function persist();
 
     /**
-     * Clears all data, whatever the storage uses to store the data.
+     * Marks the storage as a filesystem storage.
      *
-     * @return bool (if successfull)
+     * @var string
      **/
-    public function purge();
+    const FILESYSTEM = 'filesystem';
+
+    /**
+     * Marks the storage as a sql database storage.
+     *
+     * @var string
+     **/
+    const SQL = 'sql';
+
+    /**
+     * Marks the storage as a nosql storage.
+     *
+     * @var string
+     **/
+    const NOSQL = 'nosql';
+
+    /**
+     * Marks the storage as a in-memory storage.
+     *
+     * @var string
+     **/
+    const MEMORY = 'memory';
+
+    /**
+     * Marks the storage as a storage using a webservice/api.
+     *
+     * @var string
+     **/
+    const WEBSERVICE = 'webservice';
+
+    /**
+     * Marks the storage as a utility storage (like a proxy for other storages).
+     *
+     * @var string
+     **/
+    const UTILITY = 'utility';
+
+
+    /**
+     * Returns a hint what this storage is (filesystem, sql, webservice...)
+     *
+     * @return string
+     *
+     * @see self::FILESYSTEM
+     * @see self::SQL
+     * @see self::NOSQL
+     **/
+    public function storageType();
+
+
 }

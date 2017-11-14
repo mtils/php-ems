@@ -2,7 +2,7 @@
 
 namespace Ems\Contracts\Cache;
 
-use Ems\Contracts\Core\Storage as BaseStorage;
+use ArrayAccess;
 use Ems\Contracts\Core\Provider;
 use Ems\Contracts\Core\HasMethodHooks;
 
@@ -16,7 +16,7 @@ use Ems\Contracts\Core\HasMethodHooks;
  * decrement and purge. Listeners for read actions can be omitted
  * for performance reasons.
  **/
-interface Cache extends BaseStorage, Provider, HasMethodHooks
+interface Cache extends ArrayAccess, Provider, HasMethodHooks
 {
     /**
      * Turn the $value into a valid cache key.
@@ -124,13 +124,16 @@ interface Cache extends BaseStorage, Provider, HasMethodHooks
     public function decrement($key, $steps = 1);
 
     /**
-     * Invalidate a value by its id.
+     * Invalidate a value. Pass a scalar value and it is used as the key.
+     * Pass anything other and the categorizer will be asked for a key AND tags.
+     * If the categorizer finds tags ALL THESE tags get pruned after the call
+     * to forget.
      *
-     * @param $key
+     * @param mixed $keyOrValue
      *
      * @return self
      **/
-    public function forget($key);
+    public function forget($keyOrValue);
 
     /**
      * Invalidate all cache entries with the passed tag(s).
@@ -140,6 +143,13 @@ interface Cache extends BaseStorage, Provider, HasMethodHooks
      * @return self
      **/
     public function prune($tags);
+
+    /**
+     * Clear the cache
+     *
+     * @return bool (if successfull)
+     **/
+    public function clear();
 
     /**
      * Pass a name for a different cache storage.
@@ -155,22 +165,23 @@ interface Cache extends BaseStorage, Provider, HasMethodHooks
     /**
      * Add a different storage under $name to use it via
      * self::storage($name)->get($key).
+     * Add a Closure to let the Closure create the storage if
+     * it is requested.
+     * In most cases you would add the default storage in the constructor
+     * or pass an instance and all others via a Closure.
      *
-     * @param string                       $name
-     * @param \Ems\Contracts\Cache\Storage $store
+     * @param string          $name
+     * @param Storage|Closure $storage
      *
      * @return self
      **/
-    public function addStorage($name, Storage $store);
+    public function addStorage($name, $storage);
 
     /**
-     * Return the storage for $name.
+     * Return all storage names. This are all assigned names even
+     * if none of em were resolved or used.
      *
-     * @param string $name (optional)
-     *
-     * @throws \Ems\Contracts\NotFound
-     *
-     * @return \Ems\Contracts\Cache\Storage
+     * @return Ems\Core\Collections\StringList
      **/
-    public function getStorage($name=null);
+    public function storageNames();
 }

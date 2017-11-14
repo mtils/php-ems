@@ -68,11 +68,13 @@ class BootManager
     protected $configuratorsCalled = false;
 
     /**
-     * @param Ems\Contracts\Core\IOCContainer $container
+     * @param IOCContainer $container
      **/
     public function __construct(IOCContainer $container)
     {
         $this->container = $container;
+        // Make it instantly a singleton
+        $this->container->instance(self::class, $this);
     }
 
     /**
@@ -90,9 +92,16 @@ class BootManager
      **/
     public function setApplication(BaseApplication $ems)
     {
+
+        if ($ems->wasBooted()) {
+            throw new \RuntimeException('App was already booted. To late for Bootmanager to hook into boot.');
+        }
+
         $this->ems = $ems;
 
-        $ems->booting(function ($ems) {
+        $this->ems->instance('bootManager', $this);
+
+        $ems->onBefore('boot', function ($ems) {
             $this->bindPackages($ems);
             $this->bind($ems);
             $this->boot($ems);

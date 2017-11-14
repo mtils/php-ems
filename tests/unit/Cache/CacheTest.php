@@ -61,6 +61,56 @@ class CacheTest extends \Ems\TestCase
         $this->assertEquals('bar', $cache['foo']);
     }
 
+    public function test_get_does_not_ask_categorizer_if_key_and_keySource_is_passed_in_put()
+    {
+        $categorizer = $this->mockCategorizer();
+        $cache = $this->newCache($categorizer);
+        $storage = $this->mockStorage();
+        $cache->addStorage('default', $storage);
+
+        $until = new DateTime;
+        $categorizer->shouldReceive('key')->never();
+        $categorizer->shouldReceive('tags')
+                    ->once()
+                    ->andReturn(['luck']);
+
+        $categorizer->shouldReceive('lifetime')
+                    ->once()
+                    ->andReturn($until);
+
+        $storage->shouldReceive('put')
+                ->with('cache-key', 'value', ['luck'], $until)
+                ->once();
+//         $storage->shouldReceive('get')->with('foo')->andReturn('bar');
+
+        $cache->put('cache-key', 'value', 'source');
+    }
+
+    public function test_get_does_not_ask_categorizer_if_key_and_keySource_is_passed_in_put_in_proxy()
+    {
+        $categorizer = $this->mockCategorizer();
+        $cache = $this->newCache($categorizer);
+        $storage = $this->mockStorage();
+        $cache->addStorage('default', $storage);
+
+        $until = new DateTime;
+        $categorizer->shouldReceive('key')->never();
+        $categorizer->shouldReceive('tags')
+                    ->once()
+                    ->andReturn(['luck']);
+
+        $categorizer->shouldReceive('lifetime')
+                    ->once()
+                    ->andReturn($until);
+
+        $storage->shouldReceive('put')
+                ->with('cache-key', 'value', ['luck'], $until)
+                ->once();
+//         $storage->shouldReceive('get')->with('foo')->andReturn('bar');
+
+        $cache->storage('default')->put('cache-key', 'value', 'source');
+    }
+
     public function test_get_asks_categorizer_if_key_is_cacheable_array()
     {
         $categorizer = $this->mockCategorizer();
@@ -282,6 +332,59 @@ class CacheTest extends \Ems\TestCase
         $this->assertInstanceOf(CacheContract::class, $cache->storage('storage1')->put($key, $passed));
     }
 
+    public function test_storage_passes_add_to_different_storage_with_storage_closure()
+    {
+        $categorizer = $this->mockCategorizer();
+        $cache = $this->newCache($categorizer);
+        $storage = $this->mockStorage();
+        $storage2 = $this->mockStorage();
+        $cache->addStorage('default', $storage);
+        $cache->addStorage('storage1', function ($name) use ($storage2) { 
+            return $storage2;
+        });
+
+        $key = 'foo';
+        $passed = 'bar';
+        $tags = ['a','b'];
+        $wrongTags = [];
+        $lifetime = '3 days';
+        $until = (new DateTime())->modify("+$lifetime");
+
+        $categorizer->shouldReceive('tags')->andReturn($tags);
+        $categorizer->shouldReceive('lifetime')->andReturn($until);
+
+        $storage2->shouldReceive('has')->with($key)->andReturn(false);
+        $storage2->shouldReceive('put')
+                 ->with($key, $passed, $tags, $until)
+                 ->andReturn($storage);
+
+        $this->assertInstanceOf(CacheContract::class, $cache->storage('storage1')->put($key, $passed));
+    }
+
+    public function test_storageNames_returns_all_assigned_storage_names()
+    {
+        $categorizer = $this->mockCategorizer();
+        $cache = $this->newCache($categorizer);
+        $storage = $this->mockStorage();
+        $storage2 = $this->mockStorage();
+        $cache->addStorage('default', $storage);
+        $cache->addStorage('storage1', function ($name) use ($storage2) { 
+            return $storage2;
+        });
+
+        $cache->addStorage('storage2', function ($name) use ($storage2) { 
+            return $storage2;
+        });
+
+        $names = $cache->storageNames()->sort()->getSource();
+        $this->assertEquals(['default', 'storage1', 'storage2'], $names);
+
+        // Now with proxy
+        $names = $cache->storage('storage1')->storageNames()->sort()->getSource();
+        $this->assertEquals(['default', 'storage1', 'storage2'], $names);
+
+    }
+
     public function test_increment_forwards_to_storage()
     {
         $storage = $this->mockStorage();
@@ -304,16 +407,7 @@ class CacheTest extends \Ems\TestCase
         $this->assertSame($cache, $cache->decrement('foo', 2));
     }
 
-    public function test_persist_does_nothing()
-    {
-        $storage = $this->mockStorage();
-        $cache = $this->newCache();
-        $cache->addStorage('default', $storage);
-
-        $this->assertTrue($cache->persist());
-    }
-
-    public function test_purge_forwards_to_storage()
+    public function test_clear_forwards_to_storage()
     {
         $storage = $this->mockStorage();
         $cache = $this->newCache();
@@ -321,7 +415,7 @@ class CacheTest extends \Ems\TestCase
 
         $storage->shouldReceive('clear')->atLeast()->once()->andReturn(true);
 
-        $this->assertTrue($cache->purge());
+        $this->assertTrue($cache->clear());
     }
 
     public function test_forget_forwards_to_storage()
@@ -331,9 +425,76 @@ class CacheTest extends \Ems\TestCase
         $cache->addStorage('default', $storage);
 
         $storage->shouldReceive('forget')->with('foo')->twice()->andReturn($storage);
+        $storage->shouldReceive('escape')->with('foo')->andReturn('foo');
 
         $this->assertSame($cache, $cache->forget('foo'));
         unset($cache['foo']);
+    }
+
+    public function test_forget_with_non_key_lets_categorizer_guesses_the_key()
+    {
+        $storage = $this->mockStorage();
+        $categorizer = $this->mockCategorizer();
+        $cache = $this->newCache($categorizer);
+
+        $cache->addStorage('default', $storage);
+
+        $invalid = new \stdClass;
+
+        $storage->shouldReceive('forget')->with('foo')->once()->andReturn($storage);
+        $storage->shouldReceive('escape')->with('foo')->andReturn('foo');
+
+        $categorizer->shouldReceive('key')->with($invalid)->andReturn('foo');
+        $categorizer->shouldReceive('tags')->with($invalid)->andReturn([]);
+
+        $this->assertSame($cache, $cache->forget($invalid));
+        
+    }
+
+    public function test_forget_with_non_key_automatically_prunes_determined_tags()
+    {
+        $storage = $this->mockStorage();
+        $categorizer = $this->mockCategorizer();
+        $cache = $this->newCache($categorizer);
+
+        $cache->addStorage('default', $storage);
+
+        $invalid = new \stdClass;
+        $tags = ['foo_1', 'foo_2'];
+
+        $storage->shouldReceive('forget')->with('foo')->once()->andReturn($storage);
+        $storage->shouldReceive('escape')->with('foo')->andReturn('foo');
+
+        $categorizer->shouldReceive('key')->with($invalid)->andReturn('foo');
+        $categorizer->shouldReceive('tags')->with($invalid)->andReturn($tags);
+
+        $storage->shouldReceive('prune')->with($tags)->once()->andReturn(true);
+
+        $this->assertSame($cache, $cache->forget($invalid));
+
+    }
+
+    /**
+     * @expectedException Ems\Contracts\Core\Errors\NotFound
+     **/
+    public function test_forget_with_non_key_throws_exception_if_categorizer_finds_no_key()
+    {
+        $storage = $this->mockStorage();
+        $categorizer = $this->mockCategorizer();
+        $cache = $this->newCache($categorizer);
+
+        $cache->addStorage('default', $storage);
+
+        $invalid = new \stdClass;
+
+        $storage->shouldReceive('forget')->with('foo')->never();
+        $storage->shouldReceive('escape')->with('foo')->andReturn('foo');
+
+        $categorizer->shouldReceive('key')->with($invalid)->andReturn(null);
+        $categorizer->shouldReceive('tags')->with($invalid)->andReturn([]);
+
+        $this->assertSame($cache, $cache->forget($invalid));
+        
     }
 
     public function test_prune_forwards_to_storage()
@@ -440,6 +601,8 @@ class CacheTest extends \Ems\TestCase
         $cache->addStorage('default', $storage);
         $cache->addStorage('fast', $storage2);
 
+        $cache = Cheat::a($cache);
+
         $this->assertSame($storage, $cache->getStorage('default'));
         $this->assertSame($storage, $cache->getStorage());
         $this->assertSame($storage2, $cache->getStorage('fast'));
@@ -454,13 +617,13 @@ class CacheTest extends \Ems\TestCase
         $storage = $this->mockStorage();
 
         $cache->addStorage('default', $storage);
-        $cache->getStorage('foo');
+        $cache->storage('foo');
     }
 
     public function test_methodHooks_returns_hooks_for_all_altering_methods()
     {
         $cache = $this->newCache();
-        $alteringMethods = ['put', 'increment', 'decrement', 'forget', 'prune', 'purge'];
+        $alteringMethods = ['put', 'increment', 'decrement', 'forget', 'prune', 'clear'];
 
         $hooks = $cache->methodHooks();
 
@@ -569,10 +732,10 @@ class CacheTest extends \Ems\TestCase
         $cache = $this->newCache(null, $this->newStorage());
         $listener = new LoggingCallable();
 
-        $cache->onBefore('purge', $listener)->onAfter('purge', $listener);
+        $cache->onBefore('clear', $listener)->onAfter('clear', $listener);
 
 
-        $cache->purge();
+        $cache->clear();
 
         $this->assertCount(2, $listener);
         $this->assertEquals('default', $listener->arg(0));
@@ -588,12 +751,12 @@ class CacheTest extends \Ems\TestCase
 
         $proxy = $cache->storage('fast');
 
-        $proxy->onBefore('purge', $listener)->onAfter('purge', $listener);
+        $proxy->onBefore('clear', $listener)->onAfter('clear', $listener);
 
         $this->assertInstanceOf(CacheProxy::class, $proxy);
 
 
-        $proxy->purge();
+        $proxy->clear();
 
         $this->assertCount(2, $listener);
         $this->assertEquals('fast', $listener->arg(0));

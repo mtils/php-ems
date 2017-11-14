@@ -6,11 +6,11 @@ namespace Ems\Validation\Illuminate;
 use Ems\Contracts\Validation\ValidationConverter as ValidationConverterContract;
 use Ems\Contracts\Validation\ValidatorFactory as ValidatorFactoryContract;
 use Ems\Contracts\Validation\Validation;
-use Ems\Validation\RuleParseMethods;
+use Ems\Expression\ConstraintParsingMethods;
 use Illuminate\Support\MessageBag;
 use Illuminate\Translation\ArrayLoader;
 use Illuminate\Translation\Translator;
-use Ems\Skeleton\Application;
+use Ems\Core\Application;
 use Ems\Core\Helper;
 use Ems\Validation\ValidationException;
 
@@ -20,7 +20,7 @@ use Ems\Validation\ValidationException;
 class ValidationConverterIntegrationTest extends \Ems\LaravelIntegrationTest
 {
 
-    use RuleParseMethods;
+    use ConstraintParsingMethods;
 
     /**
      * @var array
@@ -105,7 +105,7 @@ class ValidationConverterIntegrationTest extends \Ems\LaravelIntegrationTest
                 ':max' => '5'
             ];
 
-            $parsedRules = $this->parseRules($rules);
+            $parsedRules = $this->parseConstraints($rules);
 
              foreach ($parsedRules as $key=>$rules) {
 
@@ -154,7 +154,7 @@ class ValidationConverterIntegrationTest extends \Ems\LaravelIntegrationTest
                 ':max' => '5'
             ];
 
-            $parsedRules = $this->parseRules($rules);
+            $parsedRules = $this->parseConstraints($rules);
 
              foreach ($parsedRules as $key=>$rules) {
 
@@ -203,7 +203,7 @@ class ValidationConverterIntegrationTest extends \Ems\LaravelIntegrationTest
                 ':max' => '5'
             ];
 
-            $parsedRules = $this->parseRules($rules);
+            $parsedRules = $this->parseConstraints($rules);
 
              foreach ($parsedRules as $key=>$rules) {
 
@@ -252,7 +252,7 @@ class ValidationConverterIntegrationTest extends \Ems\LaravelIntegrationTest
                 ':max' => '5'
             ];
 
-            $parsedRules = $this->parseRules($rules);
+            $parsedRules = $this->parseConstraints($rules);
 
              foreach ($parsedRules as $key=>$rules) {
 
@@ -307,7 +307,7 @@ class ValidationConverterIntegrationTest extends \Ems\LaravelIntegrationTest
                 ':other' => 'email'
             ];
 
-            $parsedRules = $this->parseRules($rules);
+            $parsedRules = $this->parseConstraints($rules);
 
              foreach ($parsedRules as $key=>$rules) {
 

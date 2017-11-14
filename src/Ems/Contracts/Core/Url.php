@@ -3,7 +3,9 @@
 namespace Ems\Contracts\Core;
 
 use ArrayAccess;
+use Ems\Core\Collections\StringList;
 use IteratorAggregate;
+use Ems\Contracts\Core\Arrayable;
 
 /**
  * This is a helper object to easily work with urls
@@ -12,11 +14,20 @@ use IteratorAggregate;
  *
  * Every method returns a new Url instance for chaining
  * The magic get method allows to get the values from the url
- * So basicly you write to a query by methods and read from it by property
+ * So basically you write to a query by methods and read from it by property
  * access.
  * An url has to be immutable
+ *
+ * @property string     $scheme   The scheme (or protocol)
+ * @property string     $user     The user part of authority
+ * @property string     $password The password part of authority
+ * @property string     $host     The host (or domain) name
+ * @property int        $port     The tcp port
+ * @property StringList $path     The path component
+ * @property array      $query    The query parameters
+ * @property string     $fragment The last part behind #
  **/
-interface Url extends Stringable, ArrayAccess, IteratorAggregate, Copyable
+interface Url extends Stringable, ArrayAccess, IteratorAggregate, Copyable, Arrayable
 {
     /**
      * Set the scheme.
@@ -146,4 +157,19 @@ interface Url extends Stringable, ArrayAccess, IteratorAggregate, Copyable
      * @return mixed
      **/
     public function __get($part);
+
+    /**
+     * Compare two urls. For absolute equality use the normal == operator
+     * with stringify. ("$url1" == "$url2").
+     * Single parts can be checked with $url->path->equals($url-2->path)
+     * or just $url->user == $url2->user.
+     *
+     * This method here checks every passed parts. If all match it returns true.
+     *
+     * @param string|Url   $other
+     * @param string|array $parts
+     *
+     * @return bool
+     */
+    public function equals($other, $parts=['scheme', 'user', 'password', 'host', 'path']);
 }

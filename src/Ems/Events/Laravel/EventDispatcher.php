@@ -1,9 +1,9 @@
 <?php
 
 
-namespace Ems\Core\Laravel;
+namespace Ems\Events\Laravel;
 
-use Ems\Contracts\Core\EventDispatcher as EmsDispatcher;
+use Ems\Contracts\Events\Bus;
 use Illuminate\Contracts\Events\Dispatcher;
 use Ems\Core\Exceptions\NotImplementedException;
 
@@ -13,14 +13,14 @@ use Ems\Core\Exceptions\NotImplementedException;
 class EventDispatcher implements Dispatcher
 {
     /**
-     * @var EmsDispatcher
+     * @var Bus
      **/
      protected $events;
 
     /**
-     * @param EmsDispatcher $events
+     * @param Bus $events
      **/
-    public function __construct(EmsDispatcher $events)
+    public function __construct(Bus $events)
     {
         $this->events = $events;
     }

@@ -30,4 +30,18 @@ interface Result extends IteratorAggregate
      * @return object
      **/
     public function creator();
+
+    /**
+     * Return the first result.
+     *
+     * @return mixed
+     **/
+    public function first();
+
+    /**
+     * Return the last result.
+     *
+     * @return mixed
+     **/
+    public function last();
 }

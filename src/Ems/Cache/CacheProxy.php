@@ -25,19 +25,17 @@ class CacheProxy extends Cache implements CacheContract
     protected $tags = [];
 
     /**
-     * @param Cache                            $parent
-     * @param string                           $storageName
-     * @param \Ems\Contracts\Cache\Categorizer $categorizer
-     * @param callable                         $listenerProvider
+     * @param Cache       $parent
+     * @param Categorizer $categorizer
+     * @param Storage     $storage
+     * @param string      $storageName
      **/
-    public function __construct(Cache $parent, $storageName, Categorizer $categorizer,
-                                callable $listenerProvider)
+    public function __construct(Cache $parent, Categorizer $categorizer, Storage $storage, $storageName)
     {
         $this->parent = $parent;
-        $this->storageName = $storageName;
-        $this->storage = $parent->getStorage($storageName);
         $this->categorizer = $categorizer;
-        $this->listenerProvider = $listenerProvider;
+        $this->storage = $storage;
+        $this->storageName = $storageName;
     }
 
     /**
@@ -53,10 +51,14 @@ class CacheProxy extends Cache implements CacheContract
     {
         $key = $value === null ? null : $keyOrValue;
         $value = $value === null ? $keyOrValue : $value;
-        $key = $key ?: $this->categorizer->key($value);
 
-        $tags = $this->tags ? $this->tags : $this->categorizer->tags($value);
-        $lifetime = $this->until ? $this->until : $this->categorizer->lifetime($value);
+        $keySource = $keySource ?: $value;
+
+        $key = $key ?: $this->categorizer->key($keySource);
+
+        $tags = $this->tags ? $this->tags : $this->categorizer->tags($keySource);
+
+        $lifetime = $this->until ? $this->until : $this->categorizer->lifetime($keySource);
 
         $this->callBeforeListeners('put', [$this->storageName, $key, $value, $tags, $lifetime]);
         $this->storage->put($key, $value, $tags, $lifetime);
@@ -74,7 +76,7 @@ class CacheProxy extends Cache implements CacheContract
      **/
     public function until($until = '+1 day')
     {
-        return $this->proxy($this->parent, $this->storageName)
+        return $this->proxy($this->parent, $this->storage, $this->storageName)
                     ->with($this->attributes(['until' => $until]));
     }
 
@@ -87,7 +89,7 @@ class CacheProxy extends Cache implements CacheContract
      **/
     public function tag($tags)
     {
-        return $this->proxy($this->parent, $this->storageName)
+        return $this->proxy($this->parent, $this->storage, $this->storageName)
                     ->with($this->attributes(['tag' => $tags]));
     }
 
@@ -105,17 +107,16 @@ class CacheProxy extends Cache implements CacheContract
     }
 
     /**
-     * Add a different store under name to use it via
-     * self::store($name).
+     * {@inheritdoc}
      *
-     * @param string                       $name
-     * @param \Ems\Contracts\Cache\Storage $store
+     * @param string          $name
+     * @param Storage|Closure $storage
      *
      * @return self
      **/
-    public function addStorage($name, Storage $store)
+    public function addStorage($name, $storage)
     {
-        $this->parent->addStorage($name, $store);
+        $this->parent->addStorage($name, $storage);
 
         return $this;
     }
@@ -160,7 +161,17 @@ class CacheProxy extends Cache implements CacheContract
      **/
     public function getListeners($event, $position = '')
     {
-        return call_user_func($this->listenerProvider, $event, $position);
+        return $this->parent->getListeners($event, $position);// call_user_func($this->listenerProvider, $event, $position);
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @return Ems\Core\Collections\StringList
+     **/
+    public function storageNames()
+    {
+        return $this->parent->storageNames();
     }
 
     public function with(array $attributes)

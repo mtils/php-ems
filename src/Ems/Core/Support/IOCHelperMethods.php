@@ -2,6 +2,8 @@
 
 namespace Ems\Core\Support;
 
+use Ems\Contracts\Core\ContainerCallable;
+
 trait IOCHelperMethods
 {
     /**
@@ -25,18 +27,10 @@ trait IOCHelperMethods
      * @param string $abstract
      * @param bool   $processParameters (optional)
      *
-     * @return \Closure
+     * @return ContainerCallable
      **/
     public function provide($abstract, $processParameters = false)
     {
-        if (!$processParameters) {
-            return function () use ($abstract) {
-                return $this->__invoke($abstract);
-            };
-        }
-
-        return function () use ($abstract) {
-            return $this->__invoke($abstract, func_get_args());
-        };
+        return new ContainerCallable($this, $abstract, $processParameters);
     }
 }

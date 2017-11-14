@@ -12,7 +12,7 @@ namespace Ems\Contracts\Core;
  * collect the listeners by ($fired instanceof $$event).
  * Throw an Unsupported if you do not support object based events.
  **/
-interface Hookable
+interface Hookable extends HasListeners
 {
     /**
      * Be informed before event (or method) $event is triggered.
@@ -34,14 +34,4 @@ interface Hookable
      **/
     public function onAfter($event, callable $listener);
 
-    /**
-     * Return all listeners for event $event. Ask for position be $position
-     * 'after' or 'before'.
-     *
-     * @param string|object $event
-     * @param string $position ('after'|'before'|'')
-     *
-     * @return array
-     **/
-    public function getListeners($event, $position = '');
 }

@@ -22,7 +22,7 @@ class BootManagerTest extends \Ems\IntegrationTest
     public function test_it_hooks_into_boot_process()
     {
         $manager = $this->newBootManager();
-        $app = $this->app();
+        $app = $this->appInstance();
 
         $manager->setApplication($app);
         $this->assertSame($app, $manager->getApplication());
@@ -50,10 +50,19 @@ class BootManagerTest extends \Ems\IntegrationTest
         $this->assertEquals(1, $object->bootCalled);
     }
 
+    /**
+     * @expectedException \RuntimeException
+     */
+    public function test_throws_exception_if_app_already_booted()
+    {
+        $manager = $this->newBootManager();
+        $manager->setApplication($this->app());
+    }
+
     public function test_it_boots_passed_object()
     {
         $manager = $this->newBootManager();
-        $app = $this->app();
+        $app = $this->appInstance();
 
         $manager->setApplication($app);
         $this->assertSame($app, $manager->getApplication());
@@ -80,7 +89,7 @@ class BootManagerTest extends \Ems\IntegrationTest
 
     protected function newBootManager()
     {
-        return new BootManager($this->app());
+        return new BootManager($this->container());
     }
 }
 

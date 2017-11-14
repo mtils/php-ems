@@ -71,6 +71,46 @@ trait FilesystemMethods
     }
 
     /**
+     * Outputs the files of a directory
+     *
+     * @param string $path
+     * @param bool   $recursive (default:false)
+     */
+    protected function dumpDirectory($path, $recursive=false, $indent=0)
+    {
+        if (!$indent) {
+            echo "\nDirectory: $path ----------------------------------";
+        }
+
+        $hit = false;
+
+        $indention = str_repeat(' ', $indent);
+
+        foreach (scandir($path) as $file) {
+
+            if ($file == '.' || $file == '..') {
+                continue;
+            }
+
+            $filePath = realpath("$path/$file");
+
+            if (is_dir($filePath) && $recursive) {
+                echo "\n$indention$file/";
+                $this->dumpDirectory($filePath, true, $indent+4);
+                $hit = true;
+                continue;
+            }
+
+            $hit = true;
+            echo "\n$indention$file";
+        }
+
+        if (!$hit) {
+            echo "\n$indention(empty)";
+        }
+    }
+
+    /**
      * Create a directory structure by a nested array. Every string creates a
      * file, every array a directory.
      *
@@ -146,5 +186,28 @@ trait FilesystemMethods
             return true;
         }
         return $this->shouldPurgeTempFiles;
+    }
+
+    /**
+     * @param string $dir
+     * @param array  $results (optional)
+     *
+     * @return array
+     **/
+    protected function scandirRecursive($dir,  &$results = [])
+    {
+        $files = scandir($dir);
+
+        foreach($files as $key => $value){
+            $path = realpath($dir.DIRECTORY_SEPARATOR.$value);
+            if(!is_dir($path)) {
+                $results[] = $path;
+            } else if($value != "." && $value != "..") {
+                getDirContents($path, $results);
+                $results[] = $path;
+            }
+        }
+
+        return $results;
     }
 }

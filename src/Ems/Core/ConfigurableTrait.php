@@ -31,7 +31,7 @@ trait ConfigurableTrait
      **/
     public function getOption($key)
     {
-        $this->checkKey($key);
+        $this->checkOptionKey($key);
 
         return isset($this->_options[$key]) ? $this->_options[$key] : $this->defaultOptions[$key];
     }
@@ -48,8 +48,7 @@ trait ConfigurableTrait
      **/
     public function setOption($key, $value)
     {
-        $this->_options[$this->checkKey($key)] = $value;
-
+        $this->_options[$this->checkOptionKey($key)] = $value;
         return $this;
     }
 
@@ -76,7 +75,7 @@ trait ConfigurableTrait
     {
         $keys = $keys ? (array) $keys : $this->supportedOptions();
         foreach ($keys as $key) {
-            $this->checkKey($key);
+            $this->checkOptionKey($key);
             if (isset($this->_options[$key])) {
                 unset($this->_options[$key]);
             }
@@ -125,12 +124,11 @@ trait ConfigurableTrait
      *
      * @return string
      **/
-    protected function checkKey($key)
+    protected function checkOptionKey($key)
     {
         if (!$this->optionExists($key)) {
             throw new UnsupportedParameterException("Option '$key' is not supported");
         }
-
         return $key;
     }
 

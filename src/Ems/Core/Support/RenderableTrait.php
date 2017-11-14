@@ -46,7 +46,7 @@ trait RenderableTrait
      *
      * @return string
      **/
-    protected function renderString()
+    public function toString()
     {
         if (!$this->_renderer || !$this->_renderer->canRender($this)) {
             return '';

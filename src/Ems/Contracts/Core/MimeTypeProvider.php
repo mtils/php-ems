@@ -18,7 +18,7 @@ interface MimeTypeProvider
     public function typeOfName($fileName);
 
     /**
-     * Verbosly check the mimetype of a file. (call finfo, file $path,...)
+     * Verbosely check the mimetype of a file. (call finfo, file $path,...)
      * and return the detected mimetype.
      *
      * @param $path

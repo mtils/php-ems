@@ -13,6 +13,11 @@ class Serializer implements SerializerContract
      **/
     protected $useOptions = false;
 
+    /**
+     * @var callable
+     */
+    protected $errorGetter;
+
      /**
       * @var string
       **/

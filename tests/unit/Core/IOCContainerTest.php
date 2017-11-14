@@ -4,6 +4,7 @@ namespace Ems\Core;
 
 use stdClass;
 use Ems\Contracts\Core\IOCContainer as ContainerContract;
+use Ems\Contracts\Core\ContainerCallable;
 use Ems\Testing\LoggingCallable;
 
 class IOCContainerTest extends \Ems\TestCase
@@ -66,8 +67,9 @@ class IOCContainerTest extends \Ems\TestCase
         });
 
         $provider = $container->provide('foo');
+        $this->assertFalse($provider->shouldUseParametersInResolve());
 
-        $this->assertInstanceof('\Closure', $provider);
+        $this->assertInstanceof(ContainerCallable::class, $provider);
 
         $this->assertSame($container, $provider());
     }
@@ -78,13 +80,83 @@ class IOCContainerTest extends \Ems\TestCase
 
         $provider = $container->provide(ContainerTest_ClassParameter::class, true);
 
-        $this->assertInstanceof('\Closure', $provider);
+        $this->assertInstanceof(ContainerCallable::class, $provider);
+        $this->assertTrue($provider->shouldUseParametersInResolve());
 
         $result = $provider('a', 'b', 'c');
 
         $this->assertInstanceof(ContainerTest_ClassParameter::class, $result);
 
         $this->assertEquals(['a', 'b', 'c'], $result->args);
+    }
+
+    public function test_provide_returns_callable_for_method_call()
+    {
+        $container = $this->newContainer();
+        $custom = $this->mock(ContainerContract::class);
+
+        $container->bind('foo', function () use ($custom) {
+            return $custom;
+        });
+
+        $provider = $container->provide('foo')->alias();
+
+        $custom->shouldReceive('alias')
+               ->with(1,2)
+               ->once()
+               ->andReturn('tralala');
+
+        $this->assertEquals('alias', $provider->method());
+        $this->assertFalse($provider->shouldUseAppCall());
+        $this->assertInstanceof(ContainerCallable::class, $provider);
+
+        $this->assertEquals('tralala', $provider(1, 2));
+    }
+
+    public function test_provide_returns_callable_for_app_method_call()
+    {
+        $container = $this->newContainer();
+        $custom = $this->mock(ContainerContract::class);
+
+        $container->bind('foo', function () use ($custom) {
+            return $custom;
+        });
+
+        $provider = $container->provide('foo')->alias();
+        $provider->useAppCall(true);
+        $custom->shouldReceive('alias')
+            ->with(1,2)
+            ->once()
+            ->andReturn('tralala');
+
+        $this->assertEquals('alias', $provider->method());
+        $this->assertTrue($provider->shouldUseAppCall());
+        $this->assertInstanceof(ContainerCallable::class, $provider);
+
+        $this->assertEquals('tralala', $provider(1, 2));
+    }
+
+    public function test_provide_returns_callable_for_inline_determinism_of_app_call()
+    {
+        $container = $this->newContainer();
+        $custom = $this->mock(ContainerContract::class);
+
+        $container->bind('foo', function () use ($custom) {
+            return $custom;
+        });
+
+        $provider = $container->provide('foo')->call('alias');
+
+        $custom->shouldReceive('alias')
+            ->with(1,2)
+            ->once()
+            ->andReturn('tralala');
+
+        $this->assertEquals('alias', $provider->method());
+        $this->assertTrue($provider->shouldUseAppCall());
+        $this->assertInstanceof(ContainerCallable::class, $provider);
+
+        $this->assertEquals('tralala', $provider(1, 2));
     }
 
     public function test_invoke_of_shared_binding_returns_same_object()

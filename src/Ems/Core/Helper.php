@@ -2,6 +2,7 @@
 
 namespace Ems\Core;
 
+use Ems\Core\Exceptions\UnsupportedParameterException;
 use Traversable;
 use ArrayAccess;
 use Countable;
@@ -136,6 +137,18 @@ class Helper
     }
 
     /**
+     * Return if the passed value is a string (has __toString method)
+     *
+     * @param mixed $value
+     *
+     * @return bool
+     **/
+    public static function isStringLike($value)
+    {
+        return is_string($value) || (is_object($value) && method_exists($value, '__toString'));
+    }
+
+    /**
      * Trims a word out of a string
      *
      * @param string $string
@@ -150,6 +163,49 @@ class Helper
             return $string;
         }
         return mb_substr($string, 0, mb_strlen($string)-mb_strlen($word));
+    }
+
+    /**
+     * Return true if $value contains $anyOfThis
+     *
+     * @param mixed        $value
+     * @param string|array $anyOfThis
+     *
+     * @return bool
+     **/
+    public static function contains($value, $anyOfThis)
+    {
+
+        $anyOfThis = (array)$anyOfThis;
+
+        foreach ($anyOfThis as $needle) {
+
+            if (is_scalar($value)) {
+                if (mb_strpos("$value", $needle) !== false) {
+                    return true;
+                }
+                continue;
+            }
+
+            if (is_array($value)) {
+                if (in_array($needle, array_values($value))) {
+                    return true;
+                }
+            }
+
+            if (!$value instanceof \Traversable) {
+                return false;
+            }
+
+            foreach ($value as $key=>$haystack) {
+                if ($haystack == $needle) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+
     }
 
     /**
@@ -335,6 +391,123 @@ class Helper
             static::$extractor = new Extractor;
         }
         return static::$extractor->value($root, $path);
+    }
+
+    /**
+     * Check if the passed value has ArrayAccess.
+     *
+     * @param mixed $value
+     *
+     * @return bool
+     */
+    public static function hasArrayAccess($value)
+    {
+        return (is_array($value) || $value instanceof ArrayAccess);
+    }
+
+    /**
+     * Throws an exception if the passed value has no ArrayAccess.
+     *
+     * @param $value
+     */
+    public static function forceArrayAccess($value)
+    {
+        if (!static::hasArrayAccess($value)) {
+            throw new UnsupportedParameterException("The passed value has no ArrayAccess: " . static::typeName($value));
+        }
+    }
+
+    public static function offsetExists(array &$array, $key)
+    {
+        if (!strpos($key, '.')) {
+            return array_key_exists($key, $array);
+        }
+
+        $parts = explode('.', $key);
+        $last = array_pop($parts);
+        $parentPath = implode('.', $parts);
+
+        $parent = static::offsetGet($array, $parentPath);
+
+        if (!is_array($parent)) {
+            return false;
+        }
+
+        return static::offsetExists($parent, $last);
+
+    }
+
+    public static function offsetGet(array $array, $key, $default=null)
+    {
+        if ($key === null) {
+            return $array;
+        }
+
+        if (array_key_exists($key, $array)) {
+            return $array[$key];
+        }
+
+        foreach (explode('.', $key) as $segment) {
+            if (is_array($array) && array_key_exists($segment, $array)) {
+                $array = $array[$segment];
+                continue;
+            }
+            return $default;
+        }
+
+        return $array;
+    }
+
+    public static function offsetSet(array &$array, $key, $value)
+    {
+
+        if (is_null($key)) {
+            return $array = $value;
+        }
+
+        $segments = explode('.', $key);
+
+        while (count($segments) > 1) {
+            $key = array_shift($segments);
+
+            if (! isset($array[$key]) || ! is_array($array[$key])) {
+                $array[$key] = [];
+            }
+
+            $array = &$array[$key];
+        }
+
+        $array[array_shift($segments)] = $value;
+
+        return $array;
+    }
+
+    public static function offsetUnset(array &$array, $key)
+    {
+
+        if (!strpos($key, '.')) {
+            unset($array[$key]);
+            return;
+        }
+
+        $segments = explode('.', $key);
+
+        while (count($segments) > 1) {
+            $key = array_shift($segments);
+
+            if (! isset($array[$key]) || ! is_array($array[$key])) {
+                return;
+            }
+
+            $array = &$array[$key];
+        }
+
+        $last = array_shift($segments);
+
+        if (array_key_exists($last, $array)) {
+            unset($array[$last]);
+        }
+
     }
 
     /**

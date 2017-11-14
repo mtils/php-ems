@@ -136,7 +136,7 @@ class BinaryContent implements Content
      *
      * @return string
      **/
-    protected function renderString()
+    public function toString()
     {
         return $this->filesystem->read($this->url);
     }

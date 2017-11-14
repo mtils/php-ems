@@ -78,14 +78,20 @@ class LocalFilesystem implements FileSystem
      * @param string   $path
      * @param string   $contents
      * @param bool|int $lock (default:false) Enable locking or directly set the mode (LOCK_EX,...)
+     * @param resource $handle (optional)
      *
      * @return int written bytes
      **/
-    public function write($path, $contents, $lock = false)
+    public function write($path, $contents, $lock = false, $handle = null)
     {
         if (is_bool($lock)) {
             $lock = $lock ? LOCK_EX : 0;
         }
+
+        if ($this->isStreamContext($handle)) {
+            return (int) file_put_contents($path, $contents, $lock, $handle);
+        }
+
         return (int) file_put_contents($path, $contents, $lock);
     }
 
@@ -400,7 +406,7 @@ class LocalFilesystem implements FileSystem
     public function read($path, $bytes = 0, $handle = null)
     {
         if (!$bytes) {
-            return file_get_contents($path);
+            return $this->isStreamContext($handle) ? $this->getFromStream($path, $handle) : file_get_contents($path);
         }
 
         list($handle, $handlePassed) = $handle ? [$handle, true]
@@ -419,17 +425,20 @@ class LocalFilesystem implements FileSystem
     /**
      * {@inheritdoc}
      *
-     * @param string $path
-     * @param string $mode (default: 'rb')
+     * @param string|array $pathOrContext
+     * @param string       $mode (default: 'rb')
      *
      * @throws ResourceNotFoundException
      *
      * @return resource
      **/
-    public function handle($path, $mode = 'rb')
+    public function handle($pathOrContext, $mode = 'rb')
     {
-        if (!$handle = @fopen($path, $mode)) {
-            throw new ResourceNotFoundException("Path '$path' cannot be opened");
+        if (is_array($pathOrContext)) {
+            return stream_context_create($pathOrContext);
+        }
+        if (!$handle = @fopen($pathOrContext, $mode)) {
+            throw new ResourceNotFoundException("Path '$pathOrContext' cannot be opened");
         }
         return $handle;
     }
@@ -490,5 +499,40 @@ class LocalFilesystem implements FileSystem
         sort($results);
 
         return $results;
+    }
+
+    /**
+     * Find out if the passed resource is a stream context resource.
+     *
+     * @param mixed $resource
+     *
+     * @return bool
+     */
+    protected function isStreamContext($resource)
+    {
+        return is_resource($resource) && get_resource_type($resource) == 'stream-context';
+    }
+
+    protected function getFromStream($url, $context)
+    {
+
+        $level = error_reporting(0);
+        $body = file_get_contents($url, 0, $context);
+
+        error_reporting($level);
+
+        if ($body === false) {
+            $error = error_get_last();
+            throw new RuntimeException($error['message']);
+        }
+
+
+
+        if (isset($http_response_header)) {
+            $header = implode("\r\n", $http_response_header);
+            return "$header\r\n\r\n$body";
+        }
+
+        return $body;
     }
 }

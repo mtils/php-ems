@@ -89,6 +89,18 @@ class DefaultCategorizer implements Categorizer
     }
 
     /**
+     * {@inheritdoc}
+     *
+     * @param mixed $value
+     *
+     * @return array
+     */
+    public function pruneAfterForget($value)
+    {
+        return [];
+    }
+
+    /**
      * Turns an array into a key.
      *
      * @param array $array
@@ -123,6 +135,11 @@ class DefaultCategorizer implements Categorizer
      **/
     protected function sequentialArrayToKey(array $array)
     {
+
+        if ($this->isObjectAndId($array)) {
+            return get_class($array[0]) . '-' . $array[1];
+        }
+
         $parts = [];
 
         foreach ($array as $value) {
@@ -177,7 +194,6 @@ class DefaultCategorizer implements Categorizer
      * Hashes a key if the key is too long.
      *
      * @param string $string
-     * @param int    $maxlength
      *
      * @return string
      **/
@@ -186,6 +202,26 @@ class DefaultCategorizer implements Categorizer
         if (strlen($string) > $this->maxArrayValueLength) {
             return md5($string);
         }
+    }
+
+    /**
+     * This is for a special syntax to retrieve identifiable objects before
+     * having them.
+     * Just pass an array of [$object, $id].
+     * Because of not autloading something without needing it you have to pass
+     * an (empty) object and not a class.
+     *
+     * @param array $array
+     *
+     * @return bool
+     */
+    protected function isObjectAndId(array $array)
+    {
+        if (count($array) === 2 && isset($array[0]) && is_object($array[0])) {
+            return true;
+        }
+
+        return false;
     }
 
     /**

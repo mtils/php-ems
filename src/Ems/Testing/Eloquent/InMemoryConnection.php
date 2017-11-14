@@ -7,8 +7,8 @@ use Illuminate\Database\SQLiteConnection;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Events\Dispatcher;
-use Ems\Core\Laravel\EventDispatcher as LaravelDispatcher;
-use Ems\Core\EventDispatcher;
+use Ems\Events\Laravel\EventDispatcher as LaravelDispatcher;
+use Ems\Events\Bus;
 use PDO;
 
 /**
@@ -135,7 +135,7 @@ trait InMemoryConnection
     {
         $resolver = new ConnectionResolver($connection);
         Model::setConnectionResolver($resolver);
-        Model::setEventDispatcher(new LaravelDispatcher(new EventDispatcher));
+        Model::setEventDispatcher(new LaravelDispatcher(new Bus));
     }
 
     /**

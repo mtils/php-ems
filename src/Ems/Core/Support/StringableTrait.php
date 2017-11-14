@@ -55,13 +55,6 @@ trait StringableTrait
     }
 
     /**
-     * Just a little hook which gets called before the renderer is called.
-     **/
-    protected function prepareForToString()
-    {
-    }
-
-    /**
      * Try to render the string an call the handler.
      *
      * @return string
@@ -69,26 +62,14 @@ trait StringableTrait
     protected function tryToRender()
     {
         try {
-            $this->prepareForToString();
 
-            $output = $this->renderString();
+            $output = $this->toString();
             $this->_lastRenderError = null;
 
             return $output;
         } catch (Exception $e) {
             return $this->processException($e);
         }
-    }
-
-    /**
-     * Renders the result. Is just inside its own method to allow easy
-     * overwriting __toString().
-     *
-     * @return string
-     **/
-    protected function renderString()
-    {
-        return '';
     }
 
     /**

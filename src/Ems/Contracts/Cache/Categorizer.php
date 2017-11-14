@@ -35,4 +35,14 @@ interface Categorizer
      * @return \DateTime|null
      **/
     public function lifetime($value);
+
+    /**
+     * Return the tags that should be pruned after removing an entry of $value.
+     * This is useful when deleting related entries from the cache.
+     *
+     * @param mixed $value
+     *
+     * @return array
+     */
+    public function pruneAfterForget($value);
 }

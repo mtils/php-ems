@@ -32,6 +32,39 @@ class UrlTest extends \Ems\TestCase
         $this->assertEquals('file', $newUrl->scheme);
     }
 
+    public function test_path_with_file_scheme_leads_to_path()
+    {
+        $path = 'file:///home/marcus/test.txt';
+        $url = $this->newUrl($path);
+
+        $this->assertEquals("$path", "$url");
+        $this->assertEquals('/home/marcus/test.txt', "$url->path");
+        $this->assertEquals('file', $url->scheme);
+    }
+
+    /**
+     * @expectedException InvalidArgumentException
+     **/
+    public function test_path_with_file_looking_scheme_throws_exception()
+    {
+        $path = "some-very-long-scheme-that-shouldnt-exist:///home/michael/file.txt";
+        $url = $this->newUrl($path);
+
+        $this->assertEquals("$path", "$url");
+        $this->assertEquals('/home/marcus/test.txt', "$url->path");
+        $this->assertEquals('file', $url->scheme);
+    }
+
+    public function test_path_with_non_file_scheme_leads_to_path()
+    {
+        $path = 'sqlite:///home/marcus/test.db';
+        $url = $this->newUrl($path);
+
+        $this->assertEquals("$path", "$url");
+        $this->assertEquals('/home/marcus/test.db', "$url->path");
+        $this->assertEquals('sqlite', $url->scheme);
+    }
+
     public function test_user_adds_correct_syntax()
     {
         $path = 'admin/session/create';
@@ -64,7 +97,8 @@ class UrlTest extends \Ems\TestCase
         $this->assertEquals($user, $newUrl->user);
         $this->assertEquals($scheme, $newUrl->scheme);
         $this->assertEquals($host, $newUrl->host);
-        $this->assertEquals("$scheme://$user:$password@$host/$path", "$newUrl");
+        $this->assertEquals($password, $newUrl->password);
+        $this->assertEquals("$scheme://$user:xxxxxx@$host/$path", "$newUrl");
     }
 
     public function test_user_adds_correct_syntax_on_flat_url()
@@ -100,7 +134,8 @@ class UrlTest extends \Ems\TestCase
         $this->assertEquals($user, $newUrl->user);
         $this->assertEquals($scheme, $newUrl->scheme);
         $this->assertEquals($host, $newUrl->host);
-        $this->assertEquals("$scheme://$user:$password@$host:$port/$path", "$newUrl");
+        $this->assertEquals($password, $newUrl->password);
+        $this->assertEquals("$scheme://$user:xxxxxx@$host:$port/$path", "$newUrl");
     }
 
     public function test_user_and_password_and_port_and_fragment_adds_correct_syntax()
@@ -125,7 +160,8 @@ class UrlTest extends \Ems\TestCase
         $this->assertEquals($user, $newUrl->user);
         $this->assertEquals($scheme, $newUrl->scheme);
         $this->assertEquals($host, $newUrl->host);
-        $this->assertEquals("$scheme://$user:$password@$host:$port/$path#$fragment", "$newUrl");
+        $this->assertEquals($password, $newUrl->password);
+        $this->assertEquals("$scheme://$user:xxxxxx@$host:$port/$path#$fragment", "$newUrl");
     }
 
     public function test_parses_and_renders_all_properties()
@@ -158,8 +194,9 @@ class UrlTest extends \Ems\TestCase
         $this->assertInstanceOf('Ems\Core\Collections\StringList', $url->path);
         $this->assertEquals($query, $url->query);
         $this->assertEquals($fragment, $url->fragment);
+        $this->assertEquals($password, $url->password);
 
-        $this->assertEquals($string, "$url");
+        $this->assertEquals(str_replace(':123',':xxxxxx', $string), "$url");
     }
 
 
@@ -435,8 +472,11 @@ class UrlTest extends \Ems\TestCase
         $url = $this->newUrl($string);
         $copy = $this->newUrl($url);
 
-        $this->assertEquals($string, "$url");
-        $this->assertEquals($string, "$copy");
+        $output = str_replace(':123',':xxxxxx', $string);
+        $this->assertEquals($output, "$url");
+        $this->assertEquals($output, "$copy");
+        $this->assertEquals($password, $url->password);
+        $this->assertEquals($password, $copy->password);
     }
 
     /**
@@ -504,8 +544,51 @@ class UrlTest extends \Ems\TestCase
         $url = $this->newUrl('http://');
     }
 
+    public function test_appended_slash_behaviour()
+    {
+        $tests = [
+            'http://google.de'      => '',
+            'https://google.de/'    => '/',
+            'http://localhost'      => '',
+            'http://localhost/'     => '/',
+            'http://google.de/foo'  => '/foo',
+            'http://google.de/foo/' => '/foo/',
+            '/var/tmp/'             => '/var/tmp/',
+            '/var/tmp'              => '/var/tmp',
+            'file:///var/tmp/'      => '/var/tmp/',
+            'file:///var/tmp'       => '/var/tmp',
+            'file:///'              => '/',
+            '/'                     => '/',
+        ];
+
+        foreach ($tests as $test=>$path) {
+            $url = $this->newUrl($test);
+            $this->assertEquals($test, "$url", "Slash suffix is wrong compared to $test");
+            $this->assertEquals($path, "$url->path", "Path slash suffix '$url->path' of '$url' is wrong compared to '$path'");
+        }
+
+    }
+
+    public function test_equals()
+    {
+        $this->assertTrue($this->equals('/home/michi', '/home/michi'));
+        $this->assertTrue($this->equals('http://www.ip.de', 'http://www.ip.de'));
+        $this->assertFalse($this->equals('https://www.ip.de', 'http://www.ip.de'));
+        $this->assertTrue($this->equals('https://www.ip.de', 'http://www.ip.de', ['host', 'path']));
+        $this->assertTrue($this->equals('https://www.ip.de/users/14/address', 'http://www.ip.de/users/14/address', ['host', 'path']));
+        $this->assertTrue($this->equals('https://www.ip.de/users/14/address', '/users/14/address', 'path'));
+        $this->assertFalse($this->equals('https://www.ip.de/users/14/address', '/users/14/address', 'scheme'));
+        $this->assertTrue($this->equals('https://www.ip.de/users/14/address#hihi', '/users/14/address#hihi', 'fragment'));
+
+    }
+
     public function newUrl($data=null)
     {
         return new Url($data);
+    }
+
+    protected function equals($url, $other, $parts=['scheme', 'user', 'password', 'host', 'path'])
+    {
+        return $this->newUrl($url)->equals($other, $parts);
     }
 }

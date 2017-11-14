@@ -106,11 +106,7 @@ class CsvDetector implements Configurable
     {
 
         $lines = $this->toCheckableLines($firstLines);
-        if (strpos($firstLines, 'id;')) {
-            echo "\nLINES:";
-            var_dump($lines);
-            echo "\n$firstLines";
-        }
+
         $row = str_getcsv($lines[0], $separator, $delimiter);
 
         $header = $this->guessHeader($row);

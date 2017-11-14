@@ -7,11 +7,17 @@ use Ems\Cache\Skeleton\CacheBootstrapper;
 use Ems\Core\IOCContainer;
 use Ems\Core\Skeleton\CoreBootstrapper;
 use Ems\XType\Skeleton\XTypeBootstrapper;
-use Ems\Skeleton\Application;
+use Ems\Core\Application;
 use Ems\Skeleton\BootManager;
 
 trait AppTrait
 {
+
+    /**
+     * @var IOCContainer
+     */
+    protected $_container;
+
     /**
      * @var Application
      **/
@@ -21,16 +27,41 @@ trait AppTrait
      * @param string $binding    (optional)
      * @param array  $parameters (optional)
      *
+     * @return IOCContainer
+     */
+    public function container($binding = null, array $parameters=[])
+    {
+        if (!$this->_container) {
+            $this->_container = new IOCContainer();
+        }
+        return $binding ? $this->_container->make($binding, $parameters) : $this->_container;
+    }
+
+    /**
+     * @param string $binding    (optional)
+     * @param array  $parameters (optional)
+     *
      * @return Application
      **/
     public function app($binding = null, array $parameters = [])
     {
+        $app = $this->appInstance();
+
+        if (!$app->wasBooted()) {
+            $this->bootApplication($app);
+        }
+        return $binding ? $app->__invoke($binding, $parameters) : $app;
+    }
+
+    /**
+     * @return Application
+     */
+    protected function appInstance()
+    {
         if (!$this->_app) {
             $this->_app = $this->createApplication(realpath(__DIR__.'/../../../'));
-            $this->bootApplication($this->_app);
         }
-
-        return $binding ? $this->_app->__invoke($binding, $parameters) : $this->_app;
+        return $this->_app;
     }
 
     /**
@@ -42,7 +73,7 @@ trait AppTrait
      **/
     protected function createApplication($appPath)
     {
-        $app = new Application($appPath, new IOCContainer());
+        $app = new Application($appPath, $this->container());
 
         $app->setVersion('0.1.9.4')
             ->setName('Integration Test Application');
@@ -57,7 +88,9 @@ trait AppTrait
      **/
     protected function bootApplication(Application $app)
     {
-        $this->addBootstrappers($app->bootManager());
+        $bootManager = new BootManager($app->getContainer());
+        $bootManager->setApplication($app);
+        $this->addBootstrappers($bootManager);
         $app->boot();
     }
 

@@ -50,7 +50,9 @@ trait ArrayAccessMethods
      **/
     public function offsetSet($offset, $value)
     {
+        $this->fillOnce();
         $this->_attributes[$offset] = $value;
+        $this->attributesChanged();
     }
 
     /**
@@ -62,6 +64,15 @@ trait ArrayAccessMethods
     {
         $this->fillOnce();
         unset($this->_attributes[$offset]);
+        $this->attributesChanged();
+    }
+
+    /**
+     * This method is called on every data change.
+     */
+    protected function attributesChanged()
+    {
+       //
     }
 
     protected function fillOnce()

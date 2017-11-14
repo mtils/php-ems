@@ -280,6 +280,7 @@ class ManualMimeTypeProvider implements MimeTypeProvider
         'application/rtf'                                                         => ['rtf'],
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'       => ['xslx'],
         'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => ['docx'],
+        'application/vnd.php.serialized'                                          => ['phpdata'],
         'application/xhtml+xml'                                                   => ['xhtml'],
         'application/xml'                                                         => ['xml'],
         'application/x-httpd-php'                                                 => ['php', 'phtml', 'php4', 'php5', 'php3'],

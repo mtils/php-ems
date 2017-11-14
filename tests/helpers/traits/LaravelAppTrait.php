@@ -7,7 +7,7 @@ use Ems\Cache\Skeleton\CacheBootstrapper;
 use Ems\Core\Laravel\IOCContainer;
 use Ems\Core\Skeleton\CoreBootstrapper;
 use Ems\XType\Skeleton\XTypeBootstrapper;
-use Ems\Skeleton\Application;
+use Ems\Core\Application;
 use Ems\Skeleton\BootManager;
 use Illuminate\Contracts\Container\Container as Laravel;
 

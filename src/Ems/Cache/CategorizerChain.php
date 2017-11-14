@@ -30,6 +30,7 @@ class CategorizerChain implements Categorizer
      **/
     public function key($value)
     {
+
         foreach ($this->candidates as $categorizer) {
             $result = $categorizer->key($value);
             if ($result !== null) {
@@ -39,7 +40,7 @@ class CategorizerChain implements Categorizer
 
         $name = is_object($value) ? get_class($value) : gettype($value);
 
-        throw new HandlerNotFoundException("No handler found to provide an id for $name");
+        throw new HandlerNotFoundException("No handler found to provide an id for type '$name'");
     }
 
     /**
@@ -80,6 +81,24 @@ class CategorizerChain implements Categorizer
         return $this->defaultLifetime instanceof DateTime
                 ? $this->defaultLifetime
                 : (new DateTime())->modify($this->defaultLifetime);
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @param mixed $value
+     *
+     * @return array
+     */
+    public function pruneAfterForget($value)
+    {
+        foreach ($this->candidates as $categorizer) {
+            if($result = $categorizer->pruneAfterForget($value)) {
+                return $result;
+            }
+        }
+
+        return [];
     }
 
     public function getDefaultLifetime()

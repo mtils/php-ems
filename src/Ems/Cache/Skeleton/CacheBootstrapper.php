@@ -10,6 +10,9 @@ use Ems\Cache\CategorizerChain;
 use Ems\Cache\Cache;
 use Ems\Cache\Categorizer\DefaultCategorizer;
 
+/**
+ * @codeCoverageIgnore
+ **/
 class CacheBootstrapper extends Bootstrapper
 {
     protected $categorizersAdded = false;

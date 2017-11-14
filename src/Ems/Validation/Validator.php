@@ -17,13 +17,14 @@ use Ems\Core\Helper;
 use Ems\Contracts\Core\Entity;
 use Ems\Core\Lambda;
 use Ems\Core\Collections\NestedArray;
+use Ems\Expression\ConstraintParsingMethods;
 use Ems\XType\SequenceType;
 
 
 abstract class Validator implements ValidatorContract, HasInjectMethods
 {
     use HookableTrait;
-    use RuleParseMethods;
+    use ConstraintParsingMethods;
 
     /**
      * @var array
@@ -186,6 +187,19 @@ abstract class Validator implements ValidatorContract, HasInjectMethods
     {
         $flat = NestedArray::flat($input);
         return !array_key_exists($key, $flat);
+    }
+
+    /**
+     * Overwrite this method to do some processing on the rules before
+     * using them
+     *
+     * @param array $rules
+     *
+     * @return array
+     **/
+    protected function parseRules(array $rules)
+    {
+        return $this->parseConstraints($rules);
     }
 
     /**

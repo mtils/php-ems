@@ -9,6 +9,20 @@ use Ems\Core\Collections\StringList;
 use ArrayIterator;
 use RuntimeException;
 
+/**
+ * Class Url
+ *
+ * @package Ems\Core
+ *
+ * @property string     $scheme   The scheme (or protocol)
+ * @property string     $user     The user part of authority
+ * @property string     $password The password part of authority
+ * @property string     $host     The host (or domain) name
+ * @property int        $port     The tcp port
+ * @property StringList $path     The path component
+ * @property array      $query    The query parameters
+ * @property string     $fragment The last part behind #
+ **/
 class Url implements UrlContract
 {
     use StringableTrait;
@@ -347,13 +361,12 @@ class Url implements UrlContract
      *
      * @return string
      **/
-    public function renderString()
+    public function toString()
     {
         $string = '';
 
         if ($this->scheme) {
             $slashes = $this->isFlat() ? '' : '//';
-
             $string .= "{$this->scheme}:$slashes";
         }
 
@@ -361,7 +374,7 @@ class Url implements UrlContract
             $string .= $authority;
         }
 
-        if ($this->path && !$this->isFlat()) {
+        if ($this->path->count() && !$this->isFlat()) {
             $prefix = $authority || $this->path->getPrefix() ? '/' : '';
             $string .= $prefix.ltrim((string) $this->path, '/');
         }
@@ -433,6 +446,52 @@ class Url implements UrlContract
     }
 
     /**
+     * @inheritdoc
+     *
+     * @param string|Url   $other
+     * @param string|array $parts
+     *
+     * @return bool
+     */
+    public function equals($other, $parts=['scheme', 'user', 'host', 'path'])
+    {
+        $other = $other instanceof UrlContract ? $other : new static($other);
+        $parts = (array)$parts;
+
+        foreach ($parts as $part) {
+            if ($part == 'path') {
+                continue;
+            }
+            if ($this->$part != $other->$part) {
+                return false;
+            }
+        }
+
+        if (!in_array('path', $parts)) {
+            return true;
+        }
+
+        return $this->path->equals($other->path);
+    }
+
+    /**
+     * @return array
+     */
+    public function toArray()
+    {
+        return [
+            'scheme'   => $this->scheme,
+            'user'     => $this->user,
+            'password' => $this->password,
+            'host'     => $this->host,
+            'port'     => $this->port,
+            'path'     => $this->path->copy(),
+            'query'    => $this->query,
+            'fragment' => $this->fragment,
+        ];
+    }
+
+    /**
      * {@inheritdoc}
      *
      * @param array $attributes
@@ -442,13 +501,13 @@ class Url implements UrlContract
     public function replicate(array $attributes = [])
     {
         if (!isset($attributes['query'])) {
-            return new static(array_merge($this->selfToArray(), $attributes));
+            return new static(array_merge($this->toArray(), $attributes));
         }
 
         $queryAttributes = $attributes['query'];
         unset($attributes['query']);
 
-        $newAttributes = array_merge($this->selfToArray(), $attributes);
+        $newAttributes = array_merge($this->toArray(), $attributes);
 
         $newAttributes['query'] = $this->mergeOrReplaceQuery($queryAttributes);
 
@@ -460,8 +519,6 @@ class Url implements UrlContract
      * mailto: and news: are flat f.e.
      *
      * @see self::$flatSchemes
-     *
-     * @param string $scheme
      *
      * @return bool
      */
@@ -515,8 +572,11 @@ class Url implements UrlContract
     {
         $userinfo = $this->user;
 
+        // Mask password, so that in __toString an other places no passwords
+        // will be exposed to the outside.
+        // If you need the password, you have to explicit call $url->password.
         if ($this->password) {
-            $userinfo .= ":{$this->password}";
+            $userinfo .= ":xxxxxx";
         }
 
         return $userinfo;
@@ -558,20 +618,6 @@ class Url implements UrlContract
         return $array;
     }
 
-    protected function selfToArray()
-    {
-        return [
-            'scheme'   => $this->scheme,
-            'user'     => $this->user,
-            'password' => $this->password,
-            'host'     => $this->host,
-            'port'     => $this->port,
-            'path'     => $this->path->copy(),
-            'query'    => $this->query,
-            'fragment' => $this->fragment,
-        ];
-    }
-
     /**
      * Set the path inline.
      *
@@ -589,23 +635,21 @@ class Url implements UrlContract
 
         if ($path === '') {
             $this->path->setPrefix('')->setSource([]);
-
             return $this;
         }
 
         $hasLeadingSlash = ($path[0] == '/');
+        $hasTrailingSlash = (substr($path, -1) == '/');
 
         $path = is_array($path) ? $path : explode('/', trim($path, '/ '));
 
         $this->path->setSource($path);
 
-        if ($hasLeadingSlash || $this->scheme) {
-            $this->path->setPrefix('/');
+        $prefix = $hasLeadingSlash || $this->scheme ? '/' : '';
+        $suffix = $hasTrailingSlash ? '/' : '';
 
-            return $this;
-        }
-
-        $this->path->setPrefix('');
+        $this->path->setPrefix($prefix);
+        $this->path->setSuffix($suffix);
 
         return $this;
     }
@@ -668,13 +712,35 @@ class Url implements UrlContract
      **/
     protected function parseUrl($url)
     {
-        if (!$parsed = parse_url($url)) {
+        if ($parsed = parse_url($url)) {
+            return $this->addPassword($parsed);
+        }
+
+        // A second try for not file:// schemes which does support absolute
+        // paths (like sqlite:///)
+
+        // Cut the scheme by hand
+        $parts = explode(':', $url, 2);
+
+        if (count($parts) != 2 || strlen($parts[0]) > 24) {
             throw new InvalidArgumentException("Unparseable url $url");
         }
+
+        // Now cheat parse_url by giving it a file url
+        if (!$parsed = parse_url('file:'.$parts[1])) {
+            throw new InvalidArgumentException("Unparseable url $url");
+        }
+
+        $parsed['scheme'] = $parts[0];
+
+        return $this->addPassword($parsed);
+    }
+
+    protected function addPassword(array $parsed)
+    {
         if (isset($parsed['pass'])) {
             $parsed['password'] = $parsed['pass'];
         }
-
         return $parsed;
     }
 }

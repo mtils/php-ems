@@ -2,10 +2,13 @@
 
 namespace Ems\Cache;
 
+use Closure;
 use Ems\Contracts\Cache\Cache as CacheContract;
 use Ems\Contracts\Cache\Storage;
 use Ems\Contracts\Cache\Categorizer;
 use Ems\Cache\Exception\CacheMissException;
+use Ems\Core\Collections\StringList;
+use Ems\Core\Helper;
 use Ems\Core\Patterns\HookableTrait;
 use Ems\Core\Exceptions\HandlerNotFoundException;
 
@@ -21,12 +24,17 @@ class Cache implements CacheContract
     protected $storages = [];
 
     /**
-     * @var \Ems\Contracts\Cache\Storage
+     * @var array
+     **/
+    protected $bindings = [];
+
+    /**
+     * @var Storage
      **/
     protected $storage;
 
     /**
-     * @var \Ems\Contracts\Cache\Categorizer
+     * @var Categorizer
      **/
     protected $categorizer;
 
@@ -36,14 +44,12 @@ class Cache implements CacheContract
     protected $storageName;
 
     /**
-     * @param \Ems\Contracts\Cache\Categorizer $categorizer
+     * @param Categorizer $categorizer
+     * @param Storage     $storage (optional)
      **/
     public function __construct(Categorizer $categorizer)
     {
         $this->categorizer = $categorizer;
-        $this->listenerProvider = function ($event, $position='') {
-            return $this->getListeners($event, $position);
-        };
         $this->storageName = self::DEFAULT_STORAGE;
     }
 
@@ -85,9 +91,9 @@ class Cache implements CacheContract
      **/
     public function get($key, $default = null)
     {
-        $isGuessedKey = (is_object($key) || $this->isCacheableArray($key));
+        $isGuessableKey = (is_object($key) || $this->isCacheableArray($key));
 
-        $cacheId = $isGuessedKey ? $this->key($key) : $key;
+        $cacheId = $isGuessableKey ? $this->key($key) : $key;
 
         // Return without checking if no default passed
         // $cacheId is string or an array of strings
@@ -105,7 +111,7 @@ class Cache implements CacheContract
 
         $value = is_callable($default) ? call_user_func($default) : $default;
 
-        $isGuessedKey ? $this->put($cacheId, $value, $key) : $this->put($cacheId, $value);
+        $isGuessableKey ? $this->put($cacheId, $value, $key) : $this->put($cacheId, $value);
 
         return $value;
     }
@@ -166,7 +172,7 @@ class Cache implements CacheContract
      **/
     public function until($until = '+1 day')
     {
-        return $this->proxy($this, $this->storageName)->with(['until' => $until]);
+        return $this->proxy($this, $this->storage)->with(['until' => $until]);
     }
 
     /**
@@ -178,7 +184,7 @@ class Cache implements CacheContract
      **/
     public function tag($tags)
     {
-        return $this->proxy($this, $this->storageName)->with(['tag' => $tags]);
+        return $this->proxy($this, $this->storage)->with(['tag' => $tags]);
     }
 
     /**
@@ -190,7 +196,7 @@ class Cache implements CacheContract
      **/
     public function storage($name)
     {
-        return $this->proxy($this, $name);
+        return $this->proxy($this, $this->getStorage($name), $name);
     }
 
     /**
@@ -230,15 +236,34 @@ class Cache implements CacheContract
     /**
      * {@inheritdoc}
      *
-     * @param $key
+     * @param mixed $keyOrValue
      *
      * @return self
      **/
-    public function forget($key)
+    public function forget($keyOrValue)
     {
-        $this->callBeforeListeners('forget', [$this->storageName, $key]);
-        $this->storage->forget($key);
-        $this->callAfterListeners('forget', [$this->storageName, $key]);
+
+        $key = is_scalar($keyOrValue) ? $keyOrValue : null;
+
+        $tags = [];
+
+        if (!$key) {
+            $key = $this->categorizer->key($keyOrValue);
+            $tags = $this->categorizer->tags($keyOrValue);
+        }
+
+        if (!$key) {
+            throw new HandlerNotFoundException("No categorizer found a key for " . Helper::typeName($keyOrValue));
+        }
+
+        $this->callBeforeListeners('forget', [$this->storageName, $key, $tags]);
+        $this->storage->forget($this->storage->escape($key));
+
+        if ($tags) {
+            $this->prune($tags);
+        }
+
+        $this->callAfterListeners('forget', [$this->storageName, $key, $tags]);
 
         return $this;
     }
@@ -263,18 +288,28 @@ class Cache implements CacheContract
     /**
      * {@inheritdoc}
      *
-     * @param string  $name
-     * @param Storage $store
+     * @param string          $name
+     * @param Storage|Closure $storage
      *
      * @return self
      **/
-    public function addStorage($name, Storage $store)
+    public function addStorage($name, $storage)
     {
+
+        $isClosure = $storage instanceof Closure;
+
         if ($name == self::DEFAULT_STORAGE) {
-            $this->storage = $store;
+            $this->storage = $isClosure ? $storage($name) : $storage;
+            $this->storages[$name] = $this->storage;
+            return $this;
         }
 
-        $this->storages[$name] = $store;
+        if ($isClosure) {
+            $this->bindings[$name] = $storage;
+            return $this;
+        }
+
+        $this->storages[$name] = $storage;
 
         return $this;
     }
@@ -282,47 +317,34 @@ class Cache implements CacheContract
     /**
      * {@inheritdoc}
      *
-     * @param string $name (optional)
-     *
-     * @throws \Ems\Contracts\NotFound
-     *
-     * @return Storage
+     * @return StringList
      **/
-    public function getStorage($name=null)
+    public function storageNames()
     {
-        $name = $name ?: self::DEFAULT_STORAGE;
+        $names = [];
 
-        if (isset($this->storages[$name])) {
-            return $this->storages[$name];
+        foreach ($this->storages as $name=>$storage) {
+            $names[$name] = true;
         }
 
-        throw new HandlerNotFoundException("No Storage saved under $name");
+        foreach ($this->bindings as $name=>$binding) {
+            $names[$name] = true;
+        }
+
+        return new StringList(array_keys($names));
     }
 
     /**
      * {@inheritdoc}
      *
-     * @see \Ems\Contracts\Core\Storage
      *
      * @return bool (if successfull)
      **/
-    public function persist()
+    public function clear()
     {
-        return true;
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @see \Ems\Contracts\Core\Storage
-     *
-     * @return bool (if successfull)
-     **/
-    public function purge()
-    {
-        $this->callBeforeListeners('purge', [$this->storageName]);
+        $this->callBeforeListeners('clear', [$this->storageName]);
         $result = $this->storage->clear();
-        $this->callAfterListeners('purge', [$this->storageName]);
+        $this->callAfterListeners('clear', [$this->storageName]);
 
         return $result;
     }
@@ -342,7 +364,7 @@ class Cache implements CacheContract
     /**
      * Get value of $offset.
      *
-     * @see \Ems\Contracts\Core\Storage
+     * @see Storage
      *
      * @param mixed $offset
      *
@@ -385,25 +407,51 @@ class Cache implements CacheContract
      **/
     public function methodHooks()
     {
-        return ['put', 'increment', 'decrement', 'forget', 'prune', 'purge'];
+        return ['put', 'increment', 'decrement', 'forget', 'prune', 'clear'];
     }
 
     /**
      * Create a new proxy for a different storage.
      *
      * @param self    $parent
-     * @param string  $storageName
+     * @param Storage $storage
+     * @param string  $storageName (optional)
      *
      * @return CacheProxy
      **/
-    protected function proxy($parent, $storageName)
+    protected function proxy($parent, Storage $storage, $storageName=self::DEFAULT_STORAGE)
     {
         return new CacheProxy(
             $parent,
-            $storageName,
             $this->categorizer,
-            $this->listenerProvider
+            $storage,
+            $storageName
         );
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @param string $name (optional)
+     *
+     * @throws \Ems\Contracts\NotFound
+     *
+     * @return Storage
+     **/
+    protected function getStorage($name=null)
+    {
+        $name = $name ?: self::DEFAULT_STORAGE;
+
+        if (isset($this->storages[$name])) {
+            return $this->storages[$name];
+        }
+
+        if (isset($this->bindings[$name])) {
+            $this->storages[$name] = call_user_func($this->bindings[$name], $name);
+            return $this->storages[$name];
+        }
+
+        throw new HandlerNotFoundException("No Storage saved under $name");
     }
 
     /**

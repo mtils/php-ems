@@ -45,7 +45,7 @@ interface IOCContainer
      * @param string $abstract
      * @param bool   $processParameters (optional)
      *
-     * @return \Closure
+     * @return ContainerCallable
      **/
     public function provide($abstract, $processParameters = false);
 

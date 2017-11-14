@@ -123,6 +123,25 @@ class RuleTest extends \Ems\TestCase
         $this->assertEquals($rules, "$definition");
     }
 
+    public function test_setOperator_returns_instance()
+    {
+        $rules = 'required|exists:users.id|unique|in:one,two,three';
+        $definition = $this->newRule($rules);
+
+        $this->assertSame($definition, $definition->setOperator('and'));
+    }
+
+    /**
+     * @expectedException InvalidArgumentException
+     **/
+    public function test_setOperator_with_not_and_throws_exception()
+    {
+        $rules = 'required|exists:users.id|unique|in:one,two,three';
+        $definition = $this->newRule($rules);
+
+        $this->assertSame($definition, $definition->setOperator('or'));
+    }
+
     /**
      * @expectedException Ems\Core\Exceptions\KeyNotFoundException
      **/

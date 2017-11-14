@@ -25,7 +25,7 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
      **/
     public function __construct($source = null)
     {
-        if ($source) {
+        if ($source !== null) {
             $this->setSource($source);
         }
     }
@@ -94,8 +94,6 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
      **/
     public function insert($index, $value)
     {
-        $newArray = [];
-        $pastInsertPosition = false;
         $count = $this->count();
 
         if ($index == $count) {
@@ -447,7 +445,7 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
     /**
      * Copies the list or its extended class.
      * 
-     * @return self
+     * @return $this
      */
     public function copy()
     {

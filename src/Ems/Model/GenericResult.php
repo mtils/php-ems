@@ -10,15 +10,12 @@ use UnexpectedValueException;
 
 class GenericResult implements Result
 {
+    use ResultTrait;
+
     /**
      * @var callable
      **/
     protected $getter;
-
-    /**
-     * @var object
-     **/
-    protected $creator;
 
     /**
      * Pass a callable which will return the complete result.
@@ -29,17 +26,7 @@ class GenericResult implements Result
     public function __construct(callable $getter, $creator = null)
     {
         $this->setGetter($getter);
-        $this->creator = $creator ? $creator : $this->creator;
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @return object
-     **/
-    public function creator()
-    {
-        return $this->creator;
+        $this->_creator = $creator ? $creator : $this->_creator;
     }
 
     /**
@@ -86,7 +73,7 @@ class GenericResult implements Result
         $this->getter = $getter;
 
         if (is_array($getter) && is_object($getter[0])) {
-            $this->creator = $getter[0];
+            $this->_creator = $getter[0];
         }
 
         return $this;

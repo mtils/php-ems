@@ -2,17 +2,39 @@
 
 namespace Ems\Core\Skeleton;
 
-use Ems\Contracts\Core\PathFinder;
+use Ems\Contracts\Core\ConnectionPool as ConnectionPoolContract;
+use Ems\Contracts\Core\Extractor as ExtractorContract;
+use Ems\Contracts\Core\Filesystem;
 use Ems\Contracts\Core\HasInjectMethods;
+use Ems\Contracts\Core\InputCaster as InputCasterContract;
+use Ems\Contracts\Core\InputCorrector as InputCorrectorContract;
+use Ems\Contracts\Core\Localizer;
+use Ems\Contracts\Core\MimeTypeProvider;
+use Ems\Contracts\Core\PathFinder as PathFinderContract;
+use Ems\Contracts\Core\Renderer;
+use Ems\Contracts\Core\StringConverter;
 use Ems\Contracts\Core\SupportsCustomFactory;
+use Ems\Contracts\Core\TextFormatter as TextFormatterContract;
+use Ems\Contracts\Core\TextParser;
+use Ems\Contracts\Core\Url;
+use Ems\Core\ArrayLocalizer;
+use Ems\Core\Extractor;
+use Ems\Core\InputCaster;
+use Ems\Core\InputCorrector;
+use Ems\Core\LocalFilesystem;
+use Ems\Core\ManualMimeTypeProvider;
+use Ems\Core\PathFinder;
 use Ems\Core\TextFormatter;
 use Ems\Core\StringConverterChain;
 use Ems\Core\StringConverter\MBStringConverter;
 use Ems\Core\StringConverter\IconvStringConverter;
 use Ems\Core\StringConverter\AsciiStringConverter;
+use Ems\Core\Support\RendererChain;
 use Ems\Core\TextParserQueue;
 use Ems\Core\VariablesTextParser;
 use Ems\Core\AnythingProvider;
+use Ems\Core\ConnectionPool;
+use Ems\Core\FilesystemConnection;
 use ReflectionClass;
 use ReflectionMethod;
 
@@ -22,17 +44,18 @@ class CoreBootstrapper extends Bootstrapper
      * @var array
      **/
     protected $singletons = [
-        'Ems\Core\LocalFilesystem'        => 'Ems\Contracts\Core\Filesystem',
-        'Ems\Core\ManualMimeTypeProvider' => 'Ems\Contracts\Core\MimeTypeProvider',
-        'Ems\Core\Support\RendererChain'  => 'Ems\Contracts\Core\Renderer',
-        'Ems\Core\PathFinder'             => 'Ems\Contracts\Core\PathFinder',
-        'Ems\Core\InputCorrector'         => 'Ems\Contracts\Core\InputCorrector',
-        'Ems\Core\InputCaster'            => 'Ems\Contracts\Core\InputCaster',
-        'Ems\Core\StringConverterChain'   => 'Ems\Contracts\Core\StringConverter',
-        'Ems\Core\ArrayLocalizer'         => 'Ems\Contracts\Core\Localizer',
-        'Ems\Core\TextFormatter'          => 'Ems\Contracts\Core\TextFormatter',
-        'Ems\Core\TextParserQueue'        => 'Ems\Contracts\Core\TextParser',
-        'Ems\Core\Extractor'              => 'Ems\Contracts\Core\Extractor'
+        LocalFilesystem::class            => Filesystem::class,
+        ManualMimeTypeProvider::class     => MimeTypeProvider::class,
+        RendererChain::class              => Renderer::class,
+        PathFinder::class                 => PathFinderContract::class,
+        InputCorrector::class             => InputCorrectorContract::class,
+        InputCaster::class                => InputCasterContract::class,
+        StringConverterChain::class       => StringConverter::class,
+        ArrayLocalizer::class             => Localizer::class,
+        TextFormatter::class              => TextFormatterContract::class,
+        TextParserQueue::class            => TextParser::class,
+        Extractor::class                  => ExtractorContract::class,
+        ConnectionPool::class             => ConnectionPoolContract::class
     ];
 
     /**
@@ -76,6 +99,14 @@ class CoreBootstrapper extends Bootstrapper
         $this->app->resolving(HasInjectMethods::class, function (HasInjectMethods $object) {
             $this->autoInjectDependendies($object);
         });
+
+        $this->app->resolving(ConnectionPoolContract::class, function (ConnectionPoolContract $pool) {
+            $pool->extend('php', function (Url $url) {
+                if ($url->scheme == 'php' || $url->scheme == 'file') {
+                    return new FilesystemConnection($url);
+                }
+            });
+        });
     }
 
     /**
@@ -93,7 +124,7 @@ class CoreBootstrapper extends Bootstrapper
     /**
      * Dynamically assign all StringConverters (based on installment)
      *
-     * @param StringConverterChain
+     * @param StringConverterChain $chain
      */
     protected function addStringConverters(StringConverterChain $chain)
     {

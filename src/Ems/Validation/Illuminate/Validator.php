@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Model as EloquentModel;
 use Ems\Contracts\Validation\Validation;
 use Ems\Validation\Validator as AbstractValidator;
 use Ems\Validation\ValidationException;
-use Ems\Validation\RuleParseMethods;
 use Ems\Core\Helper;
 use Ems\Core\Exceptions\KeyNotFoundException;
 use Ems\Core\Exceptions\UnConfiguredException;

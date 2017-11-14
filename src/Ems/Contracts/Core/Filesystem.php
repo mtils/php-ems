@@ -30,10 +30,11 @@ interface Filesystem
      * @param string   $path
      * @param string   $contents
      * @param bool|int $lock (default:false) Enable locking or directly set the mode (LOCK_EX,...)
+     * @param resource $handle (optional)
      *
      * @return int written bytes
      **/
-    public function write($path, $contents, $lock = false);
+    public function write($path, $contents, $lock = false, $handle = null);
 
     /**
      * Read a whole file or just a few bytes of a file
@@ -45,14 +46,15 @@ interface Filesystem
     public function read($path, $bytes = 0, $handle = null);
 
     /**
-     * Return a file handle or throw an exception. (Mostly the same as fopen())
+     * Return a file handle or throw an exception. (Mostly the same as fopen()).
+     * Pass an array to get a stream context.
      *
-     * @param string $path
-     * @param string $mode
+     * @param string|array $pathOrContext
+     * @param string       $mode
      *
      * @return resource
      **/
-    public function handle($path, $mode='rb');
+    public function handle($pathOrContext, $mode='rb');
 
     /**
      * Delete the path $path. Deletes directories, links and files.

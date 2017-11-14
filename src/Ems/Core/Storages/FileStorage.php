@@ -3,19 +3,36 @@
 namespace Ems\Core\Storages;
 
 
-use Ems\Contracts\Core\Storage;
+use Ems\Contracts\Core\UnbufferedStorage;
 use Ems\Contracts\Core\Configurable;
 use Ems\Contracts\Core\Serializer as SerializerContract;
 use Ems\Contracts\Core\Filesystem as FilesystemContract;
+use Ems\Contracts\Core\MimetypeProvider;
+use Ems\Core\Collections\StringList;
 use Ems\Contracts\Core\Url as UrlContract;
 use Ems\Core\ConfigurableTrait;
-use Ems\Core\Support\ArrayAccessMethods;
+use Ems\Core\Exceptions\UnConfiguredException;
+use Ems\Core\Exceptions\UnsupportedParameterException;
+use Ems\Core\LocalFilesystem;
+use Ems\Core\ManualMimetypeProvider;
+use Ems\Core\Serializer as NativeSerializer;
 use Ems\Core\Exceptions\DataIntegrityException;
+use RuntimeException;
 
-class FileStorage implements Storage, Configurable
+/**
+ * The FileStorage is a completely unbuffered storage.
+ * Almost every call to method on it will result in filesystem access.
+ * So just it internally or with a proxy to implement buffering around it.
+ **/
+class FileStorage implements UnbufferedStorage, Configurable
 {
-    use ArrayAccessMethods;
     use ConfigurableTrait;
+    use SerializeOptions;
+
+    /**
+     * @var SerializerContract
+     **/
+    protected $serializer;
 
     /**
      * @var FilesystemContract
@@ -23,9 +40,14 @@ class FileStorage implements Storage, Configurable
     protected $filesystem;
 
     /**
-     * @var SerializerContract
+     * @var MimetypeProvider
      **/
-    protected $serializer;
+    protected $mimetypes;
+
+    /**
+     * @var string
+     **/
+    protected $fileExtension = '';
 
     /**
      * @var callable
@@ -49,17 +71,20 @@ class FileStorage implements Storage, Configurable
      * @param FilesystemContract $filesystem
      * @param SerializerContract $serializer
      **/
-    public function __construct(FilesystemContract $filesystem, SerializerContract $serializer)
+    public function __construct(SerializerContract $serializer=null,
+                                FilesystemContract $filesystem=null,
+                                MimetypeProvider $mimetypes=null)
     {
-        $this->filesystem = $filesystem;
-        $this->serializer = $serializer;
+        $this->serializer = $serializer ?: new NativeSerializer;
+        $this->filesystem = $filesystem ?: new LocalFilesystem;
+        $this->mimetypes = $mimetypes ?: new ManualMimetypeProvider;
         $this->checksummer = function ($method, $data) {
             return $method == 'strlen' ? strlen($data) : hash($method, $data);
         };
     }
 
     /**
-     * The file url
+     * The directory url
      *
      * @return UrlContract
      **/
@@ -69,7 +94,7 @@ class FileStorage implements Storage, Configurable
     }
 
     /**
-     * Set the file url
+     * Set the directory url
      *
      * @param UrlContract $url
      *
@@ -82,38 +107,170 @@ class FileStorage implements Storage, Configurable
     }
 
     /**
-     * {@inheritdoc}
+     * Return if the key $key does exist. At the end if the file exists.
      *
-     * @return bool (if successfull)
+     * @param string $offset
+     *
+     * @return bool
      **/
-    public function persist()
+    public function offsetExists($offset)
     {
-        $blob = $this->serializer->serialize($this->_attributes);
+        return $this->filesystem->exists($this->fileOfKey($offset));
+    }
 
-        $result = (bool)$this->filesystem->write($this->url, $blob, $this->getOption('file_locking'));
+    /**
+     * Return the data of $offset. No error handling is done here. You have to
+     * catch the filesystem exceptions by yourself.
+     *
+     * @param string $offset
+     *
+     * @return mixed
+     **/
+    public function offsetGet($offset)
+    {
+        $file = $this->fileOfKey($offset);
+        return $this->serializer->deserialize($this->filesystem->contents($file));
+    }
 
-        if (!$hashMethod = $this->getOption('checksum_method')) {
-            return $result;
+    /**
+     * Put data into this storage. At least write a file.
+     *
+     * @param string $offset
+     * @param mixed  $value
+     **/
+    public function offsetSet($offset, $value)
+    {
+        $this->ensureDirectory($this->urlOrFail());
+
+        $this->checkKey($offset);
+
+        $fileUrl = $this->fileOfKey($offset);
+        $hashMethod = $this->getOption('checksum_method');
+
+        if (!$hashMethod) {
+            $this->filesystem->write(
+                $fileUrl,
+                $this->serializer->serialize($value, $this->serializeOptions),
+                $this->getOption('file_locking')
+            );
+
+            return;
         }
+
+        $blob = $this->serializer->serialize($value, $this->serializeOptions);
+
+        $this->filesystem->write(
+                $fileUrl,
+                $blob,
+                $this->getOption('file_locking')
+            );
 
         $checksum = $this->createChecksum($hashMethod, $blob);
 
-        $savedBlob = $this->filesystem->contents($this->url, 0, false);
+        $savedBlob = $this->filesystem->contents($fileUrl, 0, false);
 
         $this->checkData($hashMethod, $savedBlob, $checksum);
+    }
 
-        return $result;
+    /**
+     * Unset $offset. If the file or the directory does not exist, just ignore
+     * the error
+     *
+     * @param string $offset
+     **/
+    public function offsetUnset($offset)
+    {
+        $url = $this->urlOrFail();
+
+        // Just ignore unsetting keys that do not exist
+        if (!$this->filesystem->isDirectory($this->urlOrFail())) {
+            return;
+        }
+
+        $fileName = $this->fileOfKey($offset);
+
+        if ($this->filesystem->exists($fileName)) {
+            $this->filesystem->delete($fileName);
+        }
+    }
+
+    /**
+     * @param array $keys (optional)
+     *
+     * @return self
+     **/
+    public function clear(array $keys=null)
+    {
+        $keys = $keys === null ? $this->keys() : $keys;
+
+        foreach ($keys as $key) {
+            $this->offsetUnset($key);
+        }
+
+        return $this;
     }
 
     /**
      * {@inheritdoc}
      *
-     * @return bool (if successfull)
+     * @return StringList
      **/
-    public function purge()
+    public function keys()
     {
-        $this->_attributes = [];
-        return $this->filesystem->delete($this->url);
+
+        $keys = new StringList();
+        $url = $this->urlOrFail();
+
+        if (!$this->filesystem->isDirectory($this->urlOrFail())) {
+            return $keys;
+        }
+
+        $fileExtension = $this->fileExtension();
+
+        foreach ($this->filesystem->listDirectory($this->urlOrFail()) as $fileName) {
+
+            if ($this->filesystem->extension($fileName) != $fileExtension) {
+                continue;
+            }
+
+            if ($this->filesystem->isDirectory($fileName)) {
+                continue;
+            }
+
+            $keys->append($this->keyOfFile($fileName));
+
+        }
+
+        return $keys;
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * CAUTION: Be careful with this method! You will perhaps end up in filling
+     * your whole memory with this.
+     *
+     * @return array
+     **/
+    public function toArray()
+    {
+        $data = [];
+
+        foreach ($this->keys() as $key) {
+            $data[$key] = $this->offsetGet($key);
+        }
+
+        return $data;
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @return string
+     **/
+    public function storageType()
+    {
+        return self::FILESYSTEM;
     }
 
     /**
@@ -132,19 +289,6 @@ class FileStorage implements Storage, Configurable
     }
 
     /**
-     * Load the data from filesystem
-     **/
-    protected function fillAttributes()
-    {
-        if (!$this->filesystem->exists($this->url)) {
-            return;
-        }
-
-        $blob = $this->filesystem->contents($this->url);
-        $this->_attributes = $this->serializer->deserialize($blob);
-    }
-
-    /**
      * Check the data integrity by the passed checkum. If invalid throw an
      * exception
      *
@@ -154,11 +298,25 @@ class FileStorage implements Storage, Configurable
      *
      * @throws Ems\Contracts\Core\Errors\DataCorruption
      **/
-    protected function checkData($method, $data, $checksum)
+    protected function checkData($method, &$data, $checksum)
     {
         $freshChecksum = $this->createChecksum($method, $data);
         if ($freshChecksum != $checksum) {
             throw new DataIntegrityException('Checksum of file '.$this->getUrl()." failed. ($freshChecksum != $checksum)");
+        }
+    }
+
+    /**
+     * Checks for filesystem compatible keys.
+     *
+     * @param string $offset
+     *
+     * @throws UnsupportedParameterException
+     **/
+    protected function checkKey($offset)
+    {
+        if (preg_match('/^[\pL\pM\pN_-]+$/u', $offset) == 0) {
+            throw new UnsupportedParameterException("The key has to be filesystem compatible");
         }
     }
 
@@ -170,8 +328,64 @@ class FileStorage implements Storage, Configurable
      *
      * @return string
      **/
-    protected function createChecksum($method, $data)
+    protected function createChecksum($method, &$data)
     {
         return call_user_func($this->checksummer, $method, $data);
     }
+
+    protected function keyOfFile($fileName)
+    {
+        return $this->filesystem->name($fileName);
+    }
+
+    protected function fileOfKey($key)
+    {
+        return $this->urlOrFail()->append("$key." . $this->fileExtension());
+    }
+
+    /**
+     * Get the file extension for the cache files
+     *
+     * @return string
+     **/
+    protected function fileExtension()
+    {
+        if (!$this->fileExtension) {
+            $mimeType = $this->serializer->mimeType();
+            $this->fileExtension = $this->mimetypes->fileExtensions($mimeType)[0];
+        };
+        return $this->fileExtension;
+    }
+
+    /**
+     * Returns the assigned url or fails
+     *
+     * @return Url
+     *
+     * @throws UnConfiguredException
+     **/
+    protected function urlOrFail()
+    {
+        if (!$this->url) {
+            throw new UnConfiguredException("Assign a directory via setUrl()");
+        }
+        return $this->url;
+    }
+
+    /**
+     * Ensure the base directory exists
+     **/
+    protected function ensureDirectory($dir)
+    {
+        if ($this->filesystem->isDirectory($dir)) {
+            return true;
+        }
+
+        if (!@$this->filesystem->makeDirectory($dir)) {
+            throw new RuntimeException("Cannot create base directory '$dir'");
+        }
+
+        return true;
+    }
+
 }

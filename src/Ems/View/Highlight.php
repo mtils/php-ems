@@ -459,7 +459,7 @@ class Highlight extends View implements HighlightContract
     {
         $this->fillAttributes();
 
-        return $this->renderString();
+        return $this->toString();
     }
 
     protected function renderOrCache()
