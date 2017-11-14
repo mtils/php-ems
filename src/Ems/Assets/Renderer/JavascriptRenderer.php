@@ -30,6 +30,7 @@ class JavascriptRenderer extends AbstractRenderer
      **/
     protected function renderInline(Asset $asset, $group)
     {
-        return "<script>\n".$asset->content()."\n</script>";
+        /** @noinspection Annotator */
+        return '<script>' . "\n" . $asset->content() . "\n" . '</script>';
     }
 }

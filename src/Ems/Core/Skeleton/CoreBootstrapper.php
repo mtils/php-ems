@@ -67,6 +67,8 @@ class CoreBootstrapper extends Bootstrapper
 
     /**
      * Perform resolving hooks
+     *
+     * @return void
      **/
     public function bind()
     {
@@ -101,10 +103,12 @@ class CoreBootstrapper extends Bootstrapper
         });
 
         $this->app->resolving(ConnectionPoolContract::class, function (ConnectionPoolContract $pool) {
+            /** @return void */
             $pool->extend('php', function (Url $url) {
                 if ($url->scheme == 'php' || $url->scheme == 'file') {
                     return new FilesystemConnection($url);
                 }
+                return null;
             });
         });
     }

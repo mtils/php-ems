@@ -8,7 +8,7 @@ use Ems\Core\Exceptions\ResourceNotFoundException;
 use Ems\Core\Exceptions\ResourceLockedException;
 use ErrorException;
 
-class LocalFilesystem implements FileSystem
+class LocalFilesystem implements Filesystem
 {
     /**
      * @var MimeTypeProvider

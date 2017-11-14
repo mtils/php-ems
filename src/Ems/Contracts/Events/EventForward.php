@@ -54,7 +54,6 @@ class EventForward
      * @param HasListeners $source (optional)
      * @param string|array $event (optional)
      *
-     * @return self
      **/
     public function __construct(HasListeners $source=null, $event=null)
     {
@@ -172,14 +171,17 @@ class EventForward
         }
 
         if (!$this->source instanceof Subscribable) {
-            return $this->listenToHookable($targetEventName);
+            $this->listenToHookable($targetEventName);
+            return;
         }
 
         if (!$this->source instanceof Bus) {
-            return $this->listenToSubscribable($targetEventName);
+            $this->listenToSubscribable($targetEventName);
+            return;
         }
 
-        return $this->listenToBus($targetEventName);
+        $this->listenToBus($targetEventName);
+        return;
 
     }
 
@@ -439,7 +441,7 @@ class EventForward
 
             // We do the wildcard matching by ourselfs here...
             if (!$this->matchesPattern($originalEventName, $sourcePattern)) {
-                return;
+                return null;
             }
 
 

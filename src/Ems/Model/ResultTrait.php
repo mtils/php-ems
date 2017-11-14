@@ -38,6 +38,7 @@ trait ResultTrait
         foreach ($this->getIterator() as $result) {
             return $result;
         }
+        return null;
     }
 
     /**

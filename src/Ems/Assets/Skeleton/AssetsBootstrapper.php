@@ -78,36 +78,6 @@ class AssetsBootstrapper extends Bootstrapper
         $this->addJsRenderer($chain);
     }
 
-    protected function registerAppPathCreator($factory)
-    {
-        return;
-        if (!$this->app->isLocal()) {
-            return;
-        }
-
-        return;
-        $factory->createMapperBy(function ($group, $mapping) {
-
-            if (in_array($group, ['css', 'js'])) {
-                $mapper = $this->app->__invoke('Ems\Contracts\Core\AppPath');
-                $mapper->setBasePath($mapping['path']);
-                $mapper->setBaseUrl($mapping['url']);
-
-                return $mapper;
-            }
-
-            $mapper = $this->app->__invoke('Ems\Contracts\Core\AppPath');
-
-            $mapper->setBasePath($mapping['path']);
-
-            $url = route('_ems-assets.show');
-            $url .= "?group=$group&file=";
-            $mapper->setBaseUrl($url);
-
-            return $mapper;
-        });
-    }
-
     /**
      * This method assumes that the CoreBootstrapper already has assigned
      * a "assets" path and url.

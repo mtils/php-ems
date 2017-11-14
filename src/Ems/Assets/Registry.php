@@ -286,6 +286,8 @@ class Registry extends PathFinderProxy implements RegistryContract
      * @param string $offset
      * @param mixed  $value
      *
+     * @return void
+     *
      * @throws \BadMethodCallException
      **/
     public function offsetSet($offset, $value)
@@ -297,6 +299,8 @@ class Registry extends PathFinderProxy implements RegistryContract
      * Not allowed.
      *
      * @param string $offset
+     *
+     * @return void
      *
      * @throws \BadMethodCallException
      **/

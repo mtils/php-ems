@@ -373,7 +373,7 @@ class CsvReadIterator implements ContentIterator
     protected function readNext($handle, $chunkSize)
     {
         if (feof($handle)) {
-            return;
+            return null;
         }
 
         $row = $this->readRow($handle, $chunkSize);

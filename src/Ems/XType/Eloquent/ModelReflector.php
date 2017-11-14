@@ -147,7 +147,7 @@ class ModelReflector
         $casts = $this->getCasts($model);
 
         if (!isset($casts[$key])) {
-            return;
+            return '';
         }
 
         $cast = $casts[$key];

@@ -42,11 +42,14 @@ trait PublicAttributeFilling
 
     /**
      * Get attributes from provider or an empty array.
+     *
+     * @return void
      **/
     protected function autoAssignAttributes()
     {
         if ($this->_attributesAssigner) {
-            return call_user_func($this->_attributesAssigner, $this);
+            call_user_func($this->_attributesAssigner, $this);
+            return;
         }
 
         $attributes = isset($this->defaultAttributes) ? $this->defaultAttributes : [];

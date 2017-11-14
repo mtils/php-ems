@@ -284,6 +284,7 @@ class Repository implements ExtendableRepository
      **/
     protected function validate(array $attributes, $action = 'update')
     {
+        return true;
     }
 
     /**

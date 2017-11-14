@@ -216,7 +216,7 @@ trait ConditionalTrait
         $allowedConnectives = $this->allowedConnectives();
 
         if ($allowedConnectives && !in_array($boolean, $allowedConnectives)) {
-            throw new UnSupportedParameterException("This logical group only accept connectives:" . implode($allowedConnectives));
+            throw new UnsupportedParameterException("This logical group only accept connectives:" . implode($allowedConnectives));
         }
 
         $fork = $this->fork($conditions, $boolean);

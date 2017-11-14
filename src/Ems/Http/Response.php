@@ -363,12 +363,12 @@ class Response implements ResponseContract
     /**
      * Try to create the payload out of the assigned body.
      *
-     * @return bool|float|int|mixed|string|void
+     * @return mixed
      */
     protected function createPayload()
     {
         if (!$this->body) {
-            return;
+            return null;
         }
 
         if (!$this->serializer) {

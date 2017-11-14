@@ -276,5 +276,7 @@ class ValidationConverter implements ConverterContract
             return $this->textProvider->get($customTranslationKey);
         }
 
+        return '';
+
     }
 }

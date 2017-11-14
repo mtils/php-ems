@@ -294,11 +294,11 @@ class Manager implements ManagerContract
     protected function getBuildConfig($group)
     {
         if (!$this->buildRepository || !$this->checkBuilds) {
-            return;
+            return null;
         }
 
         if (!$this->buildRepository->has($group)) {
-            return;
+            return null;
         }
 
         $config = $this->buildRepository->getOrFail($group);
@@ -310,7 +310,7 @@ class Manager implements ManagerContract
         }
 
         if (!$this->buildRepository->compiledFileExists($config)) {
-            return;
+            return null;
         }
 
         return $config;

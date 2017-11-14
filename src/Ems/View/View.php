@@ -97,5 +97,6 @@ class View implements ViewContract
     public function setMimeType($mimeType)
     {
         $this->mimeType = $mimeType;
+        return $this;
     }
 }

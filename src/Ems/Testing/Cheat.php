@@ -43,7 +43,7 @@ class Cheat
         $reflection = new ReflectionProperty($object, $property);
         $reflection->setAccessible(true);
 
-        return $reflection->setValue($object, $value);
+        $reflection->setValue($object, $value);
     }
 
     /**

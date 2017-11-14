@@ -65,6 +65,7 @@ class GuessingAddressExtractor implements AddressExtractor
      **/
     public function name($contact)
     {
+        return null;
     }
 
     public function isMapped($name)

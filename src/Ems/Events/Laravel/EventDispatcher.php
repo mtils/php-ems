@@ -98,7 +98,7 @@ class EventDispatcher implements Dispatcher
             $subscriber->subscribe($this);
             return;
         }
-        return $this->subscribe(new $subscriber);
+        $this->subscribe(new $subscriber);
     }
 
     /**

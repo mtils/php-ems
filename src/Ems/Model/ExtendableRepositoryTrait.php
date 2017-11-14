@@ -206,9 +206,8 @@ trait ExtendableRepositoryTrait
      * @param mixed  $arg2   (optional)
      * @param mixed  $arg3   (optional)
      * @param mixed  $arg4   (optional)
-     * @param mixed  $arg5   (optional)
      **/
-    protected function publish($method, $arg1 = null, $arg2 = null, $arg3 = null, $arg4 = null, $arg5 = null)
+    protected function publish($method, $arg1 = null, $arg2 = null, $arg3 = null, $arg4 = null)
     {
         $args = func_get_args();
         array_shift($args);

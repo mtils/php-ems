@@ -72,7 +72,7 @@ class GlobalTaggingRepository implements RepositoryContract
         $resourceName = $holder->resourceName();
 
         if (!$tags = $this->tagsByForeignId($this->collectIds($tagHolders), $resourceName)) {
-            return;
+            return $this;
         }
 
         foreach ($tagHolders as $holder) {
@@ -84,6 +84,7 @@ class GlobalTaggingRepository implements RepositoryContract
                 $holder->attachTag($tag);
             }
         }
+        return $this;
     }
 
     /**
@@ -125,6 +126,7 @@ class GlobalTaggingRepository implements RepositoryContract
 
             $query->insert($records);
         }
+        return $this;
     }
 
     /**
@@ -322,5 +324,6 @@ class GlobalTaggingRepository implements RepositoryContract
         foreach ($traversable as $item) {
             return $item;
         }
+        return null;
     }
 }

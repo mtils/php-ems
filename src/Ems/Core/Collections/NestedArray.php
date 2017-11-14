@@ -388,6 +388,8 @@ class NestedArray implements ArrayAccess, Countable, IteratorAggregate
      * @param array  $nested
      * @param string $key
      * @param string $delimiter
+     *
+     * @return mixed
      **/
     public static function get(array $nested, $key, $delimiter = '.')
     {
@@ -401,7 +403,7 @@ class NestedArray implements ArrayAccess, Countable, IteratorAggregate
 
         foreach (explode($delimiter, $key) as $segment) {
             if (!is_array($nested) || !array_key_exists($segment, $nested)) {
-                return;
+                return null;
             }
 
             $nested = $nested[$segment];

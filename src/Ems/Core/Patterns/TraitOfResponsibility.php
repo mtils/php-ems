@@ -106,6 +106,8 @@ trait TraitOfResponsibility
                 return $candidate;
             }
         }
+
+        return null;
     }
 
     /**
@@ -150,6 +152,8 @@ trait TraitOfResponsibility
             }
 
         }
+
+        return null;
     }
 
     /**

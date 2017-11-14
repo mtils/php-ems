@@ -106,7 +106,7 @@ class PDOPrepared implements Prepared
         $this->bindAndRun($bindings);
 
         if (!$returnAffectedRows) {
-            return;
+            return null;
         }
 
         return $this->statement->rowCount();
@@ -139,6 +139,8 @@ class PDOPrepared implements Prepared
         if ($this->errorHandler) {
             call_user_func($this->errorHandler, $e, $this->query);
         }
+
+        return null;
     }
 
     /**

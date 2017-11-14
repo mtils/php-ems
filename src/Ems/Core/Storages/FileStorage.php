@@ -7,14 +7,14 @@ use Ems\Contracts\Core\UnbufferedStorage;
 use Ems\Contracts\Core\Configurable;
 use Ems\Contracts\Core\Serializer as SerializerContract;
 use Ems\Contracts\Core\Filesystem as FilesystemContract;
-use Ems\Contracts\Core\MimetypeProvider;
+use Ems\Contracts\Core\MimeTypeProvider;
 use Ems\Core\Collections\StringList;
 use Ems\Contracts\Core\Url as UrlContract;
 use Ems\Core\ConfigurableTrait;
 use Ems\Core\Exceptions\UnConfiguredException;
 use Ems\Core\Exceptions\UnsupportedParameterException;
 use Ems\Core\LocalFilesystem;
-use Ems\Core\ManualMimetypeProvider;
+use Ems\Core\ManualMimeTypeProvider;
 use Ems\Core\Serializer as NativeSerializer;
 use Ems\Core\Exceptions\DataIntegrityException;
 use RuntimeException;
@@ -70,10 +70,11 @@ class FileStorage implements UnbufferedStorage, Configurable
     /**
      * @param FilesystemContract $filesystem
      * @param SerializerContract $serializer
+     * @param MimeTypeProvider   $mimetypes
      **/
     public function __construct(SerializerContract $serializer=null,
                                 FilesystemContract $filesystem=null,
-                                MimetypeProvider $mimetypes=null)
+                                MimeTypeProvider $mimetypes=null)
     {
         $this->serializer = $serializer ?: new NativeSerializer;
         $this->filesystem = $filesystem ?: new LocalFilesystem;
@@ -137,6 +138,8 @@ class FileStorage implements UnbufferedStorage, Configurable
      *
      * @param string $offset
      * @param mixed  $value
+     *
+     * @return void
      **/
     public function offsetSet($offset, $value)
     {
@@ -177,6 +180,8 @@ class FileStorage implements UnbufferedStorage, Configurable
      * the error
      *
      * @param string $offset
+     *
+     * @return void
      **/
     public function offsetUnset($offset)
     {

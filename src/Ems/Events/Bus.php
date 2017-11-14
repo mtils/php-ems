@@ -111,7 +111,7 @@ class Bus implements BusContract
     {
 
         if ($this->filter && !call_user_func($this->filter, $event, $payload)) {
-            return;
+            return null;
         }
 
         if (!is_array($payload)) {

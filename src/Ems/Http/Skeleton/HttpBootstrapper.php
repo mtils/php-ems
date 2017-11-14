@@ -23,6 +23,9 @@ class HttpBootstrapper extends Bootstrapper
         Client::class => ClientContract::class
     ];
 
+    /**
+     * @return void
+     */
     public function bind()
     {
         parent::bind();
@@ -33,6 +36,7 @@ class HttpBootstrapper extends Bootstrapper
                 if ($url->scheme == 'http' || $url->scheme == 'https') {
                     return new FilesystemConnection($url);
                 }
+                return null;
             });
         });
 

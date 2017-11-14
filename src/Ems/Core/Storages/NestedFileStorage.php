@@ -8,13 +8,13 @@ use Ems\Contracts\Core\BufferedStorage;
 use Ems\Contracts\Core\Configurable;
 use Ems\Contracts\Core\Filesystem as FilesystemContract;
 use Ems\Contracts\Core\Serializer as SerializerContract;
-use Ems\Contracts\Core\MimetypeProvider;
+use Ems\Contracts\Core\MimeTypeProvider;
 use Ems\Contracts\Core\Url as UrlContract;
 use Ems\Core\Exceptions\UnConfiguredException;
 use Ems\Core\Exceptions\UnsupportedParameterException;
 use Ems\Core\ConfigurableTrait;
 use Ems\Core\LocalFilesystem;
-use Ems\Core\ManualMimetypeProvider;
+use Ems\Core\ManualMimeTypeProvider;
 use Ems\Core\Serializer\JsonSerializer;
 use Ems\Core\Support\ArrayAccessMethods;
 use Ems\Core\Url;
@@ -136,11 +136,11 @@ class NestedFileStorage implements BufferedStorage, Configurable
     /**
      * @param FilesystemContract $filesystem (optional)
      * @param SerializerContract $serializer (optional)
-     * @param MimetypeProvider   $mimetypes  (optional)
+     * @param MimeTypeProvider   $mimetypes  (optional)
      **/
     public function __construct(FilesystemContract $filesystem=null,
                                 SerializerContract $serializer=null,
-                                MimetypeProvider $mimetypes=null)
+                                MimeTypeProvider $mimetypes=null)
     {
         $this->filesystem = $filesystem ?: new LocalFilesystem;
         $this->serializer = $serializer ?: new JsonSerializer;
@@ -542,6 +542,7 @@ class NestedFileStorage implements BufferedStorage, Configurable
             return $this->storages[$arrayKey];
         }
 
+        return null;
     }
 
     /**
@@ -559,6 +560,7 @@ class NestedFileStorage implements BufferedStorage, Configurable
             unset($this->storages[$arrayKey]);
         }
 
+        return null;
     }
 
     /**

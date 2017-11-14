@@ -46,7 +46,7 @@ class GenericResourceProvider extends AnythingProvider implements AppliesToResou
      *
      * @param mixed $identifiable
      *
-     * @return self
+     * @return $this
      **/
     public function add($identifiable)
     {

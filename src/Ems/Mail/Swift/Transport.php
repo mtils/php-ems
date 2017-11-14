@@ -110,11 +110,11 @@ class Transport implements TransportContract
         $swiftMessage = $this->getSwiftMessage($message);
 
         if (!$to = $swiftMessage->getTo()) {
-            return;
+            return null;
         }
 
         if (!count($to)) {
-            return;
+            return null;
         }
 
         return $to[0];

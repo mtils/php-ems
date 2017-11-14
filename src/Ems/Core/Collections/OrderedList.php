@@ -427,6 +427,8 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
         if (isset($this->source[0])) {
             return $this->source[0];
         }
+
+        return null;
     }
 
     /**
@@ -440,6 +442,8 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
         if (isset($this->source[$lastIndex])) {
             return $this->source[$lastIndex];
         }
+
+        return null;
     }
 
     /**
@@ -455,7 +459,7 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
     /**
      * @see OrderedList::copy()
      *
-     * @return self
+     * @return void
      */
     public function __clone()
     {

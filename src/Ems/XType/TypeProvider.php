@@ -61,10 +61,10 @@ class TypeProvider implements TypeProviderContract
      * Returns a xtype object for an object property. If path is null return the
      * Xtype for the whole class
      *
-     * @param mixed   $resource The resource name, class, an object of it or just some variable
-     * @param string  $path     (optional) A key name. Can be dotted like address.street.name
+     * @param mixed   $root The resource name, class, an object of it or just some variable
+     * @param string  $path (optional) A key name. Can be dotted like address.street.name
      *
-     * @return XType
+     * @return XType|null
      **/
     public function xType($root, $path=null)
     {
@@ -84,7 +84,7 @@ class TypeProvider implements TypeProviderContract
 
         // If the class exists but not the path dont return fake types
         if (isset($this->classCache[$class]) && $path) {
-            return;
+            return null;
         }
 
         $nativeType = $this->extractor->type($root, $path);
@@ -100,7 +100,7 @@ class TypeProvider implements TypeProviderContract
      * @param string $class
      * @param string $path
      *
-     * @return XType
+     * @return XType|null
      **/
     protected function getClassXType($root, $class, $path)
     {
@@ -112,7 +112,7 @@ class TypeProvider implements TypeProviderContract
 
         // If the class is in cache but not the specific path
         if (isset($this->classCache[$class])) {
-            return;
+            return null;
         }
 
         $classType = $root instanceof SelfExplanatory ?
@@ -123,6 +123,8 @@ class TypeProvider implements TypeProviderContract
             $this->putAllIntoCache($class, $classType);
             return $path ? $this->getClassXType($root, $class, $path) : $classType;
         }
+
+        return null;
     }
 
     /**
@@ -130,12 +132,12 @@ class TypeProvider implements TypeProviderContract
      *
      * @param string $class
      *
-     * @return XType
+     * @return XType|null
      **/
     protected function getFromExtension($class)
     {
         if (!$extension = $this->nearestForClass($class)) {
-            return;
+            return null;
         }
 
         return $extension($class);
@@ -145,12 +147,12 @@ class TypeProvider implements TypeProviderContract
      * @param string $class
      * @param string $path
      *
-     * @return XType
+     * @return XType|null
      **/
     protected function getFromCache($class, $path)
     {
         if (!isset($this->classCache[$class])) {
-            return;
+            return null;
         }
 
         if (!$path) {
@@ -166,7 +168,7 @@ class TypeProvider implements TypeProviderContract
         }
 
         if (!strpos($path, '.')) {
-            return;
+            return null;
         }
 
         $segments = explode('.', $path);
@@ -177,7 +179,7 @@ class TypeProvider implements TypeProviderContract
         foreach ($segments as $segment) {
 
             if (!$type = $this->getFromCache($currentClass, $segment)) {
-                 return;
+                 return null;
             }
 
             if ($type instanceof ObjectType) {

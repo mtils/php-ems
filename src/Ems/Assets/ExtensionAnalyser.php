@@ -27,7 +27,7 @@ class ExtensionAnalyser implements NameAnalyser
      * @param \Ems\Contracts\Core\Filesystem       $files
      * @param \Ems\Contracts\Core\MimeTypeProvider $mimeTypes
      **/
-    public function __construct(FileSystem $files, MimeTypeProvider $mimeTypes)
+    public function __construct(Filesystem $files, MimeTypeProvider $mimeTypes)
     {
         $this->files = $files;
         $this->mimeTypes = $mimeTypes;

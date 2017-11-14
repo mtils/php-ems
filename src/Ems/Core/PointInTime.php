@@ -103,6 +103,9 @@ class PointInTime extends DateTime implements TemporalContract
             case 'precision':
                     return call_user_func([$this, $this->properties[$property]]);
         }
+
+        return null;
+
     }
 
     /**
@@ -143,7 +146,7 @@ class PointInTime extends DateTime implements TemporalContract
 
                 return;
             case 'timezone':
-                $this->setTimeZone($value);
+                $this->setTimezone($value);
 
                 return;
             case 'timestamp':
@@ -153,7 +156,6 @@ class PointInTime extends DateTime implements TemporalContract
             case 'offset':
                 throw new OutOfBoundsException('You cannot set an offset, assign a new DateTimeZone');
 
-                return;
             case 'precision':
                 $this->setPrecision($value);
         }

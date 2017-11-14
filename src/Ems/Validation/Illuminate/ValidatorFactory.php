@@ -25,13 +25,13 @@ class ValidatorFactory implements ValidatorFactoryContract, SupportsCustomFactor
      * @param array             $rules
      * @param AppliesToResource $resource (optional)
      *
-     * @return \Ems\Contracts\Validation\Validator
+     * @return \Ems\Contracts\Validation\Validator|null
      **/
     public function make(array $rules, AppliesToResource $resource=null)
     {
 
         if (!$rules) {
-            return;
+            return null;
         }
 
         $validator = $this->createObject(GenericValidator::class)->setRules($rules);

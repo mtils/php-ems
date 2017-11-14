@@ -314,6 +314,8 @@ class BuildConfigRepository implements RepositoryContract
         }
 
         $config->setCollection($collection);
+
+        return null;
     }
 
     protected function groupOfConfig(BuildConfigContract $config)

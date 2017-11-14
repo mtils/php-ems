@@ -135,7 +135,7 @@ class VariablesTextParser implements TextParser
         }
 
         if (!$this->isNestedKey($key)) {
-            return;
+            return null;
         }
 
         $segments = explode($this->nestingSeparator, $key);
@@ -144,7 +144,7 @@ class VariablesTextParser implements TextParser
         $varname = $segments[0];
 
         if (!isset($data[$varname])) {
-            return;
+            return null;
         }
 
         $node = &$data[$varname];
@@ -154,7 +154,7 @@ class VariablesTextParser implements TextParser
             $node = @$this->getNode($node, $segments[$i]);
 
             if ($node === null) {
-                return;
+                return null;
             }
 
             if (is_scalar($node)) {
@@ -162,9 +162,11 @@ class VariablesTextParser implements TextParser
                     return $node;
                 }
 
-                return;
+                return null;
             }
         }
+
+        return null;
     }
 
     /**

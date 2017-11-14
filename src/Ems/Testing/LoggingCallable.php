@@ -41,6 +41,7 @@ class LoggingCallable implements Countable
         if ($this->handler) {
             return call_user_func_array($this->handler, func_get_args());
         }
+        return null;
     }
 
     /**

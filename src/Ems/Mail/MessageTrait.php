@@ -60,7 +60,7 @@ trait MessageTrait
      **/
     public function send()
     {
-        $this->_mailer->send($this);
+        return $this->_mailer->send($this);
     }
 
     /**

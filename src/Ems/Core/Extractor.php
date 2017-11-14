@@ -31,7 +31,7 @@ class Extractor implements ExtractorContract
     public function value($root, $path)
     {
         if (!is_array($root) && !is_object($root)) {
-            return;
+            return null;
         }
 
         if (!$this->isNestedKey($path)) {
@@ -94,7 +94,7 @@ class Extractor implements ExtractorContract
         }
 
         if (!$foundType) {
-            return;
+            return null;
         }
 
         return $this->putIntoCache($rootObject, $path, $foundType);
@@ -131,7 +131,7 @@ class Extractor implements ExtractorContract
             $node = @$this->getNode($node, $segments[$i]);
 
             if ($node === null) {
-                return;
+                return null;
             }
 
             if (!is_scalar($node)) {
@@ -142,8 +142,10 @@ class Extractor implements ExtractorContract
                 return $node;
             }
 
-            return;
+            return null;
         }
+
+        return null;
     }
 
     /**

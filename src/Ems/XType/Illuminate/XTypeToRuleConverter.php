@@ -224,13 +224,13 @@ class XTypeToRuleConverter implements Extendable
 
     /**
      * Some basic extensions
+     *
+     * @return void
      **/
     protected function addBaseExtensions()
     {
         $this->extend('not_null', function ($notNull) {
-            if ($notNull) {
-                return 'required';
-            }
+            return $notNull ? 'required' : '';
         });
     }
 

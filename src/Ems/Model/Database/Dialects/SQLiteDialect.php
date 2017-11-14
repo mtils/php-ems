@@ -111,7 +111,7 @@ class SQLiteDialect implements Dialect
     {
 
         if ($expression instanceof KeyExpression) {
-            return $this->renderKeyExpression($expression, $bindings);
+            return $this->renderKeyExpression($expression);
         }
 
         if ($expression instanceof Constraint) {
@@ -368,6 +368,8 @@ class SQLiteDialect implements Dialect
         if ($value instanceof ExpressionContract) {
             return $this->render($value, $bindings);
         }
+
+        return '';
 
     }
 }

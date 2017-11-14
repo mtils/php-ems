@@ -2,13 +2,14 @@
 
 namespace Ems\Mail;
 
-use UnderflowException;
+use DateTime;
 use Ems\Contracts\Mail\MessageComposer as ComposerContract;
 use Ems\Contracts\Mail\BodyRenderer;
 use Ems\Contracts\Mail\MailConfig;
 use Ems\Contracts\Mail\Message;
 use Ems\Contracts\Mail\AddressExtractor;
 use Ems\Contracts\Mail\MessageContentProvider;
+use UnderflowException;
 
 class MessageComposer implements ComposerContract
 {
@@ -115,17 +116,33 @@ class MessageComposer implements ComposerContract
         $message->from($this->extractor->email($this->getSender($config, $message)));
     }
 
+    /**
+     * @param MailConfig $config
+     * @param array $data
+     * @param DateTime|null $plannedSendDate
+     *
+     * @return void
+     */
     protected function assureContentsInData(MailConfig $config, array &$data, DateTime $plannedSendDate = null)
     {
         if ($this->contentProvider) {
-            return $this->assureContentsByProvider($config, $data, $plannedSendDate);
+            $this->assureContentsByProvider($config, $data, $plannedSendDate);
+            return;
         }
 
         if (!isset($data[self::SUBJECT])) {
             throw new UnderflowException('You have to pass subject (and body) inside $data');
         }
+
     }
 
+    /**
+     * @param MailConfig    $config
+     * @param array         $data
+     * @param DateTime|null $plannedSendDate
+     *
+     * @return void
+     */
     protected function assureContentsByProvider(MailConfig $config, array &$data, DateTime $plannedSendDate = null)
     {
         if (isset($data[self::SUBJECT]) && isset($data[self::BODY]) && !$this->preferConfiguredData) {

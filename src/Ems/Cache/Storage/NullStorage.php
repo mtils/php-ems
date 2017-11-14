@@ -45,6 +45,7 @@ class NullStorage implements Storage
      **/
     public function get($id)
     {
+        return null;
     }
 
     /**

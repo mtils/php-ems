@@ -46,13 +46,13 @@ class XTypeProviderValidatorFactory implements SupportsCustomFactory, ValidatorF
      * @param array             $rules
      * @param AppliesToResource $resource (optional)
      *
-     * @return \Ems\Contracts\Validation\Validator
+     * @return \Ems\Contracts\Validation\Validator|null
      **/
     public function make(array $rules, AppliesToResource $resource=null)
     {
 
         if (!$resource) {
-            return;
+            return null;
         }
 
         $rules = array_merge($this->detectRules($resource), $rules);

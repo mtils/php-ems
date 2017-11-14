@@ -140,7 +140,7 @@ trait LogicalGroupTrait
         }
 
         if ($this->_allowedConnectives && !in_array($operator, $this->_allowedConnectives)) {
-            throw new UnSupportedParameterException("This logical group only accept connectives:" . implode($this->_allowedConnectives));
+            throw new UnsupportedParameterException("This logical group only accept connectives:" . implode($this->_allowedConnectives));
         }
         $this->_operator = $operator;
         $this->_toStringSeparator = ' ' . strtoupper($operator) . ' ';
@@ -322,11 +322,11 @@ trait LogicalGroupTrait
     protected function applyGroupRestrictions(LogicalGroupContract $group)
     {
         if (!$this->_allowNesting) {
-            throw new UnSupportedParameterException("This logical group does not allow nested groups");
+            throw new UnsupportedParameterException("This logical group does not allow nested groups");
         }
 
         if ($this->_allowedConnectives && !in_array($group->operator(), $this->_allowedConnectives)) {
-            throw new UnSupportedParameterException("This logical group only accept connectives:" . implode($this->_allowedConnectives));
+            throw new UnsupportedParameterException("This logical group only accept connectives:" . implode($this->_allowedConnectives));
         }
 
         if ($this->_allowedOperators) {
@@ -339,7 +339,7 @@ trait LogicalGroupTrait
 
         if ($group->operator() != $this->operator()) {
             $comparison = $group->operator() . ' != '. $this->operator();
-            throw new UnSupportedParameterException("This logical group forbids multiple connectives ($comparison)");
+            throw new UnsupportedParameterException("This logical group forbids multiple connectives ($comparison)");
         }
 
         $group->allowConnectives($this->operator());

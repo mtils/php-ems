@@ -227,6 +227,7 @@ class BuildConfig implements BuildConfigContract
         if (isset($this->parserOptions[$parserName])) {
             $this->parserOptions[$parserName] = [];
         }
+        return $this;
     }
 
     /**

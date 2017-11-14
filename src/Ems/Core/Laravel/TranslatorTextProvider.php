@@ -92,7 +92,7 @@ class TranslatorTextProvider implements TextProvider, Multilingual
     public function setLocale($locale)
     {
         if ($this->isRoot) {
-            $this->translator->setlocale($locale);
+            $this->translator->setLocale($locale);
 
             return $this;
         }

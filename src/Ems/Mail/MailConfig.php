@@ -218,6 +218,7 @@ class MailConfig extends NamedObject implements MailConfigContract
     public function enableGeneratedOccurences($enabled = true)
     {
         $this->generatedOccurences = $enabled;
+        return $this;
     }
 
     public function schedule()

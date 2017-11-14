@@ -56,13 +56,14 @@ trait LayoutTrait
     /**
      * {@inheritdoc}
      *
-     * @return \Ems\Contracts\Graphics\LayoutItem
+     * @return \Ems\Contracts\Graphics\LayoutItem|null
      **/
     public function getItem($row, $column)
     {
         if (isset($this->_layout[$row][$column])) {
             return $this->_layout[$row][$column];
         }
+        return null;
     }
 
     /**

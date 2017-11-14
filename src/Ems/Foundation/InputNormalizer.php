@@ -221,6 +221,8 @@ class InputNormalizer implements InputNormalizerContract
         $validator->validate($input, $resource, $locale);
         $this->callAfterListeners('validate', [$input, $resource, $locale]);
 
+        return true;
+
     }
 
     /**

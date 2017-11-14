@@ -28,7 +28,7 @@ trait StaticExtendable
      * @param string   $name
      * @param callable $callable
      *
-     * @return self
+     * @return void
      **/
     public static function extend($name, callable $callable)
     {

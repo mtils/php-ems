@@ -295,6 +295,7 @@ class HookableRepository implements HookableRepositoryContract
      **/
     protected function validate(array $attributes, $action = 'update')
     {
+        return true;
     }
 
     /**

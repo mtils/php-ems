@@ -7,7 +7,7 @@ use Ems\Contracts\Core\Subscribable;
 use Ems\Contracts\Core\Serializer as SerializerContract;
 use Ems\Contracts\Core\Storage as CoreStorageContract;
 use Ems\Contracts\Core\BufferedStorage;
-use Ems\Contracts\Core\UnBufferedStorage;
+use Ems\Contracts\Core\UnbufferedStorage;
 use Ems\Contracts\Model\QueryableStorage;
 use Ems\Core\Exceptions\DataIntegrityException;
 use Ems\Core\Exceptions\MisConfiguredException;
@@ -106,7 +106,7 @@ class CoreStorage implements CacheStorage, Subscribable
      * @param SerializerContract  $serializer (optional)
      **/
     public function __construct(QueryableStorage $storage,
-                                UnBufferedStorage $bigStorage=null,
+                                UnbufferedStorage $bigStorage=null,
                                 SerializerContract $serializer=null)
     {
         $this->storage = $storage;
@@ -452,6 +452,8 @@ class CoreStorage implements CacheStorage, Subscribable
 
         $this->callOnListeners('error', [$e]);
 
+        return null;
+
     }
 
     protected function isExpired(array &$preparedEntry)
@@ -525,6 +527,8 @@ class CoreStorage implements CacheStorage, Subscribable
             $e = new DataIntegrityException($msg, 0, $e);
             $this->callOnListeners('error', [$e]);
         }
+
+        return false;
 
     }
 

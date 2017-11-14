@@ -278,6 +278,8 @@ class Message implements MessageContract
                 $headers->removeAll($header->getFieldName());
             }
         }
+
+        return true;
     }
 
     /**

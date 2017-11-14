@@ -39,7 +39,7 @@ class BinaryReadIterator implements ContentIterator
     protected function readNext($handle, $chunkSize)
     {
         if (feof($handle)) {
-            return;
+            return null;
         }
 
         return $this->filesystem->read($this->filePath, $chunkSize, $handle);

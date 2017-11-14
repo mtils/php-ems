@@ -340,6 +340,8 @@ class SQLStorage extends ArrayWithState implements QueryableStorage, BufferedSto
      * Loads the entry from db if not previously done.
      *
      * @param string $key
+     *
+     * @return bool
      **/
     public function offsetExists($key)
     {
@@ -368,6 +370,8 @@ class SQLStorage extends ArrayWithState implements QueryableStorage, BufferedSto
      * Loads the entry from db if not previously done.
      *
      * @param string $key
+     *
+     * @return mixed
      **/
     public function offsetGet($key)
     {
@@ -379,11 +383,13 @@ class SQLStorage extends ArrayWithState implements QueryableStorage, BufferedSto
      * Load the entry from DB to now that it was deleted.
      *
      * @param mixed $offset
+     *
+     * @return void
      **/
     public function offsetUnset($offset)
     {
         $this->offsetExists($offset); // Trigger loading
-        return parent::offsetUnset($offset);
+        parent::offsetUnset($offset);
     }
 
     /**
@@ -410,7 +416,7 @@ class SQLStorage extends ArrayWithState implements QueryableStorage, BufferedSto
     {
         // Without a table creator we cannot create the table
         if (!$this->tableCreator) {
-            return;
+            return false;
         }
 
         // Do a little test query

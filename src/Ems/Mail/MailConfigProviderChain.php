@@ -65,6 +65,8 @@ class MailConfigProviderChain implements MailConfigProvider, Countable
         $this->providers = array_filter($this->providers, function ($known) use ($provider) {
             return spl_object_hash($known) != spl_object_hash($provider);
         });
+
+        return $this;
     }
 
     /**

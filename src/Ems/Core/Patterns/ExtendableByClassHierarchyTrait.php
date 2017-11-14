@@ -93,7 +93,7 @@ trait ExtendableByClassHierarchyTrait
         }
 
         if (!count($this->_extensions)) {
-            return;
+            return null;
         }
 
         if (isset($this->_extensions[$findClass])) {
@@ -102,7 +102,7 @@ trait ExtendableByClassHierarchyTrait
         }
 
         if (!$nearest = $this->findNearestForClass($this->_extensions, $findClass)) {
-            return;
+            return null;
         }
 
         $this->_cache[$findClass] = $nearest;
@@ -123,7 +123,7 @@ trait ExtendableByClassHierarchyTrait
     {
 
         if (!$all = $this->findAllForClass($providers, $findClass)) {
-            return;
+            return null;
         }
 
         if (count($all) == 1) {
@@ -136,6 +136,7 @@ trait ExtendableByClassHierarchyTrait
             }
         }
 
+        return null;
     }
 
     /**

@@ -95,7 +95,7 @@ class MatchingListener
     public function callWithMarks(array $args=[], array $marks=[])
     {
         if (!$this->matchesMarks($marks)) {
-            return;
+            return null;
         }
 
         if ($this->pattern === '*') {
@@ -107,6 +107,8 @@ class MatchingListener
         if ($this->matchesPattern($event)) {
             return Lambda::callFast($this->call, $args);
         }
+
+        return null;
     }
 
     /**
@@ -118,11 +120,11 @@ class MatchingListener
     {
 
         if ($this->pattern === '!') {
-            return;
+            return null;
         }
 
         if ($this->markFilter && !$this->matchesMarks([])) {
-            return;
+            return null;
         }
 
         if ($this->pattern === '*') {
@@ -138,6 +140,8 @@ class MatchingListener
         if ($this->matchesPattern($event)) {
             return Lambda::callFast($this->call, $args);
         }
+
+        return null;
     }
 
     /**

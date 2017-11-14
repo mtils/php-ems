@@ -278,7 +278,7 @@ class Helper
         }
 
         if (!$value) {
-            return;
+            return null;
         }
 
         if (is_string($value)) {
@@ -286,7 +286,7 @@ class Helper
         }
 
         if (!is_object($value)) {
-            return;
+            return null;
         }
 
         if ($value instanceof ArrayAccess && isset($value[0])) {
@@ -294,12 +294,15 @@ class Helper
         }
 
         if (!$value instanceof Traversable) {
-            return;
+            return null;
         }
 
         foreach ($value as $key=>$item) {
             return $item;
         }
+
+        return null;
+
     }
 
     /**

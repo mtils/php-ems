@@ -86,6 +86,8 @@ trait ExtendableTrait
                 return $result;
             }
         }
+
+        return null;
     }
 
     /**

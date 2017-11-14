@@ -58,6 +58,8 @@ class DefaultCategorizer implements Categorizer
         if (is_object($value)) {
             return $this->objectToKey($value);
         }
+
+        return null;
     }
 
     /**
@@ -72,6 +74,7 @@ class DefaultCategorizer implements Categorizer
         if ($value instanceof Cacheable) {
             $value->cacheTags();
         }
+        return null;
     }
 
     /**
@@ -86,6 +89,7 @@ class DefaultCategorizer implements Categorizer
         if ($value instanceof Cacheable) {
             return $value->lifetime();
         }
+        return null;
     }
 
     /**
@@ -202,6 +206,7 @@ class DefaultCategorizer implements Categorizer
         if (strlen($string) > $this->maxArrayValueLength) {
             return md5($string);
         }
+        return $string;
     }
 
     /**
