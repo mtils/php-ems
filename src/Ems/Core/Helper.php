@@ -412,12 +412,15 @@ class Helper
      * Throws an exception if the passed value has no ArrayAccess.
      *
      * @param $value
+     *
+     * @return array|\ArrayAccess
      */
     public static function forceArrayAccess($value)
     {
         if (!static::hasArrayAccess($value)) {
             throw new UnsupportedParameterException("The passed value has no ArrayAccess: " . static::typeName($value));
         }
+        return $value;
     }
 
     public static function offsetExists(array &$array, $key)
