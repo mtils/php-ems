@@ -7,7 +7,6 @@ use Ems\Contracts\Core\IOCContainer as ContainerContract;
 use Ems\Core\Exceptions\KeyNotFoundException;
 use Ems\Core\Exceptions\UnsupportedUsageException;
 use Ems\Core\Support\IOCContainerProxyTrait;
-use Ems\Core\Patterns\SupportListeners;
 use Ems\Core\Patterns\HookableTrait;
 use Ems\Contracts\Core\Url as UrlContract;
 
