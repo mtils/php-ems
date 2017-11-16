@@ -23,7 +23,7 @@ interface AppPath
      * Return the absolute path of a relative path
      * (wp-content/favicon.ico => /srv/www/htdocs/wordpress/wp-content/favicon.ico).
      *
-     * @param string $path (optional)
+     * @param string $relativePath (optional)
      *
      * @return string
      **/
