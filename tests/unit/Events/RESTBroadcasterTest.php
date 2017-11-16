@@ -57,6 +57,7 @@ class RESTBroadcasterTest extends \Ems\TestCase
 
         $broadcaster->setSignalsUrl($url);
         $this->assertSame($url, $broadcaster->getSignalsUrl());
+        $this->assertEquals(['signalize', 'receive'], $broadcaster->methodHooks());
     }
 
     /**
