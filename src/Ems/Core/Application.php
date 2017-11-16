@@ -4,9 +4,12 @@ namespace Ems\Core;
 
 use Ems\Contracts\Core\HasMethodHooks;
 use Ems\Contracts\Core\IOCContainer as ContainerContract;
+use Ems\Core\Exceptions\KeyNotFoundException;
+use Ems\Core\Exceptions\UnsupportedUsageException;
 use Ems\Core\Support\IOCContainerProxyTrait;
 use Ems\Core\Patterns\SupportListeners;
 use Ems\Core\Patterns\HookableTrait;
+use Ems\Contracts\Core\Url as UrlContract;
 
 /**
  * This application is a minimal version optimized
@@ -16,16 +19,47 @@ use Ems\Core\Patterns\HookableTrait;
  * $app = (new Application)->setName('My App')
  *                         ->setVersion('2.0.3')
  *                         ->setPath(realpath('../'))
+ *
+ * There should be only one real singleton: the application. If we could
+ * work without any singleton it would be better but that is very clumsy.
+ * Globals are bad, and statics (and therefore singletons) are globals so
+ * please avoid putting just everything you need into a singleton instance.
+ *
+ * The only things which are allowed to be putted into the application are
+ * the things which belong to the application. These are in this case:
+ *
+ * - bindings (therefore it implements IOCContainer)
+ * - config (you configure your Application once)
+ * - paths (the static paths of your application)
+ *
+ * What is meant here: If for example the view directory changes while
+ * processing the request, it should not be assigned to config or any singleton.
+ * Only the things which will not change after deploying your application
+ * should be stored in it.
+ *
+ * Dont use config, paths or whatever to store temporary values. If values
+ * belong to a request or console call, store them in the request because they
+ * belong to _this_ request. Then you have to pass your request just everywhere.
+ *
  **/
 class Application implements ContainerContract, HasMethodHooks
 {
     use IOCContainerProxyTrait;
     use HookableTrait;
 
+    /**
+     * @var string
+     */
     const PRODUCTION = 'production';
 
+    /**
+     * @var string
+     */
     const LOCAL = 'local';
 
+    /**
+     * @var string
+     */
     const TESTING = 'testing';
 
     /**
@@ -39,7 +73,17 @@ class Application implements ContainerContract, HasMethodHooks
     protected $version = '';
 
     /**
-     * @var string
+     * @var array|\ArrayAccess
+     */
+    protected $config = [];
+
+    /**
+     * @var array|\ArrayAccess
+     */
+    protected $paths = [];
+
+    /**
+     * @var UrlContract
      **/
     protected $path;
 
@@ -56,7 +100,7 @@ class Application implements ContainerContract, HasMethodHooks
     /**
      * @var string
      */
-    protected $environment = self::PRODUCTION;
+    protected $environment;
 
     /**
      * @var callable
@@ -80,12 +124,13 @@ class Application implements ContainerContract, HasMethodHooks
 
     public function __construct($path, ContainerContract $container = null)
     {
-        $this->setPath($path);
+        $this->path = new Url($path);
         $container = $container ?: new IOCContainer();
         $this->setContainer($container);
         $this->container->instance('app', $this);
     }
 
+    //<editor-fold desc="Getters and Setters">
     /**
      * Return the application name.
      *
@@ -133,75 +178,180 @@ class Application implements ContainerContract, HasMethodHooks
 
         return $this;
     }
+    //</editor-fold>
+
+    //<editor-fold desc="Paths and URLs">
 
     /**
-     * Return the path where the app lives, this is
-     * typically your domain root with a public folder.
+     * Return the url of the application itself. This is the one single url that
+     * never changes. Mostly it is the url of the project working on this app.
      *
-     * @return string
-     **/
-    public function path()
-    {
-        return $this->path;
-    }
-
-    /**
-     * Set the path where the app lives.
+     * It is NOT HTTP_HOST.
      *
-     * @param string (optional)
+     * Urls can change during a request or you need a specific url for a user
+     * or you run a multi virtual host application.
+     * So for url generation use other classes but not the application.
      *
-     * @return string
-     **/
-    public function setPath($path)
-    {
-        $this->path = $path;
-
-        return $this;
-    }
-
-    /**
-     * Return the root url of the application.
-     *
-     * @return string
+     * @return UrlContract
      **/
     public function url()
     {
-        if ($this->urlProvider) {
-            return call_user_func($this->urlProvider, $this);
-        }
-
         return $this->url;
     }
 
     /**
      * Set the url of the application.
      *
-     * @param string $url
+     * @param UrlContract $url
      *
      * @return self
      **/
-    public function setUrl($url)
+    public function setUrl(UrlContract $url)
     {
         $this->url = $url;
-
         return $this;
     }
 
     /**
-     * If you have a multi Domain system there is no static url
-     * so you can assign a callable to return it.
-     * 
-     * @param callable $urlProvider
+     * Return an array(like) of application paths indexed by a name.
+     * (e.g. ['public' => $appRoot/public])
      *
-     * @return self
-     **/
-    public function provideUrl(callable $urlProvider)
+     * @return array|\ArrayAccess
+     */
+    public function getPaths()
     {
-        $this->urlProvider = $urlProvider;
+        return $this->paths;
+    }
 
+    /**
+     * Set the application paths.
+     *
+     * @see self::getPaths()
+     *
+     * @param $paths
+     *
+     * @return $this
+     */
+    public function setPaths($paths)
+    {
+        $this->paths = Helper::forceArrayAccess($paths);
         return $this;
     }
 
+    /**
+     * This is a method to retrieve paths of the application.
+     * Without any parameter it returns the root path. This is
+     * typically a directory root with a public folder.
+     *
+     * This path is setted in __construct() and cannot be changed.
+     *
+     * To get any other path, just pass a name or an url.
+     *
+     *
+     * @param string                    $name (optional)
+     *
+     * @return \Ems\Contracts\Core\Url
+     */
+    public function path($name=null)
+    {
+        if (!$name || in_array($name, ['/', '.', 'root', 'app'])) {
+            return $this->path;
+        }
+
+        list($scope, $path) = $this->splitNameAndPath($name);
+
+        // If no scope was passed, just return an absolute url appended to root path
+        if (!$scope) {
+            return $this->path->append($path);
+        }
+
+        if (!isset($this->paths[$scope])) {
+            throw new KeyNotFoundException("No path found with name '$scope'");
+        }
+
+        $url = $this->paths[$scope] instanceof UrlContract ? $this->paths[$scope] : new Url($this->paths[$scope]);
+
+        return $path ? $url->append($path) : $url;
+
+    }
+
+    /**
+     * Get the application configuration.
+     *
+     * @return array|\ArrayAccess
+     */
+    public function getConfig()
+    {
+        return $this->config;
+    }
+
+    /**
+     * Set the application configuration.
+     *
+     * @param array|\ArrayAccess $config
+     *
+     * @return self
+     */
+    public function setConfig($config)
+    {
+        if ($this->wasBooted()) {
+            throw new UnsupportedUsageException('You can only set configuration before boot.');
+        }
+        $this->config = Helper::forceArrayAccess($config);
+        return $this;
+    }
+
+    /**
+     * Return a configuration value. Pass nothing and get the complete config.
+     * Pass a key and you get the value of that key, or if it does not exist
+     * $default.
+     *
+     * @param string $key
+     * @param mixed $default (optional)
+     *
+     * @return mixed
+     */
+    public function config($key, $default=null)
+    {
+        if (isset($this->config[$key])) {
+            return $this->config[$key];
+        }
+
+        return $default;
+    }
+
+    /**
+     * Set a configuration value. To prevent misuse the configuration values can
+     * not be changed after booting. Otherwise somebody will use it as a global
+     * variable storage.
+     *
+     * @param string|array $key
+     * @param mixed        $value (optional)
+     *
+     * @return self
+     */
+    public function configure($key, $value=null)
+    {
+        if ($this->wasBooted()) {
+            throw new UnsupportedUsageException('You can only set configuration before boot.');
+        }
+
+        if (!is_array($key)) {
+            $this->config[$key] = $value;
+            return $this;
+        }
+
+        foreach ($key as $configKey=>$value) {
+            $this->configure($configKey, $value);
+        }
+
+        return $this;
+
+    }
+
+    //</editor-fold>
+
+    //<editor-fold desc="Boot Process">
     /**
      * Boot the application. Whatever this means is only determined by the
      * listeners to onBefore('boot') or onAfter('boot').
@@ -233,7 +383,9 @@ class Application implements ContainerContract, HasMethodHooks
     {
         return $this->wasBooted;
     }
+    //</editor-fold>
 
+    //<editor-fold desc="Environment">
     /**
      * Return the application environment.
      *
@@ -281,7 +433,9 @@ class Application implements ContainerContract, HasMethodHooks
         $this->environment = '';
         return $this;
     }
+    //</editor-fold>
 
+    //<editor-fold desc="Events and Hooks">
     /**
      * @return array
      */
@@ -289,7 +443,9 @@ class Application implements ContainerContract, HasMethodHooks
     {
         return ['boot'];
     }
+    //</editor-fold>
 
+    //<editor-fold desc="Static Helpers">
     /**
      * This is a static alias to the make (or __invoke) method of the
      * currently running app.
@@ -347,5 +503,60 @@ class Application implements ContainerContract, HasMethodHooks
     {
         $concrete = static::get($name);
         return $arguments ? $concrete(...$arguments) : $concrete;
+    }
+    //</editor-fold>
+
+    /**
+     * Alias for $this->path()
+     *
+     * @param string                           $name
+     * @param string|\Ems\Contracts\Core\Url   $value
+     *
+     * @return string|\Ems\Contracts\Core\Url
+     */
+    public static function to($name=null, $value=null)
+    {
+        return static::$staticInstance->path($name, $value);
+    }
+
+    /**
+     * Static alias for $this->config(). Unfortunately we cant use the same
+     * method name here...
+     *     *
+     * @param string $key
+     * @param mixed  $default
+     *
+     * @return mixed
+     */
+    public static function setting($key, $default=null)
+    {
+        return static::$staticInstance->config($key, $default);
+    }
+
+    /**
+     * Splits the name and path of a path query.
+     *
+     * @param $name
+     *
+     * @return array
+     */
+    protected function splitNameAndPath($name)
+    {
+
+        list($start, $end) = strpos($name, '::') ? explode('::', $name) : ['', $name];
+
+        if ($start) {
+            return [$start, $end];
+        }
+
+        $paths = $this->getPaths();
+
+        // If the name does not exists in the paths, it assumes its a (file)path.
+        if (!isset($paths[$end])) {
+            return ['', $end];
+        }
+
+        return [$end, ''];
+
     }
 }
