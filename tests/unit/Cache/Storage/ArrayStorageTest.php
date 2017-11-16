@@ -28,6 +28,15 @@ class ArrayStorageTest extends \Ems\TestCase
         $this->assertEquals('bar', $storage->get('foo'));
     }
 
+    public function test_several_returns_putted_values()
+    {
+        $storage = $this->newStorage();
+        $this->assertNull($storage->get('foo'));
+        $storage->put('foo', 'bar');
+        $storage->put('foo2', 'bor');
+        $this->assertEquals(['foo' => 'bar', 'foo2' => 'bor'], $storage->several(['foo', 'foo2']));
+    }
+
     public function test_increment_increments_number()
     {
         $storage = $this->newStorage();

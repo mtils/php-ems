@@ -65,6 +65,20 @@ interface Cache extends ArrayAccess, Provider, HasMethodHooks
      **/
 
     /**
+     * Retrieve many values from cache. The returned array will be indexed by
+     * the keys you passed to this method.
+     * If a cache entry was found for a key, it will be in the returned array
+     * under that key.
+     * If a cache entry was not found, the key will not exist in the returned
+     * array. (So you can check for null values with array_key_exists())
+     *
+     * @param array $keys
+     *
+     * @return array
+     */
+    public function several(array $keys);
+
+    /**
      * Store the value under $key.
      * If no value was passed, guess the key of $keyOrValue and put
      * $keyOrValue in the cache.

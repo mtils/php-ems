@@ -91,7 +91,7 @@ class Cache implements CacheContract
      **/
     public function get($key, $default = null)
     {
-        $isGuessableKey = (is_object($key) || $this->isCacheableArray($key));
+        $isGuessableKey = (is_object($key) || is_array($key));
 
         $cacheId = $isGuessableKey ? $this->key($key) : $key;
 
@@ -114,6 +114,18 @@ class Cache implements CacheContract
         $isGuessableKey ? $this->put($cacheId, $value, $key) : $this->put($cacheId, $value);
 
         return $value;
+    }
+
+    /**
+     * @inheritdoc
+     *
+     * @param array $keys
+     *
+     * @return array
+     */
+    public function several(array $keys)
+    {
+        return $this->storage->several($keys);
     }
 
     /**
@@ -434,7 +446,7 @@ class Cache implements CacheContract
      *
      * @param string $name (optional)
      *
-     * @throws \Ems\Contracts\NotFound
+     * @throws \Ems\Contracts\Errors\NotFound
      *
      * @return Storage
      **/
@@ -454,35 +466,6 @@ class Cache implements CacheContract
         throw new HandlerNotFoundException("No Storage saved under $name");
     }
 
-    /**
-     * Return if the value is a cacheable array.
-     *
-     * @param mixed $value
-     *
-     * @return bool
-     **/
-    protected function isCacheableArray($value)
-    {
-        return is_array($value) && !$this->isArrayOfStrings($value);
-    }
-
-    /**
-     * @param mixed $value
-     *
-     * @return bool
-     **/
-    protected function isArrayOfStrings($value)
-    {
-        if (!is_array($value)) {
-            return false;
-        }
-
-        if (isset($value[0]) && (is_string($value[0]) || method_exists($value[0], '__toString'))) {
-            return true;
-        }
-
-        return false;
-    }
 }
 
 class _CacheMiss

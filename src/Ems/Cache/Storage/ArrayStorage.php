@@ -67,6 +67,25 @@ class ArrayStorage implements Storage
     }
 
     /**
+     * @inheritdoc
+     *
+     * @param array $ids
+     *
+     * @return mixed
+     */
+    public function several(array $ids)
+    {
+        $result = [];
+        foreach ($ids as $id) {
+            if ($this->has($id)) {
+                $result[$id] = $this->get($id);
+            }
+        }
+        return $result;
+
+    }
+
+    /**
      * {@inheritdoc}
      *
      * @param string    $id

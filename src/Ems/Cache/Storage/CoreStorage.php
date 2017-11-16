@@ -151,19 +151,27 @@ class CoreStorage implements CacheStorage, Subscribable
     /**
      * {@inheritdoc}
      *
-     * @param string|array $id
+     * @param string $id
      *
      * @return mixed
      **/
     public function get($id)
     {
-        if (!is_array($id)) {
-            $entry = $this->getEntry($id);
-            return $this->isMiss($entry) ? null : $this->getPayload($id, $entry);
-        }
+        $entry = $this->getEntry($id);
+        return $this->isMiss($entry) ? null : $this->getPayload($id, $entry);
+    }
 
+    /**
+     * @inheritdoc
+     *
+     * @param array $ids
+     *
+     * @return mixed
+     */
+    public function several(array $ids)
+    {
         $results = [];
-        foreach ($this->getEntry($id) as $cacheId=>$entry) {
+        foreach ($this->getEntry($ids) as $cacheId=>$entry) {
             if (!$this->isExpired($entry)) {
                 $results[$cacheId] =  $this->getPayload($cacheId, $entry);
             }

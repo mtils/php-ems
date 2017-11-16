@@ -49,6 +49,18 @@ class NullStorage implements Storage
     }
 
     /**
+     * @inheritdoc
+     *
+     * @param array $ids
+     *
+     * @return mixed
+     */
+    public function several(array $ids)
+    {
+        return [];
+    }
+
+    /**
      * {@inheritdoc}
      *
      * @param string    $id

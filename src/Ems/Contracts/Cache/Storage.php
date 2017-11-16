@@ -26,16 +26,25 @@ interface Storage
     public function has($id);
 
     /**
-     * Return the item with $id or all items with the passed
-     * ids. The result must be indexed by its cache id if an array was passed.
-     * Every not found entry of the array will NOT be added to the result array.
-     * So you can detect null values by array_key_exists($result, 'key').
+     * Return the item with $id.
      *
-     * @param string|array $id
+     * @param string $id
      *
      * @return mixed
      **/
     public function get($id);
+
+    /**
+     * Return all items with the passed ids. The result must be indexed by its
+     * cache id if an array was passed. Every not found entry of the array will
+     * NOT be added to the result array.
+     * So you can detect null values by array_key_exists('key', $result).
+     *
+     * @param array $ids
+     *
+     * @return mixed
+     */
+    public function several(array $ids);
 
     /**
      * Put the $value under $id in the cache and store it until

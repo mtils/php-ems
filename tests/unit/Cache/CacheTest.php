@@ -150,9 +150,9 @@ class CacheTest extends \Ems\TestCase
 
         $keys = ['a','b','c'];
 
-        $storage->shouldReceive('get')->with($keys)->andReturn(true);
+        $storage->shouldReceive('several')->with($keys)->andReturn([]);
 
-        $this->assertTrue($cache->get($keys));
+        $this->assertEquals([], $cache->several($keys));
     }
 
     public function test_get_stores_value_and_returns_it_if_default_value_passed()
@@ -762,19 +762,13 @@ class CacheTest extends \Ems\TestCase
         $this->assertEquals('fast', $listener->arg(0));
     }
 
-    public function test_isArrayOfStrings_return_false_if_no_array_posing_for_test_coverage()
-    {
-        $cache = $this->newCache();
-
-        $this->assertFalse(Cheat::call($cache, 'isArrayOfStrings', ['foo']));
-    }
-
     public function test_some_NullStorage_methods_posing_for_test_coverage()
     {
         $storage = $this->newStorage();
         $this->assertEquals('foo', $storage->escape('foo'));
         $this->assertFalse($storage->has('foo'));
         $this->assertNull($storage->get('foo'));
+        $this->assertEquals([], $storage->several([]));
     }
 
 

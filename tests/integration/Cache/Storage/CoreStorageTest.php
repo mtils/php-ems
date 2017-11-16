@@ -182,7 +182,7 @@ class CoreStorageTest extends \Ems\TestCase
 
         $storage2->now = time() + 100;
 
-        $this->assertEquals([], $storage2->get(['foo', 'baz']));
+        $this->assertEquals([], $storage2->several(['foo', 'baz']));
     }
 
     public function test_get_returns_stored_entries()
@@ -197,7 +197,7 @@ class CoreStorageTest extends \Ems\TestCase
             'foo'   => 'bar',
             'baz'   => 'boing',
             'chili' => 'tasty'
-        ], $storage->get(['foo', 'baz', 'chili']));
+        ], $storage->several(['foo', 'baz', 'chili']));
     }
 
     public function test_get_returns_stored_entries_after_loading()
@@ -216,7 +216,7 @@ class CoreStorageTest extends \Ems\TestCase
             'foo'   => 'bar',
             'baz'   => 'boing',
             'chili' => 'tasty'
-        ], $storage->get(['foo', 'baz', 'chili']));
+        ], $storage->several(['foo', 'baz', 'chili']));
 
         $mainStorage2 = $this->newMainStorage($con);
         $storage2 = $this->newStorage($mainStorage2);
@@ -225,7 +225,7 @@ class CoreStorageTest extends \Ems\TestCase
             'foo'   => 'bar',
             'baz'   => 'boing',
             'chili' => 'tasty'
-        ], $storage2->get(['foo', 'baz', 'chili']));
+        ], $storage2->several(['foo', 'baz', 'chili']));
 
         $storage->put('rebecca', 'jill');
         $storage->put('age', 55);
@@ -253,16 +253,16 @@ class CoreStorageTest extends \Ems\TestCase
             'foo'   => 'bar',
             'baz'   => 'boing',
             'chili' => 'tasty'
-        ], $storage->get(['foo', 'baz', 'chili']));
+        ], $storage->several(['foo', 'baz', 'chili']));
 
         $storage->clear();
 
-        $this->assertEquals([], $storage->get(['foo', 'baz', 'hi', 'chili']));
+        $this->assertEquals([], $storage->several(['foo', 'baz', 'hi', 'chili']));
 
         $mainStorage2 = $this->newMainStorage($con);
         $storage2 = $this->newStorage($mainStorage2);
 
-        $this->assertEquals([], $storage2->get(['foo', 'baz', 'hi', 'chili']));
+        $this->assertEquals([], $storage2->several(['foo', 'baz', 'hi', 'chili']));
     }
 
     public function test_increment_and_decrement()
@@ -298,7 +298,7 @@ class CoreStorageTest extends \Ems\TestCase
             'baz'   => 'boing',
             'hi'    => 'bye',
             'chili' => 'tasty',
-        ], $storage->get(['foo', 'baz', 'hi', 'chili']));
+        ], $storage->several(['foo', 'baz', 'hi', 'chili']));
 
         $storage->forget('baz');
 
@@ -308,7 +308,7 @@ class CoreStorageTest extends \Ems\TestCase
             'foo'   => 'bar',
             'hi'    => 'bye',
             'chili' => 'tasty',
-        ], $storage->get(['foo', 'baz', 'hi', 'chili']));
+        ], $storage->several(['foo', 'baz', 'hi', 'chili']));
 
         $mainStorage2 = $this->newMainStorage($con);
         $storage2 = $this->newStorage($mainStorage2);
@@ -318,7 +318,7 @@ class CoreStorageTest extends \Ems\TestCase
             'foo'   => 'bar',
             'hi'    => 'bye',
             'chili' => 'tasty',
-        ], $storage2->get(['foo', 'baz', 'hi', 'chili']));
+        ], $storage2->several(['foo', 'baz', 'hi', 'chili']));
 
     }
 
@@ -363,12 +363,12 @@ class CoreStorageTest extends \Ems\TestCase
             $values[$key] = $data['payload'];
         }
 
-        $this->assertEquals($values, $storage->get(array_keys($entries)));
+        $this->assertEquals($values, $storage->several(array_keys($entries)));
 
         $mainStorage2 = $this->newMainStorage($con);
         $storage2 = $this->newStorage($mainStorage2);
 
-        $this->assertEquals($values, $storage2->get(array_keys($entries)));
+        $this->assertEquals($values, $storage2->several(array_keys($entries)));
 
         $this->assertSame($storage, $storage->prune([])); // does nothing
         $this->assertSame($storage, $storage->prune(['old']));
@@ -376,19 +376,19 @@ class CoreStorageTest extends \Ems\TestCase
         unset($values['austin']);
         unset($values['rebecca']);
 
-        $this->assertEquals($values, $storage->get(array_keys($entries)));
+        $this->assertEquals($values, $storage->several(array_keys($entries)));
 
         $storage->prune(['male', 'young']);
 
         unset($values['peter']);
         unset($values['emily']);
 
-        $this->assertEquals($values, $storage->get(array_keys($entries)));
+        $this->assertEquals($values, $storage->several(array_keys($entries)));
 
         $mainStorage3 = $this->newMainStorage($con);
         $storage3 = $this->newStorage($mainStorage2);
 
-        $this->assertEquals($values, $storage3->get(array_keys($entries)));
+        $this->assertEquals($values, $storage3->several(array_keys($entries)));
 //         $this->assertEquals($values, $storage2->get(array_keys($entries)));
 
 
