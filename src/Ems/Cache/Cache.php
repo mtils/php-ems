@@ -57,11 +57,15 @@ class Cache implements CacheContract
      * {@inheritdoc}
      *
      * @param mixed $value
+     * @param mixed $criteria2 (optional)
+     * ... (allows unlimited args)
      *
      * @return string
      **/
-    public function key($value)
+    public function key($value, $criteria2=null)
     {
+        $value = func_num_args() === 1 ? $value : func_get_args();
+
         if (is_scalar($value)) {
             return $this->storage->escape((string) $value);
         }

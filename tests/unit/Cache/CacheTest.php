@@ -129,6 +129,28 @@ class CacheTest extends \Ems\TestCase
         $this->assertEquals('bar', $cache->get($key));
     }
 
+    public function test_key_asks_categorizer_if_multiple_args_were_passed()
+    {
+        $categorizer = $this->mockCategorizer();
+        $cache = $this->newCache($categorizer);
+        $storage = $this->mockStorage();
+        $cache->addStorage('default', $storage);
+
+        $key = ['a', 'b'];
+
+        $categorizer->shouldReceive('key')
+                    ->with($key)
+                    ->once()
+                    ->andReturn('a_array');
+
+        $storage->shouldReceive('escape')
+                ->with('a_array')
+                ->once()
+                ->andReturn('b_array');
+
+        $this->assertEquals('b_array', $cache->key('a', 'b'));
+    }
+
     public function test_get_returns_null_if_default_is_null_and_no_hit()
     {
         $categorizer = $this->mockCategorizer();

@@ -23,16 +23,19 @@ interface Cache extends ArrayAccess, Provider, HasMethodHooks
      * If the value is scalar or null, replace any chars which are
      * not valid.
      *
-     * If value is an object or array the categorizers will be asked
-     * for a key
+     * If you pass multiple args or value is an object or array the categorizer
+     * will be asked for a key.
+     * If you pass multiple args the categorizer will always get an array.
      * If the categorizers dont know a key for an array, encode the array
-     * to a key
+     * to a key.
      *
      * @param mixed $value
+     * @param mixed $criteria2 (optional)
+     * ... (allows unlimited args)
      *
      * @return string
      **/
-    public function key($value);
+    public function key($value, $criteria2=null);
 
     /**
      * Return if the cache has stored $key.
