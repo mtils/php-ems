@@ -78,7 +78,7 @@ class IOCContainerTest extends \Ems\TestCase
     {
         $container = $this->newContainer();
 
-        $provider = $container->provide(ContainerTest_ClassParameter::class, true);
+        $provider = $container->provide(ContainerTest_ClassParameter::class)->useParametersInResolve();
 
         $this->assertInstanceof(ContainerCallable::class, $provider);
         $this->assertTrue($provider->shouldUseParametersInResolve());

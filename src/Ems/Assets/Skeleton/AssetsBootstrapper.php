@@ -135,7 +135,7 @@ class AssetsBootstrapper extends Bootstrapper
             return public_path($subPath);
         }
 
-        $basePath = $this->app->__invoke('app')->path().'/public';
+        $basePath = $this->app->__invoke('app')->path()->append('public');
 
         return $subPath ? "$basePath/$subPath" : $basePath;
     }

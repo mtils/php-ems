@@ -38,23 +38,23 @@ interface IOCContainer
      * callable. Like this: $request->provideRoute(callable provider)
      * The provide method returns a callable which will resolve
      * the $abstract you pass to the provide method.
-     * If you resolve a class through this method you can pass
-     * $processParameters=true. Then the callable parameters will be
-     * passed to the class constructor.
+     *
+     * You can also make a method call provider by just passing a method name
+     * as the second parameter.
      *
      * @param string $abstract
-     * @param bool   $processParameters (optional)
+     * @param string $method (optional)
      *
      * @return ContainerCallable
      **/
-    public function provide($abstract, $processParameters = false);
+    public function provide($abstract, $method = '');
 
     /**
      * Bind a callable to create $abstract if requested. If the $abstract should
      * be resolved only once, pass $singleton=true.
      *
      * @param string   $abstract
-     * @param callable $callback
+     * @param callable $factory
      * @param bool     $singleton (optional)
      *
      * @return self

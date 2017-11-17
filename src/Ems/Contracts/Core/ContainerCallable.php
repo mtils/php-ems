@@ -41,13 +41,13 @@ class ContainerCallable
      *
      * @param IOCContainer $container
      * @param string       $abstract
-     * @param bool         $useParametersInResolve (default:false)
+     * @param string       $method (optional)
      */
-    public function __construct(IOCContainer $container, $abstract, $useParametersInResolve=false)
+    public function __construct(IOCContainer $container, $abstract, $method='')
     {
         $this->container = $container;
         $this->abstract = $abstract;
-        $this->useParametersInResolve = $useParametersInResolve;
+        $this->method = $method;
     }
 
     /**
@@ -107,6 +107,29 @@ class ContainerCallable
     }
 
     /**
+     * Determine if the passed parameters to this callable should be forwarded
+     * to $app->__invoke().
+     * This is mostly not the case, but to have this possibility its added.
+     *
+     * Example:
+     *
+     * $provider = $app->provide(MyClass::class);
+     * $provider(1,2,3); // This will call $app(MyClass::class) without parameters
+     *
+     * $provider = $app->provide(MyClass::class)->useParametersInResolve();
+     * $provider(1,2,3); // This will call $app(MyClass::class, [1,2,3])
+     *
+     * @param bool $use
+     *
+     * @return $this
+     */
+    public function useParametersInResolve($use=true)
+    {
+        $this->useParametersInResolve = $use;
+        return $this;
+    }
+
+    /**
      * Return if the container should process the arguments you give in __invoke.
      *
      * @return bool
@@ -149,4 +172,5 @@ class ContainerCallable
         $this->useAppCall = $use;
         return $this;
     }
+
 }

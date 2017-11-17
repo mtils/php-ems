@@ -25,12 +25,12 @@ trait IOCHelperMethods
      * {@inheritdoc}
      *
      * @param string $abstract
-     * @param bool   $processParameters (optional)
+     * @param string $method (optional)
      *
      * @return ContainerCallable
      **/
-    public function provide($abstract, $processParameters = false)
+    public function provide($abstract, $method = '')
     {
-        return new ContainerCallable($this, $abstract, $processParameters);
+        return new ContainerCallable($this, $abstract, $method);
     }
 }
