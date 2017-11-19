@@ -7,6 +7,7 @@ use Ems\Contracts\Cache\Cache as CacheContract;
 use Ems\Contracts\Cache\Storage;
 use Ems\Contracts\Cache\Categorizer;
 use Ems\Cache\Exception\CacheMissException;
+use Ems\Contracts\Core\None;
 use Ems\Core\Collections\StringList;
 use Ems\Core\Helper;
 use Ems\Core\Patterns\HookableTrait;
@@ -109,7 +110,7 @@ class Cache implements CacheContract
             return $this->storage->get($cacheId);
         }
 
-        if ($default === null || $default instanceof _CacheMiss) {
+        if ($default === null || $default instanceof None) {
             return $default;
         }
 
@@ -143,9 +144,9 @@ class Cache implements CacheContract
      **/
     public function getOrFail($id)
     {
-        $value = $this->get($id, new _CacheMiss());
+        $value = $this->get($id, new None());
 
-        if ($value instanceof _CacheMiss) {
+        if ($value instanceof None) {
             throw new CacheMissException('Cache entry not found');
         }
 
@@ -470,8 +471,4 @@ class Cache implements CacheContract
         throw new HandlerNotFoundException("No Storage saved under $name");
     }
 
-}
-
-class _CacheMiss
-{
 }
