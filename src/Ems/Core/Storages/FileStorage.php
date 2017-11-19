@@ -110,7 +110,7 @@ class FileStorage implements UnbufferedStorage, Configurable
     /**
      * Return if the key $key does exist. At the end if the file exists.
      *
-     * @param string $offset
+     * @param mixed $offset
      *
      * @return bool
      **/
@@ -301,7 +301,7 @@ class FileStorage implements UnbufferedStorage, Configurable
      * @param string $data
      * @param string $checksum
      *
-     * @throws Ems\Contracts\Core\Errors\DataCorruption
+     * @throws \Ems\Contracts\Core\Errors\DataCorruption
      **/
     protected function checkData($method, &$data, $checksum)
     {

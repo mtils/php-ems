@@ -185,7 +185,7 @@ class SingleFileStorage implements BufferedStorage, Configurable
      * @param string $data
      * @param string $checksum
      *
-     * @throws Ems\Contracts\Core\Errors\DataCorruption
+     * @throws \Ems\Contracts\Core\Errors\DataCorruption
      **/
     protected function checkData($method, $data, $checksum)
     {

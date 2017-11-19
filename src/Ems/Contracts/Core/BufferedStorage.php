@@ -2,8 +2,6 @@
 
 namespace Ems\Contracts\Core;
 
-use ArrayAccess;
-
 /**
  * An buffered storage has separate persisting methods. The user if this class
  * will know that he has to use some separate method calls to persist the data.
