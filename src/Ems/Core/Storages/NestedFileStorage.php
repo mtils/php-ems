@@ -10,13 +10,13 @@ use Ems\Contracts\Core\Filesystem as FilesystemContract;
 use Ems\Contracts\Core\Serializer as SerializerContract;
 use Ems\Contracts\Core\MimeTypeProvider;
 use Ems\Contracts\Core\Url as UrlContract;
+use Ems\Core\Exceptions\KeyLengthException;
 use Ems\Core\Exceptions\UnConfiguredException;
 use Ems\Core\Exceptions\UnsupportedParameterException;
 use Ems\Core\ConfigurableTrait;
 use Ems\Core\LocalFilesystem;
 use Ems\Core\ManualMimeTypeProvider;
 use Ems\Core\Serializer\JsonSerializer;
-use Ems\Core\Support\ArrayAccessMethods;
 use Ems\Core\Url;
 use Ems\Core\Collections\StringList;
 use OutOfBoundsException;
@@ -179,8 +179,7 @@ class NestedFileStorage implements BufferedStorage, Configurable
             return true;
         }
 
-
-        return $this->filesystem->exists($this->filePath($offset));
+        return $this->filesystem->exists($url);
 
     }
 
@@ -210,6 +209,8 @@ class NestedFileStorage implements BufferedStorage, Configurable
      *
      * @param mixed $offset
      * @param mixed $value
+     *
+     * @return void
      **/
     public function offsetSet($offset, $value)
     {
@@ -240,6 +241,8 @@ class NestedFileStorage implements BufferedStorage, Configurable
      * Unset $offset.
      *
      * @param mixed $offset
+     *
+     * @return void
      **/
     public function offsetUnset($offset)
     {
@@ -494,7 +497,7 @@ class NestedFileStorage implements BufferedStorage, Configurable
     /**
      * Return an already loaded storage or create one
      *
-     * @param Url $url
+     * @param UrlContract $url
      *
      * @return SingleFileStorage
      **/
@@ -530,7 +533,7 @@ class NestedFileStorage implements BufferedStorage, Configurable
     /**
      * Return an already loaded storage or create one
      *
-     * @param Url|string $url
+     * @param UrlContract|string $url
      *
      * @return SingleFileStorage|null
      **/
@@ -548,7 +551,7 @@ class NestedFileStorage implements BufferedStorage, Configurable
     /**
      * Return an already loaded storage or create one
      *
-     * @param Url|string $url
+     * @param UrlContract|string $url
      *
      * @return SingleFileStorage|null
      **/
@@ -566,7 +569,7 @@ class NestedFileStorage implements BufferedStorage, Configurable
     /**
      * Return an already loaded storage or create one
      *
-     * @param Url|string $url
+     * @param UrlContract|string $url
      *
      * @return SingleFileStorage|null
      **/
@@ -575,6 +578,11 @@ class NestedFileStorage implements BufferedStorage, Configurable
         return isset($this->storages["$url"]);
     }
 
+    /**
+     * Read all storages to have all the data.
+     *
+     * @return array
+     */
     protected function preloadAllStorages()
     {
 
@@ -614,6 +622,9 @@ class NestedFileStorage implements BufferedStorage, Configurable
         $this->dirExists = true;
     }
 
+    /**
+     * @param string $url
+     */
     protected function ensureStorageDirectory($url)
     {
         if (!isset($this->subDirQueue[$url])) {
@@ -626,6 +637,8 @@ class NestedFileStorage implements BufferedStorage, Configurable
 
     /**
      * Ensure the base directory exists
+     *
+     * @param string $dir
      **/
     protected function ensureDirectory($dir)
     {
@@ -657,6 +670,15 @@ class NestedFileStorage implements BufferedStorage, Configurable
         return $this->urlOrFail()->append($this->fileName($offset));
     }
 
+    /**
+     * Calculate the key prefix of a storage url. If you have for example a
+     * nesting level of 1 and the path of the filestorage is "de/messages.json" the key
+     * prefix is "de.messages".
+     *
+     * @param $storageUrl
+     *
+     * @return string
+     */
     protected function keyPrefix($storageUrl)
     {
         $urlString = "$storageUrl";
@@ -686,7 +708,7 @@ class NestedFileStorage implements BufferedStorage, Configurable
      **/
     protected function fileName($offset)
     {
-        if (preg_match('/^[\pL\pM\pN_-]+$/u', $offset) > 0) {
+        if (preg_match('/^[\pL\pM\pN_.-]+$/u', $offset) > 0) {
             return $offset . '.' . $this->fileExtension();
         }
         throw new UnsupportedParameterException("The key has to be filesystem compatible");
@@ -735,6 +757,13 @@ class NestedFileStorage implements BufferedStorage, Configurable
         return $this->fileExtension;
     }
 
+    /**
+     * Extract the file url and the key to query the storage.
+     *
+     * @param $key
+     *
+     * @return array(UrlContract, string)
+     */
     protected function fileUrlAndKey($key)
     {
 
@@ -747,7 +776,9 @@ class NestedFileStorage implements BufferedStorage, Configurable
         $partCount = count($parts);
 
         if ($partCount <= $this->nestingLevel) {
-            throw new OutOfBoundsException("The key segments has to have a minimum count of nesting level ($this->nestingLevel)");
+            $minLength = $this->nestingLevel+1;
+            $msg = "The key segments has to have a minimum count of $minLength (nesting level: $this->nestingLevel)";
+            throw (new KeyLengthException($msg))->setMinSegments($minLength);
         }
 
         $subKey = [];
