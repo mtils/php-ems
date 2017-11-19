@@ -57,6 +57,28 @@ class NestedArrayTest extends \Ems\TestCase
         $this->assertEquals($addressArray, $grouper['address']);
     }
 
+    public function testOffsetGetDoesNotDestroyIndexedArrays()
+    {
+        $array = [
+            'id'            => 13,
+            'name'          => 'Michael',
+            'surname'       => 'Tils',
+            'address.id'    => 578,
+            'address.street'=> 'Elmstreet 13',
+            'address.lang' => ['en', 'de', 'fr']
+        ];
+
+        $addressArray = [
+            'id'     => 578,
+            'street' => 'Elmstreet 13',
+            'lang'   => ['en', 'de', 'fr']
+        ];
+
+        $grouper = $this->newGrouper($array);
+
+        $this->assertEquals($addressArray, $grouper['address']);
+    }
+
     public function testLeadingSeparatorDoesntProduceChildren()
     {
         $array = [
@@ -304,6 +326,7 @@ class NestedArrayTest extends \Ems\TestCase
         $this->assertFalse(isset($grouper['category']['id']));
         $this->assertTrue(isset($grouper['category']['parent']));
     }
+
 
     public function testOffsetExistsWithDotReturnsTrueOnNestedArray()
     {

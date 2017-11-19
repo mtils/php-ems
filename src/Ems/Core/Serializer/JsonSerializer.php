@@ -48,6 +48,16 @@ class JsonSerializer implements Serializer
      const AS_ARRAY = 'array';
 
     /**
+     * @var bool
+     */
+     protected $defaultAsArray = false;
+
+    /**
+     * @var bool
+     */
+     protected $defaultPrettyPrint = false;
+
+    /**
      * {@inheritdoc}
      *
      * @return string
@@ -92,7 +102,7 @@ class JsonSerializer implements Serializer
             $string,
             $this->shouldDecodeAsArray($options),
             $this->getDepth($options),
-            $this->bitmask($options)
+            $this->bitmask($options, true)
         );
 
         return $deserialized;
@@ -100,15 +110,44 @@ class JsonSerializer implements Serializer
     }
 
     /**
+     * Configure if it should return array by default in deserialize.
+     *
+     * @param bool $asArray
+     *
+     * @return $this
+     */
+    public function asArrayByDefault($asArray=true)
+    {
+        $this->defaultAsArray = $asArray;
+        return $this;
+    }
+
+    /**
+     * Configure if it should return array by default in deserialize.
+     *
+     * @param bool $pretty
+     *
+     * @return $this
+     */
+    public function prettyByDefault($pretty=true)
+    {
+        $this->defaultPrettyPrint = $pretty;
+        return $this;
+    }
+
+    /**
      * Build a bitmask out of $options to use them with json_*
      *
      * @param array $options
+     * @param bool  $forDeserialize (default: false)
      *
      * @return int
      **/
-    protected function bitmask(array $options)
+    protected function bitmask(array $options, $forDeserialize=false)
     {
         $bitmask = 0;
+
+        $prettyPrintWasSet = false;
 
         foreach ($options as $key=>$value) {
 
@@ -116,9 +155,17 @@ class JsonSerializer implements Serializer
                 continue;
             }
 
+            if ($key == static::PRETTY) {
+                $prettyPrintWasSet = true;
+            }
             if ($value) {
                 $bitmask = $bitmask | $key;
             }
+
+        }
+
+        if (!$forDeserialize && !$prettyPrintWasSet && $this->defaultPrettyPrint) {
+            $bitmask  = $bitmask | static::PRETTY;
         }
 
         return $bitmask;
@@ -148,7 +195,7 @@ class JsonSerializer implements Serializer
         if (isset($options[static::AS_ARRAY])) {
             return $options[static::AS_ARRAY];
         }
-        return false;
+        return $this->defaultAsArray;
     }
 
 }

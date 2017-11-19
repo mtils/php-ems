@@ -101,7 +101,7 @@ class NestedFileStorageTest extends \Ems\IntegrationTest
     /**
      * @expectedException OutOfBoundsException
      **/
-    public function test_setNestingLevel_to_high_throws_exception()
+    public function test_setNestingLevel_too_high_throws_exception()
     {
 
         $data = ['foo' => 'bar'];
@@ -215,7 +215,7 @@ class NestedFileStorageTest extends \Ems\IntegrationTest
     }
 
     /**
-     * @expectedException OutOfBoundsException
+     * @expectedException \Ems\Core\Exceptions\KeyLengthException
      **/
     public function test_key_with_less_segments_than_nesting_level_throws_exception()
     {
@@ -468,6 +468,50 @@ class NestedFileStorageTest extends \Ems\IntegrationTest
         $storage2 = $this->newStorage()->setUrl($url);
 
         $this->assertEquals($awaited, $storage2->toArray());
+
+
+    }
+
+    public function test_offsetExists_works_with_nesting_level1()
+    {
+
+        $data = [
+            'foo' => 'bar',
+            'baz' => 'boing'
+        ];
+
+        $prefix = 'lang';
+
+        $p = function ($key) use ($prefix) {
+            return "$prefix.$key";
+        };
+
+        $dirName = $this->tempDirName();
+        $url = new Url($dirName);
+
+
+        $storage = $this->newStorage()->setUrl($url)->setNestingLevel(1);
+
+        $awaited = [];
+        foreach (['de', 'en', 'fr'] as $key) {
+            $storage[$p($key)] = $data;
+            $awaited[$p($key)] = $data;
+        }
+
+        $storage->persist();
+
+        $this->assertEquals($awaited, $storage->toArray());
+
+        $storage2 = $this->newStorage()->setUrl($url)->setNestingLevel(1);
+
+        $this->assertTrue(isset($storage2['lang.de']));
+        $this->assertTrue(isset($storage2['lang.en']));
+        $this->assertTrue(isset($storage2['lang.fr']));
+        $this->assertFalse(isset($storage2['lang.cz']));
+        $this->assertTrue(isset($storage2['lang.de.foo']));
+        $this->assertFalse(isset($storage2['lang.en.bla']));
+
+
 
 
     }
