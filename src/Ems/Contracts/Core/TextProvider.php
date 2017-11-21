@@ -73,7 +73,7 @@ interface TextProvider
      *
      * @param string $domain
      *
-     * @throws \Ems\Core\Errors\NotFound
+     * @throws \Ems\Contracts\Core\Errors\NotFound
      *
      * @return self
      **/
