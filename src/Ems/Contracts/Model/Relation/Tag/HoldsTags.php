@@ -31,7 +31,7 @@ interface HoldsTags
     /**
      * Add a Tag.
      *
-     * @param \Ems\Contracts\Model\Relation\Tag $tag
+     * @param Tag $tag
      *
      * @return self
      */
@@ -40,7 +40,7 @@ interface HoldsTags
     /**
      * Remove a tag from this object.
      *
-     * @param \Ems\Contracts\Model\Relation\Tag $tag
+     * @param Tag $tag
      *
      * @return self
      */
@@ -49,7 +49,7 @@ interface HoldsTags
     /**
      * Check if this object has a tag $tag.
      *
-     * @param \Ems\Contracts\Model\Relation\Tag $tag
+     * @param Tag $tag
      *
      * @return bool
      **/

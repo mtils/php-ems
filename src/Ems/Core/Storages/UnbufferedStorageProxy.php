@@ -57,6 +57,8 @@ class UnbufferedStorageProxy implements UnbufferedStorage
      *
      * @param string $offset
      * @param mixed  $value
+     *
+     * @return void
      **/
     public function offsetSet($offset, $value)
     {
@@ -69,6 +71,8 @@ class UnbufferedStorageProxy implements UnbufferedStorage
      * the error
      *
      * @param string $offset
+     *
+     * @return void
      **/
     public function offsetUnset($offset)
     {

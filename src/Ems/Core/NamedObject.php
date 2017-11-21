@@ -30,6 +30,7 @@ class NamedObject implements NamedQuantity, AppliesToResource
     /**
      * @param mixed  $id   (optional)
      * @param string $name (optional)
+     * @param string $resourceName (optional)
      **/
     public function __construct($id = null, $name = '', $resourceName = '')
     {

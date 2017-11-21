@@ -27,8 +27,9 @@ class InvalidCharsetException extends MisConfiguredException
     protected $guard;
 
     /**
-     * @param string $failedString
-     * @param string $awaitedCharset
+     * @param string    $failedString
+     * @param string    $awaitedCharset
+     * @param Exception $previous (optional)
      **/
     public function __construct($failedString, $awaitedCharset, Exception $previous=null)
     {
@@ -83,6 +84,8 @@ class InvalidCharsetException extends MisConfiguredException
      * Set the guard to determine the charset.
      *
      * @param CharsetGuard $guard
+     *
+     * @return $this
      **/
     public function useGuard(CharsetGuard $guard)
     {

@@ -230,7 +230,8 @@ trait ReadIteratorTrait
     /**
      * Clean the line (remove line breaks).
      *
-     * @param string $line
+     * @param resource $handle
+     * @param int      $chunkSize
      *
      * @return string
      **/

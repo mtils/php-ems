@@ -250,6 +250,8 @@ class IOCContainer implements ContainerContract
     /**
      * @param mixed $abstract
      * @param array $parameters
+     *
+     * @return array
      **/
     protected function convertParameters($abstract, array $parameters)
     {

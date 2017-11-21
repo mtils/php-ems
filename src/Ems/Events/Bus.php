@@ -550,7 +550,7 @@ class Bus implements BusContract
      *
      * @param MatchingListener $matchingListener
      *
-     * @retrun self
+     * @return $this
      **/
     public function useMatchingListener(MatchingListener $matchingListener)
     {

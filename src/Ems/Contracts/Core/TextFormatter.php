@@ -36,7 +36,7 @@ interface TextFormatter extends NamedCallableChain
      * Directly call a filter.
      *
      * @param string $filter
-     * @param array  $parameters
+     * @param array  $params (optional)
      *
      * @return string
      **/

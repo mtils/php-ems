@@ -67,9 +67,9 @@ interface Mailer
      * Send a message manually. This method is also called by messages created
      * by self::message(). You can send only one mail at a time with this method.
      *
-     * @param \Ems\Contracts\Mail $message
+     * @param Message $message
      *
-     * @return \Ems\Contracts\Mail\SendResult
+     * @return SendResult
      **/
     public function sendMessage(Message $message);
 

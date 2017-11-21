@@ -319,6 +319,8 @@ class ConstraintGroup implements ConstraintGroupContract
      * Throws an error if the expression is not a constraint.
      *
      * @param ExpressionContract $expression
+     *
+     * @return ConstraintContract
      */
     protected function checkType(ExpressionContract $expression)
     {

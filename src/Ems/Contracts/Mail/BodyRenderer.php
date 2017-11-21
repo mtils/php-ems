@@ -11,8 +11,8 @@ interface BodyRenderer
     /**
      * Return the html body for the email.
      *
-     * @param \Ems\Contracts\Mail\MailConfig
-     * @param aray $data
+     * @param MailConfig $config
+     * @param array      $data
      *
      * @return string
      **/
@@ -21,8 +21,8 @@ interface BodyRenderer
     /**
      * Return the plain text body for the email.
      *
-     * @param \Ems\Contracts\Mail\MailConfig
-     * @param aray $data
+     * @param MailConfig $config
+     * @param array      $data
      *
      * @return string
      **/

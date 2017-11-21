@@ -130,7 +130,8 @@ trait TextProviderTrait
      * Build the key if a domain or namespace was set.
      *
      * @param string $key
-     *                    return string
+     *
+     * @return string
      **/
     protected function composeKey($key)
     {

@@ -7,8 +7,10 @@ interface ValueFormatter
     /**
      * Builds a XType out of a config. Config can be anything.
      *
-     * @param \Ems\Contracts\XType\XType
-     * @param mixed $value
+     * @param XType  $type
+     * @param mixed  $value
+     * @param string $view
+     * @param string $lang (optional)
      *
      * @return string
      **/

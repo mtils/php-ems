@@ -135,6 +135,8 @@ trait StaticExtendable
      *
      * @param string $method
      * @param object $object
+     *
+     * @return \Closure
      **/
     protected static function buildForward($method, $object)
     {

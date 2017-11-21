@@ -20,6 +20,7 @@ class TranslatorTextProvider implements TextProvider, Multilingual
      * @param \Illuminate\Translation\Translator $translator
      * @param string                             $domain     (optional)
      * @param string                             $namespace  (optional)
+     * @param bool                               $isRoot (default:true)
      **/
     public function __construct(Translator $translator, $domain = '', $namespace = '', $isRoot = true)
     {

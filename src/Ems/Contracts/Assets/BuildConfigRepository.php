@@ -16,6 +16,8 @@ interface BuildConfigRepository extends Repository
     /**
      * Return if this repository has $group.
      *
+     * @param string $group
+     *
      * @return array
      **/
     public function has($group);

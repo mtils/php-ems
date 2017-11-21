@@ -379,6 +379,10 @@ class FileStorage implements UnbufferedStorage, Configurable
 
     /**
      * Ensure the base directory exists
+     *
+     * @param string $dir
+     *
+     * @return bool
      **/
     protected function ensureDirectory($dir)
     {

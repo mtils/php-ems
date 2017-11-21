@@ -23,7 +23,7 @@ interface TagWithGroups extends Tag
     /**
      * Add a TagGroup.
      *
-     * @param \Ems\Contracts\Model\Relation\TagGroup $group
+     * @param TagGroup $group
      *
      * @return self
      */
@@ -32,7 +32,7 @@ interface TagWithGroups extends Tag
     /**
      * Remove a group from this Tag.
      *
-     * @param \Ems\Contracts\Model\Relation\TagGroup $group
+     * @param TagGroup $group
      *
      * @return self
      */
@@ -41,7 +41,7 @@ interface TagWithGroups extends Tag
     /**
      * Check if this tag is in $group.
      *
-     * @param \Ems\Contracts\Model\Relation\TagGroup $group
+     * @param TagGroup $group
      *
      * @return bool
      **/

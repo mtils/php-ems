@@ -335,7 +335,8 @@ class Helper
      * Split a (multibyte string)
      *
      * @param string $string
-     * @param string $charset (default='UTF-8')
+     * @param int    $chunkLength (default:0)
+     * @param string $charset (default:'UTF-8')
      *
      * @return array
      **/

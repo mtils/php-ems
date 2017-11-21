@@ -38,6 +38,9 @@ interface Layout extends Countable, IteratorAggregate
     /**
      * Return the LayoutItem setted for $row and $column.
      *
+     * @param int $row
+     * @param int $column
+     *
      * @return \Ems\Contracts\Graphics\LayoutItem
      **/
     public function getItem($row, $column);

@@ -14,8 +14,8 @@ interface StringConverter
      * input encoding (defaults to mb_internal_encoding).
      *
      * @param string $text
-     * @param string $toEncoding
-     * @param string $fromEncoding (optional)
+     * @param string $outEncoding
+     * @param string $inEncoding (optional)
      *
      * @return string
      **/

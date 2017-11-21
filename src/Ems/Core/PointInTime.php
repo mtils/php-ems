@@ -68,6 +68,8 @@ class PointInTime extends DateTime implements TemporalContract
      * Set what this precision is (self::SECOND).
      *
      * @param string $precision
+     *
+     * @return $this
      **/
     public function setPrecision($precision)
     {

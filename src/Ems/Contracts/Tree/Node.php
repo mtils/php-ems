@@ -50,14 +50,18 @@ interface Node
 
     /**
      * Adds a childNode to this node (Only in memory).
-     * 
+     *
+     * @param self $child
+     *
      * @return self
      */
     public function addChild(self $child);
 
     /**
      * Removes a child node (Only in memory).
-     * 
+     *
+     * @param self $child
+     *
      * @return self
      */
     public function removeChild(self $child);

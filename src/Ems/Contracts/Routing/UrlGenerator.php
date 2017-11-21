@@ -53,7 +53,7 @@ interface UrlGenerator
     /**
      * Return the url to an asset.
      *
-     * @param string $asset
+     * @param string $path
      * @param bool   $absolute (optional)
      * @param bool   $secure   (optional)
      *

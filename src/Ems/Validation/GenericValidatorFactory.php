@@ -45,6 +45,8 @@ class GenericValidatorFactory implements ValidatorFactoryContract
      * Just assign a callable to do the validation.
      *
      * @param callable $factory (optional)
+     *
+     * @return $this
      **/
     public function makeBy(callable $factory)
     {

@@ -35,6 +35,8 @@ class AssetsBladeDirectives
      * absolute match (strpos === 0) will lead to a injection.
      *
      * @param string $groupPrefix
+     *
+     * @return $this
      **/
     public function mapDirectoryToGroupPrefix($directory, $groupPrefix)
     {

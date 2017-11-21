@@ -14,7 +14,7 @@ interface TaggingRepository
     /**
      * Attach the tags to the passed holder(s).
      *
-     * @param \Ems\Contracts\Model\Relation\HoldsTags|\Traversable $holders
+     * @param HoldsTags|\Traversable $holders
      *
      * @return self
      **/
@@ -23,7 +23,7 @@ interface TaggingRepository
     /**
      * Persist the attached tags (to database).
      *
-     * @param \Ems\Contracts\Model\Relation\HoldsTags $holder
+     * @param HoldsTags $holder
      *
      * @return self
      **/
@@ -34,7 +34,7 @@ interface TaggingRepository
      *
      * @param string $name
      *
-     * @return \Ems\Contracts\Model\Relation\Tag
+     * @return Tag
      **/
     public function make($name);
 
@@ -43,7 +43,7 @@ interface TaggingRepository
      *
      * @param string $name
      *
-     * @return \Ems\Contracts\Model\Relation\Tag
+     * @return Tag
      **/
     public function create($name);
 
@@ -52,7 +52,7 @@ interface TaggingRepository
      *
      * @param string $name
      *
-     * @return \Ems\Contracts\Model\Relation\Tag
+     * @return Tag
      **/
     public function getByNameOrCreate($name);
 
@@ -68,7 +68,7 @@ interface TaggingRepository
     /**
      * Delete a tag.
      *
-     * @param \Ems\Contracts\Model\Relation\Tag
+     * @param Tag
      *
      * @return self
      **/

@@ -87,6 +87,8 @@ class TextFormatter implements FormatterContract
      *
      * @param string $text
      * @param string $tagName
+     *
+     * @return string
      **/
     public function tag($text, $tagName)
     {

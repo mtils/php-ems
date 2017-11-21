@@ -26,7 +26,7 @@ interface Sortable
     /**
      * Get the previos sortable (like DOM.previousSibling).
      *
-     * @return \Ems\Contracts\Core|null
+     * @return self|null
      **/
     public function getPrevious();
 
@@ -43,14 +43,14 @@ interface Sortable
     /**
      * Get the next sibling.
      *
-     * @return \Ems\Contracts\Core|null|null
+     * @return self|null
      **/
     public function getNext();
 
     /**
      * Set the next sibling.
      *
-     * @param \Ems\Contracts\Core|null $next
+     * @param self|null $next
      *
      * @return self
      **/

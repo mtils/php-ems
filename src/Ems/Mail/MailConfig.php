@@ -70,6 +70,8 @@ class MailConfig extends NamedObject implements MailConfigContract
 
     /**
      * @param \Ems\Contracts\Mail\MailConfig $config
+     *
+     * @return $this
      **/
     public function setParent(MailConfigContract $config)
     {

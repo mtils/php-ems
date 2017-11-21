@@ -82,7 +82,7 @@ trait ExtendableByClassHierarchyTrait
      * It decorates findNearestForClass to cache the result
      *
      * @param string $findClass
-     * @param string $type (optional)
+     *
      * @return callable|null
      **/
     protected function nearestForClass($findClass)

@@ -120,6 +120,8 @@ abstract class Validator extends AbstractValidator
      * @param string            $key
      * @param array             $originalParameters
      * @param AppliesToResource $resource (optional)
+     *
+     * @return array
      **/
     protected function parametersOfUniqueContraint($key, array $originalParameters, AppliesToResource $resource=null)
     {

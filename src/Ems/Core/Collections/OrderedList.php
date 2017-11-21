@@ -255,6 +255,8 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
     /**
      * Remove duplicates.
      *
+     * @param callable $comparator (optional)
+     *
      * @return self
      **/
     public function unique(callable $comparator = null)

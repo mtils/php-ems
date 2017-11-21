@@ -175,7 +175,7 @@ class ManualMimeTypeProvider implements MimeTypeProvider
      * Add an alias for a mimetype. application/html vs. text/html for example
      * Leads to a true in isOfType even if the type doesnt match otherwise.
      *
-     * @param string $mimeTypeAlias
+     * @param string $typeAlias
      * @param string $realType
      *
      * @return self

@@ -76,8 +76,10 @@ trait SupportListeners
     /**
      * Call one listener.
      *
-     * @param calable $listener
-     * @param array   $args
+     * @param callable $listener
+     * @param array    $args
+     *
+     * @return mixed
      **/
     protected function callListener(callable $listener, array $args = [])
     {

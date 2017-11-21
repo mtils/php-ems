@@ -183,6 +183,8 @@ class Repository implements ExtendableRepository
      * Delete the passed model.
      *
      * @param \Ems\Contracts\Core\Identifiable $model
+     *
+     * @return void
      **/
     public function delete(Identifiable $model)
     {

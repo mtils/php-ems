@@ -23,7 +23,7 @@ interface Validation extends ArrayAccess, IteratorAggregate, Countable
      * It would be: $validation->addFailure('login', 'min', [3]).
      *
      * @param string $key
-     * @param string $rule
+     * @param string $ruleName
      * @param array  $parameters (optional)
      *
      * @return self
@@ -47,7 +47,7 @@ interface Validation extends ArrayAccess, IteratorAggregate, Countable
      * Quick access to parameters.
      *
      * @param string $key
-     * @param string $rule
+     * @param string $ruleName
      *
      * @return array
      **/

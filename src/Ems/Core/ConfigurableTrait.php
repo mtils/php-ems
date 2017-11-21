@@ -102,7 +102,6 @@ trait ConfigurableTrait
      * This is a helper method for classes which support manual
      * passed options to overwrite internal options.
      *
-     * @param string $key
      * @param array  $options
      *
      * @return mixed

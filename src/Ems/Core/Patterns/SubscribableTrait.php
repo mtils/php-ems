@@ -57,7 +57,6 @@ trait SubscribableTrait
 
     /**
      * @param string $event
-     * @param string $position ('after'|'before'|'')
      *
      * @throws \Ems\Contracts\Core\Errors\UnSupported
      *

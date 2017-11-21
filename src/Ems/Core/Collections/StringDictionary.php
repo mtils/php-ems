@@ -58,7 +58,7 @@ class StringDictionary extends Dictionary
     /**
      * Encode the value for string output.
      *
-     * @param string $key
+     * @param string $value
      *
      * @return string
      **/

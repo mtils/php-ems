@@ -150,6 +150,8 @@ class Condition implements ConditionContract
      * Checks the type of the operand
      *
      * @param mixed $operand
+     *
+     * @return mixed
      **/
     protected function checkOperand($operand)
     {
@@ -163,6 +165,8 @@ class Condition implements ConditionContract
      * Checks the type of the constraint
      *
      * @param mixed $constraint
+     *
+     * @return ConstraintContract|ConstraintGroupContract
      **/
     public function checkConstraint($constraint)
     {

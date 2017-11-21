@@ -51,7 +51,7 @@ trait TraitOfResponsibility
     /**
      * Add a candidate the none of this class was added.
      *
-     * @param object $canditate
+     * @param object $candidate
      *
      * @return self
      **/

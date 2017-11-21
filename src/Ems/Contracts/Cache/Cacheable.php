@@ -17,6 +17,7 @@ interface Cacheable
      * Pass a boolean to explicit turn caching on/off.
      * 
      * @param string|bool $id (optional)
+     * @param array       $tags (optional)
      *
      * @return self
      **/
