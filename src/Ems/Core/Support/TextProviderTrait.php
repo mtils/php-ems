@@ -27,6 +27,12 @@ trait TextProviderTrait
     protected $locale;
 
     /**
+     * @var string
+     */
+    protected $fallbacks = [];
+
+
+    /**
      * @var bool
      **/
     protected $isRoot = true;
@@ -59,12 +65,23 @@ trait TextProviderTrait
      * Return a new instance of this provider for locale $locale.
      *
      * @param string $locale
+     * @param string|array $fallbacks (optional)
      *
      * @return self
      **/
-    public function forLocale($locale)
+    public function forLocale($locale, $fallbacks=null)
     {
-        return $this->replicate($this->domain, $this->namespace)->setLocale($locale);
+        $fork = $this->replicate($this->domain, $this->namespace)->setLocale($locale);
+
+        if ($fallbacks) {
+            return $fork->setFallbacks($fallbacks);
+        }
+
+        if ($this->fallbacks) {
+            return $fork->setFallbacks($this->fallbacks);
+        }
+
+        return $fork;
     }
 
     /**
@@ -110,6 +127,28 @@ trait TextProviderTrait
     public function forNamespace($namespace)
     {
         return $this->replicate($this->domain, $namespace);
+    }
+
+    /**
+     * Return the fallback locales.
+     *
+     * @return array
+     */
+    public function getFallbacks()
+    {
+        return $this->fallbacks;
+    }
+
+    /**
+     * Set the locale fallback(s).
+     *
+     * @param string|array $fallback
+     * @return mixed
+     */
+    public function setFallbacks($fallback)
+    {
+        $this->fallbacks = (array)$fallback;
+
     }
 
     /**

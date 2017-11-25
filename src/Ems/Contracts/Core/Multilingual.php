@@ -11,11 +11,12 @@ interface Multilingual
     /**
      * Return a new instance of this provider for locale $locale.
      *
-     * @param string $locale
+     * @param string       $locale
+     * @param string|array $fallbacks (optional)
      *
      * @return self
      **/
-    public function forLocale($locale);
+    public function forLocale($locale, $fallbacks=null);
 
     /**
      * Return the current locale.
@@ -33,4 +34,21 @@ interface Multilingual
      * @return self
      **/
     public function setLocale($locale);
+
+    /**
+     * Return the fallback locales.
+     *
+     * @return array
+     */
+    public function getFallbacks();
+
+    /**
+     * Set the locale fallback(s).
+     *
+     * @param string|array $fallback
+     *
+     * @return $this
+     */
+    public function setFallbacks($fallback);
+
 }
