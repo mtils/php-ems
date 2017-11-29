@@ -1,0 +1,96 @@
+{
+    "number": {
+        "decimal_mark": ",",
+        "thousands_separator": "\u00a0"
+    },
+    "unit": "{number} {unit}",
+    "money": "{number} {currency}",
+    "date": {
+        "verbose": "Y. F d., l",
+        "long": "Y. F d.",
+        "short": "Y. m. d."
+    },
+    "time": {
+        "verbose": "G:i:s e",
+        "long": "G:i:s T",
+        "short": "G:i"
+    },
+    "datetime": {
+        "verbose": "Y. F d., l G:i:s e",
+        "long": "Y. F d. G:i:s T",
+        "short": "Y. m. d. G:i"
+    },
+    "weekday": {
+        "long": {
+            "7": "V",
+            "1": "H",
+            "2": "K",
+            "3": "Sze",
+            "4": "Cs",
+            "5": "P",
+            "6": "Szo"
+        },
+        "short": {
+            "7": "V",
+            "1": "H",
+            "2": "K",
+            "3": "Sz",
+            "4": "Cs",
+            "5": "P",
+            "6": "Sz"
+        },
+        "verbose": {
+            "7": "vas\u00e1rnap",
+            "1": "h\u00e9tf\u0151",
+            "2": "kedd",
+            "3": "szerda",
+            "4": "cs\u00fct\u00f6rt\u00f6k",
+            "5": "p\u00e9ntek",
+            "6": "szombat"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "jan.",
+            "2": "febr.",
+            "3": "m\u00e1rc.",
+            "4": "\u00e1pr.",
+            "5": "m\u00e1j.",
+            "6": "j\u00fan.",
+            "7": "j\u00fal.",
+            "8": "aug.",
+            "9": "szept.",
+            "10": "okt.",
+            "11": "nov.",
+            "12": "dec."
+        },
+        "short": {
+            "1": "J",
+            "2": "F",
+            "3": "M",
+            "4": "\u00c1",
+            "5": "M",
+            "6": "J",
+            "7": "J",
+            "8": "A",
+            "9": "Sz",
+            "10": "O",
+            "11": "N",
+            "12": "D"
+        },
+        "verbose": {
+            "1": "janu\u00e1r",
+            "2": "febru\u00e1r",
+            "3": "m\u00e1rcius",
+            "4": "\u00e1prilis",
+            "5": "m\u00e1jus",
+            "6": "j\u00fanius",
+            "7": "j\u00falius",
+            "8": "augusztus",
+            "9": "szeptember",
+            "10": "okt\u00f3ber",
+            "11": "november",
+            "12": "december"
+        }
+    }
+}

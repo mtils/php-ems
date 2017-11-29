@@ -1,0 +1,96 @@
+{
+    "number": {
+        "decimal_mark": ".",
+        "thousands_separator": ","
+    },
+    "unit": "{number}{unit}",
+    "money": "{number} {currency}",
+    "date": {
+        "verbose": "Y\ub144 n\uc6d4 d\uc77c l",
+        "long": "Y\ub144 n\uc6d4 d\uc77c",
+        "short": "y. n. d."
+    },
+    "time": {
+        "verbose": "a g\uc2dc i\ubd84 s\ucd08 e",
+        "long": "a g\uc2dc i\ubd84 s\ucd08 T",
+        "short": "a g:i"
+    },
+    "datetime": {
+        "verbose": "Y\ub144 n\uc6d4 d\uc77c l a g\uc2dc i\ubd84 s\ucd08 e",
+        "long": "Y\ub144 n\uc6d4 d\uc77c a g\uc2dc i\ubd84 s\ucd08 T",
+        "short": "y. n. d. a g:i"
+    },
+    "weekday": {
+        "long": {
+            "7": "\uc77c",
+            "1": "\uc6d4",
+            "2": "\ud654",
+            "3": "\uc218",
+            "4": "\ubaa9",
+            "5": "\uae08",
+            "6": "\ud1a0"
+        },
+        "short": {
+            "7": "\uc77c",
+            "1": "\uc6d4",
+            "2": "\ud654",
+            "3": "\uc218",
+            "4": "\ubaa9",
+            "5": "\uae08",
+            "6": "\ud1a0"
+        },
+        "verbose": {
+            "7": "\uc77c\uc694\uc77c",
+            "1": "\uc6d4\uc694\uc77c",
+            "2": "\ud654\uc694\uc77c",
+            "3": "\uc218\uc694\uc77c",
+            "4": "\ubaa9\uc694\uc77c",
+            "5": "\uae08\uc694\uc77c",
+            "6": "\ud1a0\uc694\uc77c"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "1\uc6d4",
+            "2": "2\uc6d4",
+            "3": "3\uc6d4",
+            "4": "4\uc6d4",
+            "5": "5\uc6d4",
+            "6": "6\uc6d4",
+            "7": "7\uc6d4",
+            "8": "8\uc6d4",
+            "9": "9\uc6d4",
+            "10": "10\uc6d4",
+            "11": "11\uc6d4",
+            "12": "12\uc6d4"
+        },
+        "short": {
+            "1": "1\uc6d4",
+            "2": "2\uc6d4",
+            "3": "3\uc6d4",
+            "4": "4\uc6d4",
+            "5": "5\uc6d4",
+            "6": "6\uc6d4",
+            "7": "7\uc6d4",
+            "8": "8\uc6d4",
+            "9": "9\uc6d4",
+            "10": "10\uc6d4",
+            "11": "11\uc6d4",
+            "12": "12\uc6d4"
+        },
+        "verbose": {
+            "1": "1\uc6d4",
+            "2": "2\uc6d4",
+            "3": "3\uc6d4",
+            "4": "4\uc6d4",
+            "5": "5\uc6d4",
+            "6": "6\uc6d4",
+            "7": "7\uc6d4",
+            "8": "8\uc6d4",
+            "9": "9\uc6d4",
+            "10": "10\uc6d4",
+            "11": "11\uc6d4",
+            "12": "12\uc6d4"
+        }
+    }
+}

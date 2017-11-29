@@ -1,0 +1,96 @@
+{
+    "number": {
+        "decimal_mark": ",",
+        "thousands_separator": "."
+    },
+    "unit": "{number} {unit}",
+    "money": "{number} {currency}",
+    "date": {
+        "verbose": "l, d F Y",
+        "long": "d F Y",
+        "short": "d\/n\/y"
+    },
+    "time": {
+        "verbose": "g:i:s a e",
+        "long": "g:i:s a T",
+        "short": "g:i a"
+    },
+    "datetime": {
+        "verbose": "l, d F Y - g:i:s a e",
+        "long": "d F Y - g:i:s a T",
+        "short": "d\/n\/y, g:i a"
+    },
+    "weekday": {
+        "long": {
+            "7": "\u039a\u03c5\u03c1",
+            "1": "\u0394\u03b5\u03c5",
+            "2": "\u03a4\u03c1\u03af",
+            "3": "\u03a4\u03b5\u03c4",
+            "4": "\u03a0\u03ad\u03bc",
+            "5": "\u03a0\u03b1\u03c1",
+            "6": "\u03a3\u03ac\u03b2"
+        },
+        "short": {
+            "7": "\u039a",
+            "1": "\u0394",
+            "2": "\u03a4",
+            "3": "\u03a4",
+            "4": "\u03a0",
+            "5": "\u03a0",
+            "6": "\u03a3"
+        },
+        "verbose": {
+            "7": "\u039a\u03c5\u03c1\u03b9\u03b1\u03ba\u03ae",
+            "1": "\u0394\u03b5\u03c5\u03c4\u03ad\u03c1\u03b1",
+            "2": "\u03a4\u03c1\u03af\u03c4\u03b7",
+            "3": "\u03a4\u03b5\u03c4\u03ac\u03c1\u03c4\u03b7",
+            "4": "\u03a0\u03ad\u03bc\u03c0\u03c4\u03b7",
+            "5": "\u03a0\u03b1\u03c1\u03b1\u03c3\u03ba\u03b5\u03c5\u03ae",
+            "6": "\u03a3\u03ac\u03b2\u03b2\u03b1\u03c4\u03bf"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "\u0399\u03b1\u03bd",
+            "2": "\u03a6\u03b5\u03b2",
+            "3": "\u039c\u03ac\u03c1",
+            "4": "\u0391\u03c0\u03c1",
+            "5": "\u039c\u03ac\u03b9",
+            "6": "\u0399\u03bf\u03cd\u03bd",
+            "7": "\u0399\u03bf\u03cd\u03bb",
+            "8": "\u0391\u03cd\u03b3",
+            "9": "\u03a3\u03b5\u03c0",
+            "10": "\u039f\u03ba\u03c4",
+            "11": "\u039d\u03bf\u03ad",
+            "12": "\u0394\u03b5\u03ba"
+        },
+        "short": {
+            "1": "\u0399",
+            "2": "\u03a6",
+            "3": "\u039c",
+            "4": "\u0391",
+            "5": "\u039c",
+            "6": "\u0399",
+            "7": "\u0399",
+            "8": "\u0391",
+            "9": "\u03a3",
+            "10": "\u039f",
+            "11": "\u039d",
+            "12": "\u0394"
+        },
+        "verbose": {
+            "1": "\u0399\u03b1\u03bd\u03bf\u03c5\u03ac\u03c1\u03b9\u03bf\u03c2",
+            "2": "\u03a6\u03b5\u03b2\u03c1\u03bf\u03c5\u03ac\u03c1\u03b9\u03bf\u03c2",
+            "3": "\u039c\u03ac\u03c1\u03c4\u03b9\u03bf\u03c2",
+            "4": "\u0391\u03c0\u03c1\u03af\u03bb\u03b9\u03bf\u03c2",
+            "5": "\u039c\u03ac\u03b9\u03bf\u03c2",
+            "6": "\u0399\u03bf\u03cd\u03bd\u03b9\u03bf\u03c2",
+            "7": "\u0399\u03bf\u03cd\u03bb\u03b9\u03bf\u03c2",
+            "8": "\u0391\u03cd\u03b3\u03bf\u03c5\u03c3\u03c4\u03bf\u03c2",
+            "9": "\u03a3\u03b5\u03c0\u03c4\u03ad\u03bc\u03b2\u03c1\u03b9\u03bf\u03c2",
+            "10": "\u039f\u03ba\u03c4\u03ce\u03b2\u03c1\u03b9\u03bf\u03c2",
+            "11": "\u039d\u03bf\u03ad\u03bc\u03b2\u03c1\u03b9\u03bf\u03c2",
+            "12": "\u0394\u03b5\u03ba\u03ad\u03bc\u03b2\u03c1\u03b9\u03bf\u03c2"
+        }
+    }
+}

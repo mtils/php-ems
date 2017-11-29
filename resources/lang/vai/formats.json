@@ -1,0 +1,43 @@
+{
+    "number": {
+        "decimal_mark": ".",
+        "thousands_separator": ","
+    },
+    "date": {
+        "verbose": "l, d F Y",
+        "long": "d F Y",
+        "short": "d\/m\/Y"
+    },
+    "time": {
+        "verbose": "g:i:s a e",
+        "long": "g:i:s a T",
+        "short": "g:i a"
+    },
+    "weekday": {
+        "verbose": {
+            "7": "\ua55e\ua54c\ua535",
+            "1": "\ua5f3\ua5e1\ua609",
+            "2": "\ua55a\ua55e\ua55a",
+            "3": "\ua549\ua55e\ua552",
+            "4": "\ua549\ua524\ua546\ua562",
+            "5": "\ua549\ua524\ua540\ua56e",
+            "6": "\ua53b\ua52c\ua533"
+        }
+    },
+    "month": {
+        "verbose": {
+            "1": "\ua5a8\ua56a\ua583 \ua51e\ua56e",
+            "2": "\ua552\ua561\ua59d\ua595",
+            "3": "\ua57e\ua5ba",
+            "4": "\ua5a2\ua595",
+            "5": "\ua591\ua571",
+            "6": "6",
+            "7": "7",
+            "8": "\ua5db\ua515",
+            "9": "\ua562\ua54c",
+            "10": "\ua56d\ua583",
+            "11": "\ua51e\ua60b\ua554\ua57f \ua578\ua583\ua5cf",
+            "12": "\ua5a8\ua56a\ua571 \ua5cf\ua56e"
+        }
+    }
+}

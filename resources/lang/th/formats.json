@@ -1,0 +1,96 @@
+{
+    "number": {
+        "decimal_mark": ".",
+        "thousands_separator": ","
+    },
+    "unit": "{number} {unit}",
+    "money": "{number} {currency}",
+    "date": {
+        "verbose": "l\u0e17\u0e35\u0e48 d F \\{\\e\\r\\a\\.\\s\\h\\o\\r\\t\\} Y",
+        "long": "d F \\{\\e\\r\\a\\.\\s\\h\\o\\r\\t\\} Y",
+        "short": "d\/n\/y"
+    },
+    "time": {
+        "verbose": "G \u0e19\u0e32\u0e2c\u0e34\u0e01\u0e32 i \u0e19\u0e32\u0e17\u0e35 s \u0e27\u0e34\u0e19\u0e32\u0e17\u0e35 e",
+        "long": "G \u0e19\u0e32\u0e2c\u0e34\u0e01\u0e32 i \u0e19\u0e32\u0e17\u0e35 s \u0e27\u0e34\u0e19\u0e32\u0e17\u0e35 T",
+        "short": "H:i"
+    },
+    "datetime": {
+        "verbose": "l\u0e17\u0e35\u0e48 d F \\{\\e\\r\\a\\.\\s\\h\\o\\r\\t\\} Y G \u0e19\u0e32\u0e2c\u0e34\u0e01\u0e32 i \u0e19\u0e32\u0e17\u0e35 s \u0e27\u0e34\u0e19\u0e32\u0e17\u0e35 e",
+        "long": "d F \\{\\e\\r\\a\\.\\s\\h\\o\\r\\t\\} Y G \u0e19\u0e32\u0e2c\u0e34\u0e01\u0e32 i \u0e19\u0e32\u0e17\u0e35 s \u0e27\u0e34\u0e19\u0e32\u0e17\u0e35 T",
+        "short": "d\/n\/y H:i"
+    },
+    "weekday": {
+        "long": {
+            "7": "\u0e2d\u0e32.",
+            "1": "\u0e08.",
+            "2": "\u0e2d.",
+            "3": "\u0e1e.",
+            "4": "\u0e1e\u0e24.",
+            "5": "\u0e28.",
+            "6": "\u0e2a."
+        },
+        "short": {
+            "7": "\u0e2d\u0e32",
+            "1": "\u0e08",
+            "2": "\u0e2d",
+            "3": "\u0e1e",
+            "4": "\u0e1e\u0e24",
+            "5": "\u0e28",
+            "6": "\u0e2a"
+        },
+        "verbose": {
+            "7": "\u0e27\u0e31\u0e19\u0e2d\u0e32\u0e17\u0e34\u0e15\u0e22\u0e4c",
+            "1": "\u0e27\u0e31\u0e19\u0e08\u0e31\u0e19\u0e17\u0e23\u0e4c",
+            "2": "\u0e27\u0e31\u0e19\u0e2d\u0e31\u0e07\u0e04\u0e32\u0e23",
+            "3": "\u0e27\u0e31\u0e19\u0e1e\u0e38\u0e18",
+            "4": "\u0e27\u0e31\u0e19\u0e1e\u0e24\u0e2b\u0e31\u0e2a\u0e1a\u0e14\u0e35",
+            "5": "\u0e27\u0e31\u0e19\u0e28\u0e38\u0e01\u0e23\u0e4c",
+            "6": "\u0e27\u0e31\u0e19\u0e40\u0e2a\u0e32\u0e23\u0e4c"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "\u0e21.\u0e04.",
+            "2": "\u0e01.\u0e1e.",
+            "3": "\u0e21\u0e35.\u0e04.",
+            "4": "\u0e40\u0e21.\u0e22.",
+            "5": "\u0e1e.\u0e04.",
+            "6": "\u0e21\u0e34.\u0e22.",
+            "7": "\u0e01.\u0e04.",
+            "8": "\u0e2a.\u0e04.",
+            "9": "\u0e01.\u0e22.",
+            "10": "\u0e15.\u0e04.",
+            "11": "\u0e1e.\u0e22.",
+            "12": "\u0e18.\u0e04."
+        },
+        "short": {
+            "1": "\u0e21.\u0e04.",
+            "2": "\u0e01.\u0e1e.",
+            "3": "\u0e21\u0e35.\u0e04.",
+            "4": "\u0e40\u0e21.\u0e22.",
+            "5": "\u0e1e.\u0e04.",
+            "6": "\u0e21\u0e34.\u0e22.",
+            "7": "\u0e01.\u0e04.",
+            "8": "\u0e2a.\u0e04.",
+            "9": "\u0e01.\u0e22.",
+            "10": "\u0e15.\u0e04.",
+            "11": "\u0e1e.\u0e22.",
+            "12": "\u0e18.\u0e04."
+        },
+        "verbose": {
+            "1": "\u0e21\u0e01\u0e23\u0e32\u0e04\u0e21",
+            "2": "\u0e01\u0e38\u0e21\u0e20\u0e32\u0e1e\u0e31\u0e19\u0e18\u0e4c",
+            "3": "\u0e21\u0e35\u0e19\u0e32\u0e04\u0e21",
+            "4": "\u0e40\u0e21\u0e29\u0e32\u0e22\u0e19",
+            "5": "\u0e1e\u0e24\u0e29\u0e20\u0e32\u0e04\u0e21",
+            "6": "\u0e21\u0e34\u0e16\u0e38\u0e19\u0e32\u0e22\u0e19",
+            "7": "\u0e01\u0e23\u0e01\u0e0e\u0e32\u0e04\u0e21",
+            "8": "\u0e2a\u0e34\u0e07\u0e2b\u0e32\u0e04\u0e21",
+            "9": "\u0e01\u0e31\u0e19\u0e22\u0e32\u0e22\u0e19",
+            "10": "\u0e15\u0e38\u0e25\u0e32\u0e04\u0e21",
+            "11": "\u0e1e\u0e24\u0e28\u0e08\u0e34\u0e01\u0e32\u0e22\u0e19",
+            "12": "\u0e18\u0e31\u0e19\u0e27\u0e32\u0e04\u0e21"
+        }
+    }
+}

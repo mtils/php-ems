@@ -1,0 +1,96 @@
+{
+    "number": {
+        "decimal_mark": ".",
+        "thousands_separator": ","
+    },
+    "unit": "{number} {unit}",
+    "money": "{number} {currency}",
+    "date": {
+        "verbose": "l, F d, Y",
+        "long": "F d, Y",
+        "short": "n\/d\/y"
+    },
+    "time": {
+        "verbose": "g:i:s a e",
+        "long": "g:i:s a T",
+        "short": "g:i a"
+    },
+    "datetime": {
+        "verbose": "l, F d, Y \\n\\a\\n\\g g:i:s a e",
+        "long": "F d, Y \\n\\a\\n\\g g:i:s a T",
+        "short": "n\/d\/y, g:i a"
+    },
+    "weekday": {
+        "long": {
+            "7": "Lin",
+            "1": "Lun",
+            "2": "Mar",
+            "3": "Miy",
+            "4": "Huw",
+            "5": "Biy",
+            "6": "Sab"
+        },
+        "short": {
+            "7": "Lin",
+            "1": "Lun",
+            "2": "Mar",
+            "3": "Miy",
+            "4": "Huw",
+            "5": "Biy",
+            "6": "Sab"
+        },
+        "verbose": {
+            "7": "Linggo",
+            "1": "Lunes",
+            "2": "Martes",
+            "3": "Miyerkules",
+            "4": "Huwebes",
+            "5": "Biyernes",
+            "6": "Sabado"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "Ene",
+            "2": "Peb",
+            "3": "Mar",
+            "4": "Abr",
+            "5": "May",
+            "6": "Hun",
+            "7": "Hul",
+            "8": "Ago",
+            "9": "Set",
+            "10": "Okt",
+            "11": "Nob",
+            "12": "Dis"
+        },
+        "short": {
+            "1": "E",
+            "2": "P",
+            "3": "M",
+            "4": "A",
+            "5": "M",
+            "6": "Hun",
+            "7": "Hul",
+            "8": "Ago",
+            "9": "Set",
+            "10": "Okt",
+            "11": "Nob",
+            "12": "Dis"
+        },
+        "verbose": {
+            "1": "Enero",
+            "2": "Pebrero",
+            "3": "Marso",
+            "4": "Abril",
+            "5": "Mayo",
+            "6": "Hunyo",
+            "7": "Hulyo",
+            "8": "Agosto",
+            "9": "Setyembre",
+            "10": "Oktubre",
+            "11": "Nobyembre",
+            "12": "Disyembre"
+        }
+    }
+}

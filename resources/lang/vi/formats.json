@@ -1,0 +1,96 @@
+{
+    "number": {
+        "decimal_mark": ",",
+        "thousands_separator": "."
+    },
+    "unit": "{number} {unit}",
+    "money": "{number} {currency}",
+    "date": {
+        "verbose": "l, d F, Y",
+        "long": "d F, Y",
+        "short": "d\/m\/Y"
+    },
+    "time": {
+        "verbose": "H:i:s e",
+        "long": "H:i:s T",
+        "short": "H:i"
+    },
+    "datetime": {
+        "verbose": "H:i:s e l, d F, Y",
+        "long": "H:i:s T d F, Y",
+        "short": "H:i, d\/m\/Y"
+    },
+    "weekday": {
+        "long": {
+            "7": "CN",
+            "1": "Th 2",
+            "2": "Th 3",
+            "3": "Th 4",
+            "4": "Th 5",
+            "5": "Th 6",
+            "6": "Th 7"
+        },
+        "short": {
+            "7": "CN",
+            "1": "T2",
+            "2": "T3",
+            "3": "T4",
+            "4": "T5",
+            "5": "T6",
+            "6": "T7"
+        },
+        "verbose": {
+            "7": "Ch\u1ee7 Nh\u1eadt",
+            "1": "Th\u1ee9 Hai",
+            "2": "Th\u1ee9 Ba",
+            "3": "Th\u1ee9 T\u01b0",
+            "4": "Th\u1ee9 N\u0103m",
+            "5": "Th\u1ee9 S\u00e1u",
+            "6": "Th\u1ee9 B\u1ea3y"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "Thg 1",
+            "2": "Thg 2",
+            "3": "Thg 3",
+            "4": "Thg 4",
+            "5": "Thg 5",
+            "6": "Thg 6",
+            "7": "Thg 7",
+            "8": "Thg 8",
+            "9": "Thg 9",
+            "10": "Thg 10",
+            "11": "Thg 11",
+            "12": "Thg 12"
+        },
+        "short": {
+            "1": "1",
+            "2": "2",
+            "3": "3",
+            "4": "4",
+            "5": "5",
+            "6": "6",
+            "7": "7",
+            "8": "8",
+            "9": "9",
+            "10": "10",
+            "11": "11",
+            "12": "12"
+        },
+        "verbose": {
+            "1": "Th\u00e1ng 1",
+            "2": "Th\u00e1ng 2",
+            "3": "Th\u00e1ng 3",
+            "4": "Th\u00e1ng 4",
+            "5": "Th\u00e1ng 5",
+            "6": "Th\u00e1ng 6",
+            "7": "Th\u00e1ng 7",
+            "8": "Th\u00e1ng 8",
+            "9": "Th\u00e1ng 9",
+            "10": "Th\u00e1ng 10",
+            "11": "Th\u00e1ng 11",
+            "12": "Th\u00e1ng 12"
+        }
+    }
+}

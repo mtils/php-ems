@@ -1,53 +1,69 @@
 {
     "number": {
-        "decimal_separator": ",",
+        "decimal_mark": ",",
         "thousands_separator": "."
     },
+    "unit": "{number} {unit}",
+    "money": "{number} {currency}",
     "date": {
-        "short": "d.m.Y",
+        "verbose": "l, d. F Y",
         "long": "d. F Y",
-        "verbose": "D der d. F Y"
+        "short": "d.m.y"
     },
     "time": {
-        "short": "H:i",
-        "long": "um H:i",
-        "verbose": "um H:i:s"
+        "verbose": "H:i:s e",
+        "long": "H:i:s T",
+        "short": "H:i"
     },
-    "date_time": {
-        "short": "d.m.Y H:i",
-        "long": "d. F Y um H:i Uhr",
-        "verbose": "D der d. F Y um H:i:s Uhr"
+    "datetime": {
+        "verbose": "l, d. F Y \\u\\m H:i:s e",
+        "long": "d. F Y \\u\\m H:i:s T",
+        "short": "d.m.y, H:i"
     },
-    "week_days": {
-        "short": {
+    "weekday": {
+        "long": {
+            "7": "So",
             "1": "Mo",
             "2": "Di",
             "3": "Mi",
             "4": "Do",
             "5": "Fr",
-            "6": "Sa",
-            "7": "So"
+            "6": "Sa"
         },
-        "long": {
-            "1": "Mon.",
-            "2": "Die.",
-            "3": "Mit.",
-            "4": "Don.",
-            "5": "Fre.",
-            "6": "Sam.",
-            "7": "Son."
+        "short": {
+            "7": "S",
+            "1": "M",
+            "2": "D",
+            "3": "M",
+            "4": "D",
+            "5": "F",
+            "6": "S"
         },
         "verbose": {
+            "7": "Sonntag",
             "1": "Montag",
             "2": "Dienstag",
             "3": "Mittwoch",
             "4": "Donnerstag",
             "5": "Freitag",
-            "6": "Samstag",
-            "7": "Sonntag"
+            "6": "Samstag"
         }
     },
-    "months": {
+    "month": {
+        "long": {
+            "1": "Jan",
+            "2": "Feb",
+            "3": "M\u00e4r",
+            "4": "Apr",
+            "5": "Mai",
+            "6": "Jun",
+            "7": "Jul",
+            "8": "Aug",
+            "9": "Sep",
+            "10": "Okt",
+            "11": "Nov",
+            "12": "Dez"
+        },
         "short": {
             "1": "J",
             "2": "F",
@@ -62,24 +78,10 @@
             "11": "N",
             "12": "D"
         },
-        "long": {
-            "1": "Jan",
-            "2": "Feb",
-            "3": "Mär",
-            "4": "Apr",
-            "5": "Mai",
-            "6": "Jun",
-            "7": "Jul",
-            "8": "Aug",
-            "9": "Sep",
-            "10": "Okt",
-            "11": "Nov",
-            "12": "Dez"
-        },
         "verbose": {
             "1": "Januar",
             "2": "Februar",
-            "3": "März",
+            "3": "M\u00e4rz",
             "4": "April",
             "5": "Mai",
             "6": "Juni",
@@ -90,18 +92,5 @@
             "11": "November",
             "12": "Dezember"
         }
-    },
-    "money": {
-        "format": "{currency} {number}"
-    },
-    "currency": {
-        "short": "€",
-        "long": "Euro",
-        "verbose": "Euro"
-    },
-    "length": {
-        "measuring": "metric",
-        "format": "{number} {unit}",
-        "default_unit": "m"
     }
 }

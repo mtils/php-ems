@@ -1,0 +1,85 @@
+{
+    "date": {
+        "verbose": "Y F\\a \\d. d\\i\\d",
+        "long": "Y F d",
+        "short": "Y-m-d"
+    },
+    "time": {
+        "verbose": "H:i:s e",
+        "long": "H:i:s T",
+        "short": "H:i"
+    },
+    "weekday": {
+        "long": {
+            "7": "Su",
+            "1": "Mu",
+            "2": "Tu",
+            "3": "Ve",
+            "4": "D\u00f6",
+            "5": "Fr",
+            "6": "Z\u00e4"
+        },
+        "verbose": {
+            "7": "sudel",
+            "1": "mudel",
+            "2": "tudel",
+            "3": "vedel",
+            "4": "d\u00f6del",
+            "5": "fridel",
+            "6": "z\u00e4del"
+        },
+        "short": {
+            "7": "S",
+            "1": "M",
+            "2": "T",
+            "3": "V",
+            "4": "D",
+            "5": "F",
+            "6": "Z"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "yan",
+            "2": "feb",
+            "3": "m\u00e4z",
+            "4": "prl",
+            "5": "may",
+            "6": "yun",
+            "7": "yul",
+            "8": "gst",
+            "9": "set",
+            "10": "tob",
+            "11": "nov",
+            "12": "dek"
+        },
+        "short": {
+            "1": "Y",
+            "2": "F",
+            "3": "M",
+            "4": "P",
+            "5": "M",
+            "6": "Y",
+            "7": "Y",
+            "8": "G",
+            "9": "S",
+            "10": "T",
+            "11": "N",
+            "12": "D"
+        },
+        "verbose": {
+            "1": "yanul",
+            "2": "febul",
+            "3": "m\u00e4zul",
+            "4": "prilul",
+            "5": "mayul",
+            "6": "yunul",
+            "7": "yulul",
+            "8": "gustul",
+            "9": "setul",
+            "10": "tobul",
+            "11": "novul",
+            "12": "dekul"
+        }
+    }
+}

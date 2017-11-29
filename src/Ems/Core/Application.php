@@ -87,7 +87,7 @@ class Application implements ContainerContract, HasMethodHooks
     protected $path;
 
     /**
-     * @var string
+     * @var UrlContract
      **/
     protected $url;
 
@@ -121,12 +121,22 @@ class Application implements ContainerContract, HasMethodHooks
      */
     protected static $staticContainer;
 
-    public function __construct($path, ContainerContract $container = null)
+    /**
+     * Application constructor.
+     *
+     * @param $path
+     * @param ContainerContract|null $container
+     * @param bool $bindAsApp (default:true)
+     */
+    public function __construct($path, ContainerContract $container = null, $bindAsApp=true)
     {
         $this->path = new Url($path);
         $container = $container ?: new IOCContainer();
         $this->setContainer($container);
-        $this->container->instance('app', $this);
+        if ($bindAsApp) {
+            $this->container->instance('app', $this);
+        }
+        $this->container->instance(static::class, $this);
     }
 
     //<editor-fold desc="Getters and Setters">

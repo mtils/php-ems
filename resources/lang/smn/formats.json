@@ -1,0 +1,95 @@
+{
+    "number": {
+        "decimal_mark": ",",
+        "thousands_separator": "\u00a0"
+    },
+    "money": "{number} {currency}",
+    "date": {
+        "verbose": "cccc, F d. Y",
+        "long": "F d. Y",
+        "short": "d.n.Y"
+    },
+    "time": {
+        "verbose": "G.i.s e",
+        "long": "G.i.s T",
+        "short": "G.i"
+    },
+    "datetime": {
+        "verbose": "cccc, F d. Y \\t\\m\\e G.i.s e",
+        "long": "F d. Y \\t\\m\\e G.i.s T",
+        "short": "d.n.Y G.i"
+    },
+    "weekday": {
+        "long": {
+            "7": "pas",
+            "1": "vuo",
+            "2": "maj",
+            "3": "kos",
+            "4": "tuo",
+            "5": "v\u00e1s",
+            "6": "l\u00e1v"
+        },
+        "short": {
+            "7": "S",
+            "1": "M",
+            "2": "T",
+            "3": "W",
+            "4": "T",
+            "5": "F",
+            "6": "S"
+        },
+        "verbose": {
+            "7": "pasepeivi",
+            "1": "vuossarg\u00e2",
+            "2": "majebarg\u00e2",
+            "3": "koskokko",
+            "4": "tuor\u00e2st\u00e2h",
+            "5": "v\u00e1stuppeivi",
+            "6": "l\u00e1vurd\u00e2h"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "u\u0111iv",
+            "2": "kuov\u00e2",
+            "3": "njuh\u010d\u00e2",
+            "4": "cu\u00e1\u014bui",
+            "5": "vyesi",
+            "6": "kesi",
+            "7": "syeini",
+            "8": "porge",
+            "9": "\u010doh\u010d\u00e2",
+            "10": "roovv\u00e2d",
+            "11": "skamm\u00e2",
+            "12": "juovl\u00e2"
+        },
+        "short": {
+            "1": "U",
+            "2": "K",
+            "3": "NJ",
+            "4": "C",
+            "5": "V",
+            "6": "K",
+            "7": "S",
+            "8": "P",
+            "9": "\u010c",
+            "10": "R",
+            "11": "S",
+            "12": "J"
+        },
+        "verbose": {
+            "1": "u\u0111\u0111\u00e2ivem\u00e1\u00e1nu",
+            "2": "kuov\u00e2m\u00e1\u00e1nu",
+            "3": "njuh\u010d\u00e2m\u00e1\u00e1nu",
+            "4": "cu\u00e1\u014buim\u00e1\u00e1nu",
+            "5": "vyesim\u00e1\u00e1nu",
+            "6": "kesim\u00e1\u00e1nu",
+            "7": "syeinim\u00e1\u00e1nu",
+            "8": "porgem\u00e1\u00e1nu",
+            "9": "\u010doh\u010d\u00e2m\u00e1\u00e1nu",
+            "10": "roovv\u00e2dm\u00e1\u00e1nu",
+            "11": "skamm\u00e2m\u00e1\u00e1nu",
+            "12": "juovl\u00e2m\u00e1\u00e1nu"
+        }
+    }
+}

@@ -1,0 +1,89 @@
+{
+    "number": {
+        "decimal_mark": ".",
+        "thousands_separator": ","
+    },
+    "date": {
+        "verbose": "l, d F, Y",
+        "long": "d F, Y",
+        "short": "d\/n\/y"
+    },
+    "time": {
+        "verbose": "H:i:s e",
+        "long": "H:i:s T",
+        "short": "H:i"
+    },
+    "weekday": {
+        "long": {
+            "7": "Lah",
+            "1": "Lit",
+            "2": "Tal",
+            "3": "Lar",
+            "4": "Alh",
+            "5": "Jum",
+            "6": "Asa"
+        },
+        "short": {
+            "7": "L",
+            "1": "L",
+            "2": "T",
+            "3": "L",
+            "4": "A",
+            "5": "J",
+            "6": "A"
+        },
+        "verbose": {
+            "7": "Lahadi",
+            "1": "Litinin",
+            "2": "Talata",
+            "3": "Laraba",
+            "4": "Alhamis",
+            "5": "Jumma\u02bca",
+            "6": "Asabar"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "Jan",
+            "2": "Fab",
+            "3": "Mar",
+            "4": "Afi",
+            "5": "May",
+            "6": "Yun",
+            "7": "Yul",
+            "8": "Agu",
+            "9": "Sat",
+            "10": "Okt",
+            "11": "Nuw",
+            "12": "Dis"
+        },
+        "short": {
+            "1": "J",
+            "2": "F",
+            "3": "M",
+            "4": "A",
+            "5": "M",
+            "6": "Y",
+            "7": "Y",
+            "8": "A",
+            "9": "S",
+            "10": "O",
+            "11": "N",
+            "12": "D"
+        },
+        "verbose": {
+            "1": "Janairu",
+            "2": "Faburairu",
+            "3": "Maris",
+            "4": "Afirilu",
+            "5": "Mayu",
+            "6": "Yuni",
+            "7": "Yuli",
+            "8": "Agusta",
+            "9": "Satumba",
+            "10": "Oktoba",
+            "11": "Nuwamba",
+            "12": "Disamba"
+        }
+    }
+}

@@ -1,0 +1,96 @@
+{
+    "number": {
+        "decimal_mark": ",",
+        "thousands_separator": "."
+    },
+    "unit": "{number} {unit}",
+    "money": "{number} {currency}",
+    "date": {
+        "verbose": "l, d F \\d\\e Y",
+        "long": "d F \\d\\e Y",
+        "short": "d\/n\/y"
+    },
+    "time": {
+        "verbose": "G:i:s e",
+        "long": "G:i:s T",
+        "short": "G:i"
+    },
+    "datetime": {
+        "verbose": "l, d F \\d\\e Y \\a \\l\\e\\s G:i:s e",
+        "long": "d F \\d\\e Y \\a \\l\\e\\s G:i:s T",
+        "short": "d\/n\/y G:i"
+    },
+    "weekday": {
+        "long": {
+            "7": "dg.",
+            "1": "dl.",
+            "2": "dt.",
+            "3": "dc.",
+            "4": "dj.",
+            "5": "dv.",
+            "6": "ds."
+        },
+        "short": {
+            "7": "dg",
+            "1": "dl",
+            "2": "dt",
+            "3": "dc",
+            "4": "dj",
+            "5": "dv",
+            "6": "ds"
+        },
+        "verbose": {
+            "7": "diumenge",
+            "1": "dilluns",
+            "2": "dimarts",
+            "3": "dimecres",
+            "4": "dijous",
+            "5": "divendres",
+            "6": "dissabte"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "gen.",
+            "2": "febr.",
+            "3": "mar\u00e7",
+            "4": "abr.",
+            "5": "maig",
+            "6": "juny",
+            "7": "jul.",
+            "8": "ag.",
+            "9": "set.",
+            "10": "oct.",
+            "11": "nov.",
+            "12": "des."
+        },
+        "short": {
+            "1": "GN",
+            "2": "FB",
+            "3": "M\u00c7",
+            "4": "AB",
+            "5": "MG",
+            "6": "JN",
+            "7": "JL",
+            "8": "AG",
+            "9": "ST",
+            "10": "OC",
+            "11": "NV",
+            "12": "DS"
+        },
+        "verbose": {
+            "1": "gener",
+            "2": "febrer",
+            "3": "mar\u00e7",
+            "4": "abril",
+            "5": "maig",
+            "6": "juny",
+            "7": "juliol",
+            "8": "agost",
+            "9": "setembre",
+            "10": "octubre",
+            "11": "novembre",
+            "12": "desembre"
+        }
+    }
+}

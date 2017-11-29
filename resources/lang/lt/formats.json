@@ -1,0 +1,96 @@
+{
+    "number": {
+        "decimal_mark": ",",
+        "thousands_separator": "\u00a0"
+    },
+    "unit": "{number} {unit}",
+    "money": "{number} {currency}",
+    "date": {
+        "verbose": "Y \\m. F d \\d., l",
+        "long": "Y \\m. F d \\d.",
+        "short": "Y-m-d"
+    },
+    "time": {
+        "verbose": "H:i:s e",
+        "long": "H:i:s T",
+        "short": "H:i"
+    },
+    "datetime": {
+        "verbose": "Y \\m. F d \\d., l H:i:s e",
+        "long": "Y \\m. F d \\d. H:i:s T",
+        "short": "Y-m-d H:i"
+    },
+    "weekday": {
+        "long": {
+            "7": "sk",
+            "1": "pr",
+            "2": "an",
+            "3": "tr",
+            "4": "kt",
+            "5": "pn",
+            "6": "\u0161t"
+        },
+        "short": {
+            "7": "S",
+            "1": "P",
+            "2": "A",
+            "3": "T",
+            "4": "K",
+            "5": "P",
+            "6": "\u0160"
+        },
+        "verbose": {
+            "7": "sekmadienis",
+            "1": "pirmadienis",
+            "2": "antradienis",
+            "3": "tre\u010diadienis",
+            "4": "ketvirtadienis",
+            "5": "penktadienis",
+            "6": "\u0161e\u0161tadienis"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "saus.",
+            "2": "vas.",
+            "3": "kov.",
+            "4": "bal.",
+            "5": "geg.",
+            "6": "bir\u017e.",
+            "7": "liep.",
+            "8": "rugp.",
+            "9": "rugs.",
+            "10": "spal.",
+            "11": "lapkr.",
+            "12": "gruod."
+        },
+        "short": {
+            "1": "S",
+            "2": "V",
+            "3": "K",
+            "4": "B",
+            "5": "G",
+            "6": "B",
+            "7": "L",
+            "8": "R",
+            "9": "R",
+            "10": "S",
+            "11": "L",
+            "12": "G"
+        },
+        "verbose": {
+            "1": "sausis",
+            "2": "vasaris",
+            "3": "kovas",
+            "4": "balandis",
+            "5": "gegu\u017e\u0117",
+            "6": "bir\u017eelis",
+            "7": "liepa",
+            "8": "rugpj\u016btis",
+            "9": "rugs\u0117jis",
+            "10": "spalis",
+            "11": "lapkritis",
+            "12": "gruodis"
+        }
+    }
+}

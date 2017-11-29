@@ -1,0 +1,89 @@
+{
+    "number": {
+        "decimal_mark": ",",
+        "thousands_separator": "."
+    },
+    "date": {
+        "verbose": "l, d \\d\\e F \\d\\e Y",
+        "long": "d \\d\\e F \\d\\e Y",
+        "short": "d\/n\/Y"
+    },
+    "time": {
+        "verbose": "H:i:s e",
+        "long": "H:i:s T",
+        "short": "H:i"
+    },
+    "weekday": {
+        "long": {
+            "7": "Dim",
+            "1": "Pos",
+            "2": "Pir",
+            "3": "Tat",
+            "4": "Nai",
+            "5": "Sha",
+            "6": "Sab"
+        },
+        "verbose": {
+            "7": "Dimingu",
+            "1": "Chiposi",
+            "2": "Chipiri",
+            "3": "Chitatu",
+            "4": "Chinai",
+            "5": "Chishanu",
+            "6": "Sabudu"
+        },
+        "short": {
+            "7": "D",
+            "1": "P",
+            "2": "C",
+            "3": "T",
+            "4": "N",
+            "5": "S",
+            "6": "S"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "Jan",
+            "2": "Fev",
+            "3": "Mar",
+            "4": "Abr",
+            "5": "Mai",
+            "6": "Jun",
+            "7": "Jul",
+            "8": "Aug",
+            "9": "Set",
+            "10": "Otu",
+            "11": "Nov",
+            "12": "Dec"
+        },
+        "verbose": {
+            "1": "Janeiro",
+            "2": "Fevreiro",
+            "3": "Marco",
+            "4": "Abril",
+            "5": "Maio",
+            "6": "Junho",
+            "7": "Julho",
+            "8": "Augusto",
+            "9": "Setembro",
+            "10": "Otubro",
+            "11": "Novembro",
+            "12": "Decembro"
+        },
+        "short": {
+            "1": "J",
+            "2": "F",
+            "3": "M",
+            "4": "A",
+            "5": "M",
+            "6": "J",
+            "7": "J",
+            "8": "A",
+            "9": "S",
+            "10": "O",
+            "11": "N",
+            "12": "D"
+        }
+    }
+}

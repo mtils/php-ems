@@ -1,0 +1,96 @@
+{
+    "number": {
+        "decimal_mark": ",",
+        "thousands_separator": "\u00a0"
+    },
+    "unit": "{number} {unit}",
+    "money": "{number} {currency}",
+    "date": {
+        "verbose": "l, d F Y",
+        "long": "d F Y",
+        "short": "Y-m-d"
+    },
+    "time": {
+        "verbose": "H:i:s e",
+        "long": "H:i:s T",
+        "short": "H:i"
+    },
+    "datetime": {
+        "verbose": "l, d F Y H:i:s e",
+        "long": "d F Y H:i:s T",
+        "short": "Y-m-d H:i"
+    },
+    "weekday": {
+        "long": {
+            "7": "So.",
+            "1": "Ma.",
+            "2": "Di.",
+            "3": "Wo.",
+            "4": "Do.",
+            "5": "Vr.",
+            "6": "Sa."
+        },
+        "short": {
+            "7": "S",
+            "1": "M",
+            "2": "D",
+            "3": "W",
+            "4": "D",
+            "5": "V",
+            "6": "S"
+        },
+        "verbose": {
+            "7": "Sondag",
+            "1": "Maandag",
+            "2": "Dinsdag",
+            "3": "Woensdag",
+            "4": "Donderdag",
+            "5": "Vrydag",
+            "6": "Saterdag"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "Jan.",
+            "2": "Feb.",
+            "3": "Mrt.",
+            "4": "Apr.",
+            "5": "Mei",
+            "6": "Jun.",
+            "7": "Jul.",
+            "8": "Aug.",
+            "9": "Sep.",
+            "10": "Okt.",
+            "11": "Nov.",
+            "12": "Des."
+        },
+        "short": {
+            "1": "J",
+            "2": "F",
+            "3": "M",
+            "4": "A",
+            "5": "M",
+            "6": "J",
+            "7": "J",
+            "8": "A",
+            "9": "S",
+            "10": "O",
+            "11": "N",
+            "12": "D"
+        },
+        "verbose": {
+            "1": "Januarie",
+            "2": "Februarie",
+            "3": "Maart",
+            "4": "April",
+            "5": "Mei",
+            "6": "Junie",
+            "7": "Julie",
+            "8": "Augustus",
+            "9": "September",
+            "10": "Oktober",
+            "11": "November",
+            "12": "Desember"
+        }
+    }
+}

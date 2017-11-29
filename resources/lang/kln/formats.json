@@ -1,0 +1,85 @@
+{
+    "date": {
+        "verbose": "l, d F Y",
+        "long": "d F Y",
+        "short": "d\/m\/Y"
+    },
+    "time": {
+        "verbose": "H:i:s e",
+        "long": "H:i:s T",
+        "short": "H:i"
+    },
+    "weekday": {
+        "long": {
+            "7": "Kts",
+            "1": "Kot",
+            "2": "Koo",
+            "3": "Kos",
+            "4": "Koa",
+            "5": "Kom",
+            "6": "Kol"
+        },
+        "verbose": {
+            "7": "Kotisap",
+            "1": "Kotaai",
+            "2": "Koaeng\u2019",
+            "3": "Kosomok",
+            "4": "Koang\u2019wan",
+            "5": "Komuut",
+            "6": "Kolo"
+        },
+        "short": {
+            "7": "T",
+            "1": "T",
+            "2": "O",
+            "3": "S",
+            "4": "A",
+            "5": "M",
+            "6": "L"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "Mul",
+            "2": "Ngat",
+            "3": "Taa",
+            "4": "Iwo",
+            "5": "Mam",
+            "6": "Paa",
+            "7": "Nge",
+            "8": "Roo",
+            "9": "Bur",
+            "10": "Epe",
+            "11": "Kpt",
+            "12": "Kpa"
+        },
+        "verbose": {
+            "1": "Mulgul",
+            "2": "Ng\u2019atyaato",
+            "3": "Kiptaamo",
+            "4": "Iwootkuut",
+            "5": "Mamuut",
+            "6": "Paagi",
+            "7": "Ng\u2019eiyeet",
+            "8": "Rooptui",
+            "9": "Bureet",
+            "10": "Epeeso",
+            "11": "Kipsuunde ne taai",
+            "12": "Kipsuunde nebo aeng\u2019"
+        },
+        "short": {
+            "1": "M",
+            "2": "N",
+            "3": "T",
+            "4": "I",
+            "5": "M",
+            "6": "P",
+            "7": "N",
+            "8": "R",
+            "9": "B",
+            "10": "E",
+            "11": "K",
+            "12": "K"
+        }
+    }
+}

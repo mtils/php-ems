@@ -1,0 +1,92 @@
+{
+    "unit": "{unit} {number}",
+    "money": "{currency} {number}",
+    "date": {
+        "verbose": "l, F d \\l\\i\\a Y",
+        "long": "F d \\l\\i\\a Y",
+        "short": "n\/d\/y"
+    },
+    "time": {
+        "verbose": "a \\g\\a g:i:s e",
+        "long": "a \\g\\a g:i:s T",
+        "short": "a \\g\\a g:i"
+    },
+    "datetime": {
+        "verbose": "a \\g\\a g:i:s e l, F d \\l\\i\\a Y",
+        "long": "a \\g\\a g:i:s T F d \\l\\i\\a Y",
+        "short": "a \\g\\a g:i n\/d\/y"
+    },
+    "weekday": {
+        "long": {
+            "7": "k\u0254s",
+            "1": "dzo",
+            "2": "bla",
+            "3": "ku\u0256",
+            "4": "yaw",
+            "5": "fi\u0256",
+            "6": "mem"
+        },
+        "short": {
+            "7": "k",
+            "1": "d",
+            "2": "b",
+            "3": "k",
+            "4": "y",
+            "5": "f",
+            "6": "m"
+        },
+        "verbose": {
+            "7": "k\u0254si\u0256a",
+            "1": "dzo\u0256a",
+            "2": "bla\u0256a",
+            "3": "ku\u0256a",
+            "4": "yawo\u0256a",
+            "5": "fi\u0256a",
+            "6": "memle\u0256a"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "dzv",
+            "2": "dzd",
+            "3": "ted",
+            "4": "af\u0254",
+            "5": "dam",
+            "6": "mas",
+            "7": "sia",
+            "8": "dea",
+            "9": "any",
+            "10": "kel",
+            "11": "ade",
+            "12": "dzm"
+        },
+        "short": {
+            "1": "d",
+            "2": "d",
+            "3": "t",
+            "4": "a",
+            "5": "d",
+            "6": "m",
+            "7": "s",
+            "8": "d",
+            "9": "a",
+            "10": "k",
+            "11": "a",
+            "12": "d"
+        },
+        "verbose": {
+            "1": "dzove",
+            "2": "dzodze",
+            "3": "tedoxe",
+            "4": "af\u0254f\u0129e",
+            "5": "dama",
+            "6": "masa",
+            "7": "siaml\u0254m",
+            "8": "deasiamime",
+            "9": "any\u0254ny\u0254",
+            "10": "kele",
+            "11": "ade\u025bmekp\u0254xe",
+            "12": "dzome"
+        }
+    }
+}

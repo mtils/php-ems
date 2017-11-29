@@ -1,0 +1,89 @@
+{
+    "number": {
+        "decimal_mark": ".",
+        "thousands_separator": ","
+    },
+    "date": {
+        "verbose": "l d F Y",
+        "long": "d F Y",
+        "short": "d\/m\/Y"
+    },
+    "time": {
+        "verbose": "e g:i:s a",
+        "long": "T g:i:s a",
+        "short": "g:i a"
+    },
+    "weekday": {
+        "long": {
+            "7": "C\u00e4\u014b",
+            "1": "Jiec",
+            "2": "R\u025bw",
+            "3": "Di\u0254\u0331k",
+            "4": "\u014auaan",
+            "5": "Dhieec",
+            "6": "B\u00e4k\u025bl"
+        },
+        "verbose": {
+            "7": "C\u00e4\u014b ku\u0254th",
+            "1": "Jiec la\u0331t",
+            "2": "R\u025bw l\u00e4tni",
+            "3": "Di\u0254\u0331k l\u00e4tni",
+            "4": "\u014auaan l\u00e4tni",
+            "5": "Dhieec l\u00e4tni",
+            "6": "B\u00e4k\u025bl l\u00e4tni"
+        },
+        "short": {
+            "7": "C",
+            "1": "J",
+            "2": "R",
+            "3": "D",
+            "4": "\u014a",
+            "5": "D",
+            "6": "B"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "Tiop",
+            "2": "P\u025bt",
+            "3": "Du\u0254\u0331\u0254\u0331",
+            "4": "Guak",
+            "5": "Du\u00e4",
+            "6": "Kor",
+            "7": "Pay",
+            "8": "Thoo",
+            "9": "T\u025b\u025b",
+            "10": "Laa",
+            "11": "Kur",
+            "12": "Tid"
+        },
+        "verbose": {
+            "1": "Tiop thar p\u025bt",
+            "2": "P\u025bt",
+            "3": "Du\u0254\u0331\u0254\u0331\u014b",
+            "4": "Guak",
+            "5": "Du\u00e4t",
+            "6": "Kornyoot",
+            "7": "Pay yie\u0331tni",
+            "8": "Tho\u0331o\u0331r",
+            "9": "T\u025b\u025br",
+            "10": "Laath",
+            "11": "Kur",
+            "12": "Tio\u0331p in di\u0331i\u0331t"
+        },
+        "short": {
+            "1": "T",
+            "2": "P",
+            "3": "D",
+            "4": "G",
+            "5": "D",
+            "6": "K",
+            "7": "P",
+            "8": "T",
+            "9": "T",
+            "10": "L",
+            "11": "K",
+            "12": "T"
+        }
+    }
+}

@@ -1,0 +1,95 @@
+{
+    "number": {
+        "decimal_mark": ".",
+        "thousands_separator": ","
+    },
+    "money": "{number} {currency}",
+    "date": {
+        "verbose": "Y F d, l",
+        "long": "Y F d",
+        "short": "Y-m-d"
+    },
+    "time": {
+        "verbose": "g:i:s a e",
+        "long": "g:i:s a T",
+        "short": "g:i a"
+    },
+    "datetime": {
+        "verbose": "Y F d, l g:i:s a e",
+        "long": "Y F d g:i:s a T",
+        "short": "Y-m-d g:i a"
+    },
+    "weekday": {
+        "long": {
+            "7": "\ua46d\ua18f",
+            "1": "\ua18f\ua2cd",
+            "2": "\ua18f\ua44d",
+            "3": "\ua18f\ua315",
+            "4": "\ua18f\ua1d6",
+            "5": "\ua18f\ua26c",
+            "6": "\ua18f\ua0d8"
+        },
+        "short": {
+            "7": "\ua18f",
+            "1": "\ua2cd",
+            "2": "\ua44d",
+            "3": "\ua315",
+            "4": "\ua1d6",
+            "5": "\ua26c",
+            "6": "\ua0d8"
+        },
+        "verbose": {
+            "7": "\ua46d\ua18f\ua44d",
+            "1": "\ua18f\ua282\ua2cd",
+            "2": "\ua18f\ua282\ua44d",
+            "3": "\ua18f\ua282\ua315",
+            "4": "\ua18f\ua282\ua1d6",
+            "5": "\ua18f\ua282\ua26c",
+            "6": "\ua18f\ua282\ua0d8"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "\ua2cd\ua1aa",
+            "2": "\ua44d\ua1aa",
+            "3": "\ua315\ua1aa",
+            "4": "\ua1d6\ua1aa",
+            "5": "\ua26c\ua1aa",
+            "6": "\ua0d8\ua1aa",
+            "7": "\ua3c3\ua1aa",
+            "8": "\ua246\ua1aa",
+            "9": "\ua22c\ua1aa",
+            "10": "\ua2b0\ua1aa",
+            "11": "\ua2b0\ua2aa\ua1aa",
+            "12": "\ua2b0\ua44b\ua1aa"
+        },
+        "short": {
+            "1": "1",
+            "2": "2",
+            "3": "3",
+            "4": "4",
+            "5": "5",
+            "6": "6",
+            "7": "7",
+            "8": "8",
+            "9": "9",
+            "10": "10",
+            "11": "11",
+            "12": "12"
+        },
+        "verbose": {
+            "1": "\ua2cd\ua1aa",
+            "2": "\ua44d\ua1aa",
+            "3": "\ua315\ua1aa",
+            "4": "\ua1d6\ua1aa",
+            "5": "\ua26c\ua1aa",
+            "6": "\ua0d8\ua1aa",
+            "7": "\ua3c3\ua1aa",
+            "8": "\ua246\ua1aa",
+            "9": "\ua22c\ua1aa",
+            "10": "\ua2b0\ua1aa",
+            "11": "\ua2b0\ua2aa\ua1aa",
+            "12": "\ua2b0\ua44b\ua1aa"
+        }
+    }
+}

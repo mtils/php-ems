@@ -1,0 +1,6 @@
+{
+    "date": {
+        "verbose": "l d \\d\\e F \\d\\e Y",
+        "long": "d \\d\\e F \\d\\e Y"
+    }
+}

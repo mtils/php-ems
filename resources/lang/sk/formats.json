@@ -1,0 +1,96 @@
+{
+    "number": {
+        "decimal_mark": ",",
+        "thousands_separator": "\u00a0"
+    },
+    "unit": "{number} {unit}",
+    "money": "{number} {currency}",
+    "date": {
+        "verbose": "l, d. F Y",
+        "long": "d. F Y",
+        "short": "d. n. Y"
+    },
+    "time": {
+        "verbose": "G:i:s e",
+        "long": "G:i:s T",
+        "short": "G:i"
+    },
+    "datetime": {
+        "verbose": "l, d. F Y, G:i:s e",
+        "long": "d. F Y, G:i:s T",
+        "short": "d. n. Y G:i"
+    },
+    "weekday": {
+        "long": {
+            "7": "ne",
+            "1": "po",
+            "2": "ut",
+            "3": "st",
+            "4": "\u0161t",
+            "5": "pi",
+            "6": "so"
+        },
+        "short": {
+            "7": "n",
+            "1": "p",
+            "2": "u",
+            "3": "s",
+            "4": "\u0161",
+            "5": "p",
+            "6": "s"
+        },
+        "verbose": {
+            "7": "nede\u013ea",
+            "1": "pondelok",
+            "2": "utorok",
+            "3": "streda",
+            "4": "\u0161tvrtok",
+            "5": "piatok",
+            "6": "sobota"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "jan",
+            "2": "feb",
+            "3": "mar",
+            "4": "apr",
+            "5": "m\u00e1j",
+            "6": "j\u00fan",
+            "7": "j\u00fal",
+            "8": "aug",
+            "9": "sep",
+            "10": "okt",
+            "11": "nov",
+            "12": "dec"
+        },
+        "short": {
+            "1": "j",
+            "2": "f",
+            "3": "m",
+            "4": "a",
+            "5": "m",
+            "6": "j",
+            "7": "j",
+            "8": "a",
+            "9": "s",
+            "10": "o",
+            "11": "n",
+            "12": "d"
+        },
+        "verbose": {
+            "1": "janu\u00e1r",
+            "2": "febru\u00e1r",
+            "3": "marec",
+            "4": "apr\u00edl",
+            "5": "m\u00e1j",
+            "6": "j\u00fan",
+            "7": "j\u00fal",
+            "8": "august",
+            "9": "september",
+            "10": "okt\u00f3ber",
+            "11": "november",
+            "12": "december"
+        }
+    }
+}

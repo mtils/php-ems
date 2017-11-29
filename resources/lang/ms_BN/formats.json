@@ -1,0 +1,9 @@
+{
+    "number": {
+        "decimal_mark": ",",
+        "thousands_separator": "."
+    },
+    "date": {
+        "verbose": "d F Y"
+    }
+}

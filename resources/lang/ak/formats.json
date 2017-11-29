@@ -1,0 +1,75 @@
+{
+    "number": {
+        "decimal_mark": ".",
+        "thousands_separator": ","
+    },
+    "date": {
+        "verbose": "l, Y F d",
+        "long": "Y F d",
+        "short": "y\/m\/d"
+    },
+    "time": {
+        "verbose": "g:i:s a e",
+        "long": "g:i:s a T",
+        "short": "g:i a"
+    },
+    "weekday": {
+        "long": {
+            "7": "Kwe",
+            "1": "Dwo",
+            "2": "Ben",
+            "3": "Wuk",
+            "4": "Yaw",
+            "5": "Fia",
+            "6": "Mem"
+        },
+        "verbose": {
+            "7": "Kwesida",
+            "1": "Dwowda",
+            "2": "Benada",
+            "3": "Wukuda",
+            "4": "Yawda",
+            "5": "Fida",
+            "6": "Memeneda"
+        },
+        "short": {
+            "7": "K",
+            "1": "D",
+            "2": "B",
+            "3": "W",
+            "4": "Y",
+            "5": "F",
+            "6": "M"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "S-\u0186",
+            "2": "K-\u0186",
+            "3": "E-\u0186",
+            "4": "E-O",
+            "5": "E-K",
+            "6": "O-A",
+            "7": "A-K",
+            "8": "D-\u0186",
+            "9": "F-\u0190",
+            "10": "\u0186-A",
+            "11": "\u0186-O",
+            "12": "M-\u0186"
+        },
+        "verbose": {
+            "1": "Sanda-\u0186p\u025bp\u0254n",
+            "2": "Kwakwar-\u0186gyefuo",
+            "3": "Eb\u0254w-\u0186benem",
+            "4": "Eb\u0254bira-Oforisuo",
+            "5": "Esusow Aketseaba-K\u0254t\u0254nimba",
+            "6": "Obirade-Ay\u025bwohomumu",
+            "7": "Ay\u025bwoho-Kitawonsa",
+            "8": "Difuu-\u0186sandaa",
+            "9": "Fankwa-\u0190b\u0254",
+            "10": "\u0186b\u025bs\u025b-Ahinime",
+            "11": "\u0186ber\u025bf\u025bw-Obubuo",
+            "12": "Mumu-\u0186p\u025bnimba"
+        }
+    }
+}

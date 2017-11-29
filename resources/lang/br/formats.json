@@ -1,0 +1,96 @@
+{
+    "number": {
+        "decimal_mark": ",",
+        "thousands_separator": "\u00a0"
+    },
+    "unit": "{number} {unit}",
+    "money": "{number} {currency}",
+    "date": {
+        "verbose": "Y F d, l",
+        "long": "Y F d",
+        "short": "Y-m-d"
+    },
+    "time": {
+        "verbose": "H:i:s e",
+        "long": "H:i:s T",
+        "short": "H:i"
+    },
+    "datetime": {
+        "verbose": "Y F d, l \\d\\a H:i:s e",
+        "long": "Y F d \\d\\a H:i:s T",
+        "short": "Y-m-d H:i"
+    },
+    "weekday": {
+        "long": {
+            "7": "Sul",
+            "1": "Lun",
+            "2": "Meu.",
+            "3": "Mer.",
+            "4": "Yaou",
+            "5": "Gwe.",
+            "6": "Sad."
+        },
+        "short": {
+            "7": "Su",
+            "1": "L",
+            "2": "Mz",
+            "3": "Mc",
+            "4": "Y",
+            "5": "G",
+            "6": "Sa"
+        },
+        "verbose": {
+            "7": "Sul",
+            "1": "Lun",
+            "2": "Meurzh",
+            "3": "Merc\u02bcher",
+            "4": "Yaou",
+            "5": "Gwener",
+            "6": "Sadorn"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "Gen.",
+            "2": "C\u02bchwe.",
+            "3": "Meur.",
+            "4": "Ebr.",
+            "5": "Mae",
+            "6": "Mezh.",
+            "7": "Goue.",
+            "8": "Eost",
+            "9": "Gwen.",
+            "10": "Here",
+            "11": "Du",
+            "12": "Ker."
+        },
+        "short": {
+            "1": "01",
+            "2": "02",
+            "3": "03",
+            "4": "04",
+            "5": "05",
+            "6": "06",
+            "7": "07",
+            "8": "08",
+            "9": "09",
+            "10": "10",
+            "11": "11",
+            "12": "12"
+        },
+        "verbose": {
+            "1": "Genver",
+            "2": "C\u02bchwevrer",
+            "3": "Meurzh",
+            "4": "Ebrel",
+            "5": "Mae",
+            "6": "Mezheven",
+            "7": "Gouere",
+            "8": "Eost",
+            "9": "Gwengolo",
+            "10": "Here",
+            "11": "Du",
+            "12": "Kerzu"
+        }
+    }
+}

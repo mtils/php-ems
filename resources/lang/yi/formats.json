@@ -1,0 +1,71 @@
+{
+    "number": {
+        "decimal_mark": ".",
+        "thousands_separator": ","
+    },
+    "date": {
+        "verbose": "l, d\u05d8\u05df F Y",
+        "long": "d\u05d8\u05df F Y",
+        "short": "d\/m\/y"
+    },
+    "time": {
+        "verbose": "H:i:s e",
+        "long": "H:i:s T",
+        "short": "H:i"
+    },
+    "datetime": {
+        "verbose": "l, d\u05d8\u05df F Y H:i:s e",
+        "long": "d\u05d8\u05df F Y H:i:s T",
+        "short": "d\/m\/y H:i"
+    },
+    "weekday": {
+        "long": {
+            "7": "\u05d6\u05d5\u05e0\u05d8\u05d9\u05e7",
+            "1": "\u05de\u05d0\u05b8\u05e0\u05d8\u05d9\u05e7",
+            "2": "\u05d3\u05d9\u05e0\u05e1\u05d8\u05d9\u05e7",
+            "3": "\u05de\u05d9\u05d8\u05d5\u05d5\u05d0\u05da",
+            "4": "\u05d3\u05d0\u05e0\u05e2\u05e8\u05e9\u05d8\u05d9\u05e7",
+            "5": "\u05e4\u05bf\u05e8\u05f2\u05b7\u05d8\u05d9\u05e7",
+            "6": "\u05e9\u05d1\u05ea"
+        },
+        "verbose": {
+            "7": "\u05d6\u05d5\u05e0\u05d8\u05d9\u05e7",
+            "1": "\u05de\u05d0\u05b8\u05e0\u05d8\u05d9\u05e7",
+            "2": "\u05d3\u05d9\u05e0\u05e1\u05d8\u05d9\u05e7",
+            "3": "\u05de\u05d9\u05d8\u05d5\u05d5\u05d0\u05da",
+            "4": "\u05d3\u05d0\u05e0\u05e2\u05e8\u05e9\u05d8\u05d9\u05e7",
+            "5": "\u05e4\u05bf\u05e8\u05f2\u05b7\u05d8\u05d9\u05e7",
+            "6": "\u05e9\u05d1\u05ea"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "\u05d9\u05d0\u05b7\u05e0",
+            "2": "\u05e4\u05bf\u05e2\u05d1",
+            "3": "\u05de\u05e2\u05e8\u05e5",
+            "4": "\u05d0\u05b7\u05e4\u05bc\u05e8",
+            "5": "\u05de\u05d9\u05d9",
+            "6": "\u05d9\u05d5\u05e0\u05d9",
+            "7": "\u05d9\u05d5\u05dc\u05d9",
+            "8": "\u05d0\u05d5\u05d9\u05d2",
+            "9": "\u05e1\u05e2\u05e4\u05bc",
+            "10": "\u05d0\u05e7\u05d8",
+            "11": "\u05e0\u05d0\u05d5\u05d5",
+            "12": "\u05d3\u05e2\u05e6"
+        },
+        "verbose": {
+            "1": "\u05d9\u05d0\u05b7\u05e0\u05d5\u05d0\u05b7\u05e8",
+            "2": "\u05e4\u05bf\u05e2\u05d1\u05e8\u05d5\u05d0\u05b7\u05e8",
+            "3": "\u05de\u05e2\u05e8\u05e5",
+            "4": "\u05d0\u05b7\u05e4\u05bc\u05e8\u05d9\u05dc",
+            "5": "\u05de\u05d9\u05d9",
+            "6": "\u05d9\u05d5\u05e0\u05d9",
+            "7": "\u05d9\u05d5\u05dc\u05d9",
+            "8": "\u05d0\u05d5\u05d9\u05d2\u05d5\u05e1\u05d8",
+            "9": "\u05e1\u05e2\u05e4\u05bc\u05d8\u05e2\u05de\u05d1\u05e2\u05e8",
+            "10": "\u05d0\u05e7\u05d8\u05d0\u05d1\u05e2\u05e8",
+            "11": "\u05e0\u05d0\u05d5\u05d5\u05e2\u05de\u05d1\u05e2\u05e8",
+            "12": "\u05d3\u05e2\u05e6\u05e2\u05de\u05d1\u05e2\u05e8"
+        }
+    }
+}

@@ -1,0 +1,18 @@
+{
+    "time": {
+        "verbose": "g:i:s a e",
+        "long": "g:i:s a T",
+        "short": "g:i a"
+    },
+    "weekday": {
+        "short": {
+            "7": "D",
+            "1": "L",
+            "2": "M",
+            "3": "M",
+            "4": "J",
+            "5": "V",
+            "6": "S"
+        }
+    }
+}

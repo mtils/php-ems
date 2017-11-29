@@ -1,0 +1,52 @@
+{
+    "number": {
+        "decimal_mark": ".",
+        "thousands_separator": ","
+    },
+    "date": {
+        "verbose": "l, F d, Y",
+        "long": "F d, Y",
+        "short": "n\/d\/y"
+    },
+    "time": {
+        "verbose": "g:i:s a e",
+        "long": "g:i:s a T",
+        "short": "g:i a"
+    },
+    "weekday": {
+        "short": {
+            "7": "A",
+            "1": "W",
+            "2": "N",
+            "3": "Y",
+            "4": "T",
+            "5": "Z",
+            "6": "O"
+        },
+        "verbose": {
+            "7": "A\u014bp\u00e9tuwak\u021fa\u014b",
+            "1": "A\u014bp\u00e9tuwa\u014b\u017ei",
+            "2": "A\u014bp\u00e9tunu\u014bpa",
+            "3": "A\u014bp\u00e9tuyamni",
+            "4": "A\u014bp\u00e9tutopa",
+            "5": "A\u014bp\u00e9tuzapta\u014b",
+            "6": "Ow\u00e1\u014bgyu\u017ea\u017eapi"
+        }
+    },
+    "month": {
+        "verbose": {
+            "1": "Wi\u00f3the\u021fika W\u00ed",
+            "2": "Thiy\u00f3\u021feyu\u014bka W\u00ed",
+            "3": "I\u0161t\u00e1wi\u010dhayaza\u014b W\u00ed",
+            "4": "P\u021fe\u017e\u00edt\u021fo W\u00ed",
+            "5": "\u010cha\u014bw\u00e1pet\u021fo W\u00ed",
+            "6": "W\u00edpazuk\u021fa-wa\u0161t\u00e9 W\u00ed",
+            "7": "\u010cha\u014bp\u021f\u00e1sapa W\u00ed",
+            "8": "Was\u00fat\u021fu\u014b W\u00ed",
+            "9": "\u010cha\u014bw\u00e1pe\u01e7i W\u00ed",
+            "10": "\u010cha\u014bw\u00e1pe-kasn\u00e1 W\u00ed",
+            "11": "Wan\u00edyetu W\u00ed",
+            "12": "T\u021fah\u00e9kap\u0161u\u014b W\u00ed"
+        }
+    }
+}

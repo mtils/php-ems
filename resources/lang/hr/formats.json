@@ -1,0 +1,96 @@
+{
+    "number": {
+        "decimal_mark": ",",
+        "thousands_separator": "."
+    },
+    "unit": "{number} {unit}",
+    "money": "{number} {currency}",
+    "date": {
+        "verbose": "l, d. F Y.",
+        "long": "d. F Y.",
+        "short": "d. m. Y."
+    },
+    "time": {
+        "verbose": "H:i:s (e)",
+        "long": "H:i:s T",
+        "short": "H:i"
+    },
+    "datetime": {
+        "verbose": "l, d. F Y. \\u H:i:s (e)",
+        "long": "d. F Y. \\u H:i:s T",
+        "short": "d. m. Y. H:i"
+    },
+    "weekday": {
+        "long": {
+            "7": "ned",
+            "1": "pon",
+            "2": "uto",
+            "3": "sri",
+            "4": "\u010det",
+            "5": "pet",
+            "6": "sub"
+        },
+        "short": {
+            "7": "n",
+            "1": "p",
+            "2": "u",
+            "3": "s",
+            "4": "\u010d",
+            "5": "p",
+            "6": "s"
+        },
+        "verbose": {
+            "7": "nedjelja",
+            "1": "ponedjeljak",
+            "2": "utorak",
+            "3": "srijeda",
+            "4": "\u010detvrtak",
+            "5": "petak",
+            "6": "subota"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "sij",
+            "2": "velj",
+            "3": "o\u017eu",
+            "4": "tra",
+            "5": "svi",
+            "6": "lip",
+            "7": "srp",
+            "8": "kol",
+            "9": "ruj",
+            "10": "lis",
+            "11": "stu",
+            "12": "pro"
+        },
+        "short": {
+            "1": "1.",
+            "2": "2.",
+            "3": "3.",
+            "4": "4.",
+            "5": "5.",
+            "6": "6.",
+            "7": "7.",
+            "8": "8.",
+            "9": "9.",
+            "10": "10.",
+            "11": "11.",
+            "12": "12."
+        },
+        "verbose": {
+            "1": "sije\u010danj",
+            "2": "velja\u010da",
+            "3": "o\u017eujak",
+            "4": "travanj",
+            "5": "svibanj",
+            "6": "lipanj",
+            "7": "srpanj",
+            "8": "kolovoz",
+            "9": "rujan",
+            "10": "listopad",
+            "11": "studeni",
+            "12": "prosinac"
+        }
+    }
+}

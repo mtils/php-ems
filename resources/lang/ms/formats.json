@@ -1,0 +1,96 @@
+{
+    "number": {
+        "decimal_mark": ".",
+        "thousands_separator": ","
+    },
+    "unit": "{number} {unit}",
+    "money": "{number} {currency}",
+    "date": {
+        "verbose": "l, d F Y",
+        "long": "d F Y",
+        "short": "d\/m\/y"
+    },
+    "time": {
+        "verbose": "g:i:s a e",
+        "long": "g:i:s a T",
+        "short": "g:i a"
+    },
+    "datetime": {
+        "verbose": "l, d F Y g:i:s a e",
+        "long": "d F Y g:i:s a T",
+        "short": "d\/m\/y g:i a"
+    },
+    "weekday": {
+        "long": {
+            "7": "Ahd",
+            "1": "Isn",
+            "2": "Sel",
+            "3": "Rab",
+            "4": "Kha",
+            "5": "Jum",
+            "6": "Sab"
+        },
+        "short": {
+            "7": "A",
+            "1": "I",
+            "2": "S",
+            "3": "R",
+            "4": "K",
+            "5": "J",
+            "6": "S"
+        },
+        "verbose": {
+            "7": "Ahad",
+            "1": "Isnin",
+            "2": "Selasa",
+            "3": "Rabu",
+            "4": "Khamis",
+            "5": "Jumaat",
+            "6": "Sabtu"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "Jan",
+            "2": "Feb",
+            "3": "Mac",
+            "4": "Apr",
+            "5": "Mei",
+            "6": "Jun",
+            "7": "Jul",
+            "8": "Ogo",
+            "9": "Sep",
+            "10": "Okt",
+            "11": "Nov",
+            "12": "Dis"
+        },
+        "short": {
+            "1": "J",
+            "2": "F",
+            "3": "M",
+            "4": "A",
+            "5": "M",
+            "6": "J",
+            "7": "J",
+            "8": "O",
+            "9": "S",
+            "10": "O",
+            "11": "N",
+            "12": "D"
+        },
+        "verbose": {
+            "1": "Januari",
+            "2": "Februari",
+            "3": "Mac",
+            "4": "April",
+            "5": "Mei",
+            "6": "Jun",
+            "7": "Julai",
+            "8": "Ogos",
+            "9": "September",
+            "10": "Oktober",
+            "11": "November",
+            "12": "Disember"
+        }
+    }
+}

@@ -1,0 +1,85 @@
+{
+    "date": {
+        "verbose": "l, d F Y",
+        "long": "d F Y",
+        "short": "d\/m\/Y"
+    },
+    "time": {
+        "verbose": "H:i:s e",
+        "long": "H:i:s T",
+        "short": "H:i"
+    },
+    "weekday": {
+        "long": {
+            "7": "P\u00edili",
+            "1": "T\u00e1atu",
+            "2": "\u00cdne",
+            "3": "T\u00e1ano",
+            "4": "Alh",
+            "5": "Ijm",
+            "6": "M\u00f3osi"
+        },
+        "verbose": {
+            "7": "Jumap\u00ediri",
+            "1": "Jumat\u00e1tu",
+            "2": "Juma\u00edne",
+            "3": "Jumat\u00e1ano",
+            "4": "Alam\u00edisi",
+            "5": "Ijum\u00e1a",
+            "6": "Jumam\u00f3osi"
+        },
+        "short": {
+            "7": "P",
+            "1": "T",
+            "2": "E",
+            "3": "O",
+            "4": "A",
+            "5": "I",
+            "6": "M"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "F\u00fangat\u0268",
+            "2": "Naan\u0268",
+            "3": "Keenda",
+            "4": "Ik\u00fami",
+            "5": "Inyambala",
+            "6": "Idwaata",
+            "7": "M\u0289\u0289nch\u0268",
+            "8": "V\u0268\u0268r\u0268",
+            "9": "Saat\u0289",
+            "10": "Inyi",
+            "11": "Saano",
+            "12": "Sasat\u0289"
+        },
+        "verbose": {
+            "1": "K\u0289f\u00fangat\u0268",
+            "2": "K\u0289naan\u0268",
+            "3": "K\u0289keenda",
+            "4": "Kwiikumi",
+            "5": "Kwiinyamb\u00e1la",
+            "6": "Kwiidwaata",
+            "7": "K\u0289m\u0289\u0289nch\u0268",
+            "8": "K\u0289v\u0268\u0268r\u0268",
+            "9": "K\u0289saat\u0289",
+            "10": "Kwiinyi",
+            "11": "K\u0289saano",
+            "12": "K\u0289sasat\u0289"
+        },
+        "short": {
+            "1": "F",
+            "2": "N",
+            "3": "K",
+            "4": "I",
+            "5": "I",
+            "6": "I",
+            "7": "M",
+            "8": "V",
+            "9": "S",
+            "10": "I",
+            "11": "S",
+            "12": "S"
+        }
+    }
+}

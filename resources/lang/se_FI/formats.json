@@ -1,0 +1,22 @@
+{
+    "weekday": {
+        "short": {
+            "7": "S",
+            "1": "M",
+            "2": "D",
+            "3": "G",
+            "4": "D",
+            "5": "B",
+            "6": "L"
+        },
+        "verbose": {
+            "7": "sotnabeaivi",
+            "1": "vuoss\u00e1rgga",
+            "2": "ma\u014b\u014beb\u00e1rgga",
+            "3": "gaskavahku",
+            "4": "duorastaga",
+            "5": "bearjadaga",
+            "6": "l\u00e1vvardaga"
+        }
+    }
+}

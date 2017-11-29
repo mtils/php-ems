@@ -1,0 +1,7 @@
+{
+    "unit": "{number} {unit}",
+    "date": {
+        "verbose": "Y\u5e74n\u6708d\u65e5l",
+        "short": "d\/n\/Y"
+    }
+}

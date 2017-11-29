@@ -1,0 +1,96 @@
+{
+    "number": {
+        "decimal_mark": ",",
+        "thousands_separator": "\u00a0"
+    },
+    "unit": "{number} {unit}",
+    "money": "{number} {currency}",
+    "date": {
+        "verbose": "l, d F Y",
+        "long": "d F Y",
+        "short": "d.m.Y"
+    },
+    "time": {
+        "verbose": "H:i:s e",
+        "long": "H:i:s T",
+        "short": "H:i"
+    },
+    "datetime": {
+        "verbose": "l, d F Y H:i:s e",
+        "long": "d F Y H:i:s T",
+        "short": "d.m.Y, H:i"
+    },
+    "weekday": {
+        "long": {
+            "7": "niedz.",
+            "1": "pon.",
+            "2": "wt.",
+            "3": "\u015br.",
+            "4": "czw.",
+            "5": "pt.",
+            "6": "sob."
+        },
+        "short": {
+            "7": "N",
+            "1": "P",
+            "2": "W",
+            "3": "\u015a",
+            "4": "C",
+            "5": "P",
+            "6": "S"
+        },
+        "verbose": {
+            "7": "niedziela",
+            "1": "poniedzia\u0142ek",
+            "2": "wtorek",
+            "3": "\u015broda",
+            "4": "czwartek",
+            "5": "pi\u0105tek",
+            "6": "sobota"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "sty",
+            "2": "lut",
+            "3": "mar",
+            "4": "kwi",
+            "5": "maj",
+            "6": "cze",
+            "7": "lip",
+            "8": "sie",
+            "9": "wrz",
+            "10": "pa\u017a",
+            "11": "lis",
+            "12": "gru"
+        },
+        "short": {
+            "1": "S",
+            "2": "L",
+            "3": "M",
+            "4": "K",
+            "5": "M",
+            "6": "C",
+            "7": "L",
+            "8": "S",
+            "9": "W",
+            "10": "P",
+            "11": "L",
+            "12": "G"
+        },
+        "verbose": {
+            "1": "stycze\u0144",
+            "2": "luty",
+            "3": "marzec",
+            "4": "kwiecie\u0144",
+            "5": "maj",
+            "6": "czerwiec",
+            "7": "lipiec",
+            "8": "sierpie\u0144",
+            "9": "wrzesie\u0144",
+            "10": "pa\u017adziernik",
+            "11": "listopad",
+            "12": "grudzie\u0144"
+        }
+    }
+}

@@ -1,0 +1,85 @@
+{
+    "date": {
+        "verbose": "l, d F Y",
+        "long": "d F Y",
+        "short": "d\/m\/Y"
+    },
+    "time": {
+        "verbose": "H:i:s e",
+        "long": "H:i:s T",
+        "short": "H:i"
+    },
+    "weekday": {
+        "long": {
+            "7": "SAN",
+            "1": "ORK",
+            "2": "OKB",
+            "3": "OKS",
+            "4": "OKN",
+            "5": "OKT",
+            "6": "OMK"
+        },
+        "verbose": {
+            "7": "Sande",
+            "1": "Orwokubanza",
+            "2": "Orwakabiri",
+            "3": "Orwakashatu",
+            "4": "Orwakana",
+            "5": "Orwakataano",
+            "6": "Orwamukaaga"
+        },
+        "short": {
+            "7": "S",
+            "1": "K",
+            "2": "R",
+            "3": "S",
+            "4": "N",
+            "5": "T",
+            "6": "M"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "KBZ",
+            "2": "KBR",
+            "3": "KST",
+            "4": "KKN",
+            "5": "KTN",
+            "6": "KMK",
+            "7": "KMS",
+            "8": "KMN",
+            "9": "KMW",
+            "10": "KKM",
+            "11": "KNK",
+            "12": "KNB"
+        },
+        "verbose": {
+            "1": "Okwokubanza",
+            "2": "Okwakabiri",
+            "3": "Okwakashatu",
+            "4": "Okwakana",
+            "5": "Okwakataana",
+            "6": "Okwamukaaga",
+            "7": "Okwamushanju",
+            "8": "Okwamunaana",
+            "9": "Okwamwenda",
+            "10": "Okwaikumi",
+            "11": "Okwaikumi na kumwe",
+            "12": "Okwaikumi na ibiri"
+        },
+        "short": {
+            "1": "J",
+            "2": "F",
+            "3": "M",
+            "4": "A",
+            "5": "M",
+            "6": "J",
+            "7": "J",
+            "8": "A",
+            "9": "S",
+            "10": "O",
+            "11": "N",
+            "12": "D"
+        }
+    }
+}

@@ -1,0 +1,7 @@
+{
+    "time": {
+        "verbose": "G:i:s e",
+        "long": "G:i:s T",
+        "short": "G:i"
+    }
+}

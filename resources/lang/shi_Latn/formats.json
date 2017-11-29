@@ -1,0 +1,75 @@
+{
+    "number": {
+        "decimal_mark": ",",
+        "thousands_separator": "\u00a0"
+    },
+    "date": {
+        "verbose": "l d F Y",
+        "long": "d F Y",
+        "short": "d\/n\/Y"
+    },
+    "weekday": {
+        "long": {
+            "7": "asa",
+            "1": "ayn",
+            "2": "asi",
+            "3": "ak\u1e5b",
+            "4": "akw",
+            "5": "asim",
+            "6": "asi\u1e0d"
+        },
+        "verbose": {
+            "7": "asamas",
+            "1": "aynas",
+            "2": "asinas",
+            "3": "ak\u1e5bas",
+            "4": "akwas",
+            "5": "asimwas",
+            "6": "asi\u1e0dyas"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "inn",
+            "2": "b\u1e5ba",
+            "3": "ma\u1e5b",
+            "4": "ibr",
+            "5": "may",
+            "6": "yun",
+            "7": "yul",
+            "8": "\u0263uc",
+            "9": "cut",
+            "10": "ktu",
+            "11": "nuw",
+            "12": "duj"
+        },
+        "verbose": {
+            "1": "innayr",
+            "2": "b\u1e5bay\u1e5b",
+            "3": "ma\u1e5b\u1e63",
+            "4": "ibrir",
+            "5": "mayyu",
+            "6": "yunyu",
+            "7": "yulyuz",
+            "8": "\u0263uct",
+            "9": "cutanbir",
+            "10": "ktubr",
+            "11": "nuwanbir",
+            "12": "dujanbir"
+        },
+        "short": {
+            "1": "i",
+            "2": "b",
+            "3": "m",
+            "4": "i",
+            "5": "m",
+            "6": "y",
+            "7": "y",
+            "8": "\u0263",
+            "9": "c",
+            "10": "k",
+            "11": "n",
+            "12": "d"
+        }
+    }
+}

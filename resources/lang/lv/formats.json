@@ -1,0 +1,96 @@
+{
+    "number": {
+        "decimal_mark": ",",
+        "thousands_separator": "\u00a0"
+    },
+    "unit": "{number} {unit}",
+    "money": "{number} {currency}",
+    "date": {
+        "verbose": "l, Y. \\g\\a\\d\\a d. F",
+        "long": "Y. \\g\\a\\d\\a d. F",
+        "short": "d.m.y"
+    },
+    "time": {
+        "verbose": "H:i:s e",
+        "long": "H:i:s T",
+        "short": "H:i"
+    },
+    "datetime": {
+        "verbose": "l, Y. \\g\\a\\d\\a d. F H:i:s e",
+        "long": "Y. \\g\\a\\d\\a d. F H:i:s T",
+        "short": "d.m.y H:i"
+    },
+    "weekday": {
+        "long": {
+            "7": "Sv\u0113td.",
+            "1": "Pirmd.",
+            "2": "Otrd.",
+            "3": "Tre\u0161d.",
+            "4": "Ceturtd.",
+            "5": "Piektd.",
+            "6": "Sestd."
+        },
+        "short": {
+            "7": "S",
+            "1": "P",
+            "2": "O",
+            "3": "T",
+            "4": "C",
+            "5": "P",
+            "6": "S"
+        },
+        "verbose": {
+            "7": "Sv\u0113tdiena",
+            "1": "Pirmdiena",
+            "2": "Otrdiena",
+            "3": "Tre\u0161diena",
+            "4": "Ceturtdiena",
+            "5": "Piektdiena",
+            "6": "Sestdiena"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "janv.",
+            "2": "febr.",
+            "3": "marts",
+            "4": "apr.",
+            "5": "maijs",
+            "6": "j\u016bn.",
+            "7": "j\u016bl.",
+            "8": "aug.",
+            "9": "sept.",
+            "10": "okt.",
+            "11": "nov.",
+            "12": "dec."
+        },
+        "short": {
+            "1": "J",
+            "2": "F",
+            "3": "M",
+            "4": "A",
+            "5": "M",
+            "6": "J",
+            "7": "J",
+            "8": "A",
+            "9": "S",
+            "10": "O",
+            "11": "N",
+            "12": "D"
+        },
+        "verbose": {
+            "1": "janv\u0101ris",
+            "2": "febru\u0101ris",
+            "3": "marts",
+            "4": "apr\u012blis",
+            "5": "maijs",
+            "6": "j\u016bnijs",
+            "7": "j\u016blijs",
+            "8": "augusts",
+            "9": "septembris",
+            "10": "oktobris",
+            "11": "novembris",
+            "12": "decembris"
+        }
+    }
+}

@@ -1,0 +1,75 @@
+{
+    "number": {
+        "decimal_mark": ",",
+        "thousands_separator": "\u00a0"
+    },
+    "date": {
+        "verbose": "l d F Y",
+        "long": "d F Y",
+        "short": "d\/n\/Y"
+    },
+    "time": {
+        "verbose": "H:i:s e",
+        "long": "H:i:s T",
+        "short": "H:i"
+    },
+    "weekday": {
+        "long": {
+            "7": "s\u0254\u0301n",
+            "1": "l\u01ddn",
+            "2": "maa",
+            "3": "m\u025bk",
+            "4": "j\u01dd\u01dd",
+            "5": "j\u00fam",
+            "6": "sam"
+        },
+        "verbose": {
+            "7": "s\u0254\u0301nd\u01dd",
+            "1": "l\u01ddnd\u00ed",
+            "2": "maad\u00ed",
+            "3": "m\u025bkr\u025bd\u00ed",
+            "4": "j\u01dd\u01ddd\u00ed",
+            "5": "j\u00famb\u00e1",
+            "6": "samd\u00ed"
+        },
+        "short": {
+            "7": "s",
+            "1": "l",
+            "2": "m",
+            "3": "m",
+            "4": "j",
+            "5": "j",
+            "6": "s"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "\u014b1",
+            "2": "\u014b2",
+            "3": "\u014b3",
+            "4": "\u014b4",
+            "5": "\u014b5",
+            "6": "\u014b6",
+            "7": "\u014b7",
+            "8": "\u014b8",
+            "9": "\u014b9",
+            "10": "\u014b10",
+            "11": "\u014b11",
+            "12": "\u014b12"
+        },
+        "verbose": {
+            "1": "\u014bw\u00ed\u00ed a nt\u0254\u0301nt\u0254",
+            "2": "\u014bw\u00ed\u00ed ak\u01dd b\u025b\u0301\u025b",
+            "3": "\u014bw\u00ed\u00ed ak\u01dd r\u00e1\u00e1",
+            "4": "\u014bw\u00ed\u00ed ak\u01dd nin",
+            "5": "\u014bw\u00ed\u00ed ak\u01dd t\u00e1an",
+            "6": "\u014bw\u00ed\u00ed ak\u01dd t\u00e1af\u0254k",
+            "7": "\u014bw\u00ed\u00ed ak\u01dd t\u00e1ab\u025b\u025b",
+            "8": "\u014bw\u00ed\u00ed ak\u01dd t\u00e1araa",
+            "9": "\u014bw\u00ed\u00ed ak\u01dd t\u00e1anin",
+            "10": "\u014bw\u00ed\u00ed ak\u01dd nt\u025bk",
+            "11": "\u014bw\u00ed\u00ed ak\u01dd nt\u025bk di b\u0254\u0301k",
+            "12": "\u014bw\u00ed\u00ed ak\u01dd nt\u025bk di b\u025b\u0301\u025b"
+        }
+    }
+}

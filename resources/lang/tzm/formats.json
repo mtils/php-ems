@@ -1,0 +1,84 @@
+{
+    "number": {
+        "decimal_mark": ",",
+        "thousands_separator": "\u00a0"
+    },
+    "date": {
+        "verbose": "l, d F Y",
+        "long": "d F Y",
+        "short": "d\/m\/Y"
+    },
+    "weekday": {
+        "long": {
+            "7": "Asa",
+            "1": "Ayn",
+            "2": "Asn",
+            "3": "Akr",
+            "4": "Akw",
+            "5": "Asm",
+            "6": "As\u1e0d"
+        },
+        "verbose": {
+            "7": "Asamas",
+            "1": "Aynas",
+            "2": "Asinas",
+            "3": "Akras",
+            "4": "Akwas",
+            "5": "Asimwas",
+            "6": "Asi\u1e0dyas"
+        },
+        "short": {
+            "7": "A",
+            "1": "A",
+            "2": "A",
+            "3": "A",
+            "4": "A",
+            "5": "A",
+            "6": "A"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "Yen",
+            "2": "Yeb",
+            "3": "Mar",
+            "4": "Ibr",
+            "5": "May",
+            "6": "Yun",
+            "7": "Yul",
+            "8": "\u0194uc",
+            "9": "Cut",
+            "10": "K\u1e6du",
+            "11": "Nwa",
+            "12": "Duj"
+        },
+        "verbose": {
+            "1": "Yennayer",
+            "2": "Yebrayer",
+            "3": "Mars",
+            "4": "Ibrir",
+            "5": "Mayyu",
+            "6": "Yunyu",
+            "7": "Yulyuz",
+            "8": "\u0194uct",
+            "9": "Cutanbir",
+            "10": "K\u1e6duber",
+            "11": "Nwanbir",
+            "12": "Dujanbir"
+        },
+        "short": {
+            "1": "Y",
+            "2": "Y",
+            "3": "M",
+            "4": "I",
+            "5": "M",
+            "6": "Y",
+            "7": "Y",
+            "8": "\u0194",
+            "9": "C",
+            "10": "K",
+            "11": "N",
+            "12": "D"
+        }
+    }
+}

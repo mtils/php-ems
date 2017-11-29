@@ -218,6 +218,19 @@ class FormatterTest extends \Ems\TestCase
 
     }
 
+    public function test_date_with_same_date_char_in_replacement()
+    {
+
+        $formatter = $this->newFormatter()->setLocale('de_DE');
+
+        $date  = new \DateTime('2017-11-29 10:58:23');
+
+        $formatter->setFormat(Formatter::DATE, 'l, d.m.Y');
+
+        $this->assertEquals('Mittwoch, 29.11.2017', $formatter->date($date));
+
+    }
+
     public function test_date_with_overwritten_format()
     {
 

@@ -1,0 +1,89 @@
+{
+    "number": {
+        "decimal_mark": ",",
+        "thousands_separator": "."
+    },
+    "date": {
+        "verbose": "l, d F Y",
+        "long": "d F Y",
+        "short": "d\/m\/Y"
+    },
+    "time": {
+        "verbose": "H:i:s e",
+        "long": "H:i:s T",
+        "short": "H:i"
+    },
+    "weekday": {
+        "long": {
+            "7": "Sab",
+            "1": "Jtt",
+            "2": "Jnn",
+            "3": "Jtn",
+            "4": "Ara",
+            "5": "Iju",
+            "6": "Jmo"
+        },
+        "verbose": {
+            "7": "Sabato",
+            "1": "Jumatatu",
+            "2": "Jumanne",
+            "3": "Jumatano",
+            "4": "Arahamisi",
+            "5": "Ijumaa",
+            "6": "Jumamosi"
+        },
+        "short": {
+            "7": "S",
+            "1": "J",
+            "2": "J",
+            "3": "J",
+            "4": "A",
+            "5": "I",
+            "6": "J"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "Kwa",
+            "2": "Una",
+            "3": "Rar",
+            "4": "Che",
+            "5": "Tha",
+            "6": "Moc",
+            "7": "Sab",
+            "8": "Nan",
+            "9": "Tis",
+            "10": "Kum",
+            "11": "Moj",
+            "12": "Yel"
+        },
+        "verbose": {
+            "1": "Mweri wo kwanza",
+            "2": "Mweri wo unayeli",
+            "3": "Mweri wo uneraru",
+            "4": "Mweri wo unecheshe",
+            "5": "Mweri wo unethanu",
+            "6": "Mweri wo thanu na mocha",
+            "7": "Mweri wo saba",
+            "8": "Mweri wo nane",
+            "9": "Mweri wo tisa",
+            "10": "Mweri wo kumi",
+            "11": "Mweri wo kumi na moja",
+            "12": "Mweri wo kumi na yel\u2019li"
+        },
+        "short": {
+            "1": "K",
+            "2": "U",
+            "3": "R",
+            "4": "C",
+            "5": "T",
+            "6": "M",
+            "7": "S",
+            "8": "N",
+            "9": "T",
+            "10": "K",
+            "11": "M",
+            "12": "Y"
+        }
+    }
+}

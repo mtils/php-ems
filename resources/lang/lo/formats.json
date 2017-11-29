@@ -1,0 +1,96 @@
+{
+    "number": {
+        "decimal_mark": ",",
+        "thousands_separator": "."
+    },
+    "unit": "{number} {unit}",
+    "money": "{number} {currency}",
+    "date": {
+        "verbose": "l \u0e97\u0eb5 d F \\{\\e\\r\\a\\.\\s\\h\\o\\r\\t\\} Y",
+        "long": "d F Y",
+        "short": "d\/n\/Y"
+    },
+    "time": {
+        "verbose": "G \u0ec2\u0ea1\u0e87 i \u0e99\u0eb2\u0e97\u0eb5 s \u0ea7\u0eb4\u0e99\u0eb2\u0e97\u0eb5 e",
+        "long": "G \u0ec2\u0ea1\u0e87 i \u0e99\u0eb2\u0e97\u0eb5 s \u0ea7\u0eb4\u0e99\u0eb2\u0e97\u0eb5 T",
+        "short": "G:i"
+    },
+    "datetime": {
+        "verbose": "l \u0e97\u0eb5 d F \\{\\e\\r\\a\\.\\s\\h\\o\\r\\t\\} Y, G \u0ec2\u0ea1\u0e87 i \u0e99\u0eb2\u0e97\u0eb5 s \u0ea7\u0eb4\u0e99\u0eb2\u0e97\u0eb5 e",
+        "long": "d F Y, G \u0ec2\u0ea1\u0e87 i \u0e99\u0eb2\u0e97\u0eb5 s \u0ea7\u0eb4\u0e99\u0eb2\u0e97\u0eb5 T",
+        "short": "d\/n\/Y, G:i"
+    },
+    "weekday": {
+        "long": {
+            "7": "\u0ead\u0eb2\u0e97\u0eb4\u0e94",
+            "1": "\u0e88\u0eb1\u0e99",
+            "2": "\u0ead\u0eb1\u0e87\u0e84\u0eb2\u0e99",
+            "3": "\u0e9e\u0eb8\u0e94",
+            "4": "\u0e9e\u0eb0\u0eab\u0eb1\u0e94",
+            "5": "\u0eaa\u0eb8\u0e81",
+            "6": "\u0ec0\u0eaa\u0ebb\u0eb2"
+        },
+        "short": {
+            "7": "\u0ead\u0eb2",
+            "1": "\u0e88",
+            "2": "\u0ead",
+            "3": "\u0e9e",
+            "4": "\u0e9e\u0eab",
+            "5": "\u0eaa\u0eb8",
+            "6": "\u0eaa"
+        },
+        "verbose": {
+            "7": "\u0ea7\u0eb1\u0e99\u0ead\u0eb2\u0e97\u0eb4\u0e94",
+            "1": "\u0ea7\u0eb1\u0e99\u0e88\u0eb1\u0e99",
+            "2": "\u0ea7\u0eb1\u0e99\u0ead\u0eb1\u0e87\u0e84\u0eb2\u0e99",
+            "3": "\u0ea7\u0eb1\u0e99\u0e9e\u0eb8\u0e94",
+            "4": "\u0ea7\u0eb1\u0e99\u0e9e\u0eb0\u0eab\u0eb1\u0e94",
+            "5": "\u0ea7\u0eb1\u0e99\u0eaa\u0eb8\u0e81",
+            "6": "\u0ea7\u0eb1\u0e99\u0ec0\u0eaa\u0ebb\u0eb2"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "\u0ea1.\u0e81.",
+            "2": "\u0e81.\u0e9e.",
+            "3": "\u0ea1.\u0e99.",
+            "4": "\u0ea1.\u0eaa.",
+            "5": "\u0e9e.\u0e9e.",
+            "6": "\u0ea1\u0eb4.\u0e96.",
+            "7": "\u0e81.\u0ea5.",
+            "8": "\u0eaa.\u0eab.",
+            "9": "\u0e81.\u0e8d.",
+            "10": "\u0e95.\u0ea5.",
+            "11": "\u0e9e.\u0e88.",
+            "12": "\u0e97.\u0ea7."
+        },
+        "short": {
+            "1": "1",
+            "2": "2",
+            "3": "3",
+            "4": "4",
+            "5": "5",
+            "6": "6",
+            "7": "7",
+            "8": "8",
+            "9": "9",
+            "10": "10",
+            "11": "11",
+            "12": "12"
+        },
+        "verbose": {
+            "1": "\u0ea1\u0eb1\u0e87\u0e81\u0ead\u0e99",
+            "2": "\u0e81\u0eb8\u0ea1\u0e9e\u0eb2",
+            "3": "\u0ea1\u0eb5\u0e99\u0eb2",
+            "4": "\u0ec0\u0ea1\u0eaa\u0eb2",
+            "5": "\u0e9e\u0eb6\u0e94\u0eaa\u0eb0\u0e9e\u0eb2",
+            "6": "\u0ea1\u0eb4\u0e96\u0eb8\u0e99\u0eb2",
+            "7": "\u0e81\u0ecd\u0ea5\u0eb0\u0e81\u0ebb\u0e94",
+            "8": "\u0eaa\u0eb4\u0e87\u0eab\u0eb2",
+            "9": "\u0e81\u0eb1\u0e99\u0e8d\u0eb2",
+            "10": "\u0e95\u0eb8\u0ea5\u0eb2",
+            "11": "\u0e9e\u0eb0\u0e88\u0eb4\u0e81",
+            "12": "\u0e97\u0eb1\u0e99\u0ea7\u0eb2"
+        }
+    }
+}

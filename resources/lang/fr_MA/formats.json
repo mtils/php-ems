@@ -1,0 +1,21 @@
+{
+    "number": {
+        "thousands_separator": "."
+    },
+    "month": {
+        "long": {
+            "1": "jan.",
+            "2": "f\u00e9v.",
+            "3": "mar.",
+            "4": "avr.",
+            "5": "mai",
+            "6": "jui.",
+            "7": "juil.",
+            "8": "ao\u00fbt",
+            "9": "sept.",
+            "10": "oct.",
+            "11": "nov.",
+            "12": "d\u00e9c."
+        }
+    }
+}

@@ -1,0 +1,91 @@
+{
+    "number": {
+        "decimal_mark": ",",
+        "thousands_separator": "\u00a0"
+    },
+    "unit": "{number} {unit}",
+    "money": "{number} {currency}",
+    "date": {
+        "verbose": "l, d-\\a \\d\\e F Y",
+        "long": "Y-F-d",
+        "short": "y-m-d"
+    },
+    "time": {
+        "verbose": "G-\\a \\h\\o\\r\\o \\k\\a\\j i:s e",
+        "long": "H:i:s T",
+        "short": "H:i"
+    },
+    "weekday": {
+        "long": {
+            "7": "di",
+            "1": "lu",
+            "2": "ma",
+            "3": "me",
+            "4": "\u0135a",
+            "5": "ve",
+            "6": "sa"
+        },
+        "verbose": {
+            "7": "diman\u0109o",
+            "1": "lundo",
+            "2": "mardo",
+            "3": "merkredo",
+            "4": "\u0135a\u016ddo",
+            "5": "vendredo",
+            "6": "sabato"
+        },
+        "short": {
+            "7": "D",
+            "1": "L",
+            "2": "M",
+            "3": "M",
+            "4": "\u0134",
+            "5": "V",
+            "6": "S"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "jan",
+            "2": "feb",
+            "3": "mar",
+            "4": "apr",
+            "5": "maj",
+            "6": "jun",
+            "7": "jul",
+            "8": "a\u016dg",
+            "9": "sep",
+            "10": "okt",
+            "11": "nov",
+            "12": "dec"
+        },
+        "verbose": {
+            "1": "januaro",
+            "2": "februaro",
+            "3": "marto",
+            "4": "aprilo",
+            "5": "majo",
+            "6": "junio",
+            "7": "julio",
+            "8": "a\u016dgusto",
+            "9": "septembro",
+            "10": "oktobro",
+            "11": "novembro",
+            "12": "decembro"
+        },
+        "short": {
+            "1": "J",
+            "2": "F",
+            "3": "M",
+            "4": "A",
+            "5": "M",
+            "6": "J",
+            "7": "J",
+            "8": "A",
+            "9": "S",
+            "10": "O",
+            "11": "N",
+            "12": "D"
+        }
+    }
+}

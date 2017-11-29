@@ -1,0 +1,96 @@
+{
+    "number": {
+        "decimal_mark": ",",
+        "thousands_separator": "\u00a0"
+    },
+    "unit": "{number} {unit}",
+    "money": "{number} {currency}",
+    "date": {
+        "verbose": "Y F d, l",
+        "long": "Y F d",
+        "short": "Y-m-d"
+    },
+    "time": {
+        "verbose": "H:i:s e",
+        "long": "H:i:s T",
+        "short": "H:i"
+    },
+    "datetime": {
+        "verbose": "Y F d, l H:i:s e",
+        "long": "Y F d H:i:s T",
+        "short": "Y-m-d H:i"
+    },
+    "weekday": {
+        "long": {
+            "7": "sotn",
+            "1": "vuos",
+            "2": "ma\u014b",
+            "3": "gask",
+            "4": "duor",
+            "5": "bear",
+            "6": "l\u00e1v"
+        },
+        "short": {
+            "7": "S",
+            "1": "V",
+            "2": "M",
+            "3": "G",
+            "4": "D",
+            "5": "B",
+            "6": "L"
+        },
+        "verbose": {
+            "7": "sotnabeaivi",
+            "1": "vuoss\u00e1rga",
+            "2": "ma\u014b\u014beb\u00e1rga",
+            "3": "gaskavahkku",
+            "4": "duorasdat",
+            "5": "bearjadat",
+            "6": "l\u00e1vvardat"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "o\u0111\u0111j",
+            "2": "guov",
+            "3": "njuk",
+            "4": "cuo",
+            "5": "mies",
+            "6": "geas",
+            "7": "suoi",
+            "8": "borg",
+            "9": "\u010dak\u010d",
+            "10": "golg",
+            "11": "sk\u00e1b",
+            "12": "juov"
+        },
+        "short": {
+            "1": "O",
+            "2": "G",
+            "3": "N",
+            "4": "C",
+            "5": "M",
+            "6": "G",
+            "7": "S",
+            "8": "B",
+            "9": "\u010c",
+            "10": "G",
+            "11": "S",
+            "12": "J"
+        },
+        "verbose": {
+            "1": "o\u0111\u0111ajagem\u00e1nnu",
+            "2": "guovvam\u00e1nnu",
+            "3": "njuk\u010dam\u00e1nnu",
+            "4": "cuo\u014bom\u00e1nnu",
+            "5": "miessem\u00e1nnu",
+            "6": "geassem\u00e1nnu",
+            "7": "suoidnem\u00e1nnu",
+            "8": "borgem\u00e1nnu",
+            "9": "\u010dak\u010dam\u00e1nnu",
+            "10": "golggotm\u00e1nnu",
+            "11": "sk\u00e1bmam\u00e1nnu",
+            "12": "juovlam\u00e1nnu"
+        }
+    }
+}

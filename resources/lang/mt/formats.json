@@ -1,0 +1,95 @@
+{
+    "number": {
+        "decimal_mark": ".",
+        "thousands_separator": ","
+    },
+    "money": "{number} {currency}",
+    "date": {
+        "verbose": "l, d \\t\\a\u2019 F Y",
+        "long": "d \\t\\a\u2019 F Y",
+        "short": "d\/m\/Y"
+    },
+    "time": {
+        "verbose": "H:i:s e",
+        "long": "H:i:s T",
+        "short": "H:i"
+    },
+    "datetime": {
+        "verbose": "l, d \\t\\a\u2019 F Y H:i:s e",
+        "long": "d \\t\\a\u2019 F Y H:i:s T",
+        "short": "d\/m\/Y H:i"
+    },
+    "weekday": {
+        "long": {
+            "7": "\u0126ad",
+            "1": "Tne",
+            "2": "Tli",
+            "3": "Erb",
+            "4": "\u0126am",
+            "5": "\u0120im",
+            "6": "Sib"
+        },
+        "short": {
+            "7": "\u0126d",
+            "1": "Tn",
+            "2": "Tl",
+            "3": "Er",
+            "4": "\u0126m",
+            "5": "\u0120m",
+            "6": "Sb"
+        },
+        "verbose": {
+            "7": "Il-\u0126add",
+            "1": "It-Tnejn",
+            "2": "It-Tlieta",
+            "3": "L-Erbg\u0127a",
+            "4": "Il-\u0126amis",
+            "5": "Il-\u0120img\u0127a",
+            "6": "Is-Sibt"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "Jan",
+            "2": "Fra",
+            "3": "Mar",
+            "4": "Apr",
+            "5": "Mej",
+            "6": "\u0120un",
+            "7": "Lul",
+            "8": "Aww",
+            "9": "Set",
+            "10": "Ott",
+            "11": "Nov",
+            "12": "Di\u010b"
+        },
+        "short": {
+            "1": "Jn",
+            "2": "Fr",
+            "3": "Mz",
+            "4": "Ap",
+            "5": "Mj",
+            "6": "\u0120n",
+            "7": "Lj",
+            "8": "Aw",
+            "9": "St",
+            "10": "Ob",
+            "11": "Nv",
+            "12": "D\u010b"
+        },
+        "verbose": {
+            "1": "Jannar",
+            "2": "Frar",
+            "3": "Marzu",
+            "4": "April",
+            "5": "Mejju",
+            "6": "\u0120unju",
+            "7": "Lulju",
+            "8": "Awwissu",
+            "9": "Settembru",
+            "10": "Ottubru",
+            "11": "Novembru",
+            "12": "Di\u010bembru"
+        }
+    }
+}

@@ -1,0 +1,84 @@
+{
+    "number": {
+        "decimal_mark": ",",
+        "thousands_separator": "\u2019"
+    },
+    "money": "{number} {currency}",
+    "date": {
+        "verbose": "l, d. F Y",
+        "long": "d. F Y"
+    },
+    "weekday": {
+        "long": {
+            "7": "Sun",
+            "1": "M\u00e4n",
+            "2": "Zi\u0161",
+            "3": "Mit",
+            "4": "Fr\u00f3",
+            "5": "Fri",
+            "6": "Sam"
+        },
+        "short": {
+            "7": "S",
+            "1": "M",
+            "2": "Z",
+            "3": "M",
+            "4": "F",
+            "5": "F",
+            "6": "S"
+        },
+        "verbose": {
+            "7": "Sunntag",
+            "1": "M\u00e4ntag",
+            "2": "Zi\u0161tag",
+            "3": "Mittwu\u010d",
+            "4": "Fr\u00f3ntag",
+            "5": "Fritag",
+            "6": "Sam\u0161tag"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "Jen",
+            "2": "Hor",
+            "3": "M\u00e4r",
+            "4": "Abr",
+            "5": "Mei",
+            "6": "Br\u00e1",
+            "7": "Hei",
+            "8": "\u00d6ig",
+            "9": "Her",
+            "10": "W\u00edm",
+            "11": "Win",
+            "12": "Chr"
+        },
+        "short": {
+            "1": "J",
+            "2": "H",
+            "3": "M",
+            "4": "A",
+            "5": "M",
+            "6": "B",
+            "7": "H",
+            "8": "\u00d6",
+            "9": "H",
+            "10": "W",
+            "11": "W",
+            "12": "C"
+        },
+        "verbose": {
+            "1": "Jenner",
+            "2": "Hornig",
+            "3": "M\u00e4rze",
+            "4": "Abrille",
+            "5": "Meije",
+            "6": "Br\u00e1\u010det",
+            "7": "Heiwet",
+            "8": "\u00d6ig\u0161te",
+            "9": "Herb\u0161tm\u00e1net",
+            "10": "W\u00edm\u00e1net",
+            "11": "Winterm\u00e1net",
+            "12": "Chri\u0161tm\u00e1net"
+        }
+    }
+}

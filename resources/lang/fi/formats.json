@@ -1,0 +1,96 @@
+{
+    "number": {
+        "decimal_mark": ",",
+        "thousands_separator": "\u00a0"
+    },
+    "unit": "{number} {unit}",
+    "money": "{number} {currency}",
+    "date": {
+        "verbose": "cccc d. F Y",
+        "long": "d. F Y",
+        "short": "d.n.Y"
+    },
+    "time": {
+        "verbose": "G.i.s e",
+        "long": "G.i.s T",
+        "short": "G.i"
+    },
+    "datetime": {
+        "verbose": "cccc d. F Y \\k\\l\\o G.i.s e",
+        "long": "d. F Y \\k\\l\\o G.i.s T",
+        "short": "d.n.Y G.i"
+    },
+    "weekday": {
+        "long": {
+            "7": "su",
+            "1": "ma",
+            "2": "ti",
+            "3": "ke",
+            "4": "to",
+            "5": "pe",
+            "6": "la"
+        },
+        "short": {
+            "7": "S",
+            "1": "M",
+            "2": "T",
+            "3": "K",
+            "4": "T",
+            "5": "P",
+            "6": "L"
+        },
+        "verbose": {
+            "7": "sunnuntai",
+            "1": "maanantai",
+            "2": "tiistai",
+            "3": "keskiviikko",
+            "4": "torstai",
+            "5": "perjantai",
+            "6": "lauantai"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "tammi",
+            "2": "helmi",
+            "3": "maalis",
+            "4": "huhti",
+            "5": "touko",
+            "6": "kes\u00e4",
+            "7": "hein\u00e4",
+            "8": "elo",
+            "9": "syys",
+            "10": "loka",
+            "11": "marras",
+            "12": "joulu"
+        },
+        "short": {
+            "1": "T",
+            "2": "H",
+            "3": "M",
+            "4": "H",
+            "5": "T",
+            "6": "K",
+            "7": "H",
+            "8": "E",
+            "9": "S",
+            "10": "L",
+            "11": "M",
+            "12": "J"
+        },
+        "verbose": {
+            "1": "tammikuu",
+            "2": "helmikuu",
+            "3": "maaliskuu",
+            "4": "huhtikuu",
+            "5": "toukokuu",
+            "6": "kes\u00e4kuu",
+            "7": "hein\u00e4kuu",
+            "8": "elokuu",
+            "9": "syyskuu",
+            "10": "lokakuu",
+            "11": "marraskuu",
+            "12": "joulukuu"
+        }
+    }
+}

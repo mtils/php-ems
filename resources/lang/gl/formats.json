@@ -1,0 +1,96 @@
+{
+    "number": {
+        "decimal_mark": ",",
+        "thousands_separator": "."
+    },
+    "unit": "{number} {unit}",
+    "money": "{number} {currency}",
+    "date": {
+        "verbose": "l, d \\d\\e F \\d\\e Y",
+        "long": "d \\d\\e F \\d\\e Y",
+        "short": "d\/m\/y"
+    },
+    "time": {
+        "verbose": "H:i:s e",
+        "long": "H:i:s T",
+        "short": "H:i"
+    },
+    "datetime": {
+        "verbose": "H:i:s e \\d\\o l, d \\d\\e F \\d\\e Y",
+        "long": "H:i:s T \\d\\o d \\d\\e F \\d\\e Y",
+        "short": "H:i, d\/m\/y"
+    },
+    "weekday": {
+        "long": {
+            "7": "Dom.",
+            "1": "Luns",
+            "2": "Mar.",
+            "3": "M\u00e9r.",
+            "4": "Xov.",
+            "5": "Ven.",
+            "6": "S\u00e1b."
+        },
+        "short": {
+            "7": "D",
+            "1": "L",
+            "2": "M",
+            "3": "M",
+            "4": "X",
+            "5": "V",
+            "6": "S"
+        },
+        "verbose": {
+            "7": "Domingo",
+            "1": "Luns",
+            "2": "Martes",
+            "3": "M\u00e9rcores",
+            "4": "Xoves",
+            "5": "Venres",
+            "6": "S\u00e1bado"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "Xan.",
+            "2": "Feb.",
+            "3": "Mar.",
+            "4": "Abr.",
+            "5": "Maio",
+            "6": "Xu\u00f1o",
+            "7": "Xul.",
+            "8": "Ago.",
+            "9": "Set.",
+            "10": "Out.",
+            "11": "Nov.",
+            "12": "Dec."
+        },
+        "short": {
+            "1": "X",
+            "2": "F",
+            "3": "M",
+            "4": "A",
+            "5": "M",
+            "6": "X",
+            "7": "X",
+            "8": "A",
+            "9": "S",
+            "10": "O",
+            "11": "N",
+            "12": "D"
+        },
+        "verbose": {
+            "1": "Xaneiro",
+            "2": "Febreiro",
+            "3": "Marzo",
+            "4": "Abril",
+            "5": "Maio",
+            "6": "Xu\u00f1o",
+            "7": "Xullo",
+            "8": "Agosto",
+            "9": "Setembro",
+            "10": "Outubro",
+            "11": "Novembro",
+            "12": "Decembro"
+        }
+    }
+}

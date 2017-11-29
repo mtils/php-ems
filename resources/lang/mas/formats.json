@@ -1,0 +1,71 @@
+{
+    "date": {
+        "verbose": "l, d F Y",
+        "long": "d F Y",
+        "short": "d\/m\/Y"
+    },
+    "time": {
+        "verbose": "H:i:s e",
+        "long": "H:i:s T",
+        "short": "H:i"
+    },
+    "weekday": {
+        "long": {
+            "7": "Jpi",
+            "1": "Jtt",
+            "2": "Jnn",
+            "3": "Jtn",
+            "4": "Alh",
+            "5": "Iju",
+            "6": "Jmo"
+        },
+        "verbose": {
+            "7": "Jumap\u00edl\u00ed",
+            "1": "Jumat\u00e1tu",
+            "2": "Jumane",
+            "3": "Jumat\u00e1n\u0254",
+            "4": "Ala\u00e1misi",
+            "5": "Jum\u00e1a",
+            "6": "Jumam\u00f3si"
+        },
+        "short": {
+            "7": "2",
+            "1": "3",
+            "2": "4",
+            "3": "5",
+            "4": "6",
+            "5": "7",
+            "6": "1"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "Dal",
+            "2": "Ar\u00e1",
+            "3": "\u0186\u025bn",
+            "4": "Doy",
+            "5": "L\u00e9p",
+            "6": "Rok",
+            "7": "S\u00e1s",
+            "8": "B\u0254\u0301r",
+            "9": "K\u00fas",
+            "10": "G\u00eds",
+            "11": "Sh\u0289\u0301",
+            "12": "Nt\u0289\u0301"
+        },
+        "verbose": {
+            "1": "Oladal\u0289\u0301",
+            "2": "Ar\u00e1t",
+            "3": "\u0186\u025bn\u0268\u0301\u0254\u0268\u014b\u0254k",
+            "4": "Olodoy\u00ed\u00f3r\u00ed\u00ea ink\u00f3k\u00fa\u00e2",
+            "5": "Oloil\u00e9p\u016bny\u012b\u0113 ink\u00f3k\u00fa\u00e2",
+            "6": "K\u00faj\u00fa\u0254r\u0254k",
+            "7": "M\u00f3rus\u00e1sin",
+            "8": "\u0186l\u0254\u0301\u0268\u0301b\u0254\u0301r\u00e1r\u025b",
+            "9": "K\u00fash\u00een",
+            "10": "Olg\u00edsan",
+            "11": "P\u0289sh\u0289\u0301ka",
+            "12": "Nt\u0289\u0301\u014b\u0289\u0301s"
+        }
+    }
+}

@@ -1,0 +1,75 @@
+{
+    "number": {
+        "decimal_mark": ",",
+        "thousands_separator": "\u00a0"
+    },
+    "date": {
+        "verbose": "l d F Y",
+        "long": "d F Y",
+        "short": "d\/n\/Y"
+    },
+    "time": {
+        "verbose": "H:i:s e",
+        "long": "H:i:s T",
+        "short": "H:i"
+    },
+    "weekday": {
+        "long": {
+            "7": "sd",
+            "1": "md",
+            "2": "mw",
+            "3": "et",
+            "4": "kl",
+            "5": "fl",
+            "6": "ss"
+        },
+        "verbose": {
+            "7": "s\u0254\u0301ndi\u025b",
+            "1": "m\u00f3ndie",
+            "2": "mu\u00e1ny\u00e1\u014bm\u00f3ndie",
+            "3": "met\u00fakp\u00ed\u00e1p\u025b",
+            "4": "k\u00fap\u00e9limet\u00fakpiap\u025b",
+            "5": "fel\u00e9te",
+            "6": "s\u00e9sel\u00e9"
+        },
+        "short": {
+            "7": "s",
+            "1": "m",
+            "2": "m",
+            "3": "e",
+            "4": "k",
+            "5": "f",
+            "6": "s"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "o.1",
+            "2": "o.2",
+            "3": "o.3",
+            "4": "o.4",
+            "5": "o.5",
+            "6": "o.6",
+            "7": "o.7",
+            "8": "o.8",
+            "9": "o.9",
+            "10": "o.10",
+            "11": "o.11",
+            "12": "o.12"
+        },
+        "verbose": {
+            "1": "pik\u00edt\u00edk\u00edtie, o\u00f3l\u00ed \u00fa kut\u00faan",
+            "2": "si\u025by\u025b\u0301, o\u00f3li \u00fa k\u00e1nd\u00ed\u025b",
+            "3": "\u0254ns\u00famb\u0254l, o\u00f3li \u00fa k\u00e1t\u00e1t\u00fa\u025b",
+            "4": "mesi\u014b, o\u00f3li \u00fa k\u00e9nie",
+            "5": "ensil, o\u00f3li \u00fa k\u00e1t\u00e1nu\u025b",
+            "6": "\u0254s\u0254n",
+            "7": "efute",
+            "8": "pisuy\u00fa",
+            "9": "im\u025b\u014b i pu\u0254s",
+            "10": "im\u025b\u014b i put\u00fak,o\u00f3li \u00fa k\u00e1t\u00ed\u025b",
+            "11": "makandik\u025b",
+            "12": "pil\u0254nd\u0254\u0301"
+        }
+    }
+}

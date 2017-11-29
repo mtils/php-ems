@@ -1,0 +1,96 @@
+{
+    "number": {
+        "decimal_mark": ",",
+        "thousands_separator": "\u00a0"
+    },
+    "unit": "{number} {unit}",
+    "money": "{number} {currency}",
+    "date": {
+        "verbose": "l, d-F, Y",
+        "long": "d-F, Y",
+        "short": "d\/m\/y"
+    },
+    "time": {
+        "verbose": "G:i:s (e)",
+        "long": "G:i:s (T)",
+        "short": "H:i"
+    },
+    "datetime": {
+        "verbose": "l, d-F, Y, G:i:s (e)",
+        "long": "d-F, Y, G:i:s (T)",
+        "short": "d\/m\/y, H:i"
+    },
+    "weekday": {
+        "long": {
+            "7": "Yak",
+            "1": "Dush",
+            "2": "Sesh",
+            "3": "Chor",
+            "4": "Pay",
+            "5": "Jum",
+            "6": "Shan"
+        },
+        "short": {
+            "7": "Y",
+            "1": "D",
+            "2": "S",
+            "3": "C",
+            "4": "P",
+            "5": "J",
+            "6": "S"
+        },
+        "verbose": {
+            "7": "yakshanba",
+            "1": "dushanba",
+            "2": "seshanba",
+            "3": "chorshanba",
+            "4": "payshanba",
+            "5": "juma",
+            "6": "shanba"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "Yan",
+            "2": "Fev",
+            "3": "Mar",
+            "4": "Apr",
+            "5": "May",
+            "6": "Iyn",
+            "7": "Iyl",
+            "8": "Avg",
+            "9": "Sen",
+            "10": "Okt",
+            "11": "Noy",
+            "12": "Dek"
+        },
+        "short": {
+            "1": "Y",
+            "2": "F",
+            "3": "M",
+            "4": "A",
+            "5": "M",
+            "6": "I",
+            "7": "I",
+            "8": "A",
+            "9": "S",
+            "10": "O",
+            "11": "N",
+            "12": "D"
+        },
+        "verbose": {
+            "1": "Yanvar",
+            "2": "Fevral",
+            "3": "Mart",
+            "4": "Aprel",
+            "5": "May",
+            "6": "Iyun",
+            "7": "Iyul",
+            "8": "Avgust",
+            "9": "Sentabr",
+            "10": "Oktabr",
+            "11": "Noyabr",
+            "12": "Dekabr"
+        }
+    }
+}

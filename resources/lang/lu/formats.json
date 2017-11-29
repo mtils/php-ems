@@ -1,0 +1,89 @@
+{
+    "number": {
+        "decimal_mark": ",",
+        "thousands_separator": "."
+    },
+    "date": {
+        "verbose": "l d F Y",
+        "long": "d F Y",
+        "short": "d\/n\/Y"
+    },
+    "time": {
+        "verbose": "H:i:s e",
+        "long": "H:i:s T",
+        "short": "H:i"
+    },
+    "weekday": {
+        "long": {
+            "7": "Lum",
+            "1": "Nko",
+            "2": "Ndy",
+            "3": "Ndg",
+            "4": "Njw",
+            "5": "Ngv",
+            "6": "Lub"
+        },
+        "verbose": {
+            "7": "Lumingu",
+            "1": "Nkodya",
+            "2": "Nd\u00e0ay\u00e0",
+            "3": "Ndang\u00f9",
+            "4": "Nj\u00f2wa",
+            "5": "Ng\u00f2vya",
+            "6": "Lubingu"
+        },
+        "short": {
+            "7": "L",
+            "1": "N",
+            "2": "N",
+            "3": "N",
+            "4": "N",
+            "5": "N",
+            "6": "L"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "Cio",
+            "2": "Lui",
+            "3": "Lus",
+            "4": "Muu",
+            "5": "Lum",
+            "6": "Luf",
+            "7": "Kab",
+            "8": "Lush",
+            "9": "Lut",
+            "10": "Lun",
+            "11": "Kas",
+            "12": "Cis"
+        },
+        "verbose": {
+            "1": "Ciongo",
+            "2": "L\u00f9ishi",
+            "3": "Lus\u00f2lo",
+            "4": "M\u00f9uy\u00e0",
+            "5": "Lum\u00f9ng\u00f9l\u00f9",
+            "6": "Lufuimi",
+            "7": "Kab\u00e0l\u00e0sh\u00ecp\u00f9",
+            "8": "L\u00f9sh\u00eck\u00e0",
+            "9": "Lutongolo",
+            "10": "Lung\u00f9di",
+            "11": "Kasw\u00e8k\u00e8s\u00e8",
+            "12": "Cisw\u00e0"
+        },
+        "short": {
+            "1": "C",
+            "2": "L",
+            "3": "L",
+            "4": "M",
+            "5": "L",
+            "6": "L",
+            "7": "K",
+            "8": "L",
+            "9": "L",
+            "10": "L",
+            "11": "K",
+            "12": "C"
+        }
+    }
+}

@@ -1,0 +1,96 @@
+{
+    "number": {
+        "decimal_mark": ",",
+        "thousands_separator": "."
+    },
+    "unit": "{number} {unit}",
+    "money": "{number} {currency}",
+    "date": {
+        "verbose": "l, d F \\d\\e Y",
+        "long": "d F \\d\\e Y",
+        "short": "d\/n\/y"
+    },
+    "time": {
+        "verbose": "H:i:s e",
+        "long": "H:i:s T",
+        "short": "H:i"
+    },
+    "datetime": {
+        "verbose": "l, d F \\d\\e Y \\a \\l\\e\\s H:i:s e",
+        "long": "d F \\d\\e Y \\a \\l\\e\\s H:i:s T",
+        "short": "d\/n\/y H:i"
+    },
+    "weekday": {
+        "long": {
+            "7": "dom",
+            "1": "llu",
+            "2": "mar",
+            "3": "mi\u00e9",
+            "4": "xue",
+            "5": "vie",
+            "6": "s\u00e1b"
+        },
+        "short": {
+            "7": "D",
+            "1": "L",
+            "2": "M",
+            "3": "M",
+            "4": "X",
+            "5": "V",
+            "6": "S"
+        },
+        "verbose": {
+            "7": "domingu",
+            "1": "llunes",
+            "2": "martes",
+            "3": "mi\u00e9rcoles",
+            "4": "xueves",
+            "5": "vienres",
+            "6": "s\u00e1badu"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "Xin",
+            "2": "Feb",
+            "3": "Mar",
+            "4": "Abr",
+            "5": "May",
+            "6": "Xun",
+            "7": "Xnt",
+            "8": "Ago",
+            "9": "Set",
+            "10": "Och",
+            "11": "Pay",
+            "12": "Avi"
+        },
+        "short": {
+            "1": "X",
+            "2": "F",
+            "3": "M",
+            "4": "A",
+            "5": "M",
+            "6": "X",
+            "7": "X",
+            "8": "A",
+            "9": "S",
+            "10": "O",
+            "11": "P",
+            "12": "A"
+        },
+        "verbose": {
+            "1": "xineru",
+            "2": "febreru",
+            "3": "marzu",
+            "4": "abril",
+            "5": "mayu",
+            "6": "xunu",
+            "7": "xunetu",
+            "8": "agostu",
+            "9": "setiembre",
+            "10": "ochobre",
+            "11": "payares",
+            "12": "avientu"
+        }
+    }
+}

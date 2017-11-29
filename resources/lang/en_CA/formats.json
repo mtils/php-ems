@@ -1,0 +1,7 @@
+{
+    "date": {
+        "verbose": "l, F d, Y",
+        "long": "F d, Y",
+        "short": "Y-m-d"
+    }
+}

@@ -1,0 +1,85 @@
+{
+    "date": {
+        "verbose": "l, d F Y",
+        "long": "d F Y",
+        "short": "d\/m\/Y"
+    },
+    "time": {
+        "verbose": "g:i:s a e",
+        "long": "g:i:s a T",
+        "short": "g:i a"
+    },
+    "weekday": {
+        "long": {
+            "7": "Son",
+            "1": "Ma",
+            "2": "De",
+            "3": "Wu",
+            "4": "Do",
+            "5": "Fr",
+            "6": "Sat"
+        },
+        "verbose": {
+            "7": "Sontaxtsees",
+            "1": "Mantaxtsees",
+            "2": "Denstaxtsees",
+            "3": "Wunstaxtsees",
+            "4": "Dondertaxtsees",
+            "5": "Fraitaxtsees",
+            "6": "Satertaxtsees"
+        },
+        "short": {
+            "7": "S",
+            "1": "M",
+            "2": "E",
+            "3": "W",
+            "4": "D",
+            "5": "F",
+            "6": "A"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "Jan",
+            "2": "Feb",
+            "3": "Mar",
+            "4": "Apr",
+            "5": "May",
+            "6": "Jun",
+            "7": "Jul",
+            "8": "Aug",
+            "9": "Sep",
+            "10": "Oct",
+            "11": "Nov",
+            "12": "Dec"
+        },
+        "verbose": {
+            "1": "\u01c3Khanni",
+            "2": "\u01c3Khan\u01c0g\u00f4ab",
+            "3": "\u01c0Khuu\u01c1kh\u00e2b",
+            "4": "\u01c3H\u00f4a\u01c2khaib",
+            "5": "\u01c3Khaits\u00e2b",
+            "6": "Gama\u01c0aeb",
+            "7": "\u01c2Khoesaob",
+            "8": "Ao\u01c1khuum\u00fb\u01c1kh\u00e2b",
+            "9": "Tara\u01c0khuum\u00fb\u01c1kh\u00e2b",
+            "10": "\u01c2N\u00fb\u01c1n\u00e2iseb",
+            "11": "\u01c0Hoo\u01c2gaeb",
+            "12": "H\u00f4asore\u01c1kh\u00e2b"
+        },
+        "short": {
+            "1": "J",
+            "2": "F",
+            "3": "M",
+            "4": "A",
+            "5": "M",
+            "6": "J",
+            "7": "J",
+            "8": "A",
+            "9": "S",
+            "10": "O",
+            "11": "N",
+            "12": "D"
+        }
+    }
+}

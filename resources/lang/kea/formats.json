@@ -1,0 +1,96 @@
+{
+    "number": {
+        "decimal_mark": ",",
+        "thousands_separator": "\u00a0"
+    },
+    "unit": "{number} {unit}",
+    "money": "{number} {currency}",
+    "date": {
+        "verbose": "l, d \\d\\i F \\d\\i Y",
+        "long": "d \\d\\i F \\d\\i Y",
+        "short": "d\/n\/Y"
+    },
+    "time": {
+        "verbose": "H:i:s e",
+        "long": "H:i:s T",
+        "short": "H:i"
+    },
+    "datetime": {
+        "verbose": "l, d \\d\\i F \\d\\i Y H:i:s e",
+        "long": "d \\d\\i F \\d\\i Y H:i:s T",
+        "short": "d\/n\/Y H:i"
+    },
+    "weekday": {
+        "long": {
+            "7": "dum",
+            "1": "sig",
+            "2": "ter",
+            "3": "kua",
+            "4": "kin",
+            "5": "ses",
+            "6": "sab"
+        },
+        "short": {
+            "7": "D",
+            "1": "S",
+            "2": "T",
+            "3": "K",
+            "4": "K",
+            "5": "S",
+            "6": "S"
+        },
+        "verbose": {
+            "7": "dumingu",
+            "1": "sigunda-fera",
+            "2": "tersa-fera",
+            "3": "kuarta-fera",
+            "4": "kinta-fera",
+            "5": "sesta-fera",
+            "6": "s\u00e1badu"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "Jan",
+            "2": "Feb",
+            "3": "Mar",
+            "4": "Abr",
+            "5": "Mai",
+            "6": "Jun",
+            "7": "Jul",
+            "8": "Ago",
+            "9": "Set",
+            "10": "Otu",
+            "11": "Nuv",
+            "12": "Diz"
+        },
+        "short": {
+            "1": "J",
+            "2": "F",
+            "3": "M",
+            "4": "A",
+            "5": "M",
+            "6": "J",
+            "7": "J",
+            "8": "A",
+            "9": "S",
+            "10": "O",
+            "11": "N",
+            "12": "D"
+        },
+        "verbose": {
+            "1": "Janeru",
+            "2": "Febreru",
+            "3": "Marsu",
+            "4": "Abril",
+            "5": "Maiu",
+            "6": "Junhu",
+            "7": "Julhu",
+            "8": "Agostu",
+            "9": "Setenbru",
+            "10": "Otubru",
+            "11": "Nuvenbru",
+            "12": "Dizenbru"
+        }
+    }
+}

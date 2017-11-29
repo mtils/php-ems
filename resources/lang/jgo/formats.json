@@ -1,0 +1,94 @@
+{
+    "number": {
+        "decimal_mark": ",",
+        "thousands_separator": "."
+    },
+    "date": {
+        "verbose": "l, Y F d",
+        "long": "Y F d",
+        "short": "Y-m-d"
+    },
+    "time": {
+        "verbose": "H:i:s e",
+        "long": "H:i:s T",
+        "short": "H:i"
+    },
+    "datetime": {
+        "verbose": "l, Y F d H:i:s e",
+        "long": "Y F d H:i:s T",
+        "short": "Y-m-d H:i"
+    },
+    "weekday": {
+        "long": {
+            "7": "S\u0254\u0301ndi",
+            "1": "M\u0254\u0301ndi",
+            "2": "\u00c1pta M\u0254\u0301ndi",
+            "3": "W\u025b\u0301n\u025bs\u025bd\u025b",
+            "4": "T\u0254\u0301s\u025bd\u025b",
+            "5": "F\u025bl\u00e2y\u025bd\u025b",
+            "6": "S\u00e1sid\u025b"
+        },
+        "short": {
+            "7": "S\u0254\u0301",
+            "1": "M\u0254\u0301",
+            "2": "\u00c1M",
+            "3": "W\u025b\u0301",
+            "4": "T\u0254\u0301",
+            "5": "F\u025b",
+            "6": "S\u00e1"
+        },
+        "verbose": {
+            "7": "S\u0254\u0301ndi",
+            "1": "M\u0254\u0301ndi",
+            "2": "\u00c1pta M\u0254\u0301ndi",
+            "3": "W\u025b\u0301n\u025bs\u025bd\u025b",
+            "4": "T\u0254\u0301s\u025bd\u025b",
+            "5": "F\u025bl\u00e2y\u025bd\u025b",
+            "6": "S\u00e1sid\u025b"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "Ndu\u014bmbi Sa\u014b",
+            "2": "P\u025bsa\u014b P\u025b\u0301p\u00e1",
+            "3": "P\u025bsa\u014b P\u025b\u0301t\u00e1t",
+            "4": "P\u025bsa\u014b P\u025b\u0301n\u025b\u0301kwa",
+            "5": "P\u025bsa\u014b Pataa",
+            "6": "P\u025bsa\u014b P\u025b\u0301n\u025b\u0301nt\u00fak\u00fa",
+            "7": "P\u025bsa\u014b Saamb\u00e1",
+            "8": "P\u025bsa\u014b P\u025b\u0301n\u025b\u0301f\u0254m",
+            "9": "P\u025bsa\u014b P\u025b\u0301n\u025b\u0301pf\u00fa\ua78b\u00fa",
+            "10": "P\u025bsa\u014b N\u025bg\u025b\u0301m",
+            "11": "P\u025bsa\u014b Nts\u0254\u030cpm\u0254\u0301",
+            "12": "P\u025bsa\u014b Nts\u0254\u030cpp\u00e1"
+        },
+        "short": {
+            "1": "1",
+            "2": "2",
+            "3": "3",
+            "4": "4",
+            "5": "5",
+            "6": "6",
+            "7": "7",
+            "8": "8",
+            "9": "9",
+            "10": "10",
+            "11": "11",
+            "12": "12"
+        },
+        "verbose": {
+            "1": "Ndu\u014bmbi Sa\u014b",
+            "2": "P\u025bsa\u014b P\u025b\u0301p\u00e1",
+            "3": "P\u025bsa\u014b P\u025b\u0301t\u00e1t",
+            "4": "P\u025bsa\u014b P\u025b\u0301n\u025b\u0301kwa",
+            "5": "P\u025bsa\u014b Pataa",
+            "6": "P\u025bsa\u014b P\u025b\u0301n\u025b\u0301nt\u00fak\u00fa",
+            "7": "P\u025bsa\u014b Saamb\u00e1",
+            "8": "P\u025bsa\u014b P\u025b\u0301n\u025b\u0301f\u0254m",
+            "9": "P\u025bsa\u014b P\u025b\u0301n\u025b\u0301pf\u00fa\ua78b\u00fa",
+            "10": "P\u025bsa\u014b N\u025bg\u025b\u0301m",
+            "11": "P\u025bsa\u014b Nts\u0254\u030cpm\u0254\u0301",
+            "12": "P\u025bsa\u014b Nts\u0254\u030cpp\u00e1"
+        }
+    }
+}

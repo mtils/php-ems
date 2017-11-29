@@ -1,0 +1,10 @@
+{
+    "number": {
+        "decimal_mark": ".",
+        "thousands_separator": "\u2019"
+    },
+    "date": {
+        "verbose": "l, d F Y",
+        "short": "d.m.y"
+    }
+}

@@ -1,0 +1,75 @@
+{
+    "number": {
+        "decimal_mark": ",",
+        "thousands_separator": "\u00a0"
+    },
+    "date": {
+        "verbose": "l d F Y",
+        "long": "d F Y",
+        "short": "d\/n\/Y"
+    },
+    "time": {
+        "verbose": "H:i:s e",
+        "long": "H:i:s T",
+        "short": "H:i"
+    },
+    "weekday": {
+        "long": {
+            "7": "s\u0254\u0301n",
+            "1": "m\u0254\u0301n",
+            "2": "smb",
+            "3": "sml",
+            "4": "smn",
+            "5": "mbs",
+            "6": "sas"
+        },
+        "verbose": {
+            "7": "s\u0254\u0301nd\u0254",
+            "1": "m\u0254\u0301nd\u0254",
+            "2": "s\u0254\u0301nd\u0254 maf\u00fa m\u00e1ba",
+            "3": "s\u0254\u0301nd\u0254 maf\u00fa m\u00e1lal",
+            "4": "s\u0254\u0301nd\u0254 maf\u00fa m\u00e1na",
+            "5": "mab\u00e1g\u00e1 m\u00e1 sukul",
+            "6": "s\u00e1sadi"
+        },
+        "short": {
+            "7": "s",
+            "1": "m",
+            "2": "s",
+            "3": "s",
+            "4": "s",
+            "5": "m",
+            "6": "s"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "ng1",
+            "2": "ng2",
+            "3": "ng3",
+            "4": "ng4",
+            "5": "ng5",
+            "6": "ng6",
+            "7": "ng7",
+            "8": "ng8",
+            "9": "ng9",
+            "10": "ng10",
+            "11": "ng11",
+            "12": "kris"
+        },
+        "verbose": {
+            "1": "ngw\u025bn mat\u00e1hra",
+            "2": "ngw\u025bn \u0144mba",
+            "3": "ngw\u025bn \u0144lal",
+            "4": "ngw\u025bn \u0144na",
+            "5": "ngw\u025bn \u0144tan",
+            "6": "ngw\u025bn \u0144tu\u00f3",
+            "7": "ngw\u025bn h\u025bmbu\u025br\u00ed",
+            "8": "ngw\u025bn l\u0254mbi",
+            "9": "ngw\u025bn r\u025bbvu\u00e2",
+            "10": "ngw\u025bn wum",
+            "11": "ngw\u025bn wum nav\u01d4r",
+            "12": "kr\u00edsimin"
+        }
+    }
+}

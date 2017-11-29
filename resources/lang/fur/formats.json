@@ -1,0 +1,90 @@
+{
+    "number": {
+        "decimal_mark": ",",
+        "thousands_separator": "."
+    },
+    "money": "{number} {currency}",
+    "date": {
+        "verbose": "l d \\d\\i F \\d\\a\\l Y",
+        "long": "d \\d\\i F \\d\\a\\l Y",
+        "short": "d\/m\/y"
+    },
+    "time": {
+        "verbose": "H:i:s e",
+        "long": "H:i:s T",
+        "short": "H:i"
+    },
+    "weekday": {
+        "long": {
+            "7": "dom",
+            "1": "lun",
+            "2": "mar",
+            "3": "mie",
+            "4": "joi",
+            "5": "vin",
+            "6": "sab"
+        },
+        "short": {
+            "7": "D",
+            "1": "L",
+            "2": "M",
+            "3": "M",
+            "4": "J",
+            "5": "V",
+            "6": "S"
+        },
+        "verbose": {
+            "7": "domenie",
+            "1": "lunis",
+            "2": "martars",
+            "3": "miercus",
+            "4": "joibe",
+            "5": "vinars",
+            "6": "sabide"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "Zen",
+            "2": "Fev",
+            "3": "Mar",
+            "4": "Avr",
+            "5": "Mai",
+            "6": "Jug",
+            "7": "Lui",
+            "8": "Avo",
+            "9": "Set",
+            "10": "Otu",
+            "11": "Nov",
+            "12": "Dic"
+        },
+        "short": {
+            "1": "Z",
+            "2": "F",
+            "3": "M",
+            "4": "A",
+            "5": "M",
+            "6": "J",
+            "7": "L",
+            "8": "A",
+            "9": "S",
+            "10": "O",
+            "11": "N",
+            "12": "D"
+        },
+        "verbose": {
+            "1": "Zen\u00e2r",
+            "2": "Fevr\u00e2r",
+            "3": "Mar\u00e7",
+            "4": "Avr\u00eel",
+            "5": "Mai",
+            "6": "Jugn",
+            "7": "Lui",
+            "8": "Avost",
+            "9": "Setembar",
+            "10": "Otubar",
+            "11": "Novembar",
+            "12": "Dicembar"
+        }
+    }
+}

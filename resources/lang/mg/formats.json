@@ -1,0 +1,95 @@
+{
+    "number": {
+        "decimal_mark": ".",
+        "thousands_separator": ","
+    },
+    "money": "{number} {currency}",
+    "date": {
+        "verbose": "l d F Y",
+        "long": "d F Y",
+        "short": "Y-m-d"
+    },
+    "time": {
+        "verbose": "H:i:s e",
+        "long": "H:i:s T",
+        "short": "H:i"
+    },
+    "datetime": {
+        "verbose": "l d F Y H:i:s e",
+        "long": "d F Y H:i:s T",
+        "short": "Y-m-d H:i"
+    },
+    "weekday": {
+        "long": {
+            "7": "Alah",
+            "1": "Alats",
+            "2": "Tal",
+            "3": "Alar",
+            "4": "Alak",
+            "5": "Zom",
+            "6": "Asab"
+        },
+        "short": {
+            "7": "A",
+            "1": "A",
+            "2": "T",
+            "3": "A",
+            "4": "A",
+            "5": "Z",
+            "6": "A"
+        },
+        "verbose": {
+            "7": "Alahady",
+            "1": "Alatsinainy",
+            "2": "Talata",
+            "3": "Alarobia",
+            "4": "Alakamisy",
+            "5": "Zoma",
+            "6": "Asabotsy"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "Jan",
+            "2": "Feb",
+            "3": "Mar",
+            "4": "Apr",
+            "5": "Mey",
+            "6": "Jon",
+            "7": "Jol",
+            "8": "Aog",
+            "9": "Sep",
+            "10": "Okt",
+            "11": "Nov",
+            "12": "Des"
+        },
+        "short": {
+            "1": "J",
+            "2": "F",
+            "3": "M",
+            "4": "A",
+            "5": "M",
+            "6": "J",
+            "7": "J",
+            "8": "A",
+            "9": "S",
+            "10": "O",
+            "11": "N",
+            "12": "D"
+        },
+        "verbose": {
+            "1": "Janoary",
+            "2": "Febroary",
+            "3": "Martsa",
+            "4": "Aprily",
+            "5": "Mey",
+            "6": "Jona",
+            "7": "Jolay",
+            "8": "Aogositra",
+            "9": "Septambra",
+            "10": "Oktobra",
+            "11": "Novambra",
+            "12": "Desambra"
+        }
+    }
+}

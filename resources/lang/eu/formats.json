@@ -1,0 +1,96 @@
+{
+    "number": {
+        "decimal_mark": ",",
+        "thousands_separator": "."
+    },
+    "unit": "{number} {unit}",
+    "money": "{number} {currency}",
+    "date": {
+        "verbose": "Y(\\e)\\k\\o F d, l",
+        "long": "Y(\\e)\\k\\o F d",
+        "short": "y\/n\/d"
+    },
+    "time": {
+        "verbose": "H:i:s (e)",
+        "long": "H:i:s (T)",
+        "short": "H:i"
+    },
+    "datetime": {
+        "verbose": "Y(\\e)\\k\\o F d, l H:i:s (e)",
+        "long": "Y(\\e)\\k\\o F d H:i:s (T)",
+        "short": "y\/n\/d H:i"
+    },
+    "weekday": {
+        "long": {
+            "7": "ig.",
+            "1": "al.",
+            "2": "ar.",
+            "3": "az.",
+            "4": "og.",
+            "5": "or.",
+            "6": "lr."
+        },
+        "short": {
+            "7": "I",
+            "1": "A",
+            "2": "A",
+            "3": "A",
+            "4": "O",
+            "5": "O",
+            "6": "L"
+        },
+        "verbose": {
+            "7": "Igandea",
+            "1": "Astelehena",
+            "2": "Asteartea",
+            "3": "Asteazkena",
+            "4": "Osteguna",
+            "5": "Ostirala",
+            "6": "Larunbata"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "urt.",
+            "2": "ots.",
+            "3": "mar.",
+            "4": "api.",
+            "5": "mai.",
+            "6": "eka.",
+            "7": "uzt.",
+            "8": "abu.",
+            "9": "ira.",
+            "10": "urr.",
+            "11": "aza.",
+            "12": "abe."
+        },
+        "short": {
+            "1": "U",
+            "2": "O",
+            "3": "M",
+            "4": "A",
+            "5": "M",
+            "6": "E",
+            "7": "U",
+            "8": "A",
+            "9": "I",
+            "10": "U",
+            "11": "A",
+            "12": "A"
+        },
+        "verbose": {
+            "1": "urtarrila",
+            "2": "Otsaila",
+            "3": "Martxoa",
+            "4": "Apirila",
+            "5": "Maiatza",
+            "6": "Ekaina",
+            "7": "Uztaila",
+            "8": "Abuztua",
+            "9": "Iraila",
+            "10": "Urria",
+            "11": "Azaroa",
+            "12": "Abendua"
+        }
+    }
+}

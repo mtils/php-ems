@@ -1,0 +1,8 @@
+{
+    "unit": "{number} {unit}",
+    "date": {
+        "verbose": "l, d F Y",
+        "long": "d F Y",
+        "short": "d\/m\/Y"
+    }
+}

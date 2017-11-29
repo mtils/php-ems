@@ -1,0 +1,96 @@
+{
+    "number": {
+        "decimal_mark": ",",
+        "thousands_separator": "."
+    },
+    "unit": "{number} {unit}",
+    "money": "{number} {currency}",
+    "date": {
+        "verbose": "d F Y l",
+        "long": "d F Y",
+        "short": "d.m.Y"
+    },
+    "time": {
+        "verbose": "H:i:s e",
+        "long": "H:i:s T",
+        "short": "H:i"
+    },
+    "datetime": {
+        "verbose": "d F Y l H:i:s e",
+        "long": "d F Y H:i:s T",
+        "short": "d.m.Y H:i"
+    },
+    "weekday": {
+        "long": {
+            "7": "Paz",
+            "1": "Pzt",
+            "2": "Sal",
+            "3": "\u00c7ar",
+            "4": "Per",
+            "5": "Cum",
+            "6": "Cmt"
+        },
+        "short": {
+            "7": "P",
+            "1": "P",
+            "2": "S",
+            "3": "\u00c7",
+            "4": "P",
+            "5": "C",
+            "6": "C"
+        },
+        "verbose": {
+            "7": "Pazar",
+            "1": "Pazartesi",
+            "2": "Sal\u0131",
+            "3": "\u00c7ar\u015famba",
+            "4": "Per\u015fembe",
+            "5": "Cuma",
+            "6": "Cumartesi"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "Oca",
+            "2": "\u015eub",
+            "3": "Mar",
+            "4": "Nis",
+            "5": "May",
+            "6": "Haz",
+            "7": "Tem",
+            "8": "A\u011fu",
+            "9": "Eyl",
+            "10": "Eki",
+            "11": "Kas",
+            "12": "Ara"
+        },
+        "short": {
+            "1": "O",
+            "2": "\u015e",
+            "3": "M",
+            "4": "N",
+            "5": "M",
+            "6": "H",
+            "7": "T",
+            "8": "A",
+            "9": "E",
+            "10": "E",
+            "11": "K",
+            "12": "A"
+        },
+        "verbose": {
+            "1": "Ocak",
+            "2": "\u015eubat",
+            "3": "Mart",
+            "4": "Nisan",
+            "5": "May\u0131s",
+            "6": "Haziran",
+            "7": "Temmuz",
+            "8": "A\u011fustos",
+            "9": "Eyl\u00fcl",
+            "10": "Ekim",
+            "11": "Kas\u0131m",
+            "12": "Aral\u0131k"
+        }
+    }
+}

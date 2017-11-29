@@ -5,7 +5,7 @@ namespace Ems\Core\Support;
 use Ems\Contracts\Core\Renderer;
 
 /**
- * @see Ems\Contracts\Core\Renderable
+ * @see \Ems\Contracts\Core\Renderable
  **/
 trait RenderableTrait
 {

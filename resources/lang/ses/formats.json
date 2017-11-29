@@ -1,0 +1,88 @@
+{
+    "number": {
+        "thousands_separator": "\u00a0"
+    },
+    "date": {
+        "verbose": "l d F Y",
+        "long": "d F Y",
+        "short": "d\/n\/Y"
+    },
+    "time": {
+        "verbose": "H:i:s e",
+        "long": "H:i:s T",
+        "short": "H:i"
+    },
+    "weekday": {
+        "long": {
+            "7": "Alh",
+            "1": "Ati",
+            "2": "Ata",
+            "3": "Ala",
+            "4": "Alm",
+            "5": "Alz",
+            "6": "Asi"
+        },
+        "verbose": {
+            "7": "Alhadi",
+            "1": "Atinni",
+            "2": "Atalaata",
+            "3": "Alarba",
+            "4": "Alhamiisa",
+            "5": "Alzuma",
+            "6": "Asibti"
+        },
+        "short": {
+            "7": "H",
+            "1": "T",
+            "2": "T",
+            "3": "L",
+            "4": "L",
+            "5": "L",
+            "6": "S"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "\u017dan",
+            "2": "Fee",
+            "3": "Mar",
+            "4": "Awi",
+            "5": "Me",
+            "6": "\u017duw",
+            "7": "\u017duy",
+            "8": "Ut",
+            "9": "Sek",
+            "10": "Okt",
+            "11": "Noo",
+            "12": "Dee"
+        },
+        "verbose": {
+            "1": "\u017danwiye",
+            "2": "Feewiriye",
+            "3": "Marsi",
+            "4": "Awiril",
+            "5": "Me",
+            "6": "\u017duwe\u014b",
+            "7": "\u017duyye",
+            "8": "Ut",
+            "9": "Sektanbur",
+            "10": "Oktoobur",
+            "11": "Noowanbur",
+            "12": "Deesanbur"
+        },
+        "short": {
+            "1": "\u017d",
+            "2": "F",
+            "3": "M",
+            "4": "A",
+            "5": "M",
+            "6": "\u017d",
+            "7": "\u017d",
+            "8": "U",
+            "9": "S",
+            "10": "O",
+            "11": "N",
+            "12": "D"
+        }
+    }
+}

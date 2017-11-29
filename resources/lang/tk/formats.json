@@ -1,0 +1,91 @@
+{
+    "number": {
+        "decimal_mark": ",",
+        "thousands_separator": "\u00a0"
+    },
+    "unit": "{number} {unit}",
+    "money": "{number} {currency}",
+    "date": {
+        "verbose": "d F Y l",
+        "long": "d F Y",
+        "short": "d.m.Y"
+    },
+    "time": {
+        "verbose": "H:i:s e",
+        "long": "H:i:s T",
+        "short": "H:i"
+    },
+    "weekday": {
+        "long": {
+            "7": "\u00fdb",
+            "1": "db",
+            "2": "sb",
+            "3": "\u00e7b",
+            "4": "pb",
+            "5": "an",
+            "6": "\u015fb"
+        },
+        "verbose": {
+            "7": "\u00fdek\u015fenbe",
+            "1": "du\u015fenbe",
+            "2": "si\u015fenbe",
+            "3": "\u00e7ar\u015fenbe",
+            "4": "pen\u015fenbe",
+            "5": "anna",
+            "6": "\u015fenbe"
+        },
+        "short": {
+            "7": "\u00dd",
+            "1": "D",
+            "2": "S",
+            "3": "\u00c7",
+            "4": "P",
+            "5": "A",
+            "6": "\u015e"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "\u00fdan",
+            "2": "few",
+            "3": "mart",
+            "4": "apr",
+            "5": "ma\u00fd",
+            "6": "i\u00fdun",
+            "7": "i\u00fdul",
+            "8": "awg",
+            "9": "sen",
+            "10": "okt",
+            "11": "no\u00fd",
+            "12": "dek"
+        },
+        "verbose": {
+            "1": "\u00fdanwar",
+            "2": "fewral",
+            "3": "mart",
+            "4": "aprel",
+            "5": "ma\u00fd",
+            "6": "i\u00fdun",
+            "7": "i\u00fdul",
+            "8": "awgust",
+            "9": "sent\u00fdabr",
+            "10": "okt\u00fdabr",
+            "11": "no\u00fdabr",
+            "12": "dekabr"
+        },
+        "short": {
+            "1": "\u00dd",
+            "2": "F",
+            "3": "M",
+            "4": "A",
+            "5": "M",
+            "6": "I",
+            "7": "I",
+            "8": "A",
+            "9": "S",
+            "10": "O",
+            "11": "N",
+            "12": "D"
+        }
+    }
+}

@@ -1,0 +1,10 @@
+{
+    "date": {
+        "short": "m\/d\/y"
+    },
+    "time": {
+        "verbose": "g:i:s a e",
+        "long": "g:i:s a T",
+        "short": "g:i a"
+    }
+}

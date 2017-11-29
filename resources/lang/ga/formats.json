@@ -1,0 +1,96 @@
+{
+    "number": {
+        "decimal_mark": ".",
+        "thousands_separator": ","
+    },
+    "unit": "{number} {unit}",
+    "money": "{number} {currency}",
+    "date": {
+        "verbose": "l d F Y",
+        "long": "d F Y",
+        "short": "d\/m\/Y"
+    },
+    "time": {
+        "verbose": "H:i:s e",
+        "long": "H:i:s T",
+        "short": "H:i"
+    },
+    "datetime": {
+        "verbose": "l d F Y H:i:s e",
+        "long": "d F Y H:i:s T",
+        "short": "d\/m\/Y H:i"
+    },
+    "weekday": {
+        "long": {
+            "7": "Domh",
+            "1": "Luan",
+            "2": "M\u00e1irt",
+            "3": "C\u00e9ad",
+            "4": "D\u00e9ar",
+            "5": "Aoine",
+            "6": "Sath"
+        },
+        "short": {
+            "7": "D",
+            "1": "L",
+            "2": "M",
+            "3": "C",
+            "4": "D",
+            "5": "A",
+            "6": "S"
+        },
+        "verbose": {
+            "7": "D\u00e9 Domhnaigh",
+            "1": "D\u00e9 Luain",
+            "2": "D\u00e9 M\u00e1irt",
+            "3": "D\u00e9 C\u00e9adaoin",
+            "4": "D\u00e9ardaoin",
+            "5": "D\u00e9 hAoine",
+            "6": "D\u00e9 Sathairn"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "Ean",
+            "2": "Feabh",
+            "3": "M\u00e1rta",
+            "4": "Aib",
+            "5": "Beal",
+            "6": "Meith",
+            "7": "I\u00fail",
+            "8": "L\u00fan",
+            "9": "MF\u00f3mh",
+            "10": "DF\u00f3mh",
+            "11": "Samh",
+            "12": "Noll"
+        },
+        "short": {
+            "1": "E",
+            "2": "F",
+            "3": "M",
+            "4": "A",
+            "5": "B",
+            "6": "M",
+            "7": "I",
+            "8": "L",
+            "9": "M",
+            "10": "D",
+            "11": "S",
+            "12": "N"
+        },
+        "verbose": {
+            "1": "Ean\u00e1ir",
+            "2": "Feabhra",
+            "3": "M\u00e1rta",
+            "4": "Aibre\u00e1n",
+            "5": "Bealtaine",
+            "6": "Meitheamh",
+            "7": "I\u00fail",
+            "8": "L\u00fanasa",
+            "9": "Me\u00e1n F\u00f3mhair",
+            "10": "Deireadh F\u00f3mhair",
+            "11": "Samhain",
+            "12": "Nollaig"
+        }
+    }
+}

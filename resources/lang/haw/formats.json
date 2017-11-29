@@ -1,0 +1,95 @@
+{
+    "number": {
+        "decimal_mark": ".",
+        "thousands_separator": ","
+    },
+    "money": "{number} {currency}",
+    "date": {
+        "verbose": "l, d F Y",
+        "long": "d F Y",
+        "short": "d\/n\/y"
+    },
+    "time": {
+        "verbose": "g:i:s a e",
+        "long": "g:i:s a T",
+        "short": "g:i a"
+    },
+    "datetime": {
+        "verbose": "l, d F Y g:i:s a e",
+        "long": "d F Y g:i:s a T",
+        "short": "d\/n\/y g:i a"
+    },
+    "weekday": {
+        "long": {
+            "7": "LP",
+            "1": "P1",
+            "2": "P2",
+            "3": "P3",
+            "4": "P4",
+            "5": "P5",
+            "6": "P6"
+        },
+        "short": {
+            "7": "S",
+            "1": "M",
+            "2": "T",
+            "3": "W",
+            "4": "T",
+            "5": "F",
+            "6": "S"
+        },
+        "verbose": {
+            "7": "L\u0101pule",
+            "1": "Po\u02bbakahi",
+            "2": "Po\u02bbalua",
+            "3": "Po\u02bbakolu",
+            "4": "Po\u02bbah\u0101",
+            "5": "Po\u02bbalima",
+            "6": "Po\u02bbaono"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "Ian.",
+            "2": "Pep.",
+            "3": "Mal.",
+            "4": "\u02bbAp.",
+            "5": "Mei",
+            "6": "Iun.",
+            "7": "Iul.",
+            "8": "\u02bbAu.",
+            "9": "Kep.",
+            "10": "\u02bbOk.",
+            "11": "Now.",
+            "12": "Kek."
+        },
+        "short": {
+            "1": "1",
+            "2": "2",
+            "3": "3",
+            "4": "4",
+            "5": "5",
+            "6": "6",
+            "7": "7",
+            "8": "8",
+            "9": "9",
+            "10": "10",
+            "11": "11",
+            "12": "12"
+        },
+        "verbose": {
+            "1": "Ianuali",
+            "2": "Pepeluali",
+            "3": "Malaki",
+            "4": "\u02bbApelila",
+            "5": "Mei",
+            "6": "Iune",
+            "7": "Iulai",
+            "8": "\u02bbAukake",
+            "9": "Kepakemapa",
+            "10": "\u02bbOkakopa",
+            "11": "Nowemapa",
+            "12": "Kekemapa"
+        }
+    }
+}

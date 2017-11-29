@@ -1,0 +1,96 @@
+{
+    "number": {
+        "decimal_mark": ".",
+        "thousands_separator": ","
+    },
+    "unit": "{number} {unit}",
+    "money": "{number} {currency}",
+    "date": {
+        "verbose": "l, d\\m\\h F Y",
+        "long": "d\\m\\h F Y",
+        "short": "d\/m\/Y"
+    },
+    "time": {
+        "verbose": "H:i:s e",
+        "long": "H:i:s T",
+        "short": "H:i"
+    },
+    "datetime": {
+        "verbose": "l, d\\m\\h F Y H:i:s e",
+        "long": "d\\m\\h F Y H:i:s T",
+        "short": "d\/m\/Y H:i"
+    },
+    "weekday": {
+        "long": {
+            "7": "DiD",
+            "1": "DiL",
+            "2": "DiM",
+            "3": "DiC",
+            "4": "Dia",
+            "5": "Dih",
+            "6": "DiS"
+        },
+        "short": {
+            "7": "D",
+            "1": "L",
+            "2": "M",
+            "3": "C",
+            "4": "A",
+            "5": "H",
+            "6": "S"
+        },
+        "verbose": {
+            "7": "DiD\u00f2mhnaich",
+            "1": "DiLuain",
+            "2": "DiM\u00e0irt",
+            "3": "DiCiadain",
+            "4": "DiarDaoin",
+            "5": "DihAoine",
+            "6": "DiSathairne"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "Faoi",
+            "2": "Gearr",
+            "3": "M\u00e0rt",
+            "4": "Gibl",
+            "5": "C\u00e8it",
+            "6": "\u00d2gmh",
+            "7": "Iuch",
+            "8": "L\u00f9na",
+            "9": "Sult",
+            "10": "D\u00e0mh",
+            "11": "Samh",
+            "12": "D\u00f9bh"
+        },
+        "short": {
+            "1": "F",
+            "2": "G",
+            "3": "M",
+            "4": "G",
+            "5": "C",
+            "6": "\u00d2",
+            "7": "I",
+            "8": "L",
+            "9": "S",
+            "10": "D",
+            "11": "S",
+            "12": "D"
+        },
+        "verbose": {
+            "1": "Am Faoilleach",
+            "2": "An Gearran",
+            "3": "Am M\u00e0rt",
+            "4": "An Giblean",
+            "5": "An C\u00e8itean",
+            "6": "An t-\u00d2gmhios",
+            "7": "An t-Iuchar",
+            "8": "An L\u00f9nastal",
+            "9": "An t-Sultain",
+            "10": "An D\u00e0mhair",
+            "11": "An t-Samhain",
+            "12": "An D\u00f9bhlachd"
+        }
+    }
+}

@@ -1,0 +1,96 @@
+{
+    "number": {
+        "decimal_mark": ",",
+        "thousands_separator": "."
+    },
+    "unit": "{number} {unit}",
+    "money": "{number} {currency}",
+    "date": {
+        "verbose": "l, d. F Y",
+        "long": "d. F Y",
+        "short": "d.m.y"
+    },
+    "time": {
+        "verbose": "H:i:s e",
+        "long": "H:i:s T",
+        "short": "H:i"
+    },
+    "datetime": {
+        "verbose": "l, d. F Y \\k\\l. H:i:s e",
+        "long": "d. F Y \\k\\l. H:i:s T",
+        "short": "d.m.y, H:i"
+    },
+    "weekday": {
+        "long": {
+            "7": "sun",
+            "1": "m\u00e1n",
+            "2": "t\u00fds",
+            "3": "mik",
+            "4": "h\u00f3s",
+            "5": "fr\u00ed",
+            "6": "ley"
+        },
+        "short": {
+            "7": "S",
+            "1": "M",
+            "2": "T",
+            "3": "M",
+            "4": "H",
+            "5": "F",
+            "6": "L"
+        },
+        "verbose": {
+            "7": "sunnudagur",
+            "1": "m\u00e1nadagur",
+            "2": "t\u00fdsdagur",
+            "3": "mikudagur",
+            "4": "h\u00f3sdagur",
+            "5": "fr\u00edggjadagur",
+            "6": "leygardagur"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "jan",
+            "2": "feb",
+            "3": "mar",
+            "4": "apr",
+            "5": "mai",
+            "6": "jun",
+            "7": "jul",
+            "8": "aug",
+            "9": "sep",
+            "10": "okt",
+            "11": "nov",
+            "12": "des"
+        },
+        "short": {
+            "1": "J",
+            "2": "F",
+            "3": "M",
+            "4": "A",
+            "5": "M",
+            "6": "J",
+            "7": "J",
+            "8": "A",
+            "9": "S",
+            "10": "O",
+            "11": "N",
+            "12": "D"
+        },
+        "verbose": {
+            "1": "januar",
+            "2": "februar",
+            "3": "mars",
+            "4": "apr\u00edl",
+            "5": "mai",
+            "6": "juni",
+            "7": "juli",
+            "8": "august",
+            "9": "september",
+            "10": "oktober",
+            "11": "november",
+            "12": "desember"
+        }
+    }
+}

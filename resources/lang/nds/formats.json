@@ -1,0 +1,96 @@
+{
+    "number": {
+        "decimal_mark": ",",
+        "thousands_separator": "."
+    },
+    "unit": "{number} {unit}",
+    "money": "{number} {currency}",
+    "date": {
+        "verbose": "l, \\d\\e d. F Y",
+        "long": "d. F Y",
+        "short": "d.m.y"
+    },
+    "time": {
+        "verbose": "\\K\\l\\o\\c\\k G.i:s (e)",
+        "long": "\\K\\l\\o\\c\\k G.i:s (T)",
+        "short": "\\K\\l. G.i"
+    },
+    "datetime": {
+        "verbose": "l, \\d\\e d. F Y, \\K\\l\\o\\c\\k G.i:s (e)",
+        "long": "d. F Y, \\K\\l\\o\\c\\k G.i:s (T)",
+        "short": "d.m.y, \\K\\l. G.i"
+    },
+    "weekday": {
+        "long": {
+            "7": "S\u00fc.",
+            "1": "Ma.",
+            "2": "Di.",
+            "3": "Mi.",
+            "4": "Du.",
+            "5": "Fr.",
+            "6": "Sa."
+        },
+        "short": {
+            "7": "S",
+            "1": "M",
+            "2": "D",
+            "3": "M",
+            "4": "D",
+            "5": "F",
+            "6": "S"
+        },
+        "verbose": {
+            "7": "S\u00fcnndag",
+            "1": "Maandag",
+            "2": "Dingsdag",
+            "3": "Middeweken",
+            "4": "Dunnersdag",
+            "5": "Freedag",
+            "6": "S\u00fcnnavend"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "Jan.",
+            "2": "Feb.",
+            "3": "M\u00e4rz",
+            "4": "Apr.",
+            "5": "Mai",
+            "6": "Juni",
+            "7": "Juli",
+            "8": "Aug.",
+            "9": "Sep.",
+            "10": "Okt.",
+            "11": "Nov.",
+            "12": "Dez."
+        },
+        "short": {
+            "1": "J",
+            "2": "F",
+            "3": "M",
+            "4": "A",
+            "5": "M",
+            "6": "J",
+            "7": "J",
+            "8": "A",
+            "9": "S",
+            "10": "O",
+            "11": "N",
+            "12": "D"
+        },
+        "verbose": {
+            "1": "Januaar",
+            "2": "Februaar",
+            "3": "M\u00e4rz",
+            "4": "April",
+            "5": "Mai",
+            "6": "Juni",
+            "7": "Juli",
+            "8": "August",
+            "9": "September",
+            "10": "Oktover",
+            "11": "November",
+            "12": "Dezember"
+        }
+    }
+}

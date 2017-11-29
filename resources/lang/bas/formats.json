@@ -1,0 +1,89 @@
+{
+    "number": {
+        "decimal_mark": ",",
+        "thousands_separator": "\u00a0"
+    },
+    "date": {
+        "verbose": "l d F Y",
+        "long": "d F Y",
+        "short": "d\/n\/Y"
+    },
+    "time": {
+        "verbose": "H:i:s e",
+        "long": "H:i:s T",
+        "short": "H:i"
+    },
+    "weekday": {
+        "long": {
+            "7": "n\u0254y",
+            "1": "nja",
+            "2": "uum",
+            "3": "\u014bge",
+            "4": "mb\u0254",
+            "5": "k\u0254\u0254",
+            "6": "jon"
+        },
+        "verbose": {
+            "7": "\u014bgw\u00e0 n\u0254\u0302y",
+            "1": "\u014bgw\u00e0 nja\u014bgumba",
+            "2": "\u014bgw\u00e0 \u00fbm",
+            "3": "\u014bgw\u00e0 \u014bg\u00ea",
+            "4": "\u014bgw\u00e0 mb\u0254k",
+            "5": "\u014bgw\u00e0 k\u0254\u0254",
+            "6": "\u014bgw\u00e0 j\u00f4n"
+        },
+        "short": {
+            "7": "n",
+            "1": "n",
+            "2": "u",
+            "3": "\u014b",
+            "4": "m",
+            "5": "k",
+            "6": "j"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "k\u0254n",
+            "2": "mac",
+            "3": "mat",
+            "4": "mto",
+            "5": "mpu",
+            "6": "hil",
+            "7": "nje",
+            "8": "hik",
+            "9": "dip",
+            "10": "bio",
+            "11": "may",
+            "12": "li\u0253"
+        },
+        "verbose": {
+            "1": "K\u0254nd\u0254\u014b",
+            "2": "M\u00e0c\u025b\u0302l",
+            "3": "M\u00e0t\u00f9mb",
+            "4": "M\u00e0top",
+            "5": "M\u0300puy\u025b",
+            "6": "H\u00ecl\u00f2nd\u025b\u0300",
+            "7": "Nj\u00e8b\u00e0",
+            "8": "H\u00ecka\u014b",
+            "9": "D\u00ecp\u0254\u0300s",
+            "10": "B\u00ec\u00f2\u00f4m",
+            "11": "M\u00e0y\u025bs\u00e8p",
+            "12": "L\u00ecbuy li \u0144y\u00e8e"
+        },
+        "short": {
+            "1": "k",
+            "2": "m",
+            "3": "m",
+            "4": "m",
+            "5": "m",
+            "6": "h",
+            "7": "n",
+            "8": "h",
+            "9": "d",
+            "10": "b",
+            "11": "m",
+            "12": "l"
+        }
+    }
+}

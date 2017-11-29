@@ -1,0 +1,6 @@
+{
+    "money": "{currency} {number}",
+    "date": {
+        "short": "d\/m\/y"
+    }
+}

@@ -1,0 +1,89 @@
+{
+    "number": {
+        "decimal_mark": ",",
+        "thousands_separator": "\u00a0"
+    },
+    "date": {
+        "verbose": "l d F Y",
+        "long": "d F Y",
+        "short": "d\/n\/Y"
+    },
+    "time": {
+        "verbose": "H:i:s e",
+        "long": "H:i:s T",
+        "short": "H:i"
+    },
+    "weekday": {
+        "long": {
+            "7": "s\u0254\u0301n",
+            "1": "m\u0254\u0301n",
+            "2": "smb",
+            "3": "sml",
+            "4": "smn",
+            "5": "f\u00fal",
+            "6": "s\u00e9r"
+        },
+        "verbose": {
+            "7": "s\u0254\u0301nd\u0254",
+            "1": "m\u0254\u0301ndi",
+            "2": "s\u0254\u0301nd\u0254 m\u0259l\u00fa m\u0259\u0301b\u025b\u030c",
+            "3": "s\u0254\u0301nd\u0254 m\u0259l\u00fa m\u0259\u0301l\u025b\u0301",
+            "4": "s\u0254\u0301nd\u0254 m\u0259l\u00fa m\u0259\u0301nyi",
+            "5": "f\u00falad\u00e9",
+            "6": "s\u00e9rad\u00e9"
+        },
+        "short": {
+            "7": "s",
+            "1": "m",
+            "2": "s",
+            "3": "s",
+            "4": "s",
+            "5": "f",
+            "6": "s"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "ngo",
+            "2": "ngb",
+            "3": "ngl",
+            "4": "ngn",
+            "5": "ngt",
+            "6": "ngs",
+            "7": "ngz",
+            "8": "ngm",
+            "9": "nge",
+            "10": "nga",
+            "11": "ngad",
+            "12": "ngab"
+        },
+        "verbose": {
+            "1": "ng\u0254n os\u00fa",
+            "2": "ng\u0254n b\u025b\u030c",
+            "3": "ng\u0254n l\u00e1la",
+            "4": "ng\u0254n nyina",
+            "5": "ng\u0254n t\u00e1na",
+            "6": "ng\u0254n sam\u0259na",
+            "7": "ng\u0254n zamgb\u00e1la",
+            "8": "ng\u0254n mwom",
+            "9": "ng\u0254n ebul\u00fa",
+            "10": "ng\u0254n aw\u00f3m",
+            "11": "ng\u0254n aw\u00f3m ai dzi\u00e1",
+            "12": "ng\u0254n aw\u00f3m ai b\u025b\u030c"
+        },
+        "short": {
+            "1": "o",
+            "2": "b",
+            "3": "l",
+            "4": "n",
+            "5": "t",
+            "6": "s",
+            "7": "z",
+            "8": "m",
+            "9": "e",
+            "10": "a",
+            "11": "d",
+            "12": "b"
+        }
+    }
+}

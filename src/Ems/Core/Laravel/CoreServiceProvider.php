@@ -3,7 +3,6 @@
 namespace Ems\Core\Laravel;
 
 use Ems\Contracts\Core\TextProvider;
-use Ems\Core\Laravel\TranslatorTextProvider;
 
 class CoreServiceProvider extends BootstrapperAsServiceProvider
 {

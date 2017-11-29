@@ -1,0 +1,43 @@
+{
+    "number": {
+        "decimal_mark": ".",
+        "thousands_separator": ","
+    },
+    "date": {
+        "verbose": "l, d F Y",
+        "long": "d F Y",
+        "short": "d\/m\/Y"
+    },
+    "time": {
+        "verbose": "g:i:s a e",
+        "long": "g:i:s a T",
+        "short": "g:i a"
+    },
+    "weekday": {
+        "verbose": {
+            "7": "lahadi",
+            "1": "t\u025b\u025bn\u025b\u025b",
+            "2": "talata",
+            "3": "alaba",
+            "4": "aimisa",
+            "5": "aijima",
+            "6": "si\u0253iti"
+        }
+    },
+    "month": {
+        "verbose": {
+            "1": "luukao kem\u00e3",
+            "2": "\u0253anda\u0253u",
+            "3": "v\u0254\u0254",
+            "4": "fulu",
+            "5": "goo",
+            "6": "6",
+            "7": "7",
+            "8": "k\u0254nde",
+            "9": "saah",
+            "10": "galo",
+            "11": "kenpkato \u0253olol\u0254",
+            "12": "luukao l\u0254ma"
+        }
+    }
+}

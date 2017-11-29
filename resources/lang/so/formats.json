@@ -1,0 +1,89 @@
+{
+    "number": {
+        "decimal_mark": ".",
+        "thousands_separator": ","
+    },
+    "date": {
+        "verbose": "l, F d, Y",
+        "long": "d F Y",
+        "short": "d\/m\/y"
+    },
+    "time": {
+        "verbose": "g:i:s a e",
+        "long": "g:i:s a T",
+        "short": "g:i a"
+    },
+    "weekday": {
+        "long": {
+            "7": "Axd",
+            "1": "Isn",
+            "2": "Tal",
+            "3": "Arb",
+            "4": "Kha",
+            "5": "Jim",
+            "6": "Sab"
+        },
+        "short": {
+            "7": "A",
+            "1": "I",
+            "2": "T",
+            "3": "A",
+            "4": "Kh",
+            "5": "J",
+            "6": "S"
+        },
+        "verbose": {
+            "7": "Axad",
+            "1": "Isniin",
+            "2": "Talaado",
+            "3": "Arbaco",
+            "4": "Khamiis",
+            "5": "Jimco",
+            "6": "Sabti"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "Kob",
+            "2": "Lab",
+            "3": "Sad",
+            "4": "Afr",
+            "5": "Sha",
+            "6": "Lix",
+            "7": "Tod",
+            "8": "Sid",
+            "9": "Sag",
+            "10": "Tob",
+            "11": "KIT",
+            "12": "LIT"
+        },
+        "short": {
+            "1": "K",
+            "2": "L",
+            "3": "S",
+            "4": "A",
+            "5": "S",
+            "6": "L",
+            "7": "T",
+            "8": "S",
+            "9": "S",
+            "10": "T",
+            "11": "K",
+            "12": "L"
+        },
+        "verbose": {
+            "1": "Bisha Koobaad",
+            "2": "Bisha Labaad",
+            "3": "Bisha Saddexaad",
+            "4": "Bisha Afraad",
+            "5": "Bisha Shanaad",
+            "6": "Bisha Lixaad",
+            "7": "Bisha Todobaad",
+            "8": "Bisha Sideedaad",
+            "9": "Bisha Sagaalaad",
+            "10": "Bisha Tobnaad",
+            "11": "Bisha Kow iyo Tobnaad",
+            "12": "Bisha Laba iyo Tobnaad"
+        }
+    }
+}

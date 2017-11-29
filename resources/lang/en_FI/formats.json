@@ -1,0 +1,10 @@
+{
+    "number": {
+        "thousands_separator": "\u00a0"
+    },
+    "time": {
+        "verbose": "G.i.s e",
+        "long": "G.i.s T",
+        "short": "G.i"
+    }
+}

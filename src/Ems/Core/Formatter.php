@@ -655,12 +655,11 @@ class Formatter implements FormatterContract, Multilingual
         $month = $this->escapeEveryChar($month);
 
         // Replace every php date char by the respecting symbol
-        $format = $this->replaceUnEscaped('D', $weekDay3, $format);
-        $format = $this->replaceUnEscaped('l', $weekDay, $format);
-        $format = $this->replaceUnEscaped('M', $month3, $format);
-        $format = $this->replaceUnEscaped('F', $month, $format);
-
-        return $format;
+        return $this->replaceUnEscaped(
+            ['D',       'l',      'M',     'F'],
+            [$weekDay3, $weekDay, $month3, $month],
+            $format
+        );
 
     }
 
@@ -687,6 +686,15 @@ class Formatter implements FormatterContract, Multilingual
      */
     protected function replaceUnEscaped($search, $replace, $subject)
     {
-        return preg_replace('/([^\\\\]{0,1})([' . $search . '])/u', '$1'.$replace, $subject);
+        $search = (array)$search;
+        $replace = (array)$replace;
+
+        $patterns = [];
+
+        foreach ($search as $i => $pattern) {
+            $patterns[] = "/(?<!\\\\)$pattern/u";
+        }
+
+        return preg_replace($patterns, $replace, $subject);
     }
 }

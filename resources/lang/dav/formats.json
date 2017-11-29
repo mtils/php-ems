@@ -1,0 +1,85 @@
+{
+    "date": {
+        "verbose": "l, d F Y",
+        "long": "d F Y",
+        "short": "d\/m\/Y"
+    },
+    "time": {
+        "verbose": "H:i:s e",
+        "long": "H:i:s T",
+        "short": "H:i"
+    },
+    "weekday": {
+        "long": {
+            "7": "Jum",
+            "1": "Jim",
+            "2": "Kaw",
+            "3": "Kad",
+            "4": "Kan",
+            "5": "Kas",
+            "6": "Ngu"
+        },
+        "verbose": {
+            "7": "Ituku ja jumwa",
+            "1": "Kuramuka jimweri",
+            "2": "Kuramuka kawi",
+            "3": "Kuramuka kadadu",
+            "4": "Kuramuka kana",
+            "5": "Kuramuka kasanu",
+            "6": "Kifula nguwo"
+        },
+        "short": {
+            "7": "J",
+            "1": "J",
+            "2": "K",
+            "3": "K",
+            "4": "K",
+            "5": "K",
+            "6": "N"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "Imb",
+            "2": "Kaw",
+            "3": "Kad",
+            "4": "Kan",
+            "5": "Kas",
+            "6": "Kar",
+            "7": "Mfu",
+            "8": "Wun",
+            "9": "Ike",
+            "10": "Iku",
+            "11": "Imw",
+            "12": "Iwi"
+        },
+        "verbose": {
+            "1": "Mori ghwa imbiri",
+            "2": "Mori ghwa kawi",
+            "3": "Mori ghwa kadadu",
+            "4": "Mori ghwa kana",
+            "5": "Mori ghwa kasanu",
+            "6": "Mori ghwa karandadu",
+            "7": "Mori ghwa mfungade",
+            "8": "Mori ghwa wunyanya",
+            "9": "Mori ghwa ikenda",
+            "10": "Mori ghwa ikumi",
+            "11": "Mori ghwa ikumi na imweri",
+            "12": "Mori ghwa ikumi na iwi"
+        },
+        "short": {
+            "1": "I",
+            "2": "K",
+            "3": "K",
+            "4": "K",
+            "5": "K",
+            "6": "K",
+            "7": "M",
+            "8": "W",
+            "9": "I",
+            "10": "I",
+            "11": "I",
+            "12": "I"
+        }
+    }
+}

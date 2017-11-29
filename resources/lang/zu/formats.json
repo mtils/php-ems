@@ -1,0 +1,96 @@
+{
+    "number": {
+        "decimal_mark": ".",
+        "thousands_separator": ","
+    },
+    "unit": "{number} {unit}",
+    "money": "{number} {currency}",
+    "date": {
+        "verbose": "l, F d, Y",
+        "long": "F d, Y",
+        "short": "n\/d\/y"
+    },
+    "time": {
+        "verbose": "H:i:s e",
+        "long": "H:i:s T",
+        "short": "H:i"
+    },
+    "datetime": {
+        "verbose": "l, F d, Y H:i:s e",
+        "long": "F d, Y H:i:s T",
+        "short": "n\/d\/y H:i"
+    },
+    "weekday": {
+        "long": {
+            "7": "Son",
+            "1": "Mso",
+            "2": "Bil",
+            "3": "Tha",
+            "4": "Sin",
+            "5": "Hla",
+            "6": "Mgq"
+        },
+        "short": {
+            "7": "S",
+            "1": "M",
+            "2": "B",
+            "3": "T",
+            "4": "S",
+            "5": "H",
+            "6": "M"
+        },
+        "verbose": {
+            "7": "ISonto",
+            "1": "UMsombuluko",
+            "2": "ULwesibili",
+            "3": "ULwesithathu",
+            "4": "ULwesine",
+            "5": "ULwesihlanu",
+            "6": "UMgqibelo"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "Jan",
+            "2": "Feb",
+            "3": "Mas",
+            "4": "Eph",
+            "5": "Mey",
+            "6": "Jun",
+            "7": "Jul",
+            "8": "Aga",
+            "9": "Sep",
+            "10": "Okt",
+            "11": "Nov",
+            "12": "Dis"
+        },
+        "short": {
+            "1": "J",
+            "2": "F",
+            "3": "M",
+            "4": "A",
+            "5": "M",
+            "6": "J",
+            "7": "J",
+            "8": "A",
+            "9": "S",
+            "10": "O",
+            "11": "N",
+            "12": "D"
+        },
+        "verbose": {
+            "1": "Januwari",
+            "2": "Februwari",
+            "3": "Mashi",
+            "4": "Ephreli",
+            "5": "Meyi",
+            "6": "Juni",
+            "7": "Julayi",
+            "8": "Agasti",
+            "9": "Septhemba",
+            "10": "Okthoba",
+            "11": "Novemba",
+            "12": "Disemba"
+        }
+    }
+}

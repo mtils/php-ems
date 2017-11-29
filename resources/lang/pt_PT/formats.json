@@ -1,0 +1,19 @@
+{
+    "number": {
+        "thousands_separator": "\u00a0"
+    },
+    "date": {
+        "short": "d\/m\/y"
+    },
+    "weekday": {
+        "long": {
+            "7": "domingo",
+            "1": "segunda",
+            "2": "ter\u00e7a",
+            "3": "quarta",
+            "4": "quinta",
+            "5": "sexta",
+            "6": "s\u00e1bado"
+        }
+    }
+}

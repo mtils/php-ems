@@ -1,0 +1,62 @@
+{
+    "number": {
+        "decimal_mark": ",",
+        "thousands_separator": "."
+    },
+    "date": {
+        "verbose": "l d F Y",
+        "long": "d F Y",
+        "short": "d\/m Y"
+    },
+    "time": {
+        "short": "H:i"
+    },
+    "datetime": {
+        "short": "d\/m Y H:i"
+    },
+    "weekday": {
+        "long": {
+            "7": "s\u0254ndi",
+            "1": "lundi",
+            "2": "mardi",
+            "3": "m\u025brk\u025br\u025bdi",
+            "4": "yedi",
+            "5": "va\u014bd\u025br\u025bdi",
+            "6": "m\u0254n\u0254 s\u0254ndi"
+        },
+        "short": {
+            "7": "so",
+            "1": "lu",
+            "2": "ma",
+            "3": "m\u025b",
+            "4": "ye",
+            "5": "va",
+            "6": "ms"
+        },
+        "verbose": {
+            "7": "s\u0254ndi",
+            "1": "lundi",
+            "2": "mardi",
+            "3": "m\u025brk\u025br\u025bdi",
+            "4": "yedi",
+            "5": "va\u014bd\u025br\u025bdi",
+            "6": "m\u0254n\u0254 s\u0254ndi"
+        }
+    },
+    "month": {
+        "verbose": {
+            "1": "pamba",
+            "2": "wanja",
+            "3": "mbiy\u0254 m\u025bndo\u014bg\u0254",
+            "4": "Ny\u0254l\u0254mb\u0254\u014bg\u0254",
+            "5": "M\u0254n\u0254 \u014bgbanja",
+            "6": "Nya\u014bgw\u025b \u014bgbanja",
+            "7": "ku\u014bgw\u025b",
+            "8": "f\u025b",
+            "9": "njapi",
+            "10": "nyukul",
+            "11": "11",
+            "12": "\u0253ul\u0253us\u025b"
+        }
+    }
+}

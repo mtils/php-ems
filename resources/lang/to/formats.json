@@ -1,0 +1,96 @@
+{
+    "number": {
+        "decimal_mark": ".",
+        "thousands_separator": ","
+    },
+    "unit": "{unit} {number}",
+    "money": "{currency} {number}",
+    "date": {
+        "verbose": "l d F Y",
+        "long": "d F Y",
+        "short": "d\/n\/y"
+    },
+    "time": {
+        "verbose": "g:i:s a e",
+        "long": "g:i:s a T",
+        "short": "g:i a"
+    },
+    "datetime": {
+        "verbose": "l d F Y, g:i:s a e",
+        "long": "d F Y, g:i:s a T",
+        "short": "d\/n\/y g:i a"
+    },
+    "weekday": {
+        "long": {
+            "7": "S\u0101p",
+            "1": "M\u014dn",
+            "2": "T\u016bs",
+            "3": "Pul",
+            "4": "Tu\u02bba",
+            "5": "Fal",
+            "6": "Tok"
+        },
+        "short": {
+            "7": "S",
+            "1": "M",
+            "2": "T",
+            "3": "P",
+            "4": "T",
+            "5": "F",
+            "6": "T"
+        },
+        "verbose": {
+            "7": "S\u0101pate",
+            "1": "M\u014dnite",
+            "2": "T\u016bsite",
+            "3": "Pulelulu",
+            "4": "Tu\u02bbapulelulu",
+            "5": "Falaite",
+            "6": "Tokonaki"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "S\u0101n",
+            "2": "F\u0113p",
+            "3": "Ma\u02bba",
+            "4": "\u02bbEpe",
+            "5": "M\u0113",
+            "6": "Sun",
+            "7": "Siu",
+            "8": "\u02bbAok",
+            "9": "Sep",
+            "10": "\u02bbOka",
+            "11": "N\u014dv",
+            "12": "T\u012bs"
+        },
+        "short": {
+            "1": "S",
+            "2": "F",
+            "3": "M",
+            "4": "E",
+            "5": "M",
+            "6": "S",
+            "7": "S",
+            "8": "A",
+            "9": "S",
+            "10": "O",
+            "11": "N",
+            "12": "T"
+        },
+        "verbose": {
+            "1": "S\u0101nuali",
+            "2": "F\u0113pueli",
+            "3": "Ma\u02bbasi",
+            "4": "\u02bbEpeleli",
+            "5": "M\u0113",
+            "6": "Sune",
+            "7": "Siulai",
+            "8": "\u02bbAokosi",
+            "9": "Sepitema",
+            "10": "\u02bbOkatopa",
+            "11": "N\u014dvema",
+            "12": "T\u012bsema"
+        }
+    }
+}

@@ -1,0 +1,61 @@
+{
+    "number": {
+        "decimal_mark": ",",
+        "thousands_separator": "."
+    },
+    "date": {
+        "verbose": "l , \\l\\y\\\u025b\u030c\u02bc d \\n\\a F, Y",
+        "long": "\\l\\y\\\u025b\u030c\u02bc d \\n\\a F, Y",
+        "short": "d\/m\/y"
+    },
+    "weekday": {
+        "long": {
+            "7": "ly\u025b\u02bc\u025b\u0301 s\u1e85\u00ed\u014bt\u00e8",
+            "1": "mvf\u00f2 ly\u025b\u030c\u02bc",
+            "2": "mb\u0254\u0301\u0254nt\u00e8 mvf\u00f2 ly\u025b\u030c\u02bc",
+            "3": "ts\u00e8ts\u025b\u0300\u025b ly\u025b\u030c\u02bc",
+            "4": "mb\u0254\u0301\u0254nt\u00e8 tsets\u025b\u0300\u025b ly\u025b\u030c\u02bc",
+            "5": "mvf\u00f2 m\u00e0ga ly\u025b\u030c\u02bc",
+            "6": "m\u00e0ga ly\u025b\u030c\u02bc"
+        },
+        "verbose": {
+            "7": "ly\u025b\u02bc\u025b\u0301 s\u1e85\u00ed\u014bt\u00e8",
+            "1": "mvf\u00f2 ly\u025b\u030c\u02bc",
+            "2": "mb\u0254\u0301\u0254nt\u00e8 mvf\u00f2 ly\u025b\u030c\u02bc",
+            "3": "ts\u00e8ts\u025b\u0300\u025b ly\u025b\u030c\u02bc",
+            "4": "mb\u0254\u0301\u0254nt\u00e8 tsets\u025b\u0300\u025b ly\u025b\u030c\u02bc",
+            "5": "mvf\u00f2 m\u00e0ga ly\u025b\u030c\u02bc",
+            "6": "m\u00e0ga ly\u025b\u030c\u02bc"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "sa\u014b tsets\u025b\u0300\u025b l\u00f9m",
+            "2": "sa\u014b k\u00e0g ngw\u00f3\u014b",
+            "3": "sa\u014b lepy\u00e8 sh\u00fam",
+            "4": "sa\u014b c\u00ff\u00f3",
+            "5": "sa\u014b ts\u025b\u0300\u025b c\u00ff\u00f3",
+            "6": "sa\u014b nj\u00ffol\u00e1\u02bc",
+            "7": "sa\u014b ty\u025b\u0300b ty\u025b\u0300b mb\u0289\u0300\u014b",
+            "8": "sa\u014b mb\u0289\u0300\u014b",
+            "9": "sa\u014b ngw\u0254\u0300\u02bc mb\u00ff\u025b",
+            "10": "sa\u014b t\u00e0\u014ba tsets\u00e1\u02bc",
+            "11": "sa\u014b mejwo\u014b\u00f3",
+            "12": "sa\u014b l\u00f9m"
+        },
+        "verbose": {
+            "1": "sa\u014b tsets\u025b\u0300\u025b l\u00f9m",
+            "2": "sa\u014b k\u00e0g ngw\u00f3\u014b",
+            "3": "sa\u014b lepy\u00e8 sh\u00fam",
+            "4": "sa\u014b c\u00ff\u00f3",
+            "5": "sa\u014b ts\u025b\u0300\u025b c\u00ff\u00f3",
+            "6": "sa\u014b nj\u00ffol\u00e1\u02bc",
+            "7": "sa\u014b ty\u025b\u0300b ty\u025b\u0300b mb\u0289\u0300\u014b",
+            "8": "sa\u014b mb\u0289\u0300\u014b",
+            "9": "sa\u014b ngw\u0254\u0300\u02bc mb\u00ff\u025b",
+            "10": "sa\u014b t\u00e0\u014ba tsets\u00e1\u02bc",
+            "11": "sa\u014b mejwo\u014b\u00f3",
+            "12": "sa\u014b l\u00f9m"
+        }
+    }
+}

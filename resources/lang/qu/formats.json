@@ -1,0 +1,95 @@
+{
+    "number": {
+        "decimal_mark": ".",
+        "thousands_separator": ","
+    },
+    "money": "{number} {currency}",
+    "date": {
+        "verbose": "l, d F, Y",
+        "long": "d F Y",
+        "short": "d\/m\/Y"
+    },
+    "time": {
+        "verbose": "H:i:s e",
+        "long": "H:i:s T",
+        "short": "H:i"
+    },
+    "datetime": {
+        "verbose": "l, d F, Y H:i:s e",
+        "long": "H:i:s T d F Y",
+        "short": "d\/m\/Y H:i"
+    },
+    "weekday": {
+        "long": {
+            "7": "Dom",
+            "1": "Lun",
+            "2": "Mar",
+            "3": "Mi\u00e9",
+            "4": "Jue",
+            "5": "Vie",
+            "6": "Sab"
+        },
+        "short": {
+            "7": "D",
+            "1": "L",
+            "2": "M",
+            "3": "X",
+            "4": "J",
+            "5": "V",
+            "6": "S"
+        },
+        "verbose": {
+            "7": "Domingo",
+            "1": "Lunes",
+            "2": "Martes",
+            "3": "Mi\u00e9rcoles",
+            "4": "Jueves",
+            "5": "Viernes",
+            "6": "S\u00e1bado"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "Qul",
+            "2": "Hat",
+            "3": "Pau",
+            "4": "Ayr",
+            "5": "Aym",
+            "6": "Int",
+            "7": "Ant",
+            "8": "Qha",
+            "9": "Uma",
+            "10": "Kan",
+            "11": "Aya",
+            "12": "Kap"
+        },
+        "short": {
+            "1": "1",
+            "2": "2",
+            "3": "3",
+            "4": "4",
+            "5": "5",
+            "6": "6",
+            "7": "7",
+            "8": "8",
+            "9": "9",
+            "10": "10",
+            "11": "11",
+            "12": "12"
+        },
+        "verbose": {
+            "1": "Qulla puquy",
+            "2": "Hatun puquy",
+            "3": "Pauqar waray",
+            "4": "Ayriwa",
+            "5": "Aymuray",
+            "6": "Inti raymi",
+            "7": "Anta Sitwa",
+            "8": "Qhapaq Sitwa",
+            "9": "Uma raymi",
+            "10": "Kantaray",
+            "11": "Ayamarq\u02bca",
+            "12": "Kapaq Raymi"
+        }
+    }
+}

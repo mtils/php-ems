@@ -1,0 +1,89 @@
+{
+    "number": {
+        "decimal_mark": ",",
+        "thousands_separator": "\u00a0"
+    },
+    "date": {
+        "verbose": "l d F Y",
+        "long": "d F Y",
+        "short": "d\/n\/Y"
+    },
+    "time": {
+        "verbose": "g:i:s a e",
+        "long": "g:i:s a T",
+        "short": "g:i a"
+    },
+    "weekday": {
+        "long": {
+            "7": "Yan",
+            "1": "San",
+            "2": "Kra\u1e0d",
+            "3": "Ku\u1e93",
+            "4": "Sam",
+            "5": "S\u1e0dis",
+            "6": "Say"
+        },
+        "verbose": {
+            "7": "Yanass",
+            "1": "Sanass",
+            "2": "Kra\u1e0dass",
+            "3": "Ku\u1e93ass",
+            "4": "Samass",
+            "5": "S\u1e0disass",
+            "6": "Sayass"
+        },
+        "short": {
+            "7": "Y",
+            "1": "S",
+            "2": "K",
+            "3": "K",
+            "4": "S",
+            "5": "S",
+            "6": "S"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "Yen",
+            "2": "Fur",
+            "3": "Me\u0263",
+            "4": "Yeb",
+            "5": "May",
+            "6": "Yun",
+            "7": "Yul",
+            "8": "\u0194uc",
+            "9": "Cte",
+            "10": "Tub",
+            "11": "Nun",
+            "12": "Du\u01e7"
+        },
+        "verbose": {
+            "1": "Yennayer",
+            "2": "Fu\u1e5bar",
+            "3": "Me\u0263res",
+            "4": "Yebrir",
+            "5": "Mayyu",
+            "6": "Yunyu",
+            "7": "Yulyu",
+            "8": "\u0194uct",
+            "9": "Ctembe\u1e5b",
+            "10": "Tube\u1e5b",
+            "11": "Nunembe\u1e5b",
+            "12": "Du\u01e7embe\u1e5b"
+        },
+        "short": {
+            "1": "Y",
+            "2": "F",
+            "3": "M",
+            "4": "Y",
+            "5": "M",
+            "6": "Y",
+            "7": "Y",
+            "8": "\u0194",
+            "9": "C",
+            "10": "T",
+            "11": "N",
+            "12": "D"
+        }
+    }
+}

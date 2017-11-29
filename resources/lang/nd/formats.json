@@ -1,0 +1,85 @@
+{
+    "date": {
+        "verbose": "l, d F Y",
+        "long": "d F Y",
+        "short": "d\/m\/Y"
+    },
+    "time": {
+        "verbose": "H:i:s e",
+        "long": "H:i:s T",
+        "short": "H:i"
+    },
+    "weekday": {
+        "long": {
+            "7": "Son",
+            "1": "Mvu",
+            "2": "Sib",
+            "3": "Sit",
+            "4": "Sin",
+            "5": "Sih",
+            "6": "Mgq"
+        },
+        "verbose": {
+            "7": "Sonto",
+            "1": "Mvulo",
+            "2": "Sibili",
+            "3": "Sithathu",
+            "4": "Sine",
+            "5": "Sihlanu",
+            "6": "Mgqibelo"
+        },
+        "short": {
+            "7": "S",
+            "1": "M",
+            "2": "S",
+            "3": "S",
+            "4": "S",
+            "5": "S",
+            "6": "M"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "Zib",
+            "2": "Nhlo",
+            "3": "Mbi",
+            "4": "Mab",
+            "5": "Nkw",
+            "6": "Nhla",
+            "7": "Ntu",
+            "8": "Ncw",
+            "9": "Mpan",
+            "10": "Mfu",
+            "11": "Lwe",
+            "12": "Mpal"
+        },
+        "verbose": {
+            "1": "Zibandlela",
+            "2": "Nhlolanja",
+            "3": "Mbimbitho",
+            "4": "Mabasa",
+            "5": "Nkwenkwezi",
+            "6": "Nhlangula",
+            "7": "Ntulikazi",
+            "8": "Ncwabakazi",
+            "9": "Mpandula",
+            "10": "Mfumfu",
+            "11": "Lwezi",
+            "12": "Mpalakazi"
+        },
+        "short": {
+            "1": "Z",
+            "2": "N",
+            "3": "M",
+            "4": "M",
+            "5": "N",
+            "6": "N",
+            "7": "N",
+            "8": "N",
+            "9": "M",
+            "10": "M",
+            "11": "L",
+            "12": "M"
+        }
+    }
+}

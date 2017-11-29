@@ -1,0 +1,44 @@
+{
+    "number": {
+        "decimal_mark": ",",
+        "thousands_separator": "."
+    },
+    "date": {
+        "short": "d\/m\/y"
+    },
+    "time": {
+        "verbose": "g:i:s a e",
+        "long": "g:i:s a T",
+        "short": "g:i a"
+    },
+    "datetime": {
+        "short": "d\/m\/y, g:i a"
+    },
+    "weekday": {
+        "short": {
+            "7": "d",
+            "1": "l",
+            "2": "m",
+            "3": "m",
+            "4": "j",
+            "5": "v",
+            "6": "s"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "ene.",
+            "2": "feb.",
+            "3": "mar.",
+            "4": "abr.",
+            "5": "may.",
+            "6": "jun.",
+            "7": "jul.",
+            "8": "ago.",
+            "9": "sept.",
+            "10": "oct.",
+            "11": "nov.",
+            "12": "dic."
+        }
+    }
+}

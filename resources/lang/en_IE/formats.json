@@ -1,0 +1,10 @@
+{
+    "date": {
+        "verbose": "l d F Y"
+    },
+    "time": {
+        "verbose": "H:i:s e",
+        "long": "H:i:s T",
+        "short": "H:i"
+    }
+}

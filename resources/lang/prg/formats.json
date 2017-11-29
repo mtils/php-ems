@@ -1,0 +1,95 @@
+{
+    "number": {
+        "decimal_mark": ",",
+        "thousands_separator": "\u00a0"
+    },
+    "money": "{number} {currency}",
+    "date": {
+        "verbose": "l, Y \\m\\e\\t\\t\\a\\s d. F",
+        "long": "Y \\m\\e\\t\\t\\a\\s d. F",
+        "short": "d.m.y"
+    },
+    "time": {
+        "verbose": "H:i:s e",
+        "long": "H:i:s T",
+        "short": "H:i"
+    },
+    "datetime": {
+        "verbose": "l, Y \\m\\e\\t\\t\\a\\s d. F H:i:s e",
+        "long": "Y \\m\\e\\t\\t\\a\\s d. F H:i:s T",
+        "short": "d.m.y H:i"
+    },
+    "weekday": {
+        "long": {
+            "7": "nad",
+            "1": "pan",
+            "2": "wis",
+            "3": "pus",
+            "4": "ket",
+            "5": "p\u0113n",
+            "6": "sab"
+        },
+        "short": {
+            "7": "N",
+            "1": "P",
+            "2": "W",
+            "3": "P",
+            "4": "K",
+            "5": "P",
+            "6": "S"
+        },
+        "verbose": {
+            "7": "nad\u012bli",
+            "1": "panad\u012bli",
+            "2": "wisas\u012bdis",
+            "3": "pussisawaiti",
+            "4": "ketwirtiks",
+            "5": "p\u0113ntniks",
+            "6": "sabattika"
+        }
+    },
+    "month": {
+        "long": {
+            "1": "rag",
+            "2": "was",
+            "3": "p\u016bl",
+            "4": "sak",
+            "5": "zal",
+            "6": "s\u012bm",
+            "7": "l\u012bp",
+            "8": "dag",
+            "9": "sil",
+            "10": "spa",
+            "11": "lap",
+            "12": "sal"
+        },
+        "short": {
+            "1": "R",
+            "2": "W",
+            "3": "P",
+            "4": "S",
+            "5": "Z",
+            "6": "S",
+            "7": "L",
+            "8": "D",
+            "9": "S",
+            "10": "S",
+            "11": "L",
+            "12": "S"
+        },
+        "verbose": {
+            "1": "rags",
+            "2": "wassarins",
+            "3": "p\u016blis",
+            "4": "sakkis",
+            "5": "zallaws",
+            "6": "s\u012bmenis",
+            "7": "l\u012bpa",
+            "8": "daggis",
+            "9": "sillins",
+            "10": "spallins",
+            "11": "lapkr\u016btis",
+            "12": "sallaws"
+        }
+    }
+}
