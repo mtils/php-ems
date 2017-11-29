@@ -23,7 +23,7 @@ class Extractor implements ExtractorContract
     /**
      * {@inheritdoc}
      *
-     * @param mixed  $root (object|array|classname)
+     * @param mixed  $root (object|array|class name)
      * @param string $path
      *
      * @return mixed
@@ -45,7 +45,7 @@ class Extractor implements ExtractorContract
      * {@inheritdoc}
      * This class has no clue about getting the types of a class/object
      * model. In eloquent you would read a relation and return its target
-     * class. In propel you would ask a mapbuilder. The extractor acts
+     * class. In propel you would ask a MapBuilder. The extractor acts
      * as a proxy for a callable you assign to read the relations. It just
      * cares about the nesting stuff so that your callable can just handle
      * typeOf($object, $key) without nested keys.
@@ -113,7 +113,7 @@ class Extractor implements ExtractorContract
     /**
      * Search inside an hierarchy by a nested key.
      *
-     * @param mixed  $root (object|array|classname)
+     * @param mixed  $root (object|array|class name)
      * @param string $path
      *
      * @return mixed
@@ -125,7 +125,6 @@ class Extractor implements ExtractorContract
         $segments = explode($this->separator, $path);
 
         $last = count($segments) - 1;
-        $varname = $segments[0];
 
         for ($i = 0; $i <= $last; ++$i) {
             $node = @$this->getNode($node, $segments[$i]);
