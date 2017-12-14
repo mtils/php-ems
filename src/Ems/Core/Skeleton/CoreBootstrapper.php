@@ -112,7 +112,6 @@ class CoreBootstrapper extends Bootstrapper
             $app = $ioc(Application::class);
             $storage = new NestedFileStorage();
             $storage->setUrl($app->path('ems-resources')->append('lang'));
-            echo $app->path('ems-resources')->append('lang');
             $storage->setNestingLevel(1);
 
             $provider = new ArrayProvider();
