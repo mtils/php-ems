@@ -10,15 +10,12 @@ namespace Ems\Http;
 
 use Ems\Contracts\Core\Configurable;
 use Ems\Contracts\Core\Filesystem;
+use Ems\Contracts\Core\HasMethodHooks;
 use Ems\Contracts\Core\Url as UrlContract;
-use Ems\Core\Url;
-use Ems\Core\FilesystemConnection as BaseConnection;
-use Ems\Core\LocalFilesystem;
 use Ems\Contracts\Http\Connection as HttpConnection;
 use Ems\Core\ConfigurableTrait;
-use Ems\Contracts\Core\HasMethodHooks;
+use Ems\Core\FilesystemConnection as BaseConnection;
 use Ems\Core\Patterns\HookableTrait;
-use RuntimeException;
 
 class FilesystemConnection extends BaseConnection implements HttpConnection, Configurable, HasMethodHooks
 {
@@ -110,6 +107,8 @@ class FilesystemConnection extends BaseConnection implements HttpConnection, Con
 
     /**
      * @return resource
+     *
+     * @throws \Ems\Contracts\Core\Errors\Unsupported
      */
     public function resource()
     {
@@ -168,6 +167,8 @@ class FilesystemConnection extends BaseConnection implements HttpConnection, Con
      * Build the beautiful array for stream_context_create
      *
      * @return array
+     *
+     * @throws \Ems\Contracts\Core\Errors\UnSupported
      */
     protected function streamContextArray()
     {
@@ -196,11 +197,11 @@ class FilesystemConnection extends BaseConnection implements HttpConnection, Con
     /**
      * Remove the credentials from url and assign them to
      *
-     * @param Url $url
+     * @param UrlContract $url
      *
-     * @return Url
+     * @return UrlContract
      */
-    protected function popCredentials(Url $url)
+    protected function popCredentials(UrlContract $url)
     {
         if ($url->user && $url->password) {
             $this->user = $url->user;

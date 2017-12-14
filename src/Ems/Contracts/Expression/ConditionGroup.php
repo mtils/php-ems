@@ -3,7 +3,6 @@
 namespace Ems\Contracts\Expression;
 
 use Ems\Contracts\Core\HasKeys;
-use ArrayAccess;
 
 
 /**
@@ -20,7 +19,7 @@ interface ConditionGroup extends LogicalGroup, Conditional, HasKeys
     /**
      * Return all conditions. Pass an operand to get all conditions for $operand.
      *
-     * @param string|\Ems\Contratcs\Core\Expression $operand (optional)
+     * @param string|\Ems\Contracts\Core\Expression $operand (optional)
      *
      * @return array
      **/
@@ -30,7 +29,7 @@ interface ConditionGroup extends LogicalGroup, Conditional, HasKeys
      * Return true if the ConditionGroup has a condition for $operand or if none
      * passed if it has conditions at all.
      *
-     * @param string|\Ems\Contratcs\Core\Expression $operand (optional)
+     * @param string|\Ems\Contracts\Core\Expression $operand (optional)
      *
      * @return bool
      **/

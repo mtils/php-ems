@@ -22,7 +22,7 @@ interface Queryable
      * @example where('name', 'Ralf') // name = Ralf
      * @example where('name', 'Ralf')->where('birthday', '2017-01-01') // name = 'Ralf' AND birthday = '2017-01-01'
      * @example where('category_id', 'in', [1,3,4]) // category_id IN (1,3,4)
-     * @example where(Expression('CONCAT(firstname,lastname)'), 'like', 'Ralf') // CONCAT(firstname, lastname) LIKE 'Ralf'
+     * @example where(Expression('CONCAT(firstName,lastName)'), 'like', 'Ralf') // CONCAT(firstName, lastName) LIKE 'Ralf'
      * @example where(new Condition('name', 'equals:Ralf')) // name = 'Ralf'
      * @example where('age', 'min:5|max:18') // age >= 5 AND age <= 18
      * @example where('name', 'Ralf')->where(function (Conditional $conditional) {
@@ -30,9 +30,9 @@ interface Queryable
      *     $conditional->orWhere('age', '<=', 18)
      * }) // name = 'Ralf' AND (age >= 5 OR age <= 18)
      *
-     * @param string|\Ems\Constracts\Core\Expression|\Closure $operand
-     * @param mixed                                           $operatorOrValue (optional)
-     * @param mixed                                           $value
+     * @param string|\Ems\Contracts\Core\Expression|\Closure $operand
+     * @param mixed                                          $operatorOrValue (optional)
+     * @param mixed                                          $value
      *
      * @return self
      **/

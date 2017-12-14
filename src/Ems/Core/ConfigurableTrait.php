@@ -25,7 +25,7 @@ trait ConfigurableTrait
      *
      * @param string $key
      *
-     * @throws \Ems\Contracts\Core\Unsupported
+     * @throws \Ems\Contracts\Core\Errors\Unsupported
      *
      * @return mixed
      **/
@@ -42,7 +42,7 @@ trait ConfigurableTrait
      * @param string $key
      * @param mixed  $value
      *
-     * @throws \Ems\Contracts\Core\Unsupported
+     * @throws \Ems\Contracts\Core\Errors\Unsupported
      *
      * @return self
      **/
@@ -67,7 +67,7 @@ trait ConfigurableTrait
      *
      * @param string|array $keys (optional)
      *
-     * @throws \Ems\Contracts\Core\Unsupported
+     * @throws \Ems\Contracts\Core\Errors\Unsupported
      *
      * @return self
      **/
@@ -89,10 +89,12 @@ trait ConfigurableTrait
      * passed options to overwrite internal options.
      *
      * @param string $key
-     * @param array  $options
+     * @param array $options
      *
      * @return mixed
-     **/
+     *
+     * @throws \Ems\Contracts\Core\Errors\Unsupported
+     */
     protected function mergeOption($key, array $options)
     {
         return isset($options[$key]) ? $options[$key] : $this->getOption($key);
@@ -102,10 +104,12 @@ trait ConfigurableTrait
      * This is a helper method for classes which support manual
      * passed options to overwrite internal options.
      *
-     * @param array  $options
+     * @param array $options
      *
      * @return mixed
-     **/
+     *
+     * @throws \Ems\Contracts\Core\Errors\Unsupported
+     */
     protected function mergeOptions(array $options)
     {
         $merged = [];
