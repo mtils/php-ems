@@ -14,3 +14,4 @@ tmp*
 .kateproject*
 .DS_Store
 Thumbs.db
+build
