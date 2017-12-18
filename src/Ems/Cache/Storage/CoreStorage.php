@@ -12,10 +12,10 @@ use Ems\Contracts\Model\QueryableStorage;
 use Ems\Core\Exceptions\DataIntegrityException;
 use Ems\Core\Exceptions\MisConfiguredException;
 use Ems\Core\Storages\UnbufferedStorageProxy;
-use Ems\Core\Helper;
 use Ems\Core\Patterns\SubscribableTrait;
 use Ems\Core\Serializer;
 use DateTime;
+use Ems\Contracts\Core\Type;
 use UnexpectedValueException;
 
 /**
@@ -198,7 +198,7 @@ class CoreStorage implements CacheStorage, Subscribable
         $isPlain = true;
 
         if (!$canSerialize && !$this->bigStorage) {
-            throw new UnexpectedValueException('Cannot store a value of type ' . Helper::typeName($value) . '. Assign a big storage who supports that.');
+            throw new UnexpectedValueException('Cannot store a value of type ' . Type::of($value) . '. Assign a big storage who supports that.');
         }
 
         // Lets save some memory and try not to copy value more around than
@@ -531,7 +531,7 @@ class CoreStorage implements CacheStorage, Subscribable
             $this->bigStorage[$id] = $value;
             return true;
         } catch (\Exception $e) {
-            $msg = "Data of id #$id (type:" . Helper::typeName($value) . ") couldnt be written to big storage";
+            $msg = "Data of id #$id (type:" . Type::of($value) . ") couldnt be written to big storage";
             $e = new DataIntegrityException($msg, 0, $e);
             $this->callOnListeners('error', [$e]);
         }

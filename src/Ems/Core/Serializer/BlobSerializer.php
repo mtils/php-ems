@@ -3,8 +3,8 @@
 namespace Ems\Core\Serializer;
 
 use Ems\Contracts\Core\Serializer;
-use Ems\Core\Helper;
 use UnexpectedValueException;
+use Ems\Contracts\Core\Type;
 
 /**
  * The blob serializer is a fake serializer. It checks if something is
@@ -55,7 +55,7 @@ class BlobSerializer implements Serializer
     {
 
         if (!is_string($value)) {
-            throw new UnexpectedValueException('I can only work with strings, not ' . Helper::typeName($value));
+            throw new UnexpectedValueException('I can only work with strings, not ' . Type::of($value));
         }
 
         return $value;
@@ -73,7 +73,7 @@ class BlobSerializer implements Serializer
     public function deserialize($string, array $options=[])
     {
         if (!is_string($string)) {
-            throw new UnexpectedValueException('I can only work with strings, not ' . Helper::typeName($string));
+            throw new UnexpectedValueException('I can only work with strings, not ' . Type::of($string));
         }
 
         return $string;

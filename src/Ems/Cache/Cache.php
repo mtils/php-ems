@@ -9,9 +9,9 @@ use Ems\Contracts\Cache\Categorizer;
 use Ems\Cache\Exception\CacheMissException;
 use Ems\Contracts\Core\None;
 use Ems\Core\Collections\StringList;
-use Ems\Core\Helper;
 use Ems\Core\Patterns\HookableTrait;
 use Ems\Core\Exceptions\HandlerNotFoundException;
+use Ems\Contracts\Core\Type;
 
 class Cache implements CacheContract
 {
@@ -227,10 +227,10 @@ class Cache implements CacheContract
     public function increment($key, $steps = 1)
     {
         $this->callBeforeListeners('increment', [$this->storageName, $key, $steps]);
-        $this->storage->increment($key, $steps);
+        $result = $this->storage->increment($key, $steps);
         $this->callAfterListeners('increment', [$this->storageName, $key, $steps]);
 
-        return $this;
+        return $result;
     }
 
     /**
@@ -244,10 +244,10 @@ class Cache implements CacheContract
     public function decrement($key, $steps = 1)
     {
         $this->callBeforeListeners('decrement', [$this->storageName, $key, $steps]);
-        $this->storage->decrement($key, $steps);
+        $result = $this->storage->decrement($key, $steps);
         $this->callAfterListeners('decrement', [$this->storageName, $key, $steps]);
 
-        return $this;
+        return $result;
     }
 
     /**
@@ -270,7 +270,7 @@ class Cache implements CacheContract
         }
 
         if (!$key) {
-            throw new HandlerNotFoundException("No categorizer found a key for " . Helper::typeName($keyOrValue));
+            throw new HandlerNotFoundException("No categorizer found a key for " . Type::of($keyOrValue));
         }
 
         $this->callBeforeListeners('forget', [$this->storageName, $key, $tags]);
@@ -451,7 +451,7 @@ class Cache implements CacheContract
      *
      * @param string $name (optional)
      *
-     * @throws \Ems\Contracts\Errors\NotFound
+     * @throws \Ems\Contracts\Core\Errors\NotFound
      *
      * @return Storage
      **/

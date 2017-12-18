@@ -3,7 +3,7 @@
 namespace Ems\XType\Eloquent;
 
 use Ems\Contracts\XType\TypeFactory;
-use Ems\Core\Helper;
+use Ems\Contracts\Core\Type;
 use Ems\XType\ObjectType;
 use Ems\XType\SequenceType;
 use Ems\Core\Exceptions\MisConfiguredException;
@@ -270,7 +270,7 @@ class ModelTypeFactory
 
         // Checks without instantiating first
         if (!is_subclass_of($model, Model::class)) {
-            throw new UnsupportedParameterException('ModelTypeFactory only supports Eloquent models not '.Helper::typeName($model) );
+            throw new UnsupportedParameterException('ModelTypeFactory only supports Eloquent models not '.Type::of($model) );
         }
 
         return is_object($model) ? [$model, get_class($model)] : [new $model(), $model];

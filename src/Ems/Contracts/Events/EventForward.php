@@ -3,13 +3,11 @@
 namespace Ems\Contracts\Events;
 
 use Closure;
-use Ems\Contracts\Core\Hookable;
 use Ems\Contracts\Core\Subscribable;
 use Ems\Contracts\Core\HasListeners;
 use Ems\Contracts\Core\HasMethodHooks;
 use Ems\Core\Exceptions\UnsupportedUsageException;
-use Ems\Core\Helper;
-use InvalidArgumentException;
+use Ems\Contracts\Core\Type;
 use LogicException;
 
 
@@ -167,7 +165,7 @@ class EventForward
         $targetEventName = $event ? $event : $targetOrEvent;
 
         if (!is_string($targetEventName)) {
-            throw new LogicException("Cannot map to unkown target event type: " . Helper::typeName($targetEventName));
+            throw new LogicException("Cannot map to unkown target event type: " . Type::of($targetEventName));
         }
 
         if (!$this->source instanceof Subscribable) {

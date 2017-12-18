@@ -3,7 +3,7 @@
 namespace Ems\XType\Eloquent;
 
 use Ems\Core\Exceptions\UnsupportedParameterException;
-use Ems\Core\Helper;
+use Ems\Contracts\Core\Type;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -53,7 +53,7 @@ class RelationReflector
 
             default:
                 $modelClass = get_class($model);
-                $relationType = Helper::typeName($relation);
+                $relationType = Type::of($relation);
 
                 throw new UnsupportedParameterException("Result of $modelClass->$key() did not return a Relation (it returned $relationType)");
         }

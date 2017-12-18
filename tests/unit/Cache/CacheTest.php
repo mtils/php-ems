@@ -413,9 +413,9 @@ class CacheTest extends \Ems\TestCase
         $cache = $this->newCache();
         $cache->addStorage('default', $storage);
 
-        $storage->shouldReceive('increment')->with('foo', 2)->atLeast()->once();
+        $storage->shouldReceive('increment')->with('foo', 2)->atLeast()->once()->andReturn(3);
 
-        $this->assertSame($cache, $cache->increment('foo', 2));
+        $this->assertEquals(3, $cache->increment('foo', 2));
     }
 
     public function test_decrement_forwards_to_storage()
@@ -424,9 +424,9 @@ class CacheTest extends \Ems\TestCase
         $cache = $this->newCache();
         $cache->addStorage('default', $storage);
 
-        $storage->shouldReceive('decrement')->with('foo', 2)->atLeast()->once();
+        $storage->shouldReceive('decrement')->with('foo', 2)->atLeast()->once()->andReturn(1);
 
-        $this->assertSame($cache, $cache->decrement('foo', 2));
+        $this->assertSame(1, $cache->decrement('foo', 2));
     }
 
     public function test_clear_forwards_to_storage()

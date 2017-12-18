@@ -3,6 +3,7 @@
 namespace Ems\Core\Support;
 
 use BadMethodCallException;
+use Ems\Contracts\Core\Type;
 use InvalidArgumentException;
 
 /**
@@ -79,24 +80,7 @@ trait TypeCheckMethods
             return true;
         }
 
-        switch ($this->forceType) {
-            case 'bool':
-                return is_bool($value);
-            case 'int':
-                return is_int($value);
-            case 'float':
-                return is_float($value);
-            case 'string':
-                return is_string($value);
-            case 'resource':
-                return is_resource($value);
-            case 'array':
-                return is_array($value);
-            case 'object':
-                return is_object($value);
-            default:
-                return $value instanceof $this->forceType;
-        }
+        return Type::is($value, $this->forceType);
     }
 
     /**
@@ -104,11 +88,14 @@ trait TypeCheckMethods
      * if it does not match.
      *
      * @param mixed $value
+     *
+     * @return mixed
      **/
     protected function checkType($value)
     {
         if (!$this->hasAllowedType($value)) {
             throw new InvalidArgumentException("You can only add values of '{$this->forceType}' to this object");
         }
+        return $value;
     }
 }

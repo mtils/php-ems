@@ -2,19 +2,15 @@
 
 namespace Ems\Validation\Illuminate;
 
-use Ems\Contracts\Validation\Validator as EmsValidatorContract;
 use Ems\Contracts\Core\AppliesToResource;
 use Ems\Contracts\Core\Entity;
+use Ems\Contracts\Core\Type;
+use Ems\Contracts\Validation\Validation;
+use Ems\Core\Collections\NestedArray;
+use Ems\Core\Exceptions\UnConfiguredException;
+use Ems\Validation\Validator as AbstractValidator;
 use Illuminate\Contracts\Validation\Factory as IlluminateFactory;
 use Illuminate\Database\Eloquent\Model as EloquentModel;
-use Ems\Contracts\Validation\Validation;
-use Ems\Validation\Validator as AbstractValidator;
-use Ems\Validation\ValidationException;
-use Ems\Core\Helper;
-use Ems\Core\Exceptions\KeyNotFoundException;
-use Ems\Core\Exceptions\UnConfiguredException;
-use Ems\Core\Lambda;
-use Ems\Core\Collections\NestedArray;
 
 
 abstract class Validator extends AbstractValidator
@@ -25,7 +21,7 @@ abstract class Validator extends AbstractValidator
     protected $validatorFactory;
 
     /**
-     * @var Illuminate\Contracts\Validation\Validator
+     * @var \Illuminate\Contracts\Validation\Validator
      **/
     protected $illuminateValidator;
 
@@ -50,7 +46,7 @@ abstract class Validator extends AbstractValidator
 
         foreach ($illuminateValidator->failed() as $key=>$fails) {
             foreach ($fails as $ruleName=>$parameters) {
-                $validation->addFailure($key, Helper::snake_case($ruleName), $parameters);
+                $validation->addFailure($key, Type::snake_case($ruleName), $parameters);
             }
         }
     }
@@ -71,7 +67,7 @@ abstract class Validator extends AbstractValidator
         $preparedRules = [];
         $rules = parent::prepareRulesForValidation($rules, $input, $resource, $locale);
 
-        $dateConstraints = ['after', 'before', 'date'];
+//        $dateConstraints = ['after', 'before', 'date'];
 
         // Flatify to allow nested checks
         $input = NestedArray::flat($input);
@@ -89,14 +85,14 @@ abstract class Validator extends AbstractValidator
 //                 }
 
                 if ($constraint == 'unique') {
-                    $preparedRules[$key][$constraint] = $this->parametersOfUniqueContraint($key, $parameters, $resource);
+                    $preparedRules[$key][$constraint] = $this->parametersOfUniqueConstraint($key, $parameters, $resource);
                     continue;
                 }
 
                 // required on an existing model should mean:
                 // If the key isset, it should not contain any empty values
                 // if not, the request is valid.
-                // So just remove it if it shouldnt be updated
+                // So just remove it if it shouldn't be updated
                 if ($resource instanceof Entity && !$resource->isNew() && $constraint == 'required') {
                     if (!array_key_exists($key, $input)) {
                         continue;
@@ -123,7 +119,7 @@ abstract class Validator extends AbstractValidator
      *
      * @return array
      **/
-    protected function parametersOfUniqueContraint($key, array $originalParameters, AppliesToResource $resource=null)
+    protected function parametersOfUniqueConstraint($key, array $originalParameters, AppliesToResource $resource=null)
     {
         if (!$resource instanceof Entity) {
             return $originalParameters;
@@ -194,8 +190,8 @@ abstract class Validator extends AbstractValidator
             $laravelRules[$key] = [];
 
             foreach ($keyRules as $ruleName=>$parameters) {
-                $seperator = $parameters ? ':' : '';
-                $laravelRules[$key][] = $ruleName.$seperator.implode(',', $parameters);
+                $separator = $parameters ? ':' : '';
+                $laravelRules[$key][] = $ruleName.$separator.implode(',', $parameters);
             }
         }
 

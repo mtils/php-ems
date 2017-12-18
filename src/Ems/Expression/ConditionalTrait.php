@@ -13,8 +13,7 @@ use Ems\Core\Exceptions\NotImplementedException;
 use Ems\Core\Exceptions\UnsupportedParameterException;
 use Ems\Core\Expression;
 use Ems\Core\KeyExpression;
-use Ems\Core\Helper;
-use Ems\Core\Support\StringableTrait;
+use Ems\Contracts\Core\Type;
 use InvalidArgumentException;
 use Closure;
 
@@ -46,7 +45,7 @@ trait ConditionalTrait
     /**
      * {@inheritdoc}
      *
-     * @param string|\Ems\Constracts\Core\Expression|\Closure $operand
+     * @param string|\Ems\Contracts\Core\Expression|\Closure $operand
      * @param mixed                                           $operatorOrValue (optional)
      * @param mixed                                           $value
      *
@@ -60,7 +59,7 @@ trait ConditionalTrait
     /**
      * {@inheritdoc}
      *
-     * @param string|\Ems\Constracts\Core\Expression|\Closure $operand
+     * @param string|\Ems\Contracts\Core\Expression|\Closure $operand
      * @param mixed                                           $operatorOrValue (optional)
      * @param mixed                                           $value
      *
@@ -76,7 +75,7 @@ trait ConditionalTrait
     /**
      * {@inheritdoc}
      *
-     * @param string|\Ems\Constracts\Core\Expression|\Closure $operand
+     * @param string|\Ems\Contracts\Core\Expression|\Closure $operand
      * @param mixed                                           $operatorOrValue (optional)
      * @param mixed                                           $value
      *
@@ -92,7 +91,7 @@ trait ConditionalTrait
     /**
      * {@inheritdoc}
      *
-     * @param string|\Ems\Constracts\Core\Expression|\Closure $operand
+     * @param string|\Ems\Contracts\Core\Expression|\Closure $operand
      * @param mixed                                           $operatorOrValue (optional)
      * @param mixed                                           $value
      *
@@ -105,6 +104,15 @@ trait ConditionalTrait
         return $this->addWhere($operand, $operatorOrValue, $value, 'nor', func_num_args());
     }
 
+    /**
+     * @param string|\Ems\Contracts\Core\Expression|\Closure $operand
+     * @param mixed                                           $operatorOrValue (optional)
+     * @param mixed                                           $value
+     * @param string                                          $boolean
+     * @param int                                             $argCount
+     *
+     * @return static
+     */
     protected function addWhere($operand, $operatorOrValue, $value, $boolean, $argCount)
     {
         $expressionCount = count($this->expressions());
@@ -190,7 +198,7 @@ trait ConditionalTrait
         }
 
         if (!$operand instanceof Closure) {
-            throw new InvalidArgumentException('Unknown operand type: ' . Helper::typeName($operand));
+            throw new InvalidArgumentException('Unknown operand type: ' . Type::of($operand));
         }
 
         return $operand($this->newClosureGroup());
@@ -211,6 +219,12 @@ trait ConditionalTrait
 
     }
 
+    /**
+     * @param array $conditions
+     * @param $boolean
+     *
+     * @return static
+     */
     protected function copyForChaining(array $conditions, $boolean)
     {
         $allowedConnectives = $this->allowedConnectives();
@@ -241,6 +255,14 @@ trait ConditionalTrait
         return $fork;
     }
 
+    /**
+     * @param array $conditions
+     * @param $boolean
+     *
+     * @return static
+     *
+     * @throws NotImplementedException
+     */
     protected function fork(array $conditions, $boolean)
     {
         throw new NotImplementedException('You have to implement fork to work with ConditionalTrait');

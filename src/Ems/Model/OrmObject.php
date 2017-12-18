@@ -44,7 +44,7 @@ abstract class OrmObject implements OrmObjectContract
     /**
      * @var callable
      */
-    protected $relationLoader;
+    protected $lazyLoader;
 
     /**
      * @var array
@@ -56,11 +56,11 @@ abstract class OrmObject implements OrmObjectContract
      *
      * @param array $attributes (optional)
      * @param bool $isFromStorage (default: false)
-     * @param callable $relationLoader (optional)
+     * @param callable $lazyLoader (optional)
      */
-    public function __construct(array $attributes=[], $isFromStorage=false, callable $relationLoader=null)
+    public function __construct(array $attributes=[], $isFromStorage=false, callable $lazyLoader=null)
     {
-        $this->relationLoader = $relationLoader;
+        $this->lazyLoader = $lazyLoader;
         $this->init($attributes, $isFromStorage);
         $this->originalAttributes = $attributes;
         $this->attributes = $attributes;
@@ -230,11 +230,11 @@ abstract class OrmObject implements OrmObjectContract
             throw new RelationNotFoundException("Key $key is no relation");
         }
 
-        if (!is_callable($this->relationLoader)) {
+        if (!is_callable($this->lazyLoader)) {
             throw new UnConfiguredException('No callable assigned to load the relations.');
         }
 
-        $this->attributes[$key] = call_user_func($this->relationLoader, $this, $key);
+        $this->attributes[$key] = call_user_func($this->lazyLoader, $this, $key);
 
         return $this->attributes[$key];
 
@@ -253,6 +253,17 @@ abstract class OrmObject implements OrmObjectContract
     }
 
     /**
+     * Return true if the passed key should be lazy loaded.
+     *
+     * @param string $key
+     * @return bool
+     */
+    public function isLazyLoadKey($key)
+    {
+        return false;
+    }
+
+    /**
      * {@inheritdoc}
      *
      * @param $name string
@@ -261,11 +272,17 @@ abstract class OrmObject implements OrmObjectContract
      */
     public function __get($name)
     {
-        if (!isset($this->attributes[$name]) && $this->isRelation($name)) {
+        if (isset($this->attributes[$name])) {
+            return $this->attributes[$name];
+        }
+
+        if ($this->isRelation($name)) {
             $this->attributes[$name] = $this->getRelated($name);
             $this->originalAttributes[$name] = $this->attributes[$name];
+            return $this->attributes[$name];
         }
-        return $this->attributes[$name];
+
+        return null;
     }
 
     /**
@@ -343,7 +360,7 @@ abstract class OrmObject implements OrmObjectContract
      * @param array $attributes
      * @param bool $isFromStorage
      */
-    protected function init(array $attributes, $isFromStorage)
+    protected function init(array &$attributes, $isFromStorage)
     {
         //
     }

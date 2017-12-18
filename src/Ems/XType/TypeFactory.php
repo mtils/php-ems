@@ -3,16 +3,15 @@
 namespace Ems\XType;
 
 
-use Ems\Contracts\XType\TypeFactory as TypeFactoryContract;
-use Ems\Contracts\XType\SelfExplanatory;
-use Ems\Contracts\XType\HasTypedItems;
-use Ems\Contracts\XType\XType;
 use Ems\Contracts\Core\Extendable;
+use Ems\Contracts\Core\Type;
+use Ems\Contracts\XType\SelfExplanatory;
+use Ems\Contracts\XType\TypeFactory as TypeFactoryContract;
+use Ems\Contracts\XType\XType;
+use Ems\Core\Exceptions\ResourceNotFoundException;
 use Ems\Core\Helper;
 use Ems\Core\Patterns\ExtendableTrait;
 use InvalidArgumentException;
-use Ems\Core\Exceptions\ResourceNotFoundException;
-use UnexpectedValueException;
 
 /**
  * This is the default xtype factory. Create types by a string or an
@@ -49,7 +48,7 @@ class TypeFactory implements TypeFactoryContract, Extendable
     public function toType($config)
     {
         if (!$this->canCreate($config)) {
-            throw new InvalidArgumentException('Cannot create an xtype out of parameter. Please check with canCreate first. Received '.Helper::typeName($config));
+            throw new InvalidArgumentException('Cannot create an xtype out of parameter. Please check with canCreate first. Received '.Type::of($config));
         }
 
         if (is_string($config)) {
@@ -119,6 +118,8 @@ class TypeFactory implements TypeFactoryContract, Extendable
      * @param string $config
      *
      * @return AbstractType
+     *
+     * @throws \Ems\Contracts\Core\Errors\Unsupported
      **/
     protected function stringToType($config)
     {
@@ -200,7 +201,7 @@ class TypeFactory implements TypeFactoryContract, Extendable
         foreach ($properties as $propertyString) {
             if (!mb_strpos($propertyString, ':')) {
                 list($key, $value) = $this->parseBooleanShortcut($propertyString);
-                $parsed[Helper::camelCase($key)] = $value;
+                $parsed[Type::camelCase($key)] = $value;
                 continue;
             }
 
@@ -209,13 +210,13 @@ class TypeFactory implements TypeFactoryContract, Extendable
 
 
             if (!$this->isNestedShortCut($value)) {
-                $parsed[Helper::camelCase($key)] = $value;
+                $parsed[Type::camelCase($key)] = $value;
                 continue;
             }
 
             $type = $this->stringToType(trim($value, '[]'));
 
-            $parsed[Helper::camelCase($key)] = $type;
+            $parsed[Type::camelCase($key)] = $type;
         }
 
         return $parsed;
@@ -236,8 +237,6 @@ class TypeFactory implements TypeFactoryContract, Extendable
             $typeName = array_shift($parts);
             return [$typeName, $parts];
         }
-
-        $levels = [];
 
         $chars = Helper::stringSplit($rule);
 
@@ -319,7 +318,7 @@ class TypeFactory implements TypeFactoryContract, Extendable
      **/
     protected function typeToClassName($typeName)
     {
-        $classBase = Helper::studlyCaps($typeName).'Type';
+        $classBase = Type::studlyCaps($typeName).'Type';
 
         $class = __NAMESPACE__."\\$classBase";
 

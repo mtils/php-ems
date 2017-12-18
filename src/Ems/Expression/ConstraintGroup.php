@@ -4,10 +4,10 @@
 namespace Ems\Expression;
 
 use Ems\Contracts\Core\Expression as ExpressionContract;
+use Ems\Contracts\Core\Type;
 use Ems\Contracts\Expression\Constraint as ConstraintContract;
 use Ems\Contracts\Expression\ConstraintGroup as ConstraintGroupContract;
 use Ems\Core\Exceptions\KeyNotFoundException;
-use Ems\Core\Helper;
 use Ems\Core\Support\StringableTrait;
 use InvalidArgumentException;
 
@@ -137,7 +137,7 @@ class ConstraintGroup implements ConstraintGroupContract
                                        $this->nameAndParameters($definition);
 
             $constraint = $this->newConstraint(
-                Helper::snake_case($name),
+                Type::snake_case($name),
                 $parameters,
                 ''
             );
@@ -168,7 +168,7 @@ class ConstraintGroup implements ConstraintGroupContract
     public function __get($name)
     {
 
-        $name = Helper::snake_case($name);
+        $name = Type::snake_case($name);
 
         if (!$this->__isset($name)) {
             throw new KeyNotFoundException("No constraint with key $name");
@@ -202,7 +202,7 @@ class ConstraintGroup implements ConstraintGroupContract
     public function __set($name, $parameters)
     {
         $constraint = $this->newConstraint(
-            Helper::snake_case($name),
+            Type::snake_case($name),
             (array)$parameters,
             ''
         );
@@ -219,7 +219,7 @@ class ConstraintGroup implements ConstraintGroupContract
      **/
     public function __isset($name)
     {
-        $name = Helper::snake_case($name);
+        $name = Type::snake_case($name);
         return isset($this->constraints[$name]);
     }
 
@@ -232,7 +232,7 @@ class ConstraintGroup implements ConstraintGroupContract
      **/
     public function __unset($name)
     {
-        $name = Helper::snake_case($name);
+        $name = Type::snake_case($name);
         unset($this->constraints[$name]);
     }
 
@@ -325,7 +325,7 @@ class ConstraintGroup implements ConstraintGroupContract
     protected function checkType(ExpressionContract $expression)
     {
         if (!$expression instanceof ConstraintContract) {
-            throw new InvalidArgumentException("ConstraintGroup works only with Constraint not " . Helper::typeName($expression));
+            throw new InvalidArgumentException("ConstraintGroup works only with Constraint not " . Type::of($expression));
         }
 
         return $expression;

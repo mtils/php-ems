@@ -8,9 +8,8 @@ use Ems\Contracts\Core\Expression as ExpressionContract;
 use Ems\Contracts\Expression\Condition as ConditionContract;
 use Ems\Contracts\Expression\Constraint as ConstraintContract;
 use Ems\Contracts\Expression\ConstraintGroup as ConstraintGroupContract;
-use Ems\Core\Exceptions\UnsupportedParameterException;
-use Ems\Core\Helper;
 use Ems\Core\Support\StringableTrait;
+use Ems\Contracts\Core\Type;
 use InvalidArgumentException;
 
 
@@ -19,7 +18,7 @@ class Condition implements ConditionContract
     use StringableTrait;
 
     /**
-     * @var string|Expression
+     * @var string|\Ems\Contracts\Core\Expression
      **/
     protected $operand;
 
@@ -156,7 +155,7 @@ class Condition implements ConditionContract
     protected function checkOperand($operand)
     {
         if (!is_scalar($operand) && !$operand instanceof ExpressionContract) {
-            throw new InvalidArgumentException('Condition only acceps scalars and Expression, not ' . Helper::typeName($operand));
+            throw new InvalidArgumentException('Condition only acceps scalars and Expression, not ' . Type::of($operand));
         }
         return $operand;
     }
@@ -171,7 +170,7 @@ class Condition implements ConditionContract
     public function checkConstraint($constraint)
     {
         if (!$constraint instanceof ConstraintContract && !$constraint instanceof ConstraintGroupContract) {
-            throw new InvalidArgumentException("Constraint has to be Constraint or ConstraintGroup, not " . Helper::typeName($constraint));
+            throw new InvalidArgumentException("Constraint has to be Constraint or ConstraintGroup, not " . Type::of($constraint));
         }
         if ($this->allowedOperators && $constraint instanceof Constraint) {
             $constraint->allowOperators($this->allowedOperators);

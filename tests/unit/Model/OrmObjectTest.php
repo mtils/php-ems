@@ -104,6 +104,7 @@ class OrmObjectTest extends \Ems\TestCase
         $object = $this->newObject($data);
 
         $this->assertFalse($object->wasModified());
+        $this->assertFalse($object->isLazyLoadKey('foo'));
     }
 
     public function test_wasModified_returns_true_without_parameters()

@@ -5,6 +5,7 @@ namespace Ems\Validation;
 
 use Ems\Contracts\Core\AppliesToResource;
 use Ems\Contracts\Core\HasInjectMethods;
+use Ems\Contracts\Core\Type;
 use Ems\Contracts\Validation\Validator as ValidatorContract;
 use Ems\Contracts\Validation\GenericValidator as GenericValidatorContract;
 use Ems\Contracts\Validation\ResourceRuleDetector;
@@ -468,7 +469,7 @@ abstract class Validator implements ValidatorContract, HasInjectMethods
      **/
     protected function methodNameToRule($methodName)
     {
-        return Helper::snake_case(substr($methodName, 8));
+        return Type::snake_case(substr($methodName, 8));
     }
 
     /**

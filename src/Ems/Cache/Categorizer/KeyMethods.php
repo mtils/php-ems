@@ -8,7 +8,7 @@
 
 namespace Ems\Cache\Categorizer;
 
-use Ems\Core\Helper;
+use Ems\Contracts\Core\Type;
 
 /**
  * Trait KeyMethods
@@ -85,6 +85,6 @@ trait KeyMethods
      */
     protected function keyMethodName($first)
     {
-        return Helper::camelCase($first) . 'Key';
+        return Type::camelCase($first) . 'Key';
     }
 }

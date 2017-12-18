@@ -3,16 +3,16 @@
 namespace Ems\XType;
 
 use BadMethodCallException;
+use Closure;
+use Ems\Contracts\Core\Type;
 use Ems\Contracts\Validation\Rule;
-use Ems\Validation\Rule as Constraint;
 use Ems\Contracts\XType\XType;
-use Ems\Core\Exceptions\UnsupportedParameterException;
 use Ems\Core\Exceptions\KeyNotFoundException;
 use Ems\Core\Helper;
+use Ems\Validation\Rule as Constraint;
+use ReflectionMethod;
 use ReflectionObject;
 use ReflectionProperty;
-use ReflectionMethod;
-use Closure;
 
 abstract class AbstractType implements XType
 {
@@ -63,6 +63,8 @@ abstract class AbstractType implements XType
 
     /**
      * @param array $attributes (optional)
+     *
+     * @throws \Ems\Contracts\Core\Errors\Unsupported
      **/
     public function __construct(array $attributes = [])
     {
@@ -97,7 +99,7 @@ abstract class AbstractType implements XType
      *
      * @param array $attributes
      *
-     * @throws \Ems\Contracts\Core\Unsupported
+     * @throws \Ems\Contracts\Core\Errors\Unsupported
      *
      * @return self
      **/
@@ -291,8 +293,8 @@ abstract class AbstractType implements XType
     public function getName()
     {
         if (!$this->_name) {
-            $class = Helper::withoutNamespace($this);
-            $this->_name = Helper::rtrimWord(Helper::snake_case($class, '-'), '-type');
+            $class = Type::short($this);
+            $this->_name = Helper::rtrimWord(Type::snake_case($class, '-'), '-type');
         }
 
         return $this->_name;

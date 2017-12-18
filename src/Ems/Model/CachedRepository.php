@@ -12,7 +12,7 @@ use Ems\Contracts\Cache\Cache;
 use Ems\Contracts\Core\Identifiable;
 use Ems\Contracts\Model\Repository;
 use Ems\Core\Exceptions\ResourceNotFoundException;
-use Ems\Core\Helper;
+use Ems\Contracts\Core\Type;
 
 /**
  * Class CachedRepository
@@ -95,7 +95,7 @@ class CachedRepository implements Repository
             return $model;
         }
 
-        $typeName = Helper::typeName($this->prototype());
+        $typeName = Type::of($this->prototype());
 
         throw new ResourceNotFoundException("$typeName #$id not found.");
     }
@@ -153,7 +153,11 @@ class CachedRepository implements Repository
      **/
     public function update(Identifiable $model, array $newAttributes)
     {
-        return parent::update($model, $newAttributes);
+        if ($result =$this->parent->update($model, $newAttributes)) {
+            $this->cache->put($model);
+        }
+
+        return $result;
     }
 
     /**

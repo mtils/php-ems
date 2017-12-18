@@ -14,6 +14,7 @@ use Ems\Contracts\Core\Provider;
 use Ems\Core\Exceptions\KeyLengthException;
 use Ems\Core\Exceptions\KeyNotFoundException;
 use Ems\Core\Exceptions\NotImplementedException;
+use Ems\Contracts\Core\Type;
 
 /**
  * Class ArrayProvider
@@ -129,7 +130,7 @@ class ArrayProvider implements Provider, ArrayAccess
      *
      * @param mixed $key
      *
-     * @throws \Ems\Contracts\Core\NotFound
+     * @throws \Ems\Contracts\Core\Errors\NotFound
      *
      * @return mixed
      **/
@@ -148,6 +149,8 @@ class ArrayProvider implements Provider, ArrayAccess
      * @param mixed $offset
      *
      * @return boolean
+     *
+     * @throws \Ems\Contracts\Core\Errors\NotFound
      *
      */
     public function offsetExists($offset)
@@ -241,7 +244,7 @@ class ArrayProvider implements Provider, ArrayAccess
      */
     public function add($data, $namespace='default')
     {
-        Helper::forceArrayAccess($data);
+        Type::force($data, ArrayAccess::class);
 
         if (!isset($this->addedData[$namespace])) {
             $this->addedData[$namespace] = [];
@@ -263,7 +266,7 @@ class ArrayProvider implements Provider, ArrayAccess
      */
     public function prepend($data, $namespace='default')
     {
-        Helper::forceArrayAccess($data);
+        Type::force($data, ArrayAccess::class);
 
         if (!isset($this->addedData[$namespace])) {
             $this->addedData[$namespace] = [];

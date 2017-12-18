@@ -3,8 +3,8 @@
 namespace Ems\Foundation;
 
 use Ems\Contracts\Core\AppliesToResource;
+use Ems\Contracts\Core\Type;
 use Ems\Contracts\Foundation\InputNormalizer as InputNormalizerContract;
-use Ems\Core\Helper;
 
 trait SelfNormalizingTrait
 {
@@ -77,7 +77,7 @@ trait SelfNormalizingTrait
 
         if (!isset($this->_methodCache[$arrayKey])) {
 
-            $method = $prefix . ucfirst(Helper::camelCase(str_replace([' ', '.'],'_', $key)));
+            $method = $prefix . ucfirst(Type::camelCase(str_replace([' ', '.'],'_', $key)));
 
             $this->_methodCache[$arrayKey] = method_exists($this, $method) ? $method : false;
 

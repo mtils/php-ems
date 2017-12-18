@@ -58,4 +58,12 @@ interface OrmObject extends HasKeys, Arrayable, ObjectAccess, ChangeTracking, Id
      * @return Relation
      */
     public function getRelation($key);
+
+    /**
+     * Return true if the passed key should be lazy loaded.
+     *
+     * @param string $key
+     * @return bool
+     */
+    public function isLazyLoadKey($key);
 }

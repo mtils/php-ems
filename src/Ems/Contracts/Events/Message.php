@@ -8,7 +8,7 @@
 
 namespace Ems\Contracts\Events;
 
-use Ems\Core\Helper;
+use Ems\Contracts\Core\Type;
 
 /**
  * Class Message
@@ -111,7 +111,7 @@ class Message
                 continue;
             }
 
-            $parameters[] = Helper::typeName($value) . " $$key";
+            $parameters[] = Type::of($value) . " $$key";
         }
 
         return $this->name . '(' . implode(', ', $parameters) . ')';

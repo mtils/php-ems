@@ -10,7 +10,7 @@ use Ems\Contracts\Validation\Validator;
 use Ems\Core\Patterns\HookableTrait;
 use Ems\Core\Exceptions\MisConfiguredException;
 use Ems\Core\Exceptions\UnsupportedParameterException;
-use Ems\Core\Helper;
+use Ems\Contracts\Core\Type;
 use UnexpectedValueException;
 
 class InputNormalizer implements InputNormalizerContract
@@ -103,7 +103,7 @@ class InputNormalizer implements InputNormalizerContract
     /**
      * {@inheritdoc}
      *
-     * @param array|bool|Ems\Contracts\Validation\Validator $constraint (optional)
+     * @param array|bool|\Ems\Contracts\Validation\Validator $constraint (optional)
      *
      * @return self
      **/
@@ -131,7 +131,7 @@ class InputNormalizer implements InputNormalizerContract
             return $this;
         }
 
-        throw new UnsupportedParameterException("Unsupported parameter type: " . Helper::typeName($constraint));
+        throw new UnsupportedParameterException("Unsupported parameter type: " . Type::of($constraint));
 
     }
 
@@ -257,7 +257,7 @@ class InputNormalizer implements InputNormalizerContract
         foreach ($listeners as $listener) {
             $input = $listener($input, $resource, $locale);
             if (!is_array($input)) {
-                throw new UnexpectedValueException('Every listener of InputNormalizer has to return the input not ' . Helper::typeName($input));
+                throw new UnexpectedValueException('Every listener of InputNormalizer has to return the input not ' . Type::of($input));
             }
         }
 

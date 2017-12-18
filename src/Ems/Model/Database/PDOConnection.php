@@ -4,6 +4,7 @@
 namespace Ems\Model\Database;
 
 use Closure;
+use Ems\Contracts\Core\Type;
 use Exception;
 use Ems\Contracts\Core\HasMethodHooks;
 use Ems\Contracts\Core\Url;
@@ -13,13 +14,12 @@ use Ems\Contracts\Model\Database\Dialect;
 use Ems\Contracts\Model\Database\SQLException;
 use Ems\Contracts\Model\Database\NativeError;
 use Ems\Core\ConfigurableTrait;
-use Ems\Core\Helper;
 use Ems\Core\Patterns\HookableTrait;
-use Ems\Model\GenericResult;
 use PDO;
 use PDOStatement;
 use PDOException;
 use InvalidArgumentException;
+use UnderflowException;
 
 /**
  * Whats this? No idea?
@@ -195,8 +195,8 @@ class PDOConnection implements Connection, Configurable, HasMethodHooks
      **/
     public function setDialect($dialect)
     {
-        if (!Helper::isStringLike($dialect)) {
-            throw new InvalidArgumentException('Dialect hast to be stringlike, not ' . Helper::typeName($dialect));
+        if (!Type::isStringLike($dialect)) {
+            throw new InvalidArgumentException('Dialect hast to be stringlike, not ' . Type::of($dialect));
         }
         $this->dialect = $dialect;
         return $this;
@@ -288,11 +288,13 @@ class PDOConnection implements Connection, Configurable, HasMethodHooks
     /**
      * Run a select statement and return the result.
      *
-     * @param string|\Ems\Contracts\Stringable $query
-     * @param array                            $binding (optional)
-     * @param mixed                            $fetchMode (optional)
+     * @param string|\Ems\Contracts\Core\Stringable $query
+     * @param array                                 $binding (optional)
+     * @param mixed                                 $fetchMode (optional)
      *
-     * @return Result
+     * @return PDOResult
+     *
+     * @throws \Ems\Contracts\Core\Errors\UnSupported
      **/
     public function select($query, array $bindings=[], $fetchMode=null)
     {

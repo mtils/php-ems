@@ -2,29 +2,14 @@
 
 namespace Ems\Core;
 
-use Ems\Core\Exceptions\UnsupportedParameterException;
+use function call_user_func;
 use Traversable;
 use ArrayAccess;
-use Countable;
+use Ems\Contracts\Core\Type;
 use Ems\Contracts\Core\Extractor as ExtractorContract;
 
 class Helper
 {
-
-    /**
-     * @var array
-     **/
-    protected static $camelCache = [];
-
-    /**
-     * @var array
-     **/
-    protected static $studlyCache = [];
-
-    /**
-     * @var array
-     **/
-    protected static $snakeCache = [];
 
     /**
      * @var ExtractorContract
@@ -64,23 +49,21 @@ class Helper
     /**
      * Converts a name to camel case (first letter is lowercase)
      *
+     * @deprecated Use Type::camelCase()
+     *
      * @param string $value
      *
      * @return string
      **/
     public static function camelCase($value)
     {
-        if (isset(static::$camelCache[$value])) {
-            return static::$camelCache[$value];
-        }
-
-        static::$camelCache[$value] = lcfirst(static::studlyCaps($value));
-
-        return static::$camelCache[$value];
+        return Type::camelCase($value);
     }
 
     /**
      * Converts a name to studly caps (camel case first letter uppercase)
+     *
+     * @deprecated Use Type::studlyCaps()
      *
      * @param string $value
      *
@@ -88,19 +71,13 @@ class Helper
      **/
     public static function studlyCaps($value)
     {
-        $key = $value;
-
-        if (isset(static::$studlyCache[$key])) {
-            return static::$studlyCache[$key];
-        }
-
-        static::$studlyCache[$key] = str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $value)));
-
-        return static::$studlyCache[$key];
+        return Type::studlyCaps($value);
     }
 
     /**
      * Convert a string to snake case.
+     *
+     * @deprecated Use Type::snake_case()
      *
      * @param  string  $value
      * @param  string  $delimiter
@@ -108,44 +85,21 @@ class Helper
      */
     public static function snake_case($value, $delimiter = '_')
     {
-        $key = $value;
-
-        if (isset(static::$snakeCache[$key][$delimiter])) {
-            return static::$snakeCache[$key][$delimiter];
-        }
-
-        if (! ctype_lower($value)) {
-            $value = preg_replace('/\s+/u', '', $value);
-
-            $value = mb_strtolower(preg_replace('/(.)(?=[A-Z])/u', '$1'.$delimiter, $value));
-        }
-
-        return static::$snakeCache[$key][$delimiter] = $value;
+        return Type::snake_case($value, $delimiter);
     }
 
     /**
      * Return the class without namespace
      *
+     * @deprecated  use Type::short()
+     *
      * @param  string|object  $class
+     *
      * @return string
      */
     public static function withoutNamespace($class)
     {
-        $class = is_object($class) ? get_class($class) : $class;
-
-        return basename(str_replace('\\', '/', $class));
-    }
-
-    /**
-     * Return if the passed value is a string (has __toString method)
-     *
-     * @param mixed $value
-     *
-     * @return bool
-     **/
-    public static function isStringLike($value)
-    {
-        return is_string($value) || (is_object($value) && method_exists($value, '__toString'));
+        return Type::short($class);
     }
 
     /**
@@ -252,13 +206,15 @@ class Helper
     /**
      * Return the name of the passed values type
      *
+     * @deprecated Use Type::of()
+     *
      * @param mixed $value
      *
      * @return string
      **/
     public static function typeName($value)
     {
-        return is_object($value) ? get_class($value) : strtolower(gettype($value)); //NULL is uppercase
+        return Type::of($value);
     }
 
     /**
@@ -400,17 +356,21 @@ class Helper
     /**
      * Check if the passed value has ArrayAccess.
      *
+     * @deprecated Use Type::is($value, ArrayAccess::class)
+     *
      * @param mixed $value
      *
      * @return bool
      */
     public static function hasArrayAccess($value)
     {
-        return (is_array($value) || $value instanceof ArrayAccess);
+        return Type::is($value, ArrayAccess::class);
     }
 
     /**
      * Throws an exception if the passed value has no ArrayAccess.
+     *
+     * @deprecated Use Type::forceAndReturn($value, ArrayAccess::class)
      *
      * @param $value
      *
@@ -418,10 +378,7 @@ class Helper
      */
     public static function forceArrayAccess($value)
     {
-        if (!static::hasArrayAccess($value)) {
-            throw new UnsupportedParameterException("The passed value has no ArrayAccess: " . static::typeName($value));
-        }
-        return $value;
+        return Type::forceAndReturn($value, ArrayAccess::class);
     }
 
     public static function offsetExists(array &$array, $key)

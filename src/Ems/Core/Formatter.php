@@ -5,6 +5,7 @@
 
 namespace Ems\Core;
 
+use ArrayAccess;
 use DateTime;
 use Ems\Contracts\Core\Formatter as FormatterContract;
 use Ems\Contracts\Core\Multilingual;
@@ -13,6 +14,7 @@ use Ems\Core\Patterns\ExtendableTrait;
 use Ems\Core\Support\StringChainSupport;
 use Ems\Core\Exceptions\HandlerNotFoundException;
 use InvalidArgumentException;
+use Ems\Contracts\Core\Type;
 
 class Formatter implements FormatterContract, Multilingual
 {
@@ -325,7 +327,7 @@ class Formatter implements FormatterContract, Multilingual
      */
     public function setFormats($formats)
     {
-        $this->formats = Helper::forceArrayAccess($formats);
+        $this->formats = Type::forceAndReturn($formats, ArrayAccess::class);
         $this->formatCache = [];
         return $this;
     }
@@ -583,7 +585,7 @@ class Formatter implements FormatterContract, Multilingual
         }
 
         if (!is_string($date) && !method_exists($date, '__toString')) {
-            $typeName = Helper::typeName($date);
+            $typeName = Type::of($date);
             throw new InvalidArgumentException("No idea how to cast $typeName to DateTime");
         }
 

@@ -8,6 +8,7 @@
 
 namespace Ems\Events;
 
+use ArrayAccess;
 use Ems\Contracts\Core\Url as UrlContract;
 use Ems\Contracts\Events\Broadcaster;
 use Ems\Contracts\Events\Bus as BusContract;
@@ -21,8 +22,8 @@ use Ems\Contracts\Http\Client as ClientContract;
 use Ems\Core\Exceptions\ConstraintViolationException;
 use Ems\Core\Exceptions\ResourceNotFoundException;
 use Ems\Core\Exceptions\UnConfiguredException;
-use Ems\Core\Helper;
 Use Ems\Core\Patterns\HookableTrait;
+use Ems\Contracts\Core\Type;
 use Ems\Core\Url;
 
 
@@ -232,8 +233,7 @@ class RESTBroadcaster implements Broadcaster, HasMethodHooks
      */
     public function setReceivers($receivers)
     {
-        Helper::forceArrayAccess($receivers);
-        $this->receivers = $receivers;
+        $this->receivers = Type::forceAndReturn($receivers, ArrayAccess::class);
         return $this;
     }
 

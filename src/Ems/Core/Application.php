@@ -2,6 +2,7 @@
 
 namespace Ems\Core;
 
+use ArrayAccess;
 use Ems\Contracts\Core\HasMethodHooks;
 use Ems\Contracts\Core\IOCContainer as ContainerContract;
 use Ems\Core\Exceptions\KeyNotFoundException;
@@ -9,6 +10,7 @@ use Ems\Core\Exceptions\UnsupportedUsageException;
 use Ems\Core\Support\IOCContainerProxyTrait;
 use Ems\Core\Patterns\HookableTrait;
 use Ems\Contracts\Core\Url as UrlContract;
+use Ems\Contracts\Core\Type;
 
 /**
  * This application is a minimal version optimized
@@ -243,7 +245,7 @@ class Application implements ContainerContract, HasMethodHooks
      */
     public function setPaths($paths)
     {
-        $this->paths = Helper::forceArrayAccess($paths);
+        $this->paths = Type::forceAndReturn($paths, ArrayAccess::class);
         return $this;
     }
 
@@ -306,7 +308,7 @@ class Application implements ContainerContract, HasMethodHooks
         if ($this->wasBooted()) {
             throw new UnsupportedUsageException('You can only set configuration before boot.');
         }
-        $this->config = Helper::forceArrayAccess($config);
+        $this->config = Type::forceAndReturn($config, ArrayAccess::class);
         return $this;
     }
 

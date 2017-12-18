@@ -5,7 +5,7 @@ namespace Ems\Core\Serializer;
 use Ems\Contracts\Core\Serializer;
 use Ems\Core\Exceptions\DataIntegrityException;
 use Ems\Core\Exceptions\UnsupportedParameterException;
-use Ems\Core\Helper;
+use Ems\Contracts\Core\Type;
 
 /**
  * This serializer serializes a GD resource into a string and
@@ -75,7 +75,7 @@ class GDSerializer implements Serializer
     {
 
         if (!$this->isGDResource($value)) {
-            throw new UnsupportedParameterException('I can only serialize gd resource not ' . Helper::typeName($value));
+            throw new UnsupportedParameterException('I can only serialize gd resource not ' . Type::of($value));
         }
 
 

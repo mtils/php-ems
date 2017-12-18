@@ -4,30 +4,27 @@ namespace Ems\Model\Database\Dialects;
 
 use DateTime;
 use Ems\Contracts\Core\Expression as ExpressionContract;
+use Ems\Contracts\Core\Type;
+use Ems\Contracts\Expression\Condition;
+use Ems\Contracts\Expression\Constraint;
+use Ems\Contracts\Expression\LogicalGroup;
 use Ems\Contracts\Model\Database\Dialect;
 use Ems\Contracts\Model\Database\NativeError;
 use Ems\Contracts\Model\Database\SQLException;
-use Ems\Contracts\Expression\Condition;
-use Ems\Contracts\Expression\ConditionGroup;
-use Ems\Contracts\Expression\LogicalGroup;
-use Ems\Contracts\Expression\Constraint;
-use Ems\Contracts\Expression\ConstraintGroup;
-use Ems\Core\Support\StringableTrait;
 use Ems\Core\Exceptions\UnsupportedParameterException;
-use Ems\Core\Expression;
 use Ems\Core\Helper;
 use Ems\Core\KeyExpression;
+use Ems\Core\Support\StringableTrait;
 use Ems\Model\Database\SQLConstraintException;
 use Ems\Model\Database\SQLDeniedException;
-use Ems\Model\Database\SQLIOException;
 use Ems\Model\Database\SQLExceededException;
+use Ems\Model\Database\SQLIOException;
 use Ems\Model\Database\SQLLockException;
 use Ems\Model\Database\SQLNameNotFoundException;
 use Ems\Model\Database\SQLSyntaxException;
-
-
 use Exception;
 use InvalidArgumentException;
+
 
 class SQLiteDialect implements Dialect
 {
@@ -123,7 +120,7 @@ class SQLiteDialect implements Dialect
         }
 
         if (!$expression instanceof LogicalGroup) {
-            throw new InvalidArgumentException("Cannot render a " . Helper::typeName($expression));
+            throw new InvalidArgumentException("Cannot render a " . Type::of($expression));
         }
 
         $parts = [];
@@ -321,7 +318,7 @@ class SQLiteDialect implements Dialect
             }
 
             if (!is_array($parameter)) {
-                throw new UnsupportedParameterException('Cannot render parameter of type ' . Helper::typeName($parameter));
+                throw new UnsupportedParameterException('Cannot render parameter of type ' . Type::of($parameter));
             }
 
             // Ensure numerical indexes here to not destroy the binding sequence

@@ -150,12 +150,11 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
      *
      * @param mixed $value
      *
-     * @return self
+     * @return int
      **/
     public function indexOf($value)
     {
         $count = $this->count();
-        $found = false;
         for ($i = 0; $i < $count; ++$i) {
             if ($value === $this->source[$i]) {
                 return $i;

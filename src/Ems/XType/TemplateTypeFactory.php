@@ -7,6 +7,7 @@ use ArrayAccess;
 use DateTime;
 use Ems\Contracts\XType\TypeFactory as TypeFactoryContract;
 use Ems\Core\Helper;
+use Ems\Contracts\Core\Type;
 
 /**
  * The TemplateTypeFactory can be used to create a type of all
@@ -154,7 +155,7 @@ class TemplateTypeFactory implements TypeFactoryContract
                 return false;
             }
 
-            $itemType = Helper::typeName($item);
+            $itemType = Type::of($item);
 
             // TODO: list could be typed by common class or interface
             if ($i !== 0 && $itemType != $lastItemType) {

@@ -3,10 +3,10 @@
 
 namespace Ems\Events;
 
-use Ems\Core\Helper;
 use Ems\Core\Lambda;
 use Ems\Core\Exceptions\UnConfiguredException;
 use Ems\Core\Exceptions\UnsupportedParameterException;
+use Ems\Contracts\Core\Type;
 use InvalidArgumentException;
 
 class MatchingListener
@@ -173,8 +173,6 @@ class MatchingListener
 
         foreach ($this->markFilter as $mark => $mustBe) {
 
-            $markValue = isset($marks[$mark]) ? $marks[$mark] : null;
-
             // $mustBe has to be boolean or string, for performance reasons
             // it will not be checked again here
 
@@ -309,7 +307,7 @@ class MatchingListener
         }
 
         if (!is_bool($value) && !is_string($value)) {
-            throw new UnsupportedParameterException("This MatchingListener can only match boolean and strings. You added for $mark a value of " . Helper::typeName($value));
+            throw new UnsupportedParameterException("This MatchingListener can only match boolean and strings. You added for $mark a value of " . Type::of($value));
         }
     }
 }
