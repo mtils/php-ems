@@ -18,6 +18,7 @@ use Ems\Core\Helper;
 use Ems\Contracts\Core\Entity;
 use Ems\Core\Lambda;
 use Ems\Core\Collections\NestedArray;
+use Ems\Core\Patterns\SnakeCaseCallableMethods;
 use Ems\Expression\ConstraintParsingMethods;
 use Ems\XType\SequenceType;
 
@@ -26,6 +27,9 @@ abstract class Validator implements ValidatorContract, HasInjectMethods
 {
     use HookableTrait;
     use ConstraintParsingMethods;
+    use SnakeCaseCallableMethods {
+        SnakeCaseCallableMethods::isSnakeCaseCallableMethod as parentIsSnakeCaseCallableMethod;
+    }
 
     /**
      * @var array
@@ -61,6 +65,13 @@ abstract class Validator implements ValidatorContract, HasInjectMethods
      * @var TypeProvider
      **/
     protected $typeProvider;
+
+    /**
+     * This is the prefix for the "own validation methods" of this class.
+     *
+     * @var string
+     */
+    protected $snakeCasePrefix = 'validate';
 
     /**
      * Perform validation by the the base validator. Reimplement this method
@@ -403,7 +414,7 @@ abstract class Validator implements ValidatorContract, HasInjectMethods
         $ownRules = [];
         $baseRules = [];
 
-        $own = $this->getOwnValidationMethods();
+        $own = $this->getSnakeCaseMethods();
 
         foreach ($parsedRules as $key=>$keyRules) {
             foreach ($keyRules as $ruleName=>$parameters) {
@@ -420,56 +431,19 @@ abstract class Validator implements ValidatorContract, HasInjectMethods
     }
 
     /**
-     * Collect all methods which should be used as validation rules. Also
-     * information about parameter names and if they are optional
+     * Overwritten to skip the two validateBy... methods.
      *
-     * @return array
-     **/
-    protected function getOwnValidationMethods()
-    {
-        if ($this->ownValidationMethods !== null) {
-            return $this->ownValidationMethods;
-        }
-
-        $this->ownValidationMethods = [];
-
-        foreach (get_class_methods($this) as $method) {
-
-            if (!$this->isRuleMethod($method)) {
-                continue;
-            }
-
-            $this->ownValidationMethods[$this->methodNameToRule($method)] = $method;
-        }
-
-        return $this->ownValidationMethods;
-    }
-
-    /**
-     * Test if a method name is a validation rule method
-     *
-     * @param string $methodName
+     * @param string $method
+     * @param string $prefix
      *
      * @return bool
      **/
-    protected function isRuleMethod($methodName)
+    protected function isSnakeCaseCallableMethod($method, $prefix)
     {
-        if (in_array($methodName, ['validateByBaseValidator', 'validateByOwnMethods'])) {
+        if (in_array($method, ['validateByBaseValidator', 'validateByOwnMethods'])) {
             return false;
         }
-        return ($methodName != 'validate') && Helper::startsWith($methodName, 'validate');
-    }
-
-    /**
-     * Converts a validation method name to a rule name
-     *
-     * @param string $methodName
-     *
-     * @return string
-     **/
-    protected function methodNameToRule($methodName)
-    {
-        return Type::snake_case(substr($methodName, 8));
+        return $this->parentIsSnakeCaseCallableMethod($method, $prefix);
     }
 
     /**
@@ -540,7 +514,7 @@ abstract class Validator implements ValidatorContract, HasInjectMethods
      **/
     protected function validateByOwnMethod($ruleName, array $vars, array $parameters)
     {
-        $method = $this->getOwnValidationMethods()[$ruleName];
+        $method = $this->getMethodBySnakeCaseName($ruleName);
 
         $methodParams = Lambda::mergeArguments([$this, $method], $vars, $parameters);
 
