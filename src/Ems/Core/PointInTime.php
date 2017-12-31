@@ -4,14 +4,39 @@ namespace Ems\Core;
 
 use DateTime;
 use DateTimeZone;
+use Ems\Contracts\Core\None;
 use Ems\Contracts\Core\PointInTime as TemporalContract;
+use Ems\Contracts\Core\Type;
+use InvalidArgumentException;
+use function method_exists;
 
+/**
+ * Class PointInTime
+ *
+ * @package Ems\Core
+ *
+ * @property int $year
+ * @property int $month
+ * @property int $day
+ * @property int $hour
+ * @property int $minute
+ * @property int $second
+ * @property int $timezone
+ * @property int $timestamp
+ * @property int $offset
+ * @property int $precision
+ */
 class PointInTime extends DateTime implements TemporalContract
 {
     /**
      * @var string
      **/
     protected $precision;
+
+    /**
+     * @var bool
+     */
+    protected $isInValid = false;
 
     protected $properties = [
         'year'      => self::YEAR,
@@ -45,6 +70,12 @@ class PointInTime extends DateTime implements TemporalContract
      */
     public function __construct($time = null, $tz = null)
     {
+
+        if ($time instanceof None) {
+            $this->invalidate();
+            $time = null;
+        }
+
         parent::__construct($time, $tz);
     }
 
@@ -77,6 +108,30 @@ class PointInTime extends DateTime implements TemporalContract
 
         return $this;
     }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @return bool
+     */
+    public function isValid()
+    {
+        return !$this->isInValid;
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @param bool $makeInvalid
+     *
+     * @return self
+     */
+    public function invalidate($makeInvalid = true)
+    {
+        $this->isInValid = $makeInvalid;
+        return $this;
+    }
+
 
     /**
      * {@inheritdoc}
@@ -175,6 +230,13 @@ class PointInTime extends DateTime implements TemporalContract
         return isset($this->properties[$property]);
     }
 
+    /**
+     * @param string       $format
+     * @param string       $string
+     * @param DateTimeZone $timezone (optional)
+     *
+     * @return PointInTime
+     */
     public static function createFromFormat($format, $string, $timezone = null)
     {
         $timezone = $timezone ?: new DateTimeZone(date_default_timezone_get());
@@ -182,5 +244,40 @@ class PointInTime extends DateTime implements TemporalContract
 
         return (new static())->setTimestamp($other->getTimestamp())
                            ->setTimezone($other->getTimezone());
+    }
+
+    /**
+     * Try to guess the datetime by the passed string.
+     *
+     * @param string $date
+     *
+     * @return static
+     */
+    public static function guessFrom($date)
+    {
+        if ($date instanceof DateTime) {
+            return (new static())->setTimestamp($date->getTimestamp());
+        }
+
+        if (is_numeric($date)) {
+            return (new static())->setTimestamp((int) $date);
+        }
+
+        if (is_object($date) && method_exists($date, 'getTimestamp')) {
+            return (new static())->setTimestamp($date->getTimestamp());
+        }
+
+        if (!Type::isStringLike($date)) {
+            $typeName = Type::of($date);
+            throw new InvalidArgumentException("No idea how to cast $typeName to DateTime");
+        }
+
+        $date = (string) $date;
+
+        if ($dateTime = date_create($date)) {
+            return $dateTime;
+        }
+
+        throw new InvalidArgumentException("No idea how to cast $date to DateTime");
     }
 }

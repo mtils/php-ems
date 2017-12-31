@@ -82,6 +82,24 @@ interface PointInTime
     public function setTime($hour, $minute, $second = 0);
 
     /**
+     * You can invalidate a PointInTime Object. Normally there is no
+     * "null"-state of a DateTime object. But in many cases I just
+     * want to have a invalid DateTime object.
+     *
+     * @return bool
+     */
+    public function isValid();
+
+    /**
+     * Make this datetime object invalid.
+     *
+     * @param bool $makeInvalid
+     *
+     * @return self
+     */
+    public function invalidate($makeInvalid=true);
+
+    /**
      * Use properties for all units
      * Must support year, month, day, hour, minute, second, timezone, timestamp,
      * offset, unit.

@@ -2,13 +2,15 @@
 
 namespace Ems\Core;
 
+use Ems\Contracts\Core\None;
+use Ems\Contracts\Core\PointInTime as PointInTimeContract;
 
 class PointInTimeTest extends \Ems\TestCase
 {
     public function test_implements_interface()
     {
         $this->assertInstanceOf(
-            'Ems\Contracts\Core\PointInTime',
+            PointInTimeContract::class,
             $this->time()
         );
     }
@@ -35,6 +37,25 @@ class PointInTimeTest extends \Ems\TestCase
         $this->assertEquals(6, $unit->month);
     }
 
+    public function test_precision()
+    {
+        $time = $this->time();
+        $this->assertEquals(PointInTimeContract::SECOND, $time->precision());
+        $this->assertSame($time, $time->setPrecision(PointInTimeContract::DAY));
+        $this->assertEquals(PointInTimeContract::DAY, $time->precision());
+    }
+
+    public function test_invalidate()
+    {
+        $this->assertTrue($this->time()->isValid());
+        $this->assertFalse((new PointInTime(new None))->isValid());
+    }
+
+    /**
+     * @param null $date
+     *
+     * @return PointInTime
+     */
     protected function time($date=null)
     {
         return $date ? PointInTime::createFromFormat('Y-m-d H:i:s', $date) : new PointInTime();
