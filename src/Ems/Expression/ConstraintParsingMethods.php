@@ -4,6 +4,8 @@
 namespace Ems\Expression;
 
 
+use function is_array;
+
 trait ConstraintParsingMethods
 {
     /**
@@ -18,17 +20,36 @@ trait ConstraintParsingMethods
         $parsedConstraints = [];
 
         foreach ($constraints as $key=>$keyConstraints) {
-            $keyConstraintArray = $this->explodeConstraints($keyConstraints);
-
-            $parsedConstraints[$key] = [];
-
-            foreach ($keyConstraintArray as $keyConstraint) {
-                list($name, $parameters) = $this->nameAndParameters($keyConstraint);
-                $parsedConstraints[$key][$name] = $parameters;
-            }
+            $parsedConstraints[$key] = $this->parseConstraint($keyConstraints);
         }
 
         return $parsedConstraints;
+    }
+
+    /**
+     * Parses the constraints for easier usage.
+     *
+     * @param mixed $rule
+     *
+     * @return array
+     **/
+    protected function parseConstraint($rule)
+    {
+        $parsed = [];
+
+        // If someone added a native (associative) array.
+        if (is_array($rule) && !isset($rule[0])) {
+            return $this->normalizeNativeRule($rule);
+        }
+
+        $constraints = $this->explodeConstraints($rule);
+
+        foreach ($constraints as $constraint) {
+            list($name, $parameters) = $this->nameAndParameters($constraint);
+            $parsed[$name] = $parameters;
+        }
+
+        return $parsed;
     }
 
     /**
@@ -73,4 +94,19 @@ trait ConstraintParsingMethods
         return str_replace('-', '_', mb_strtolower($name));
     }
 
+    /**
+     * Make every parameters to array if they are not already arrays.
+     *
+     * @param array $rule
+     *
+     * @return array
+     */
+    protected function normalizeNativeRule(array $rule)
+    {
+        $normalized = [];
+        foreach ($rule as $key=>$parameters) {
+            $normalized[$key] = is_array($parameters) ? $parameters : [$parameters];
+        }
+        return $normalized;
+    }
 }

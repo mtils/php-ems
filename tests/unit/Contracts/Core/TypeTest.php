@@ -8,7 +8,9 @@ namespace Ems\Contracts\Core;
 
 use ArrayIterator;
 
+use Ems\Core\Collections\OrderedList;
 use Ems\TestCase;
+use Ems\XType\Eloquent\Order;
 use Traversable;
 
 class TypeTest extends TestCase
@@ -30,6 +32,21 @@ class TypeTest extends TestCase
     {
         $this->assertTrue(Type::is(new ArrayIterator(), Traversable::class));
         $this->assertTrue(Type::is([], Traversable::class));
+    }
+
+    public function test_toBool_returns_right_values()
+    {
+        $this->assertTrue(Type::toBool('') === false);
+        $list = new OrderedList([1,2,3]);
+        $this->assertTrue(Type::toBool($list) === true);
+        $this->assertTrue(Type::toBool(new OrderedList()) === false);
+        $this->assertTrue(Type::toBool(' ') === false);
+        $this->assertTrue(Type::toBool('0') === false);
+        $this->assertTrue(Type::toBool(false) === false);
+        $this->assertTrue(Type::toBool('false') === false);
+        $this->assertTrue(Type::toBool('true') === true);
+        $this->assertTrue(Type::toBool(new \Ems\Core\Url()) === false);
+
     }
 
     /**

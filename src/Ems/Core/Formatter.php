@@ -571,31 +571,7 @@ class Formatter implements FormatterContract, Multilingual
      **/
     protected function toDateTime($date)
     {
-        if ($date instanceof DateTime) {
-            return $date;
-        }
-
-        if (is_numeric($date)) {
-            return (new DateTime())->setTimestamp((int) $date);
-        }
-
-        // Support for the ancient Zend_Date and others...
-        if (is_object($date) && method_exists($date, 'getTimestamp')) {
-            return (new DateTime())->setTimestamp($date->getTimestamp());
-        }
-
-        if (!is_string($date) && !method_exists($date, '__toString')) {
-            $typeName = Type::of($date);
-            throw new InvalidArgumentException("No idea how to cast $typeName to DateTime");
-        }
-
-        $date = (string) $date;
-
-        if ($dateTime = date_create($date)) {
-            return $dateTime;
-        }
-
-        throw new InvalidArgumentException("No idea how to cast $date to DateTime");
+        return PointInTime::guessFrom($date);
     }
 
     /**

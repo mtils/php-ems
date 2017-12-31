@@ -8,6 +8,7 @@ use IteratorAggregate;
 use Ems\Testing\LoggingCallable;
 use Ems\Core\Support\ArrayAccessMethods;
 use Ems\Core\Support\IteratorAggregateMethods;
+use stdClass;
 
 class HelperTest extends \Ems\TestCase
 {
@@ -296,6 +297,44 @@ class HelperTest extends \Ems\TestCase
         $this->assertNull(Helper::first((object)['first'=>'foo']));
     }
 
+    public function test_last_returns_last_array_value()
+    {
+        $this->assertEquals(12, Helper::last([12]));
+    }
+
+    public function test_last_returns_null_on_empty_array()
+    {
+        $this->assertNull(Helper::last([]));
+    }
+
+    public function test_last_returns_last_char_of_string()
+    {
+        $this->assertEquals('e', Helper::last('abcde'));
+        $this->assertEquals('ü', Helper::last('abcdeääßü'));
+        $this->assertNull(Helper::last(''));
+    }
+
+    public function test_last_returns_null_on_unsupported_values()
+    {
+        $this->assertNull(Helper::last(null));
+        $this->assertNull(Helper::last(12));
+        $this->assertNull(Helper::last(3.5));
+        $this->assertNull(Helper::last(true));
+        $this->assertNull(Helper::last(new stdClass()));
+    }
+
+    public function test_last_returns_last_on_Traversable_object()
+    {
+
+        $test = new HelperTestTraversable;
+        $test->array = ['foo', 'bar'];
+        $this->assertEquals('bar', Helper::last($test));
+
+        $test = new HelperTestTraversable;
+        $this->assertNull(Helper::last($test));
+
+    }
+
     public function test_stringSplit_splits_normal_string()
     {
         $test = 'Hello my name is michael';
@@ -346,6 +385,35 @@ class HelperTest extends \Ems\TestCase
         $this->assertTrue(Helper::startsWith(['a','b','c'], 'a'));
         $this->assertTrue(Helper::startsWith(['bananas','apples','melon'], 'bananas'));
         $this->assertFalse(Helper::startsWith(['bananas','apples','melon'], 'apples'));
+    }
+
+    public function test_endsWith_works_with_strings()
+    {
+        $this->assertTrue(Helper::endsWith('Hello', 'o'));
+        $this->assertTrue(Helper::endsWith('Hello', 'ello'));
+        $this->assertTrue(Helper::endsWith('Hello', 'Hello'));
+        $this->assertFalse(Helper::endsWith('Hello', 'l'));
+
+        $this->assertTrue(Helper::endsWith('Ährenöbstä', 'ä'));
+        $this->assertTrue(Helper::endsWith('Ährenöbstä', 'öbstä'));
+        $this->assertFalse(Helper::endsWith('Ährenöbst', 'Ühr'));
+
+    }
+
+    public function test_endsWith_works_with_numbers()
+    {
+        $this->assertTrue(Helper::endsWith(1, 1));
+        $this->assertTrue(Helper::endsWith(1.53, 53));
+        $this->assertTrue(Helper::endsWith(3529, 29));
+        $this->assertFalse(Helper::endsWith(3529, 35));
+
+    }
+
+    public function test_endsWith_works_with_arrays()
+    {
+        $this->assertTrue(Helper::endsWith(['a','b','c'], 'c'));
+        $this->assertTrue(Helper::endsWith(['bananas','apples','melon'], 'melon'));
+        $this->assertFalse(Helper::endsWith(['bananas','apples','melon'], 'apples'));
     }
 
     public function test_value_uses_extractor()

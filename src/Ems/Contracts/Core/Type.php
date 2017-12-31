@@ -5,7 +5,10 @@
 
 namespace Ems\Contracts\Core;
 
+use Countable;
 use Ems\Contracts\Core\Exceptions\TypeException;
+use function is_bool;
+use function is_numeric;
 use Traversable;
 use ArrayAccess;
 
@@ -86,6 +89,18 @@ class Type
     public static function isStringLike($value)
     {
         return is_string($value) || (is_object($value) && method_exists($value, '__toString'));
+    }
+
+    /**
+     * Return true if a value can be casted to string.
+     *
+     * @param mixed $value
+     *
+     * @return bool
+     */
+    public static function isStringable($value)
+    {
+        return static::isStringLike($value) || is_numeric($value) || is_bool($value) || is_null($value);
     }
 
     /**
@@ -215,6 +230,37 @@ class Type
         static::$studlyCache[$key] = str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $value)));
 
         return static::$studlyCache[$key];
+    }
+
+    /**
+     * Cast a value to boolean.
+     *
+     * @param mixed $value
+     *
+     * @return bool
+     */
+    public static function toBool($value)
+    {
+        if ($value instanceof Countable) {
+            return (bool)count($value);
+        }
+
+        if (!static::isStringLike($value)) {
+            return (bool)$value;
+        }
+
+        $string = "$value";
+
+        if (trim($string) == '') {
+            return false;
+        }
+
+        if (in_array(strtolower($value), ['0', 'false'], true)) {
+            return false;
+        }
+
+        return (bool)$string;
+
     }
 
     /**

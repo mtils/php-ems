@@ -33,7 +33,8 @@ trait SnakeCaseCallableMethods
      */
     protected function getMethodBySnakeCaseName($name)
     {
-        return $this->getSnakeCaseMethods()[$name];
+        $methods = $this->getSnakeCaseMethods();
+        return isset($methods[$name]) ? $methods[$name] : '';
     }
 
     /**

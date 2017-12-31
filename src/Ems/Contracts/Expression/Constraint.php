@@ -9,7 +9,7 @@ use Ems\Contracts\Core\Stringable;
 
 /**
  * A constraint represents a constraint definition. It cannot check itself
- * if this definition applies to a value. ts just a unified interface to store
+ * if this definition applies to a value. It is just a unified interface to store
  * how a value must be to match.
  *
  * @example $constraint->name() // equals

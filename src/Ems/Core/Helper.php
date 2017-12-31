@@ -262,6 +262,46 @@ class Helper
     }
 
     /**
+     * Return the last item fo the passed value. (Last array item, last letter,
+     * last object item.
+     *
+     * @param mixed $value
+     *
+     * @return mixed
+     **/
+    public static function last($value)
+    {
+
+        if (is_array($value) && $value) {
+            return end($value);
+        }
+
+        if (!$value) {
+            return null;
+        }
+
+        if (is_string($value)) {
+            return mb_substr($value, -1);
+        }
+
+        if (!is_object($value)) {
+            return null;
+        }
+
+        if (!$value instanceof Traversable) {
+            return null;
+        }
+
+        $item = null;
+
+        foreach ($value as $key=>$item) {
+        }
+
+        return $item;
+
+    }
+
+    /**
      * Return the keys of the passed array or object
      *
      * @param mixed $value
@@ -333,6 +373,25 @@ class Helper
 
         return mb_strpos("$value", "$start") === 0;
 
+    }
+
+    /**
+     * Return true if $value ends with $end
+     *
+     * @param array|string $value
+     * @param mixed $end
+     *
+     * @return bool
+     */
+    public static function endsWith($value, $end)
+    {
+        if (is_array($value)) {
+            return self::last($value) == $end;
+        }
+
+        $end = "$end";
+
+        return substr($value, -strlen($end)) === $end;
     }
 
     /**

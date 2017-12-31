@@ -294,30 +294,7 @@ class TextFormatter implements FormatterContract
      **/
     protected function toDateTime($date)
     {
-        if ($date instanceof DateTime) {
-            return $date;
-        }
-
-        if (is_numeric($date)) {
-            return (new DateTime())->setTimestamp((int) $date);
-        }
-
-        if (is_object($date) && get_class($date) == 'Zend_Date') {
-            return (new DateTime())->setTimestamp($date->getTimestamp());
-        }
-
-        if (!is_string($date) && !method_exists($date, '__toString')) {
-            $typeName = is_object($date) ? get_class($date) : gettype($date);
-            throw new InvalidArgumentException("No idea how to cast $typeName to DateTime");
-        }
-
-        $date = (string) $date;
-
-        if ($dateTime = date_create($date)) {
-            return $dateTime;
-        }
-
-        throw new InvalidArgumentException("No idea how to cast $date to DateTime");
+        return PointInTime::guessFrom($date);
     }
 
     /**
