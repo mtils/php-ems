@@ -18,7 +18,9 @@ use Ems\Core\Exceptions\NotImplementedException;
 use Ems\Core\Patterns\ExtendableTrait;
 use Ems\Core\Patterns\SnakeCaseCallableMethods;
 use Ems\Expression\ConstraintParsingMethods;
+use function gettype;
 use InvalidArgumentException;
+use function is_bool;
 use UnderflowException;
 use const FILTER_FLAG_IPV4;
 use const FILTER_VALIDATE_URL;
@@ -424,7 +426,7 @@ class Checker implements CheckerContract
     {
 
         if ($strict || in_array($operator, ['is', 'is not', '=', '!=', '<>'])) {
-            return $this->compare($left, $operator, $right);
+            return $this->isComparable($left, $right) ? $this->compare($left, $operator, $right) : false;
         }
 
         if (!$comparable = $this->makeComparable($left, $right)) {
@@ -940,6 +942,31 @@ class Checker implements CheckerContract
     }
 
     /**
+     * Check if two values are comparable. ([] > 4 evaluates to true in php...)
+     * This is somehow by definition...
+     *
+     * @param mixed $left
+     * @param mixed $right
+     *
+     * @return bool
+     */
+    protected function isComparable($left, $right)
+    {
+
+        if (gettype($left) == gettype($right)) {
+            return true;
+        }
+
+        if (is_numeric($left) && is_numeric($right)) {
+            return true;
+        }
+
+        // You can compare anything to bool and anything to null (really?...)
+        return is_bool($left) || is_bool($right) || is_null($left) || is_null($right);
+
+    }
+
+    /**
      * Try to convert a arbitrary date parameter into a timestamp.
      *
      * @param mixed $date
@@ -992,19 +1019,43 @@ class Checker implements CheckerContract
      */
     protected function constraintToArray($rule)
     {
-        if ($rule instanceof Constraint) {
-            return [
-                $rule->name() => $rule->parameters()
-            ];
+        if ($rule instanceof ConstraintGroup) {
+            return $this->constraintGroupToArray($rule);
         }
 
-        /** @var ConstraintGroup $rule */
+        $operator = $rule->operator();
 
+        // Do some more strict checks if constraints with operators were passed
+        if (!$operator) {
+            return [$rule->name() => $rule->parameters()];
+        }
+
+        if (strtolower($operator) == 'like') {
+            return ['like' => $rule->parameters()];
+        }
+
+        return [
+            'compare' => [
+                $operator,
+                $rule->parameters()[0],
+                true
+            ]
+        ];
+    }
+
+    /**
+     * @param ConstraintGroup $group
+     *
+     * @return array
+     */
+    protected function constraintGroupToArray(ConstraintGroup $group)
+    {
         $array = [];
 
-        /** @var Constraint $constraint */
-        foreach ($rule->constraints() as $constraint) {
-            $array[$constraint->name()] = $constraint->parameters();
+        foreach ($group->constraints() as $constraint) {
+            foreach ($this->constraintToArray($constraint) as $key=>$value) {
+                $array[$key] = $value;
+            }
         }
 
         return $array;

@@ -10,7 +10,7 @@ use Traversable;
 class Map
 {
     /**
-     * Return true if all $check returns true on ALL items.
+     * Return true if $check returns true on ALL items.
      *
      * @param array|Traversable $items
      * @param callable          $check

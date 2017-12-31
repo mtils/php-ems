@@ -135,6 +135,17 @@ class CheckerTest extends TestCase
         $c = new Constraint('equals', [3]);
         $this->assertTrue($checker->check(3, $c));
         $this->assertFalse($checker->check(4, $c));
+
+        // without operator fuzzy check
+        $c = new Constraint('min', [3]);
+        $this->assertTrue($checker->check(3, $c));
+        $this->assertTrue($checker->check([1,2,3], $c));
+
+        // with operator strict check
+        $c = new Constraint('min', [3], '>=');
+        $this->assertTrue($checker->check(3, $c));
+        $this->assertFalse($checker->check([1,2,3], $c));
+
     }
 
     public function test_check_with_ConstraintGroup()
