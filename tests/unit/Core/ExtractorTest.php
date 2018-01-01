@@ -2,6 +2,7 @@
 
 namespace Ems\Core;
 
+use function array_key_exists;
 use Ems\Contracts\Core\Extractor as ExtractorContract;
 use Ems\Testing\LoggingCallable;
 
@@ -63,6 +64,25 @@ class ExtractorTest extends \Ems\TestCase
         foreach ($test as $key=>$value) {
             $this->assertEquals($value, $extractor->value($test, $key));
         }
+    }
+
+    public function test_it_extracts_object_value_from_magic_method()
+    {
+        $extractor = $this->newExtractor();
+
+        $data = [
+            'a'     => 'a',
+            'foo'   => true
+        ];
+
+        $test = new MagicOverloadedClass($data);
+        $test->c = new MagicOverloadedClass(['a' => 'foo']);
+
+        foreach ($data as $key=>$value) {
+            $this->assertEquals($value, $extractor->value($test, $key));
+        }
+
+        $this->assertEquals('foo', $extractor->value($test, 'c.a'));
     }
 
     public function test_it_extracts_nested_object_value()
@@ -244,4 +264,29 @@ class NestedSubTypeTest
 
 class NestedChildTypeTest
 {
+}
+
+class MagicOverloadedClass
+{
+    protected $attributes = [];
+
+    public function __construct(array $attributes=[])
+    {
+        $this->attributes = $attributes;
+    }
+
+    public function __isset($name)
+    {
+        return array_key_exists($name, $this->attributes);
+    }
+
+    public function __get($name)
+    {
+        return $this->attributes[$name];
+    }
+
+    public function __set($name, $value)
+    {
+        $this->attributes[$name] = $value;
+    }
 }

@@ -5,6 +5,8 @@ namespace Ems\Core;
 use Ems\Contracts\Core\Extractor as ExtractorContract;
 use Ems\Core\Patterns\ExtendableTrait;
 use InvalidArgumentException;
+use function method_exists;
+use function property_exists;
 
 class Extractor implements ExtractorContract
 {
@@ -157,16 +159,26 @@ class Extractor implements ExtractorContract
      **/
     protected function &getNode(&$node, $key)
     {
-        if (is_object($node) && isset($node->$key)) {
-            return $node->$key;
-        }
-
         if (is_array($node) && isset($node[$key])) {
             return $node[$key];
         }
 
-        $result = null; //$this->callUntilNotNull($node, $key);
+        if (!is_object($node) || !isset($node->$key)) {
+            $result = null;
+            return $result;
+        }
 
+        // Special check for __isset and __get
+        if (property_exists($node, $key)) {
+            return $node->$key;
+        }
+
+        if (method_exists($node, '__get')) {
+            $value = $node->__get($key);
+            return $value;
+        }
+
+        $result = null;
         return $result;
     }
 

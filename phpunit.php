@@ -31,6 +31,7 @@ require __DIR__.'/tests/helpers/TestCase.php';
 
 require __DIR__.'/tests/helpers/traits/AppTrait.php';
 require __DIR__.'/tests/helpers/traits/LaravelAppTrait.php';
+require __DIR__.'/tests/helpers/traits/TestData.php';
 require __DIR__.'/tests/helpers/IntegrationTest.php';
 require __DIR__.'/tests/helpers/LaravelIntegrationTest.php';
 

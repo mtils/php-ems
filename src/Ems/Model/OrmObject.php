@@ -307,7 +307,18 @@ abstract class OrmObject implements OrmObjectContract
      */
     public function __isset($name)
     {
-        return array_key_exists($name, $this->attributes);
+        // If the key was loaded, return true
+        if (array_key_exists($name, $this->attributes)) {
+            return true;
+        }
+
+        // If it is a not loaded relation, return true
+        if ($this->isRelation($name)) {
+            return true;
+        }
+
+        // At least return true if this key can be lazy loaded
+        return $this->isLazyLoadKey($name);
     }
 
     /**
