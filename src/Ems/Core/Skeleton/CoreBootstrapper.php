@@ -3,6 +3,7 @@
 namespace Ems\Core\Skeleton;
 
 use Ems\Contracts\Core\ConnectionPool as ConnectionPoolContract;
+use Ems\Contracts\Core\Checker as CheckerContract;
 use Ems\Contracts\Core\Extractor as ExtractorContract;
 use Ems\Contracts\Core\Filesystem;
 use Ems\Contracts\Core\Formatter as FormatterContract;
@@ -21,6 +22,7 @@ use Ems\Contracts\Core\Url as UrlContract;
 use Ems\Core\Application;
 use Ems\Core\ArrayLocalizer;
 use Ems\Core\ArrayProvider;
+use Ems\Core\Checker;
 use Ems\Core\Extractor;
 use Ems\Core\Formatter;
 use Ems\Core\InputCaster;
@@ -41,6 +43,7 @@ use Ems\Core\VariablesTextParser;
 use Ems\Core\AnythingProvider;
 use Ems\Core\ConnectionPool;
 use Ems\Core\FilesystemConnection;
+use Ems\Expression\Matcher;
 use ReflectionClass;
 use ReflectionMethod;
 
@@ -62,7 +65,8 @@ class CoreBootstrapper extends Bootstrapper
         TextParserQueue::class            => TextParser::class,
         Extractor::class                  => ExtractorContract::class,
         Formatter::class                  => FormatterContract::class,
-        ConnectionPool::class             => ConnectionPoolContract::class
+        ConnectionPool::class             => ConnectionPoolContract::class,
+        Checker::class                    => CheckerContract::class
     ];
 
     /**
@@ -119,6 +123,10 @@ class CoreBootstrapper extends Bootstrapper
 
             return $provider;
 
+        }, true);
+
+        $this->app->bind(Matcher::class, function ($ioc) {
+            return new Matcher($ioc(CheckerContract::class), $ioc(ExtractorContract::class));
         }, true);
 
         $this->app->resolving(Formatter::class, function (Formatter $formatter, $app) {
