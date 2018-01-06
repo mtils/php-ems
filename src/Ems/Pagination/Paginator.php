@@ -418,7 +418,12 @@ class Paginator implements PaginatorContract
         $currentPage = $this->currentPageNumber;
         $baseUrl = $this->baseUrl;
 
-        for ($page=1; $page <= $currentPage; $page++) {
+        for ($page=1; $page <= ($currentPage+1); $page++) {
+
+            if (!$perhapsMorePages && $page > $currentPage) {
+                break;
+            }
+
             $pages->add($this->newPage([
                 'number'      => $page,
                 'url'         => $baseUrl ? $baseUrl->query($pageParameter, $page) : '',
