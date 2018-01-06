@@ -61,6 +61,7 @@ class PhpSearchEngine implements SearchEngine
     {
         $this->matcher = $matcher;
         $this->extractor = $extractor ?: new Extractor();
+
     }
 
     /**
@@ -157,7 +158,10 @@ class PhpSearchEngine implements SearchEngine
         $filtered = $this->filterData($matcher, $offset, $limit);
 
         if ($shouldBreak) {
-            return $filtered;
+            // Create a "not length aware" paginator here
+            $paginator = new Paginator($page, $perPage, $this);
+            $paginator->setResult($filtered);
+            return $paginator;
         }
 
         if ($sorting) {

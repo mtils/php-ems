@@ -73,13 +73,13 @@ class PhpSearchEngineTest extends TestCase
         $result = $engine->search($query);
 
         $this->assertInstanceOf(Result::class, $result);
-        $items = $result->paginate(1, 15);
+        $items = iterator_to_array($result->paginate(1, 15));
         $this->assertCount(15, $items);
 
         $this->assertEquals('Afghanistan', $items[0]->name);
         $this->assertEquals('Barbados', $items[14]->name);
 
-        $items = $result->paginate(2, 15);
+        $items = iterator_to_array($result->paginate(2, 15));
 
         $this->assertEquals('Belarus', $items[0]->name);
         $this->assertEquals('Cameroon', $items[14]->name);
@@ -124,13 +124,13 @@ class PhpSearchEngineTest extends TestCase
         $result = $engine->search($query);
 
         $this->assertInstanceOf(Result::class, $result);
-        $items = $result->paginate(1, 10);
+        $items = iterator_to_array($result->paginate(1, 10));
 
         $this->assertCount(10, $items);
         $this->assertEquals(20, $items[0]->getId());
         $this->assertEquals(29, $items[9]->getId());
 
-        $items = $result->paginate(2, 10);
+        $items = iterator_to_array($result->paginate(2, 10));
 
         $this->assertCount(10, $items);
         $this->assertEquals(30, $items[0]->getId());
