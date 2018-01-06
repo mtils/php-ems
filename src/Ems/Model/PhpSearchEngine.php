@@ -14,6 +14,7 @@ use Ems\Contracts\Model\Result;
 use Ems\Contracts\Model\SearchEngine;
 use Ems\Core\Extractor;
 use Ems\Expression\Matcher;
+use Ems\Pagination\Paginator;
 use function is_numeric;
 use function is_string;
 use function strnatcasecmp;
@@ -142,7 +143,7 @@ class PhpSearchEngine implements SearchEngine
      * @param int            $page (optional)
      * @param int            $perPage (optional)
      *
-     * @return array
+     * @return array|Paginator
      */
     protected function buildResult(ConditionGroup $conditions, array $sorting, $keys=[], $page=null, $perPage=null)
     {
@@ -167,7 +168,9 @@ class PhpSearchEngine implements SearchEngine
             return $filtered;
         }
 
-        return array_slice($filtered, ($page-1)*$perPage, $perPage);
+        $paginator = new Paginator($page, $perPage, $this);
+
+        return $paginator->setResult($paginator->slice($filtered), count($filtered));
 
     }
 

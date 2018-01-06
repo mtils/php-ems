@@ -209,7 +209,7 @@ class PhpSearchEngineTest extends TestCase
 
         $result = $engine->search($query, ['currency.code' => 'desc', 'name' => 'asc']);
 
-        $items = $result->paginate(1, 20);
+        $items = iterator_to_array($result->paginate(1, 20));
 
         $this->assertCount(20, $items);
 
