@@ -7,8 +7,10 @@ namespace Ems\Contracts\Core;
 
 use Countable;
 use Ems\Contracts\Core\Exceptions\TypeException;
+use function is_array;
 use function is_bool;
 use function is_numeric;
+use function iterator_to_array;
 use Traversable;
 use ArrayAccess;
 
@@ -73,6 +75,8 @@ class Type
                 return is_array($value) || $value instanceof Traversable;
             case ArrayAccess::class:
                 return is_array($value) || $value instanceof ArrayAccess;
+            case Countable::class:
+                return is_array($value) || $value instanceof Countable;
             default:
                 return $value instanceof $type;
         }
@@ -261,6 +265,25 @@ class Type
 
         return (bool)$string;
 
+    }
+
+    /**
+     * Make something an array.
+     *
+     * @param array|Traversable $value
+     *
+     * @return array
+     *
+     * @throws TypeException
+     */
+    public static function toArray($value)
+    {
+        if (!is_array($value) && !$value instanceof Traversable) {
+            $name = static::of($value);
+            throw new TypeException("Can only cast Traversable and arrays to array, not $name");
+        }
+
+        return is_array($value) ? $value : iterator_to_array($value);
     }
 
     /**

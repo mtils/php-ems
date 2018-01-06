@@ -7,10 +7,9 @@ namespace Ems\Contracts\Core;
 
 
 use ArrayIterator;
-
+use Countable;
 use Ems\Core\Collections\OrderedList;
 use Ems\TestCase;
-use Ems\XType\Eloquent\Order;
 use Traversable;
 
 class TypeTest extends TestCase
@@ -34,6 +33,12 @@ class TypeTest extends TestCase
         $this->assertTrue(Type::is([], Traversable::class));
     }
 
+    public function test_is_returns_true_if_countable()
+    {
+        $this->assertTrue(Type::is(new ArrayIterator(), Countable::class));
+        $this->assertTrue(Type::is([], Countable::class));
+    }
+
     public function test_toBool_returns_right_values()
     {
         $this->assertTrue(Type::toBool('') === false);
@@ -47,6 +52,14 @@ class TypeTest extends TestCase
         $this->assertTrue(Type::toBool('true') === true);
         $this->assertTrue(Type::toBool(new \Ems\Core\Url()) === false);
 
+    }
+
+    /**
+     * @expectedException \Ems\Contracts\Core\Exceptions\TypeException
+     */
+    public function test_toArray_throws_exception_when_not_castable()
+    {
+        Type::toArray(0.127);
     }
 
     /**
