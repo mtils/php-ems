@@ -17,7 +17,14 @@ use Ems\Contracts\Expression\Queryable;
 use Ems\Core\Checker;
 use Ems\Core\Exceptions\NotImplementedException;
 use Ems\Core\Extractor;
+use Ems\Core\Helper;
 use Ems\Core\KeyExpression;
+use Traversable;
+use function array_pop;
+use function array_shift;
+use function is_array;
+use function is_object;
+use function strpos;
 use function strtolower;
 
 /**
@@ -183,7 +190,22 @@ class Matcher implements Queryable
     protected function compileConstraint($constraint)
     {
         return function ($value) use ($constraint) {
-            return $this->checker->check($value, $constraint);
+
+            if (!$value instanceof MatchesCollection) {
+                return $this->checker->check($value, $constraint);
+            }
+
+            // Matching values against sequential arrays will result in
+            // checking if ANY of the values matches the criteria.
+            // This will allow normal sql like "WHERE categories.id = 13" queries
+            foreach ($value as $item) {
+                if ($this->checker->check($item, $constraint)) {
+                    return true;
+                }
+            }
+
+            return false;
+
         };
     }
 
@@ -205,7 +227,87 @@ class Matcher implements Queryable
             return $root;
         }
 
-        return $this->extractor->value($root, $path->toString());
+        $pathString = $path->toString();
+
+        if ($value = $this->extractor->value($root, $pathString)) {
+            return $value;
+        }
+
+        // If a "to many" relation is checked here (like categories.id)
+        // the extractor will not be able to retrieve the id, because it will
+        // look for $root->categories['id'] but it is a numeric array like
+        // this: categories[0]->id. So we have to make a workaround for this
+        if (!strpos($pathString, '.')) {
+            return $value;
+        }
+
+        return $this->buildCollection($root, $pathString);
+
+    }
+
+    /**
+     * @param Traversable|array $root
+     * @param string            $path
+     *
+     * @return MatchesCollection|null
+     */
+    protected function buildCollection($root, $path)
+    {
+
+        $pathStack = explode('.', $path);
+        $last = array_pop($pathStack);
+        $lastIndex = count($pathStack) - 1;
+
+        foreach ($pathStack as $i=>$segment) {
+
+            $currentStack[] = $segment;
+            $currentPath = implode('.', $currentStack);
+
+            if (!$parent = $this->value($root, new KeyExpression($currentPath))) {
+                break;
+            }
+
+            if (!Helper::isSequential($parent)) {
+                array_shift($pathStack);
+                $offsetPath = new KeyExpression(implode('.', $pathStack) . ".$last");
+                return $this->value($parent, $offsetPath);
+            }
+
+            if ($i == $lastIndex) {
+
+                $values = new MatchesCollection();
+
+                foreach ($parent as $child) {
+                    $values->append($this->extractor->value($child, $last));
+                }
+
+                return $values;
+            }
+
+            array_shift($pathStack);
+
+            $offsetPath = implode('.', $pathStack) . ".$last";
+
+            $values = new MatchesCollection();
+
+            foreach ($parent as $child) {
+
+                $collection = $this->buildCollection($child, $offsetPath);
+
+                if (!$collection instanceof MatchesCollection) {
+                    continue;
+                }
+
+                foreach ($collection as $hit) {
+                    $values->append($hit);
+                }
+            }
+
+            return $values;
+
+        }
+
+        return null;
     }
 
     /**
@@ -254,4 +356,5 @@ class Matcher implements Queryable
             ->forbidMultipleConnectives();
 
     }
+
 }

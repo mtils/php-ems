@@ -179,6 +179,132 @@ class MatcherTest extends TestCase
 
     }
 
+    public function test_matches_to_many_relation()
+    {
+        $data = [
+            'foo' => 'bar',
+            'name' => 'Bill',
+            'buddy' => [
+                'name' => 'Tim',
+                'age' => 35
+            ],
+            'married' => true,
+            'address' => [
+                'street' => 'Elm Street 14',
+                'postcode' => '76148',
+                'country' => [
+                    'name' => 'Germany',
+                    'iso'  => 'DE'
+                ]
+            ],
+            'categories' => [
+                ['id' => 13],
+                ['id' => 57]
+            ]
+        ];
+
+        $matcher = $this->newMatcher();
+
+        $this->assertTrue($matcher->where('categories.id', 13)->matches($data));
+        $this->assertTrue($matcher->where('categories.id', 57)->matches($data));
+        $this->assertFalse($matcher->where('categories.id', 17)->matches($data));
+    }
+
+    public function test_matches_to_many_relation_nested()
+    {
+        $data = [
+            'foo' => 'bar',
+            'name' => 'Bill',
+            'buddy' => [
+                'name' => 'Tim',
+                'age' => 35
+            ],
+            'married' => true,
+            'address' => [
+                'street' => 'Elm Street 14',
+                'postcode' => '76148',
+                'country' => [
+                    'name' => 'Germany',
+                    'iso'  => 'DE'
+                ]
+            ],
+            'categories' => [
+                [
+                    'id' => 13,
+                    'colours' => [
+                        [
+                            'id' => '#000',
+                            'name' => 'black'
+                        ],
+                        [
+                            'id' => '#f00',
+                            'name' => 'red'
+                        ]
+                    ]
+                ],
+                [
+                    'id' => 57,
+                    'colours' => [
+                        [
+                            'id' => '#fff',
+                            'name' => 'white'
+                        ],
+                        [
+                            'id' => '#0f0',
+                            'name' => 'green'
+                        ]
+                    ]
+                ]
+            ]
+        ];
+
+        $matcher = $this->newMatcher();
+        $this->assertTrue($matcher->where('categories.colours.name', 'white')->matches($data));
+        $this->assertTrue($matcher->where('categories.colours.name', 'red')->matches($data));
+        $this->assertFalse($matcher->where('categories.colours.name', 'yellow')->matches($data));
+
+
+    }
+
+    public function test_matches_to_many_relation_of_nested_to_one_relation()
+    {
+        $data = [
+            'foo' => 'bar',
+            'name' => 'Bill',
+            'buddy' => [
+                'name' => 'Tim',
+                'age' => 35
+            ],
+            'married' => true,
+            'address' => [
+                'street' => 'Elm Street 14',
+                'postcode' => '76148',
+                'country' => [
+                    'name' => 'Germany',
+                    'iso'  => 'DE'
+                ],
+                'shipping' => [
+                    [
+                        'name' => 'dhl'
+                    ],
+                    [
+                        'name' => 'ups'
+                    ]
+                ]
+            ]
+        ];
+
+        $matcher = $this->newMatcher();
+        $this->assertTrue($matcher->where('address.shipping.name', 'dhl')->matches($data));
+        $this->assertTrue($matcher->where('address.shipping.name', 'ups')->matches($data));
+        $this->assertFalse($matcher->where('address.shipping.name', 'ghl')->matches($data));
+        $this->assertFalse($matcher->where('address.foo.name', 'ghl')->matches($data));
+        $this->assertFalse($matcher->where('address.shipping.foo', 'ghl')->matches($data));
+        $this->assertFalse($matcher->where('address.shipping.name.foo', 'ghl')->matches($data));
+
+
+    }
+
     /**
      * @expectedException \Ems\Core\Exceptions\NotImplementedException
      */
