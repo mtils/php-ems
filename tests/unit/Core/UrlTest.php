@@ -371,6 +371,51 @@ class UrlTest extends \Ems\TestCase
         $this->assertFalse($this->newUrl('/home/michael')->isEmpty());
     }
 
+    public function test_without_removes_one_query_keys()
+    {
+        $path = 'admin/session/create';
+        $host = 'foo.de';
+        $scheme = 'http';
+        $query = [
+            'id'   => 45,
+            'name' => 'elsa-unicorn-power',
+            'age' => 56,
+            'nick' => 'mustafa'
+        ];
+
+        $url = $this->newUrl("$scheme://$host/$path");
+
+        $newUrl = $url->query($query);
+
+        $this->assertNotSame($url, $newUrl);
+        $this->assertEquals($query, $newUrl->query);
+
+        $this->assertTrue(isset($newUrl->query['id']));
+
+        $url2 = $newUrl->without('id');
+
+        $this->assertNotSame($url2, $newUrl);
+
+        foreach ($query as $key=>$value) {
+            if ($key == 'id') {
+                $this->assertFalse(isset($url2->query[$key]));
+                continue;
+            }
+            $this->assertTrue(isset($url2->query[$key]));
+        }
+
+        $url3 = $newUrl->without('id', 'name', 'nick');
+
+        foreach ($query as $key=>$value) {
+            if ($key == 'age') {
+                $this->assertTrue(isset($url3->query[$key]));
+                continue;
+            }
+            $this->assertFalse(isset($url3->query[$key]));
+        }
+
+    }
+
     /**
      * @expectedException InvalidArgumentException
      **/

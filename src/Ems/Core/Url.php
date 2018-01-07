@@ -3,10 +3,12 @@
 namespace Ems\Core;
 
 use Ems\Contracts\Core\Url as UrlContract;
+use function func_get_args;
 use InvalidArgumentException;
 use Ems\Core\Support\StringableTrait;
 use Ems\Core\Collections\StringList;
 use ArrayIterator;
+use function is_array;
 use RuntimeException;
 
 /**
@@ -244,6 +246,27 @@ class Url implements UrlContract
         return $this->replicate(['query' => $key]);
     }
 
+
+    /**
+     * {@inheritdoc}
+     *
+     * @param string|array $key
+     *
+     * @return self
+     */
+    public function without($key)
+    {
+        $keys = is_array($key) ? $key : func_get_args();
+        $query = $this->query;
+
+        foreach ($keys as $key) {
+            if (isset($query[$key])) {
+                unset($query[$key]);
+            }
+        }
+        return $this->replicate(['query' => ''])->query($query);
+    }
+
     /**
      * {@inheritdoc}
      *
@@ -254,52 +277,6 @@ class Url implements UrlContract
     public function fragment($fragment)
     {
         return $this->replicate(['fragment' => $fragment]);
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @param * @param string|array|self $url $url
-     *
-     * @return self
-     **/
-    protected function fill($url)
-    {
-        $parts = $this->castToArray($url);
-
-        if (isset($parts['scheme']) && $parts['scheme']) {
-            $this->scheme = mb_strtolower($parts['scheme']);
-        }
-
-        if (isset($parts['user']) && $parts['user']) {
-            $this->user = $parts['user'];
-        }
-
-        if (isset($parts['password']) && $parts['password']) {
-            $this->password = $parts['password'];
-        }
-
-        if (isset($parts['host']) && $parts['host']) {
-            $this->host = $parts['host'];
-        }
-
-        if (isset($parts['port']) && $parts['port']) {
-            $this->port = $parts['port'];
-        }
-
-        if (isset($parts['path'])) {
-            $this->setPath($parts['path']);
-        }
-
-        if (isset($parts['query']) && $parts['query']) {
-            $this->setQuery($parts['query']);
-        }
-
-        if (isset($parts['fragment']) && $parts['fragment']) {
-            $this->fragment = $parts['fragment'];
-        }
-
-        return $this;
     }
 
     /**
@@ -438,7 +415,7 @@ class Url implements UrlContract
     /**
      * Return the count of this array like object.
      *
-     * @return int
+     * @return ArrayIterator
      **/
     public function getIterator()
     {
@@ -512,6 +489,52 @@ class Url implements UrlContract
         $newAttributes['query'] = $this->mergeOrReplaceQuery($queryAttributes);
 
         return new static($newAttributes);
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @param * @param string|array|self $url $url
+     *
+     * @return self
+     **/
+    protected function fill($url)
+    {
+        $parts = $this->castToArray($url);
+
+        if (isset($parts['scheme']) && $parts['scheme']) {
+            $this->scheme = mb_strtolower($parts['scheme']);
+        }
+
+        if (isset($parts['user']) && $parts['user']) {
+            $this->user = $parts['user'];
+        }
+
+        if (isset($parts['password']) && $parts['password']) {
+            $this->password = $parts['password'];
+        }
+
+        if (isset($parts['host']) && $parts['host']) {
+            $this->host = $parts['host'];
+        }
+
+        if (isset($parts['port']) && $parts['port']) {
+            $this->port = $parts['port'];
+        }
+
+        if (isset($parts['path'])) {
+            $this->setPath($parts['path']);
+        }
+
+        if (isset($parts['query']) && $parts['query']) {
+            $this->setQuery($parts['query']);
+        }
+
+        if (isset($parts['fragment']) && $parts['fragment']) {
+            $this->fragment = $parts['fragment'];
+        }
+
+        return $this;
     }
 
     /**

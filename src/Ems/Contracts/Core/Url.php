@@ -123,6 +123,16 @@ interface Url extends Stringable, ArrayAccess, IteratorAggregate, Copyable, Arra
     public function query($key, $value = null);
 
     /**
+     * Remove a query value. Pass on key, an array of keys or multiple
+     * arguments to remove the keys from the query.
+     *
+     * @param string|array $key
+     *
+     * @return self
+     */
+    public function without($key);
+
+    /**
      * Set the fragmenbt part (#top).
      *
      * @param string $fragment
