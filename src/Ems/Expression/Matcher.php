@@ -352,9 +352,7 @@ class Matcher implements Queryable
     protected function newQuery()
     {
         return (new MatcherQuery($this))
-            ->allowConnectives('and', 'or')
-            ->forbidMultipleConnectives();
-
+            ->allowConnectives('and', 'or');
     }
 
 }
