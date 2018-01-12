@@ -448,11 +448,12 @@ class Paginator implements PaginatorContract
      */
     protected function buildSqueezed($squeezeTo, $numberOfPages)
     {
-        if ($this->currentPageNumber <= $squeezeTo) {
+
+        if ($this->currentPageNumber < $squeezeTo - static::$defaultSqueezeSpace) {
             return $this->buildStartEmphasized($squeezeTo, $numberOfPages);
         }
 
-        if ($this->currentPageNumber > ($numberOfPages - $squeezeTo)) {
+        if ($this->currentPageNumber - (static::$defaultSqueezeSpace+1) > ($numberOfPages - $squeezeTo)) {
             return $this->buildEndEmphasized($squeezeTo, $numberOfPages);
         }
 
