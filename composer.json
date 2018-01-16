@@ -44,5 +44,11 @@
             "name": "Michael Tils",
             "email": "mtils@web-utils.de"
         }
-    ]
+    ],
+    "repositories" : {
+        "packagist": {
+            "url": "https://packagist.org",
+            "type": "composer"
+        }
+    }
 }
