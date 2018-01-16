@@ -327,6 +327,23 @@ class PaginatorTest extends TestCase
 
     }
 
+    public function test_pages_with_totalCount_and_perPage_for_twelf_pages_and_6_per_page()
+    {
+
+        $result = range('a', 'l');
+
+        $paginator = $this->paginate(1, 6);
+
+
+        $url = new Url('https://web-utils.de/products');
+        $paginator->setBaseUrl($url);
+
+        $items = $paginator->slice($result);
+        $paginator->setResult($items, count($result));
+
+        $this->assertCount(2, $paginator->pages());
+    }
+
     public function test_pages_with_totalCount_and_perPage_for_one_pages()
     {
 
@@ -492,6 +509,7 @@ class PaginatorTest extends TestCase
     {
 
         $result = range(1, 300000);
+
         $paginator = $this->paginate(1, 10);
 
         $url = new Url('https://web-utils.de/products');
@@ -509,7 +527,7 @@ class PaginatorTest extends TestCase
         $this->assertTrue($pages->isSqueezed());
 
         $this->assertCount(11, $pages);
-        $this->assertEquals(30001, $pages->totalPageCount());
+        $this->assertEquals(30000, $pages->totalPageCount());
 
         $this->assertTrue($pages[1]->isFirst());
         $this->assertTrue($pages[1]->isCurrent());
@@ -547,7 +565,7 @@ class PaginatorTest extends TestCase
         $this->assertTrue($pages->isSqueezed());
 
         $this->assertCount(11, $pages);
-        $this->assertEquals(30001, $pages->totalPageCount());
+        $this->assertEquals(30000, $pages->totalPageCount());
 
 
         $this->assertTrue($pages[1]->isFirst());
@@ -557,9 +575,9 @@ class PaginatorTest extends TestCase
         $this->assertTrue($pages[3]->isPlaceholder());
         $this->assertFalse($pages[4]->isPlaceholder());
 
-        $this->assertTrue($pages[9]->isPrevious());
+        $this->assertTrue($pages[10]->isPrevious());
 
-        $this->assertTrue($pages[10]->isCurrent());
+        $this->assertTrue($pages[11]->isCurrent());
 
         $this->assertFalse($pages[10]->isLast());
         $this->assertTrue($pages[11]->isLast());
@@ -587,14 +605,8 @@ class PaginatorTest extends TestCase
 
         $this->assertTrue($pages->isSqueezed());
 
-        $dumps = [];
-
-        foreach ($pages as $page) {
-            $dumps[] = $page->dump();
-        }
-
         $this->assertCount(12, $pages);
-        $this->assertEquals(30001, $pages->totalPageCount());
+        $this->assertEquals(30000, $pages->totalPageCount());
 
         $this->assertTrue($pages[1]->isFirst());
         $this->assertFalse($pages[1]->isCurrent());

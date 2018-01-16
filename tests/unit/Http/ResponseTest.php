@@ -14,6 +14,7 @@ use Ems\Contracts\Core\Serializer;
 use Ems\Contracts\Http\Connection;
 use Ems\Contracts\Http\Response as ResponseContract;
 use Ems\Core\Expression;
+use Ems\Core\KeyExpression;
 use Ems\Core\Serializer\JsonSerializer;
 use Ems\Core\Url;
 
@@ -120,6 +121,12 @@ class ResponseTest extends \Ems\TestCase
         $this->assertEquals('foo', $response->body());
     }
 
+    public function test_construct_with_string()
+    {
+        $response = $this->response([], 'foo');
+        $this->assertEquals('foo', $response->body());
+    }
+
     public function test_body_gets_rendered_from_scalar_payload()
     {
         $response = $this->response();
@@ -133,9 +140,8 @@ class ResponseTest extends \Ems\TestCase
 
     public function test_body_gets_rendered_from_stringable()
     {
-        $response = $this->response();
-        $payload = new Expression('foo');
-        $this->assertSame($response, $response->setPayload($payload));
+        $body = new Expression('foo');
+        $response = $this->response([], $body);
         $this->assertEquals('foo', $response->body());
     }
 
@@ -183,6 +189,14 @@ class ResponseTest extends \Ems\TestCase
         $response = $this->response();
         $this->assertSame($response, $response->setPayload(['haha']));
         $this->assertEquals(['haha'], $response->payload());
+    }
+
+    public function test_setPayload_with_stringable()
+    {
+        $response = $this->response();
+        $this->assertSame($response, $response->setPayload(new KeyExpression('haha')));
+        $this->assertEquals('haha', $response->payload());
+        $this->assertEquals('haha', $response->body());
     }
 
     public function test_payload_returns_null_if_no_body_found()

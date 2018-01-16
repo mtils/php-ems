@@ -257,6 +257,14 @@ class Pages implements Result, ArrayAccess, Countable
     }
 
     /**
+     * @return bool
+     */
+    public function hasMoreThanOnePage()
+    {
+        return $this->count() > 1;
+    }
+
+    /**
      * Return the total amount of pages. This only differs when you have a
      * squeezed pagination.
      *

@@ -369,8 +369,8 @@ class Paginator implements PaginatorContract
             return $this->buildLengthUnaware();
 
         }
-
-        $numberOfPages = $this->totalCount ? (int)(floor($this->totalCount/$this->perPage)+1) : 0;
+        //echo "\n$this->totalCount $this->perPage: float:" . ($this->totalCount/$this->perPage) . ' ceil: ' . ceil($this->totalCount/$this->perPage);
+        $numberOfPages = $this->totalCount ? ceil($this->totalCount/$this->perPage) : 0;
 
         if ($squeezeTo && $numberOfPages > $squeezeTo) {
             return $this->buildSqueezed($squeezeTo, $numberOfPages);
@@ -558,7 +558,7 @@ class Paginator implements PaginatorContract
                 'is_previous' => $page == $this->currentPageNumber-1,
                 'is_next'     => $page == $this->currentPageNumber+1,
                 'is_first'    => $page == 1,
-                'is_last'     => $items > $this->totalCount,
+                'is_last'     => $items >= $this->totalCount,
                 'offset'      => ($page-1) * $this->perPage
             ]);
 

@@ -14,8 +14,10 @@ use Ems\Contracts\Core\Serializer as SerializerContract;
 use Ems\Contracts\Http\Response as ResponseContract;
 use Ems\Core\Exceptions\NotImplementedException;
 use Ems\Core\Exceptions\UnConfiguredException;
+use Ems\Core\Serializer\JsonSerializer;
 use Ems\Core\Support\BootingArrayData;
 use Ems\Core\Support\StringableTrait;
+use function is_string;
 use Traversable;
 use UnexpectedValueException;
 
@@ -78,6 +80,12 @@ class Response implements ResponseContract
     public function __construct(array $headers=[], $body='')
     {
         $this->headers = $headers;
+
+        if ($this->contentType() == 'application/json') {
+            $this->serializer = new JsonSerializer();
+            $this->serializer->asArrayByDefault(true);
+        }
+
         if ($body) {
             $this->setBody($body);
         }
@@ -179,7 +187,7 @@ class Response implements ResponseContract
      */
     public function setBody($body)
     {
-        $this->body = $body;
+        $this->body = "$body";
         $this->bodyRendered = true;
         return $this;
     }
@@ -273,6 +281,17 @@ class Response implements ResponseContract
     }
 
     /**
+     * Return the response body.
+     *
+     * @return string
+     */
+    public function toString()
+    {
+        return (string)$this->body;
+    }
+
+
+    /**
      * Fills the array when accessing it.
      */
     protected function fillOnce()
@@ -296,17 +315,6 @@ class Response implements ResponseContract
         }
 
         return $this->fillAttributes([]);
-    }
-
-
-    /**
-     * Return the response body.
-     *
-     * @return string
-     */
-    public function toString()
-    {
-        return (string)$this->body;
     }
 
     /**
