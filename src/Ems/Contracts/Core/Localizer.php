@@ -2,6 +2,12 @@
 
 namespace Ems\Contracts\Core;
 
+/**
+ * Interface Localizer
+ *
+ * @package Ems\Contracts\Core
+ * @deprecated Use \Ems\Contracts\Core\Formatter
+ */
 interface Localizer
 {
     /**

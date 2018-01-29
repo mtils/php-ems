@@ -18,7 +18,7 @@ use Ems\Contracts\Core\Extendable;
 interface Formatter extends Extendable
 {
     /**
-     * Format the $path of $object fir $view in $lang.
+     * Format the $path of $object for $view in $lang.
      * This Formatter has to support $paths of properties like "title" but also
      * nested like $user, 'address.street'.
      *

@@ -3,6 +3,18 @@
 
 namespace Ems\Core;
 
+use function call_user_func;
+use function class_exists;
+use Closure;
+use Ems\Core\Exceptions\UnsupportedParameterException;
+use function function_exists;
+use function is_array;
+use function is_callable;
+use function is_object;
+use function is_string;
+use LogicException;
+use function method_exists;
+use ReflectionException;
 use UnexpectedValueException;
 use ReflectionMethod;
 use ReflectionFunction;
@@ -14,17 +26,62 @@ use Ems\Core\Exceptions\KeyNotFoundException;
  * parameters in dynamic calls like Container::call
  *
  * It also allows you to add additional parameters to your
- * callables which you dont know when registering them.
+ * callables which you don't know when registering them.
  *
- * The best way to understand how it is used look into its unittest.
+ * The best way to understand how it is used look into its unit test.
  **/
 class Lambda
 {
 
     /**
-     * @var callable
+     * @var string|array|callable
      **/
     protected $call;
+
+    /**
+     * @var callable
+     */
+    protected $callable;
+
+    /**
+     * @var array
+     */
+    protected $parsedCall;
+
+    /**
+     * @var string
+     */
+    protected $callClass;
+
+    /**
+     * @var object
+     */
+    protected $callInstance = false;
+
+    /**
+     * @var string
+     */
+    protected $callMethod;
+
+    /**
+     * @var bool
+     */
+    protected $isStaticMethod;
+
+    /**
+     * @var bool
+     */
+    protected $isFunction;
+
+    /**
+     * @var bool
+     */
+    protected $isClosure;
+
+    /**
+     * @var callable
+     */
+    protected $instanceResolver;
 
     /**
      * @var array
@@ -42,28 +99,45 @@ class Lambda
     protected static $reflectionCache = [];
 
     /**
-     * @param callable $call
+     * @var array
+     */
+    protected static $methodSeparators = ['::', '->', '@'];
+
+    /**
+     * Create a new Lambda object. Pass something what can be parsed by this
+     * class. To resolve classes from class based calls inject a callable to
+     * resolve this classes. (An IOCContainer or something similar)
+     *
+     * @param array|string|callable $call
+     * @param callable              $instanceResolver (optional)
      **/
-    public function __construct(callable $call)
+    public function __construct($call, callable $instanceResolver=null)
     {
         if ($call instanceof self) {
             throw new UnexpectedValueException("You cannot make a lambda to forward a lambda.");
         }
+
         $this->call = $call;
+        $this->instanceResolver = $instanceResolver;
+
     }
 
     /**
      * Run the lambda code
      *
      * @return mixed
+     *
+     * @throws \ReflectionException
      **/
     public function __invoke()
     {
+        $callable = $this->getCallable();
+
         if ($this->injections) {
-            return static::callNamed($this->call, $this->injections, func_get_args());
+            return static::callNamed($callable, $this->injections, func_get_args());
         }
         $args = array_merge(func_get_args(), $this->additionalArgs);
-        return static::call($this->call, $args);
+        return static::call($callable, $args);
     }
 
     /**
@@ -108,6 +182,126 @@ class Lambda
     {
         $this->injections = $injections;
         return $this;
+    }
+
+    /**
+     * Get the class of the callable. (if there is one)
+     *
+     * @return string
+     *
+     * @throws ReflectionException
+     */
+    public function getCallClass()
+    {
+        if ($this->callClass === null) {
+            $this->parseCall();
+        }
+        return $this->callClass;
+    }
+
+    /**
+     * Get the method|function of the callable (if there is one)
+     *
+     * @return string
+     *
+     * @throws ReflectionException
+     */
+    public function getCallMethod()
+    {
+        if ($this->callMethod === null) {
+            $this->parseCall();
+        }
+        return $this->callMethod;
+    }
+
+    /**
+     * @return null|object
+     *
+     * @throws ReflectionException
+     */
+    public function getCallInstance()
+    {
+        if ($this->callInstance !== false) {
+            return $this->callInstance;
+        }
+
+        if (is_array($this->call) && isset($this->call[0]) && is_object($this->call[0])) {
+            $this->callInstance = $this->call[0];
+            return $this->callInstance;
+        }
+
+        if (is_object($this->call) && method_exists($this->call, '__invoke')){
+            $this->callInstance = $this->call;
+            return $this->callInstance;
+        }
+
+        if ($this->isFunction() || $this->isStaticMethod()) {
+            $this->callInstance = null;
+            return $this->callInstance;
+        }
+
+        $this->callInstance = $this->resolveCallInstance($this->getCallClass());
+
+        return $this->callInstance;
+    }
+
+    /**
+     * Return true if the callable is an instance method. This is true if the
+     * there is a class and the method is not static. Also true on __invoke.
+     *
+     * @return bool
+     *
+     * @throws ReflectionException
+     */
+    public function isInstanceMethod()
+    {
+        return $this->getCallClass() && !$this->isClosure() && !$this->isStaticMethod();
+    }
+
+    /**
+     * Return true if the callable is a method call and the reflection says it
+     * is static.
+     *
+     * @return bool
+     *
+     * @throws ReflectionException
+     */
+    public function isStaticMethod()
+    {
+        if ($this->isStaticMethod === null) {
+            $this->parseCall();
+        }
+        return $this->isStaticMethod;
+    }
+
+    /**
+     * Return true if the callable is just a plain function.
+     *
+     * @return bool
+     *
+     * @throws ReflectionException
+     */
+    public function isFunction()
+    {
+        if ($this->isFunction === null) {
+            $this->parseCall();
+        }
+        return $this->isFunction;
+    }
+
+    /**
+     * Return true if the callable is a Closure.
+     *
+     * @return bool
+     *
+     * @throws ReflectionException
+     */
+    public function isClosure()
+    {
+        if ($this->isClosure === null) {
+            $this->parseCall();
+        }
+        return $this->isClosure;
     }
 
     /**
@@ -173,6 +367,8 @@ class Lambda
      * @param array    $callArgs (optional)
      *
      * @return array
+     *
+     * @throws \ReflectionException
      **/
     public static function callNamed(callable $callable, array $inject, array $callArgs=[])
     {
@@ -192,6 +388,8 @@ class Lambda
      * @param array    $callArgs (optional)
      *
      * @return array
+     *
+     * @throws \ReflectionException
      **/
     public static function callMerged(callable $callable, array $inject, array $callArgs=[])
     {
@@ -248,13 +446,14 @@ class Lambda
     /**
      * Static constructor for shorter instance creation
      *
-     * @param callable $callable
+     * @param string|array|callable $callable
+     * @param callable              $instanceResolver (optional)
      *
      * @return self
      **/
-    public static function f(callable $callable)
+    public static function f($callable, callable $instanceResolver=null)
     {
-        return new static($callable);
+        return new static($callable, $instanceResolver);
     }
 
     /**
@@ -267,6 +466,8 @@ class Lambda
      * @param callable|array $callable
      *
      * @return array
+     *
+     * @throws \ReflectionException
      **/
     public static function reflect($callable)
     {
@@ -307,6 +508,8 @@ class Lambda
      * @param array          $callArgs (optional)
      *
      * @return array
+     *
+     * @throws \ReflectionException
      **/
     public static function toArguments($callable, array $inject, array $callArgs=[])
     {
@@ -351,6 +554,8 @@ class Lambda
      * @param array          $callArgs (optional)
      *
      * @return array
+     *
+     * @throws \ReflectionException
      **/
     public static function mergeArguments($callable, array $inject, array $callArgs=[])
     {
@@ -366,6 +571,155 @@ class Lambda
         }
 
         return $arguments;
+    }
+
+    /**
+     * Return all method separators. These are used to split class
+     * and method out of a string.
+     *
+     * @return array
+     */
+    public static function methodSeparators()
+    {
+        return static::$methodSeparators;
+    }
+
+    /**
+     * Add another supported method separator.
+     *
+     * @param string $separator
+     */
+    public static function addMethodSeparator($separator)
+    {
+        static::$methodSeparators[] = $separator;
+    }
+
+    /**
+     * Get the real callable to pass it to call_user_func.
+     *
+     * @return callable
+     *
+     * @throws ReflectionException
+     */
+    protected function getCallable()
+    {
+        if (!$this->callable) {
+            $this->callable = $this->makeCallable();
+        }
+        return $this->callable;
+    }
+
+    /**
+     * Make the (eventually not) callable base arg of this class callable.
+     *
+     * @return callable
+     *
+     * @throws ReflectionException
+     */
+    protected function makeCallable()
+    {
+        if ($this->call instanceof Closure || $this->isFunction()) {
+            return $this->call;
+        }
+
+        if ($this->isStaticMethod()) {
+            return [$this->getCallClass(), $this->getCallMethod()];
+        }
+
+        return [$this->getCallInstance(), $this->getCallMethod()];
+
+    }
+
+    /**
+     * Parse the call to make it callable and know a few things about it.
+     *
+     * @throws ReflectionException
+     * @throws LogicException
+     */
+    protected function parseCall()
+    {
+
+        if ($this->call instanceof Closure) {
+            $this->callClass = Closure::class;
+            $this->callMethod = '';
+            $this->isStaticMethod = false;
+            $this->isFunction = false;
+            $this->isClosure = true;
+            return;
+        }
+
+        list($class, $method) = $this->toClassAndMethod($this->call);
+
+        if ($class === '') {
+            $this->callClass = '';
+            $this->callMethod = $method;
+            $this->isStaticMethod = false;
+            $this->isFunction = true;
+            $this->isClosure = false;
+            return;
+        }
+
+        $this->callClass = $class;
+        $this->callMethod = $method;
+        $this->isFunction = false;
+        $this->isClosure = false;
+
+        $reflection = new ReflectionMethod($class, $method);
+        $this->isStaticMethod = $reflection->isStatic();
+
+        if (!$reflection->isPublic()) {
+            throw new LogicException("Method '$method' of $class is not public and therefore not callable.");
+        }
+
+        return;
+
+    }
+
+    /**
+     * @param string|array $call
+     *
+     * @return array
+     */
+    protected function toClassAndMethod($call)
+    {
+        if (is_array($call)) {
+            return is_object($call[0]) ? [get_class($call[0]), $call[1]] : $call;
+        }
+
+        if (is_object($call) && method_exists($call, '__invoke')) {
+            return [get_class($call), '__invoke'];
+        }
+
+        if (function_exists($call)) {
+            return ['', $call];
+        }
+
+        if (class_exists($call) && method_exists($call, '__invoke')) {
+            return [$call, '__invoke'];
+        }
+
+        foreach (static::$methodSeparators as $separator) {
+            if (strpos($call, $separator)) {
+                return explode($separator, $call, 2);
+            }
+        }
+
+        throw new UnsupportedParameterException("Cannot parse '$call'.");
+    }
+
+    /**
+     * Resolve the class of a callable.
+     *
+     * @param string $class
+     *
+     * @return object
+     */
+    protected function resolveCallInstance($class)
+    {
+        if (!$this->instanceResolver) {
+            return new $class();
+        }
+        return call_user_func($this->instanceResolver, $class);
     }
 
     /**
@@ -400,6 +754,8 @@ class Lambda
      * @param callable|array $callable
      *
      * @return string
+     *
+     * @throws \ReflectionException
      **/
     protected static function cacheId($callable)
     {
@@ -429,6 +785,8 @@ class Lambda
      * @param callable|array $callable
      *
      * @return ReflectionFunctionAbstract
+     *
+     * @throws \ReflectionException
      **/
     protected static function getReflection($callable)
     {

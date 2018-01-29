@@ -10,6 +10,8 @@ use Closure;
 use Ems\Contracts\Core\Extractor;
 use Ems\Contracts\Core\Formatter as CoreFormatter;
 use Ems\Contracts\Core\Multilingual;
+use Ems\Contracts\Core\PointInTime;
+use Ems\Contracts\Core\TextProvider;
 use Ems\Contracts\XType\Formatter as FormatterContract;
 use Ems\Contracts\XType\XType;
 use Ems\Core\Patterns\ExtendableByClassHierarchyTrait;
@@ -35,6 +37,11 @@ class Formatter implements FormatterContract, Multilingual
     protected $typeProvider;
 
     /**
+     * @var TextProvider
+     */
+    protected $textProvider;
+
+    /**
      * @var array
      */
     protected $formatterCache = [];
@@ -55,11 +62,13 @@ class Formatter implements FormatterContract, Multilingual
     protected $localeFallbacks = [];
 
     public function __construct(CoreFormatter $formatter, Extractor $extractor,
-                                TypeProviderContract $typeProvider, array $extensions=[])
+                                TypeProviderContract $typeProvider,
+                                TextProvider $textProvider, array $extensions=[])
     {
         $this->coreFormatter = $formatter;
         $this->extractor = $extractor;
         $this->typeProvider = $typeProvider;
+        $this->textProvider = $textProvider;
         $this->_extensions = $extensions;
         $this->createOwnExtension();
     }
@@ -92,7 +101,7 @@ class Formatter implements FormatterContract, Multilingual
     public function value(XType $type, $value, $view = 'default')
     {
         $formatter = $this->getFormatter($type);
-        return call_user_func($formatter, $type, $value, $view);
+        return call_user_func($formatter, $type, $value, $view, $this->locale);
     }
 
     /**
@@ -109,6 +118,7 @@ class Formatter implements FormatterContract, Multilingual
             $this->coreFormatter,
             $this->extractor,
             $this->typeProvider,
+            $this->textProvider,
             $this->_extensions
         );
 
@@ -142,6 +152,9 @@ class Formatter implements FormatterContract, Multilingual
         if ($this->coreFormatter instanceof Multilingual) {
             $this->coreFormatter->setLocale($locale);
         }
+        if ($this->textProvider instanceof Multilingual) {
+            $this->textProvider->setLocale($locale);
+        }
         return $this;
     }
 
@@ -167,6 +180,9 @@ class Formatter implements FormatterContract, Multilingual
         $this->localeFallbacks = (array)$fallback;
         if ($this->coreFormatter instanceof Multilingual) {
             $this->coreFormatter->setFallbacks($this->localeFallbacks);
+        }
+        if ($this->textProvider instanceof Multilingual) {
+            $this->textProvider->setFallbacks($this->localeFallbacks);
         }
         return $this;
     }
@@ -210,27 +226,49 @@ class Formatter implements FormatterContract, Multilingual
 
     protected function formatBool(BoolType $type, $value, $view, $lang)
     {
-        return $value ? '1' : '0';
+        return $value ? $this->textProvider->get('boolean.true') : $this->textProvider->get('boolean.false');
     }
 
     protected function formatNumber(NumberType $type, $value, $view, $lang)
     {
-        return $value ? '1' : '0';
+        return $this->coreFormatter->number($value, $type->decimalPlaces);
     }
 
     protected function formatString(StringType $type, $value, $view, $lang)
     {
-        return $value ? '1' : '0';
+        return $value;
     }
 
     protected function formatUnit(UnitType $type, $value, $view, $lang)
     {
-        return $value ? '1' : '0';
+        return $this->coreFormatter->unit($value, $type->unit, $type->decimalPlaces);
     }
 
     protected function formatTemporal(TemporalType $type, $value, $view, $lang)
     {
+
+        if (!$type->absolute) {
+            return $this->formatRelativeTemporal($type, $value, $view);
+        }
+
+        if (in_array($type->precision, [PointInTime::HOUR, PointInTime::MINUTE, PointInTime::SECOND])) {
+            return $this->coreFormatter->dateTime($value, $view);
+        }
+
+        if ($type->precision == PointInTime::DAY) {
+            return $this->coreFormatter->date($value, $view);
+        }
+
+        if ($type->precision == PointInTime::MONTH) {
+            return $this->coreFormatter->date($value, $view);
+        }
+
         return $value ? '1' : '0';
+    }
+
+    protected function formatRelativeTemporal($type, $value, $view)
+    {
+
     }
 
     /**

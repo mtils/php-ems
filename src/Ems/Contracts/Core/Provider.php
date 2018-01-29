@@ -25,7 +25,7 @@ interface Provider
      *
      * @param mixed $id
      *
-     * @throws \Ems\Contracts\NotFound
+     * @throws \Ems\Contracts\Core\Errors\NotFound
      *
      * @return mixed
      **/

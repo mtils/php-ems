@@ -391,6 +391,16 @@ class FormatterTest extends \Ems\TestCase
         $this->assertEquals($html, $formatter->html($text));
     }
 
+    /**
+     * @expectedException \Ems\Core\Exceptions\KeyNotFoundException
+     */
+    public function test_getFormat_throws_exception_if_key_not_found()
+    {
+        $formatter = $this->newFormatter([]);
+
+        $formatter->getFormat('foo');
+    }
+
     protected function newFormatter($formats=null)
     {
         return new Formatter($formats === null ? $this->formats() : $formats);

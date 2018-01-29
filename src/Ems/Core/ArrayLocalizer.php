@@ -7,6 +7,12 @@ use InvalidArgumentException;
 use DateTime;
 use ArrayAccess;
 
+/**
+ * Class ArrayLocalizer
+ *
+ * @package Ems\Core
+ * @deprecated use \Ems\Core\Formatter
+ */
 class ArrayLocalizer implements Localizer
 {
     /**

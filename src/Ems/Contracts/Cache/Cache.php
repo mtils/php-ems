@@ -187,8 +187,8 @@ interface Cache extends ArrayAccess, Provider, HasMethodHooks
      * In most cases you would add the default storage in the constructor
      * or pass an instance and all others via a Closure.
      *
-     * @param string          $name
-     * @param Storage|Closure $storage
+     * @param string           $name
+     * @param Storage|\Closure $storage
      *
      * @return self
      **/

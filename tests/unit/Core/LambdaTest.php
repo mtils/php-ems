@@ -2,7 +2,9 @@
 
 namespace Ems\Core;
 
+use Closure;
 use Ems\Testing\LoggingCallable;
+use function func_get_args;
 
 class LambdaTest extends \Ems\TestCase
 {
@@ -19,7 +21,7 @@ class LambdaTest extends \Ems\TestCase
     }
 
     /**
-     * @expectedException UnexpectedValueException
+     * @expectedException \UnexpectedValueException
      **/
     public function test_constructing_with_lambda_throws_exception()
     {
@@ -307,7 +309,7 @@ class LambdaTest extends \Ems\TestCase
     }
 
     /**
-     * @expectedException Ems\Core\Exceptions\KeyNotFoundException
+     * @expectedException \Ems\Core\Exceptions\KeyNotFoundException
      **/
     public function test_toArguments_throws_exception_if_optional_parameter_is_not_passed()
     {
@@ -345,7 +347,201 @@ class LambdaTest extends \Ems\TestCase
 
     }
 
-    protected function lambda(callable $callable=null)
+    public function test_examine_a_closure()
+    {
+        $closure = function () {};
+        $f = $this->lambda($closure);
+
+        $this->assertEquals(Closure::class, $f->getCallClass());
+        $this->assertEquals('', $f->getCallMethod());
+        $this->assertSame($closure, $f->getCallInstance());
+        $this->assertFalse($f->isInstanceMethod());
+        $this->assertFalse($f->isStaticMethod());
+        $this->assertFalse($f->isFunction());
+        $this->assertTrue($f->isClosure());
+    }
+
+    public function test_examine_an_instance_method()
+    {
+
+        $obj = new LambdaTestObject();
+
+        $f = $this->lambda([$obj, 'process']);
+        $this->assertEquals(LambdaTestObject::class, $f->getCallClass());
+
+        $this->assertEquals('process', $f->getCallMethod());
+        $this->assertSame($obj, $f->getCallInstance());
+        $this->assertTrue($f->isInstanceMethod());
+        $this->assertFalse($f->isStaticMethod());
+        $this->assertFalse($f->isFunction());
+        $this->assertFalse($f->isClosure());
+
+    }
+
+    public function test_examine_a_static_method()
+    {
+
+        $f = $this->lambda([LambdaTestObject::class, 'check']);
+        $this->assertEquals(LambdaTestObject::class, $f->getCallClass());
+
+        $this->assertEquals('check', $f->getCallMethod());
+        $this->assertNull($f->getCallInstance());
+        $this->assertFalse($f->isInstanceMethod());
+        $this->assertTrue($f->isStaticMethod());
+        $this->assertFalse($f->isFunction());
+        $this->assertFalse($f->isClosure());
+
+    }
+
+    public function test_examine_an_instance_method_of_passed_class()
+    {
+
+        $f = $this->lambda([LambdaTestObject::class, 'process']);
+        $this->assertEquals(LambdaTestObject::class, $f->getCallClass());
+
+        $this->assertEquals('process', $f->getCallMethod());
+        $this->assertInstanceOf(LambdaTestObject::class, $f->getCallInstance());
+        $this->assertTrue($f->isInstanceMethod());
+        $this->assertFalse($f->isStaticMethod());
+        $this->assertFalse($f->isFunction());
+        $this->assertFalse($f->isClosure());
+
+    }
+
+    public function test_examine_an_instance_method_of_passed_class_string()
+    {
+
+        $f = $this->lambda('Ems\Core\LambdaTestObject::process');
+
+        $this->assertEquals(LambdaTestObject::class, $f->getCallClass());
+
+        $this->assertEquals('process', $f->getCallMethod());
+        $this->assertInstanceOf(LambdaTestObject::class, $f->getCallInstance());
+        $this->assertTrue($f->isInstanceMethod());
+        $this->assertFalse($f->isStaticMethod());
+        $this->assertFalse($f->isFunction());
+        $this->assertFalse($f->isClosure());
+
+        $f = $this->lambda('Ems\Core\LambdaTestObject->process');
+
+        $this->assertEquals(LambdaTestObject::class, $f->getCallClass());
+
+        $this->assertEquals('process', $f->getCallMethod());
+        $this->assertInstanceOf(LambdaTestObject::class, $f->getCallInstance());
+        $this->assertTrue($f->isInstanceMethod());
+        $this->assertFalse($f->isStaticMethod());
+        $this->assertFalse($f->isFunction());
+        $this->assertFalse($f->isClosure());
+
+        $f = $this->lambda('Ems\Core\LambdaTestObject@process');
+
+        $this->assertEquals(LambdaTestObject::class, $f->getCallClass());
+
+        $this->assertEquals('process', $f->getCallMethod());
+        $this->assertInstanceOf(LambdaTestObject::class, $f->getCallInstance());
+        $this->assertTrue($f->isInstanceMethod());
+        $this->assertFalse($f->isStaticMethod());
+        $this->assertFalse($f->isFunction());
+        $this->assertFalse($f->isClosure());
+    }
+
+    public function test_examine_an_invokable_class()
+    {
+
+        $f = $this->lambda(LambdaTestInvokable::class);
+        $this->assertEquals(LambdaTestInvokable::class, $f->getCallClass());
+
+        $this->assertEquals('__invoke', $f->getCallMethod());
+        $this->assertInstanceOf(LambdaTestInvokable::class, $f->getCallInstance());
+        $this->assertTrue($f->isInstanceMethod());
+        $this->assertFalse($f->isStaticMethod());
+        $this->assertFalse($f->isFunction());
+        $this->assertFalse($f->isClosure());
+
+    }
+
+    public function test_examine_an_invokable_instance()
+    {
+
+        $i = new LambdaTestInvokable();
+        $f = $this->lambda($i);
+        $this->assertEquals(LambdaTestInvokable::class, $f->getCallClass());
+
+        $this->assertEquals('__invoke', $f->getCallMethod());
+        $this->assertSame($i, $f->getCallInstance());
+        $this->assertTrue($f->isInstanceMethod());
+        $this->assertFalse($f->isStaticMethod());
+        $this->assertFalse($f->isFunction());
+        $this->assertFalse($f->isClosure());
+
+    }
+
+    /**
+     * @expectedException \LogicException
+     */
+    public function test_passing_not_public_method_throws_exception()
+    {
+        $f = $this->lambda([static::class, 'f']);
+        $f->isClosure();
+    }
+
+    public function test_examine_a_function()
+    {
+
+        $f = $this->lambda('str_replace');
+        $this->assertEquals('', $f->getCallClass());
+
+        $this->assertEquals('str_replace', $f->getCallMethod());
+        $this->assertNull($f->getCallInstance());
+        $this->assertFalse($f->isInstanceMethod());
+        $this->assertFalse($f->isStaticMethod());
+        $this->assertTrue($f->isFunction());
+        $this->assertFalse($f->isClosure());
+
+    }
+
+    public function test_call_instance_method()
+    {
+        $f = $this->lambda('Ems\Core\LambdaTestObject::run');
+
+        $this->assertEquals([1,2,3], $f(1,2,3));
+    }
+
+    public function test_call_static_method()
+    {
+        $f = $this->lambda('Ems\Core\LambdaTestObject::runStatic');
+
+        $this->assertEquals([1,2,3], $f(1,2,3));
+    }
+
+    /**
+     * @expectedException \Ems\Contracts\Core\Errors\Unsupported
+     */
+    public function test_call_with_unknown_syntax_throws_exception()
+    {
+        $f = $this->lambda('Ems\Core\LambdaTestObject||runStatic');
+
+        $f(1,2,3);
+    }
+
+    public function test_call_with_custom_factory()
+    {
+        $factory = function ($class) {
+            return new \stdClass();
+        };
+
+        $f = Lambda::f(LambdaTestObject::class.'@run', $factory);
+
+        $this->assertInstanceOf(\stdClass::class, $f->getCallInstance());
+    }
+
+    public function test_method_separators()
+    {
+        Lambda::addMethodSeparator('|||');
+        $this->assertContains('|||', Lambda::methodSeparators());
+    }
+
+    protected function lambda($callable=null)
     {
         return new Lambda($callable ?: function () {});
     }
@@ -353,6 +549,11 @@ class LambdaTest extends \Ems\TestCase
     protected function f()
     {
         return function () {};
+    }
+
+    public function foo()
+    {
+        return 'bar';
     }
 }
 
@@ -368,7 +569,17 @@ class LambdaTestObject
     public function process(NamedObject $object, Url $url, $split=false )
     {
     }
-    
+
+    public function run()
+    {
+        return func_get_args();
+    }
+
+    public static function runStatic()
+    {
+        return func_get_args();
+    }
+
     public static function check($user)
     {
     }
