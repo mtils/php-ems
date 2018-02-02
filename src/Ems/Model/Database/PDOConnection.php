@@ -242,9 +242,9 @@ class PDOConnection implements Connection, Configurable, HasMethodHooks
      * Run the callable in an transaction.
      *
      * @param callable $run
-     * @param bool     $attempts (default:1)
+     * @param int      $attempts (default:1)
      *
-     * @return bool (if it was successfully commited)
+     * @return mixed The result of the callable
      **/
     public function transaction(callable $run, $attempts=1)
     {
@@ -258,8 +258,9 @@ class PDOConnection implements Connection, Configurable, HasMethodHooks
             $this->begin();
 
             try {
-                $run($this);
-                return $this->commit();
+                $result = $run($this);
+                $this->commit();
+                return $result;
             } catch (SQLLockException $e) {
                 $this->rollback();
                 continue;

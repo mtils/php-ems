@@ -14,6 +14,23 @@ namespace Ems\Contracts\Core;
  */
 class Progress
 {
+
+    /**
+     * Progress constructor.
+     *
+     * @param int    $percent    (default:0)
+     * @param int    $step       (default:0)
+     * @param int    $totalSteps (default:1)
+     * @param string $stepName   (optional)
+     */
+    public function __construct($percent=0, $step=0, $totalSteps=1, $stepName='')
+    {
+        $this->percent = $percent;
+        $this->step = $step;
+        $this->totalSteps = $totalSteps;
+        $this->stepName = $stepName;
+    }
+
     /**
      * How many percent of 100 was currently processed.
      *

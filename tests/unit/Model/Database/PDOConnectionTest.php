@@ -221,6 +221,8 @@ class PDOConnectionTest extends PDOBaseTest
             $con->insert($q, ['susanne', 22, 68.7]);
             $this->assertTrue($con->isInTransaction());
 
+            return true;
+
         });
 
         $this->assertTrue($result);

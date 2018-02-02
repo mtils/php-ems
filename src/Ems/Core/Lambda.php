@@ -6,7 +6,9 @@ namespace Ems\Core;
 use function call_user_func;
 use function class_exists;
 use Closure;
+use Ems\Contracts\Core\Stringable;
 use Ems\Core\Exceptions\UnsupportedParameterException;
+use Ems\Core\Support\StringableTrait;
 use function function_exists;
 use function is_array;
 use function is_callable;
@@ -30,8 +32,9 @@ use Ems\Core\Exceptions\KeyNotFoundException;
  *
  * The best way to understand how it is used look into its unit test.
  **/
-class Lambda
+class Lambda implements Stringable
 {
+    use StringableTrait;
 
     /**
      * @var string|array|callable
@@ -303,6 +306,32 @@ class Lambda
         }
         return $this->isClosure;
     }
+
+    /**
+     * {@inheritdoc}
+     *
+     * This is used to serialize and deserialize the callable of a lambda.
+     * It will complain if it is not possible to serialize it.
+     * Filled arguments are not concerned!
+     *
+     * @return string
+     **/
+    public function toString()
+    {
+        if ($this->isClosure()) {
+            throw new LogicException('You cannot serialize a closure.');
+        }
+
+        if ($this->isFunction()) {
+            return $this->getCallMethod();
+        }
+
+        $separator = $this->isStaticMethod() ? '::' : '->';
+
+        return $this->getCallClass() . $separator . $this->getCallMethod();
+
+    }
+
 
     /**
      * Just call a callable without parsing any lambdas
@@ -601,7 +630,7 @@ class Lambda
      *
      * @throws ReflectionException
      */
-    protected function getCallable()
+    public function getCallable()
     {
         if (!$this->callable) {
             $this->callable = $this->makeCallable();

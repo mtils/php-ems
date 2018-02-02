@@ -4,9 +4,11 @@
 namespace Ems\Contracts\Model\Database;
 
 use Ems\Contracts\Core\Connection as BaseConnection;
+use Ems\Contracts\Model\Result;
+use Ems\Contracts\Model\SupportsTransactions;
 
 /**
- * For database connection urls see the Engine configration of SQLAlchemy:
+ * For database connection urls see the Engine configuration of SQLAlchemy:
  *
  * @see http://docs.sqlalchemy.org/en/latest/core/engines.html
  *
@@ -14,7 +16,7 @@ use Ems\Contracts\Core\Connection as BaseConnection;
  * @example sqlite:///var/lib/sqlite/my.db
  * @example mysql://scott:tiger@localhost:3306/mydatabase
  **/
-interface Connection extends BaseConnection
+interface Connection extends BaseConnection, SupportsTransactions
 {
 
     /**
@@ -46,28 +48,11 @@ interface Connection extends BaseConnection
     public function rollback();
 
     /**
-     * Run the callable in an transaction.
-     *
-     * @param callable $run
-     * @param bool     $attempts (default:1)
-     *
-     * @return bool (if it was successfully commited)
-     **/
-    public function transaction(callable $run, $attempts=1);
-
-    /**
-     * Return if currently a transaction is running.
-     *
-     * @return bool
-     **/
-    public function isInTransaction();
-
-    /**
      * Run a select statement and return the result.
      *
-     * @param string|\Ems\Contracts\Stringable $query
-     * @param array                            $binding (optional)
-     * @param mixed                            $fetchMode (optional)
+     * @param string|\Ems\Contracts\Core\Stringable $query
+     * @param array                                 $bindings (optional)
+     * @param mixed                                 $fetchMode (optional)
      *
      * @return Result
      **/
@@ -76,9 +61,9 @@ interface Connection extends BaseConnection
     /**
      * Run an insert statement.
      *
-     * @param string|\Ems\Contracts\Stringable $query
-     * @param array                            $binding (optional)
-     * @param bool                             $returnLastInsertId (optional)
+     * @param string|\Ems\Contracts\Core\Stringable $query
+     * @param array                                 $bindings (optional)
+     * @param bool                                  $returnLastInsertId (optional)
      *
      * @return int (last inserted id)
      **/
@@ -87,9 +72,9 @@ interface Connection extends BaseConnection
     /**
      * Run an altering statement.
      *
-     * @param string|\Ems\Contracts\Stringable $query
-     * @param array                            $binding (optional)
-     * @param bool                             $returnAffected (optional)
+     * @param string|\Ems\Contracts\Core\Stringable $query
+     * @param array                                 $bindings (optional)
+     * @param bool                                  $returnAffected (optional)
      *
      * @return int (Number of affected rows)
      **/
@@ -98,8 +83,8 @@ interface Connection extends BaseConnection
     /**
      * Create a prepared statement.
      *
-     * @param array                            $binding (optional)
-     * @param bool                             $returnAffected (optional)
+     * @param string|\Ems\Contracts\Core\Stringable $query
+     * @param array                                 $bindings (optional)
      *
      * @return \Ems\Contracts\Expression\Prepared
      **/
