@@ -29,7 +29,11 @@ class Queue implements QueueContract
      */
     public static $defaultChannel = 'default';
 
-
+    /**
+     * Queue constructor.
+     *
+     * @param Driver $defaultChannel
+     */
     public function __construct(Driver $defaultChannel)
     {
         $this->addChannel(static::$defaultChannel, $defaultChannel);
@@ -164,6 +168,8 @@ class Queue implements QueueContract
      */
     protected function createJob(array $attributes, $operation, array $arguments)
     {
+        $attributes['channelName'] = isset($attributes['channelName']) ? $attributes['channelName'] : static::$defaultChannel;
+
         return (new Job($attributes))
             ->setOperation($operation)
             ->setArguments($arguments);

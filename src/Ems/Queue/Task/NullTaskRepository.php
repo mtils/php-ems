@@ -216,9 +216,13 @@ class NullTaskRepository implements TaskRepository
 
         foreach ($jobs as $job) {
 
-            if (!$task = $job->arguments()[0]) {
+            $args = $job->arguments();
+
+            if (!isset($args[0]) || !is_scalar($args[0]) || !isset($this->tasks[$args[0]])) {
                 continue;
             }
+
+            $task = $this->tasks[$args[0]];
 
             $task->state = $job->state();
             $updates++;
@@ -266,8 +270,8 @@ class NullTaskRepository implements TaskRepository
                 throw $e;
             }
 
-            if (isset($this->tasks[static::$nextId])) {
-                unset($this->tasks[static::$nextId]);
+            if (isset($this->tasks[$lastInsertedId])) {
+                unset($this->tasks[$lastInsertedId]);
             }
 
             static::$nextId--;

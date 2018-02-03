@@ -15,6 +15,7 @@ use Ems\Contracts\Queue\TaskRepository;
 use Ems\Queue\Drivers\NullDriver;
 use Ems\Queue\Task\NullTaskRepository;
 use Ems\TestCase;
+use RuntimeException;
 
 class TaskerTest extends TestCase
 {
@@ -153,6 +154,135 @@ class TaskerTest extends TestCase
     public function test_methodHooks()
     {
         $this->assertEquals(['run'], $this->newTasker()->methodHooks());
+    }
+
+    public function test_pop_job_from_queue()
+    {
+        $queue = $this->newQueue();
+        $tasker = $this->newTasker($queue);
+
+        $operation = [TaskerTest::class, 'fake'];
+        $args = [1, 2];
+
+        $task = $tasker->run($operation, $args);
+        $this->assertInstanceOf(Task::class, $task);
+
+        $job = $queue->pop();
+
+        $this->assertEquals(Queue::QUEUED, $job->state());
+        $this->assertEquals(TaskProxyJob::class, $job->operation()[0]);
+        $this->assertEquals('run', $job->operation()[1]);
+        $this->assertEquals($task->getId(), $job->arguments()[0]);
+        $this->assertEquals(TaskerTest::class . '->' . 'fake', $job->arguments()[1]);
+        $this->assertEquals($args, $job->arguments()[2]);
+
+        $this->assertNull($queue->pop());
+        $this->assertNull($this->nullDriver()->pop('foo'));
+        $this->assertEmpty($this->nullDriver()->all('foo'));
+    }
+
+    public function test_NullTaskRepository_get()
+    {
+        $taskRepo = $this->nullRepo();
+        $task = $taskRepo->create([]);
+        $this->assertInstanceOf(Task::class, $task);
+        $this->assertSame($task, $taskRepo->get($task->getId()));
+        $this->assertSame($task, $taskRepo->getOrFail($task->getId()));
+        $this->assertEquals('foo', $taskRepo->get(11546878974, 'foo'));
+    }
+
+    /**
+     * @expectedException  \Ems\Contracts\Core\Errors\NotFound
+     */
+    public function test_NullTaskRepository_getOrFail_throws_exception()
+    {
+        $taskRepo = $this->nullRepo();
+        $taskRepo->getOrFail('hihihaha');
+    }
+
+    public function test_NullTaskRepository_delete()
+    {
+        $taskRepo = $this->nullRepo();
+        $task = $taskRepo->create([]);
+        $this->assertInstanceOf(Task::class, $task);
+
+        $this->assertSame($task, $taskRepo->get($task->getId()));
+
+        $this->assertTrue($taskRepo->delete($task->getId()));
+
+        $this->assertNull($taskRepo->get($task->getId()));
+
+        $this->assertFalse($taskRepo->delete($task->getId()));
+    }
+
+    public function test_NullTaskRepository_purge()
+    {
+        $taskRepo = $this->nullRepo();
+        $task = $taskRepo->create([]);
+        $this->assertInstanceOf(Task::class, $task);
+
+        $this->assertSame($task, $taskRepo->get($task->getId()));
+
+        $this->assertEquals(0, $taskRepo->purge());
+
+        $task->state = Queue::FINISHED;
+
+        $this->assertEquals(1, $taskRepo->purge());
+
+    }
+
+    public function test_NullTaskRepository_sync()
+    {
+        $taskRepo = $this->nullRepo();
+        $queue = $this->newQueue();
+        $tasker = $this->newTasker($queue, $taskRepo);
+
+        $operation = [TaskerTest::class, 'fake'];
+        $args = [1, 2];
+
+        $task = $tasker->run($operation, $args);
+        $this->assertInstanceOf(Task::class, $task);
+
+        $job = $task->getJob();
+        $jobWithoutTask = $queue->run('str_replace');
+
+        $this->assertEquals(1, $taskRepo->sync([$job, $jobWithoutTask]));
+
+    }
+
+    /**
+     * @expectedException  \RuntimeException
+     */
+    public function test_NullTaskRepository_failing_transaction()
+    {
+        $taskRepo = $this->nullRepo();
+
+        $taskRepo->transaction(function($repo){
+            $this->assertTrue($repo->isInTransaction());
+            $task = $repo->create([]);
+            throw new RuntimeException();
+
+        });
+
+        $this->assertFalse($taskRepo->isInTransaction());
+
+    }
+
+    /**
+     * @expectedException  \RuntimeException
+     */
+    public function test_NullTaskRepository_failing_transaction_without_task_creation()
+    {
+        $taskRepo = $this->nullRepo();
+
+        $taskRepo->transaction(function($repo){
+            $this->assertTrue($repo->isInTransaction());
+            throw new RuntimeException();
+
+        });
+
+        $this->assertFalse($taskRepo->isInTransaction());
+
     }
 
     protected function newTasker(QueueContract $queue=null, TaskRepository $repo=null)

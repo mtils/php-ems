@@ -63,9 +63,10 @@ class Tasker implements TaskerContract
 
             $task = $this->repository->create($taskTemplate);
 
-            // Create the TaskProxyJob with lambda::toString(), arguments, ...
             $job = $this->createJob($task, $lambda, $arguments);
 
+            // We can just ignore to write state because typically the job
+            // is typically started in another process
             $task->setJob($job);
 
             $this->callAfterListeners('run', [$taskTemplate, $job]);

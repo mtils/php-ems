@@ -75,18 +75,6 @@ trait JobConfiguration
     }
 
     /**
-     * Create a new fork of the using class.
-     *
-     * @param array $attributes
-     *
-     * @return self
-     */
-    protected function fork(array $attributes)
-    {
-        return new static($attributes);
-    }
-
-    /**
      * Create a new fork with the given job attribute
      *
      * @param string $key

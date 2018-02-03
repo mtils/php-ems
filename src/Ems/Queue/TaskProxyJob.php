@@ -6,14 +6,12 @@
 namespace Ems\Queue;
 
 
-use function call_user_func;
 use Ems\Contracts\Core\Chatty;
 use Ems\Contracts\Core\IOCContainer;
 use Ems\Contracts\Core\Progress;
 use Ems\Contracts\Core\PublishesProgress;
 use Ems\Contracts\Queue\TaskRepository;
 use Ems\Core\Lambda;
-use function function_exists;
 
 class TaskProxyJob
 {

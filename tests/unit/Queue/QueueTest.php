@@ -149,6 +149,46 @@ class QueueTest extends TestCase
         $this->assertSame($job, $queue->pop('local'));
     }
 
+    public function test_channel_sets_channel_on_proxy()
+    {
+        $otherChannel = $this->mock(Driver::class);
+
+        $queue = $this->newQueue();
+        $this->assertSame($queue, $queue->addChannel('local', $otherChannel));
+
+        $operation = [QueueTest::class, 'nullDriver'];
+        $args = [1, 2];
+        $handle = 'handle';
+
+        $otherChannel->shouldReceive('push')
+            ->once()
+            ->andReturn(Queue::RUNNING);
+
+        $job = $queue->onChannel('local')->run($operation, $args, $handle);
+
+        $this->assertInstanceOf(Job::class, $job);
+        $this->assertEquals($operation, $job->operation());
+        $this->assertEquals($args, $job->arguments());
+        $this->assertEquals(QueueContract::RUNNING, $job->state());
+
+        $this->assertEquals('local', $job->channelName());
+
+        $otherChannel->shouldReceive('pop')
+            ->with('local')
+            ->andReturn($job);
+
+        $this->assertSame($job, $queue->timeout(6000)->pop('local'));
+    }
+
+    public function test_addChannel_on_proxy()
+    {
+        $otherChannel = $this->mock(Driver::class);
+
+        $queue = $this->newQueue()->timeout(8000);
+        $this->assertSame($queue, $queue->addChannel('local', $otherChannel));
+        $this->assertEquals(['default', 'local'], $queue->channelNames());
+    }
+
     public function test_removeChannel_removes_channel()
     {
         $queue = $this->newQueue();
@@ -157,6 +197,29 @@ class QueueTest extends TestCase
         $this->assertEquals([Queue::$defaultChannel, 'remote'], $queue->channelNames());
         $this->assertSame($queue, $queue->removeChannel('remote'));
         $this->assertEquals([Queue::$defaultChannel], $queue->channelNames());
+    }
+
+    public function test_removeChannel_on_proxy()
+    {
+        $otherChannel = $this->mock(Driver::class);
+
+        $queue = $this->newQueue()->timeout(8000);
+        $this->assertSame($queue, $queue->addChannel('local', $otherChannel));
+        $this->assertEquals(['default', 'local'], $queue->channelNames());
+        $this->assertSame($queue, $queue->removeChannel('local'));
+        $this->assertEquals(['default'], $queue->channelNames());
+    }
+
+    public function test_count_on_proxy()
+    {
+        $queue = $this->newQueue()->timeout(8000);
+        $this->assertEquals(0, $queue->count());
+    }
+
+    public function test_all_on_proxy()
+    {
+        $queue = $this->newQueue()->timeout(8000);
+        $this->assertEquals([], $queue->all());
     }
 
     /**

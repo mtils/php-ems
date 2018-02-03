@@ -68,7 +68,7 @@ class NullDriver implements Driver
             return null;
         }
 
-        if ($this->queues[$queueName]) {
+        if (!$this->queues[$queueName]) {
             return null;
         }
 
