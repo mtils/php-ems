@@ -19,7 +19,7 @@
         "patchwork/jsqueeze": "~2.0",
         "natxet/cssmin": "~3.0",
         "tedivm/jshrink": "~1.1",
-        "satooshi/php-coveralls": "dev-master"
+        "satooshi/php-coveralls": "2.0.*"
     },
     "replace": {
         "ems/assets": "self.version",
