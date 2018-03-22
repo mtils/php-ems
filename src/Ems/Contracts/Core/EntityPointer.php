@@ -4,6 +4,8 @@
  **/
 
 namespace Ems\Contracts\Core;
+use function json_decode;
+use Serializable;
 
 /**
  * Class EntityPointer
@@ -14,7 +16,7 @@ namespace Ems\Contracts\Core;
  *
  * @package Ems\Contracts\Core
  */
-class EntityPointer
+class EntityPointer implements Serializable
 {
 
     /**
@@ -38,5 +40,47 @@ class EntityPointer
      * @var string
      */
     public $hash = '';
+
+    /**
+     * EntityPointer constructor.
+     *
+     * @param string     $type
+     * @param string|int $id
+     * @param string     $hash
+     */
+    public function __construct($type='', $id=0, $hash='')
+    {
+        $this->type = $type;
+        $this->id = $id;
+        $this->hash = $hash;
+    }
+
+    /**
+     * String representation of object
+     * @link http://php.net/manual/en/serializable.serialize.php
+     * @return string the string representation of the object or null
+     * @since 5.1.0
+     */
+    public function serialize()
+    {
+        return json_encode([$this->type, $this->id]);
+    }
+
+    /**
+     * Constructs the object
+     * @link http://php.net/manual/en/serializable.unserialize.php
+     * @param string $serialized <p>
+     * The string representation of the object.
+     * </p>
+     * @return void
+     * @since 5.1.0
+     */
+    public function unserialize($serialized)
+    {
+        list($type, $id) = json_decode($serialized);
+        $this->type = $type;
+        $this->id = $id;
+    }
+
 
 }

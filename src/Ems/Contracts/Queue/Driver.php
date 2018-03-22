@@ -33,7 +33,7 @@ interface Driver
      *
      * @param string $queueName (optional)
      *
-     * @return Job
+     * @return Job|null
      */
     public function pop($queueName='');
 

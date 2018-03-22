@@ -14,6 +14,7 @@
         "illuminate/validation": "5.1.*|5.2.*|5.3.*|5.4.*",
         "illuminate/view": "5.1.*|5.2.*|5.3.*|5.4.*",
         "illuminate/support": "5.1.*|5.2.*|5.3.*|5.4.*",
+        "illuminate/queue": "5.1.*|5.2.*|5.3.*|5.4.*",
         "swiftmailer/swiftmailer": "~5.1",
         "patchwork/jsqueeze": "~2.0",
         "natxet/cssmin": "~3.0",

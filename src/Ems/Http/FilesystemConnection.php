@@ -56,7 +56,7 @@ class FilesystemConnection extends BaseConnection implements HttpConnection, Con
      * @var array
      */
     protected $defaultOptions = [
-        'ignore_errors' => true,
+        'ignore_errors' => false,
         'max_redirects' => 5,
         'timeout'       => 5,
         'verify_peer'   => true,

@@ -7,6 +7,7 @@ use Ems\Contracts\Core\MimeTypeProvider;
 use Ems\Core\Exceptions\ResourceNotFoundException;
 use Ems\Core\Exceptions\ResourceLockedException;
 use ErrorException;
+use RuntimeException;
 
 class LocalFilesystem implements Filesystem
 {
@@ -523,7 +524,8 @@ class LocalFilesystem implements Filesystem
 
         if ($body === false) {
             $error = error_get_last();
-            throw new RuntimeException($error['message']);
+            $message = isset($error['message']) && $error['message'] ? $error['message'] : "Cannot read from $url.";
+            throw new RuntimeException($message);
         }
 
 

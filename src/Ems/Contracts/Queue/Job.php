@@ -26,11 +26,6 @@ use function property_exists;
 class Job
 {
     /**
-     * @var int|string
-     */
-    protected $taskId;
-
-    /**
      * @var string|callable
      */
     protected $operation;
@@ -78,27 +73,6 @@ class Job
     public function __construct(array $attributes=[])
     {
         $this->fill($attributes);
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @return string|int
-     */
-    public function taskId()
-    {
-        return $this->taskId;
-    }
-
-    /**
-     * @param int|string $taskId
-     *
-     * @return $this
-     */
-    public function setTaskId($taskId)
-    {
-        $this->taskId = $taskId;
-        return $this;
     }
 
     /**

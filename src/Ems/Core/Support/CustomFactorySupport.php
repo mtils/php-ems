@@ -6,6 +6,7 @@ namespace Ems\Core\Support;
 use Ems\Core\Lambda;
 use Ems\Core\Exceptions\UnConfiguredException;
 use ReflectionClass;
+use ReflectionException;
 
 /**
  * @see \Ems\Contracts\Core\SupportsCustomFactory
@@ -38,6 +39,8 @@ trait CustomFactorySupport
      * @param array  $parameters (optional)
      *
      * @return object
+     *
+     * @throws ReflectionException
      **/
     protected function createObject($abstract=null, array $parameters=[])
     {
@@ -58,6 +61,8 @@ trait CustomFactorySupport
      * @param array  $parameters (optional)
      *
      * @return object
+     *
+     * @throws ReflectionException
      **/
     protected function createWithoutFactory($abstract, array $parameters=[])
     {

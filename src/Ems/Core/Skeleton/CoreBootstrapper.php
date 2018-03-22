@@ -23,6 +23,7 @@ use Ems\Core\Application;
 use Ems\Core\ArrayLocalizer;
 use Ems\Core\ArrayProvider;
 use Ems\Core\Checker;
+use Ems\Core\EntityManager;
 use Ems\Core\Extractor;
 use Ems\Core\Formatter;
 use Ems\Core\InputCaster;
@@ -46,6 +47,7 @@ use Ems\Core\FilesystemConnection;
 use Ems\Expression\Matcher;
 use ReflectionClass;
 use ReflectionMethod;
+use Ems\Contracts\Core\EntityManager as EntityManagerContract;
 
 class CoreBootstrapper extends Bootstrapper
 {
@@ -66,7 +68,8 @@ class CoreBootstrapper extends Bootstrapper
         Extractor::class                  => ExtractorContract::class,
         Formatter::class                  => FormatterContract::class,
         ConnectionPool::class             => ConnectionPoolContract::class,
-        Checker::class                    => CheckerContract::class
+        Checker::class                    => CheckerContract::class,
+        EntityManager::class              => EntityManagerContract::class
     ];
 
     /**

@@ -11,7 +11,7 @@ namespace Ems\Contracts\Core;
 interface Provider
 {
     /**
-     * Get a named object by its id.
+     * Get an object by its id.
      *
      * @param mixed $id
      * @param mixed $default (optional)
@@ -21,7 +21,7 @@ interface Provider
     public function get($id, $default = null);
 
     /**
-     * Get a named object by its id or throw an exception if it cant be found.
+     * Get an object by its id or throw an exception if it cant be found.
      *
      * @param mixed $id
      *

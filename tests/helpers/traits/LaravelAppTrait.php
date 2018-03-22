@@ -27,7 +27,7 @@ trait LaravelAppTrait
      * @param string $binding    (optional)
      * @param array  $parameters (optional)
      *
-     * @return Application
+     * @return Application|mixed
      **/
     public function app($binding = null, array $parameters = [])
     {
