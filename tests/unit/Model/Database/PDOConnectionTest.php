@@ -11,6 +11,7 @@ use Ems\Contracts\Model\Database\SQLException;
 use Ems\Contracts\Model\Result;
 use Ems\Model\Database\Dialects\SQLiteDialect;
 use Ems\Core\Url;
+use Ems\Testing\Cheat;
 
 require_once(__DIR__.'/PDOBaseTest.php');
 
@@ -398,13 +399,31 @@ class PDOConnectionTest extends PDOBaseTest
 //         $this->assertEquals('mysql', $con->dialect());
     }
 
-
+    public function test_methodsHooks_contains_basic_hooks()
+    {
+        $con = $this->newConnection();
+        $hooks = $con->methodHooks();
+        foreach (['select', 'insert', 'write', 'prepare'] as $hook) {
+            $this->assertContains($hook, $hooks);
+        }
+    }
 
     public function test_url_returns_url()
     {
         $url = new Url('mysql://user@host/phpmyadmin');
         $con = $this->newConnection(false, $url);
         $this->assertSame($url, $con->url());
+    }
+
+    public function test_urlToDsn_creates_valid_dsn()
+    {
+        $url = new Url('mysql://username@hostname:3363/phpmyadmin');
+        $con = $this->newConnection(false, $url);
+
+        $dsn = Cheat::call($con, 'urlToDsn', [$url]);
+
+        $this->assertEquals('mysql:dbname=phpmyadmin;host=hostname;port=3363', $dsn);
+
     }
 
 }

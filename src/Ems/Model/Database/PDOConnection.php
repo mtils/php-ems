@@ -155,7 +155,7 @@ class PDOConnection implements Connection, Configurable, HasMethodHooks
     /**
      * {@inheritdoc}
      *
-     * @return resource|object|null
+     * @return resource|PDO|null
      **/
     public function resource()
     {
@@ -290,7 +290,7 @@ class PDOConnection implements Connection, Configurable, HasMethodHooks
      * Run a select statement and return the result.
      *
      * @param string|\Ems\Contracts\Core\Stringable $query
-     * @param array                                 $binding (optional)
+     * @param array                                 $bindings (optional)
      * @param mixed                                 $fetchMode (optional)
      *
      * @return PDOResult
@@ -319,7 +319,7 @@ class PDOConnection implements Connection, Configurable, HasMethodHooks
      * Run an insert statement.
      *
      * @param string|\Ems\Contracts\Stringable $query
-     * @param array                            $binding (optional)
+     * @param array                            $bindings (optional)
      * @param bool                             $returnLastInsertId (optional)
      *
      * @return int (last inserted id)
@@ -345,7 +345,7 @@ class PDOConnection implements Connection, Configurable, HasMethodHooks
      * Run an altering statement.
      *
      * @param string|\Ems\Contracts\Stringable $query
-     * @param array                            $binding (optional)
+     * @param array                            $bindings (optional)
      * @param bool                             $returnAffected (optional)
      *
      * @return int (Number of affected rows)
@@ -406,6 +406,15 @@ class PDOConnection implements Connection, Configurable, HasMethodHooks
         return ['select', 'insert', 'write', 'prepare'];
     }
 
+    /**
+     * Try to perform an operation. If it fails convert the native exception
+     * into a SQLException.
+     *
+     * @param Closure $run
+     * @param string $query
+     *
+     * @return mixed
+     */
     protected function attempt(Closure $run, $query='')
     {
         try {
@@ -438,15 +447,9 @@ class PDOConnection implements Connection, Configurable, HasMethodHooks
         return $this->resource();
     }
 
-    protected function wasCausedByLock(Exception $e)
-    {
-        $message = $e->getMessage();
-        
-    }
-
     /**
      * @param string|\Ems\Contracts\Stringable $query
-     * @param array                            $binding (optional)
+     * @param array                            $bindings (optional)
      * @param mixed                            $fetchMode (optional)
      *
      * @return PDOStatement
@@ -480,6 +483,7 @@ class PDOConnection implements Connection, Configurable, HasMethodHooks
 
     protected function createPDO(Url $url)
     {
+
         $pdo = new PDO(
             $this->urlToDsn($url),
             $url->user ? $url->user : null,
@@ -517,16 +521,19 @@ class PDOConnection implements Connection, Configurable, HasMethodHooks
         $parts = [];
 
         if ($db) {
-            $parts[] = "dbname=$db";
+            $parts[] = "dbname=" . trim($db, '/');
         }
+
         if ($host) {
             $parts[] = "host=$host";
         }
+
         if ($port) {
             $parts[] = "port=$port";
         }
-        print_r($parts);
-        return implode(';', $parts);
+
+        return "$driver:" . implode(';', $parts);
+
     }
 
     protected function prepared($query, array $bindings, $fetchMode=null)
