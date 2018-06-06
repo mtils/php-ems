@@ -13,6 +13,8 @@ use Ems\XType\Eloquent\RelationReflector;
 use Ems\XType\TypeFactory;
 use Ems\XType\TypeProvider;
 use Illuminate\Database\Eloquent\Model;
+use Ems\Contracts\XType\Formatter as FormatterContract;
+use Ems\XType\Formatter;
 
 class XTypeBootstrapper extends Bootstrapper
 {
@@ -23,7 +25,8 @@ class XTypeBootstrapper extends Bootstrapper
 
     protected $singletons = [
         TypeFactory::class  => TypeFactoryContract::class,
-        TypeProvider::class => TypeProviderContract::class
+        TypeProvider::class => TypeProviderContract::class,
+        Formatter::class    => FormatterContract::class
     ];
 
     public function bind()

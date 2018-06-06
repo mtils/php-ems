@@ -18,10 +18,12 @@ use Ems\Contracts\Core\StringConverter;
 use Ems\Contracts\Core\SupportsCustomFactory;
 use Ems\Contracts\Core\TextFormatter as TextFormatterContract;
 use Ems\Contracts\Core\TextParser;
+use Ems\Contracts\Core\TextProvider;
 use Ems\Contracts\Core\Url as UrlContract;
 use Ems\Core\Application;
 use Ems\Core\ArrayLocalizer;
 use Ems\Core\ArrayProvider;
+use Ems\Core\ArrayTextProvider;
 use Ems\Core\Checker;
 use Ems\Core\EntityManager;
 use Ems\Core\Extractor;
@@ -69,7 +71,8 @@ class CoreBootstrapper extends Bootstrapper
         Formatter::class                  => FormatterContract::class,
         ConnectionPool::class             => ConnectionPoolContract::class,
         Checker::class                    => CheckerContract::class,
-        EntityManager::class              => EntityManagerContract::class
+        EntityManager::class              => EntityManagerContract::class,
+        ArrayTextProvider::class          => TextProvider::class
     ];
 
     /**

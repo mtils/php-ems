@@ -11,6 +11,7 @@ use Ems\Contracts\Core\Formatter as FormatterContract;
 use Ems\Contracts\Core\Multilingual;
 use Ems\Core\Exceptions\KeyNotFoundException;
 use Ems\Core\Patterns\ExtendableTrait;
+use Ems\Core\Support\MultilingualTrait;
 use Ems\Core\Support\StringChainSupport;
 use Ems\Core\Exceptions\HandlerNotFoundException;
 use InvalidArgumentException;
@@ -20,16 +21,10 @@ class Formatter implements FormatterContract, Multilingual
 {
     use ExtendableTrait;
     use StringChainSupport;
-
-    /**
-     * @var string
-     */
-    protected $locale;
-
-    /**
-     * @var array
-     */
-    protected $localeFallbacks = [];
+    use MultilingualTrait {
+        MultilingualTrait::setLocale as parentSetLocale;
+        MultilingualTrait::setFallbacks as parentSetFallbacks;
+    }
 
     /**
      * @var array|\ArrayAccess
@@ -50,11 +45,6 @@ class Formatter implements FormatterContract, Multilingual
      * @var array
      */
     protected $dateFormatCache = [];
-
-    /**
-     * @var array
-     */
-    protected $localeSequence = [];
 
     /**
      * @var string
@@ -336,38 +326,12 @@ class Formatter implements FormatterContract, Multilingual
      * {@inheritdoc}
      *
      * @param string $locale
-     * @param string|array $fallbacks (optional)
-     *
-     * @return self
-     **/
-    public function forLocale($locale, $fallbacks = null)
-    {
-        $copy = new static($this->getFormats(), $this->overwrites);
-        $fallbacks = $fallbacks ? (array)$fallbacks: $this->localeFallbacks;
-        return $copy->setLocale($locale)->setFallbacks($fallbacks);
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @return string
-     **/
-    public function getLocale()
-    {
-        return $this->locale;
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @param string $locale
      *
      * @return self
      **/
     public function setLocale($locale)
     {
-        $this->locale = $locale;
-        $this->localeSequence = [];
+        $this->parentSetLocale($locale);
         $this->formatCache = [];
         $this->dateFormatCache = [];
         return $this;
@@ -392,8 +356,7 @@ class Formatter implements FormatterContract, Multilingual
      */
     public function setFallbacks($fallback)
     {
-        $this->localeFallbacks = (array)$fallback;
-        $this->localeSequence = [];
+        $this->parentSetFallbacks($fallback);
         $this->formatCache = [];
         return $this;
     }
@@ -498,35 +461,13 @@ class Formatter implements FormatterContract, Multilingual
     }
 
     /**
-     * Calculates the priority for loading formatting keys. (e.g. de_DE, de, en)
+     * @param array $properties (optional)
      *
-     * @return array
+     * @return static
      */
-    protected function localeSequence()
+    protected function replicate(array $properties = [])
     {
-        if ($this->localeSequence) {
-            return $this->localeSequence;
-        }
-
-        if ($this->localeFallbacks) {
-            $this->localeSequence = $this->localeFallbacks;
-        }
-
-        if (!$this->locale) {
-            return $this->localeSequence;
-        }
-
-        if (!strpos($this->locale, '_') ) {
-            array_unshift($this->localeSequence, $this->locale);
-            return $this->localeSequence;
-        }
-
-        $base = explode('_', $this->locale, 2)[0];
-
-        array_unshift($this->localeSequence, $base);
-        array_unshift($this->localeSequence, $this->locale);
-
-        return $this->localeSequence;
+        return new static($this->getFormats(), $this->overwrites);
     }
 
     /**

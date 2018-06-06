@@ -6,6 +6,8 @@ namespace Ems\Core\Support;
 
 trait TextProviderTrait
 {
+    use MultilingualTrait;
+
     /**
      * @var string
      **/
@@ -14,23 +16,7 @@ trait TextProviderTrait
     /**
      * @var string
      **/
-    protected $namespace = '';
-
-    /**
-     * @var string
-     **/
     protected $keyPrefix = '';
-
-    /**
-     * @var string
-     **/
-    protected $locale;
-
-    /**
-     * @var string
-     */
-    protected $fallbacks = [];
-
 
     /**
      * @var bool
@@ -42,13 +28,13 @@ trait TextProviderTrait
      *
      * @param string $domain
      *
-     * @throws \Ems\Core\Errors\NotFound
+     * @throws \Ems\Contracts\Core\Errors\NotFound
      *
      * @return self
      **/
     public function forDomain($domain)
     {
-        return $this->replicate($domain, $this->namespace);
+        return $this->replicate(['domain' => $domain]);
     }
 
     /**
@@ -62,107 +48,16 @@ trait TextProviderTrait
     }
 
     /**
-     * Return a new instance of this provider for locale $locale.
-     *
-     * @param string $locale
-     * @param string|array $fallbacks (optional)
-     *
-     * @return self
-     **/
-    public function forLocale($locale, $fallbacks=null)
-    {
-        $fork = $this->replicate($this->domain, $this->namespace)->setLocale($locale);
-
-        if ($fallbacks) {
-            return $fork->setFallbacks($fallbacks);
-        }
-
-        if ($this->fallbacks) {
-            return $fork->setFallbacks($this->fallbacks);
-        }
-
-        return $fork;
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @return string
-     **/
-    public function getLocale()
-    {
-        return $this->locale;
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @param string $locale
-     *
-     * @return self
-     **/
-    public function setLocale($locale)
-    {
-        $this->locale = $locale;
-        return $this;
-    }
-
-    /**
-     * Return the current namespace (if one set).
-     *
-     * @return string
-     **/
-    public function getNamespace()
-    {
-        return $this->namespace;
-    }
-
-    /**
-     * Return a new TextProvider with a predefinied namespace.
-     *
-     * @param string
-     *
-     * @return self
-     **/
-    public function forNamespace($namespace)
-    {
-        return $this->replicate($this->domain, $namespace);
-    }
-
-    /**
-     * Return the fallback locales.
-     *
-     * @return array
-     */
-    public function getFallbacks()
-    {
-        return $this->fallbacks;
-    }
-
-    /**
-     * Set the locale fallback(s).
-     *
-     * @param string|array $fallback
-     * @return mixed
-     */
-    public function setFallbacks($fallback)
-    {
-        $this->fallbacks = (array)$fallback;
-
-    }
-
-    /**
      * Returns a new instance of this TextProvider.
      *
-     * @param string $domain
-     * @param string $namespace
+     * @param array $properties
      *
      * @return self
      **/
-    protected function replicate($domain, $namespace)
+    protected function replicate(array $properties=[])
     {
         $class = get_class($this);
-        return new $class($domain, $namespace, false);
+        return new $class(isset($properties['domain']) ? $properties['domain'] : null);
     }
 
     /**

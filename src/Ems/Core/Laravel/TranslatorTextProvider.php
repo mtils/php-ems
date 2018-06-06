@@ -17,6 +17,11 @@ class TranslatorTextProvider implements TextProvider, Multilingual
     protected $translator;
 
     /**
+     * @var string
+     **/
+    protected $namespace = '';
+
+    /**
      * @param \Illuminate\Translation\Translator $translator
      * @param string                             $domain     (optional)
      * @param string                             $namespace  (optional)
@@ -104,16 +109,40 @@ class TranslatorTextProvider implements TextProvider, Multilingual
     }
 
     /**
-     * Returns a new instance of this TextProvider.
+     * Return the current namespace (if one set).
      *
-     * @param string $domain
-     * @param string $namespace
+     * @return string
+     **/
+    public function getNamespace()
+    {
+        return $this->namespace;
+    }
+
+    /**
+     * Return a new TextProvider with a predefined namespace.
+     *
+     * @param string
      *
      * @return self
      **/
-    protected function replicate($domain, $namespace)
+    public function forNamespace($namespace)
+    {
+        return $this->replicate(['namespace' => $namespace]);
+    }
+
+    /**
+     * Returns a new instance of this TextProvider.
+     *
+     * @param array $properties
+     *
+     * @return self
+     **/
+    protected function replicate(array $properties=[])
     {
         $class = get_class($this);
+        $domain = isset($properties['domain']) ? $properties['domain'] : $this->domain;
+        $namespace = isset($properties['namespace']) ? $properties['namespace'] : $this->namespace;
+
         return new $class($this->translator, $domain, $namespace, false);
     }
 
