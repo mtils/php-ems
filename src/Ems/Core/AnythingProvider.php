@@ -3,12 +3,8 @@
 namespace Ems\Core;
 
 use Ems\Contracts\Core\AllProvider;
-use Ems\Contracts\Core\TextProvider;
-use Ems\Contracts\Core\Named;
-use Ems\Contracts\Core\Identifiable;
-use Ems\Contracts\Core\AppliesToResource;
-use Ems\Core\Support\TypeCheckMethods;
 use Ems\Core\Exceptions\ResourceNotFoundException;
+use Ems\Core\Support\TypeCheckMethods;
 
 class AnythingProvider implements AllProvider
 {

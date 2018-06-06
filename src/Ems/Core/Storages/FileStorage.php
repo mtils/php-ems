@@ -22,7 +22,7 @@ use RuntimeException;
 /**
  * The FileStorage is a completely unbuffered storage.
  * Almost every call to method on it will result in filesystem access.
- * So just it internally or with a proxy to implement buffering around it.
+ * So just use it internally or with a proxy to implement buffering around it.
  **/
 class FileStorage implements UnbufferedStorage, Configurable
 {

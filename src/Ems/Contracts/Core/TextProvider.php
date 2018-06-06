@@ -15,11 +15,11 @@ namespace Ems\Contracts\Core;
  * writing any texts in your code, you write an id and let some object turn
  * it into text. So this is more like a glossary or technically a TextProvider.
  *
- * I tried to find the right wording for translate|get|trans and realizied there
+ * I tried to find the right wording for translate|get|trans and realized there
  * is no translation happening. So the wording here is different.
  *
- * The multilang features has been removed of this class, because the consumer
- * of this class usually doesnt care about a manual locale.
+ * The multilingual features has been removed of this class, because the consumer
+ * of this class usually does not care about a manual locale.
  **/
 interface TextProvider
 {
