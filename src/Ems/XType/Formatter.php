@@ -14,8 +14,12 @@ use Ems\Contracts\Core\PointInTime;
 use Ems\Contracts\Core\TextProvider;
 use Ems\Contracts\XType\Formatter as FormatterContract;
 use Ems\Contracts\XType\XType;
+use Ems\Core\Exceptions\UnsupportedParameterException;
+use Ems\Core\Helper;
 use Ems\Core\Patterns\ExtendableByClassHierarchyTrait;
 use Ems\Contracts\XType\TypeProvider as TypeProviderContract;
+use function in_array;
+use function str_replace;
 
 class Formatter implements FormatterContract, Multilingual
 {
@@ -60,6 +64,27 @@ class Formatter implements FormatterContract, Multilingual
      * @var array
      */
     protected $localeFallbacks = [];
+
+    /**
+     * @var string
+     */
+    protected $trueLangKey = 'true';
+
+    /**
+     * @var string
+     */
+    protected $falseLangKey = 'false';
+
+    /**
+     * @var array
+     */
+    protected $viewToVerbosity = [
+        'default' => CoreFormatter::SHORT,
+        'show'    => CoreFormatter::LONG,
+        'index'   => CoreFormatter::SHORT,
+        'detail'  => CoreFormatter::VERBOSE,
+        'edit'    => CoreFormatter::VERBOSE
+    ];
 
     public function __construct(CoreFormatter $formatter, Extractor $extractor,
                                 TypeProviderContract $typeProvider,
@@ -187,6 +212,68 @@ class Formatter implements FormatterContract, Multilingual
         return $this;
     }
 
+    /**
+     * Manually map a view name to a Core\Formatter verbosity.
+     * Use this to choose a distinct (date) format for a given view.
+     *
+     * @param string $view
+     * @param string $verbosity
+     *
+     * @return $this
+     */
+    public function mapViewToVerbosity($view, $verbosity)
+    {
+        if (!in_array($verbosity, [CoreFormatter::SHORT, CoreFormatter::LONG, CoreFormatter::VERBOSE])) {
+            throw new UnsupportedParameterException("Verbosity $verbosity is not known.");
+        }
+        $this->viewToVerbosity[$view] = $verbosity;
+        return $this;
+    }
+
+    /**
+     * Set the translation key for turning boolean true values into text.
+     *
+     * @return string
+     */
+    public function getTrueLangKey()
+    {
+        return $this->trueLangKey;
+    }
+
+    /**
+     * Set the translation key for turning boolean true values into text
+     *
+     * @param string $trueLangKey
+     * @return Formatter
+     */
+    public function setTrueLangKey($trueLangKey)
+    {
+        $this->trueLangKey = $trueLangKey;
+        return $this;
+    }
+
+    /**
+     * Set the translation key for turning boolean false values into text
+     *
+     * @return string
+     */
+    public function getFalseLangKey()
+    {
+        return $this->falseLangKey;
+    }
+
+    /**
+     * Set the translation key for turning boolean false values into text
+     *
+     * @param string $falseLangKey
+     * @return Formatter
+     */
+    public function setFalseLangKey($falseLangKey)
+    {
+        $this->falseLangKey = $falseLangKey;
+        return $this;
+    }
+
 
     /**
      * Do the formatting by this class.
@@ -205,16 +292,16 @@ class Formatter implements FormatterContract, Multilingual
             return $this->formatBool($type, $value, $view, $lang);
         }
 
+        if ($type instanceof UnitType) {
+            return $this->formatUnit($type, $value, $view, $lang);
+        }
+
         if ($type instanceof NumberType) {
             return $this->formatNumber($type, $value, $view, $lang);
         }
 
         if ($type instanceof StringType) {
             return $this->formatString($type, $value, $view, $lang);
-        }
-
-        if ($type instanceof UnitType) {
-            return $this->formatUnit($type, $value, $view, $lang);
         }
 
         if ($type instanceof TemporalType) {
@@ -226,7 +313,8 @@ class Formatter implements FormatterContract, Multilingual
 
     protected function formatBool(BoolType $type, $value, $view, $lang)
     {
-        return $value ? $this->textProvider->get('boolean.true') : $this->textProvider->get('boolean.false');
+        $langKey = $value ? $this->trueLangKey : $this->falseLangKey;
+        return $this->textProvider->get($langKey);
     }
 
     protected function formatNumber(NumberType $type, $value, $view, $lang)
@@ -247,27 +335,59 @@ class Formatter implements FormatterContract, Multilingual
     protected function formatTemporal(TemporalType $type, $value, $view, $lang)
     {
 
+        $verbosity = $this->viewToVerbosity[$view];
+
         if (!$type->absolute) {
-            return $this->formatRelativeTemporal($type, $value, $view);
+            return $this->formatRelativeTemporal($type, $value, $verbosity);
         }
 
         if (in_array($type->precision, [PointInTime::HOUR, PointInTime::MINUTE, PointInTime::SECOND])) {
-            return $this->coreFormatter->dateTime($value, $view);
+            return $this->coreFormatter->dateTime($value, $verbosity);
         }
 
-        if ($type->precision == PointInTime::DAY) {
-            return $this->coreFormatter->date($value, $view);
-        }
+        return $this->coreFormatter->date($value, $verbosity);
 
-        if ($type->precision == PointInTime::MONTH) {
-            return $this->coreFormatter->date($value, $view);
-        }
-
-        return $value ? '1' : '0';
     }
 
-    protected function formatRelativeTemporal($type, $value, $view)
+    protected function formatRelativeTemporal(TemporalType $type, $value, $view)
     {
+        if ($type->precision == PointInTime::MONTH) {
+            return \Ems\Core\PointInTime::guessFrom($value)->format('F');
+        }
+
+        if ($type->precision == PointInTime::WEEKDAY) {
+            return \Ems\Core\PointInTime::guessFrom($value)->format('l');
+        }
+
+        // month + day
+        if ($type->precision == PointInTime::DAY) {
+
+            $format = $this->coreFormatter->getFormat(CoreFormatter::DATE);
+            $format = str_replace(['L', 'o', 'Y', 'y'],'', $format); // Remove all year output
+            $format = trim($format, '.-,_/');
+
+            return \Ems\Core\PointInTime::guessFrom($value)->format($format);
+        }
+
+        $format = $this->coreFormatter->getFormat(CoreFormatter::TIME);
+
+        // $hour
+        if ($type->precision == PointInTime::HOUR) {
+            // We dont need leading zeros, just make sure to stay in 12/24h format
+            $hourFormat = Helper::contains($format, ['g', 'h']) ? 'g' : 'G';
+            return \Ems\Core\PointInTime::guessFrom($value)->format($hourFormat);
+        }
+
+        // $hour:$minute
+        if ($type->precision == PointInTime::MINUTE) {
+            $format = str_replace(['s', 'v', 'u'],'', $format); // Remove all second output
+            $format = trim($format, '.-,_:');
+
+            return \Ems\Core\PointInTime::guessFrom($value)->format($format);
+        }
+
+        // $hour:$minute:$second
+        return \Ems\Core\PointInTime::guessFrom($value)->format($format);
 
     }
 
@@ -297,8 +417,9 @@ class Formatter implements FormatterContract, Multilingual
             return $this->formatterCache[$name];
         }
 
-        if ($extension = $this->getExtension($class)) {
+        if ($extension = $this->nearestForClass($class)) {
             $this->formatterCache[$name] = $extension;
+            $this->formatterCache[$class] = $extension;
             return $this->formatterCache[$name];
         }
 

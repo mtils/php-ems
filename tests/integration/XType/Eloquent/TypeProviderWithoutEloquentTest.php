@@ -23,4 +23,9 @@ class TypeProviderWithoutEloquentTest extends \Ems\IntegrationTest
         $this->assertInstanceOf(NumberType::class, $type);
     }
 
+    public static function tearDownAfterClass()
+    {
+        parent::tearDownAfterClass();
+        XTypeBootstrapper::setEloquentInstalled(null);
+    }
 }

@@ -58,6 +58,7 @@ class Aliases
         'unit' => [
             'temperature' => 'native_type:float|precision:4|decimal_places:1|unit:°',
             'weight' => 'native_type:float|precision:2|decimal_places:1|unit:kg',
+            'area'   => 'native_type:float|precision:2|decimal_places:1|unit:m²',
             'speed' => 'native_type:float|precision:2|decimal_places:0|unit:km/h',
             'bytes' => 'native_type:int|precision:0|decimal_places:0|unit:MB',
             'frequency' => 'native_type:float|precision:2|decimal_places:1|unit:Hz',

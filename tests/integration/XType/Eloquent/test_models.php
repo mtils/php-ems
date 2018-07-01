@@ -125,6 +125,23 @@ class User extends BaseModel
 
 }
 
+class ExtendedUser extends User
+{
+    use SoftDeletes;
+    public $timestamps = true;
+    public function __construct(array $attributes = [])
+    {
+        parent::__construct($attributes);
+        $this->xType['activated'] = 'bool';
+        $this->xType['login_count'] = 'number|native_type:int';
+        $this->xType['nickname'] = 'string|min:3|max:32';
+        $this->xType['misc'] = 'array_access';
+        $this->xType['birthday'] = 'date';
+        $this->xType['height'] = 'length';
+        $this->xType['distance_to_work'] = 'distance';
+    }
+}
+
 class Category extends BaseModel
 {
     protected $xType = [
@@ -156,6 +173,7 @@ class Country extends BaseModel
     protected $xType = [
         'name'      => 'string|min:2|max:255',
         'iso_code'  => 'string|min:2|max:2',
+        'area'      => 'area|unit:m²',
         'residents' => 'relation'
     ];
 
@@ -176,7 +194,8 @@ class Order extends BaseModel
 {
     protected $xType = [
         'name'    => 'string|min:2|max:255',
-        'comments'=> 'relation'
+        'comments'=> 'relation',
+        'amount'  => 'money'
     ];
 
     public function comments()

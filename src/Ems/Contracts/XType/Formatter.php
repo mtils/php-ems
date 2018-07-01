@@ -24,7 +24,7 @@ interface Formatter extends Extendable
      *
      * @param object $object
      * @param string $path   The path. Can be a property name or a nested path
-     * @param string $view   (optional)
+     * @param string $view   (default:'default')
      *
      * @return string
      **/
@@ -35,7 +35,7 @@ interface Formatter extends Extendable
      *
      * @param XType  $type
      * @param mixed  $value
-     * @param string $view
+     * @param string $view  (default:'default')
      *
      * @return string
      **/

@@ -457,6 +457,7 @@ class Formatter implements FormatterContract, Multilingual
                 return $this->formats[$path];
             }
         }
+
         throw new KeyNotFoundException("Format for '$key' not found in formats.'");
     }
 

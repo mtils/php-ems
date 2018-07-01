@@ -108,6 +108,33 @@ class ModelTypeFactoryTest extends \Ems\IntegrationTest
 
     }
 
+    public function test_myXtype_returns_manual_and_standard_properties()
+    {
+        $type = $this->xType(new ExtendedUser);
+
+        $this->assertInstanceOf(NumberType::class, $type['id']);
+        $this->assertTrue($type['id']->readonly);
+
+        foreach (['created_at','updated_at'] as $key) {
+            $this->assertInstanceOf(TemporalType::class, $type[$key]);
+            $this->assertTrue($type[$key]->readonly);
+        }
+
+        $this->assertInstanceOf(StringType::class, $type['login']);
+
+        $this->assertEquals(5, $type['login']->min);
+        $this->assertEquals(128, $type['login']->max);
+
+        $this->assertInstanceOf(StringType::class, $type['email']);
+        $this->assertEquals(10, $type['email']->min);
+        $this->assertEquals(255, $type['email']->max);
+
+        foreach (['created_at','updated_at','deleted_at'] as $key) {
+            $this->assertInstanceOf(TemporalType::class, $type[$key]);
+            $this->assertTrue($type[$key]->readonly);
+        }
+    }
+
     public function test_myXType_overwrites_auto_detected_types_with_manually_setted()
     {
 
@@ -316,11 +343,7 @@ class ModelTypeFactoryTest extends \Ems\IntegrationTest
     protected function provider()
     {
         if (!$this->typeProvider) {
-            $this->typeProvider = new ModelTypeFactory(
-                $this->factory(),
-                new ModelReflector,
-                new RelationReflector
-            );
+            $this->typeProvider = $this->app(ModelTypeFactory::class);
         }
         return $this->typeProvider;
     }
