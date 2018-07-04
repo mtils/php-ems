@@ -13,4 +13,4 @@ script:
   - vendor/bin/phpunit --coverage-clover build/logs/clover.xml
 
 after_success:
-  - travis_retry php vendor/satooshi/php-coveralls/bin/php-coveralls
+  - travis_retry php vendor/php-coveralls/php-coveralls/bin/php-coveralls
