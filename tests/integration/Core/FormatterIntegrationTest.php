@@ -3,6 +3,7 @@
 namespace Ems\Core;
 
 
+use DateTimeZone;
 use Ems\IntegrationTest;
 use Ems\Contracts\Core\Formatter as FormatterContract;
 /**
@@ -57,11 +58,11 @@ class FormatterIntegrationTest extends IntegrationTest
     {
         $f = $this->newFormatter('de_DE');
 
-        $date = new \DateTime('2017-01-29 06:08:42 UTC');
+        $date = new \DateTime('2017-01-29 06:08:42', new DateTimeZone('CST'));
 
         $this->assertEquals('06:08', $f->time($date));
-        $this->assertEquals('06:08:42 UTC', $f->time($date, Formatter::LONG));
-        $this->assertEquals('06:08:42 UTC', $f->time($date, Formatter::VERBOSE));
+        $this->assertEquals('06:08:42 CST', $f->time($date, Formatter::LONG));
+        $this->assertEquals('06:08:42 CST', $f->time($date, Formatter::VERBOSE));
 
     }
 
@@ -69,11 +70,11 @@ class FormatterIntegrationTest extends IntegrationTest
     {
         $f = $this->newFormatter('de_DE');
 
-        $date = new \DateTime('2017-01-29 06:08:42 UTC');
+        $date = new \DateTime('2017-01-29 06:08:42 CET');
 
         $this->assertEquals('29.01.17, 06:08', $f->datetime($date));
-        $this->assertEquals('29. Januar 2017 um 06:08:42 UTC', $f->datetime($date, Formatter::LONG));
-        $this->assertEquals('Sonntag, 29. Januar 2017 um 06:08:42 UTC', $f->datetime($date, Formatter::VERBOSE));
+        $this->assertEquals('29. Januar 2017 um 06:08:42 CET', $f->datetime($date, Formatter::LONG));
+        $this->assertEquals('Sonntag, 29. Januar 2017 um 06:08:42 CET', $f->datetime($date, Formatter::VERBOSE));
 
     }
 

@@ -6,20 +6,20 @@
         "php": ">=5.5.0"
     },
     "require-dev": {
-        "phpunit/phpunit": "5.*",
+        "phpunit/phpunit": "6.*",
         "mockery/mockery": "~0.9",
-        "illuminate/mail": "5.1.*|5.2.*|5.3.*|5.4.*",
-        "illuminate/database": "5.1.*|5.2.*|5.3.*|5.4.*",
-        "illuminate/filesystem": "5.1.*|5.2.*|5.3.*|5.4.*",
-        "illuminate/validation": "5.1.*|5.2.*|5.3.*|5.4.*",
-        "illuminate/view": "5.1.*|5.2.*|5.3.*|5.4.*",
-        "illuminate/support": "5.1.*|5.2.*|5.3.*|5.4.*",
-        "illuminate/queue": "5.1.*|5.2.*|5.3.*|5.4.*",
+        "illuminate/mail": "5.1.*|5.2.*|5.3.*|5.4.*|5.5.*",
+        "illuminate/database": "5.1.*|5.2.*|5.3.*|5.4.*|5.5.*",
+        "illuminate/filesystem": "5.1.*|5.2.*|5.3.*|5.4.*|5.5.*",
+        "illuminate/validation": "5.1.*|5.2.*|5.3.*|5.4.*|5.5.*",
+        "illuminate/view": "5.1.*|5.2.*|5.3.*|5.4.*|5.5.*",
+        "illuminate/support": "5.1.*|5.2.*|5.3.*|5.4.*|5.5.*",
+        "illuminate/queue": "5.1.*|5.2.*|5.3.*|5.4.*|5.5.*",
         "swiftmailer/swiftmailer": "~5.1",
         "patchwork/jsqueeze": "~2.0",
         "natxet/cssmin": "~3.0",
         "tedivm/jshrink": "~1.1",
-        "satooshi/php-coveralls": "2.0.*"
+        "php-coveralls/php-coveralls": "2.1.*"
     },
     "replace": {
         "ems/assets": "self.version",

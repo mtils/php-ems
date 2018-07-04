@@ -256,7 +256,7 @@ class PointInTime extends DateTime implements TemporalContract
     public static function guessFrom($date)
     {
         if ($date instanceof DateTime) {
-            return (new static())->setTimestamp($date->getTimestamp());
+            return (new static())->setTimestamp($date->getTimestamp())->setTimezone($date->getTimezone());
         }
 
         if (is_numeric($date)) {
