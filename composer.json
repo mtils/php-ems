@@ -32,7 +32,7 @@
         "ems/skeleton": "self.version",
         "ems/testing": "self.version",
         "ems/view": "self.version",
-        "ems/xtype": "self.version"
+        "ems/x-type": "self.version"
     },
     "autoload": {
         "psr-4": {

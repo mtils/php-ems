@@ -1,5 +1,5 @@
 {
-    "name": "ems/xtype",
+    "name": "ems/x-type",
     "description": "The ems xtype framework",
     "type": "library",
     "require": {
