@@ -15,7 +15,7 @@ use Ems\Contracts\Core\Type;
  *
  * A message is a description of any listener or event you are exposing.
  * You are not firing messages. Signals describe what you are firing or
- * accepts on a listener endpoint.
+ * accepting on a listener endpoint.
  *
  * @package Ems\Contracts\Events
  */
