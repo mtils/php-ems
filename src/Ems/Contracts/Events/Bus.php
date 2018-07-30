@@ -260,7 +260,7 @@ interface Bus extends Hookable, Subscribable
      *
      * @return self
      *
-     * @throws OutOfBoundsException (if bus not found)
+     * @throws \OutOfBoundsException (if bus not found)
      **/
     public function bus($name);
 
@@ -287,7 +287,7 @@ interface Bus extends Hookable, Subscribable
      *
      * @return self
      *
-     * @throws OutOfBoundsException (if bus not found)
+     * @throws \OutOfBoundsException (if bus not found)
      **/
     public function removeBus($name);
 
