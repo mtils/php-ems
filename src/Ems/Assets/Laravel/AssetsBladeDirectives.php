@@ -130,6 +130,9 @@ class AssetsBladeDirectives
     {
         $class = get_class($this);
         $blade->directive($this->importDirective, function ($expression) use ($class) {
+            if ($expression && $expression[0] != '(') {
+                $expression = "($expression)";
+            }
             return "<?php App::make('$class')->manager(\$currentViewPath)->import$expression ?>";
         });
     }
@@ -141,6 +144,9 @@ class AssetsBladeDirectives
     {
         $class = get_class($this);
         $blade->directive($this->renderDirective, function ($expression) use ($class) {
+            if ($expression && $expression[0] != '(') {
+                $expression = "($expression)";
+            }
             return "<?php echo App::make('$class')->manager(\$currentViewPath)->render$expression ?>";
 
         });
