@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use function method_exists;
 
 class RelationReflector
 {
@@ -174,6 +175,14 @@ class RelationReflector
         // Renamed in Laravel 5.4
         if (method_exists($relation, 'getQualifiedForeignKeyName')) {
             return $relation->getQualifiedForeignKeyName();
+        }
+        // Renamed in Laravel 5.5
+        if (method_exists($relation, 'getQualifiedForeignPivotKeyName')) {
+            return $relation->getQualifiedForeignPivotKeyName();
+        }
+        // Renamed in Laravel 5.6
+        if (method_exists($relation, 'getExistenceCompareKey')) {
+            return $relation->getExistenceCompareKey();
         }
         return $relation->getForeignKey();
     }
