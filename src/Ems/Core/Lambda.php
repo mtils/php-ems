@@ -315,6 +315,9 @@ class Lambda implements Stringable
      * Filled arguments are not concerned!
      *
      * @return string
+     *
+     * @throws LogicException
+     * @throws ReflectionException
      **/
     public function toString()
     {
