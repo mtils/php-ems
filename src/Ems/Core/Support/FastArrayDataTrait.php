@@ -2,6 +2,8 @@
 
 namespace Ems\Core\Support;
 
+use Ems\Core\Collections\OrderedList;
+
 /**
  * This trait is an implementation without any extra functionality. Use it
  * for fast passthru array access.
@@ -61,13 +63,13 @@ trait FastArrayDataTrait
     /**
      * Return an array of key (strings)
      *
-     * @return array
+     * @return OrderedList
      *
      * @see \Ems\Contracts\Core\HasKeys
      **/
     public function keys()
     {
-        return array_keys($this->_attributes);
+        return new OrderedList(array_keys($this->_attributes));
     }
 
     /**
@@ -82,4 +84,30 @@ trait FastArrayDataTrait
         return $this->_attributes;
     }
 
+    /**
+     * Clears the internal array
+     *
+     * @param array $keys (optional)
+     *
+     * @return self
+     **/
+    public function clear(array $keys=null)
+    {
+        if ($keys === null) {
+            $this->_attributes = [];
+            return $this;
+        }
+
+        if (!$keys) {
+            return $this;
+        }
+
+        foreach ($keys as $key) {
+            if (array_key_exists($key, $this->_attributes)) {
+                $this->offsetUnset($key);
+            }
+        }
+
+        return $this;
+    }
 }
