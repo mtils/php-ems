@@ -2,18 +2,22 @@
 
 namespace Ems\Model;
 
+use ArrayIterator;
 use Ems\Contracts\Model\OrmObject as OrmObjectContract;
 use Ems\Contracts\Model\Search as SearchContract;
 use Ems\Contracts\Model\SearchEngine;
+use Ems\Contracts\Pagination\Paginator;
 use Ems\Core\Collections\StringList;
 use Ems\Expression\ConditionGroup;
 use Ems\TestCase;
 use Ems\Testing\Cheat;
+use Ems\Testing\LoggingCallable;
+use function func_get_args;
 use Mockery;
 use function array_slice;
 use function iterator_to_array;
 
-class SearchTest extends TestCase
+class GenericSearchTest extends TestCase
 {
     public function test_implements_interface()
     {
@@ -22,13 +26,139 @@ class SearchTest extends TestCase
             $this->newSearch()
         );
 
-        $this->assertInstanceOf(
-            SearchContract::class,
-            $this->newSearch()
-        );
     }
 
-    public function test_sort()
+    public function test_pass_OrmObject_in___construct()
+    {
+        $search = $this->newSearch(null, new GenericSearchTest_OrmObject());
+        $this->assertInstanceOf(GenericSearchTest_OrmObject::class, $search->ormObject());
+    }
+
+    public function test_pass_array_result_in___construct()
+    {
+
+        $data = $this->getTestData();
+
+        $search = $this->newSearch($data, new GenericSearchTest_OrmObject());
+        $this->assertEquals($data, iterator_to_array($search));
+        $this->assertEquals($search->getResult(), $data);
+    }
+
+    public function test_pass_traversable_result_in___construct()
+    {
+
+        $data = $this->getTestData();
+
+        $iterator = new ArrayIterator($data);
+
+        $search = $this->newSearch($iterator, new GenericSearchTest_OrmObject());
+        $this->assertEquals($data, iterator_to_array($search));
+        $this->assertSame($iterator, $search->getResult());
+    }
+
+    public function test_pass_callable_resultProvider_in___construct()
+    {
+
+        $data = $this->getTestData();
+
+        $provider = new LoggingCallable(function ($filters, $sorting, $queryKeys, $search) use ($data) {
+            return $data;
+        });
+
+        $search = $this->newSearch($provider, new GenericSearchTest_OrmObject());
+
+        $search->filter('foo', 'bar');
+        $search->sort('foo', 'desc');
+
+        $this->assertEquals($data, iterator_to_array($search));
+        $this->assertEquals(iterator_to_array($search), $data);
+
+        // Check the closure parameters
+        $this->assertEquals(['foo' => 'bar'], $provider->arg(0)); // filter
+        $this->assertEquals(['foo' => 'desc'], $provider->arg(1)); // sorting
+        $this->assertEquals((new GenericSearchTest_OrmObject())->keys()->getSource(), $provider->arg(2)); // queryKeys
+        $this->assertSame($search, $provider->arg(3));
+    }
+
+    public function test_empty_search()
+    {
+        $search = $this->newSearch();
+        $this->assertEquals([], iterator_to_array($search));
+    }
+
+    public function test_automatic_pagination()
+    {
+
+        $data = $this->getTestData();
+
+        $search = $this->newSearch($data, new GenericSearchTest_OrmObject());
+
+        $paginator = $search->paginate(1, 10);
+        $paginatorItems = iterator_to_array($paginator);
+
+        $this->assertInstanceOf(Paginator::class, $paginator);
+        $this->assertCount(10, $paginator);
+
+        $this->assertSame($data[0], $paginatorItems[0]);
+        $this->assertSame($data[9], $paginatorItems[9]);
+
+        $paginator2 = $search->paginate(2, 10);
+        $paginatorItems2 = iterator_to_array($paginator2);
+
+        $this->assertInstanceOf(Paginator::class, $paginator2);
+        $this->assertCount(10, $paginator2);
+
+        $this->assertSame($data[10], $paginatorItems2[0]);
+        $this->assertSame($data[19], $paginatorItems2[9]);
+    }
+
+    public function test_pagination_by_custom_provider()
+    {
+
+        $data = $this->getTestData();
+
+        $provider = new LoggingCallable(function ($page, $perPage, $filters, $sorting, $queryKeys, $search) use ($data) {
+            $paginator = new \Ems\Pagination\Paginator($page+1, $perPage/2);
+            $paginator->setResult($paginator->slice($data), count($data));
+            return $paginator;
+        });
+
+        $search = $this->newSearch($data, new GenericSearchTest_OrmObject());
+        $search->providePaginatorBy($provider);
+
+        $search->filter('foo', 'bar');
+        $search->sort('foo', 'desc');
+
+
+        $paginator = $search->paginate(1, 10);
+        $paginatorItems = iterator_to_array($paginator);
+
+        $this->assertInstanceOf(Paginator::class, $paginator);
+        $this->assertCount(5, $paginator);
+
+        $this->assertSame($data[5], $paginatorItems[0]);
+        $this->assertSame($data[9], $paginatorItems[4]);
+
+        $paginator2 = $search->paginate(2, 10);
+        $paginatorItems2 = iterator_to_array($paginator2);
+
+        $this->assertInstanceOf(Paginator::class, $paginator2);
+        $this->assertCount(5, $paginator2);
+
+        $this->assertSame($data[10], $paginatorItems2[0]);
+        $this->assertSame($data[14], $paginatorItems2[4]);
+
+        // Check the closure parameters
+        $this->assertEquals(2, $provider->arg(0));
+        $this->assertEquals(10, $provider->arg(1));
+        $this->assertEquals(['foo' => 'bar'], $provider->arg(2)); // filter
+        $this->assertEquals(['foo' => 'desc'], $provider->arg(3)); // sorting
+        $this->assertEquals((new GenericSearchTest_OrmObject())->keys()->getSource(), $provider->arg(4)); // queryKeys
+        $this->assertSame($search, $provider->arg(5));
+    }
+
+
+    public function _test_sort()
     {
         $search = $this->newSearch();
         $this->assertEquals([], $search->sorting());
@@ -55,7 +185,7 @@ class SearchTest extends TestCase
         $this->assertEquals([], $search->sorting());
     }
 
-    public function test_apply_and_input()
+    public function _test_apply_and_input()
     {
         $search = $this->newSearch();
 
@@ -73,7 +203,7 @@ class SearchTest extends TestCase
         $this->assertEquals(true, $search->input('haha', true));
     }
 
-    public function test_filter()
+    public function _test_filter()
     {
         $search = $this->newSearch();
 
@@ -102,7 +232,7 @@ class SearchTest extends TestCase
 
     }
 
-    public function test_hasFilter_returns_true_if_filter_was_set()
+    public function _test_hasFilter_returns_true_if_filter_was_set()
     {
         $search = $this->newSearch();
 
@@ -122,7 +252,7 @@ class SearchTest extends TestCase
         $this->assertFalse($search->hasFilter('foo'));
     }
 
-    public function test_hasFilter_returns_true_if_filter_was_set_with_value()
+    public function _test_hasFilter_returns_true_if_filter_was_set_with_value()
     {
         $search = $this->newSearch();
 
@@ -146,7 +276,7 @@ class SearchTest extends TestCase
         $this->assertFalse($search->hasFilter('category', 3));
     }
 
-    public function test_clearFilter_returns_true_if_filter_was_set()
+    public function _test_clearFilter_returns_true_if_filter_was_set()
     {
         $search = $this->newSearch();
 
@@ -175,7 +305,7 @@ class SearchTest extends TestCase
 
     }
 
-    public function test_filterKeys()
+    public function _test_filterKeys()
     {
         $search = $this->newSearch();
 
@@ -196,7 +326,7 @@ class SearchTest extends TestCase
         $this->assertEquals(array_keys($filters), $search->filterKeys()->getSource());
     }
 
-    public function test_fill_by_input()
+    public function _test_fill_by_input()
     {
         $input = [
             'age'           => 14,
@@ -224,7 +354,7 @@ class SearchTest extends TestCase
 
     }
 
-    public function test_fill_by_input_with_direction()
+    public function _test_fill_by_input_with_direction()
     {
         $input = [
             'age'           => 14,
@@ -252,7 +382,7 @@ class SearchTest extends TestCase
 
     }
 
-    public function test_fill_by_input_with_multiple_sort()
+    public function _test_fill_by_input_with_multiple_sort()
     {
         $input = [
             'age'           => 14,
@@ -282,16 +412,16 @@ class SearchTest extends TestCase
 
     }
 
-    public function test_keys_forwards_to_ormObject()
+    public function _test_keys_forwards_to_ormObject()
     {
         $engine = $this->mockEngine();
-        $ormObject1 = new SearchTest_OrmObject();
+        $ormObject1 = new GenericSearchTest_OrmObject();
 
         $search = $this->newSearch($engine, $ormObject1, $this);
 
 
         $this->assertSame($ormObject1, $search->ormObject());
-        $ormObject = new SearchTest_OrmObject();
+        $ormObject = new GenericSearchTest_OrmObject();
         $search->setOrmObject($ormObject);
         $this->assertSame($ormObject, $search->ormObject());
 
@@ -301,16 +431,16 @@ class SearchTest extends TestCase
 
     }
 
-    public function test_getIterator_forwards_to_engine()
+    public function _test_getIterator_forwards_to_engine()
     {
         $engine = $this->mockEngine();
-        $ormObject1 = new SearchTest_OrmObject();
+        $ormObject1 = new GenericSearchTest_OrmObject();
 
         $search = $this->newSearch($engine, $ormObject1, $this);
 
 
         $this->assertSame($ormObject1, $search->ormObject());
-        $ormObject = new SearchTest_OrmObject();
+        $ormObject = new GenericSearchTest_OrmObject();
         $search->setOrmObject($ormObject);
         $this->assertSame($ormObject, $search->ormObject());
 
@@ -318,10 +448,10 @@ class SearchTest extends TestCase
         $query = new ConditionGroup();
 
         $results = [
-            new SearchTest_OrmObject(['id' => 1]),
-            new SearchTest_OrmObject(['id' => 2]),
-            new SearchTest_OrmObject(['id' => 3]),
-            new SearchTest_OrmObject(['id' => 4])
+            new GenericSearchTest_OrmObject(['id' => 1]),
+            new GenericSearchTest_OrmObject(['id' => 2]),
+            new GenericSearchTest_OrmObject(['id' => 3]),
+            new GenericSearchTest_OrmObject(['id' => 4])
         ];
 
         $result = new GenericResult(function () use ($results) {
@@ -347,10 +477,10 @@ class SearchTest extends TestCase
 
     }
 
-    public function test_buildConditions()
+    public function _test_buildConditions()
     {
         $engine = $this->mockEngine();
-        $ormObject = new SearchTest_OrmObject();
+        $ormObject = new GenericSearchTest_OrmObject();
 
         $search = $this->newSearch($engine, $ormObject, $this);
 
@@ -359,10 +489,10 @@ class SearchTest extends TestCase
         $query = new ConditionGroup();
 
         $results = [
-            new SearchTest_OrmObject(['id' => 1]),
-            new SearchTest_OrmObject(['id' => 2]),
-            new SearchTest_OrmObject(['id' => 3]),
-            new SearchTest_OrmObject(['id' => 4])
+            new GenericSearchTest_OrmObject(['id' => 1]),
+            new GenericSearchTest_OrmObject(['id' => 2]),
+            new GenericSearchTest_OrmObject(['id' => 3]),
+            new GenericSearchTest_OrmObject(['id' => 4])
         ];
 
         $result = new GenericResult(function () use ($results) {
@@ -380,7 +510,7 @@ class SearchTest extends TestCase
 
         $engine->shouldReceive('search')
             ->with(Mockery::type(get_class($query)), $sort, $ormKeys->getSource())
-            ->twice()
+            ->once() // due caching
             ->andReturn($result);
 
         $input = [
@@ -420,10 +550,10 @@ class SearchTest extends TestCase
     /**
      * @expectedException \Ems\Contracts\Core\Errors\Unsupported
      */
-    public function test_paginate_with_unpaginatable_result_throws_exception()
+    public function _test_paginate_with_unpaginatable_result_throws_exception()
     {
         $engine = $this->mockEngine();
-        $ormObject = new SearchTest_OrmObject();
+        $ormObject = new GenericSearchTest_OrmObject();
 
         $search = $this->newSearch($engine, $ormObject, $this);
 
@@ -432,10 +562,10 @@ class SearchTest extends TestCase
         $query = new ConditionGroup();
 
         $results = [
-            new SearchTest_OrmObject(['id' => 1]),
-            new SearchTest_OrmObject(['id' => 2]),
-            new SearchTest_OrmObject(['id' => 3]),
-            new SearchTest_OrmObject(['id' => 4])
+            new GenericSearchTest_OrmObject(['id' => 1]),
+            new GenericSearchTest_OrmObject(['id' => 2]),
+            new GenericSearchTest_OrmObject(['id' => 3]),
+            new GenericSearchTest_OrmObject(['id' => 4])
         ];
 
         $result = new GenericResult(function () use ($results) {
@@ -472,10 +602,10 @@ class SearchTest extends TestCase
 
     }
 
-    public function test_paginate()
+    public function _test_paginate()
     {
         $engine = $this->mockEngine();
-        $ormObject = new SearchTest_OrmObject();
+        $ormObject = new GenericSearchTest_OrmObject();
 
         $search = $this->newSearch($engine, $ormObject, $this);
 
@@ -484,16 +614,16 @@ class SearchTest extends TestCase
         $query = new ConditionGroup();
 
         $results = [
-            new SearchTest_OrmObject(['id' => 1]),
-            new SearchTest_OrmObject(['id' => 2]),
-            new SearchTest_OrmObject(['id' => 3]),
-            new SearchTest_OrmObject(['id' => 4]),
-            new SearchTest_OrmObject(['id' => 5]),
-            new SearchTest_OrmObject(['id' => 6]),
-            new SearchTest_OrmObject(['id' => 7]),
-            new SearchTest_OrmObject(['id' => 8]),
-            new SearchTest_OrmObject(['id' => 9]),
-            new SearchTest_OrmObject(['id' => 10])
+            new GenericSearchTest_OrmObject(['id' => 1]),
+            new GenericSearchTest_OrmObject(['id' => 2]),
+            new GenericSearchTest_OrmObject(['id' => 3]),
+            new GenericSearchTest_OrmObject(['id' => 4]),
+            new GenericSearchTest_OrmObject(['id' => 5]),
+            new GenericSearchTest_OrmObject(['id' => 6]),
+            new GenericSearchTest_OrmObject(['id' => 7]),
+            new GenericSearchTest_OrmObject(['id' => 8]),
+            new GenericSearchTest_OrmObject(['id' => 9]),
+            new GenericSearchTest_OrmObject(['id' => 10])
         ];
 
         $result = new GenericPaginatableResult(function () use ($results) {
@@ -538,32 +668,39 @@ class SearchTest extends TestCase
 
     }
 
-    protected function newSearch(SearchEngine $engine=null, OrmObjectContract $ormObject=null, $creator=null)
+    protected function newSearch($result=null, OrmObjectContract $ormObject=null, $creator=null)
     {
-        $engine = $engine ?: $this->mockEngine(true);
-        return new Search($engine, $ormObject, $creator);
+        return new GenericSearch($ormObject ?: new GenericSearchTest_OrmObject(), $result, $creator);
     }
 
-    protected function mockEngine($registerDefaults=false)
+    protected function getTestData()
     {
-        $engine = $this->mock(SearchEngine::class);
-
-        if ($registerDefaults) {
-
-            $engine->shouldReceive('newQuery')
-                   ->andReturn(new ConditionGroup());
-
-            $engine->shouldReceive('search')
-                ->andReturn(new GenericPaginatableResult(
-                    function () {},
-                    function () {}));
-        }
-
-        return $engine;
+        return [
+            new GenericSearchTest_OrmObject(['id' => 1]),
+            new GenericSearchTest_OrmObject(['id' => 2]),
+            new GenericSearchTest_OrmObject(['id' => 3]),
+            new GenericSearchTest_OrmObject(['id' => 4]),
+            new GenericSearchTest_OrmObject(['id' => 5]),
+            new GenericSearchTest_OrmObject(['id' => 6]),
+            new GenericSearchTest_OrmObject(['id' => 7]),
+            new GenericSearchTest_OrmObject(['id' => 8]),
+            new GenericSearchTest_OrmObject(['id' => 9]),
+            new GenericSearchTest_OrmObject(['id' => 10]),
+            new GenericSearchTest_OrmObject(['id' => 11]),
+            new GenericSearchTest_OrmObject(['id' => 12]),
+            new GenericSearchTest_OrmObject(['id' => 13]),
+            new GenericSearchTest_OrmObject(['id' => 14]),
+            new GenericSearchTest_OrmObject(['id' => 15]),
+            new GenericSearchTest_OrmObject(['id' => 16]),
+            new GenericSearchTest_OrmObject(['id' => 17]),
+            new GenericSearchTest_OrmObject(['id' => 18]),
+            new GenericSearchTest_OrmObject(['id' => 19]),
+            new GenericSearchTest_OrmObject(['id' => 20])
+        ];
     }
 }
 
-class SearchTest_OrmObject extends OrmObject
+class GenericSearchTest_OrmObject extends OrmObject
 {
     public function keys()
     {

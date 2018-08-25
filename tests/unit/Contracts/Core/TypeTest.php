@@ -69,4 +69,130 @@ class TypeTest extends TestCase
     {
         Type::force(145, 'string');
     }
+
+    public function test_traits_returns_directly_used_traits()
+    {
+        // Test unnested traits
+        $this->assertEquals([
+            TypeTest_Trait1::class => TypeTest_Trait1::class
+        ], Type::traits(TypeTest_TraitTest1::class));
+
+        // Test nested traits
+        $this->assertEquals([
+            TypeTest_Trait1::class => TypeTest_Trait1::class,
+            TypeTest_Trait2::class => TypeTest_Trait2::class,
+        ], Type::traits(TypeTest_TraitTest12::class));
+
+        $this->assertEquals([], Type::traits(TypeTest_TraitTest1_extended::class));
+    }
+
+    public function test_traits_returns_traits_from_parent_classes()
+    {
+        // Test one trait of parent class
+        $this->assertEquals([
+            TypeTest_Trait1::class => TypeTest_Trait1::class
+        ], Type::traits(TypeTest_TraitTest1_extended::class, true));
+
+        $this->assertEquals([
+            TypeTest_Trait1::class => TypeTest_Trait1::class
+        ], Type::traits(TypeTest_TraitTest1_extended2::class, true));
+
+    }
+
+    public function test_traits_returns_traits_used_by_traits()
+    {
+        // Test one trait of parent class
+        $this->assertEquals([
+            TypeTest_Trait1::class => TypeTest_Trait1::class,
+            TypeTest_Trait2::class => TypeTest_Trait2::class,
+            TypeTest_SubTrait1::class => TypeTest_SubTrait1::class
+        ], Type::traits(TypeTest_TraitTest12::class, true));
+
+        $this->assertEquals([
+            TypeTest_Trait3::class => TypeTest_Trait3::class,
+            TypeTest_SubTrait2::class => TypeTest_SubTrait2::class,
+            TypeTest_SubTrait_of_SubTrait::class => TypeTest_SubTrait_of_SubTrait::class
+        ], Type::traits(TypeTest_TraitTest3::class, true));
+
+        $this->assertEquals([
+            TypeTest_SubTrait1::class => TypeTest_SubTrait1::class,
+            TypeTest_SubTrait2::class => TypeTest_SubTrait2::class,
+            TypeTest_SubTrait_of_SubTrait::class => TypeTest_SubTrait_of_SubTrait::class,
+            TypeTest_Trait4::class => TypeTest_Trait4::class
+        ], Type::traits(TypeTest_TraitTest4::class, true));
+
+    }
+}
+
+trait TypeTest_SubTrait_of_SubTrait
+{
+
+}
+
+trait TypeTest_SubTrait2
+{
+    use TypeTest_SubTrait_of_SubTrait;
+}
+
+trait TypeTest_SubTrait1
+{
+
+}
+
+trait TypeTest_Trait1
+{
+
+}
+
+trait TypeTest_Trait2
+{
+    use TypeTest_SubTrait1;
+}
+
+trait TypeTest_Trait3
+{
+    use TypeTest_SubTrait2;
+}
+
+trait TypeTest_Trait4
+{
+    use TypeTest_SubTrait1;
+    use TypeTest_SubTrait2;
+}
+
+class TypeTest_TraitTest1
+{
+    use TypeTest_Trait1;
+}
+
+class TypeTest_TraitTest1_extended extends TypeTest_TraitTest1
+{
+    //
+}
+
+class TypeTest_TraitTest12
+{
+    use TypeTest_Trait1;
+    use TypeTest_Trait2;
+
+}
+
+class TypeTest_TraitTest3
+{
+    use TypeTest_Trait3;
+}
+
+class TypeTest_TraitTest3_extended extends TypeTest_TraitTest3
+{
+    //
+}
+
+class TypeTest_TraitTest4
+{
+    use TypeTest_Trait4;
+}
+
+class TypeTest_TraitTest1_extended2 extends TypeTest_TraitTest1_extended
+{
+    //
 }
