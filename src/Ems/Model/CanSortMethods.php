@@ -5,11 +5,12 @@
 
 namespace Ems\Model;
 use function array_search;
+use Ems\Contracts\Model\CanSort;
 
 /**
  * Trait CanSortMethods
  *
- * @see \Ems\Contracts\Model\CanSort
+ * @see CanSort
  *
  * @package Ems\Model
  */
@@ -33,7 +34,7 @@ trait CanSortMethods
      *
      * @return $this
      */
-    public function sort($key, $direction=self::ASC)
+    public function sort($key, $direction=CanSort::ASC)
     {
         $this->bootCanSortMethodsOnce();
         $this->sorting[$key] = $direction;

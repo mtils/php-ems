@@ -14,7 +14,7 @@ use Ems\Contracts\Core\Arrayable;
  *
  * Every method returns a new Url instance for chaining
  * The magic get method allows to get the values from the url
- * So basically you write to a query by methods and read from it by property
+ * So basically you write to a Url by methods and read from it by property
  * access.
  * An url has to be immutable
  *

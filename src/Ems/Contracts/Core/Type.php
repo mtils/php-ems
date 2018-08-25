@@ -5,8 +5,10 @@
 
 namespace Ems\Contracts\Core;
 
+use function array_unique;
 use Countable;
 use Ems\Contracts\Core\Exceptions\TypeException;
+use function get_parent_class;
 use function is_array;
 use function is_bool;
 use function is_numeric;
@@ -299,5 +301,54 @@ class Type
     {
         $name = static::of($value);
         return new $class(str_replace(':type', $name, $msg));
+    }
+
+    /**
+     * @param $class
+     * @param bool $recursive
+     * @param bool $autoload
+     *
+     * @return array
+     */
+    public static function traits($class, $recursive=false, $autoload=true)
+    {
+
+        if (!$recursive) {
+            return class_uses($class, $autoload);
+        }
+
+        $traits = [];
+
+        // Collect the "use" statements in class and parent classes
+        do {
+            $traits = array_merge(class_uses($class, $autoload), $traits);
+        } while ($class = get_parent_class($class));
+
+        // Copy the found traits into an array we can alter
+        $allTraits = $traits;
+
+        foreach ($traits as $trait) {
+            $allTraits += static::traitsOfTrait($trait);
+        }
+
+        return array_unique($allTraits);
+    }
+
+    /**
+     * Return all traits that $trait uses.
+     *
+     * @param string $trait The trait "classname"
+     *
+     * @return array
+     */
+    protected static function traitsOfTrait($trait)
+    {
+        $traits = static::traits($trait, false, false);
+
+        foreach ($traits as $usedTrait) {
+            $traits += static::traitsOfTrait($usedTrait);
+        }
+
+        return $traits;
     }
 }
