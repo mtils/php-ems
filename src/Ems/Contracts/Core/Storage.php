@@ -2,8 +2,6 @@
 
 namespace Ems\Contracts\Core;
 
-use ArrayAccess;
-
 /**
  * A storage is the simplest form of data storage.
  * (Simpler than for example Repository)
@@ -18,10 +16,10 @@ use ArrayAccess;
  *
  * ArrayAccess:
  *
- * @method     Storage offsetExists($offset) Check if entry with key $offset exists
- * @method     Storage offsetGet($offset) Return the stored data for key $offset
- * @method     Storage offsetSet($offset, $value) Set data under key $offset. No objects are allowed
- * @method     Storage offsetUnset($offset) Remove the data under key $offset
+ * @see     ArrayAccess::offsetExists($offset) Check if entry with key $offset exists
+ * @see     ArrayAccess::offsetGet(mixed $offset) Return the stored data for key $offset
+ * @see     ArrayAccess::offsetSet(mixed $offset, mixed $value) Set data under key $offset. No objects are allowed
+ * @see     ArrayAccess::offsetUnset(mixed $offset) Remove the data under key $offset
  **/
 interface Storage extends ArrayData
 {
