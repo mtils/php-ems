@@ -3,19 +3,24 @@
 namespace Ems\Core\Storages;
 
 
-use Ems\Contracts\Core\BufferedStorage;
 use Ems\Contracts\Core\Configurable;
-use Ems\Contracts\Core\Serializer as SerializerContract;
 use Ems\Contracts\Core\Filesystem as FilesystemContract;
+use Ems\Contracts\Core\Serializer as SerializerContract;
+use Ems\Contracts\Core\Storage;
 use Ems\Contracts\Core\Url as UrlContract;
 use Ems\Core\ConfigurableTrait;
-use Ems\Core\Support\ArrayAccessMethods;
-use Ems\Core\Support\BootingArrayData;
-use Ems\Core\ArrayWithState;
-use Ems\Core\QueryableArrayWithState;
 use Ems\Core\Exceptions\DataIntegrityException;
+use Ems\Core\Support\BootingArrayData;
 
-class SingleFileStorage implements BufferedStorage, Configurable
+/**
+ * Class SingleFileStorage
+ *
+ * In opposite to FileStorage a SingleFileStorage serializes all data into one
+ * single file.
+ *
+ * @package Ems\Core\Storages
+ */
+class SingleFileStorage implements Storage, Configurable
 {
     use BootingArrayData;
     use ConfigurableTrait;
@@ -88,7 +93,7 @@ class SingleFileStorage implements BufferedStorage, Configurable
     /**
      * {@inheritdoc}
      *
-     * @return bool (if successfull)
+     * @return bool (if successful)
      **/
     public function persist()
     {
@@ -115,7 +120,7 @@ class SingleFileStorage implements BufferedStorage, Configurable
      *
      * @param array $keys (optional)
      *
-     * @return bool (if successfull)
+     * @return bool (if successful)
      **/
     public function purge(array $keys=null)
     {
@@ -148,7 +153,16 @@ class SingleFileStorage implements BufferedStorage, Configurable
     }
 
     /**
-     * Assign a custom callable to create the checksum. The checksum dont has
+     * @inheritDoc
+     */
+    public function isBuffered()
+    {
+        return true;
+    }
+
+
+    /**
+     * Assign a custom callable to create the checksum. The checksum don't has
      * to be a paranoid secure hash. It is just to ensure data integrity and
      * should make cache attacks (a little) more difficult
      *
@@ -178,7 +192,7 @@ class SingleFileStorage implements BufferedStorage, Configurable
     }
 
     /**
-     * Check the data integrity by the passed checkum. If invalid throw an
+     * Check the data integrity by the passed checksum. If invalid throw an
      * exception
      *
      * @param string $method

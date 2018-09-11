@@ -5,7 +5,7 @@ namespace Ems\Validation;
 
 use Ems\Contracts\Core\AppliesToResource;
 use Ems\Core\NamedObject;
-use Ems\Core\GenericEntity;
+use Ems\Core\FakeEntity as GenericEntity;
 use Ems\Contracts\Validation\Validation;
 use Ems\Contracts\Validation\GenericValidator as GenericValidatorContract;
 use Ems\Contracts\Validation\AlterableValidator as AlterableValidatorContract;

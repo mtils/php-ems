@@ -2,20 +2,18 @@
 
 namespace Ems\Cache\Storage;
 
+use DateTime;
 use Ems\Contracts\Cache\Storage as CacheStorage;
-use Ems\Contracts\Core\Subscribable;
 use Ems\Contracts\Core\Serializer as SerializerContract;
 use Ems\Contracts\Core\Storage as CoreStorageContract;
-use Ems\Contracts\Core\BufferedStorage;
-use Ems\Contracts\Core\UnbufferedStorage;
+use Ems\Contracts\Core\Subscribable;
+use Ems\Contracts\Core\Type;
 use Ems\Contracts\Model\QueryableStorage;
 use Ems\Core\Exceptions\DataIntegrityException;
 use Ems\Core\Exceptions\MisConfiguredException;
-use Ems\Core\Storages\UnbufferedStorageProxy;
 use Ems\Core\Patterns\SubscribableTrait;
 use Ems\Core\Serializer;
-use DateTime;
-use Ems\Contracts\Core\Type;
+use Ems\Core\Storages\UnbufferedProxyStorage;
 use UnexpectedValueException;
 
 /**
@@ -55,7 +53,7 @@ class CoreStorage implements CacheStorage, Subscribable
      * If the main storage is buffered, it will add a proxy for all write
      * operations here.
      *
-     * @var UnBufferedStorage
+     * @var CoreStorageContract
      **/
     protected $writeStorage;
 
@@ -102,18 +100,18 @@ class CoreStorage implements CacheStorage, Subscribable
 
     /**
      * @param QueryableStorage    $storage
-     * @param UnBufferedStorage $bigStorage (optional)
+     * @param CoreStorageContract $bigStorage (optional)
      * @param SerializerContract  $serializer (optional)
      **/
     public function __construct(QueryableStorage $storage,
-                                UnbufferedStorage $bigStorage=null,
+                                CoreStorageContract $bigStorage=null,
                                 SerializerContract $serializer=null)
     {
         $this->storage = $storage;
         $this->bigStorage = $bigStorage;
         $this->serializer = $serializer ?: new Serializer;
-        $this->writeStorage = $storage instanceof BufferedStorage ?
-                              new UnbufferedStorageProxy($storage) : $storage;
+        $this->writeStorage = $storage->isBuffered() ?
+                              new UnbufferedProxyStorage($storage) : $storage;
     }
 
     /**

@@ -3,20 +3,20 @@
 namespace Ems\Core\Storages;
 
 
-use Ems\Contracts\Core\UnbufferedStorage;
 use Ems\Contracts\Core\Configurable;
-use Ems\Contracts\Core\Serializer as SerializerContract;
 use Ems\Contracts\Core\Filesystem as FilesystemContract;
 use Ems\Contracts\Core\MimeTypeProvider;
-use Ems\Core\Collections\StringList;
+use Ems\Contracts\Core\Serializer as SerializerContract;
+use Ems\Contracts\Core\Storage;
 use Ems\Contracts\Core\Url as UrlContract;
+use Ems\Core\Collections\StringList;
 use Ems\Core\ConfigurableTrait;
+use Ems\Core\Exceptions\DataIntegrityException;
 use Ems\Core\Exceptions\UnConfiguredException;
 use Ems\Core\Exceptions\UnsupportedParameterException;
 use Ems\Core\LocalFilesystem;
 use Ems\Core\ManualMimeTypeProvider;
 use Ems\Core\Serializer as NativeSerializer;
-use Ems\Core\Exceptions\DataIntegrityException;
 use RuntimeException;
 
 /**
@@ -24,7 +24,7 @@ use RuntimeException;
  * Almost every call to method on it will result in filesystem access.
  * So just use it internally or with a proxy to implement buffering around it.
  **/
-class FileStorage implements UnbufferedStorage, Configurable
+class FileStorage implements Storage, Configurable
 {
     use ConfigurableTrait;
     use SerializeOptions;
@@ -277,6 +277,32 @@ class FileStorage implements UnbufferedStorage, Configurable
     {
         return self::FILESYSTEM;
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function isBuffered()
+    {
+        return false;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function persist()
+    {
+        return true;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function purge(array $keys = null)
+    {
+        $this->clear($keys);
+        return true;
+    }
+
 
     /**
      * Assign a custom callable to create the checksum. The checksum dont has

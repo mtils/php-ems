@@ -3,61 +3,72 @@
 namespace Ems\Core;
 
 use Ems\Contracts\Core\Entity;
-use Ems\Contracts\Core\AppliesToResource;
+use Ems\Contracts\Core\ArrayWithState as ArrayWithStateContract;
+use Ems\Core\Support\TrackedArrayDataTrait;
 
-class GenericEntity extends NamedObject implements Entity
+class GenericEntity implements Entity, ArrayWithStateContract
 {
-    /**
-     * @var bool
-     **/
-    protected $isNew = true;
+    use TrackedArrayDataTrait;
+
+    protected $idKey = 'id';
 
     /**
-     * @var bool
-     **/
-    protected $modified = false;
+     * @var string
+     */
+    protected $resourceName = '';
 
     /**
-     * {@inheritdoc}
+     * GenericEntity constructor.
      *
-     * @return bool
-     **/
-    public function isNew()
+     * @param array $attributes
+     * @param bool $isFromStorage
+     * @param string $resourceName
+     * @param string $idKey
+     */
+    public function __construct(array $attributes=[], $isFromStorage=false, $resourceName = '', $idKey='id')
     {
-        return $this->isNew;
+        $this->_fill($attributes, $isFromStorage);
+        $this->resourceName = $resourceName;
+        $this->idKey = $idKey;
     }
 
     /**
-     * {@inheritdoc}
-     *
-     * @param string|array $attributes (optional)
-     *
-     * @return bool
-     **/
-    public function wasModified($attributes=null)
+     * @inheritDoc
+     */
+    public function getId()
     {
-        return $this->isDirty($attributes);
+        return $this->offsetGet($this->idKey);
     }
 
     /**
-     * @param bool $new (default:true)
-     *
-     * @return self
-     **/
-    public function makeNew($new=true)
+     * @inheritDoc
+     */
+    public function resourceName()
     {
-        $this->isNew = $new;
-        return $this;
+        return $this->resourceName;
     }
 
     /**
-     * @param bool $modified
+     * Get the key of the id value in its array.
      *
-     * @return self
-     **/
-    public function makeModified($modified=true)
+     * @return string
+     */
+    public function getIdKey()
     {
-        $this->modified = $modified;
-        return $this;
+        return $this->idKey;
+    }
+
+    /**
+     * This is a pseudo protected method and should only be called from the
+     * storage/repository.
+     *
+     * @param array $attributes
+     * @param bool $isFromStorage (default:true)
+     *
+     * @return $this
+     */
+    public function _fill(array $attributes, $isFromStorage=true)
+    {
+        return $this->fillAttributes($attributes, $isFromStorage);
     }
 }

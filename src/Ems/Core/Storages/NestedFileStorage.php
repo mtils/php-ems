@@ -4,21 +4,21 @@ namespace Ems\Core\Storages;
 
 
 use BadMethodCallException;
-use Ems\Contracts\Core\BufferedStorage;
 use Ems\Contracts\Core\Configurable;
 use Ems\Contracts\Core\Filesystem as FilesystemContract;
-use Ems\Contracts\Core\Serializer as SerializerContract;
 use Ems\Contracts\Core\MimeTypeProvider;
+use Ems\Contracts\Core\Serializer as SerializerContract;
+use Ems\Contracts\Core\Storage;
 use Ems\Contracts\Core\Url as UrlContract;
+use Ems\Core\Collections\StringList;
+use Ems\Core\ConfigurableTrait;
 use Ems\Core\Exceptions\KeyLengthException;
 use Ems\Core\Exceptions\UnConfiguredException;
 use Ems\Core\Exceptions\UnsupportedParameterException;
-use Ems\Core\ConfigurableTrait;
 use Ems\Core\LocalFilesystem;
 use Ems\Core\ManualMimeTypeProvider;
 use Ems\Core\Serializer\JsonSerializer;
 use Ems\Core\Url;
-use Ems\Core\Collections\StringList;
 use OutOfBoundsException;
 use RuntimeException;
 
@@ -35,7 +35,7 @@ use RuntimeException;
  * So you can build the typical app configuration stuff
  * or locale stuff into it.
  **/
-class NestedFileStorage implements BufferedStorage, Configurable
+class NestedFileStorage implements Storage, Configurable
 {
     use ConfigurableTrait;
     use SerializeOptions;
@@ -357,6 +357,15 @@ class NestedFileStorage implements BufferedStorage, Configurable
         return $this->persist();
 
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function isBuffered()
+    {
+        return true;
+    }
+
 
     /**
      * The directory url

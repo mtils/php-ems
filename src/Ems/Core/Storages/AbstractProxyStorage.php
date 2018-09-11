@@ -1,28 +1,25 @@
 <?php
+/**
+ *  * Created by mtils on 09.09.18 at 10:30.
+ **/
 
 namespace Ems\Core\Storages;
 
 
-use Ems\Contracts\Core\UnbufferedStorage;
-use Ems\Contracts\Core\BufferedStorage;
+use Ems\Contracts\Core\Storage;
+use Ems\Core\Collections\StringList;
 
-/**
- * The UnbufferedStorageProxy makes a buffered storage an unbuffered.
- * Just wrap the other one with this proxy and all changes get instantly
- * persisted.
- **/
-class UnbufferedStorageProxy implements UnbufferedStorage
+abstract class AbstractProxyStorage implements Storage
 {
-
     /**
-     * @var BufferedStorage
+     * @var Storage
      **/
     protected $storage;
 
     /**
-     * @param BufferedStorage $storage
+     * @param Storage $storage
      **/
-    public function __construct(BufferedStorage $storage)
+    public function __construct(Storage $storage)
     {
         $this->storage = $storage;
     }
@@ -63,7 +60,6 @@ class UnbufferedStorageProxy implements UnbufferedStorage
     public function offsetSet($offset, $value)
     {
         $this->storage->offsetSet($offset, $value);
-        $this->storage->persist();
     }
 
     /**
@@ -76,7 +72,7 @@ class UnbufferedStorageProxy implements UnbufferedStorage
      **/
     public function offsetUnset($offset)
     {
-        $this->storage->purge([$offset]);
+        $this->storage->offsetUnset($offset);
     }
 
     /**
@@ -86,7 +82,7 @@ class UnbufferedStorageProxy implements UnbufferedStorage
      **/
     public function clear(array $keys=null)
     {
-        $this->storage->purge($keys);
+        $this->storage->clear($keys);
         return $this;
     }
 
@@ -122,5 +118,30 @@ class UnbufferedStorageProxy implements UnbufferedStorage
     {
         return self::UTILITY;
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function isBuffered()
+    {
+        return $this->storage->isBuffered();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function persist()
+    {
+        return $this->storage->persist();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function purge(array $keys = null)
+    {
+        return $this->storage->purge($keys);
+    }
+
 
 }

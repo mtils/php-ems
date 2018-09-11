@@ -3,13 +3,12 @@
 namespace Ems\Core\Storages;
 
 
-use Ems\Testing\FilesystemMethods;
-use Ems\Contracts\Core\BufferedStorage;
-use Ems\Contracts\Core\Serializer as SerializerContract;
 use Ems\Contracts\Core\Filesystem;
-use Ems\Core\LocalFilesystem;
+use Ems\Contracts\Core\Serializer as SerializerContract;
+use Ems\Contracts\Core\Storage as StorageContract;
 use Ems\Core\Serializer;
 use Ems\Core\Url;
+use Ems\Testing\FilesystemMethods;
 
 class SingleFileStorageTest extends \Ems\TestCase
 {
@@ -17,7 +16,12 @@ class SingleFileStorageTest extends \Ems\TestCase
 
     public function test_implements_interface()
     {
-        $this->assertInstanceOf(BufferedStorage::class, $this->newStorage());
+        $this->assertInstanceOf(StorageContract::class, $this->newStorage());
+    }
+
+    public function test_isBuffered_returns_true()
+    {
+        $this->assertTrue($this->newStorage()->isBuffered());
     }
 
     public function test_getUrl_returns_setted_url()

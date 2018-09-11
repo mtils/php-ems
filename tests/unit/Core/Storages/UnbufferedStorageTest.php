@@ -4,8 +4,7 @@ namespace Ems\Core\Storages;
 
 
 
-use Ems\Contracts\Core\BufferedStorage;
-use Ems\Contracts\Core\UnbufferedStorage;
+use Ems\Contracts\Core\Storage as StorageContract;
 use Ems\Core\Collections\StringList;
 
 class UnbufferedStorageTest extends \Ems\TestCase
@@ -13,7 +12,22 @@ class UnbufferedStorageTest extends \Ems\TestCase
 
     public function test_implements_interface()
     {
-        $this->assertInstanceOf(UnBufferedStorage::class, $this->newProxy());
+        $this->assertInstanceOf(StorageContract::class, $this->newProxy());
+    }
+
+    /**
+     * @expectedException \LogicException
+     */
+    public function test_instantiating_fails_with_already_unbuffered_storage()
+    {
+        $unbufferedStorage = $this->mock(StorageContract::class);
+        $unbufferedStorage->shouldReceive('isBuffered')->andReturn(false);
+        $this->newProxy($unbufferedStorage);
+    }
+
+    public function test_is_unbuffered()
+    {
+        $this->assertFalse($this->newProxy()->isBuffered());
     }
 
     public function test_forwards_to_offsetExists()
@@ -109,16 +123,18 @@ class UnbufferedStorageTest extends \Ems\TestCase
 
     public function test_storageType_returns_utility()
     {
-        $this->assertEquals(BufferedStorage::UTILITY, $this->newProxy()->storageType());
+        $this->assertEquals(StorageContract::UTILITY, $this->newProxy()->storageType());
     }
 
-    protected function newProxy(BufferedStorage $storage=null)
+    protected function newProxy(StorageContract $storage=null)
     {
-        return new UnbufferedStorageProxy($storage ?: $this->mockStorage());
+        return new UnbufferedProxyStorage($storage ?: $this->mockStorage());
     }
 
     protected function mockStorage()
     {
-        return $this->mock(BufferedStorage::class);
+        $mock = $this->mock(StorageContract::class);
+        $mock->shouldReceive('isBuffered')->andReturn(true);
+        return $mock;
     }
 }

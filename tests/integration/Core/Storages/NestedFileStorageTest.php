@@ -2,7 +2,7 @@
 
 namespace Ems\Core\Storages;
 
-use Ems\Contracts\Core\BufferedStorage;
+use Ems\Contracts\Core\Storage as StorageContract;
 use Ems\Contracts\Core\Filesystem;
 use Ems\Contracts\Core\Serializer;
 use Ems\Contracts\Core\MimetypeProvider;
@@ -22,20 +22,37 @@ class NestedFileStorageTest extends \Ems\IntegrationTest
 
     public function test_implements_interface()
     {
-        $this->assertInstanceOf(BufferedStorage::class, $this->newStorage());
+        $this->assertInstanceOf(StorageContract::class, $this->newStorage());
     }
 
     /**
-     * @expectedException Ems\Core\Exceptions\UnconfiguredException
+     * @expectedException \Ems\Core\Exceptions\UnconfiguredException
      **/
     public function test_offsetExists_throws_exception_if_url_not_assigned()
     {
         $this->newStorage()->offsetExists('foo');
     }
-    
+
+    public function test_isBuffered_returns_true()
+    {
+        $this->assertTrue($this->newStorage()->isBuffered());
+    }
+
     public function test_storageType_returns_filesystem()
     {
         $this->assertEquals('filesystem', $this->newStorage()->storageType());
+    }
+
+    public function test_get_serialize_options()
+    {
+        $this->assertTrue($this->newStorage()->getSerializeOptions()[JsonSerializer::PRETTY]);
+    }
+
+    public function test_get_deSerialize_options()
+    {
+        $storage = $this->newStorage();
+        $this->assertSame($storage, $storage->setDeserializeOptions([JsonSerializer::AS_ARRAY=>true]));
+        $this->assertTrue($this->newStorage()->getDeserializeOptions()[JsonSerializer::AS_ARRAY]);
     }
 
     public function test_offsetExists_returns_false_if_file_not_found()
@@ -67,7 +84,7 @@ class NestedFileStorageTest extends \Ems\IntegrationTest
     }
 
     /**
-     * @expectedException RuntimeException
+     * @expectedException \RuntimeException
      **/
     public function test_persist_throws_exception_if_directory_not_creatable()
     {
@@ -83,7 +100,7 @@ class NestedFileStorageTest extends \Ems\IntegrationTest
     }
 
     /**
-     * @expectedException Ems\Core\Exceptions\UnsupportedParameterException
+     * @expectedException \Ems\Core\Exceptions\UnsupportedParameterException
      **/
     public function test_filesystem_incompatible_key_throws_exception()
     {
@@ -99,7 +116,7 @@ class NestedFileStorageTest extends \Ems\IntegrationTest
     }
 
     /**
-     * @expectedException OutOfBoundsException
+     * @expectedException \OutOfBoundsException
      **/
     public function test_setNestingLevel_too_high_throws_exception()
     {
@@ -115,7 +132,7 @@ class NestedFileStorageTest extends \Ems\IntegrationTest
     }
 
     /**
-     * @expectedException BadMethodCallException
+     * @expectedException \BadMethodCallException
      **/
     public function test_setNestingLevel_after_file_access_throws_exception()
     {
@@ -291,6 +308,51 @@ class NestedFileStorageTest extends \Ems\IntegrationTest
         unset($storage);
         $storage2 = $this->newStorage()->setUrl($url);
         $this->assertEquals(['baz'=>'boing'], $storage2['de']);
+    }
+
+    public function test_clear_removes_keys()
+    {
+
+        $data = [
+            'foo' => 'bar',
+            'baz' => 'boing'
+        ];
+
+        $dirName = $this->tempDirName();
+        $url = new Url($dirName);
+
+        $storage = $this->newStorage()->setUrl($url);
+        $storage['de'] = $data;
+
+        $this->assertTrue(isset($storage['de']));
+        $this->assertEquals($data, $storage['de']);
+        $storage->clear(['de.foo']);
+        $this->assertEquals(['baz'=>'boing'], $storage['de']);
+
+        $storage->persist();
+        unset($storage);
+        $storage2 = $this->newStorage()->setUrl($url);
+        $this->assertEquals(['baz'=>'boing'], $storage2['de']);
+    }
+
+    public function test_clear_removes_nothing_on_empty_keys_array()
+    {
+
+        $data = [
+            'foo' => 'bar',
+            'baz' => 'boing'
+        ];
+
+        $dirName = $this->tempDirName();
+        $url = new Url($dirName);
+
+        $storage = $this->newStorage()->setUrl($url);
+        $storage['de'] = $data;
+
+        $this->assertTrue(isset($storage['de']));
+        $this->assertEquals($data, $storage['de']);
+        $storage->clear([]);
+        $this->assertEquals($data, $storage['de']);
     }
 
     public function test_offsetUnset_removes_complete_file()

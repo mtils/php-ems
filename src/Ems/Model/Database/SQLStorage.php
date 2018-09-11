@@ -2,18 +2,14 @@
 
 namespace Ems\Model\Database;
 
-use Ems\Contracts\Core\BufferedStorage;
 use Ems\Contracts\Expression\Prepared;
 use Ems\Contracts\Model\Database\Connection;
 use Ems\Contracts\Model\Database\Dialect;
 use Ems\Contracts\Model\QueryableStorage;
 use Ems\Core\ArrayWithState;
 use Ems\Core\Collections\StringList;
-use Ems\Core\Support\TrackedArrayDataTrait;
 use Ems\Core\Exceptions\UnConfiguredException;
-use Ems\Model\Database\SQLNameNotFoundException;
 use Ems\Model\StorageQuery;
-use Ems\Model\GenericResult;
 use IteratorAggregate;
 
 
@@ -30,7 +26,7 @@ use IteratorAggregate;
  * It also does not cache any data from the database, use a Proxy for
  * cache.
  **/
-class SQLStorage extends ArrayWithState implements QueryableStorage, BufferedStorage, IteratorAggregate
+class SQLStorage extends ArrayWithState implements QueryableStorage, IteratorAggregate
 {
     /**
      * @var Connection
@@ -212,6 +208,15 @@ class SQLStorage extends ArrayWithState implements QueryableStorage, BufferedSto
     {
         return self::SQL;
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function isBuffered()
+    {
+        return true;
+    }
+
 
     /**
      * Return the name of the queried table.

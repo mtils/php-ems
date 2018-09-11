@@ -9,10 +9,8 @@ namespace Ems\Contracts\Core;
  * with the has_array_access() and force_array_access() function
  * you can accept array and ArrayAccess in your classes.
  *
- * This is like an abstract interface. Your Storage should either implement
- * UnbufferedStorage or BufferedStorage to mark it the right way.
- * You can, by the way, use proxy storages to make any storage
- * buffered or unbuffered.
+ * Decide by the backend if an unbuffered or buffered storage is better and mark
+ * it with isBuffered() true/false
  *
  * ArrayAccess:
  *
@@ -77,6 +75,43 @@ interface Storage extends ArrayData
      * @see self::NOSQL
      **/
     public function storageType();
+
+    /**
+     * A buffered storage needs an manual call to persist() to write the state.
+     * An unbuffered storage just writes on every change.
+     *
+     * @return bool
+     */
+    public function isBuffered();
+
+    /**
+     * Persists all data, whatever the storage uses to store the data
+     * If the whole data is stored as json the Storage would save
+     * the json file here.
+     *
+     * A call to persist on an unbuffered storage returns always true
+     *
+     * @return bool (if successful)
+     **/
+    public function persist();
+
+    /**
+     * Clears all data if no keys passed. If keys passed remove all the passed
+     * keys. (More or less foreach ($keys as $key) { self::unset($key); }).
+     * The keys are a performance related feature of storages. In some cases the
+     * storage knows a much faster way to remove multiple entries at once.
+     * The keys are by default null, so it cannot happen to unintended delete
+     * all data by an empty array.
+     * Please implement it this way : if ($keys === null) { deleteAll() }
+     *
+     * A call to purge() an unbuffered storage should offsetUnset() them all and
+     * immediately persist the changes. and return true
+     *
+     * @param array $keys (optional)
+     *
+     * @return bool (if successful)
+     **/
+    public function purge(array $keys=null);
 
 
 }

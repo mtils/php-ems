@@ -3,7 +3,6 @@
 
 namespace Ems\Model\Database;
 
-use Ems\Contracts\Core\BufferedStorage;
 use Ems\Contracts\Core\Storage;
 use Ems\Contracts\Model\Database\Connection;
 use Ems\Contracts\Model\QueryableStorage;
@@ -33,7 +32,7 @@ class SQLStorageTest extends \Ems\TestCase
         );
 
         $this->assertInstanceof(
-            BufferedStorage::class,
+            Storage::class,
             $this->newStorage()
         );
 

@@ -3,13 +3,12 @@
 namespace Ems\Core\Storages;
 
 
-use Ems\Testing\FilesystemMethods;
-use Ems\Contracts\Core\UnBufferedStorage;
-use Ems\Contracts\Core\Serializer as SerializerContract;
 use Ems\Contracts\Core\Filesystem;
-use Ems\Core\LocalFilesystem;
+use Ems\Contracts\Core\Serializer as SerializerContract;
+use Ems\Contracts\Core\Storage as StorageContract;
 use Ems\Core\Serializer;
 use Ems\Core\Url;
+use Ems\Testing\FilesystemMethods;
 
 class FileStorageTest extends \Ems\TestCase
 {
@@ -17,10 +16,20 @@ class FileStorageTest extends \Ems\TestCase
 
     public function test_implements_interface()
     {
-        $this->assertInstanceOf(UnBufferedStorage::class, $this->newStorage());
+        $this->assertInstanceOf(StorageContract::class, $this->newStorage());
     }
 
-    public function test_getUrl_returns_setted_url()
+    public function test_isBuffered_returns_false()
+    {
+        $this->assertFalse($this->newStorage()->isBuffered());
+    }
+
+    public function test_persist_just_returns_true()
+    {
+        $this->assertTrue($this->newStorage()->persist());
+    }
+
+    public function test_getUrl_returns_previous_set_url()
     {
         $storage = $this->newStorage();
         $url = new Url('/home/michael');
@@ -208,6 +217,25 @@ class FileStorageTest extends \Ems\TestCase
         $this->assertEquals('bar', $storage2['foo']);
         $this->assertEquals('b', $storage2['a']);
         $storage2->clear();
+
+        $this->assertFalse(isset($storage['bar']));
+        $this->assertFalse(isset($storage['a']));
+    }
+
+    public function test_purge_empties_storage()
+    {
+        $storage = $this->newStorage(null, null, false);
+        $url = new Url($this->tempFileName());
+        $storage->setUrl($url);
+        $storage['foo'] = 'bar';
+        $storage['a'] = 'b';
+        unset($storage);
+
+        $storage2 = $this->newStorage();
+        $storage2->setUrl($url);
+        $this->assertEquals('bar', $storage2['foo']);
+        $this->assertEquals('b', $storage2['a']);
+        $storage2->purge();
 
         $this->assertFalse(isset($storage['bar']));
         $this->assertFalse(isset($storage['a']));

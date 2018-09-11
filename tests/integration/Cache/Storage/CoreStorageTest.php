@@ -6,7 +6,6 @@ namespace Ems\Cache\Storage;
 use Ems\Contracts\Cache\Storage as CacheStorageContract;
 use Ems\Contracts\Core\Serializer as SerializerContract;
 use Ems\Contracts\Core\Storage as CoreStorageContract;
-use Ems\Contracts\Core\UnbufferedStorage;
 use Ems\Contracts\Model\Database\Connection;
 use Ems\Contracts\Model\QueryableStorage;
 use Ems\Core\Exceptions\DataIntegrityException;
@@ -92,7 +91,7 @@ class CoreStorageTest extends \Ems\TestCase
 
     public function test_put_throws_no_exception_if_unserializable_value_is_passed_and_big_storage_assigned()
     {
-        $bigStorage = $this->mock(UnbufferedStorage::class);
+        $bigStorage = $this->mock(CoreStorageContract::class);
         $storage = $this->newStorage(null, $bigStorage);
 
         $logger = new LoggingCallable;
@@ -131,7 +130,7 @@ class CoreStorageTest extends \Ems\TestCase
     }
 
     /**
-     * @expectedException Ems\Contracts\Core\Errors\ConfigurationError
+     * @expectedException \Ems\Contracts\Core\Errors\ConfigurationError
      **/
     public function test_get_throws_exception_if_entry_marked_as_outside_but_no_bigStorage_assigned()
     {
@@ -140,6 +139,7 @@ class CoreStorageTest extends \Ems\TestCase
         $con = $this->newConnection();
 
         $mainStorage = $this->mock(QueryableStorage::class);
+        $mainStorage->shouldReceive('isBuffered')->andReturn(false);
 
 
         $storage = $this->newStorage($mainStorage);
@@ -640,7 +640,7 @@ class CoreStorageTest extends \Ems\TestCase
         $url = new Url($dirName);
 
         $mainStorage = $this->newMainStorage($con);
-        $bigStorage = $this->mock(UnbufferedStorage::class);
+        $bigStorage = $this->mock(CoreStorageContract::class);
         $storage = $this->newStorage($mainStorage, $bigStorage);
 
         $this->assertSame($storage, $storage->setMaxMainStorageBytes(30));
