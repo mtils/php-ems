@@ -93,7 +93,7 @@ class Bus implements BusContract
     {
         $this->root = $root ?: $this;
         $this->name = $name;
-        $this->bused[$name] = $this;
+        $this->buses[$name] = $this;
         $this->addKnownMarks();
         $this->useMatchingListener($matchingListener ?: new MatchingListener);
     }
@@ -373,8 +373,10 @@ class Bus implements BusContract
      * {@inheritdoc}
      *
      * @param string|callable $filter
-     * @param callable        $run
-     **/
+     * @param callable $run
+     *
+     * @throws Exception
+     */
     public function filtered($filter, callable $run)
     {
         $this->installFilter($filter);
@@ -441,7 +443,9 @@ class Bus implements BusContract
      * @param callable $run
      *
      * @return mixed.
-     **/
+     *
+     * @throws Exception
+     */
     public function muted(callable $run)
     {
         return $this->filtered('!', $run);
