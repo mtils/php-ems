@@ -44,6 +44,11 @@ abstract class AbstractIdGenerator implements IdGenerator
      */
     protected $maxAttempts = 100000;
 
+    /**
+     * @var int
+     */
+    protected $failedAttempts = 0;
+
     public function __construct(callable $isUniqueChecker=null)
     {
         $this->isUniqueChecker = $isUniqueChecker;
@@ -69,7 +74,7 @@ abstract class AbstractIdGenerator implements IdGenerator
             return $this->generateFresh($salt, $length, $asciiOnly);
         }
 
-        for ($i=0; $i<$this->maxAttempts; $i++) {
+        for ($this->failedAttempts=0; $this->failedAttempts<$this->maxAttempts; $this->failedAttempts++) {
 
             $id = $this->generateFresh($salt, $length, $asciiOnly);
 
@@ -78,7 +83,7 @@ abstract class AbstractIdGenerator implements IdGenerator
             }
         }
 
-        throw new TooManyIterationsException("Giving up after $i tries to find a unique id");
+        throw new TooManyIterationsException("Giving up after $this->failedAttempts tries to find a unique id");
 
     }
 
