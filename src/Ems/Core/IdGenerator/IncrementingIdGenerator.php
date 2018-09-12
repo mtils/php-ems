@@ -12,7 +12,6 @@ use Ems\Core\Exceptions\UnsupportedParameterException;
 use Ems\Core\Exceptions\UnsupportedUsageException;
 use function is_numeric;
 use OutOfBoundsException;
-use function var_dump;
 
 
 class IncrementingIdGenerator extends AbstractIdGenerator
