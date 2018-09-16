@@ -32,7 +32,7 @@ class HookableRepository implements HookableRepositoryContract
     protected $attributeFilter;
 
     /**
-     * @param EloquentModel
+     * @param EloquentModel $model
      **/
     public function __construct(EloquentModel $model)
     {
@@ -59,6 +59,7 @@ class HookableRepository implements HookableRepositoryContract
 
         $this->callAfterListeners('get', [$model]);
 
+        /** @var Identifiable $model */
         return $model;
     }
 
@@ -89,6 +90,7 @@ class HookableRepository implements HookableRepositoryContract
      **/
     public function make(array $attributes = [])
     {
+        /** @var Identifiable $model */
         $model = $this->performMake($attributes);
         $this->fill($model, $attributes);
         $this->callAfterListeners('make', [$model]);
@@ -128,9 +130,12 @@ class HookableRepository implements HookableRepositoryContract
      **/
     public function fill(Identifiable $model, array $attributes)
     {
+        $this->checkIsModel($model);
+
         $this->callBeforeListeners('fill', [$model, $attributes]);
         $filtered = $this->toModelAttributes($model, $attributes);
 
+        /** @var EloquentModel $model */
         $beforeDirty = $model->isDirty();
         $this->performFill($model, $filtered);
         $changed = $beforeDirty || $model->isDirty();
@@ -177,6 +182,7 @@ class HookableRepository implements HookableRepositoryContract
     public function save(Identifiable $model)
     {
         $this->checkIsModel($model);
+        /** @var EloquentModel $model */
         $this->callBeforeListeners('save', $model);
         $result = $this->performSave($model);
         $this->callAfterListeners('save', $model);
@@ -188,10 +194,13 @@ class HookableRepository implements HookableRepositoryContract
      * {@inheritdoc}
      *
      * @param Identifiable $model
-     **/
+     *
+     * @throws \Exception
+     */
     public function delete(Identifiable $model)
     {
         $this->checkIsModel($model);
+        /** @var EloquentModel $model */
         $this->callBeforeListeners('delete', $model);
         $this->performDelete($model);
         $this->callAfterListeners('delete', $model);
@@ -208,7 +217,7 @@ class HookableRepository implements HookableRepositoryContract
     }
 
     /**
-     * Assign a custim attributeFilter. A attributefilter is just a callable
+     * Assign a custom attributeFilter. An AttributeFilter is just a callable
      * which gets key and value passed and returns true to apply the attribute
      * and false to remove it.
      *
@@ -245,6 +254,7 @@ class HookableRepository implements HookableRepositoryContract
      **/
     protected function performMake(array $attributes)
     {
+        unset($attributes); // Just to make inspection happy
         return $this->model->newInstance();
     }
 
@@ -276,7 +286,9 @@ class HookableRepository implements HookableRepositoryContract
      * {@inheritdoc}
      *
      * @param EloquentModel $model
-     **/
+     *
+     * @throws \Exception
+     */
     protected function performDelete(EloquentModel $model)
     {
         $model->delete();
@@ -289,22 +301,22 @@ class HookableRepository implements HookableRepositoryContract
      * @param array  $attributes
      * @param string $action
      *
-     * @throws \Illuminate\Contracts\Validation\ValidationException
-     *
      * @return bool
      **/
     protected function validate(array $attributes, $action = 'update')
     {
+        unset($attributes);
+        unset($action);
         return true;
     }
 
     /**
      * Cast an clean the incoming attributes so that this repository can
-     * savely pass them to the database.
+     * safely pass them to the database.
      * The attributes have to be validated before passing them to this method.
      *
-     * @param mixed $model
-     * @param array $attributes
+     * @param Identifiable $model
+     * @param array        $attributes
      *
      * @return array
      **/
@@ -314,7 +326,7 @@ class HookableRepository implements HookableRepositoryContract
         $filter = $this->getAttributeFilter();
 
         foreach ($attributes as $key => $value) {
-            if (!$filter($key, $value)) {
+            if (!$filter($key, $value, $model)) {
                 continue;
             }
 
@@ -325,7 +337,7 @@ class HookableRepository implements HookableRepositoryContract
     }
 
      /**
-     * Return the internal attributefilter. If none is present, create one.
+     * Return the internal attribute filter. If none is present, create one.
      *
      * @return callable
      *
@@ -404,6 +416,8 @@ class HookableRepository implements HookableRepositoryContract
      * Checks a model for the Identifiable interface.
      *
      * @param mixed
+     *
+     * @return Identifiable
      *
      * @throws InvalidArgumentException
      **/

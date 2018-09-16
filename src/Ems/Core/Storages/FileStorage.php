@@ -185,9 +185,7 @@ class FileStorage implements Storage, Configurable
      **/
     public function offsetUnset($offset)
     {
-        $url = $this->urlOrFail();
-
-        // Just ignore unsetting keys that do not exist
+        // Just ignore unset keys that do not exist
         if (!$this->filesystem->isDirectory($this->urlOrFail())) {
             return;
         }
@@ -226,13 +224,13 @@ class FileStorage implements Storage, Configurable
         $keys = new StringList();
         $url = $this->urlOrFail();
 
-        if (!$this->filesystem->isDirectory($this->urlOrFail())) {
+        if (!$this->filesystem->isDirectory($url)) {
             return $keys;
         }
 
         $fileExtension = $this->fileExtension();
 
-        foreach ($this->filesystem->listDirectory($this->urlOrFail()) as $fileName) {
+        foreach ($this->filesystem->listDirectory($url) as $fileName) {
 
             if ($this->filesystem->extension($fileName) != $fileExtension) {
                 continue;
@@ -305,7 +303,7 @@ class FileStorage implements Storage, Configurable
 
 
     /**
-     * Assign a custom callable to create the checksum. The checksum dont has
+     * Assign a custom callable to create the checksum. The checksum don't has
      * to be a paranoid secure hash. It is just to ensure data integrity and
      * should make cache attacks (a little) more difficult
      *
@@ -320,7 +318,7 @@ class FileStorage implements Storage, Configurable
     }
 
     /**
-     * Check the data integrity by the passed checkum. If invalid throw an
+     * Check the data integrity by the passed checksum. If invalid throw an
      * exception
      *
      * @param string $method
@@ -391,7 +389,7 @@ class FileStorage implements Storage, Configurable
     /**
      * Returns the assigned url or fails
      *
-     * @return Url
+     * @return UrlContract
      *
      * @throws UnConfiguredException
      **/
