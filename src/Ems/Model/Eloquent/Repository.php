@@ -10,6 +10,13 @@ use Illuminate\Database\Eloquent\Model as EloquentModel;
 use Ems\Testing\Cheat;
 use DateTime;
 
+/**
+ * Class Repository
+ *
+ * @deprecated use Hookable
+ *
+ * @package Ems\Model\Eloquent
+ */
 class Repository implements ExtendableRepository
 {
     use ExtendableRepositoryTrait;

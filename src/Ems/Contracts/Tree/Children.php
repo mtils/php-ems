@@ -2,16 +2,22 @@
 
 namespace Ems\Contracts\Tree;
 
-use Traversable;
 use Countable;
-use ArrayAccess;
+use Ems\Contracts\Model\OrmCollection;
 
-interface Children extends Traversable, Countable, ArrayAccess
+/**
+ * Interface Children
+ *
+ * This interface is for all node collections under one node.
+ *
+ * @package Ems\Contracts\Tree
+ */
+interface Children extends OrmCollection, Countable
 {
     /**
      * Append a node to the list.
      *
-     * @param \Ems\Contracts\Tree\Node $node
+     * @param Node $node
      *
      * @return self
      **/
@@ -20,7 +26,7 @@ interface Children extends Traversable, Countable, ArrayAccess
     /**
      * Remove a node from the list.
      *
-     * @param \Ems\Contracts\Tree\Node $node
+     * @param Node $node
      *
      * @return self
      **/

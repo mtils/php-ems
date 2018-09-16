@@ -50,6 +50,8 @@ trait BootingArrayData
      *
      * @param mixed $offset
      * @param mixed $value
+     *
+     * @return void
      **/
     public function offsetSet($offset, $value)
     {
@@ -131,12 +133,13 @@ trait BootingArrayData
      **/
     protected function fillAttributes(array $attributes, $isFromStorage=true)
     {
+        unset($isFromStorage); // Make inspection happy
         $this->_attributes = $attributes;
         return $this;
     }
 
     /**
-     * Provide the attributes to autofill them
+     * Provide the attributes to auto fill them
      **/
     protected function autoAssignAttributes()
     {

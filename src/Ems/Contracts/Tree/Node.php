@@ -2,7 +2,9 @@
 
 namespace Ems\Contracts\Tree;
 
-interface Node
+use Ems\Contracts\Core\Identifiable;
+
+interface Node extends Identifiable
 {
     /**
      * Returns if node is a root node.
@@ -14,18 +16,18 @@ interface Node
     /**
      * Returns the parent node of this node.
      * 
-     * @return \BeeTree\Contracts\Node
+     * @return Node|null
      */
     public function getParent();
 
     /**
      * Set the parent node of this node (Only in memory).
      * 
-     * @param self $parent
+     * @param Node $parent
      *
      * @return self
      */
-    public function setParent(self $parent);
+    public function setParent(Node $parent);
 
     /**
      * Clear the parent, which makes the node a root node.
@@ -35,9 +37,9 @@ interface Node
     public function clearParent();
 
     /**
-     * Returns the childs of this node.
+     * Returns the children of this node.
      * 
-     * @return \Ems\Contracts\Tree\Children
+     * @return Children
      */
     public function getChildren();
 
@@ -51,20 +53,20 @@ interface Node
     /**
      * Adds a childNode to this node (Only in memory).
      *
-     * @param self $child
+     * @param Node $child
      *
      * @return self
      */
-    public function addChild(self $child);
+    public function addChild(Node $child);
 
     /**
      * Removes a child node (Only in memory).
      *
-     * @param self $child
+     * @param Node $child
      *
      * @return self
      */
-    public function removeChild(self $child);
+    public function removeChild(Node $child);
 
     /**
      * Does this node have children?
@@ -88,20 +90,9 @@ interface Node
     public function getLevel();
 
     /**
-     * Returns the identifier of this node
-     * Identifiers are used to compare nodes and deceide which
-     * child depends to which parent.
-     * In a filesystem the path would be the identifier, in
-     * a database an id column.
-     * 
-     * @return mixed
-     */
-    public function getId();
-
-    /**
      * This is needed to hydrate the trees.
      *
-     * @return mixed
+     * @return int|string
      **/
     public function getParentId();
 }

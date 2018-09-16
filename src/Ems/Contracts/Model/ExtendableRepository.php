@@ -5,6 +5,7 @@ namespace Ems\Contracts\Model;
 /**
  * An extendable repository allows to hooks in every crud
  * action. Assign a callable.
+ * @deprecated Use Hookable
  **/
 interface ExtendableRepository extends Repository
 {
