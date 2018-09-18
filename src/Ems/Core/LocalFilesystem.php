@@ -4,13 +4,17 @@ namespace Ems\Core;
 
 use Ems\Contracts\Core\Filesystem;
 use Ems\Contracts\Core\MimeTypeProvider;
-use Ems\Core\Exceptions\ResourceNotFoundException;
+use Ems\Contracts\Core\Url as UrlContract;
 use Ems\Core\Exceptions\ResourceLockedException;
-use ErrorException;
+use Ems\Core\Exceptions\ResourceNotFoundException;
+use Ems\Core\Filesystem\FilesystemMethods;
 use RuntimeException;
+use Throwable;
 
 class LocalFilesystem implements Filesystem
 {
+    use FilesystemMethods;
+
     /**
      * @var MimeTypeProvider
      **/
@@ -37,13 +41,27 @@ class LocalFilesystem implements Filesystem
     }
 
     /**
+     * Return the (absolute) url to this filesystem or a path
+     * inside it.
+     *
+     * @param string $path
+     *
+     * @return UrlContract
+     */
+    public function url($path = '/')
+    {
+        return new Url("file://$path");
+    }
+
+
+    /**
      * {@inheritdoc}
      *
      * @param string   $path
      * @param int      $bytes (optional)
      * @param bool|int $lock (default:false) Enable locking or directly set the mode (LOCK_SH,...)
      *
-     * @return bool
+     * @return string
      **/
     public function contents($path, $bytes = 0, $lock = false)
     {
@@ -56,6 +74,8 @@ class LocalFilesystem implements Filesystem
         }
 
         $handle = $this->handle($path);
+
+        $contents = '';
 
         try {
             $lock = is_bool($lock) ? LOCK_SH : $lock;
@@ -120,7 +140,7 @@ class LocalFilesystem implements Filesystem
                 if (!@unlink($path)) {
                     $success = false;
                 }
-            } catch (ErrorException $e) {
+            } catch (Throwable $e) {
                 $success = false;
             }
         }
@@ -232,25 +252,10 @@ class LocalFilesystem implements Filesystem
             return $this->type($path) == 'file';
         });
 
-        $fs = $this; //PHP 5.3
+        $extensions = $extensions ? (array)$extensions : [];
 
-        if ($pattern != '*') {
-            $all = array_filter($all, function ($path) use ($fs, $pattern) {
-                $baseName = $fs->basename($path);
+        return $this->filterPaths($all, $pattern, $extensions);
 
-                return fnmatch($pattern, $fs->basename($path));
-            });
-        }
-
-        if (!$extensions) {
-            return $all;
-        }
-
-        $extensions = (array) $extensions;
-
-        return array_filter($all, function ($path) use ($fs, $extensions) {
-            return in_array(strtolower($fs->extension($path)), $extensions);
-        });
     }
 
     /**
@@ -267,17 +272,7 @@ class LocalFilesystem implements Filesystem
             return $this->type($path) == 'dir';
         });
 
-        if ($pattern == '*') {
-            return $all;
-        }
-
-        $fs = $this; //PHP 5.3
-
-        return array_filter($all, function ($path) use ($fs, $pattern) {
-            $baseName = $fs->basename($path);
-
-            return fnmatch($pattern, $fs->basename($path));
-        });
+        return $this->filterPaths($all, $pattern);
     }
 
     /**
@@ -422,6 +417,26 @@ class LocalFilesystem implements Filesystem
         }
         return $part;
     }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @return string[]
+     */
+    public function supportedTypes()
+    {
+        return [
+            self::TYPE_FIFO,
+            self::TYPE_CHAR,
+            self::TYPE_DIR,
+            self::TYPE_BLOCK,
+            self::TYPE_LINK,
+            self::TYPE_FILE,
+            self::TYPE_SOCKET,
+            self::TYPE_UNKNOWN
+        ];
+    }
+
 
     /**
      * {@inheritdoc}

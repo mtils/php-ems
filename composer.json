@@ -19,7 +19,8 @@
         "patchwork/jsqueeze": "~2.0",
         "natxet/cssmin": "~3.0",
         "tedivm/jshrink": "~1.1",
-        "php-coveralls/php-coveralls": "2.1.*"
+        "php-coveralls/php-coveralls": "2.1.*",
+        "league/flysystem": "^1.0"
     },
     "replace": {
         "ems/assets": "self.version",

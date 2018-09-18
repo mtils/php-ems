@@ -2,7 +2,9 @@
 
 namespace Ems\Core;
 
+use Ems\Contracts\Core\Filesystem;
 use Ems\Testing\FilesystemMethods;
+use function in_array;
 
 class LocalFilesystemTest extends \Ems\IntegrationTest
 {
@@ -12,33 +14,32 @@ class LocalFilesystemTest extends \Ems\IntegrationTest
     {
         $this->assertInstanceOf(
             'Ems\Contracts\Core\Filesystem',
-            $this->newFilesystem()
+            $this->newTestFilesystem()
         );
     }
 
     public function test_exists_return_true_on_dirs_and_files()
     {
-        $fs = $this->newFilesystem();
+        $fs = $this->newTestFilesystem();
         $this->assertTrue($fs->exists(__FILE__));
         $this->assertTrue($fs->exists(__DIR__));
     }
 
     public function test_exists_return_false_if_not_exists()
     {
-        $fs = $this->newFilesystem();
-        $this->assertFalse($this->newFilesystem()->exists('foo'));
+        $this->assertFalse($this->newTestFilesystem()->exists('foo'));
     }
 
     public function test_contents_returns_file_content()
     {
-        $fs = $this->newFilesystem();
+        $fs = $this->newTestFilesystem();
         $contentsOfThisFile = file_get_contents(__FILE__);
         $this->assertEquals($contentsOfThisFile, $fs->contents(__FILE__));
     }
 
     public function test_contents_returns_head_if_bytes_are_passed()
     {
-        $fs = $this->newFilesystem();
+        $fs = $this->newTestFilesystem();
         $contentsOfThisFile = file_get_contents(__FILE__);
         $head = substr($contentsOfThisFile, 0, 80);
         $this->assertEquals($head, $fs->contents(__FILE__, 80));
@@ -49,23 +50,23 @@ class LocalFilesystemTest extends \Ems\IntegrationTest
      **/
     public function test_contents_throws_NotFoundException_if_file_not_found()
     {
-        $fs = $this->newFilesystem();
+        $fs = $this->newTestFilesystem();
         $fs->contents('some-not-existing-file.txt');
     }
 
     public function test_contents_returns_contents_with_file_locking()
     {
-        $fs = $this->newFilesystem();
+        $fs = $this->newTestFilesystem();
         $contentsOfThisFile = file_get_contents(__FILE__);
         $this->assertEquals($contentsOfThisFile, $fs->contents(__FILE__, 0, true));
     }
 
     /**
-     * @expectedException Ems\Contracts\Core\Errors\ConcurrentAccess
+     * @expectedException \Ems\Contracts\Core\Errors\ConcurrentAccess
      **/
     public function test_contents_throws_exception_when_trying_to_read_a_locked_file()
     {
-        $fs = $this->newFilesystem();
+        $fs = $this->newTestFilesystem();
         $fileName = $this->tempFileName();
         $testString = 'Foo is a buddy of bar';
 
@@ -80,7 +81,7 @@ class LocalFilesystemTest extends \Ems\IntegrationTest
     public function test_write_writes_contents_to_file()
     {
         $testString = 'Foo is a buddy of bar';
-        $fs = $this->newFilesystem();
+        $fs = $this->newTestFilesystem();
 
         $fileName = sys_get_temp_dir().'/'.basename(__FILE__).'.tmp';
 
@@ -93,7 +94,7 @@ class LocalFilesystemTest extends \Ems\IntegrationTest
 
     public function test_delete_deletes_one_file()
     {
-        $fs = $this->newFilesystem();
+        $fs = $this->newTestFilesystem();
         $tempFile = $this->tempFile();
 
         $this->assertTrue($fs->exists($tempFile));
@@ -103,7 +104,7 @@ class LocalFilesystemTest extends \Ems\IntegrationTest
 
     public function test_delete_deletes_many_files()
     {
-        $fs = $this->newFilesystem();
+        $fs = $this->newTestFilesystem();
         $count = 4;
         $tempFiles = [];
 
@@ -126,7 +127,7 @@ class LocalFilesystemTest extends \Ems\IntegrationTest
     {
         $dirName = $this->tempDirName();
 
-        $fs = $this->newFilesystem();
+        $fs = $this->newTestFilesystem();
 
         $this->assertTrue(mkdir($dirName));
         $this->assertTrue($fs->exists($dirName));
@@ -143,14 +144,15 @@ class LocalFilesystemTest extends \Ems\IntegrationTest
                 'baz.xml'    => '',
                 'users.json' => '',
                 '2016'       => [
-                    'gung.doc' => '',
+                    'gong.doc' => '',
                     'ho.odt'   => ''
                 ]
             ]
         ];
 
         list($tempDir, $dirs) = $this->createNestedDirectories($structure);
-        $fs = $this->newFilesystem();
+        unset($dirs);
+        $fs = $this->newTestFilesystem();
 
         $this->assertTrue($fs->exists($tempDir));
         $this->assertTrue($fs->delete($tempDir));
@@ -159,7 +161,7 @@ class LocalFilesystemTest extends \Ems\IntegrationTest
 
     public function test_list_directory_lists_paths()
     {
-        $fs = $this->newFilesystem();
+        $fs = $this->newTestFilesystem();
         $structure = [
             'foo.txt' => '',
             'bar.txt' => '',
@@ -176,7 +178,7 @@ class LocalFilesystemTest extends \Ems\IntegrationTest
 
     public function test_list_directory_lists_path_recursive()
     {
-        $fs = $this->newFilesystem();
+        $fs = $this->newTestFilesystem();
         $structure = [
             'foo.txt'   => '',
             'bar.txt'   => '',
@@ -184,7 +186,7 @@ class LocalFilesystemTest extends \Ems\IntegrationTest
                 'baz.xml'    => '',
                 'users.json' => '',
                 '2016'       => [
-                    'gung.doc' => '',
+                    'gong.doc' => '',
                     'ho.odt'   => ''
                 ]
             ]
@@ -201,7 +203,7 @@ class LocalFilesystemTest extends \Ems\IntegrationTest
 
     public function test_files_returns_only_files()
     {
-        $fs = $this->newFilesystem();
+        $fs = $this->newTestFilesystem();
 
         $structure = [
             'foo.txt'   => '',
@@ -227,7 +229,7 @@ class LocalFilesystemTest extends \Ems\IntegrationTest
 
     public function test_files_returns_only_files_matching_pattern()
     {
-        $fs = $this->newFilesystem();
+        $fs = $this->newTestFilesystem();
 
         $structure = [
             'foo.txt'   => '',
@@ -253,7 +255,7 @@ class LocalFilesystemTest extends \Ems\IntegrationTest
 
     public function test_files_returns_only_files_matching_extensions()
     {
-        $fs = $this->newFilesystem();
+        $fs = $this->newTestFilesystem();
 
         $structure = [
             'foo.txt'     => '',
@@ -293,7 +295,7 @@ class LocalFilesystemTest extends \Ems\IntegrationTest
 
     public function test_directories_returns_only_directories_matching_pattern()
     {
-        $fs = $this->newFilesystem();
+        $fs = $this->newTestFilesystem();
 
         $structure = [
             'foo'       => [],
@@ -320,7 +322,7 @@ class LocalFilesystemTest extends \Ems\IntegrationTest
 
     public function test_directories_returns_only_directories()
     {
-        $fs = $this->newFilesystem();
+        $fs = $this->newTestFilesystem();
 
         $structure = [
             'foo'       => [],
@@ -344,9 +346,154 @@ class LocalFilesystemTest extends \Ems\IntegrationTest
         $this->assertEquals($shouldBe, $directories);
     }
 
+    public function test_copy_copies_file()
+    {
+        $fs = $this->newTestFilesystem();
+        $structure = [
+            'foo.txt' => '',
+            'bar.txt' => '',
+            'baz.txt' => ''
+        ];
+
+        list($tmpDir, $dirs) = $this->createNestedDirectories($structure);
+        $listedDirs = $fs->listDirectory($tmpDir);
+
+        sort($listedDirs);
+        sort($dirs);
+        $this->assertEquals($dirs, $listedDirs);
+
+        $this->assertFalse($fs->exists("$tmpDir/foo2.txt"));
+        $this->assertTrue($fs->copy("$tmpDir/foo.txt","$tmpDir/foo2.txt"));
+        $this->assertTrue($fs->exists("$tmpDir/foo.txt"));
+        $this->assertTrue($fs->exists("$tmpDir/foo2.txt"));
+    }
+
+    public function test_move_moves_file()
+    {
+        $fs = $this->newTestFilesystem();
+        $structure = [
+            'foo.txt' => '',
+            'bar.txt' => '',
+            'baz.txt' => ''
+        ];
+
+        list($tmpDir, $dirs) = $this->createNestedDirectories($structure);
+        $listedDirs = $fs->listDirectory($tmpDir);
+
+        sort($listedDirs);
+        sort($dirs);
+        $this->assertEquals($dirs, $listedDirs);
+
+        $this->assertFalse($fs->exists("$tmpDir/foo2.txt"));
+        $this->assertTrue($fs->move("$tmpDir/foo.txt","$tmpDir/foo2.txt"));
+        $this->assertFalse($fs->exists("$tmpDir/foo.txt"));
+        $this->assertTrue($fs->exists("$tmpDir/foo2.txt"));
+    }
+
+    public function test_link_links_file()
+    {
+        $fs = $this->newTestFilesystem();
+        $structure = [
+            'foo.txt' => '',
+            'bar.txt' => '',
+            'baz.txt' => ''
+        ];
+
+        list($tmpDir, $dirs) = $this->createNestedDirectories($structure);
+        $listedDirs = $fs->listDirectory($tmpDir);
+
+        sort($listedDirs);
+        sort($dirs);
+        $this->assertEquals($dirs, $listedDirs);
+
+        $this->assertFalse($fs->exists("$tmpDir/foo2.txt"));
+        $this->assertTrue($fs->link("$tmpDir/foo.txt","$tmpDir/foo2.txt"));
+        $this->assertTrue($fs->exists("$tmpDir/foo.txt"));
+        $this->assertTrue($fs->exists("$tmpDir/foo2.txt"));
+        $this->assertEquals(Filesystem::TYPE_FILE, $fs->type("$tmpDir/foo.txt"));
+        $this->assertEquals(Filesystem::TYPE_LINK, $fs->type("$tmpDir/foo2.txt"));
+    }
+
+    public function test_url_returns_root()
+    {
+        $fs = $this->newTestFileSystem();
+        $url = $fs->url();
+        $this->assertInstanceOf(\Ems\Contracts\Core\Url::class, $url);
+        $this->assertEquals('file:///', "$url");
+    }
+
+    public function test_size_returns_size()
+    {
+        $fs = $this->newTestFileSystem();
+        $this->assertGreaterThan(10, $fs->size(__FILE__));
+    }
+
+    public function test_supportedTypes_are_not_empty_and_contains_file()
+    {
+        $fs = $this->newTestFileSystem();
+        $this->assertTrue(count($fs->supportedTypes()) > 0);
+        $this->assertTrue(in_array(Filesystem::TYPE_FILE, $fs->supportedTypes()));
+    }
+
+    public function test_name_returns_only_name()
+    {
+        $fs = $this->newTestFilesystem();
+
+        $tmpDir = $this->tempDir();
+        $fs->write("$tmpDir/foo.txt", 'foo');
+        $this->assertEquals('foo', $fs->name("$tmpDir/foo.txt"));
+    }
+
+    public function test_dirname_returns_only_name()
+    {
+        $fs = $this->newTestFilesystem();
+
+        $tmpDir = $this->tempDir();
+        $fs->write("$tmpDir/foo.txt", 'foo');
+        $this->assertEquals($tmpDir, $fs->dirname("$tmpDir/foo.txt"));
+    }
+
+    public function test_mimeType_returns_mimeType()
+    {
+        $fs = $this->newTestFilesystem();
+
+        $tmpDir = $this->tempDir();
+        $fs->write("$tmpDir/foo.txt", 'foo');
+        $this->assertEquals('text/plain', $fs->mimeType("$tmpDir/foo.txt"));
+    }
+
     public function test_lastModified_returns_filemtime()
     {
-        $fs = $this->newFilesystem();
+        $fs = $this->newTestFilesystem();
         $this->assertEquals(filemtime(__FILE__), (int)$fs->lastModified(__FILE__)->format('U'));
+    }
+
+    public function test_type_returns_right_type()
+    {
+        $fs = $this->newTestFilesystem();
+
+        $structure = [
+            'foo'       => [],
+            'bar'       => [],
+            'baz.txt'   => '',
+            'directory' => []
+        ];
+
+        list($tmpDir, $dirs) = $this->createNestedDirectories($structure);
+
+        unset($dirs);
+        $this->assertEquals(Filesystem::TYPE_FILE, $fs->type("$tmpDir/baz.txt"));
+        $this->assertEquals(Filesystem::TYPE_DIR, $fs->type("$tmpDir/foo"));
+        $this->assertEquals(Filesystem::TYPE_DIR, $fs->type("$tmpDir/bar"));
+
+        $this->assertTrue($fs->makeDirectory("$tmpDir/test"));
+        $this->assertEquals(Filesystem::TYPE_DIR, $fs->type("$tmpDir/test"));
+
+    }
+
+    protected function newTestFileSystem(array $args=[])
+    {
+        unset($args);
+        return $this->newFilesystem();
     }
 }

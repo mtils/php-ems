@@ -8,7 +8,7 @@ use Ems\Testing\FilesystemMethods;
 
 use Iterator;
 
-class LocalFilesystemTest extends \Ems\IntegrationTest
+class BinaryReadIteratorTest extends \Ems\IntegrationTest
 {
 
     public function test_implements_interface()

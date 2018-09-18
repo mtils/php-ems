@@ -5,6 +5,46 @@ namespace Ems\Contracts\Core;
 interface Filesystem
 {
     /**
+     * @var string
+     */
+    const TYPE_FIFO = 'fifo';
+
+    /**
+     * @var string
+     */
+    const TYPE_CHAR = 'char';
+
+    /**
+     * @var string
+     */
+    const TYPE_DIR = 'dir';
+
+    /**
+     * @var string
+     */
+    const TYPE_BLOCK = 'block';
+
+    /**
+     * @var string
+     */
+    const TYPE_LINK = 'link';
+
+    /**
+     * @var string
+     */
+    const TYPE_FILE = 'file';
+
+    /**
+     * @var string
+     */
+    const TYPE_SOCKET = 'socket';
+
+    /**
+     * @var string
+     */
+    const TYPE_UNKNOWN = 'unknown';
+
+    /**
      * Returns if a path exists.
      *
      * @param string $path
@@ -14,13 +54,23 @@ interface Filesystem
     public function exists($path);
 
     /**
+     * Return the (absolute) url to this filesystem or a path
+     * inside it.
+     *
+     * @param string $path
+     *
+     * @return Url
+     */
+    public function url($path='/');
+
+    /**
      * Return the contents of a file.
      *
      * @param string   $path
      * @param int      $bytes (optional)
      * @param bool|int $lock (default:false) Enable locking or directly set the mode (LOCK_SH,...)
      *
-     * @return bool
+     * @return string
      **/
     public function contents($path, $bytes = 0, $lock = false);
 
@@ -42,6 +92,8 @@ interface Filesystem
      * @param string   $path
      * @param int      $bytes (optional)
      * @param resource $handle (optional)
+     *
+     * @return string
      **/
     public function read($path, $bytes = 0, $handle = null);
 
@@ -229,4 +281,14 @@ interface Filesystem
      * @return string
      **/
     public function mimeType($path);
+
+    /**
+     * Return the supported file (path) types of this filesystem
+     *
+     * @see self::TYPE_FILE, self::TYPE_DIRECTORY
+     *
+     * @return string[]
+     */
+    public function supportedTypes();
+
 }
