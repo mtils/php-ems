@@ -34,6 +34,11 @@ class CharsetGuard
     const UTF8 = 'UTF-8';
 
     /**
+     * @var MBStringConverter
+     */
+    protected $converter;
+
+    /**
      * This is filled in __construct()
      *
      * @var array
@@ -43,7 +48,7 @@ class CharsetGuard
     /**
      * @var array
      **/
-    protected $detectOrder = [
+    protected $defaultDetectOrder = [
         'UTF-8',
         'ISO-8859-1',
         'Windows-1252',
@@ -53,8 +58,14 @@ class CharsetGuard
         'SJIS'
     ];
 
-    public function __construct()
+    /**
+     * @var array
+     **/
+    protected $detectOrder;
+
+    public function __construct(MBStringConverter $converter=null)
     {
+        $this->converter = $converter ?: new MBStringConverter();
         $this->fillByteOrderMarks();
     }
 
@@ -84,9 +95,9 @@ class CharsetGuard
             return 'UTF-8';
         }
 
-        $detectOrder = $detectOrder ?: $this->detectOrder;
+        $detectOrder = $detectOrder ?: $this->getDefaultDetectOrder();
 
-        // Passing an array didnt work here, even if doc says...
+        // Passing an array didn't work here, even if doc says...
         return mb_detect_encoding($string, implode(',', $detectOrder), $strict);
     }
 
@@ -185,6 +196,37 @@ class CharsetGuard
     }
 
     /**
+     * @return array
+     */
+    public function getDefaultDetectOrder()
+    {
+        if ($this->detectOrder === null) {
+            $this->detectOrder = $this->buildDetectOrder();
+        }
+        return $this->detectOrder;
+    }
+
+    /**
+     * Filters the detect order charsets by the support of the system.
+     *
+     * @return array
+     */
+    protected function buildDetectOrder()
+    {
+
+        $detectOrder = [];
+
+        foreach ($this->defaultDetectOrder as $i=>$charset) {
+            if ($this->converter->canConvert($charset)) {
+                $detectOrder[] = $charset;
+            }
+        }
+
+        return $detectOrder;
+
+    }
+
+    /**
      * Fill the boms with known marks
      **/
     protected function fillByteOrderMarks()
@@ -197,7 +239,6 @@ class CharsetGuard
             self::UTF8                  => chr(0xEF) . chr(0xBB) . chr(0xBF)
         ];
     }
-
     /**
      * Detect the charset by bom.
      *
