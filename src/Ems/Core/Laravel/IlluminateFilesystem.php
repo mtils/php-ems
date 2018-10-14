@@ -20,9 +20,13 @@ use Illuminate\Contracts\Filesystem\Cloud;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Contracts\Filesystem\Filesystem as IlluminateFilesystemContract;
 use Illuminate\Filesystem\FilesystemAdapter;
+use League\Flysystem\Adapter\Local;
+use League\Flysystem\AdapterInterface;
+use League\Flysystem\Filesystem as Flysystem;
 use function array_merge;
 use function func_get_args;
 use function is_array;
+use function method_exists;
 use function pathinfo;
 use const PATHINFO_FILENAME;
 
@@ -39,6 +43,11 @@ class IlluminateFilesystem implements Filesystem
      * @var MimeTypeProvider
      **/
     protected $mimeTypes;
+
+    /**
+     * @var \Ems\Contracts\Core\Url
+     */
+    protected $baseUrl;
 
     public function __construct(IlluminateFilesystemContract $laravelFS, MimeTypeProvider $mimeTypes=null)
     {
@@ -68,13 +77,7 @@ class IlluminateFilesystem implements Filesystem
      */
     public function url($path = '/')
     {
-        $url = $this->laravelFS instanceof Cloud ? new Url($this->laravelFS->url($path)) : new Url($path);
-
-        if (!$url->scheme) {
-            $url = $url->scheme('file');
-        }
-        return $url;
-
+        return $this->buildUrl($path);
     }
 
 
@@ -423,6 +426,9 @@ class IlluminateFilesystem implements Filesystem
      **/
     public function mimeType($path)
     {
+        if ($this->isDirectory($path)) {
+
+        }
         return $this->mimeTypes->typeOfName($path);
     }
 
@@ -462,7 +468,7 @@ class IlluminateFilesystem implements Filesystem
         $formatted = [];
 
         foreach ($dirsAndFiles as $path) {
-            $formatted[] = $this->toFullPath($path);
+            $formatted[] = $this->toPseudoAbsPath($path);
         }
         return $formatted;
     }
@@ -474,11 +480,37 @@ class IlluminateFilesystem implements Filesystem
      *
      * @return string
      */
-    protected function toFullPath($path)
+    protected function toPseudoAbsPath($path)
     {
-        if ($this->laravelFS instanceof FilesystemAdapter) {
-            $path = $this->laravelFS->path($path);
-        }
         return '/' . ltrim($path, '/');
+    }
+
+    /**
+     * @param string $path
+     *
+     * @return \Ems\Contracts\Core\Url
+     */
+    protected function buildUrl($path)
+    {
+        if (!$this->laravelFS instanceof Cloud) {
+            return (new Url($path))->scheme('file');
+        }
+
+        if (!$this->laravelFS instanceof FilesystemAdapter) {
+            return new Url($this->laravelFS->url($path));
+        }
+
+        /** @var AdapterInterface $adapter */
+        $adapter = $this->laravelFS->getDriver()->getAdapter();
+
+        if ($adapter instanceof Local) {
+            $pathPrefix = rtrim($adapter->getPathPrefix(), '/');
+            $path = trim($path, '/');
+            $fullPath = $pathPrefix ? "$pathPrefix/$path" : "/$path";
+            return (new Url($fullPath))->scheme('file');
+        }
+
+        return new Url($this->laravelFS->url($path));
+
     }
 }

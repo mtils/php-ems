@@ -166,4 +166,22 @@ trait InMemoryConnection
         return (bool)$this->app;
     }
 
+    /**
+     * A short debug method to dump a table into stdout.
+     *
+     * @param string $name
+     * @param array $filters
+     */
+    protected function dumpTable($name, array $filters=[])
+    {
+        $query = static::$_testConnection->table($name);
+
+        foreach ($filters as $key=>$value) {
+            $query->where($key, $value);
+        }
+
+        foreach ($query->get() as $row) {
+            print_r($row);
+        }
+    }
 }

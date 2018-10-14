@@ -6,19 +6,32 @@
 namespace Ems\Tree\Eloquent;
 
 
+use Ems\Contracts\Core\Errors\NotFound;
 use Ems\Contracts\Core\Exceptions\TypeException;
+use Ems\Contracts\Tree\CanHaveParent;
 use Ems\Contracts\Tree\Node;
 use Ems\Contracts\Tree\NodeRepository as NodeRepositoryContract;
 use Ems\Core\Exceptions\NotImplementedException;
-use Ems\Tree\GenericChildren;
+use Ems\Model\Database\PDOPrepared;
 use Ems\Model\Eloquent\HookableRepository;
 use Ems\Model\Eloquent\Model;
 use Ems\Model\Eloquent\NotFoundException;
+use Ems\Tree\GenericChildren;
+use Ems\Tree\HierarchyMethods;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model as EloquentModel;
+use Illuminate\Database\Query\Builder as Query;
+use function array_fill;
+use function is_array;
+use function is_numeric;
+use function iterator_to_array;
+use function ksort;
+use const SORT_NUMERIC;
 
 class NodeRepository extends HookableRepository implements NodeRepositoryContract
 {
+    use HierarchyMethods;
+
     /**
      * @var Node
      */
@@ -37,7 +50,17 @@ class NodeRepository extends HookableRepository implements NodeRepositoryContrac
     /**
      * @var string
      */
+    protected $segmentKey = 'path_segment';
+
+    /**
+     * @var string
+     */
     protected $parentIdKey = 'parent_id';
+
+    /**
+     * @var PDOPrepared
+     */
+    protected $ancestorsStatement;
 
     /**
      * @inheritDoc
@@ -46,6 +69,7 @@ class NodeRepository extends HookableRepository implements NodeRepositoryContrac
     {
         $this->checkIsNode($model);
         parent::__construct($model);
+        $this->_maxDepth = 10;
         $this->currentParent = isset($attributes['parent']) ? $attributes['parent'] : null;
         $this->currentDepth = isset($attributes['depth']) ? $attributes['depth'] : null;
     }
@@ -116,7 +140,11 @@ class NodeRepository extends HookableRepository implements NodeRepositoryContrac
     }
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
+     *
+     * @param int $depth default:1
+     *
+     * @return self
      */
     public function recursive($depth = 1)
     {
@@ -124,9 +152,14 @@ class NodeRepository extends HookableRepository implements NodeRepositoryContrac
     }
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
+     *
+     * @param string        $path
+     * @param CanHaveParent $default [optional]
+     *
+     * @return CanHaveParent
      */
-    public function getByPath($path, Node $default = null)
+    public function getByPath($path, CanHaveParent $default = null)
     {
         $query = $this->model->newQuery();
 
@@ -146,9 +179,14 @@ class NodeRepository extends HookableRepository implements NodeRepositoryContrac
         }
 
 
+
+
         /** @var Node $node */
+
+        $children = $node->getChildren();
+
         foreach ($this->recursive(0)->children($node) as $child) {
-            $node->addChild($child);
+            $children->append($child);
         }
 
         $this->callAfterListeners('getByPath', [$node]);
@@ -157,8 +195,42 @@ class NodeRepository extends HookableRepository implements NodeRepositoryContrac
     }
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
+     *
+     * @param string $path
+     *
+     * @return CanHaveParent
+     *
+     * @throws NotFound
      */
+    public function getByPathOrFail($path)
+    {
+        if ($node = $this->getByPath($path)) {
+            return $node;
+        }
+
+        throw new NotFoundException("No node under path '$path' found'");
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @param string $segment
+     *
+     * @return CanHaveParent[]
+     */
+    public function findBySegment($segment)
+    {
+        if ($this->currentDepth) {
+            throw new NotImplementedException('Currently depth is not supported for findBySegment().');
+        }
+
+        return $this->model->newQuery()
+                    ->where($this->segmentKey, $segment)
+                    ->get()->all();
+
+    }
+
     public function children(Node $parent)
     {
         if ($this->currentDepth) {
@@ -173,7 +245,7 @@ class NodeRepository extends HookableRepository implements NodeRepositoryContrac
     /**
      * @inheritDoc
      */
-    public function parent(Node $child)
+    public function parent(CanHaveParent $child)
     {
         if ($child->isRoot()) {
             return null;
@@ -185,17 +257,57 @@ class NodeRepository extends HookableRepository implements NodeRepositoryContrac
         return $this->getOrFail($child->getAttribute($this->parentIdKey));
     }
 
-
     /**
      * @inheritDoc
      */
-    public function getByPathOrFail($path)
+    public function ancestors(CanHaveParent $child)
     {
-        if ($node = $this->getByPath($path)) {
-            return $node;
+
+        // Not from database and no parentId
+        if (!$child->getId() && !$child->getParentId()) {
+            return $this->collectAncestors($child);
         }
 
-        throw new NotFoundException("No node under path '$path' found'");
+        $ancestors = [];
+        $parentsById = [];
+
+        $bindings = array_fill(0, $this->_maxDepth, $child->getId());
+        $idKey = $this->model->getKeyName();
+
+        foreach ($this->getAncestorStatement()->bind($bindings) as $parentRow) {
+
+            $data = $this->pdoResultToArray($parentRow);
+            $distance = $data['_child_distance'];
+            unset($data['_child_distance']);
+
+            $node = $this->model->newFromBuilder($data);
+            $ancestors[$distance] = $node;
+            $parentsById[$data[$idKey]] = $node;
+
+        }
+
+        /**
+         * Set all parent relations
+         *
+         * @var int $id
+         * @var Node $node
+         */
+        foreach ($parentsById as $id=>$node) {
+            $parentId = $node->getParentId();
+            if (isset($parentsById[$parentId])) {
+                $node->setParent($parentsById[$parentId]);
+            }
+        }
+
+        if (isset($parentsById[$child->getParentId()])) {
+            $child->setParent($parentsById[$child->getParentId()]);
+        }
+
+        ksort($ancestors, SORT_NUMERIC);
+
+        // Return a clean array
+        return array_values($ancestors);
+
     }
 
     /**
@@ -216,6 +328,9 @@ class NodeRepository extends HookableRepository implements NodeRepositoryContrac
 
     /**
      * Set the key (model attribute) of the path column.
+     * If a key is set this repository will store the complete paths in the
+     * database and allows passing the path via store(), update() and fill().
+     * If no path key is set you can neither pass the path nor c
      *
      * @param string $pathKey
      *
@@ -248,6 +363,24 @@ class NodeRepository extends HookableRepository implements NodeRepositoryContrac
         return $this;
     }
 
+    /**
+     * @return string
+     */
+    public function getSegmentKey(): string
+    {
+        return $this->segmentKey;
+    }
+
+    /**
+     * @param string $segmentKey
+     *
+     * @return $this
+     */
+    public function setSegmentKey(string $segmentKey)
+    {
+        $this->segmentKey = $segmentKey;
+        return $this;
+    }
 
     /**
      * @param EloquentModel $model
@@ -294,9 +427,13 @@ class NodeRepository extends HookableRepository implements NodeRepositoryContrac
 
         // Then assign its children
         /** @var Node $node */
+
+        $searchedNodeChildren = $searchedNode->getChildren();
+
         foreach ($nodes as $node) {
             if ($node->getParentId() == $searchedNode->getId()) {
-                $searchedNode->addChild($node);
+                //$searchedNode->addChild($node);
+                $searchedNodeChildren->append($node);
             }
         }
 
@@ -333,6 +470,7 @@ class NodeRepository extends HookableRepository implements NodeRepositoryContrac
     {
         $this->checkIsNode($model);
 
+
         parent::performFill($model, $attributes);
 
         /** @var Node $model */
@@ -349,14 +487,75 @@ class NodeRepository extends HookableRepository implements NodeRepositoryContrac
     {
         $this->checkIsNode($model);
 
-        /** @var Node $model */
+        /** @var EloquentNode $model */
         if ($this->currentParent) {
             $model->setParent($this->currentParent);
         }
 
+        if (!$this->pathKey || $model->getAttribute($this->pathKey)) {
+            return parent::performSave($model);
+        }
+
+        $this->addPathIfNeeded($model);
+
         return parent::performSave($model);
     }
 
+    /**
+     * Calculate and add a stored path attribute if a pathKey exists.
+     *
+     * @param EloquentNode $node
+     */
+    protected function addPathIfNeeded(EloquentNode $node)
+    {
+        // No path column
+        if (!$this->pathKey) {
+            return;
+        }
+
+        // Path was passed
+        if ($node->getAttribute($this->pathKey)) {
+            return;
+        }
+
+        $segment = $node->getAttribute($this->segmentKey);
+
+        if ($node->isRoot() && $segment) {
+            $node->setAttribute($this->pathKey, '/' . $this->cleanSegment($segment));
+            return;
+        }
+
+        $parent = $this->guessParent($node);
+
+        $parentPath = $parent->getPath();
+
+        $node->setAttribute($this->pathKey, rtrim($parentPath, '/') . '/' . $this->cleanSegment($node->getPathSegment()));
+
+    }
+
+    /**
+     * @param CanHaveParent $node
+     *
+     * @return Node|null
+     */
+    protected function guessParent(CanHaveParent $node)
+    {
+        // First priority is always $this->asChildOf($parent)
+        if ($this->currentParent) {
+            return $this->currentParent;
+        }
+
+        if (!$node->hasParent()) {
+            return null;
+        }
+
+        if ($parent = $node->getParent()) {
+            return $parent;
+        }
+
+        return $this->getOrFail($node->getParentId());
+
+    }
 
     /**
      * @param EloquentModel $model
@@ -372,4 +571,102 @@ class NodeRepository extends HookableRepository implements NodeRepositoryContrac
         throw new TypeException('The model has to implement the Node interface');
     }
 
+    /**
+     * Build the query to retrieve the parents from database.
+     *
+     * @param int $childId
+     *
+     * @return PDOPrepared
+     */
+    protected function buildAncestorQuery($childId)
+    {
+        // We don't use Eloquent here because of endless subquery nesting
+        $grammar = $this->select()->getGrammar();
+
+        $table = $this->model->getTable();
+        $idKey = $this->model->getKeyName();
+        $idQueryColumn = $grammar->wrap("$table.$idKey");
+
+        $childQuery = $this->select(["$table.$this->parentIdKey"])
+                           ->where("$table.$idKey", $childId);
+
+        $last = $childQuery;
+        $queries = [];
+
+        for ($i=1; $i <= $this->_maxDepth; $i++) {
+
+            $queries[] = $this->buildOuterAncestorQuery($i, $last, $table, $idQueryColumn)->toSql();
+
+            $last = $this->select([$this->parentIdKey])->whereRaw("$idQueryColumn = (" . $last->toSql() . ')');
+
+        }
+
+        $query = implode("\nUNION\n", $queries);
+
+        $pdoStatement = $this->model->getConnection()->getPdo()->prepare($query);
+
+        return new PDOPrepared($pdoStatement, $query);
+
+    }
+
+    /**
+     * Build a prepared statement for ancestor queries.
+     *
+     * @return PDOPrepared
+     */
+    protected function getAncestorStatement()
+    {
+        if (!$this->ancestorsStatement) {
+            $this->ancestorsStatement = $this->buildAncestorQuery(0);
+        }
+        return $this->ancestorsStatement;
+    }
+
+    protected function buildOuterAncestorQuery($level, Query $childQuery, $table, $idQueryColumn)
+    {
+        $outerQuery = $this->model->newQuery()->getQuery();
+
+        $outerQuery->select(["$table.*", "$level as _child_distance"])
+            ->whereRaw("$idQueryColumn = (" . $childQuery->toSql() . ')');
+
+        return $outerQuery;
+    }
+
+    /**
+     * Create a new base query builder (not Eloquent)
+     *
+     * @param array $columns (optional)
+     *
+     * @return Query
+     */
+    protected function select($columns=[])
+    {
+        $query = $this->model->newQuery()->getQuery();
+        if ($columns) {
+            $query->select($columns);
+        }
+        return $query;
+    }
+
+    /**
+     * @param stdClass|array $row
+     *
+     * @return array
+     */
+    protected function pdoResultToArray($row)
+    {
+        if (is_object($row)) {
+            $row = (array)$row;
+        }
+
+        $data = [];
+
+        foreach ($row as $key=>$value) {
+            if (!is_numeric($key)) {
+                $data[$key] = $value;
+            }
+        }
+
+        return $data;
+    }
 }

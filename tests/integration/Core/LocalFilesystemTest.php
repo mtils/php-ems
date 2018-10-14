@@ -153,7 +153,6 @@ class LocalFilesystemTest extends \Ems\IntegrationTest
         list($tempDir, $dirs) = $this->createNestedDirectories($structure);
         unset($dirs);
         $fs = $this->newTestFilesystem();
-
         $this->assertTrue($fs->exists($tempDir));
         $this->assertTrue($fs->delete($tempDir));
         $this->assertFalse($fs->exists($tempDir));

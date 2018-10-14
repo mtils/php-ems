@@ -7,6 +7,7 @@ namespace Ems\Tree;
 
 
 use function array_values;
+use Ems\Contracts\Tree\CanHaveParent;
 use Ems\Contracts\Tree\Children;
 use Ems\Contracts\Tree\Node;
 use Ems\Model\GenericResult;
@@ -26,11 +27,14 @@ class GenericChildren extends GenericResult implements Children
     /**
      * @inheritDoc
      */
-    public function append(Node $node)
+    public function append(CanHaveParent $node)
     {
         // Add every node once
         if ($this->findNodeIndex($node) === null) {
             $this->data[] = $node;
+            if ($this->_creator instanceof Node) {
+                $node->setParent($this->_creator);
+            }
         }
         return $this;
     }
@@ -38,7 +42,7 @@ class GenericChildren extends GenericResult implements Children
     /**
      * @inheritDoc
      */
-    public function remove(Node $node)
+    public function remove(CanHaveParent $node)
     {
         $index = $this->findNodeIndex($node);
         if ($index === null) {
@@ -48,6 +52,8 @@ class GenericChildren extends GenericResult implements Children
         unset($this->data[$this->findNodeIndex($node)]);
 
         $this->data = array_values($this->data);
+
+        $node->clearParent();
 
         return $this;
     }
@@ -67,8 +73,6 @@ class GenericChildren extends GenericResult implements Children
     {
         return count($this->data);
     }
-
-
 
     /**
      * Try to find the node and returns its index

@@ -252,7 +252,7 @@ You should also write your implementation specific type into your @return statem
 like in the example above.
 
 *Important*: This is because every class that uses the implemented *class* explicitly is already bound
-to that implementation and knows what its returning!.
+to that implementation and knows what its returning!
 
 So avoid classes directly, use only interfaces as strict as you can.
 

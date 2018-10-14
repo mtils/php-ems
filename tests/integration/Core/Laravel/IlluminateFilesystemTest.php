@@ -129,6 +129,65 @@ class IlluminateFilesystemTest extends \Ems\Core\LocalFilesystemTest
         $this->newTestFileSystem()->makeDirectory('/test', 655);
     }
 
+    public function test_chrooted_baseUrl_leads_to_right_urls()
+    {
+        $structure = [
+            'foo.txt'   => '',
+            'bar.txt'   => '',
+            'directory' => [
+                'baz.xml'    => '',
+                'users.json' => '',
+                '2016'       => [
+                    'gong.doc' => '',
+                    'ho.odt'   => ''
+                ]
+            ]
+        ];
+
+        list($tempDir, $dirs) = $this->createNestedDirectories($structure);
+        unset($dirs);
+        $fs = $this->newTestFilesystem(['root' => $tempDir]);
+
+        $filesAndFolders = $fs->listDirectory('/');
+
+        foreach ($structure as $basename=>$unused) {
+            $fullPath = "/$basename";
+            $this->assertTrue(in_array($fullPath, $filesAndFolders), "$fullPath was not contained in listDirectory");
+
+            $url = "file://$tempDir$fullPath";
+
+            $this->assertEquals($url, (string)$fs->url($basename));
+
+        }
+
+        $filesAndFolders1 = $fs->listDirectory('/directory');
+
+        foreach ($structure['directory'] as $basename=>$unused) {
+
+            // pseudo full path (without fs url/prefix)
+            $fullPath = "/directory/$basename";
+            $this->assertTrue(in_array($fullPath, $filesAndFolders1), "$fullPath was not contained in listDirectory");
+
+            $url = "file://$tempDir$fullPath";
+            $this->assertEquals($url, (string)$fs->url($fullPath));
+
+        }
+
+        $filesAndFolders2 = $fs->listDirectory('/directory/2016');
+
+        foreach ($structure['directory']['2016'] as $basename=>$unused) {
+
+            // pseudo full path (without fs url/prefix)
+            $fullPath = "/directory/2016/$basename";
+            $this->assertTrue(in_array($fullPath, $filesAndFolders2), "$fullPath was not contained in listDirectory");
+
+            $url = "file://$tempDir$fullPath";
+            $this->assertEquals($url, (string)$fs->url($fullPath));
+
+        }
+
+    }
+
     /**
      * Return a new Filesystem instance
      *
@@ -138,7 +197,7 @@ class IlluminateFilesystemTest extends \Ems\Core\LocalFilesystemTest
      **/
     protected function newTestFileSystem(array $args=[])
     {
-        return new IlluminateFilesystem($this->createLaravelAdapter());
+        return new IlluminateFilesystem($this->createLaravelAdapter($args));
     }
 
     /**
