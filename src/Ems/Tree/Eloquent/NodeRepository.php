@@ -63,11 +63,11 @@ class NodeRepository extends HookableRepository implements NodeRepositoryContrac
     /**
      * @inheritDoc
      */
-    public function __construct(EloquentModel $model, array $attributes=[])
+    public function __construct(EloquentModel $model, array $attributes=[], $maxDepth=10)
     {
         $this->checkIsNode($model);
         parent::__construct($model);
-        $this->_maxDepth = 10;
+        $this->_maxDepth = $maxDepth;
         $this->currentParent = isset($attributes['parent']) ? $attributes['parent'] : null;
         $this->currentDepth = isset($attributes['depth']) ? $attributes['depth'] : null;
     }
@@ -389,7 +389,7 @@ class NodeRepository extends HookableRepository implements NodeRepositoryContrac
      */
     protected function replicate(EloquentModel $model, array $attributes=[])
     {
-        $next = new static($model, $attributes);
+        $next = new static($model, $attributes, $this->_maxDepth);
         $next->setParentIdKey($this->getParentIdKey())
              ->setSegmentKey($this->getSegmentKey())
              ->setPathKey($this->getPathKey());

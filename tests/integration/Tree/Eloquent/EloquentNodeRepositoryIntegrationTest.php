@@ -610,8 +610,11 @@ class EloquentNodeRepositoryIntegrationTest extends TestCase
      */
     protected function newRepository(Model $model=null)
     {
-        $repo = new NodeRepository($model ?: new EloquentNodeRepositoryIntegrationTest_Node());
+        $model = $model ?: new EloquentNodeRepositoryIntegrationTest_Node();
+        // got sqlite parser overflow errors on some systems with maxDepth 10
+        $repo = new NodeRepository($model, [], 5);
         $repo->setSegmentKey('name');
+
         return $repo;
     }
 

@@ -15,6 +15,7 @@ use Ems\Core\Exceptions\ResourceLockedException;
 use Ems\Core\Helper;
 use Ems\Core\Support\StringableTrait;
 use Ems\Core\Url;
+use function function_exists;
 use LogicException;
 use function flock;
 use function fseek;
@@ -256,10 +257,15 @@ abstract class AbstractStream implements Stream
      */
     public function isTerminalType()
     {
-        if($this->hasValidResource()) {
+        if(!$this->hasValidResource()) {
+            return false;
+        }
+
+        if (function_exists('stream_isatty')) {
             /** @noinspection PhpVoidFunctionResultUsedInspection */
             return (bool)stream_isatty($this->resource);
         }
+
         return false;
     }
 
