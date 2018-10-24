@@ -7,6 +7,15 @@ use Ems\Core\Exceptions\ResourceNotFoundException;
 
 class ManualMimeTypeProvider implements MimeTypeProvider
 {
+
+    /**
+     * The "I don't know what it is" mimetype. This is not used by this class
+     * if it didn't find a mimetype. Just as a global variable.
+     *
+     * @var string
+     */
+    public static $fallbackMimeType = 'application/octet-stream';
+
     /**
      * @var array
      **/

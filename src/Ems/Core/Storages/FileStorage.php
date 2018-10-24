@@ -130,7 +130,7 @@ class FileStorage implements Storage, Configurable
     public function offsetGet($offset)
     {
         $file = $this->fileOfKey($offset);
-        return $this->serializer->deserialize($this->filesystem->contents($file));
+        return $this->serializer->deserialize($this->filesystem->read($file));
     }
 
     /**
@@ -170,7 +170,7 @@ class FileStorage implements Storage, Configurable
 
         $checksum = $this->createChecksum($hashMethod, $blob);
 
-        $savedBlob = $this->filesystem->contents($fileUrl, 0, false);
+        $savedBlob = $this->filesystem->read($fileUrl);
 
         $this->checkData($hashMethod, $savedBlob, $checksum);
     }

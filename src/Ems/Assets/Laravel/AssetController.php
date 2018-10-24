@@ -32,7 +32,7 @@ class AssetController extends Controller
         $path = $this->absolutePath($group, $file);
         $mimeType = $this->names->guessMimeType($file, $group);
 
-        $content = $this->files->contents($path);
+        $content = $this->files->read($path);
 
         return new Response($content, 200, ['Content-Type' => $mimeType]);
     }

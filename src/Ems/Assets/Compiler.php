@@ -153,7 +153,7 @@ class Compiler implements CompilerContract
     {
         $file = $this->absolutePath($collection, $asset);
 
-        $content = $this->files->contents($file);
+        $content = $this->files->read($file);
 
         foreach ($parsers as $name => $parser) {
             $options = $this->parseOptions($collection, $name, $asset, $file, $parserOptions);
@@ -195,7 +195,7 @@ class Compiler implements CompilerContract
         $nl = '';
 
         foreach ($collection as $asset) {
-            $allContent .= $nl.$this->files->contents($this->absolutePath($collection, $asset));
+            $allContent .= $nl.$this->files->read($this->absolutePath($collection, $asset));
             $nl = "\n";
         }
 

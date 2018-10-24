@@ -55,12 +55,12 @@ interface NodeProvider extends Provider
     /**
      * Return a node by path or $default if not found. Supports also depth.
      *
-     * @param string $path
-     * @param Node   $default [optional]
+     * @param string        $path
+     * @param CanHaveParent $default [optional]
      *
-     * @return Node
+     * @return CanHaveParent
      */
-    public function getByPath($path, Node $default=null);
+    public function getByPath($path, CanHaveParent $default=null);
 
     /**
      * Return a node by path or throw an exception.
@@ -69,11 +69,21 @@ interface NodeProvider extends Provider
      *
      * @param string $path
      *
-     * @return Node
+     * @return CanHaveParent
      *
      * @throws NotFound
      */
     public function getByPathOrFail($path);
+
+    /**
+     * Find nodes by its path segment (CanHaveParent::getPathSegment()).
+     * In a filesystem like structure it would be basename.
+     *
+     * @param string $segment
+     *
+     * @return CanHaveParent[]
+     */
+    public function findBySegment($segment);
 
     /**
      * Return the children of $parent.
@@ -87,9 +97,19 @@ interface NodeProvider extends Provider
     /**
      * Return the parent node of $node if it exists.
      *
-     * @param Node $child
+     * @param CanHaveParent $child
      *
      * @return Node|null
      */
-    public function parent(Node $child);
+    public function parent(CanHaveParent $child);
+
+    /**
+     * Return all ancestors of $child. ($child->getParent()->getParent()->getParent())
+     * ALSO assign the parent to $child and each parent up the tree.
+     *
+     * @param CanHaveParent $child
+     *
+     * @return Node[]
+     */
+    public function ancestors(CanHaveParent $child);
 }

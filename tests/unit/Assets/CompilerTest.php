@@ -99,7 +99,7 @@ class CompilerTest extends \Ems\TestCase
 
         $registry->shouldReceive('absolute')
                  ->andReturnUsing($pathProvider);
-        $files->shouldReceive('contents')
+        $files->shouldReceive('read')
                       ->andReturnUsing(function ($file) {
                         return $file;
                       });
@@ -133,7 +133,7 @@ class CompilerTest extends \Ems\TestCase
 
         $registry->shouldReceive('absolute')
                  ->andReturnUsing($pathProvider);
-        $files->shouldReceive('contents')
+        $files->shouldReceive('read')
                       ->andReturnUsing(function ($file) {
                         return $file;
                       });
@@ -209,7 +209,7 @@ class CompilerTest extends \Ems\TestCase
 
         $registry->shouldReceive('absolute')
                  ->andReturnUsing($pathProvider);
-        $files->shouldReceive('contents')
+        $files->shouldReceive('read')
                       ->andReturnUsing(function ($file) {
                         return $file;
                       });
@@ -293,7 +293,7 @@ class CompilerTest extends \Ems\TestCase
 
         $registry->shouldReceive('absolute')
                  ->andReturnUsing($pathProvider);
-        $files->shouldReceive('contents')
+        $files->shouldReceive('read')
                       ->andReturnUsing(function ($file) {
                         return $file;
                       });
@@ -382,7 +382,7 @@ class CompilerTest extends \Ems\TestCase
 
         $registry->shouldReceive('absolute')
                  ->andReturnUsing($pathProvider);
-        $files->shouldReceive('contents')
+        $files->shouldReceive('read')
                       ->andReturnUsing(function ($file) {
                         return $file;
                       });
@@ -426,7 +426,7 @@ class CompilerTest extends \Ems\TestCase
 
         $registry->shouldReceive('absolute')
                  ->andReturnUsing($pathProvider);
-        $files->shouldReceive('contents')
+        $files->shouldReceive('read')
                       ->andReturnUsing(function ($file) {
                         return $file;
                       });
@@ -464,7 +464,7 @@ class CompilerTest extends \Ems\TestCase
 
         $registry->shouldReceive('absolute')
                  ->andReturnUsing($pathProvider);
-        $files->shouldReceive('contents')
+        $files->shouldReceive('read')
                       ->andReturnUsing(function ($file) {
                         return $file;
                       });

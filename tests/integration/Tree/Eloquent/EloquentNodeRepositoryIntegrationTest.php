@@ -35,7 +35,8 @@ class EloquentNodeRepositoryIntegrationTest extends TestCase
     public function store_creates_rootNode()
     {
         $repo = $this->newRepository();
-        $node = $repo->store(['name' => 'Root #1', 'path' => '/root-1']);
+        $this->assertEquals('name', $repo->getSegmentKey());
+        $node = $repo->store(['name' => 'root-1']);
         $this->assertInstanceOf(EloquentNode::class, $node);
         $this->assertTrue($node->isRoot());
         $this->assertGreaterThan(0, $node->getId());
@@ -48,7 +49,7 @@ class EloquentNodeRepositoryIntegrationTest extends TestCase
     {
         $repo = $this->newRepository();
         $rootNode = $repo->getByPath('/root-1');
-        $this->assertEquals('Root #1', $rootNode->getAttribute('name'));
+        $this->assertEquals('root-1', $rootNode->getAttribute('name'));
 
     }
 
@@ -59,7 +60,7 @@ class EloquentNodeRepositoryIntegrationTest extends TestCase
     {
         $repo = $this->newRepository();
         $rootNode = $repo->getByPathOrFail('/root-1');
-        $this->assertEquals('Root #1', $rootNode->getAttribute('name'));
+        $this->assertEquals('root-1', $rootNode->getAttribute('name'));
 
     }
 
@@ -126,7 +127,8 @@ class EloquentNodeRepositoryIntegrationTest extends TestCase
             /** @var Model $child */
             $child = $repo->asChildOf($rootNode)->store($childAttributes);
             $this->assertEquals($childAttributes['name'], $child->getAttribute('name'));
-            $this->assertEquals($childAttributes['path'], $child->getAttribute('path'));
+            $this->assertEquals($childAttributes['title'], $child->getAttribute('title'));
+
             /** @var Node $child */
             $this->assertGreaterThan(1, $child->getId());
         }
@@ -177,8 +179,10 @@ class EloquentNodeRepositoryIntegrationTest extends TestCase
         foreach ($childArray as $childData) {
             $node = $this->findInChildren($childData['name'], $children);
             /** @var Model $node */
-            $this->assertEquals($node->getAttribute('path'), $childData['path']);
+            $this->assertEquals($node->getAttribute('name'), $childData['name']);
             $this->assertEquals($node->getParent()->getId(), $rootNode->getId());
+            $path = $rootNode->getPath() . '/' . $node->getPathSegment();
+            $this->assertEquals($path, $node->getPath());
         }
 
     }
@@ -233,11 +237,11 @@ class EloquentNodeRepositoryIntegrationTest extends TestCase
     {
         $repo = $this->newRepository();
 
-        $node = $repo->recursive(1)->getByPath('/root-1');
+        $rootNode = $repo->recursive(1)->getByPath('/root-1');
 
-        $this->assertEquals('/root-1', $node->path);
+        $this->assertEquals('/root-1', $rootNode->getPath());
 
-        $children = $node->getChildren();
+        $children = $rootNode->getChildren();
         $childArray = $this->getChildrenData();
 
         $this->assertInstanceOf(GenericChildren::class, $children);
@@ -246,7 +250,7 @@ class EloquentNodeRepositoryIntegrationTest extends TestCase
         foreach ($childArray as $childData) {
             /** @var Model $node */
             $node = $this->findInChildren($childData['name'], $children);
-            $this->assertEquals($node->getAttribute('path'), $childData['path']);
+            $this->assertEquals($node->getAttribute('name'), $childData['name']);
         }
 
     }
@@ -269,8 +273,11 @@ class EloquentNodeRepositoryIntegrationTest extends TestCase
     {
         $repo = $this->newRepository();
 
-        $rootNode = $repo->getByPath('/root-1');
-        $child = $repo->getByPath('/child-3');
+
+        $rootNode = $repo->getByPathOrFail('/root-1');
+        $child = $repo->getByPathOrFail('/root-1/child-3');
+
+
 
         $this->assertEquals($rootNode->getId(), $repo->parent($child)->getId());
 
@@ -326,8 +333,8 @@ class EloquentNodeRepositoryIntegrationTest extends TestCase
     public function EloquentNode_clearParent()
     {
         $repo = $this->newRepository();
-        $child = $repo->getByPath('/child-2');
-        $newParent = $repo->getByPath('/child-3');
+        $child = $repo->getByPathOrFail('/root-1/child-2');
+        $newParent = $repo->getByPathOrFail('/root-1/child-3');
 
         $this->assertNull($child->getParent());
 
@@ -354,21 +361,21 @@ class EloquentNodeRepositoryIntegrationTest extends TestCase
     public function EloquentNode_removeChild()
     {
         $repo = $this->newRepository();
-        $child = $repo->getByPath('/child-2');
+        $child = $repo->getByPath('/root-1/child-2');
 
         $rootNodeWithChildren = $repo->recursive(1)->getByPath('/root-1');
 
         $this->assertCount(count($this->getChildrenData()), $rootNodeWithChildren->getChildren());
 
-        if (!$node = $this->findInChildren($child->path, $rootNodeWithChildren->getChildren(), 'path')) {
+        if (!$node = $this->findInChildren($child->name, $rootNodeWithChildren->getChildren(), 'name')) {
             $this->fail('The node was not found');
         }
 
-        $rootNodeWithChildren->removeChild($child);
+        $rootNodeWithChildren->getChildren()->remove($child);
 
         $this->assertCount(count($this->getChildrenData())-1, $rootNodeWithChildren->getChildren());
 
-        if ($node = $this->findInChildren($child->path, $rootNodeWithChildren->getChildren(), 'path')) {
+        if ($node = $this->findInChildren($child->name, $rootNodeWithChildren->getChildren(), 'name')) {
             $this->fail('The node was not removed');
         }
 
@@ -383,10 +390,33 @@ class EloquentNodeRepositoryIntegrationTest extends TestCase
     public function EloquentNode_getLevel()
     {
         $repo = $this->newRepository();
-        $child = $repo->getByPath('/child-2');
+        $child = $repo->getByPath('/root-1/child-2');
         $this->assertNull($child->getLevel());
         $child->level = 12;
         $this->assertEquals(12, $child->getLevel());
+
+    }
+
+    /**
+     * @test
+     */
+    public function EloquentNode_getPathSegment()
+    {
+        $repo = $this->newRepository();
+        $child = $repo->getByPath('/root-1/child-2');
+        $this->assertEquals($child->getPathSegment(), $child->getAttribute('name'));
+
+    }
+
+    /**
+     * @test
+     */
+    public function EloquentNode_getParentId()
+    {
+        $repo = $this->newRepository();
+        $child = $repo->getByPath('/root-1/child-2');
+        $parent = $repo->parent($child);
+        $this->assertEquals($parent->getId(), $child->getParentId());
 
     }
 
@@ -397,12 +427,180 @@ class EloquentNodeRepositoryIntegrationTest extends TestCase
     public function EloquentNode_removeChild_throws_exception_if_child_not_found()
     {
         $repo = $this->newRepository();
-        $newRoot = $repo->store(['name' => 'Root #2', 'path' => '/root-2']);
+        $newRoot = $repo->store(['name' => 'root-2']);
 
 
         $rootNodeWithChildren = $repo->recursive(1)->getByPath('/root-1');
 
-        $rootNodeWithChildren->removeChild($newRoot);
+        $rootNodeWithChildren->getChildren()->remove($newRoot);
+
+    }
+
+    /**
+     * @test
+     */
+    public function EloquentNode_getPath()
+    {
+        $repo = $this->newRepository();
+
+        $rootNode = $repo->recursive(1)->getByPath('/root-1');
+
+        $this->assertEquals('/root-1', $rootNode->getPath());
+
+        $children = $rootNode->getChildren();
+        $childArray = $this->getChildrenData();
+
+        $this->assertInstanceOf(GenericChildren::class, $children);
+        $this->assertCount(count($childArray), $children);
+
+        foreach ($childArray as $childData) {
+            /** @var Model $node */
+            $node = $this->findInChildren($childData['name'], $children);
+            $this->assertEquals($node->getAttribute('name'), $childData['name']);
+            foreach ([1,2,3,4] as $level2Id) {
+
+                $node->getChildren()->append($repo->make([
+                    'title'    => "Child #" . $node->getId() . "-$level2Id",
+                    'name' => $node->getId() . "-$level2Id"
+                ]));
+            }
+        }
+
+    }
+
+    /**
+     * @test
+     */
+    public function store_children_on_level3()
+    {
+        $repo = $this->newRepository();
+
+        $parentNode = $repo->recursive(1)->getByPath('/root-1/child-2');
+
+        $this->assertEquals('/root-1/child-2', $parentNode->getPath());
+
+        $children = $this->getChildrenData();
+
+        foreach ($children as $childAttributes) {
+
+            /** @var EloquentNode $child */
+            $child = $repo->asChildOf($parentNode)->store($childAttributes);
+            $this->assertEquals($childAttributes['name'], $child->getAttribute('name'));
+            $this->assertEquals($childAttributes['title'], $child->getAttribute('title'));
+
+            $path = $parentNode->getPath() . '/' . $childAttributes['name'];
+            $this->assertEquals($path, $child->getPath());
+            $this->assertSame($parentNode, $child->getParent());
+            $this->assertEquals($parentNode->getId(), $child->getParentId());
+        }
+
+        //$this->dumpTable('nodes');
+
+    }
+
+    /**
+     * @test
+     */
+    public function ancestors_on_level3()
+    {
+        $repo = $this->newRepository();
+
+        $childNode = $repo->getByPath('/root-1/child-2/child-3');
+
+        $ancestors = $repo->ancestors($childNode);
+
+        $this->assertCount(2, $ancestors);
+
+        $this->assertSame($childNode->getParent(), $ancestors[0]);
+        $this->assertSame($childNode->getParent()->getParent(), $ancestors[1]);
+
+        $this->assertEquals($ancestors[0]->getPath(), '/root-1/child-2');
+        $this->assertEquals($ancestors[1]->getPath(), '/root-1');
+
+    }
+
+    /**
+     * @test
+     */
+    public function ancestors_on_level2()
+    {
+        $repo = $this->newRepository();
+
+        $childNode = $repo->getByPath('/root-1/child-2');
+
+        $ancestors = $repo->ancestors($childNode);
+
+        $this->assertCount(1, $ancestors);
+
+        $this->assertSame($childNode->getParent(), $ancestors[0]);
+
+        $this->assertEquals($ancestors[0]->getPath(), '/root-1');
+
+    }
+
+    /**
+     * @test
+     */
+    public function ancestors_on_rootNode()
+    {
+        $repo = $this->newRepository();
+
+        $childNode = $repo->getByPath('/root-1');
+
+        $ancestors = $repo->ancestors($childNode);
+
+        $this->assertCount(0, $ancestors);
+
+        $this->assertSame([], $ancestors);
+
+    }
+
+    /**
+     * @test
+     */
+    public function ancestors_on_manually_created_structure()
+    {
+        $repo = $this->newRepository();
+
+        $rootNode = $repo->make(['name' => 'root-3']);
+
+        $childNode = $repo->make(['name' => 'child-1']);
+
+        $childNode2 = $repo->make(['name' => 'child-1']);
+
+        $childNode2->setParent($childNode);
+
+        $childNode->setParent($rootNode);
+
+        $ancestors = $repo->ancestors($childNode2);
+
+        $this->assertCount(2, $ancestors);
+
+        $this->assertSame($childNode2->getParent(), $ancestors[0]);
+        $this->assertSame($childNode2->getParent()->getParent(), $ancestors[1]);
+
+        $this->assertEquals($ancestors[0]->getPath(), '/root-3/child-1');
+        $this->assertEquals($ancestors[1]->getPath(), '/root-3');
+
+
+    }
+
+    /**
+     * @test
+     */
+    public function findBySegment_finds_all_child_1_nodes()
+    {
+        $repo = $this->newRepository();
+
+        $nodes = $repo->findBySegment('child-1');
+
+        $segments = [];
+
+        foreach ($nodes as $node) {
+            $segments[] = $node->getPathSegment();
+        }
+
+        $this->assertEquals(['child-1', 'child-1'], $segments);
 
     }
 
@@ -412,7 +610,9 @@ class EloquentNodeRepositoryIntegrationTest extends TestCase
      */
     protected function newRepository(Model $model=null)
     {
-        return new NodeRepository($model ?: new EloquentNodeRepositoryIntegrationTest_Node());
+        $repo = new NodeRepository($model ?: new EloquentNodeRepositoryIntegrationTest_Node());
+        $repo->setSegmentKey('name');
+        return $repo;
     }
 
     /**
@@ -436,20 +636,20 @@ class EloquentNodeRepositoryIntegrationTest extends TestCase
     {
         return [
             [
-                'name' => 'Child #1',
-                'path' => '/child-1'
+                'title' => 'Child #1',
+                'name'  => 'child-1'
             ],
             [
-                'name' => 'Child #2',
-                'path' => '/child-2'
+                'title'   => 'Child #2',
+                'name'    => 'child-2'
             ],
             [
-                'name' => 'Child #3',
-                'path' => '/child-3'
+                'title' => 'Child #3',
+                'name'  => 'child-3'
             ],
             [
-                'name' => 'Child #4',
-                'path' => '/child-4'
+                'title' => 'Child #4',
+                'name'  => 'child-4'
             ]
         ];
     }
@@ -468,10 +668,29 @@ class EloquentNodeRepositoryIntegrationTest_Node extends EloquentNode
         return false;
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @return string
+     */
+    public function getPathSegment()
+    {
+        return $this->getAttribute('name');
+    }
+
+    public function getPath()
+    {
+        if ($path = $this->getAttributeFromArray('path')) {
+            return $path;
+        }
+        return parent::getPath();
+    }
 
 }
 
 class EloquentNodeRepositoryIntegrationTest_Model extends Model implements Identifiable
 {
     use IdentifiableByKeyTrait;
+
+
 }

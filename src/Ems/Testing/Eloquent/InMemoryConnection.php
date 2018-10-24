@@ -3,17 +3,19 @@
 
 namespace Ems\Testing\Eloquent;
 
-use Illuminate\Database\SQLiteConnection;
+use Ems\Events\Bus;
+use Ems\Events\Laravel\EventDispatcher as LaravelDispatcher;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Events\Dispatcher;
-use Ems\Events\Laravel\EventDispatcher as LaravelDispatcher;
-use Ems\Events\Bus;
+use Illuminate\Database\SQLiteConnection;
 use PDO;
 
 /**
  * The InMemoryConnection uses a :memory: sqlite connection
  * to allow eloquent/database tests
+ *
+ * @property Application $app
  **/
 trait InMemoryConnection
 {
@@ -89,10 +91,10 @@ trait InMemoryConnection
     {
 
         if ($this->hasRunningApp()) {
-            return $this->injectAppConnection($connection);
+            $this->injectAppConnection($connection);
         }
 
-        return $this->injectAppLessConnection($connection);
+        $this->injectAppLessConnection($connection);
 
     }
 
@@ -183,5 +185,15 @@ trait InMemoryConnection
         foreach ($query->get() as $row) {
             print_r($row);
         }
+    }
+
+    /**
+     * Truncate a table.
+     *
+     * @param string $table
+     */
+    protected function truncate($table)
+    {
+        static::$_testConnection->table($table)->truncate();
     }
 }

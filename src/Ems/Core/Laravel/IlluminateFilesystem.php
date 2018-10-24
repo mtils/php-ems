@@ -7,12 +7,18 @@ namespace Ems\Core\Laravel;
 
 
 use DateTime;
+use Ems\Contracts\Core\Exceptions\TypeException;
 use Ems\Contracts\Core\Filesystem;
 use Ems\Contracts\Core\MimeTypeProvider;
+use Ems\Contracts\Core\Stream;
+use Ems\Contracts\Core\Type;
 use Ems\Contracts\Core\Url as UrlContract;
 use Ems\Core\Exceptions\NotImplementedException;
 use Ems\Core\Exceptions\ResourceNotFoundException;
 use Ems\Core\Filesystem\FilesystemMethods;
+use Ems\Core\Filesystem\ResourceStream;
+use Ems\Core\Flysystem\FilesystemStream;
+use Ems\Core\LocalFilesystem;
 use Ems\Core\ManualMimeTypeProvider;
 use Ems\Core\PointInTime;
 use Ems\Core\Url;
@@ -22,11 +28,13 @@ use Illuminate\Contracts\Filesystem\Filesystem as IlluminateFilesystemContract;
 use Illuminate\Filesystem\FilesystemAdapter;
 use League\Flysystem\Adapter\Local;
 use League\Flysystem\AdapterInterface;
-use League\Flysystem\Filesystem as Flysystem;
+use League\Flysystem\FilesystemInterface;
+use RuntimeException;
 use function array_merge;
 use function func_get_args;
 use function is_array;
-use function method_exists;
+use function is_resource;
+use function is_string;
 use function pathinfo;
 use const PATHINFO_FILENAME;
 
@@ -38,6 +46,11 @@ class IlluminateFilesystem implements Filesystem
      * @var IlluminateFilesystemContract
      */
     protected $laravelFS;
+
+    /**
+     * @var FilesystemInterface
+     */
+    protected $flysystem;
 
     /**
      * @var MimeTypeProvider
@@ -82,85 +95,82 @@ class IlluminateFilesystem implements Filesystem
 
 
     /**
-     * Return the contents of a file.
+     * Read a whole file or just a few bytes of a file
      *
-     * @param string $path
-     * @param int $bytes (optional)
-     * @param bool|int $lock (default:false) Enable locking or directly set the mode (LOCK_SH,...)
+     * @param string|Stream|resource $source
+     * @param int                    $bytes (optional)
+     * @param bool|int               $lock (default:false) Enable locking or directly set the mode (LOCK_EX,...)
      *
      * @return string
      *
      * @throws ResourceNotFoundException
      * @throws NotImplementedException
      */
-    public function contents($path, $bytes = 0, $lock = false)
+    public function read($source, $bytes = 0, $lock = false)
     {
-        if ($bytes !== 0 || $lock) {
-            throw new NotImplementedException('Passing bytes or file locking is not supported by this filesystem.');
+        if ($bytes !== 0 || $lock || is_resource($source)) {
+            throw new NotImplementedException('Passing bytes or an handle is not supported by this filesystem.');
         }
 
         try {
-            return $this->laravelFS->get($path);
+            return $this->laravelFS->get($source);
         } catch (FileNotFoundException $e) {
-            throw new ResourceNotFoundException("File $path not found.");
+            throw new ResourceNotFoundException("File $source not found.");
         }
 
     }
+
 
     /**
      * Write the contents $contents to the file in $path.
      *
-     * @param string $path
-     * @param string $contents
-     * @param bool|int $lock (default:false) Enable locking or directly set the mode (LOCK_EX,...)
-     * @param resource $handle (optional)
+     * @param string|Stream|resource $target (also objects with __toString)
+     * @param string|Stream|resource $contents (also objects with __toString)
+     * @param bool|int               $lock (default:false) Enable locking or directly set the mode (LOCK_EX,...)
      *
-     * @return int written bytes
+     * @return bool
      **/
-    public function write($path, $contents, $lock = false, $handle = null)
+    public function write($target, $contents, $lock = false)
     {
-        if ($lock || $handle !== null) {
-            throw new NotImplementedException('Locking and explicit passing of an handle is not supported by this filesystem.');
+        if ($lock) {
+            throw new NotImplementedException('Locking is not supported by this filesystem.');
         }
 
-        $result = $this->laravelFS->put($path, $contents);
+        if ($target instanceof Stream) {
+            return $target->write($contents);
+        }
 
-        return $result ? $this->laravelFS->size($path) : 0;
+        if (is_resource($target)) {
+            return $this->open($target, 'w', $lock)->write($contents);
+        }
+
+        if ($contents instanceof Stream) {
+            return $this->laravelFS->put($target, $contents->resource(), 'public');
+        }
+
+        return $this->laravelFS->put($target, $contents, 'public');
     }
 
-
     /**
-     * Read a whole file or just a few bytes of a file
+     * Open a stream to a url.
      *
-     * @param string $path
-     * @param int $bytes (optional)
-     * @param resource $handle (optional)
+     * @param UrlContract|string|resource $uri
+     * @param string $mode (default:'r+')
+     * @param bool $lock (default:false)
      *
-     * @return string
-     *
-     * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
-     * @throws NotImplementedException
+     * @return Stream
      */
-    public function read($path, $bytes = 0, $handle = null)
+    public function open($uri, $mode = 'r+', $lock = false)
     {
-        if ($bytes !== 0 || $handle !== null) {
-            throw new NotImplementedException('Passing bytes or an handle is not supported by this filesystem.');
+        if (is_resource($uri)) {
+            return new ResourceStream($uri, $lock);
         }
-        return $this->laravelFS->get($path);
-    }
 
-    /**
-     * Return a file handle or throw an exception. (Mostly the same as fopen()).
-     * Pass an array to get a stream context.
-     *
-     * @param string|array $pathOrContext
-     * @param string $mode
-     *
-     * @throws NotImplementedException
-     **/
-    public function handle($pathOrContext, $mode = 'rb')
-    {
-        throw new NotImplementedException('getting handles is not supported by this filesystem.');
+        if ($uri instanceof UrlContract || is_string($uri)) {
+            return new FilesystemStream($this->flysystemOrFail(), $uri, $mode, $lock);
+        }
+
+        throw new TypeException('Unknown $uri type: ' . Type::of($uri));
     }
 
     /**
@@ -332,6 +342,10 @@ class IlluminateFilesystem implements Filesystem
      **/
     public function isDirectory($path)
     {
+        // The root is always a directory
+        if($path == '/') {
+            return true;
+        }
         $parentDir = $this->dirname($path);
         return in_array($path, $this->directories($parentDir));
     }
@@ -426,8 +440,8 @@ class IlluminateFilesystem implements Filesystem
      **/
     public function mimeType($path)
     {
-        if ($this->isDirectory($path)) {
-
+        if ($this->isDirectory($path) || $path == '/') {
+            return LocalFilesystem::$directoryMimetype;
         }
         return $this->mimeTypes->typeOfName($path);
     }
@@ -500,8 +514,7 @@ class IlluminateFilesystem implements Filesystem
             return new Url($this->laravelFS->url($path));
         }
 
-        /** @var AdapterInterface $adapter */
-        $adapter = $this->laravelFS->getDriver()->getAdapter();
+        $adapter = $this->flysystemAdapterOrFail();
 
         if ($adapter instanceof Local) {
             $pathPrefix = rtrim($adapter->getPathPrefix(), '/');
@@ -511,6 +524,50 @@ class IlluminateFilesystem implements Filesystem
         }
 
         return new Url($this->laravelFS->url($path));
+
+    }
+
+    /**
+     * @return AdapterInterface
+     */
+    protected function flysystemAdapterOrFail()
+    {
+        $flysystem = $this->flysystemOrFail();
+
+        if (!method_exists($flysystem, 'getAdapter')) {
+            throw new TypeException('I need the flysystem adapter but it is not exposed by the filesystem.');
+        }
+
+        $adapter = $flysystem->getAdapter();
+
+        if ($adapter instanceof AdapterInterface) {
+            return $adapter;
+        }
+
+        throw new TypeException('I need the flysystem adapter it was not returned by getAdapter().');
+    }
+
+    /**
+     * @return FilesystemInterface
+     * @throws RuntimeException
+     */
+    protected function flysystemOrFail()
+    {
+        if ($this->flysystem) {
+            return $this->flysystem;
+        }
+
+        if (!$this->laravelFS instanceof FilesystemAdapter) {
+            throw new RuntimeException('Laravel Filesystem has to expose the flysystem for that feature.');
+        }
+
+        if (!$driver = $this->laravelFS->getDriver()) {
+            throw new RuntimeException('Laravel Filesystem did not expose a valid flysystem when calling getDriver.');
+        }
+
+        $this->flysystem = $driver;
+
+        return $this->flysystem;
 
     }
 }

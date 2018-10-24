@@ -17,20 +17,20 @@ interface Children extends OrmCollection, Countable
     /**
      * Append a node to the list.
      *
-     * @param Node $node
+     * @param CanHaveParent $node
      *
      * @return self
      **/
-    public function append(Node $node);
+    public function append(CanHaveParent $node);
 
     /**
      * Remove a node from the list.
      *
-     * @param Node $node
+     * @param CanHaveParent $node
      *
      * @return self
      **/
-    public function remove(Node $node);
+    public function remove(CanHaveParent $node);
 
     /**
      * Removes all nodes.

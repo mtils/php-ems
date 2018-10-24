@@ -108,7 +108,7 @@ class SingleFileStorage implements Storage, Configurable
 
         $checksum = $this->createChecksum($hashMethod, $blob);
 
-        $savedBlob = $this->filesystem->contents($this->url, 0, false);
+        $savedBlob = $this->filesystem->read($this->url);
 
         $this->checkData($hashMethod, $savedBlob, $checksum);
 
@@ -185,7 +185,7 @@ class SingleFileStorage implements Storage, Configurable
             return;
         }
 
-        $blob = $this->filesystem->contents($this->url);
+        $blob = $this->filesystem->read($this->url);
 
         $this->fillAttributes($this->serializer->deserialize($blob, $this->deserializeOptions));
 

@@ -11,6 +11,7 @@ use Illuminate\Filesystem\FilesystemAdapter;
 use League\Flysystem\Adapter\Local as LocalFSAdapter;
 use League\Flysystem\Filesystem as Flysystem;
 use Mockery;
+use function stream_context_get_default;
 
 include_once __DIR__ .'/../LocalFilesystemTest.php';
 
@@ -20,28 +21,6 @@ class IlluminateFilesystemTest extends \Ems\Core\LocalFilesystemTest
      * @var string
      */
     protected $currentRoot = '';
-
-    public function test_contents_returns_head_if_bytes_are_passed()
-    {
-        try {
-            parent::test_contents_returns_head_if_bytes_are_passed();
-            $boom = true;
-            $this->fail('Passing bytes to ->contents() should fail');
-        } catch (NotImplementedException $e) {
-            $this->assertFalse(isset($boom));
-        }
-    }
-
-    public function test_contents_returns_contents_with_file_locking()
-    {
-        try {
-            parent::test_contents_returns_contents_with_file_locking();
-            $boom = true;
-            $this->fail('Passing locking to ->contents should fail');
-        } catch (NotImplementedException $e) {
-            $this->assertFalse(isset($boom));
-        }
-    }
 
     public function test_link_links_file()
     {
@@ -78,40 +57,6 @@ class IlluminateFilesystemTest extends \Ems\Core\LocalFilesystemTest
     }
 
     /**
-     * @expectedException \Ems\Core\Exceptions\NotImplementedException
-     */
-    public function test_write_throws_exception_if_handle_passed()
-    {
-        $this->newTestFileSystem()->write('/', 'blue', false, true);
-    }
-
-    /**
-     * @expectedException \Ems\Core\Exceptions\NotImplementedException
-     * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
-     */
-    public function test_read_throws_exception_if_bytes_was_passed()
-    {
-        $this->newTestFileSystem()->read('/', 33);
-    }
-
-    /**
-     * @expectedException \Ems\Core\Exceptions\NotImplementedException
-     * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
-     */
-    public function test_read_throws_exception_if_handle_was_passed()
-    {
-        $this->newTestFileSystem()->read('/', 0, true);
-    }
-
-    /**
-     * @expectedException \Ems\Core\Exceptions\NotImplementedException
-     */
-    public function test_handle_throws_NotImplementedException()
-    {
-        $this->newTestFileSystem()->handle('/');
-    }
-
-    /**
      * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
      */
     public function test_read_returns_file_content()
@@ -127,6 +72,29 @@ class IlluminateFilesystemTest extends \Ems\Core\LocalFilesystemTest
     public function test_makeDirectory_throws_NotImplementedException_when_passing_mode()
     {
         $this->newTestFileSystem()->makeDirectory('/test', 655);
+    }
+
+    /**
+     * @expectedException \Ems\Core\Exceptions\NotImplementedException
+     */
+    public function test_read_returns_contents_with_file_locking()
+    {
+        $fs = $this->newTestFilesystem();
+        $contentsOfThisFile = file_get_contents(__FILE__);
+        $this->assertEquals($contentsOfThisFile, $fs->read(__FILE__, 0, true));
+    }
+
+    /**
+     * @expectedException \Ems\Core\Exceptions\NotImplementedException
+     **/
+    public function test_read_throws_exception_when_trying_to_read_a_locked_file()
+    {
+        $fs = $this->newTestFilesystem();
+        $fileName = $this->tempFileName();
+        $testString = 'Foo is a buddy of bar';
+
+        $this->assertEquals(strlen($testString),
+            $fs->write($fileName, $testString, LOCK_EX | LOCK_NB));
     }
 
     public function test_chrooted_baseUrl_leads_to_right_urls()
@@ -150,11 +118,15 @@ class IlluminateFilesystemTest extends \Ems\Core\LocalFilesystemTest
 
         $filesAndFolders = $fs->listDirectory('/');
 
+        $this->assertTrue($fs->isDirectory('/'));
+
         foreach ($structure as $basename=>$unused) {
             $fullPath = "/$basename";
             $this->assertTrue(in_array($fullPath, $filesAndFolders), "$fullPath was not contained in listDirectory");
 
             $url = "file://$tempDir$fullPath";
+
+            $this->assertSame($basename == 'directory', $fs->isDirectory($fullPath));
 
             $this->assertEquals($url, (string)$fs->url($basename));
 
@@ -171,6 +143,8 @@ class IlluminateFilesystemTest extends \Ems\Core\LocalFilesystemTest
             $url = "file://$tempDir$fullPath";
             $this->assertEquals($url, (string)$fs->url($fullPath));
 
+            $this->assertSame($basename == '2016', $fs->isDirectory($fullPath));
+
         }
 
         $filesAndFolders2 = $fs->listDirectory('/directory/2016');
@@ -183,6 +157,8 @@ class IlluminateFilesystemTest extends \Ems\Core\LocalFilesystemTest
 
             $url = "file://$tempDir$fullPath";
             $this->assertEquals($url, (string)$fs->url($fullPath));
+
+            $this->assertFalse($fs->isDirectory($fullPath));
 
         }
 

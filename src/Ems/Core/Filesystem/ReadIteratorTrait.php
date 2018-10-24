@@ -3,9 +3,6 @@
 namespace Ems\Core\Filesystem;
 
 use Ems\Contracts\Core\Filesystem;
-use Ems\Contracts\Core\ContentIterator;
-use Ems\Core\LocalFilesystem;
-use Iterator;
 
 /**
  * The LineReadIterator is a iterator which allows to read
@@ -46,9 +43,8 @@ trait ReadIteratorTrait
      **/
     protected $handle;
 
-
     /**
-     * Return the bytes which will be readed in one iteration.
+     * Return the bytes which will be read in one iteration.
      *
      * @return int
      **/
@@ -224,7 +220,7 @@ trait ReadIteratorTrait
      **/
     protected function createHandle($filePath)
     {
-        return $this->filesystem->handle($filePath);
+        return fopen($filePath, 'r');
     }
 
     /**

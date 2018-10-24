@@ -64,49 +64,39 @@ interface Filesystem
     public function url($path='/');
 
     /**
-     * Return the contents of a file.
+     * Read a whole file or just a few bytes of a file.
      *
-     * @param string   $path
-     * @param int      $bytes (optional)
-     * @param bool|int $lock (default:false) Enable locking or directly set the mode (LOCK_SH,...)
-     *
-     * @return string
-     **/
-    public function contents($path, $bytes = 0, $lock = false);
-
-    /**
-     * Write the contents $contents to the file in $path.
-     *
-     * @param string   $path
-     * @param string   $contents
-     * @param bool|int $lock (default:false) Enable locking or directly set the mode (LOCK_EX,...)
-     * @param resource $handle (optional)
-     *
-     * @return int written bytes
-     **/
-    public function write($path, $contents, $lock = false, $handle = null);
-
-    /**
-     * Read a whole file or just a few bytes of a file
-     *
-     * @param string   $path
-     * @param int      $bytes (optional)
-     * @param resource $handle (optional)
+     * @param string|Stream|resource $source
+     * @param int                    $bytes (optional)
+     * @param bool|int               $lock (default:false) Enable locking or directly set the mode (LOCK_EX,...)
      *
      * @return string
      **/
-    public function read($path, $bytes = 0, $handle = null);
+    public function read($source, $bytes = 0, $lock = false);
 
     /**
-     * Return a file handle or throw an exception. (Mostly the same as fopen()).
-     * Pass an array to get a stream context.
+     * Write the contents $contents to the file in $path. Pass a resource for
+     * in $contents to read from a stream. Optionally pass a $writeHandle to
+     * have even more control over writing or continued writes.
      *
-     * @param string|array $pathOrContext
-     * @param string       $mode
+     * @param string|Stream|resource $target (also objects with __toString)
+     * @param string|Stream|resource $contents (also objects with __toString)
+     * @param bool|int               $lock (default:false) Enable locking or directly set the mode (LOCK_EX,...)
      *
-     * @return resource
+     * @return bool
      **/
-    public function handle($pathOrContext, $mode='rb');
+    public function write($target, $contents, $lock = false);
+
+    /**
+     * Open a stream to a url.
+     *
+     * @param Url|string|resource $uri
+     * @param string              $mode (default:'r+')
+     * @param bool                $lock (default:false)
+     *
+     * @return Stream
+     */
+    public function open($uri, $mode='r+', $lock=false);
 
     /**
      * Delete the path $path. Deletes directories, links and files.

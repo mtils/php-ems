@@ -9,38 +9,18 @@
 namespace Ems\Http;
 
 use Ems\Contracts\Core\Configurable;
-use Ems\Contracts\Core\Filesystem;
 use Ems\Contracts\Core\HasMethodHooks;
 use Ems\Contracts\Core\Url as UrlContract;
 use Ems\Contracts\Http\Connection as HttpConnection;
 use Ems\Core\ConfigurableTrait;
 use Ems\Core\FilesystemConnection as BaseConnection;
 use Ems\Core\Patterns\HookableTrait;
+use Ems\Core\Url;
 
 class FilesystemConnection extends BaseConnection implements HttpConnection, Configurable, HasMethodHooks
 {
     use ConfigurableTrait;
     use HookableTrait;
-
-    /**
-     * @var string
-     */
-    protected $method = '';
-
-    /**
-     * @var array
-     */
-    protected $headers = [];
-
-    /**
-     * @var string
-     */
-    protected $content = '';
-
-    /**
-     * @var string
-     */
-    protected $protocolVersion = '1.1';
 
     /**
      * @var string
@@ -66,12 +46,12 @@ class FilesystemConnection extends BaseConnection implements HttpConnection, Con
     /**
      * FilesystemConnection constructor.
      *
-     * @param UrlContract        $url
-     * @param Filesystem $filesystem (optional)
+     * @param UrlContract|string $url
      */
-    public function __construct(UrlContract $url, Filesystem $filesystem=null)
+    public function __construct($url)
     {
-        parent::__construct($this->popCredentials($url), $filesystem);
+        $url = $url instanceof UrlContract ? $url : new Url($url);
+        parent::__construct($this->popCredentials($url));
     }
 
     /**
@@ -86,36 +66,33 @@ class FilesystemConnection extends BaseConnection implements HttpConnection, Con
      */
     public function send($method, array $headers = [], $content = null, $protocolVersion = '1.1')
     {
+
+        $headers = $this->addCredentials($headers);
+
         $this->callBeforeListeners('send', [$this->url, $method, &$headers]);
 
-        $this->method = $method;
-        $this->headers = $headers;
-        $this->content = $content;
-        $this->protocolVersion = $protocolVersion;
-        $raw = $this->read();
+        // We have to recreate the stream every time
+        $this->close();
+
+        $header = implode("\r\n", $headers);
+        $stream = $this->createHttpStream($method, $header, $content, $protocolVersion);
+
+        $this->stream = $stream;
+
+        // Currently only stream-less connections are supported
+        $raw = $stream->toString();
 
         list($responseHeader, $content) = $this->parseMessage($raw);
 
         $response = new Response($responseHeader, $content);
         $response->setRaw($raw);
 
-        $this->callAfterListeners('send', [$this->url, $method, &$headers]);
+        $this->callAfterListeners('send', [$this->url, $method, &$headers, $response]);
+
+        $this->close();
 
         return $response;
 
-    }
-
-    /**
-     * @return resource
-     *
-     * @throws \Ems\Contracts\Core\Errors\Unsupported
-     */
-    public function resource()
-    {
-        if (!$this->resource) {
-            $this->resource = $this->filesystem->handle($this->streamContextArray());
-        }
-        return $this->resource;
     }
 
     /**
@@ -127,7 +104,7 @@ class FilesystemConnection extends BaseConnection implements HttpConnection, Con
     }
 
     /**
-     * Devides the received message in header and body.
+     * Splits the received message in header and body.
      *
      * @param string $message
      * @return array
@@ -161,37 +138,6 @@ class FilesystemConnection extends BaseConnection implements HttpConnection, Con
         }
 
         return $filtered;
-    }
-
-    /**
-     * Build the beautiful array for stream_context_create
-     *
-     * @return array
-     *
-     * @throws \Ems\Contracts\Core\Errors\UnSupported
-     */
-    protected function streamContextArray()
-    {
-        return [
-            'http' => [
-                // direct connection properties
-                'method'           => $this->method,
-                'header'           => implode("\r\n", $this->addCredentials($this->headers)),
-                'content'          => $this->content,
-                'protocol_version' => $this->protocolVersion,
-
-                // options
-                'ignore_errors'    => $this->getOption('ignore_errors'),
-                'follow_location'  => $this->getOption('max_redirects') > 0,
-                'max_redirects'    => $this->getOption('max_redirects') + 1,
-                'timeout'          => $this->getOption('timeout')
-            ],
-            'ssl' => [
-                'verify_peer' => $this->getOption('verify_peer'),
-                'verify_host' => $this->getOption('verify_host'),
-            ]
-        ];
-
     }
 
     /**
@@ -244,4 +190,46 @@ class FilesystemConnection extends BaseConnection implements HttpConnection, Con
         return $headers;
 
     }
+
+    /**
+     * This method is only called if you asking for the resource or open without
+     * calling send().
+     * Calling send() will create a stream on demand which is only active until
+     * the response was completely received.
+     *
+     * @return HttpFileStream
+     */
+    protected function createStream()
+    {
+        return $this->createHttpStream('GET');
+    }
+
+    /**
+     * @param string $method
+     * @param string $header (optional)
+     * @param string $content (optional)
+     * @param string $protocolVersion (default:'1.1')
+     *
+     * @return HttpFileStream
+     */
+    protected function createHttpStream($method, $header = '', $content = null, $protocolVersion = '1.1')
+    {
+        $stream = new HttpFileStream($this->url());
+
+        $stream->setMethod($method)
+            ->setHeader($header)
+            ->setProtocolVersion($protocolVersion);
+
+        if ($content !== null) {
+            $stream->setContent($content);
+        }
+
+        foreach ($this->supportedOptions() as $key) {
+            $stream->setOption($key, $this->getOption($key));
+        }
+
+        return $stream;
+
+    }
+
 }

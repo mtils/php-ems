@@ -5,6 +5,8 @@ namespace Ems\Core;
 use Ems\Contracts\Core\Filesystem;
 use Ems\Testing\FilesystemMethods;
 use function in_array;
+use stdClass;
+use function stream_context_get_default;
 
 class LocalFilesystemTest extends \Ems\IntegrationTest
 {
@@ -30,52 +32,36 @@ class LocalFilesystemTest extends \Ems\IntegrationTest
         $this->assertFalse($this->newTestFilesystem()->exists('foo'));
     }
 
-    public function test_contents_returns_file_content()
-    {
-        $fs = $this->newTestFilesystem();
-        $contentsOfThisFile = file_get_contents(__FILE__);
-        $this->assertEquals($contentsOfThisFile, $fs->contents(__FILE__));
-    }
-
-    public function test_contents_returns_head_if_bytes_are_passed()
-    {
-        $fs = $this->newTestFilesystem();
-        $contentsOfThisFile = file_get_contents(__FILE__);
-        $head = substr($contentsOfThisFile, 0, 80);
-        $this->assertEquals($head, $fs->contents(__FILE__, 80));
-    }
-
     /**
      * @expectedException \Ems\Core\Exceptions\ResourceNotFoundException
      **/
-    public function test_contents_throws_NotFoundException_if_file_not_found()
+    public function test_read_throws_NotFoundException_if_file_not_found()
     {
         $fs = $this->newTestFilesystem();
-        $fs->contents('some-not-existing-file.txt');
+        $fs->read('some-not-existing-file.txt');
     }
 
-    public function test_contents_returns_contents_with_file_locking()
+    public function test_read_returns_contents_with_file_locking()
     {
         $fs = $this->newTestFilesystem();
         $contentsOfThisFile = file_get_contents(__FILE__);
-        $this->assertEquals($contentsOfThisFile, $fs->contents(__FILE__, 0, true));
+        $this->assertEquals($contentsOfThisFile, $fs->read(__FILE__, 0, true));
     }
 
     /**
      * @expectedException \Ems\Contracts\Core\Errors\ConcurrentAccess
      **/
-    public function test_contents_throws_exception_when_trying_to_read_a_locked_file()
+    public function test_read_throws_exception_when_trying_to_read_a_locked_file()
     {
         $fs = $this->newTestFilesystem();
         $fileName = $this->tempFileName();
         $testString = 'Foo is a buddy of bar';
 
         $this->assertEquals(strlen($testString), $fs->write($fileName, $testString, LOCK_EX | LOCK_NB));
-        $resource = fopen($fileName, 'w');
+        $resource = fopen($fileName, 'a');
         flock($resource, LOCK_EX | LOCK_NB);
-        $this->assertEquals($testString, $fs->contents($fileName, 0, LOCK_SH | LOCK_NB));
+        $this->assertEquals($testString, $fs->read($fileName, 0, LOCK_SH | LOCK_NB));
 
-//         $this->assertEquals($contentsOfThisFile, $fs->contents(__FILE__, 0, true));
     }
 
     public function test_write_writes_contents_to_file()
@@ -83,13 +69,94 @@ class LocalFilesystemTest extends \Ems\IntegrationTest
         $testString = 'Foo is a buddy of bar';
         $fs = $this->newTestFilesystem();
 
-        $fileName = sys_get_temp_dir().'/'.basename(__FILE__).'.tmp';
+        $fileName = $this->tempFile();
 
         $this->assertEquals(strlen($testString), $fs->write($fileName, $testString));
         $this->assertTrue(file_exists($fileName));
-        $this->assertEquals($testString, $fs->contents($fileName));
+        $this->assertEquals($testString, $fs->read($fileName));
         $fs->delete($fileName);
         $this->assertFalse($fs->exists($fileName));
+    }
+
+    public function test_write_writes_stringable_contents_to_file()
+    {
+        $testString = 'Foo is a buddy of bar';
+        $fs = $this->newTestFilesystem();
+
+        $fileName = $this->tempFile();
+
+        $this->assertEquals(strlen($testString), $fs->write($fileName, new Expression($testString)));
+        $this->assertTrue(file_exists($fileName));
+        $this->assertEquals($testString, $fs->read($fileName));
+        $fs->delete($fileName);
+        $this->assertFalse($fs->exists($fileName));
+    }
+
+    public function test_write_writes_stringable_contents_to_resource()
+    {
+        $testString = 'Foo is a buddy of bar';
+        $fs = $this->newTestFilesystem();
+
+        $fileName = $this->tempFileName();
+        $fileHandle = $fs->open($fileName, 'w+');
+
+        $this->assertTrue($fs->write($fileHandle, new Expression($testString)));
+        $this->assertTrue(file_exists($fileName));
+        $this->assertEquals($testString, $fs->read($fileName));
+        $fs->delete($fileName);
+        $this->assertFalse($fs->exists($fileName));
+    }
+
+    public function test_write_writes_from_resource_to_file()
+    {
+        $fs = $this->newTestFilesystem();
+
+        $fileName = $this->tempFile();
+        $readFile = __FILE__;
+
+        $contents = $fs->read($readFile);
+
+        $readHandle = $fs->open($readFile, 'r+');
+
+
+        $this->assertEquals(strlen($contents), $fs->write($fileName, $readHandle));
+        $this->assertTrue(file_exists($fileName));
+        $this->assertEquals($contents, $fs->read($fileName));
+        $fs->delete($fileName);
+        $this->assertFalse($fs->exists($fileName));
+    }
+
+    public function test_write_writes_from_resource_to_stream()
+    {
+        $fs = $this->newTestFilesystem();
+
+        $fileName = $this->tempFileName();
+
+        $writeHandle = $fs->open($fileName, 'w');
+
+        $readFile = __FILE__;
+
+        $contents = $fs->read($readFile);
+
+        $readHandle = $fs->open($readFile, 'r+');
+
+
+        $this->assertTrue($fs->write($writeHandle, $readHandle, false));
+        $this->assertTrue(file_exists($fileName));
+        $this->assertEquals($contents, $fs->read($fileName));
+        $fs->delete($fileName);
+        $this->assertFalse($fs->exists($fileName));
+    }
+
+    /**
+     * @expectedException \Ems\Contracts\Core\Exceptions\TypeException
+     */
+    public function test_write_throws_exception_on_unsupported_content()
+    {
+        $fs = $this->newTestFilesystem();
+
+        $fs->write(stream_context_get_default(), []);
+
     }
 
     public function test_delete_deletes_one_file()
@@ -459,6 +526,7 @@ class LocalFilesystemTest extends \Ems\IntegrationTest
         $tmpDir = $this->tempDir();
         $fs->write("$tmpDir/foo.txt", 'foo');
         $this->assertEquals('text/plain', $fs->mimeType("$tmpDir/foo.txt"));
+        $this->assertEquals(LocalFilesystem::$directoryMimetype, $fs->mimeType($tmpDir));
     }
 
     public function test_lastModified_returns_filemtime()

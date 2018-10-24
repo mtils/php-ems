@@ -8,18 +8,12 @@
 
 namespace Ems\Core;
 
-use Ems\Contracts\Core\Filesystem;
-use Ems\Contracts\Core\Url as UrlContract;
 use Ems\Contracts\Core\Connection;
-use RuntimeException;
+use Ems\Contracts\Core\Url as UrlContract;
+use Ems\Core\Filesystem\FileStream;
 
 class FilesystemConnection implements Connection
 {
-    /**
-     * @var Filesystem
-     */
-    protected $filesystem;
-
     /**
      * @var UrlContract
      */
@@ -31,15 +25,23 @@ class FilesystemConnection implements Connection
     protected $resource;
 
     /**
+     * @var FileStream
+     */
+    protected $stream;
+
+    /**
+     * @var bool
+     */
+    protected $didWrite = false;
+
+    /**
      * FilesystemConnection constructor.
      *
-     * @param UrlContract        $url
-     * @param Filesystem $filesystem (optional)
+     * @param UrlContract|string $url
      */
-    public function __construct(UrlContract $url, Filesystem $filesystem=null)
+    public function __construct($url)
     {
-        $this->url = $url;
-        $this->filesystem = $filesystem ?: new LocalFilesystem();
+        $this->url = $url instanceof UrlContract ? $url : new Url($url);
     }
 
     /**
@@ -50,20 +52,41 @@ class FilesystemConnection implements Connection
      */
     public function read($bytes=0)
     {
-        return $this->filesystem->read((string)$this->url, $bytes, $this->resource());
+        // If the connection wrote into the resource the handle will be placed
+        // at the end and nothing will be returned
+        if ($this->didWrite) {
+            $this->stream = null;
+        }
+
+        if (!$bytes) {
+            return $this->stream()->toString();
+        }
+
+        $stream = $this->stream();
+        $stream->setChunkSize($bytes);
+
+        if (!$stream->isOpen()) {
+            $stream->rewind();
+        } else {
+            $stream->next();
+        }
+
+        return $stream->current();
     }
 
     /**
      * Write some bytes into the connection.
      *
      * @param string $content
-     * @param bool   $lock (default:false)
      *
      * @return int The written bytes
      */
-    public function write($content, $lock=false)
+    public function write($content)
     {
-        return $this->filesystem->write((string)$this->url, $content, $lock, $this->resource());
+
+        $bytes =  $this->stream()->write($content);
+        $this->didWrite = true;
+        return $bytes;
     }
 
     /**
@@ -71,7 +94,7 @@ class FilesystemConnection implements Connection
      */
     public function open()
     {
-        $this->resource();
+        $this->stream()->open();
         return $this;
     }
 
@@ -80,6 +103,14 @@ class FilesystemConnection implements Connection
      */
     public function close()
     {
+        if (!$this->stream) {
+            return $this;
+        }
+
+        if ($this->stream->isOpen()) {
+            $this->stream->close();
+        }
+        $this->stream = null;
         return $this;
     }
 
@@ -88,7 +119,10 @@ class FilesystemConnection implements Connection
      */
     public function isOpen()
     {
-        return (bool)$this->resource;
+        if (!$this->stream) {
+            return false;
+        }
+        return (bool)$this->stream()->isOpen();
     }
 
     /**
@@ -96,10 +130,7 @@ class FilesystemConnection implements Connection
      */
     public function resource()
     {
-        if (!$this->resource) {
-            $this->resource = $this->filesystem->handle((string)$this->url);
-        }
-        return $this->resource;
+        return $this->stream()->resource();
     }
 
     /**
@@ -108,5 +139,24 @@ class FilesystemConnection implements Connection
     public function url()
     {
         return $this->url;
+    }
+
+    /**
+     * @return FileStream
+     */
+    protected function stream()
+    {
+        if (!$this->stream) {
+            $this->stream = $this->createStream();
+        }
+        return $this->stream;
+    }
+
+    /**
+     * @return FileStream
+     */
+    protected function createStream()
+    {
+        return new FileStream($this->url());
     }
 }

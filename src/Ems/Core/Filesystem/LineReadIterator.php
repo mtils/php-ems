@@ -2,10 +2,9 @@
 
 namespace Ems\Core\Filesystem;
 
-use Ems\Contracts\Core\Filesystem;
 use Ems\Contracts\Core\ContentIterator;
+use Ems\Contracts\Core\Filesystem;
 use Ems\Core\LocalFilesystem;
-use Iterator;
 
 /**
  * The LineReadIterator is an iterator which allows to read
@@ -69,16 +68,6 @@ class LineReadIterator implements ContentIterator
         fclose($handle);
 
         return $lineCount;
-    }
-
-    /**
-     * @param string $filePath
-     *
-     * @return resource
-     **/
-    protected function createHandle($filePath)
-    {
-        return $this->filesystem->handle($filePath, 'r');
     }
 
 }

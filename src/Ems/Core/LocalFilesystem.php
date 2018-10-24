@@ -2,18 +2,32 @@
 
 namespace Ems\Core;
 
+use Ems\Contracts\Core\Exceptions\TypeException;
 use Ems\Contracts\Core\Filesystem;
 use Ems\Contracts\Core\MimeTypeProvider;
+use Ems\Contracts\Core\Stream;
+use Ems\Contracts\Core\Type;
 use Ems\Contracts\Core\Url as UrlContract;
-use Ems\Core\Exceptions\ResourceLockedException;
 use Ems\Core\Exceptions\ResourceNotFoundException;
+use Ems\Core\Filesystem\FileStream;
 use Ems\Core\Filesystem\FilesystemMethods;
+use Ems\Core\Filesystem\ResourceStream;
+use Ems\Http\HttpFileStream;
 use RuntimeException;
 use Throwable;
+use function class_exists;
+use function file_get_contents;
+use function is_resource;
+use function stream_copy_to_stream;
 
 class LocalFilesystem implements Filesystem
 {
     use FilesystemMethods;
+
+    /**
+     * @var string
+     */
+    public static $directoryMimetype = 'inode/directory';
 
     /**
      * @var MimeTypeProvider
@@ -57,6 +71,49 @@ class LocalFilesystem implements Filesystem
     /**
      * {@inheritdoc}
      *
+     * @param string|resource  $source
+     * @param int              $bytes  (optional)
+     * @param bool|int         $lock (default:false) Enable locking or directly set the mode (LOCK_EX,...)
+     *
+     * @return string
+     **/
+    public function read($source, $bytes = 0, $lock = false)
+    {
+        $isString = Type::isStringLike($source);
+
+        if ($isString && !$this->isFile($source)) {
+            throw new ResourceNotFoundException("Path '$source' not found");
+        }
+
+        if ($isString && !$lock) {
+            return $bytes ? file_get_contents($source, false, null, 0, $bytes) : file_get_contents($source);
+        }
+
+        $handlePassed = $source instanceof Stream || is_resource($source);
+
+        if (!$handlePassed) {
+            clearstatcache(true, $source);
+        }
+
+        $stream = $this->open($source, 'r', $lock);
+
+        if (!$bytes) {
+            return $stream->toString();
+        }
+
+        $string = $stream->read($bytes);
+
+        if (!$handlePassed) {
+            $stream->close();
+        }
+
+        return $string;
+
+    }
+
+    /**
+     * @deprecated
+     *
      * @param string   $path
      * @param int      $bytes (optional)
      * @param bool|int $lock (default:false) Enable locking or directly set the mode (LOCK_SH,...)
@@ -65,56 +122,74 @@ class LocalFilesystem implements Filesystem
      **/
     public function contents($path, $bytes = 0, $lock = false)
     {
-        if (!$this->isFile($path)) {
-            throw new ResourceNotFoundException("Path '$path' not found");
-        }
-
-        if (!$lock) {
-            return $this->read($path, $bytes);
-        }
-
-        $handle = $this->handle($path);
-
-        $contents = '';
-
-        try {
-            $lock = is_bool($lock) ? LOCK_SH : $lock;
-
-            if (!flock($handle, $lock)) {
-                throw new ResourceLockedException("Path '$path' is read locked by another process");
-            }
-
-            $contents = $this->read($path, $bytes, $handle);
-            flock($handle, LOCK_UN);
-        } finally {
-            fclose($handle);
-        }
-
-        return $contents;
+        return $this->read($path, $bytes, $lock);
     }
 
     /**
      * {@inheritdoc}
      *
-     * @param string   $path
-     * @param string   $contents
-     * @param bool|int $lock (default:false) Enable locking or directly set the mode (LOCK_EX,...)
-     * @param resource $handle (optional)
+     * @param string|Stream|resource $target (also objects with __toString)
+     * @param string|Stream|resource $contents (also objects with __toString)
+     * @param bool|int               $lock (default:false) Enable locking or directly set the mode (LOCK_EX,...)
      *
-     * @return int written bytes
+     * @return bool
      **/
-    public function write($path, $contents, $lock = false, $handle = null)
+    public function write($target, $contents, $lock = false)
     {
+        if ($target instanceof Stream) {
+            return (bool)$target->write($contents);
+        }
+
         if (is_bool($lock)) {
             $lock = $lock ? LOCK_EX : 0;
         }
 
-        if ($this->isStreamContext($handle)) {
-            return (int) file_put_contents($path, $contents, $lock, $handle);
+        if (!$this->isStream($target) && !$this->isStreamContext($target)) {
+            return (bool) file_put_contents($target, $contents, $lock);
         }
 
-        return (int) file_put_contents($path, $contents, $lock);
+        if (Type::isStringLike($contents)) {
+            return (bool)fwrite($target, $contents);
+        }
+
+        // $target and $contents are streams
+        if ($this->isStream($contents)) {
+            return (bool)stream_copy_to_stream($contents, $target);
+        }
+
+        throw new TypeException("Unsupported contents type: " . Type::of($contents));
+
     }
+
+    /**
+     * Open a stream to a url.
+     *
+     * @param Url|string|resource $uri
+     * @param string              $mode (default:'r+')
+     * @param bool                $lock (default:false)
+     *
+     * @return Stream
+     */
+    public function open($uri, $mode='r+', $lock=false)
+    {
+
+        if (is_resource($uri)) {
+            return new ResourceStream($uri, $lock);
+        }
+
+        if (!Type::isStringLike($uri) && !$uri instanceof UrlContract) {
+            throw new TypeException('$uri has to be string or ' . Type::of($uri));
+        }
+
+        $uri = $uri instanceof UrlContract ? $uri : new Url($uri);
+
+        if ($uri->scheme == 'http' || $uri->scheme == 'https' && class_exists(HttpFileStream::class)) {
+            return new HttpFileStream($uri, $mode, $lock);
+        }
+
+        return new FileStream($uri, $mode, $lock);
+    }
+
 
     /**
      * {@inheritdoc}
@@ -387,35 +462,10 @@ class LocalFilesystem implements Filesystem
      **/
     public function mimeType($path)
     {
+        if ($this->isDirectory($path)) {
+            return static::$directoryMimetype;
+        }
         return $this->mimeTypes->typeOfFile($path);
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @param string   $path
-     * @param int      $bytes  (optional)
-     * @param resource $handle (optional)
-     *
-     * @return string
-     **/
-    public function read($path, $bytes = 0, $handle = null)
-    {
-        if (!$bytes) {
-            return $this->isStreamContext($handle) ? $this->getFromStream($path, $handle) : file_get_contents($path);
-        }
-
-        list($handle, $handlePassed) = $handle ? [$handle, true]
-                                               : [$this->handle($path), false];
-
-        clearstatcache(true, $path);
-
-        $part = fread($handle, $bytes);
-
-        if (!$handlePassed) {
-            fclose($handle);
-        }
-        return $part;
     }
 
     /**
@@ -440,6 +490,8 @@ class LocalFilesystem implements Filesystem
 
     /**
      * {@inheritdoc}
+     *
+     * @deprecated
      *
      * @param string|array $pathOrContext
      * @param string       $mode (default: 'rb')
@@ -529,7 +581,25 @@ class LocalFilesystem implements Filesystem
         return is_resource($resource) && get_resource_type($resource) == 'stream-context';
     }
 
-    protected function getFromStream($url, $context)
+    /**
+     * Find out if the passed resource is a stream resource.
+     *
+     * @param mixed $resource
+     *
+     * @return bool
+     */
+    protected function isStream($resource)
+    {
+        return is_resource($resource) && get_resource_type($resource) == 'stream';
+    }
+
+    /**
+     * @param string   $url
+     * @param resource $context
+     *
+     * @return string
+     */
+    protected function getFromStreamContext($url, $context)
     {
 
         $level = error_reporting(0);
@@ -551,5 +621,28 @@ class LocalFilesystem implements Filesystem
         }
 
         return $body;
+    }
+
+    /**
+     * Read from an resource/handle.
+     *
+     * @param $handle
+     * @param bool $closeAfter (default:true)
+     *
+     * @return string
+     */
+    protected function getFromResource($handle, $closeAfter=true)
+    {
+        $contents = '';
+
+        while (!feof($handle)) {
+            $contents .= fread($handle, 8192);
+        }
+
+        if ($closeAfter) {
+            fclose($handle);
+        }
+
+        return $contents;
     }
 }

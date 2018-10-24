@@ -2,10 +2,9 @@
 
 namespace Ems\Core\Filesystem;
 
-use Ems\Contracts\Core\Filesystem;
 use Ems\Contracts\Core\ContentIterator;
+use Ems\Contracts\Core\Filesystem;
 use Ems\Core\LocalFilesystem;
-use Iterator;
 
 /**
  * The BinaryReadIterator is a iterator which allows to read
@@ -42,7 +41,7 @@ class BinaryReadIterator implements ContentIterator
             return null;
         }
 
-        return $this->filesystem->read($this->filePath, $chunkSize, $handle);
+        return $this->filesystem->read($handle, $chunkSize);
     }
 
     /**

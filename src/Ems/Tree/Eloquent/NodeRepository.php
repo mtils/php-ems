@@ -22,9 +22,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model as EloquentModel;
 use Illuminate\Database\Query\Builder as Query;
 use function array_fill;
-use function is_array;
 use function is_numeric;
-use function iterator_to_array;
 use function ksort;
 use const SORT_NUMERIC;
 
@@ -209,7 +207,7 @@ class NodeRepository extends HookableRepository implements NodeRepositoryContrac
             return $node;
         }
 
-        throw new NotFoundException("No node under path '$path' found'");
+        throw new NotFoundException("No node under path (column:$this->pathKey) '$path' found'");
     }
 
     /**
@@ -391,7 +389,12 @@ class NodeRepository extends HookableRepository implements NodeRepositoryContrac
      */
     protected function replicate(EloquentModel $model, array $attributes=[])
     {
-        return new static($model, $attributes);
+        $next = new static($model, $attributes);
+        $next->setParentIdKey($this->getParentIdKey())
+             ->setSegmentKey($this->getSegmentKey())
+             ->setPathKey($this->getPathKey());
+
+        return $next;
     }
 
     /**
@@ -625,9 +628,10 @@ class NodeRepository extends HookableRepository implements NodeRepositoryContrac
     protected function buildOuterAncestorQuery($level, Query $childQuery, $table, $idQueryColumn)
     {
         $outerQuery = $this->model->newQuery()->getQuery();
+        $con = $outerQuery->getConnection();
 
-        $outerQuery->select(["$table.*", "$level as _child_distance"])
-            ->whereRaw("$idQueryColumn = (" . $childQuery->toSql() . ')');
+        $outerQuery->select(["$table.*", $con->raw("$level as _child_distance")])
+                   ->whereRaw("$idQueryColumn = (" . $childQuery->toSql() . ')');
 
         return $outerQuery;
     }
@@ -649,7 +653,7 @@ class NodeRepository extends HookableRepository implements NodeRepositoryContrac
     }
 
     /**
-     * @param stdClass|array $row
+     * @param \stdClass|array $row
      *
      * @return array
      */

@@ -20,6 +20,8 @@ class CreateNodesTable extends Migration
             /** @noinspection PhpUndefinedMethodInspection */
             $table->string('name')->nullable();
             /** @noinspection PhpUndefinedMethodInspection */
+            $table->string('title')->nullable();
+            /** @noinspection PhpUndefinedMethodInspection */
             $table->string('path')->nullable();
             /** @noinspection PhpUndefinedMethodInspection */
             $table->string('parent_id')->nullable();
