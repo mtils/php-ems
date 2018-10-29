@@ -38,7 +38,7 @@ class FilesystemConnection extends BaseConnection implements HttpConnection, Con
     protected $defaultOptions = [
         'ignore_errors' => false,
         'max_redirects' => 5,
-        'timeout'       => 5,
+        'timeout'       => 30,
         'verify_peer'   => true,
         'verify_host'   => 2
     ];
@@ -225,6 +225,10 @@ class FilesystemConnection extends BaseConnection implements HttpConnection, Con
         }
 
         foreach ($this->supportedOptions() as $key) {
+            if ($key == 'timeout') {
+                $stream->setTimeout($this->getOption($key));
+                continue;
+            }
             $stream->setOption($key, $this->getOption($key));
         }
 

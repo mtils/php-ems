@@ -9,8 +9,8 @@ namespace Ems\Http;
 use Ems\Contracts\Core\Configurable;
 use Ems\Core\ConfigurableTrait;
 use Ems\Core\Filesystem\FileStream;
-use function file_get_contents;
 use RuntimeException;
+use function file_get_contents;
 
 class HttpFileStream extends FileStream implements Configurable
 {
@@ -42,7 +42,6 @@ class HttpFileStream extends FileStream implements Configurable
     protected $defaultOptions = [
         'ignore_errors' => false,
         'max_redirects' => 5,
-        'timeout'       => 5,
         'verify_peer'   => true,
         'verify_host'   => 2
     ];
@@ -192,7 +191,7 @@ class HttpFileStream extends FileStream implements Configurable
                 'ignore_errors'    => $this->getOption('ignore_errors'),
                 'follow_location'  => $this->getOption('max_redirects') > 0,
                 'max_redirects'    => $this->getOption('max_redirects') + 1,
-                'timeout'          => $this->getOption('timeout')
+                'timeout'          => $this->timeout === -1 ? 30 : $this->timeout
             ],
             'ssl' => [
                 'verify_peer' => $this->getOption('verify_peer'),

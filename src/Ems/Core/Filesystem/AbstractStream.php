@@ -280,7 +280,7 @@ abstract class AbstractStream implements Stream
     {
         $this->timeout = $timeout;
 
-        if($this->hasValidResource()) {
+        if($this->hasValidResource() && $this->timeout !== -1) {
             stream_set_timeout($this->resource, $timeout);
         }
 
