@@ -112,4 +112,11 @@ interface NodeProvider extends Provider
      * @return Node[]
      */
     public function ancestors(CanHaveParent $child);
+
+    /**
+     * Return all known root nodes.
+     *
+     * @return Node[]
+     */
+    public function rootNodes();
 }

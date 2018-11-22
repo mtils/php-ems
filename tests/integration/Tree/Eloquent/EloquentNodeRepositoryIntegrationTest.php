@@ -299,6 +299,37 @@ class EloquentNodeRepositoryIntegrationTest extends TestCase
     /**
      * @test
      */
+    public function rootNodes_returns_one_rootNode()
+    {
+        $repo = $this->newRepository();
+
+        $rootNodes = $repo->rootNodes();
+
+        $this->assertCount(1, $rootNodes);
+
+    }
+
+    /**
+     * @test
+     */
+    public function rootNodes_returns_many_rootNodes()
+    {
+        $repo = $this->newRepository();
+
+        $rootNode2 = $repo->store(['name' => 'root-2']);
+
+        $rootNodes = $repo->rootNodes();
+
+        $this->assertCount(2, $rootNodes);
+
+        $this->assertEquals('root-1', $rootNodes[0]->getPathSegment());
+        $this->assertEquals('root-2', $rootNodes[1]->getPathSegment());
+
+    }
+
+    /**
+     * @test
+     */
     public function getPathKey_and_setPathKey()
     {
         $repo = $this->newRepository();

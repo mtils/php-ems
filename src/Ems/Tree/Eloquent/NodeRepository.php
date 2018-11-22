@@ -309,6 +309,25 @@ class NodeRepository extends HookableRepository implements NodeRepositoryContrac
     }
 
     /**
+     * {@inheritdoc}
+     *
+     * @return Node[]
+     */
+    public function rootNodes()
+    {
+        $query = $this->model->newQuery()->whereNull($this->parentIdKey);
+
+        $this->callBeforeListeners('rootNodes', [$query]);
+
+        $nodes = $query->get()->all();
+
+        $this->callAfterListeners('rootNodes', [$nodes]);
+
+        return $nodes;
+    }
+
+
+    /**
      * @inheritDoc
      */
     public function asChildOf(Node $node)
