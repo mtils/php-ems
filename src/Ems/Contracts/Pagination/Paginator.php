@@ -80,6 +80,11 @@ interface Paginator extends Result, Countable
     public function hasTotalCount();
 
     /**
+     * @return int
+     */
+    public function getTotalCount();
+
+    /**
      * Return the base url. With this url the page urls will be built.
      *
      * @return Url
