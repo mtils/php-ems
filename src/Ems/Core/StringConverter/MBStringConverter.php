@@ -47,7 +47,9 @@ class MBStringConverter implements StringConverter
     public function convert($text, $toEncoding, $fromEncoding = null)
     {
         $fromEncoding = $fromEncoding ?: $this->defaultEncoding;
-
+        if ($fromEncoding == $toEncoding || $toEncoding == 'PASS') {
+            return $text;
+        }
         return mb_convert_encoding($text, $toEncoding, $fromEncoding);
     }
 

@@ -13,6 +13,8 @@ class StringConverterChainTest extends AbstractStringConverterTest
 
     protected $iconvString;
 
+    protected $testEveryEncoding = false;
+
     protected function convert($text, $toEncoding, $fromEncoding=null)
     {
         try {

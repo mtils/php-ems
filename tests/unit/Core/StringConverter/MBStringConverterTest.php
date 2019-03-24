@@ -13,6 +13,8 @@ class MBStringConverterTest extends AbstractStringConverterTest
      **/
     protected $extension = 'mbstring';
 
+    protected $testEveryEncoding = false;
+
     protected function convert($text, $toEncoding, $fromEncoding=null)
     {
         return mb_convert_encoding($text, $toEncoding);
