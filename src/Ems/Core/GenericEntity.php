@@ -30,6 +30,9 @@ class GenericEntity implements Entity, ArrayWithStateContract
         $this->_fill($attributes, $isFromStorage);
         $this->resourceName = $resourceName;
         $this->idKey = $idKey;
+        if ($attributes) {
+            $this->_booted = true; // Skip autoloading of attribute when filled here
+        }
     }
 
     /**
@@ -37,7 +40,7 @@ class GenericEntity implements Entity, ArrayWithStateContract
      */
     public function getId()
     {
-        return $this->offsetGet($this->idKey);
+        return $this->offsetExists($this->idKey) ? $this->offsetGet($this->idKey) : null;
     }
 
     /**

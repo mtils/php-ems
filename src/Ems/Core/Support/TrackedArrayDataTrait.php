@@ -30,7 +30,9 @@ trait TrackedArrayDataTrait
      **/
     protected function fillAttributes(array $attributes, $isFromStorage=true)
     {
-        $this->_originalAttributes = $attributes;
+        if ($isFromStorage) {
+            $this->_originalAttributes = $attributes;
+        }
         $this->baseFillAttributes($attributes);
         $this->_loadedFromStorage = $isFromStorage;
         return $this;
