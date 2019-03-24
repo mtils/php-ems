@@ -6,7 +6,7 @@ namespace Ems\Contracts\Core;
  * This is the translatable part of a text provider which not has to be a
  * translator.
  **/
-interface Multilingual
+interface Multilingual extends AssignedToLocale
 {
     /**
      * Return a new instance of this provider for locale $locale.
@@ -17,13 +17,6 @@ interface Multilingual
      * @return self
      **/
     public function forLocale($locale, $fallbacks=null);
-
-    /**
-     * Return the current locale.
-     *
-     * @return string
-     **/
-    public function getLocale();
 
     /**
      * Set the current locale. Remember to apply this to all "forks" you built
