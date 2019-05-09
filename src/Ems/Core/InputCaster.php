@@ -5,6 +5,12 @@ namespace Ems\Core;
 use Ems\Contracts\Core\InputCaster as CasterContract;
 use Ems\Core\Support\ProvidesNamedCallableChain;
 
+/**
+ * Class InputCaster
+ *
+ * @deprecated Use \Ems\Foundation\InputNormalizer or InputProcessor
+ * @package Ems\Core
+ */
 class InputCaster implements CasterContract
 {
     use ProvidesNamedCallableChain;

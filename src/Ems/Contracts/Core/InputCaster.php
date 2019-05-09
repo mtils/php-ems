@@ -2,6 +2,12 @@
 
 namespace Ems\Contracts\Core;
 
+/**
+ * Interface InputCaster
+ *
+ * @deprecated Use \Ems\Contracts\Foundation\InputNormalizer or InputProcessor
+ * @package Ems\Contracts\Core
+ */
 interface InputCaster extends NamedCallableChain
 {
     /**
