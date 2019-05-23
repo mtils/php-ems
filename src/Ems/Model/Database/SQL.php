@@ -2,17 +2,13 @@
 
 namespace Ems\Model\Database;
 
-use Ems\Contracts\Model\Database\Connection;
 use Ems\Contracts\Model\Database\Dialect;
-use Ems\Contracts\Model\Result;
-use Ems\Core\Exceptions\HandlerNotFoundException;
 use Ems\Core\Expression;
 use Ems\Core\KeyExpression;
-use Ems\Core\Patterns\ExtendableTrait;
-use Ems\Expression\Condition;
 use Ems\Expression\ConditionGroup;
 use Ems\Expression\Constraint;
-use PDOStatement;
+use function array_map;
+use function implode;
 
 class SQL
 {
@@ -63,7 +59,7 @@ class SQL
 // Later...
 //     public static function func($name, $parameters)
 //     {
-//         return 
+//         return
 //     }
 
     /**
@@ -116,4 +112,81 @@ class SQL
         return new Expression($string);
     }
 
+    /**
+     * Create a string to render an insert statement.
+     *
+     * @param Dialect $dialect
+     * @param array   $values
+     *
+     * @return string
+     */
+    public static function renderColumnsForInsert(Dialect $dialect, array $values)
+    {
+        $columns = [];
+        $quotedValues = [];
+
+        foreach ($values as $column=>$value) {
+            $columns[] = $dialect->quote($column, Dialect::NAME);
+            $quotedValues[] = $dialect->quote($value);
+        }
+
+        return '(' . implode(",", $columns) . ")\nVALUES (" . implode(",", $quotedValues) . ')';
+    }
+
+    /**
+     * Create a string to render an update (without bindings)
+     *
+     * @param Dialect $dialect
+     * @param array   $values
+     *
+     * @return string
+     */
+    public static function renderColumnsForUpdate(Dialect $dialect, array $values)
+    {
+        return static::renderKeyValue($dialect, $values, ",\n");
+    }
+
+    /**
+     * Make an assoc array to a where string.
+     *
+     * @param Dialect $dialect
+     * @param array   $values
+     * @param string  $boolean (default: AND)
+     *
+     * @return string
+     */
+    public static function renderColumnsForWhere(Dialect $dialect, array $values, $boolean='AND')
+    {
+        return static::renderKeyValue($dialect, $values, " $boolean\n");
+    }
+
+    /**
+     * Render columns in a `$key` = "$value", `$key` = "$value" form.
+     *
+     * @param Dialect $dialect
+     * @param array   $values
+     * @param string  $connectBy (default: ,\n)
+     *
+     * @return string
+     */
+    public static function renderKeyValue(Dialect $dialect, array $values, $connectBy=",\n")
+    {
+        $lines = [];
+
+        foreach ($values as $column=>$value) {
+
+            if (!is_array($value)) {
+                $lines[] = $dialect->quote($column, Dialect::NAME) . ' = ' . $dialect->quote($value);
+                continue;
+            }
+
+            $quotedValues = array_map(function ($item) use ($dialect) {
+                return $dialect->quote($item);
+            }, $value);
+
+            $lines[] = $dialect->quote($column, Dialect::NAME) . ' IN (' . implode(", ",$quotedValues) . ')';
+        }
+
+        return implode($connectBy, $lines);
+    }
 }
