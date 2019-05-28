@@ -60,7 +60,8 @@ interface Url extends Stringable, ArrayAccess, IteratorAggregate, Copyable, Arra
      * Set the host.
      *
      * @param string $host
-     * @retrurn self
+     *
+     * @return self
      **/
     public function host($host);
 
