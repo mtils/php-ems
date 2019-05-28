@@ -382,7 +382,9 @@ class PDOConnectionTest extends PDOBaseTest
     {
         $dialect = $this->mock(Dialect::class);
 
-        $con = $this->newConnection()->setDialect($dialect);
+        $con = $this->newConnection();
+
+        $this->injectDialect($con, $dialect);
 
         $exception = new SQLException('bla');
 
@@ -426,4 +428,8 @@ class PDOConnectionTest extends PDOBaseTest
 
     }
 
+    protected function injectDialect(PDOConnection $connection, Dialect $dialect)
+    {
+        $connection->setDialect($dialect);
+    }
 }

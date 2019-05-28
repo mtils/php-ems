@@ -6,6 +6,8 @@
 namespace Ems\Core\Repositories;
 
 
+use Ems\Contracts\Core\ChangeTracking;
+use Ems\Contracts\Core\DataObject;
 use Ems\Contracts\Core\Errors\NotFound;
 use Ems\Contracts\Core\Exceptions\TypeException;
 use Ems\Contracts\Core\Identifiable;
@@ -32,15 +34,26 @@ class StorageRepository implements Repository
     protected $caster;
 
     /**
+     * @var callable
+     */
+    protected $objectFactory;
+
+    /**
      * @var bool
      */
     protected $isBufferedStorage = false;
+
+    /**
+     * @var string
+     */
+    protected $itemClass = GenericEntity::class;
 
     public function __construct(PushableStorage $storage, InputProcessorContract $caster=null)
     {
         $this->storage = $storage;
         $this->caster = $caster ?: new InputProcessor();
         $this->isBufferedStorage = $storage->isBuffered();
+        $this->init();
     }
 
     /**
@@ -51,7 +64,7 @@ class StorageRepository implements Repository
      * @param mixed $id
      * @param mixed $default (optional)
      *
-     * @return GenericEntity
+     * @return DataObject
      **/
     public function get($id, $default = null)
     {
@@ -72,7 +85,7 @@ class StorageRepository implements Repository
      *
      * @throws \Ems\Contracts\Core\Errors\NotFound
      *
-     * @return GenericEntity
+     * @return DataObject
      **/
     public function getOrFail($id)
     {
@@ -87,7 +100,7 @@ class StorageRepository implements Repository
      *
      * @param array $attributes
      *
-     * @return GenericEntity The instantiated resource
+     * @return DataObject The instantiated resource
      **/
     public function make(array $attributes = [])
     {
@@ -99,7 +112,7 @@ class StorageRepository implements Repository
      *
      * @param array $attributes
      *
-     * @return GenericEntity The created resource
+     * @return DataObject The created resource
      **/
     public function store(array $attributes)
     {
@@ -114,8 +127,8 @@ class StorageRepository implements Repository
     /**
      * {@inheritdoc}
      *
-     * @param GenericEntity $model
-     * @param array     $attributes
+     * @param DataObject $model
+     * @param array      $attributes
      *
      * @return bool if attributes where changed after filling
      **/
@@ -123,24 +136,28 @@ class StorageRepository implements Repository
     {
 
         $model = $this->checkTypeAndReturn($model);
-        $changed = false;
+        $modelAttributes = $model->toArray();
+        $changedAttributes = [];
 
         foreach ($attributes as $key=>$value) {
             // Check for exact comparison
-            if(isset($model[$key]) && $model[$key] === $value) {
+            if(isset($modelAttributes[$key]) && $modelAttributes[$key] === $value) {
                 continue;
             }
-            $model[$key] = $value;
-            $changed = true;
+            $changedAttributes[$key] = $value;
         }
-        return $changed;
+        if (!$changedAttributes) {
+            return false;
+        }
+        $model->apply($changedAttributes);
+        return true;
     }
 
     /**
      * {@inheritdoc}
      *
-     * @param GenericEntity $model
-     * @param array     $newAttributes
+     * @param DataObject $model
+     * @param array      $newAttributes
      *
      * @return bool true if it was actually saved, false if not. Look above!
      **/
@@ -155,7 +172,7 @@ class StorageRepository implements Repository
     /**
      * {@inheritdoc}
      *
-     * @param GenericEntity $model
+     * @param DataObject $model
      *
      * @return bool if the model was actually saved
      **/
@@ -163,7 +180,7 @@ class StorageRepository implements Repository
     {
         $model = $this->checkTypeAndReturn($model);
 
-        if (!$model->wasModified()) {
+        if ($model instanceof ChangeTracking && !$model->wasModified() && !$model->isNew()) {
             return false;
         }
 
@@ -180,9 +197,7 @@ class StorageRepository implements Repository
             return false;
         }
 
-        $casted[$model->getIdKey()] = $id;
-
-        $model->_fill($casted, true);
+        $model->hydrate($casted, $id);
 
         return true;
 
@@ -191,7 +206,7 @@ class StorageRepository implements Repository
     /**
      * {@inheritdoc}
      *
-     * @param GenericEntity $model
+     * @param DataObject $model
      *
      * @return bool
      **/
@@ -202,7 +217,46 @@ class StorageRepository implements Repository
         return $this->persistIfNeeded();
 
     }
+    /**
+     * {@inheritdoc}
+     *
+     * @param callable $factory
+     *
+     * @return self
+     **/
+    public function createObjectsBy(callable $factory)
+    {
+        $this->objectFactory = $factory;
+        return $this;
+    }
 
+    /**
+     * @return string
+     */
+    public function getItemClass()
+    {
+        return $this->itemClass;
+    }
+
+    /**
+     * @param string $itemClass
+     *
+     * @return StorageRepository
+     */
+    public function setItemClass($itemClass)
+    {
+        $this->itemClass = $itemClass;
+        return $this;
+    }
+
+
+    protected function init()
+    {
+        $this->createObjectsBy(function (array $attributes, $isFromStorage, $resourceName='') {
+            $itemClass = $this->itemClass;
+            return new $itemClass($attributes, $isFromStorage, $resourceName);
+        });
+    }
     /**
      * @param array $attributes
      * @param bool  $fromStorage (default:false)
@@ -211,7 +265,7 @@ class StorageRepository implements Repository
      */
     protected function newInstance(array $attributes, $fromStorage=false)
     {
-        return new GenericEntity($attributes, $fromStorage, 'data-object');
+        return call_user_func($this->objectFactory, $attributes, $fromStorage, 'data-object');
     }
 
     /**
@@ -224,12 +278,12 @@ class StorageRepository implements Repository
     }
 
     /**
-     * @param GenericEntity $entity
+     * @param DataObject $entity
      * @param array $castedData
      *
      * @return int|string
      */
-    protected function writeToStorage(GenericEntity $entity, array $castedData)
+    protected function writeToStorage(DataObject $entity, array $castedData)
     {
         if ($entity->isNew()) {
             return $this->storage->offsetPush($castedData);
@@ -243,21 +297,20 @@ class StorageRepository implements Repository
     /**
      * @param Identifiable $model
      *
-     * @return GenericEntity
+     * @return DataObject
      */
     protected function checkTypeAndReturn(Identifiable $model)
     {
-        if (!$model instanceof GenericEntity) {
-            throw new TypeException('Model has to be GenericEntity not ' . Type::of($model));
+        if (!$model instanceof DataObject) {
+            throw new TypeException('Model has to be DataObject not ' . Type::of($model));
         }
         return $model;
     }
 
-    protected function toIdAndData(GenericEntity $entity)
+    protected function toIdAndData(DataObject $entity)
     {
-        $id = $entity->getId();
         $data = $entity->toArray();
-        if (isset($data[$entity->getIdKey()])) {
+        if ($id = $entity->getId()) {
             return [$id, $data];
         }
         return [null, $data];

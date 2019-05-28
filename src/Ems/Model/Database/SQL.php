@@ -2,16 +2,31 @@
 
 namespace Ems\Model\Database;
 
+use Ems\Contracts\Core\Stringable;
 use Ems\Contracts\Model\Database\Dialect;
+use Ems\Core\Exceptions\NotImplementedException;
 use Ems\Core\Expression;
 use Ems\Core\KeyExpression;
+use Ems\Core\Patterns\StaticExtendable;
 use Ems\Expression\ConditionGroup;
 use Ems\Expression\Constraint;
+use Ems\Model\Database\Dialects\MySQLDialect;
+use Ems\Model\Database\Dialects\SQLiteDialect;
 use function array_map;
 use function implode;
 
 class SQL
 {
+    use StaticExtendable;
+
+    const MY = 'mysql';
+
+    const POSTGRES = 'postgresql';
+
+    const SQLITE = 'sqlite';
+
+    const MS = 'mssql';
+
     /**
      * Try to build a readable sql query of a prepared one.
      *
@@ -110,6 +125,38 @@ class SQL
     public static function raw($string)
     {
         return new Expression($string);
+    }
+
+    /**
+     * Create a sql dialect out of an string or just return the dialect if it
+     * is already a dialect and we dont have a extension that overwrites it.
+     *
+     * @param string|Stringable $dialect
+     *
+     * @return Dialect
+     */
+    public static function dialect($dialect)
+    {
+        $dialectName = "$dialect";
+
+        // Event if this would be a dialect already check for an extension
+        if (static::hasExtension($dialectName)) {
+            return static::callExtension($dialectName, [$dialect]);
+        }
+
+        if ($dialect instanceof Dialect) {
+            return $dialect;
+        }
+
+        if ($dialectName == static::SQLITE) {
+            return new SQLiteDialect();
+        }
+
+        if ($dialectName == static::MY) {
+            return new MySQLDialect();
+        }
+
+        throw new NotImplementedException("SQL dialect $dialectName is not supported");
     }
 
     /**

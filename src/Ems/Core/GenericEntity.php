@@ -2,11 +2,13 @@
 
 namespace Ems\Core;
 
-use Ems\Contracts\Core\Entity;
 use Ems\Contracts\Core\ArrayWithState as ArrayWithStateContract;
+use Ems\Contracts\Core\DataObject;
+use Ems\Contracts\Core\Entity;
 use Ems\Core\Support\TrackedArrayDataTrait;
+use function is_bool;
 
-class GenericEntity implements Entity, ArrayWithStateContract
+class GenericEntity implements Entity, ArrayWithStateContract, DataObject
 {
     use TrackedArrayDataTrait;
 
@@ -27,7 +29,7 @@ class GenericEntity implements Entity, ArrayWithStateContract
      */
     public function __construct(array $attributes=[], $isFromStorage=false, $resourceName = '', $idKey='id')
     {
-        $this->_fill($attributes, $isFromStorage);
+        $this->hydrate($attributes, null, $isFromStorage);
         $this->resourceName = $resourceName;
         $this->idKey = $idKey;
         if ($attributes) {
@@ -62,16 +64,39 @@ class GenericEntity implements Entity, ArrayWithStateContract
     }
 
     /**
-     * This is a pseudo protected method and should only be called from the
-     * storage/repository.
+     * {@inheritDoc}
      *
-     * @param array $attributes
-     * @param bool $isFromStorage (default:true)
+     * @param array $data
+     * @param int|string $id (optional)
+     * @param bool $forceIsFromStorage (optional)
      *
-     * @return $this
+     * @return void
      */
-    public function _fill(array $attributes, $isFromStorage=true)
+    public function hydrate(array $data, $id = null, $forceIsFromStorage = null)
     {
-        return $this->fillAttributes($attributes, $isFromStorage);
+        if ($id === null) {
+            $id = isset($data[$this->idKey]) ? $data[$this->idKey] : null;
+        }
+        if ($id) {
+            $data[$this->idKey] = $id;
+        }
+        $isFromStorage = is_bool($forceIsFromStorage) ? $forceIsFromStorage : (bool)$id;
+        $this->fillAttributes($data, $isFromStorage);
     }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param array $data
+     *
+     * @return self
+     */
+    public function apply(array $data)
+    {
+        foreach ($data as $key=>$value) {
+            $this->offsetSet($key, $value);
+        }
+        return $this;
+    }
+
 }

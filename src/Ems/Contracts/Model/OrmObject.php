@@ -9,19 +9,19 @@ namespace Ems\Contracts\Model;
 use Ems\Contracts\Core\AppliesToResource;
 use Ems\Contracts\Core\Arrayable;
 use Ems\Contracts\Core\ChangeTracking;
+use Ems\Contracts\Core\DataObject;
 use Ems\Contracts\Core\HasKeys;
-use Ems\Contracts\Core\Identifiable;
 use Ems\Contracts\Core\ObjectAccess;
 
 /**
  * Interface OrmObject
- * 
+ *
  * An OrmObject is an object used to store resources. It is not to work only
  * with databases. Its just an interface to work with relation, change tracking...
- * 
+ *
  * @package Ems\Contracts\Model
  */
-interface OrmObject extends HasKeys, Arrayable, ObjectAccess, ChangeTracking, Identifiable, AppliesToResource
+interface OrmObject extends HasKeys, Arrayable, ObjectAccess, ChangeTracking, DataObject, AppliesToResource
 {
     /**
      * Check if $key is a relation.

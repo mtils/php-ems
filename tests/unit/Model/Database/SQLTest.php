@@ -7,6 +7,8 @@ use Ems\Core\Expression;
 use Ems\Core\KeyExpression;
 use Ems\Expression\ConditionGroup;
 use Ems\Expression\Constraint;
+use Ems\Model\Database\Dialects\AbstractDialect;
+use Ems\Model\Database\Dialects\MySQLDialect;
 
 class SQLTest extends \Ems\TestCase
 {
@@ -78,5 +80,29 @@ class SQLTest extends \Ems\TestCase
         $e = SQL::raw('foo');
         $this->assertInstanceof(Expression::class, $e);
         $this->assertEquals('foo', $e);
+    }
+
+    public function test_dialect_uses_custom_extension()
+    {
+        $test = $this->mock(AbstractDialect::class);
+
+        SQL::extend('bavarian', function () use ($test) {
+            return $test;
+        });
+
+        $this->assertSame($test, SQL::dialect('bavarian'));
+    }
+
+    public function test_dialect_uses_mysql_dialect()
+    {
+        $this->assertInstanceOf(MySQLDialect::class, SQL::dialect('mysql'));
+    }
+
+    /**
+     * @expectedException \Ems\Core\Exceptions\NotImplementedException
+     */
+    public function test_dialect_throws_Exception_if_not_supported()
+    {
+        SQL::dialect('informix');
     }
 }

@@ -448,9 +448,9 @@ class PDOConnection implements Connection, Configurable, HasMethodHooks
     }
 
     /**
-     * @param string|\Ems\Contracts\Stringable $query
-     * @param array                            $bindings (optional)
-     * @param mixed                            $fetchMode (optional)
+     * @param string|\Ems\Contracts\Core\Stringable $query
+     * @param array                                 $bindings (optional)
+     * @param mixed                                 $fetchMode (optional)
      *
      * @return PDOStatement
      **/
@@ -491,7 +491,7 @@ class PDOConnection implements Connection, Configurable, HasMethodHooks
         );
 
         foreach ($this->supportedOptions() as $option) {
-            if (is_int($option)) {
+            if (!$this->isClassOption($option)) {
                 $pdo->setAttribute($option, $this->getOption($option));
             }
         }
@@ -574,11 +574,13 @@ class PDOConnection implements Connection, Configurable, HasMethodHooks
             return new SQLException($msg, $query, $code, $e);
         }
 
-        if (!$this->dialect instanceof Dialect) {
+        $dialect = $this->dialect();
+
+        if (!$dialect instanceof Dialect) {
             return new SQLException($e->getMessage(), $this->toError($e, $query), $code, $e);
         }
 
-        return $this->dialect->createException($this->toError($e, $query), $e);
+        return $dialect->createException($this->toError($e, $query), $e);
 
     }
 
@@ -601,5 +603,15 @@ class PDOConnection implements Connection, Configurable, HasMethodHooks
         $this->errorHandler = function (Exception $e, $query) {
             throw $this->convertException($e, $query);
         };
+    }
+
+    /**
+     * @param string $key
+     *
+     * @return bool
+     */
+    protected function isClassOption($key)
+    {
+        return in_array($key, [static::RETURN_LAST_ID, static::RETURN_LAST_AFFECTED]);
     }
 }

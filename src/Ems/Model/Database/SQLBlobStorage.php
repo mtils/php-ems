@@ -95,7 +95,7 @@ class SQLBlobStorage implements PushableStorage
     public function __construct(Connection $connection, $table = 'blob_entries', $blobKey='data')
     {
         $this->connection = $connection;
-        $this->dialect = $connection->dialect();
+        $this->dialect = SQL::dialect($connection->dialect()); // TODO Defer this!
         $this->setTable($table);
         $this->setBlobKey($blobKey);
         $this->setIdKey($this->idKey); // Just to set the quotedBlobKey
@@ -180,12 +180,12 @@ class SQLBlobStorage implements PushableStorage
      */
     public function offsetSet($offset, $value)
     {
-        $quotedValue = $this->dialect->quote($this->serializer->serialize($value));
+        $value = $this->serializer->serialize($value);
 
         $where = $this->buildWhere($offset);
 
         $query = "UPDATE " . $this->quotedTable . "
-                  SET " . $this->quotedBlobKey . " = " . $quotedValue . "
+                  SET " . SQL::renderColumnsForUpdate($this->dialect, [$this->blobKey => $value]) . "
                   WHERE " . SQL::renderColumnsForWhere($this->dialect, $where);
 
         $updated = $this->connection->write($query);

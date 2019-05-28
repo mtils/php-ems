@@ -14,6 +14,7 @@ use Ems\Contracts\Model\Relation;
 use Ems\Core\Collections\StringList;
 use Ems\Core\Exceptions\NotImplementedException;
 use Ems\Core\Exceptions\UnConfiguredException;
+use function is_bool;
 use function is_callable;
 
 
@@ -61,10 +62,7 @@ abstract class OrmObject implements OrmObjectContract
     public function __construct(array $attributes=[], $isFromStorage=false, callable $lazyLoader=null)
     {
         $this->lazyLoader = $lazyLoader;
-        $this->init($attributes, $isFromStorage);
-        $this->originalAttributes = $attributes;
-        $this->attributes = $attributes;
-        $this->loadedFromStorage = $isFromStorage;
+        $this->hydrate($attributes, null, $isFromStorage);
     }
 
     /**
@@ -364,6 +362,51 @@ abstract class OrmObject implements OrmObjectContract
         $this->attributes = $this->originalAttributes;
         return $this;
     }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param array $data
+     * @param int|string $id (optional)
+     * @param bool $forceIsFromStorage (optional)
+     *
+     * @return void
+     */
+    public function hydrate(array $data, $id = null, $forceIsFromStorage = null)
+    {
+        if ($id) {
+            $data[$this->idKey] = $id;
+        }
+
+        if (!$id && isset($data[$this->idKey])) {
+            $id = $data[$this->idKey];
+        }
+
+        $isFromStorage = is_bool($forceIsFromStorage) ? $forceIsFromStorage : (bool)$id;
+
+        $this->init($data, $isFromStorage);
+
+        $this->loadedFromStorage = $isFromStorage;
+        $this->attributes = $data;
+        $this->originalAttributes = $data;
+
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param array $data
+     *
+     * @return self
+     */
+    public function apply(array $data)
+    {
+        foreach ($data as $key=>$value) {
+            $this->__set($key, $value);
+        }
+        return $this;
+    }
+
 
     /**
      * Do some custom things here.
