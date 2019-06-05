@@ -81,6 +81,7 @@ class GenericEntity implements Entity, ArrayWithStateContract, DataObject
             $data[$this->idKey] = $id;
         }
         $isFromStorage = is_bool($forceIsFromStorage) ? $forceIsFromStorage : (bool)$id;
+        $this->_booted = true;
         $this->fillAttributes($data, $isFromStorage);
     }
 

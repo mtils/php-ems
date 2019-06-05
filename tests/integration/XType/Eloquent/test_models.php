@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model as EloquentModel;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Ems\Model\Eloquent\EntityTrait;
 use Ems\Contracts\Core\Entity;
-
+use Ems\XType\Support\XTypeTrait;
 
 
 class PlainUser extends EloquentModel
