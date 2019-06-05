@@ -25,9 +25,9 @@ interface Relation
     public function getParentKey();
 
     /**
-     * Return the related object.
+     * Return the related object. Does NOT have to be an OrmObject.
      *
-     * @return OrmObject
+     * @return object
      */
     public function getRelatedObject();
 

@@ -68,7 +68,7 @@ class Relation implements RelationContract
     /**
      * @inheritdoc
      *
-     * @return OrmObjectContract
+     * @return object
      */
     public function getRelatedObject()
     {
@@ -138,11 +138,11 @@ class Relation implements RelationContract
     }
 
     /**
-     * @param OrmObjectContract $relatedObject
+     * @param object $relatedObject
      *
      * @return $this
      */
-    public function setRelatedObject(OrmObjectContract $relatedObject)
+    public function setRelatedObject($relatedObject)
     {
         $this->relatedObject = $relatedObject;
         return $this;
