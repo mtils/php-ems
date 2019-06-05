@@ -31,12 +31,6 @@ class FoundationBootstrapper extends Bootstrapper
         });
 
         $this->app->resolving(InputNormalizerFactory::class, function (InputNormalizerFactory $factory) {
-
-            // Assign the container as an InputNormalizer creator
-            $factory->createNormalizerBy(function () {
-                return $this->app->make(InputNormalizerContract::class);
-            });
-
             // Assign a default extension to omit the "not-found-errors"
             $factory->extend('*', function () {});
         });

@@ -3,13 +3,12 @@
 namespace Ems\Foundation;
 
 use Ems\Contracts\Core\AppliesToResource;
-use Ems\Contracts\Foundation\InputProcessor as InputProcessorContract;
 use Ems\Contracts\Foundation\InputNormalizer as InputNormalizerContract;
 use Ems\Contracts\Foundation\InputNormalizerFactory as NormalizerFactoryContract;
+use Ems\Contracts\Foundation\InputProcessor as InputProcessorContract;
 use Ems\Contracts\Validation\ValidatorFactory;
-use Ems\Core\Patterns\HookableTrait;
-use Ems\Core\Exceptions\MisConfiguredException;
 use Ems\Core\Patterns\ExtendableTrait;
+use Ems\Core\Patterns\HookableTrait;
 use InvalidArgumentException;
 
 
@@ -34,12 +33,12 @@ class InputNormalizerFactory implements NormalizerFactoryContract
      **/
     protected $caster;
 
-    /** 
+    /**
      * @var callable
      **/
     protected $normalizerCreator;
 
-    /** 
+    /**
      * @var InputNormalizerContract
      **/
     protected $normalizerPrototype;
@@ -132,6 +131,9 @@ class InputNormalizerFactory implements NormalizerFactoryContract
      * Assign a custom callable to create the InputNormalizer instances. The
      * validatorFactory, adjuster and caster are passed to the callable.
      *
+     * CAUTION: The normalizers are creating forks of their adjusters and casters.
+     * You have to pass them or the whole thing will stop to work.
+     *
      * @param callable $creator
      *
      * @return self
@@ -217,7 +219,6 @@ class InputNormalizerFactory implements NormalizerFactoryContract
         $segments = explode('.', $inputType);
 
         $this->checkSegmentCount($segments);
-        $segmentCount = 3;
 
         list($protocol, $client, $method) = $segments;
 
