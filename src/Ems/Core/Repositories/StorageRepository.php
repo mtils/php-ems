@@ -6,6 +6,7 @@
 namespace Ems\Core\Repositories;
 
 
+use Ems\Contracts\Core\AllProvider;
 use Ems\Contracts\Core\ChangeTracking;
 use Ems\Contracts\Core\DataObject;
 use Ems\Contracts\Core\Errors\NotFound;
@@ -21,7 +22,7 @@ use Ems\Core\Exceptions\ResourceNotFoundException;
 use Ems\Core\GenericEntity;
 use Ems\Foundation\InputProcessor;
 
-class StorageRepository implements Repository
+class StorageRepository implements Repository, AllProvider
 {
     /**
      * @var PushableStorage
@@ -92,7 +93,7 @@ class StorageRepository implements Repository
         if (!$this->storage->offsetExists($id)) {
             throw new ResourceNotFoundException("Model with id #$id not found.");
         }
-        return $this->deserializeFromStorage($this->storage->offsetGet($id));
+        return $this->deserializeFromStorage($id, $this->storage->offsetGet($id));
     }
 
     /**
@@ -249,6 +250,22 @@ class StorageRepository implements Repository
         return $this;
     }
 
+    /**
+     * Return an iterable of all known named objects of this provider.
+     *
+     * @return array|\Traversable<\Ems\Contracts\Core\Identifiable>
+     **/
+    public function all()
+    {
+        $items = [];
+
+        foreach($this->storage->toArray() as $id=>$data) {
+            $items[] = $this->deserializeFromStorage($id, $data);
+        }
+
+        return $items;
+
+    }
 
     protected function init()
     {
@@ -269,12 +286,16 @@ class StorageRepository implements Repository
     }
 
     /**
-     * @param $data
+     * @param int|string $id
+     * @param array $data
+     *
      * @return GenericEntity
      */
-    protected function deserializeFromStorage($data)
+    protected function deserializeFromStorage($id, $data)
     {
-        return $this->newInstance($data, true);
+        $instance = $this->newInstance([]);
+        $instance->hydrate($data, $id);
+        return $instance;
     }
 
     /**
