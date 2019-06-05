@@ -78,7 +78,6 @@ class ValidationConverter implements ConverterContract
     public function __construct(TextProvider $textProvider)
     {
         $this->textProvider = $textProvider;
-//         dd($this->textProvider->getDomain());
     }
 
     /**
