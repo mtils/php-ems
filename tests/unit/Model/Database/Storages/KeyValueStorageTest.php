@@ -1,9 +1,11 @@
 <?php
+/**
+ *  * Created by mtils on 09.06.19 at 14:25.
+ **/
+
+namespace Ems\Model\Database\Storages;
 
 
-namespace Ems\Model\Database;
-
-use Ems\Contracts\Core\PushableStorage;
 use Ems\Contracts\Core\Storage;
 use Ems\Contracts\Expression\Prepared;
 use Ems\Contracts\Model\Database\Connection;
@@ -12,17 +14,18 @@ use Ems\Core\Helper;
 use Ems\Core\Serializer\BlobSerializer;
 use Ems\Core\Url;
 use Ems\Model\Database\Dialects\SQLiteDialect;
-use function array_chunk;
+use Ems\Model\Database\PDOConnection;
+use Ems\Model\Database\SQL;
 use Ems\TestCase;
-use function json_encode;
+use function array_chunk;
 use function print_r;
+use function uniqid;
 
-
-class SQLBlobStorageTest extends TestCase
+class KeyValueStorageTest extends TestCase
 {
 
     protected $testTable = 'CREATE TABLE `tests_entries` (
-        `id`            INTEGER PRIMARY KEY,
+        `key`            PRIMARY KEY,
         `resource_name` TEXT,
         `data`       TEXT
     );';
@@ -30,7 +33,7 @@ class SQLBlobStorageTest extends TestCase
     public function test_implements_interfaces()
     {
         $this->assertInstanceof(
-            PushableStorage::class,
+            Storage::class,
             $this->newStorage()
         );
 
@@ -62,11 +65,13 @@ class SQLBlobStorageTest extends TestCase
             'database'    => 88
         ];
 
+        $id=1;
+
         $storage = $this->newStorage($con);
 
-        $this->assertFalse(isset($storage[1]));
+        $this->assertFalse(isset($storage[$id]));
 
-        $id = $storage->offsetPush($data);
+        $storage[$id] = $data;
 
         $this->assertTrue(isset($storage[$id]));
 
@@ -102,7 +107,8 @@ class SQLBlobStorageTest extends TestCase
             'database'    => 88
         ];
 
-        $id = $storage->offsetPush($data);
+        $id = '{bla-bli}';
+        $storage[$id] = $data;
 
         $this->assertTrue(isset($storage[$id]));
 
@@ -111,36 +117,16 @@ class SQLBlobStorageTest extends TestCase
     }
 
     /**
-     * @expectedException \Ems\Core\Exceptions\DataIntegrityException
+     * @expectedException \Ems\Core\Exceptions\KeyNotFoundException
      */
-    public function test_offsetPush_throws_exception_if_insert_failed()
+    public function test_offsetGet_throws_exception_if_key_not_found()
     {
 
-        $con = $this->mock(Connection::class);
-        $con->shouldReceive('dialect')->andReturn(
-            new SQLiteDialect()
-        );
-
-        $con->shouldReceive('write')->andReturn(0); // CREATE TABLE
+        $con = $this->con();
 
         $storage = $this->newStorage($con);
 
-        $data = [
-            'some'        => 'stuff',
-            'stored'      => 'into',
-            'database'    => 88
-        ];
-
-        $writeData = [
-            'data' => json_encode($data)
-        ];
-
-        $statement = $this->mock(Prepared::class);
-        $statement->shouldReceive('write')->with($writeData, 1)->andReturn(0);
-
-        $con->shouldReceive('prepare')->andReturn($statement);
-
-        $storage->offsetPush($data);
+        $storage['not-existing-key'];
 
     }
 
@@ -159,7 +145,9 @@ class SQLBlobStorageTest extends TestCase
             'database'    => 88
         ];
 
-        $id = $storage->offsetPush($data);
+        $id = 'some-complete-random-id';
+
+        $storage[$id] = $data;
 
         $this->assertTrue(isset($storage[$id]));
 
@@ -191,7 +179,9 @@ class SQLBlobStorageTest extends TestCase
             'database'    => 88
         ];
 
-        $id = $storage->offsetPush($data);
+        $id = 123456789;
+
+        $storage[$id] = $data;
 
         $this->assertTrue(isset($storage[$id]));
 
@@ -215,77 +205,6 @@ class SQLBlobStorageTest extends TestCase
 
     }
 
-    /**
-     * @expectedException \Ems\Core\Exceptions\DataIntegrityException
-     */
-    public function test_offsetSet_throws_exception_if_update_changed_more_than_one_row()
-    {
-
-        $con = $this->mock(Connection::class);
-        $con->shouldReceive('dialect')->andReturn(
-            new SQLiteDialect()
-        );
-
-        $con->shouldReceive('write')->once()->andReturn(0); // CREATE TABLE
-
-        $storage = $this->newStorage($con);
-
-        $data = [
-            'some'        => 'stuff',
-            'stored'      => 'into',
-            'database'    => 88
-        ];
-
-
-        $writeData = [
-            'data' => json_encode($data),
-            'id'   => 1
-        ];
-
-        $statement = $this->mock(Prepared::class);
-        $statement->shouldReceive('write')->with($writeData, 1)->andReturn(2);
-
-        $con->shouldReceive('prepare')->andReturn($statement);
-
-        $storage[1] = $data;
-
-    }
-
-    /**
-     * @expectedException \Ems\Core\Exceptions\KeyNotFoundException
-     */
-    public function test_offsetSet_throws_exception_if_update_failed()
-    {
-
-        $con = $this->mock(Connection::class);
-        $con->shouldReceive('dialect')->andReturn(
-            new SQLiteDialect()
-        );
-
-        $con->shouldReceive('write')->once()->andReturn(0); // CREATE TABLE
-
-        $storage = $this->newStorage($con);
-
-        $data = [
-            'some'        => 'stuff',
-            'stored'      => 'into',
-            'database'    => 88
-        ];
-
-        $writeData = [
-            'data' => json_encode($data),
-            'id'   => 1
-        ];
-
-        $statement = $this->mock(Prepared::class);
-        $statement->shouldReceive('write')->with($writeData, 1)->andReturn(0);
-
-        $con->shouldReceive('prepare')->andReturn($statement);
-
-        $storage[1] = $data;
-
-    }
-
     public function test_offsetUnset_removes_entry()
     {
 
@@ -301,7 +220,8 @@ class SQLBlobStorageTest extends TestCase
             'database'    => 88
         ];
 
-        $id = $storage->offsetPush($data);
+        $id = uniqid();
+        $storage[$id] = $data;
 
         $this->assertTrue(isset($storage[$id]));
 
@@ -377,11 +297,13 @@ class SQLBlobStorageTest extends TestCase
         $ids = [];
 
         for ($i=0;$i<20;$i++) {
+            $id = "id#$i";
             $entries[$i] = [
                 'foo' => 'foo ' . $i,
                 'bar' => $i . '. bar'
             ];
-            $ids[] = $storage->offsetPush($entries[$i]);
+            $ids[] = $id;
+            $storage[$id] = $entries[$i];
         }
 
         foreach ($ids as $id) {
@@ -409,11 +331,13 @@ class SQLBlobStorageTest extends TestCase
         $ids = [];
 
         for ($i=0;$i<20;$i++) {
+            $id = uniqid();
             $entries[$i] = [
                 'foo' => 'foo ' . $i,
                 'bar' => $i . '. bar'
             ];
-            $ids[] = $storage->offsetPush($entries[$i]);
+            $ids[] = $id;
+            $storage[$id] = $entries[$i];
         }
 
         foreach ($ids as $id) {
@@ -441,11 +365,13 @@ class SQLBlobStorageTest extends TestCase
         $ids = [];
 
         for ($i=0;$i<20;$i++) {
+            $id = "id#$i";
             $entries[$i] = [
                 'foo' => 'foo ' . $i,
                 'bar' => $i . '. bar'
             ];
-            $ids[] = $storage->offsetPush($entries[$i]);
+            $ids[] = $id;
+            $storage[$id] = $entries[$i];
         }
 
 
@@ -474,11 +400,13 @@ class SQLBlobStorageTest extends TestCase
         $ids = [];
 
         for ($i=0;$i<20;$i++) {
+            $id = "id#$i";
             $entries[$i] = [
                 'foo' => 'foo ' . $i,
                 'bar' => $i . '. bar'
             ];
-            $ids[] = $storage->offsetPush($entries[$i]);
+            $ids[] = $id;
+            $storage[$id] = $entries[$i];
         }
 
         foreach ($ids as $id) {
@@ -504,11 +432,13 @@ class SQLBlobStorageTest extends TestCase
         $ids = [];
 
         for ($i=0;$i<20;$i++) {
+            $id = "id#$i";
             $entries[$i] = [
                 'foo' => 'foo ' . $i,
                 'bar' => $i . '. bar'
             ];
-            $ids[] = $storage->offsetPush($entries[$i]);
+            $ids[] = $id;
+            $storage[$id] = $entries[$i];
         }
 
         foreach ($ids as $id) {
@@ -534,11 +464,13 @@ class SQLBlobStorageTest extends TestCase
         $ids = [];
 
         for ($i=0;$i<20;$i++) {
+            $id = "id#$i";
             $entries[$i] = [
                 'foo' => 'foo ' . $i,
                 'bar' => $i . '. bar'
             ];
-            $ids[] = $storage->offsetPush($entries[$i]);
+            $ids[] = $id;
+            $storage[$id] = $entries[$i];
         }
 
         $keys = $storage->keys();
@@ -558,13 +490,13 @@ class SQLBlobStorageTest extends TestCase
         $ids = [];
 
         for ($i=0;$i<20;$i++) {
-            $data = [
+            $id = "id#$i";
+            $entries[$id] = [
                 'foo' => 'foo ' . $i,
                 'bar' => $i . '. bar'
             ];
-            $id = $storage->offsetPush($data);
             $ids[] = $id;
-            $entries[$id] = $data;
+            $storage[$id] = $entries[$id];
         }
 
         $storedArray = $storage->toArray();
@@ -602,7 +534,8 @@ class SQLBlobStorageTest extends TestCase
                     'foo' => 'A: foo ' . $i,
                     'bar' => 'A: ' . $i . '. bar'
                 ];
-                $id = $storageA->offsetPush($data);
+                $id = 'completely-random-' . $i;
+                $storageA[$id] = $data;
                 $aIds[] = $id;
                 $aEntries[$id] = $data;
                 continue;
@@ -613,7 +546,9 @@ class SQLBlobStorageTest extends TestCase
                 'bar' => 'B: ' . $i . '. bar'
             ];
 
-            $id = $storageB->offsetPush($data);
+            $id = 'even-more-random-' . $i;
+
+            $storageB[$id] = $data;
             $bIds[] = $id;
             $bEntries[$id] = $data;
         }
@@ -677,7 +612,8 @@ class SQLBlobStorageTest extends TestCase
     protected function newStorage($con = null, $table=null, $blobKey='data', $serializer=null)
     {
         $con = $con ?: $this->con();
-        $storage = new SQLBlobStorage($con, $table ?: 'tests_entries', $blobKey);
+        $storage = new KeyValueStorage($con, $table ?: 'tests_entries', $blobKey);
+        $storage->setIdKey('key');
         $con->write($this->testTable);
         $storage->setDiscriminator('sql-blob-storage-test');
         return $storage;
@@ -686,7 +622,8 @@ class SQLBlobStorageTest extends TestCase
     protected function newEmptyStorage($con = null, $table=null, $blobKey='data', $serializer=null)
     {
         $con = $con ?: $this->con();
-        $storage = new SQLBlobStorage($con, $table ?: 'tests_entries', $blobKey);
+        $storage = new KeyValueStorage($con, $table ?: 'tests_entries', $blobKey);
+        $storage->setIdKey('key');
         return $storage;
     }
 
@@ -711,17 +648,6 @@ class SQLBlobStorageTest extends TestCase
             echo "\n$query";
         });
         return $con;
-    }
-
-    protected function newAutoStorage($con = null, $table=null, $idKey='id')
-    {
-        $storage = $this->newStorage($con, $table ?: 'cache_entries', $idKey);
-
-        return $storage->createTableBy(function (Connection $con, $table, $idKey) {
-
-            $con->write($this->testTable);
-
-        });
     }
 
     protected function queryPrinter($event=null)

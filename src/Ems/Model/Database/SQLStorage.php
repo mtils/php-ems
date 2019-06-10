@@ -2,13 +2,11 @@
 
 namespace Ems\Model\Database;
 
-use Ems\Contracts\Expression\Prepared;
 use Ems\Contracts\Model\Database\Connection;
-use Ems\Contracts\Model\Database\Dialect;
 use Ems\Contracts\Model\QueryableStorage;
 use Ems\Core\ArrayWithState;
 use Ems\Core\Collections\StringList;
-use Ems\Core\Exceptions\UnConfiguredException;
+use Ems\Model\Database\Storages\DatabaseStorageTrait;
 use Ems\Model\StorageQuery;
 use IteratorAggregate;
 
@@ -28,45 +26,7 @@ use IteratorAggregate;
  **/
 class SQLStorage extends ArrayWithState implements QueryableStorage, IteratorAggregate
 {
-    /**
-     * @var Connection
-     **/
-    protected $connection;
-
-    /**
-     * @var Dialect
-     **/
-    protected $dialect;
-
-    /**
-     * @var string
-     **/
-    protected $table = '';
-
-    /**
-     * @var string
-     **/
-    protected $quotedTable = '';
-
-    /**
-     * @var string
-     **/
-    protected $idKey = 'id';
-
-    /**
-     * @var string
-     **/
-    protected $quotedIdKey = '';
-
-    /**
-     * @var Prepared
-     **/
-    protected $selectOneStatement;
-
-    /**
-     * @var Prepared
-     **/
-    protected $replaceStatement;
+    use DatabaseStorageTrait;
 
     /**
      * @var array
@@ -102,7 +62,7 @@ class SQLStorage extends ArrayWithState implements QueryableStorage, IteratorAgg
      **/
     public function __construct(Connection $connection, $table='', $idKey='id')
     {
-        $this->setConnection($connection);
+        $this->connection = $connection;
         $this->setTable($table);
         $this->setIdKey($idKey);
         $this->assignQueryProxies();
@@ -200,16 +160,6 @@ class SQLStorage extends ArrayWithState implements QueryableStorage, IteratorAgg
     }
 
     /**
-     * {@inheritdoc}
-     *
-     * @return string
-     **/
-    public function storageType()
-    {
-        return self::SQL;
-    }
-
-    /**
      * @inheritDoc
      */
     public function isBuffered()
@@ -217,16 +167,6 @@ class SQLStorage extends ArrayWithState implements QueryableStorage, IteratorAgg
         return true;
     }
 
-
-    /**
-     * Return the name of the queried table.
-     *
-     * @return string
-     **/
-    public function table()
-    {
-        return $this->table;
-    }
 
     /**
      * This is a helper mechanism if you work with dynamically created databases
@@ -248,30 +188,6 @@ class SQLStorage extends ArrayWithState implements QueryableStorage, IteratorAgg
     }
 
     /**
-     * Set the table for the queries.
-     *
-     * @param string $table
-     *
-     * @return self
-     **/
-    protected function setTable($table)
-    {
-        $this->table = $table;
-        $this->quotedTable = $this->dialect->quote($table, 'name');
-        return $this;
-    }
-
-    /**
-     * Return the name of the "id" column.
-     *
-     * @return string
-     **/
-    public function idKey()
-    {
-        return $this->idKey;
-    }
-
-    /**
      * Return an array of key (strings)
      *
      * @return StringList
@@ -290,9 +206,7 @@ class SQLStorage extends ArrayWithState implements QueryableStorage, IteratorAgg
             $uniqueKeys[$key] = true;
         }
 
-        foreach ($this->select(null, $this->quotedIdKey) as $row) {
-
-            $key = $row[$this->idKey];
+        foreach ($this->getDriver()->keys() as $key) {
 
             if (in_array($key, $unsettedKeys)) {
                 continue;
@@ -319,26 +233,12 @@ class SQLStorage extends ArrayWithState implements QueryableStorage, IteratorAgg
      * {@inheritdoc}
      *
      * CAUTION: This method can eat your memory, use self::getIterator()
-     * 
+     *
      * @return \Iterator
      **/
     public function toArray()
     {
         return iterator_to_array($this->getIterator());
-    }
-
-    /**
-     * Set the name of the "id" column.
-     *
-     * @param string $idKey
-     *
-     * @return self
-     **/
-    protected function setIdKey($idKey)
-    {
-        $this->idKey = $idKey;
-        $this->quotedIdKey = $this->dialect->quote($idKey, 'name');
-        return $this;
     }
 
     /**
@@ -444,7 +344,7 @@ class SQLStorage extends ArrayWithState implements QueryableStorage, IteratorAgg
 
     protected function getFromDB($id)
     {
-        $data = $this->selectOneStatement()->bind(['id'=>$id])->first();
+        $data = $this->getDriver()->selectOne($id);
         unset($data[$this->idKey]);
         return $data;
     }
@@ -452,7 +352,7 @@ class SQLStorage extends ArrayWithState implements QueryableStorage, IteratorAgg
     protected function writeToDB($id, $data)
     {
         $data[$this->idKey] = $id;
-        $this->replaceStatement($data)->write($data, false);
+        $this->getDriver()->replace($data);
     }
 
     /**
@@ -463,59 +363,7 @@ class SQLStorage extends ArrayWithState implements QueryableStorage, IteratorAgg
      **/
     protected function deleteFromDB($ids=null)
     {
-
-        $query = "DELETE FROM {$this->quotedTable}";
-
-        if ($ids == null) {
-            $this->connection->write($query, [], false);
-            return;
-        }
-
-        $query .= " WHERE {$this->quotedIdKey} IN ";
-
-        $quotedIds = array_map(function ($id) {
-            return $this->dialect->quote($id, 'string');
-        },(array)$ids);
-
-        $this->connection->write($query . "\n(" . implode(',', $quotedIds) . ')', [], false);
-
-    }
-
-    protected function selectOneStatement()
-    {
-        if ($this->selectOneStatement) { 
-            return $this->selectOneStatement;
-        }
-
-        $query = "SELECT * FROM {$this->quotedTable} WHERE {$this->quotedIdKey} = :id";
-        $this->selectOneStatement = $this->connection->prepare($query);
-
-        return $this->selectOneStatement;
-    }
-
-    protected function replaceStatement(array $array)
-    {
-        if ($this->replaceStatement) {
-            return $this->replaceStatement;
-        }
-
-        $columns =  array_keys($array);
-
-        $quotedColumns = array_map(function ($key) {
-            return $this->dialect->quote($key, 'name');
-        }, $columns);
-
-        $placeHolders = array_map(function ($key) {
-            return ":$key";
-        }, $columns);
-
-        $query  = "REPLACE INTO {$this->quotedTable}\n";
-        $query .= '(' . implode(', ', $quotedColumns) . ")\n";
-        $query .= "VALUES\n(" . implode(', ', $placeHolders) . ')';
-
-        $this->replaceStatement = $this->connection->prepare($query);
-
-        return $this->replaceStatement;
+        $this->getDriver()->delete($ids === null ? '*' : $ids);
     }
 
     protected function selectArray(StorageQuery $query)
@@ -553,7 +401,7 @@ class SQLStorage extends ArrayWithState implements QueryableStorage, IteratorAgg
         $queryString  = "SELECT $columns FROM {$this->quotedTable}";
         $bindings = [];
 
-        if ($query && $wherePart = $this->dialect->render($query, $bindings)) {
+        if ($query && $wherePart = $this->dialect()->render($query, $bindings)) {
             $queryString .= "\nWHERE $wherePart";
         }
 
@@ -598,15 +446,4 @@ class SQLStorage extends ArrayWithState implements QueryableStorage, IteratorAgg
         }
     }
 
-    protected function setConnection(Connection $connection)
-    {
-        $dialect = $connection->dialect();
-
-        if (!$dialect instanceof Dialect) {
-            throw new UnConfiguredException("The passed connection has to have a dialect object before adding it");
-        }
-
-        $this->dialect = $dialect;
-        $this->connection = $connection;
-    }
 }

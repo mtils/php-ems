@@ -222,6 +222,11 @@ class SQL
 
         foreach ($values as $column=>$value) {
 
+            if ($value instanceof Expression) {
+                $lines[] = $dialect->quote($column, Dialect::NAME) . " = $value";
+                continue;
+            }
+
             if (!is_array($value)) {
                 $lines[] = $dialect->quote($column, Dialect::NAME) . ' = ' . $dialect->quote($value);
                 continue;

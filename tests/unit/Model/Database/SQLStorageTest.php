@@ -49,14 +49,14 @@ class SQLStorageTest extends \Ems\TestCase
         $this->assertEquals(Storage::SQL, $this->newStorage()->storageType());
     }
 
-    public function test_table_returns_table()
+    public function test_getTable_returns_table()
     {
-        $this->assertEquals('foo', $this->newStorage(null, 'foo', null)->table());
+        $this->assertEquals('foo', $this->newStorage(null, 'foo', null)->getTable());
     }
 
-    public function test_idKey_returns_idKey()
+    public function test_getIdKey_returns_idKey()
     {
-        $this->assertEquals('foo', $this->newStorage(null, null, 'foo')->idKey());
+        $this->assertEquals('foo', $this->newStorage(null, null, 'foo')->getIdKey());
     }
 
     /**
@@ -303,23 +303,6 @@ class SQLStorageTest extends \Ems\TestCase
         ];
 
         $storage['foo'] = $data;
-
-    }
-
-    /**
-     * @expectedException Ems\Core\Exceptions\UnConfiguredException
-     **/
-    public function test_connection_withoutdialect_object_throws_exception()
-    {
-
-        $con = $this->mock(Connection::class);
-
-        $con->shouldReceive('dialect')
-            ->andReturn('sqlite');
-
-        $storage = $this->newAutoStorage($con);
-
-        isset($storage['foo']);
 
     }
 
@@ -721,7 +704,7 @@ class SQLStorageTest extends \Ems\TestCase
             print_r($bindings);
         };
     }
-    
+
     protected function installPrinter(Connection $con)
     {
         foreach (['select', 'insert', 'write', 'prepare'] as $event) {
