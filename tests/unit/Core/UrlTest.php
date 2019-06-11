@@ -3,8 +3,12 @@
 namespace Ems\Core;
 
 use Ems\Contracts\Core\Url as UrlContract;
+use Ems\TestCase;
+use InvalidArgumentException;
+use RuntimeException;
+use stdClass;
 
-class UrlTest extends \Ems\TestCase
+class UrlTest extends TestCase
 {
     public function test_implements_interface()
     {
@@ -40,6 +44,61 @@ class UrlTest extends \Ems\TestCase
         $this->assertEquals("$path", "$url");
         $this->assertEquals('/home/marcus/test.txt', "$url->path");
         $this->assertEquals('file', $url->scheme);
+    }
+
+    public function test_psr_scheme_methods()
+    {
+        $string = 'ftps://ftp.tils.org/public';
+        $url = $this->newUrl($string);
+        $this->assertEquals('ftps', $url->getScheme());
+        $this->assertNotSame($url->withScheme('https'), $url);
+        $this->assertEquals('https', $url->withScheme('https')->getScheme());
+    }
+
+    public function test_psr_host_methods()
+    {
+        $string = 'ftps://ftp.tils.org/public';
+        $url = $this->newUrl($string);
+        $this->assertEquals('ftp.tils.org', $url->getHost());
+        $this->assertNotSame($url->withHost('web-utils.de'), $url);
+        $this->assertEquals('web-utils.de', $url->withHost('web-utils.de')->getHost());
+    }
+
+    public function test_psr_post_methods()
+    {
+        $string = 'ftps://ftp.tils.org:55/public';
+        $url = $this->newUrl($string);
+        $this->assertEquals('55', $url->getPort());
+        $this->assertNotSame($url->withPort(66), $url);
+        $this->assertEquals('66', $url->withPort(66)->getPort());
+    }
+
+    public function test_psr_query_methods()
+    {
+        $string = 'https://ftp.tils.org:55/public?foo=bar&boing=whoops';
+        $url = $this->newUrl($string);
+        $this->assertEquals('foo=bar&boing=whoops', $url->getQuery());
+        $this->assertNotSame($url->withQuery('foo=bar&boing=yippeah'), $url);
+        $this->assertEquals('foo=bar&boing=yippeah', $url->withQuery('foo=bar&boing=yippeah')->getQuery());
+        $this->assertSame('', $this->newUrl('https://ftp.tils.org:55/public')->getQuery());
+    }
+
+    public function test_psr_fragment()
+    {
+        $string = 'https://ftp.tils.org:55/public#top';
+        $url = $this->newUrl($string);
+        $this->assertEquals('top', $url->getFragment());
+        $this->assertNotSame($url->withFragment('contact'), $url);
+        $this->assertEquals('contact', $url->withFragment('contact')->getFragment());
+    }
+
+    public function test_psr_path_methods()
+    {
+        $string = 'ftps://ftp.tils.org/public/index.html';
+        $url = $this->newUrl($string);
+        $this->assertEquals('/public/index.html', $url->getPath());
+        $this->assertNotSame($url->withPath('public/img/blank.gif'), $url);
+        $this->assertEquals('/public/img/blank.gif', $url->withPath('public/img/blank.gif')->getPath());
     }
 
     /**
@@ -82,6 +141,23 @@ class UrlTest extends \Ems\TestCase
         $this->assertEquals("$scheme://$user@$host/$path", "$newUrl");
     }
 
+    public function test_user_adds_correct_syntax_psr()
+    {
+        $path = 'admin/session/create';
+        $host = 'foo.de';
+        $scheme = 'http';
+        $user = 'hannah';
+
+        $url = $this->newUrl("$scheme://$host/$path");
+
+        $newUrl = $url->withUserInfo($user);
+        $this->assertNotSame($url, $newUrl);
+        $this->assertEquals($user, $newUrl->user);
+        $this->assertEquals($scheme, $newUrl->scheme);
+        $this->assertEquals($host, $newUrl->host);
+        $this->assertEquals("$scheme://$user@$host/$path", "$newUrl");
+    }
+
     public function test_user_and_password_adds_correct_syntax()
     {
         $path = 'admin/session/create';
@@ -93,6 +169,25 @@ class UrlTest extends \Ems\TestCase
         $url = $this->newUrl("$scheme://$host/$path");
 
         $newUrl = $url->user($user)->password($password);
+        $this->assertNotSame($url, $newUrl);
+        $this->assertEquals($user, $newUrl->user);
+        $this->assertEquals($scheme, $newUrl->scheme);
+        $this->assertEquals($host, $newUrl->host);
+        $this->assertEquals($password, $newUrl->password);
+        $this->assertEquals("$scheme://$user:xxxxxx@$host/$path", "$newUrl");
+    }
+
+    public function test_user_and_password_adds_correct_syntax_psr()
+    {
+        $path = 'admin/session/create';
+        $host = 'foo.de';
+        $scheme = 'http';
+        $user = 'hannah';
+        $password = '123';
+
+        $url = $this->newUrl("$scheme://$host/$path");
+
+        $newUrl = $url->withUserInfo($user, $password);
         $this->assertNotSame($url, $newUrl);
         $this->assertEquals($user, $newUrl->user);
         $this->assertEquals($scheme, $newUrl->scheme);
@@ -529,7 +624,7 @@ class UrlTest extends \Ems\TestCase
      **/
     public function test_passing_unknown_object_throws_exception()
     {
-        $this->newUrl(new \stdClass());
+        $this->newUrl(new stdClass());
     }
 
     public function test_clear_path()
@@ -568,7 +663,7 @@ class UrlTest extends \Ems\TestCase
     }
 
     /**
-     * @expectedException InvalidArgumentException
+     * @expectedException \InvalidArgumentException
      **/
     public function test_query_throws_exception_if_type_unsupported()
     {
@@ -578,15 +673,15 @@ class UrlTest extends \Ems\TestCase
 
         $url = $this->newUrl("$scheme://$host/$path");
 
-        $url = $url->query(new \stdClass());
+        $url->query(new stdClass());
     }
 
     /**
-     * @expectedException InvalidArgumentException
+     * @expectedException \InvalidArgumentException
      **/
     public function test_query_throws_exception_if_query_unparseable()
     {
-        $url = $this->newUrl('http://');
+        $this->newUrl('http://');
     }
 
     public function test_appended_slash_behaviour()

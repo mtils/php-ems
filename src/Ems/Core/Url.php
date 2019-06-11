@@ -4,15 +4,26 @@ namespace Ems\Core;
 
 use Ems\Contracts\Core\Url as UrlContract;
 use function func_get_args;
+use function http_build_query;
 use InvalidArgumentException;
 use Ems\Core\Support\StringableTrait;
 use Ems\Core\Collections\StringList;
 use ArrayIterator;
 use function is_array;
+use function parse_str;
+use Psr\Http\Message\UriInterface;
 use RuntimeException;
 
 /**
  * Class Url
+ *
+ * This is the base url implementation. Now it also implement psr
+ * URIInterface.
+ * Please do either depend on the psr interface OR the ems interface
+ * but not both! Perhaps I will remove the psr interface some day...
+ * The ems interface is basically properties for getting values, methods
+ * for setting values. All with the shortest syntax I could plan.
+ * PSR is something different.
  *
  * @package Ems\Core
  *
@@ -25,7 +36,7 @@ use RuntimeException;
  * @property array      $query    The query parameters
  * @property string     $fragment The last part behind #
  **/
-class Url implements UrlContract
+class Url implements UrlContract, UriInterface
 {
     use StringableTrait;
 
@@ -492,6 +503,220 @@ class Url implements UrlContract
     }
 
     /**
+     * {@inheritDoc}
+     *
+     * @see https://tools.ietf.org/html/rfc3986#section-3.1
+     * @return string The URI scheme.
+     */
+    public function getScheme()
+    {
+        return $this->__get('scheme');
+    }
+
+
+    /**
+     *        ----------authority------------
+     *        |                             |
+     * http://mike:password@somewhere.net:80/demo/example.php?foo=bar#first
+     * |      |    |        |             | |                 |       |
+     * |      |    |        host          | url-path          |       fragment
+     * |      user password               port                query
+     * scheme.
+     *
+     * @return string
+     */
+    public function getAuthority()
+    {
+        if (!$this->host) {
+            return '';
+        }
+
+        $authority = '';
+
+        if ($userInfo = $this->getUserInfo()) {
+            $authority .= "$userInfo@";
+        }
+
+        $authority .= $this->host;
+
+        if ($this->port) {
+            $authority .= ":$this->port";
+        }
+
+        return $authority;
+    }
+
+    /**
+     * @see MDF_Url::setUserInfo($userinfo)
+     *
+     * @return string
+     */
+    public function getUserInfo()
+    {
+        $userinfo = $this->user;
+
+        // Mask password, so that in __toString an other places no passwords
+        // will be exposed to the outside.
+        // If you need the password, you have to explicit call $url->password.
+        if ($this->password) {
+            $userinfo .= ":xxxxxx";
+        }
+
+        return $userinfo;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see http://tools.ietf.org/html/rfc3986#section-3.2.2
+     * @return string The URI host.
+     */
+    public function getHost()
+    {
+        return $this->__get('host');
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @return null|int The URI port.
+     */
+    public function getPort()
+    {
+        $port = $this->__get('port');
+        return $port ? $port : null;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see https://tools.ietf.org/html/rfc3986#section-2
+     * @see https://tools.ietf.org/html/rfc3986#section-3.3
+     * @return string The URI path.
+     */
+    public function getPath()
+    {
+        return (string)$this->__get('path');
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see https://tools.ietf.org/html/rfc3986#section-2
+     * @see https://tools.ietf.org/html/rfc3986#section-3.4
+     * @return string The URI query string.
+     */
+    public function getQuery()
+    {
+        if (!$this->query) {
+            return '';
+        }
+        return http_build_query($this->query);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see https://tools.ietf.org/html/rfc3986#section-2
+     * @see https://tools.ietf.org/html/rfc3986#section-3.5
+     * @return string The URI fragment.
+     */
+    public function getFragment()
+    {
+        return $this->__get('fragment');
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param string $scheme The scheme to use with the new instance.
+     * @return static A new instance with the specified scheme.
+     * @throws \InvalidArgumentException for invalid or unsupported schemes.
+     */
+    public function withScheme($scheme)
+    {
+        return $this->scheme($scheme);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param string $user The user name to use for authority.
+     * @param null|string $password The password associated with $user.
+     * @return static A new instance with the specified user information.
+     */
+    public function withUserInfo($user, $password = null)
+    {
+        $copy = $this->user($user);
+        if (!$password) {
+            return $copy;
+        }
+        return $copy->password($password);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param string $host The hostname to use with the new instance.
+     * @return static A new instance with the specified host.
+     * @throws \InvalidArgumentException for invalid hostnames.
+     */
+    public function withHost($host)
+    {
+        return $this->host($host);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param null|int $port The port to use with the new instance; a null value
+     *     removes the port information.
+     * @return static A new instance with the specified port.
+     * @throws \InvalidArgumentException for invalid ports.
+     */
+    public function withPort($port)
+    {
+        return $this->port($port === null ? 0 : $port);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param string $path The path to use with the new instance.
+     * @return static A new instance with the specified path.
+     * @throws \InvalidArgumentException for invalid paths.
+     */
+    public function withPath($path)
+    {
+        return $this->path($path);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param string $query The query string to use with the new instance.
+     * @return static A new instance with the specified query string.
+     * @throws \InvalidArgumentException for invalid query strings.
+     */
+    public function withQuery($query)
+    {
+        $queryArray = [];
+        parse_str($query, $queryArray);
+        return $this->query($queryArray);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param string $fragment The fragment to use with the new instance.
+     * @return static A new instance with the specified fragment.
+     */
+    public function withFragment($fragment)
+    {
+        return $this->fragment($fragment);
+    }
+
+    /**
      * {@inheritdoc}
      *
      * @param * @param string|array|self $url $url
@@ -552,57 +777,6 @@ class Url implements UrlContract
         }
 
         return isset(static::$flatSchemes[$this->scheme]) && static::$flatSchemes[$this->scheme];
-    }
-
-    /**
-     *        ----------authority------------
-     *        |                             |
-     * http://mike:password@somewhere.net:80/demo/example.php?foo=bar#first
-     * |      |    |        |             | |                 |       |
-     * |      |    |        host          | url-path          |       fragment
-     * |      user password               port                query
-     * scheme.
-     *
-     * @return string
-     */
-    protected function getAuthority()
-    {
-        if (!$this->host) {
-            return '';
-        }
-
-        $authority = '';
-
-        if ($userInfo = $this->getUserInfo()) {
-            $authority .= "$userInfo@";
-        }
-
-        $authority .= $this->host;
-
-        if ($this->port) {
-            $authority .= ":$this->port";
-        }
-
-        return $authority;
-    }
-
-    /**
-     * @see MDF_Url::setUserInfo($userinfo)
-     *
-     * @return string
-     */
-    protected function getUserInfo()
-    {
-        $userinfo = $this->user;
-
-        // Mask password, so that in __toString an other places no passwords
-        // will be exposed to the outside.
-        // If you need the password, you have to explicit call $url->password.
-        if ($this->password) {
-            $userinfo .= ":xxxxxx";
-        }
-
-        return $userinfo;
     }
 
     /**
