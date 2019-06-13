@@ -4,7 +4,10 @@
 namespace Ems\Model\Database;
 
 use Closure;
+use Ems\Contracts\Core\Errors\UnSupported;
+use Ems\Contracts\Core\Stringable;
 use Ems\Contracts\Core\Type;
+use Ems\Contracts\Expression\Prepared;
 use Exception;
 use Ems\Contracts\Core\HasMethodHooks;
 use Ems\Contracts\Core\Url;
@@ -15,11 +18,12 @@ use Ems\Contracts\Model\Database\SQLException;
 use Ems\Contracts\Model\Database\NativeError;
 use Ems\Core\ConfigurableTrait;
 use Ems\Core\Patterns\HookableTrait;
+use function microtime;
 use PDO;
 use PDOStatement;
 use PDOException;
 use InvalidArgumentException;
-use UnderflowException;
+use function round;
 
 /**
  * Whats this? No idea?
@@ -116,6 +120,7 @@ class PDOConnection implements Connection, Configurable, HasMethodHooks
     {
         $this->url = $url;
         $this->createErrorHandler();
+        $this->mergeOptions($options);
     }
 
     /**
@@ -264,7 +269,7 @@ class PDOConnection implements Connection, Configurable, HasMethodHooks
             } catch (SQLLockException $e) {
                 $this->rollback();
                 continue;
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $this->rollback();
                 throw $this->convertException($e);
             }
@@ -289,13 +294,13 @@ class PDOConnection implements Connection, Configurable, HasMethodHooks
     /**
      * Run a select statement and return the result.
      *
-     * @param string|\Ems\Contracts\Core\Stringable $query
+     * @param string|Stringable $query
      * @param array                                 $bindings (optional)
      * @param mixed                                 $fetchMode (optional)
      *
      * @return PDOResult
      *
-     * @throws \Ems\Contracts\Core\Errors\UnSupported
+     * @throws UnSupported
      **/
     public function select($query, array $bindings=[], $fetchMode=null)
     {
@@ -305,11 +310,14 @@ class PDOConnection implements Connection, Configurable, HasMethodHooks
 
         $this->callBeforeListeners('select',[$query, $bindings]);
 
+        $start = microtime(true);
+
         $statement = $bindings
                      ? $this->prepared($query, $bindings, $fetchMode)
                      : $this->selectRaw($query, $fetchMode);
 
-        $this->callAfterListeners('select',[$query, $bindings, $statement]);
+
+        $this->callAfterListeners('select',[$query, $bindings, $statement, $this->getElapsedTime($start)]);
 
         return new PDOResult($statement, $this);
 
@@ -318,9 +326,9 @@ class PDOConnection implements Connection, Configurable, HasMethodHooks
     /**
      * Run an insert statement.
      *
-     * @param string|\Ems\Contracts\Stringable $query
-     * @param array                            $bindings (optional)
-     * @param bool                             $returnLastInsertId (optional)
+     * @param string|Stringable $query
+     * @param array             $bindings (optional)
+     * @param bool              $returnLastInsertId (optional)
      *
      * @return int (last inserted id)
      **/
@@ -333,10 +341,12 @@ class PDOConnection implements Connection, Configurable, HasMethodHooks
 
         $this->callBeforeListeners('insert',[$query, $bindings]);
 
-        $result = $bindings ? $this->runPrepared($query, $bindings)
-                            : $this->writeUnprepared($query);
+        $start = microtime(true);
 
-        $this->callBeforeListeners('insert',[$query, $bindings]);
+        $bindings ? $this->runPrepared($query, $bindings)
+                  : $this->writeUnprepared($query);
+
+        $this->callBeforeListeners('insert',[$query, $bindings, $this->getElapsedTime($start)]);
 
         return $returnLastInsertId ? $this->lastInsertId() : null;
     }
@@ -344,9 +354,9 @@ class PDOConnection implements Connection, Configurable, HasMethodHooks
     /**
      * Run an altering statement.
      *
-     * @param string|\Ems\Contracts\Stringable $query
-     * @param array                            $bindings (optional)
-     * @param bool                             $returnAffected (optional)
+     * @param string|Stringable $query
+     * @param array                                 $bindings (optional)
+     * @param bool                                  $returnAffected (optional)
      *
      * @return int (Number of affected rows)
      **/
@@ -358,15 +368,17 @@ class PDOConnection implements Connection, Configurable, HasMethodHooks
 
         $this->callBeforeListeners('write',[$query, $bindings]);
 
+        $start = microtime(true);
+
         if (!$bindings) {
             $rows = $this->writeUnprepared($query);
-            $this->callAfterListeners('write',[$query, $bindings]);
+            $this->callAfterListeners('write',[$query, $bindings, $this->getElapsedTime($start)]);
             return $returnAffected ? $rows : null;
         }
 
         $statement = $this->runPrepared($query, $bindings);
 
-        $this->callAfterListeners('write',[$query, $bindings]);
+        $this->callAfterListeners('write',[$query, $bindings, $this->getElapsedTime($start)]);
 
         return $returnAffected ? $statement->rowCount() : null;
     }
@@ -374,10 +386,10 @@ class PDOConnection implements Connection, Configurable, HasMethodHooks
     /**
      * {@inheritdoc}
      *
-     * @param array                            $binding (optional)
-     * @param bool                             $returnAffected (optional)
+     * @param array $binding (optional)
+     * @param bool  $returnAffected (optional)
      *
-     * @return \Ems\Contracts\Expression\Prepared
+     * @return Prepared
      **/
     public function prepare($query, array $bindings=[])
     {
@@ -448,13 +460,12 @@ class PDOConnection implements Connection, Configurable, HasMethodHooks
     }
 
     /**
-     * @param string|\Ems\Contracts\Core\Stringable $query
+     * @param string|Stringable $query
      * @param array                                 $bindings (optional)
-     * @param mixed                                 $fetchMode (optional)
      *
      * @return PDOStatement
      **/
-    protected function runPrepared($query, array $bindings, $fetchMode=null)
+    protected function runPrepared($query, array $bindings)
     {
         return $this->attempt(function () use ($query, $bindings) {
 
@@ -613,5 +624,16 @@ class PDOConnection implements Connection, Configurable, HasMethodHooks
     protected function isClassOption($key)
     {
         return in_array($key, [static::RETURN_LAST_ID, static::RETURN_LAST_AFFECTED]);
+    }
+
+    /**
+     * Get the elapsed time since $start.
+     *
+     * @param  int    $start
+     * @return float
+     */
+    protected function getElapsedTime($start)
+    {
+        return round((microtime(true) - $start) * 1000, 2);
     }
 }
