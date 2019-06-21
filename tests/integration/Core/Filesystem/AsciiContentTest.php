@@ -50,7 +50,6 @@ class AsciiContentTest extends \Ems\IntegrationTest
         $iterator = $content->getIterator();
 
         $this->assertInstanceOf(Stream::class, $iterator);
-        $this->assertEquals($file, $iterator->getFilePath());
     }
 
     public function _test_getIterator_creates_iterator_by_custom_callable()

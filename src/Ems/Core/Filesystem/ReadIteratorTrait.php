@@ -2,9 +2,10 @@
 
 namespace Ems\Core\Filesystem;
 
-use Ems\Contracts\Core\Filesystem;
+use Ems\Contracts\Core\Exceptions\TypeException;
 use Ems\Contracts\Core\None;
 use Ems\Contracts\Core\Stream;
+use Ems\Contracts\Core\Type;
 
 /**
  * The LineReadIterator is a iterator which allows to read
@@ -16,19 +17,9 @@ trait ReadIteratorTrait
 {
 
     /**
-     * @var string
-     **/
-    protected $filePath = '';
-
-    /**
      * @var Stream
      */
     protected $stream;
-
-    /**
-     * @var Filesystem
-     **/
-    protected $filesystem;
 
     /**
      * @var string
@@ -44,52 +35,6 @@ trait ReadIteratorTrait
      * @var resource
      **/
     protected $handle;
-
-
-    /**
-     * @return string
-     **/
-    public function getFilePath()
-    {
-        if ($this->filePath) {
-            return $this->filePath;
-        }
-        return $this->filePath;
-    }
-
-    /**
-     * @param string $filePath
-     *
-     * @return self
-     **/
-    public function setFilePath($filePath)
-    {
-        $this->filePath = $filePath;
-        $this->releaseHandle();
-        $this->onFileChanged();
-
-        return $this;
-    }
-
-    /**
-     * @return Filesystem
-     **/
-    public function getFilesystem()
-    {
-        return $this->filesystem;
-    }
-
-    /**
-     * @param Filesystem $filesystem
-     *
-     * @return self
-     **/
-    public function setFilesystem(Filesystem $filesystem)
-    {
-        $this->filesystem = $filesystem;
-
-        return $this;
-    }
 
     /**
      * Reset the internal pointer to the beginning.
@@ -157,13 +102,6 @@ trait ReadIteratorTrait
     }
 
     /**
-     * Hook into a file change.
-     **/
-    protected function onFileChanged()
-    {
-    }
-
-    /**
      * Hook into the rewind call.
      **/
     protected function onRewind()
@@ -183,5 +121,21 @@ trait ReadIteratorTrait
         $line = $chunkSize ? fgets($handle, $chunkSize) : fgets($handle);
 
         return rtrim($line, "\n\r");
+    }
+
+    /**
+     * @param string|object|Stream $filePathOrStream
+     *
+     * @return FileStream
+     */
+    protected function makeStream($filePathOrStream)
+    {
+        if ($filePathOrStream instanceof Stream) {
+            return $filePathOrStream;
+        }
+        if (Type::isStringLike($filePathOrStream)) {
+            return new FileStream($filePathOrStream);
+        }
+        throw new TypeException('filePathOrStream has to be string like or a stream');
     }
 }

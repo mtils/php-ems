@@ -48,11 +48,6 @@ class CsvReadIteratorTest extends IntegrationTest
         $this->assertInstanceOf(CsvDetector::class, $this->newReader()->getDetector());
     }
 
-    public function test_getLineReader_returns_LineReadIterator()
-    {
-        $this->assertInstanceOf(LineReadIterator::class, $this->newReader()->getLineReader());
-    }
-
     public function test_getHeader_detects_header_if_not_setted()
     {
         $reader = $this->newReader($this->dataFile('simple-pipe-placeholder-normalized.csv'));
@@ -67,12 +62,6 @@ class CsvReadIteratorTest extends IntegrationTest
         $reader = $this->newReader();
         $this->assertSame($reader, $reader->setHeader(['id', 'name']));
         $this->assertEquals(['id', 'name'], $reader->getHeader());
-    }
-
-    public function test_getHeader_returns_empty_header_if_no_filePath_setted()
-    {
-        $reader = $this->newReader();
-        $this->assertEquals([], $reader->getHeader());
     }
 
     public function test_getStringConverter_returns_converter()
@@ -246,84 +235,6 @@ class CsvReadIteratorTest extends IntegrationTest
 
     }
 
-    public function _test_setting_new_file_on_same_reader()
-    {
-        $reader = $this->newReader($this->dataFile('Countries-ISO-3166-2.csv'));
-
-        $firstRowShouldBe = [
-            'Sort Order'               => '1',
-            'Common Name'              => 'Afghanistan',
-            'Formal Name'              => 'Islamic State of Afghanistan',
-            'Type'                     => 'Independent State',
-            'Sub Type'                 => '',
-            'Sovereignty'              => '',
-            'Capital'                  => 'Kabul',
-            'ISO 4217 Currency Code'   => 'AFN',
-            'ISO 4217 Currency Name'   => 'Afghani',
-            'ITU-T Telephone Code'     => '93',
-            'ISO 3166-1 2 Letter Code' => 'AF',
-            'ISO 3166-1 3 Letter Code' => 'AFG',
-            'ISO 3166-1 Number'        => '4',
-            'IANA Country Code TLD'    => '.af'
-        ];
-
-        $lastRowShouldBe = [
-            'Sort Order'               => '272',
-            'Common Name'              => 'British Antarctic Territory',
-            'Formal Name'              => '',
-            'Type'                     => 'Antarctic Territory',
-            'Sub Type'                 => 'Overseas Territory',
-            'Sovereignty'              => 'United Kingdom',
-            'Capital'                  => '',
-            'ISO 4217 Currency Code'   => '',
-            'ISO 4217 Currency Name'   => '',
-            'ITU-T Telephone Code'     => '',
-            'ISO 3166-1 2 Letter Code' => 'AQ',
-            'ISO 3166-1 3 Letter Code' => 'ATA',
-            'ISO 3166-1 Number'        => '10',
-            'IANA Country Code TLD'    => '.aq'
-        ];
-
-        $firstRow = [];
-
-        foreach ($reader as $i=>$row) {
-            if ($i==0) {
-                $firstRow = $row;
-            }
-        }
-
-        $this->assertEquals($firstRowShouldBe, $firstRow);
-        $this->assertEquals($lastRowShouldBe, $row);
-        $this->assertEquals(268, $i+1);
-
-        $reader->setFilePath($this->dataFile('simple-pipe-placeholder-normalized.csv'));
-
-        $result = [];
-
-        foreach ($reader as $row) {
-            $result[] = $row;
-        }
-
-        $awaited = [
-            [
-                'id'        => '42',
-                'name'      => 'Talent',
-                'last_name' => 'Billy',
-                'age'       => '35',
-                'street'    => 'Elm Street'
-            ],
-            [
-                'id'        => '52',
-                'name'      => 'Duck',
-                'last_name' => 'Donald',
-                'age'       => '8',
-                'street'    => 'Duckcity'
-            ]
-        ];
-        $this->assertEquals($awaited, $result);
-
-    }
-
     public function test_read_with_different_encoding()
     {
         $reader = $this->newReader($this->dataFile('simple-semicolon-placeholder-iso.csv'));
@@ -404,7 +315,7 @@ class CsvReadIteratorTest extends IntegrationTest
     }
 
     /**
-     * @expectedException Ems\Core\Exceptions\DetectionFailedException
+     * @expectedException \Ems\Core\Exceptions\DetectionFailedException
      **/
     public function test_read_undetectable_header_throws_DetectionFailedException()
     {
@@ -442,9 +353,9 @@ class CsvReadIteratorTest extends IntegrationTest
         $this->assertCount(268, $reader);
     }
 
-    protected function newReader($path='', FSContract $filesystem=null)
+    protected function newReader($path='')
     {
-        return new CsvReadIterator($path, $filesystem);
+        return new CsvReadIterator($path);
     }
 
 }

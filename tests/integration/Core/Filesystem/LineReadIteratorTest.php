@@ -22,13 +22,6 @@ class LineReadIteratorTest extends IntegrationTest
         );
     }
 
-    public function test_getting_and_setting_filePath()
-    {
-        $reader = $this->newReader();
-        $this->assertSame($reader, $reader->setFilePath('/tmp/test.bin'));
-        $this->assertEquals('/tmp/test.bin', $reader->getFilePath());
-    }
-
     public function test_reads_filled_txt_file()
     {
         $file = $this->dataFile('ascii-data-eol-l.txt');
@@ -105,9 +98,17 @@ class LineReadIteratorTest extends IntegrationTest
 
     }
 
+    /**
+     * @expectedException \Ems\Contracts\Core\Exceptions\TypeException
+     */
+    public function test_construct_with_unsupported_parameter()
+    {
+        new LineReadIterator(15);
+    }
+
     protected function newReader($path='', Stream $stream=null)
     {
-        return new LineReadIterator($path, $stream ?: $this->stream($path));
+        return new LineReadIterator($stream ?: $this->stream($path));
     }
 
     protected function stream($path, $chunkSize=0)

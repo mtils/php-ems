@@ -4,6 +4,7 @@ namespace Ems\Core\Filesystem;
 
 use Countable;
 use Ems\Contracts\Core\Stream;
+use Ems\Contracts\Core\Stringable;
 use Ems\Contracts\Core\StringConverter;
 use Ems\Core\ConfigurableTrait;
 use Ems\Core\Exceptions\DetectionFailedException;
@@ -85,11 +86,6 @@ class CsvReadIterator implements Iterator, Countable
     protected $detector;
 
     /**
-     * @var LineReadIterator
-     **/
-    protected $lineReader;
-
-    /**
      * @var string
      **/
     protected $firstLines;
@@ -132,18 +128,14 @@ class CsvReadIterator implements Iterator, Countable
     protected $charsetGuard;
 
     /**
-     * @param string           $filePath   (optional)
-     * @param Stream           $stream (optional)
+     * @param string|Stringable|Stream     $filePathOrStream   (optional)
      * @param CsvDetector      $detector   (optional)
-     * @param LineReadIterator $lineReader (optional)
      **/
-    public function __construct($filePath = '', Stream $stream = null, CsvDetector $detector = null, LineReadIterator $lineReader = null)
+    public function __construct($filePathOrStream, CsvDetector $detector = null)
     {
         $this->position = 0;
-        $this->filePath = $filePath;
-        $this->stream = $stream ?: new FileStream($filePath);
+        $this->stream = $this->makeStream($filePathOrStream);
         $this->setDetector($detector ?: new CsvDetector());
-        $this->lineReader = $lineReader ?: new LineReadIterator($filePath, $stream);
         $this->stringConverter = new MBStringConverter;
     }
 
@@ -154,7 +146,7 @@ class CsvReadIterator implements Iterator, Countable
      **/
     public function getSeparator()
     {
-        if (!$this->separator && $this->getFilePath()) {
+        if (!$this->separator) {
             $this->separator = $this->detector->separator(
                 $this->firstLines(),
                 $this->getDelimiter()
@@ -221,31 +213,6 @@ class CsvReadIterator implements Iterator, Countable
     }
 
     /**
-     * @return LineReadIterator
-     **/
-    public function getLineReader()
-    {
-        return $this->lineReader;
-    }
-
-    /**
-     * @param LineReadIterator $lineReader
-     *
-     * @return self
-     **/
-    public function setLineReader(LineReadIterator $lineReader)
-    {
-        $this->lineReader = $lineReader;
-        if ($this->filesystem) {
-            $this->lineReader->setFilesystem($this->filesystem);
-        }
-        if ($this->filePath) {
-            $this->lineReader->setFilePath($this->filePath);
-        }
-        return $this;
-    }
-
-    /**
      * @return StringConverter
      **/
     public function getStringConverter()
@@ -289,10 +256,6 @@ class CsvReadIterator implements Iterator, Countable
         }
 
         $this->updateConversion();
-
-        if (!$this->getFilePath()) {
-            return $this->header;
-        }
 
         $detectorException = null;
 
@@ -441,23 +404,6 @@ class CsvReadIterator implements Iterator, Countable
     /**
      * Empty first line cache if file did change
      **/
-    protected function onFileChanged()
-    {
-        $this->firstLinesRaw = null;
-        $this->firstLines = null;
-        if ($this->separatorWasDetected) {
-            $this->separator = '';
-            $this->separatorWasDetected = false;
-        }
-        if ($this->headerWasDetected) {
-            $this->setHeader([]);
-            $this->headerWasDetected = false;
-        }
-    }
-
-    /**
-     * Empty first line cache if file did change
-     **/
     protected function onRewind()
     {
         $this->headerRowSkipped = false;
@@ -497,19 +443,17 @@ class CsvReadIterator implements Iterator, Countable
             return $this->firstLinesRaw;
         }
 
-        $this->lineReader->setFilePath($this->filePath);
+        $lineReader = $this->newLineReader($this->stream);
 
         $lines = [];
 
-        foreach ($this->lineReader as $i=>$line) {
+        foreach ($lineReader as $i=>$line) {
             $lines[] = $line;
 
             if ($i >= $lineCount) {
                 break;
             }
         }
-
-        $this->lineReader->releaseHandle();
 
         $this->firstLinesRaw = implode("\n", $lines);
 
@@ -537,10 +481,8 @@ class CsvReadIterator implements Iterator, Countable
     protected function newCountInstance()
     {
         $instance = new static(
-            $this->getFilePath(),
             $this->stream,
-            $this->getDetector(),
-            clone $this->getLineReader()
+            $this->getDetector()
         );
         return $instance->setDelimiter($this->getDelimiter())
                         ->setSeparator($this->getSeparator())
@@ -570,5 +512,10 @@ class CsvReadIterator implements Iterator, Countable
     {
         $this->convertFrom = strtoupper($this->getOption(self::ENCODING));
         $this->shouldConvert = $this->convertFrom != 'UTF-8';
+    }
+
+    protected function newLineReader(Stream $stream)
+    {
+        return new LineReadIterator($stream);
     }
 }

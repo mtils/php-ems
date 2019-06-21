@@ -30,7 +30,6 @@ class CsvContentTest extends \Ems\IntegrationTest
 
         $iterator = $content->rows();
         $this->assertInstanceOf(CsvReadIterator::class, $iterator);
-        $this->assertEquals($file, $iterator->getFilePath());
     }
 
     protected function newContent($url='', Stream $stream=null)

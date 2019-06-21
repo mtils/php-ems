@@ -14,6 +14,6 @@ class AsciiContent extends BinaryContent implements AsciiContentContract
      **/
     public function lines()
     {
-        return new LineReadIterator($this->url(), $this->getStream());
+        return new LineReadIterator($this->getStream());
     }
 }

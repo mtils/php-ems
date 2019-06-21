@@ -20,7 +20,7 @@ class CsvContent extends AsciiContent implements RowContent
             throw new UnsupportedParameterException('Layers are not supported by csv');
         }
 
-        return new CsvReadIterator($this->url(), $this->getStream());
+        return new CsvReadIterator($this->getStream());
     }
 
 }

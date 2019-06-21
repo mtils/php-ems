@@ -4,6 +4,7 @@ namespace Ems\Core\Filesystem;
 
 use Countable;
 use Ems\Contracts\Core\Stream;
+use Ems\Contracts\Core\Stringable;
 use Iterator;
 
 /**
@@ -17,14 +18,12 @@ class LineReadIterator implements Iterator, Countable
     use ReadIteratorTrait;
 
     /**
-     * @param string     $filePath   (optional)
-     * @param Stream $stream (optional)
+     * @param string|Stringable|Stream     $filePathOrStream
      **/
-    public function __construct($filePath = '', Stream $stream = null)
+    public function __construct($filePathOrStream)
     {
         $this->position = 0;
-        $this->filePath = $filePath;
-        $this->stream = $stream ?: new FileStream($filePath);
+        $this->stream = $this->makeStream($filePathOrStream);
     }
 
     /**
