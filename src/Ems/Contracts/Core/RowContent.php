@@ -2,8 +2,7 @@
 
 namespace Ems\Contracts\Core;
 
-use Countable;
-use IteratorAggregate;
+use Iterator;
 
 /**
  * RowContent is Content for row based text files like csv files.
@@ -19,7 +18,7 @@ interface RowContent extends Content
      *
      * @param mixed $layer (optional) Allow to choose a spreadsheet or tag or so
      *
-     * @return ContentIterator
+     * @return Iterator|array[]
      **/
     public function rows($layer=null);
 

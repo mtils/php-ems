@@ -6,10 +6,12 @@
 namespace Ems\Core\Filesystem;
 
 
+use Countable;
 use Ems\Contracts\Core\Url as UrlContract;
 use Ems\Core\Exceptions\ResourceNotFoundException;
 use Ems\Core\Url;
 use function file_get_contents;
+use function filesize;
 
 /**
  * Class FileStream
@@ -20,7 +22,7 @@ use function file_get_contents;
  *
  * @package Ems\Core\Filesystem
  */
-class FileStream extends AbstractStream
+class FileStream extends AbstractStream implements Countable
 {
     /**
      * @var UrlContract
@@ -47,6 +49,20 @@ class FileStream extends AbstractStream
     }
 
     /**
+     * {@inheritdoc}
+     *
+     * @return string
+     */
+    public function type()
+    {
+        if (is_resource($this->resource)) {
+            return parent::type();
+        }
+        return 'stream';
+    }
+
+
+    /**
      * @return UrlContract
      */
     public function url()
@@ -63,6 +79,19 @@ class FileStream extends AbstractStream
             $this->assignResource($this->createHandle((string)$this->url));
         }
         return $this->resource;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @link https://php.net/manual/en/countable.count.php
+     *
+     * @return int The custom count as an integer.
+     *
+     */
+    public function count()
+    {
+        return filesize((string)$this->url);
     }
 
     /**

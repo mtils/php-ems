@@ -27,4 +27,11 @@ interface Content extends Countable, IteratorAggregate, Stringable
      * @return string
      **/
     public function url();
+
+    /**
+     * Return the used stream,
+     *
+     * @return Stream
+     */
+    public function getStream();
 }

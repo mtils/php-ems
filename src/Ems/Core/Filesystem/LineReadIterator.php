@@ -2,9 +2,9 @@
 
 namespace Ems\Core\Filesystem;
 
-use Ems\Contracts\Core\ContentIterator;
-use Ems\Contracts\Core\Filesystem;
-use Ems\Core\LocalFilesystem;
+use Countable;
+use Ems\Contracts\Core\Stream;
+use Iterator;
 
 /**
  * The LineReadIterator is an iterator which allows to read
@@ -12,20 +12,19 @@ use Ems\Core\LocalFilesystem;
  *
  * @sample foreach (new LineReadIterator($file) as $line) ...
  **/
-class LineReadIterator implements ContentIterator
+class LineReadIterator implements Iterator, Countable
 {
     use ReadIteratorTrait;
 
     /**
      * @param string     $filePath   (optional)
-     * @param Filesystem $filesystem (optional)
+     * @param Stream $stream (optional)
      **/
-    public function __construct($filePath = '', Filesystem $filesystem = null)
+    public function __construct($filePath = '', Stream $stream = null)
     {
         $this->position = 0;
         $this->filePath = $filePath;
-        $this->chunkSize = 0;
-        $this->setFilesystem($filesystem ?: new LocalFilesystem());
+        $this->stream = $stream ?: new FileStream($filePath);
     }
 
     /**
@@ -55,7 +54,11 @@ class LineReadIterator implements ContentIterator
      **/
     public function count()
     {
-        $handle = $this->createHandle($this->getFilePath());
+        if (!$this->stream) {
+            return 0;
+        }
+        $this->stream->rewind();
+        $handle = $this->stream->resource();
         $lineCount = 0;
 
         while (!feof($handle)) {
@@ -64,8 +67,6 @@ class LineReadIterator implements ContentIterator
                 ++$lineCount;
             }
         }
-
-        fclose($handle);
 
         return $lineCount;
     }

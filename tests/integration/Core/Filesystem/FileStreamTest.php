@@ -2,16 +2,13 @@
 
 namespace Ems\Core\Filesystem;
 
-use Ems\Contracts\Core\Filesystem as FSContract;
 use Ems\Contracts\Core\Stream;
 use Ems\Contracts\Core\Stringable;
-use Ems\Core\LocalFilesystem;
 use Ems\Core\Url;
 use Ems\Testing\FilesystemMethods;
-
 use function file_get_contents;
 use function filesize;
-use Iterator;
+use function ftell;
 
 class FileStreamTest extends \Ems\IntegrationTest
 {
@@ -31,6 +28,54 @@ class FileStreamTest extends \Ems\IntegrationTest
             Stringable::class,
             $stream
         );
+    }
+
+    /**
+     * @test
+     */
+    public function type_returns_right_type_in_AbstractStream()
+    {
+        $stream = new FileStreamTest_AbstractStream();
+        $this->assertEquals('', $stream->type());
+    }
+
+    /**
+     * @test
+     */
+    public function type_returns_right_type_even_without_resource()
+    {
+        $this->assertEquals('stream', $this->newStream()->type());
+
+        $file = $this->dataFile('ascii-data-eol-l.txt');
+
+        $stream = $this->newStream($file)->setChunkSize(1024);
+
+        $stream->rewind();
+        $stream->current();
+
+        $this->assertEquals('stream', $stream->type());
+
+    }
+
+    /**
+     * @test
+     */
+    public function methods_that_need_a_stream_also_work_without_one()
+    {
+        $stream = new FileStreamTest_ResourceLessStream();
+
+        $this->assertSame($stream, $stream->makeAsynchronous());
+        $this->assertTrue($stream->isAsynchronous());
+        $this->assertFalse($stream->isLocked());
+        $this->assertFalse($stream->isTerminalType());
+        $this->assertFalse($stream->lock());
+        $this->assertFalse($stream->unlock());
+
+        $url = $stream->url();
+        $this->assertInstanceOf(\Ems\Contracts\Core\Url::class, $url);
+        $this->assertEquals("", "$url");
+
+
     }
 
     /**
@@ -123,6 +168,20 @@ class FileStreamTest extends \Ems\IntegrationTest
     /**
      * @test
      */
+    public function read_chunk()
+    {
+        $file = $this->dataFile('ascii-data-eol-l.txt');
+
+        $stream = $this->newStream($file);
+        $content = "$stream";
+
+        $this->assertEquals(substr($content, 0, 1024), $stream->read(1024));
+
+    }
+
+    /**
+     * @test
+     */
     public function reads_filled_txt_file_in_toString()
     {
         $file = $this->dataFile('ascii-data-eol-l.txt');
@@ -131,6 +190,25 @@ class FileStreamTest extends \Ems\IntegrationTest
         $fileContent = file_get_contents($file);
 
         $this->assertEquals($fileContent, "$stream");
+
+    }
+
+    /**
+     * @test
+     */
+    public function reads_empty_file()
+    {
+        $file = $this->dataFile('empty.txt');
+
+        $stream = $this->newStream($file)->setChunkSize(1024);
+
+        $i=0;
+        foreach ($stream as $chunk) {
+            $i++;
+        }
+
+        $this->assertEquals(1, $i);
+        $this->assertSame('', $chunk);
 
     }
 
@@ -171,6 +249,18 @@ class FileStreamTest extends \Ems\IntegrationTest
     {
         $stream = $this->newStream('/foo');
         $stream->rewind();
+
+    }
+
+    /**
+     * @test
+     */
+    public function count_returns_filesize()
+    {
+        $file = $this->dataFile('ascii-data-eol-l.txt');
+
+        $stream = $this->newStream($file);
+        $this->assertCount(filesize($file), $stream);
 
     }
 
@@ -219,6 +309,69 @@ class FileStreamTest extends \Ems\IntegrationTest
         $this->assertSame('', $stream->current());
 
         $this->assertEquals(filesize($file), ftell($stream->resource()));
+
+    }
+
+    /**
+     * @test
+     * @expectedException \Ems\Contracts\Core\Errors\UnSupported
+     */
+    public function seek_throws_exception_if_resource_not_seekable()
+    {
+        (new FileStreamTest_ResourceLessStream())->seek(10);
+    }
+
+    /**
+     * @test
+     */
+    public function metaData_returns_data()
+    {
+        $file = $this->dataFile('ascii-data-eol-l.txt');
+
+        $stream = $this->newStream($file)->setChunkSize(128);
+
+        $stream->rewind();
+
+        $stream->current();
+
+        $metaData = $stream->metaData();
+        $uri = $stream->metaData('uri');
+        $this->assertEquals($metaData['uri'], $uri);
+
+        $stream2 = new FileStreamTest_AbstractStream();
+        $stream2->setResource(null);
+
+    }
+
+    /**
+     * @test
+     */
+    public function mode_returns_mode()
+    {
+        $stream = new FileStreamTest_ResourceLessStream();
+        $this->assertEquals('r+', $stream->mode());
+
+    }
+
+    /**
+     * @test
+     */
+    public function isLocal_returns_correct_value_is_no_resource_present()
+    {
+
+        $stream = new FileStreamTest_ResourceLessStream();
+        $stream->url = new Url('file:///tmp/test.txt');
+
+        $this->assertTrue($stream->isLocal());
+
+        $stream = new FileStreamTest_ResourceLessStream();
+        $stream->url = new Url('https://www.google.de');
+
+        $this->assertFalse($stream->isLocal());
+
+        $stream = new FileStreamTest_ResourceLessStream();
+        $stream->url = null;
+        $this->assertFalse($stream->isLocal());
 
     }
 
@@ -302,5 +455,46 @@ class FileStreamTest extends \Ems\IntegrationTest
         return new FileStream($path, $mode, $lock);
     }
 
-    
+
+}
+
+class FileStreamTest_AbstractStream extends AbstractStream
+{
+    public $url = false;
+
+    /**
+     * @return Url
+     */
+    public function url()
+    {
+        if ($this->url !== false) {
+            return $this->url;
+        }
+        return parent::url();
+    }
+
+
+    /**
+     * @param resource $resource
+     * @return $this
+     */
+    public function setResource($resource)
+    {
+        $this->resource = $resource;
+        return $this;
+    }
+}
+
+class FileStreamTest_ResourceLessStream extends FileStreamTest_AbstractStream
+{
+
+
+    /**
+     * @return resource
+     */
+    public function resource()
+    {
+        return null;
+    }
+
 }

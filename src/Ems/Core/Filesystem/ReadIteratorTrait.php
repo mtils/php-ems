@@ -3,6 +3,8 @@
 namespace Ems\Core\Filesystem;
 
 use Ems\Contracts\Core\Filesystem;
+use Ems\Contracts\Core\None;
+use Ems\Contracts\Core\Stream;
 
 /**
  * The LineReadIterator is a iterator which allows to read
@@ -19,6 +21,11 @@ trait ReadIteratorTrait
     protected $filePath = '';
 
     /**
+     * @var Stream
+     */
+    protected $stream;
+
+    /**
      * @var Filesystem
      **/
     protected $filesystem;
@@ -31,11 +38,6 @@ trait ReadIteratorTrait
     /**
      * @var int
      **/
-    protected $chunkSize = 4096;
-
-    /**
-     * @var int
-     **/
     private $position = 0;
 
     /**
@@ -43,35 +45,15 @@ trait ReadIteratorTrait
      **/
     protected $handle;
 
-    /**
-     * Return the bytes which will be read in one iteration.
-     *
-     * @return int
-     **/
-    public function getChunkSize()
-    {
-        return $this->chunkSize;
-    }
-
-    /**
-     * @see self::getChunkSize()
-     *
-     * @param int $chunkSize
-     *
-     * @return self
-     **/
-    public function setChunkSize($chunkSize)
-    {
-        $this->chunkSize = $chunkSize;
-
-        return $this;
-    }
 
     /**
      * @return string
      **/
     public function getFilePath()
     {
+        if ($this->filePath) {
+            return $this->filePath;
+        }
         return $this->filePath;
     }
 
@@ -115,11 +97,9 @@ trait ReadIteratorTrait
     public function rewind()
     {
         $this->onRewind();
-        $this->currentValue = $this->readNext(
-            $this->initHandle($this->getFilePath()),
-            $this->chunkSize
-        );
-        $this->position = $this->currentValue === null ? -1 : 0;
+        $this->stream->rewind();
+        $this->position = $this->stream->valid() ? 0 : -1;
+        $this->currentValue = new None();
     }
 
     /**
@@ -127,6 +107,9 @@ trait ReadIteratorTrait
      **/
     public function current()
     {
+        if ($this->position === 0 && $this->currentValue instanceof None) {
+            $this->currentValue = $this->readNext($this->stream->resource(), $this->stream->getChunkSize());
+        }
         return $this->currentValue;
     }
 
@@ -140,7 +123,10 @@ trait ReadIteratorTrait
 
     public function next()
     {
-        $this->currentValue = $this->readNext($this->handle, $this->chunkSize);
+        $this->currentValue = $this->readNext(
+            $this->stream->resource(),
+            $this->stream->getChunkSize()
+        );
         $this->position = $this->currentValue === null ? -1 : $this->position + 1;
     }
 
@@ -149,7 +135,7 @@ trait ReadIteratorTrait
      **/
     public function valid()
     {
-        return is_resource($this->handle) && $this->position !== -1;
+        return $this->stream->valid() && $this->position !== -1;
     }
 
     /**
@@ -165,10 +151,9 @@ trait ReadIteratorTrait
      **/
     public function releaseHandle()
     {
-        if (is_resource($this->handle)) {
-            fclose($this->handle);
+        if ($this->stream) {
+            $this->stream->close();
         }
-        $this->handle = null;
     }
 
     /**
@@ -183,44 +168,6 @@ trait ReadIteratorTrait
      **/
     protected function onRewind()
     {
-    }
-
-    /**
-     * @return bool
-     **/
-    protected function hasHandle()
-    {
-        return is_resource($this->handle);
-    }
-
-    /**
-     * Create or rewind the handle.
-     *
-     * @param string $filePath
-     *
-     * @return resource
-     **/
-    protected function initHandle($filePath)
-    {
-        if ($this->hasHandle()) {
-            rewind($this->handle);
-
-            return $this->handle;
-        }
-
-        $this->handle = $this->createHandle($filePath);
-
-        return $this->handle;
-    }
-
-    /**
-     * @param string $filePath
-     *
-     * @return resource
-     **/
-    protected function createHandle($filePath)
-    {
-        return fopen($filePath, 'r');
     }
 
     /**

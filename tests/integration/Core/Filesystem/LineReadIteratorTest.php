@@ -2,27 +2,24 @@
 
 namespace Ems\Core\Filesystem;
 
-use Ems\Contracts\Core\Filesystem as FSContract;
-use Ems\Contracts\Core\ContentIterator;
-use Ems\Core\LocalFilesystem;
-use Ems\Testing\FilesystemMethods;
+use Countable;
+use Ems\Contracts\Core\Stream;
+use Ems\IntegrationTest;
+use Iterator;
 
-class LineReadIteratorTest extends \Ems\IntegrationTest
+class LineReadIteratorTest extends IntegrationTest
 {
 
-    public function test_implements_interface()
+    public function test_implements_interfaces()
     {
         $this->assertInstanceOf(
-            ContentIterator::class,
+            Iterator::class,
             $this->newReader()
         );
-    }
-
-    public function test_setting_and_getting_chunkSize()
-    {
-        $reader = $this->newReader();
-        $this->assertSame($reader, $reader->setChunkSize(1024));
-        $this->assertEquals(1024, $reader->getChunkSize());
+        $this->assertInstanceOf(
+            Countable::class,
+            $this->newReader()
+        );
     }
 
     public function test_getting_and_setting_filePath()
@@ -32,28 +29,15 @@ class LineReadIteratorTest extends \Ems\IntegrationTest
         $this->assertEquals('/tmp/test.bin', $reader->getFilePath());
     }
 
-    public function test_getting_and_setting_filesystem()
-    {
-        $filesystem = new LocalFilesystem;
-        $reader = $this->newReader('', $filesystem);
-        $this->assertSame($filesystem, $reader->getFilesystem());
-        $filesystem2 = new LocalFilesystem;
-        $this->assertNotSame($filesystem2, $reader->getFilesystem());
-        $this->assertSame($reader, $reader->setFilesystem($filesystem2));
-        $this->assertSame($filesystem2, $reader->getFilesystem());
-    }
-
     public function test_reads_filled_txt_file()
     {
         $file = $this->dataFile('ascii-data-eol-l.txt');
 
-        $reader = $this->newReader($file)->setChunkSize(1024);
+        $reader = $this->newReader($file, $this->stream($file, 1024));
 
         $lines = [];
 
         $fileContent = file_get_contents($file);
-
-        $readContent = '';
 
         foreach ($reader as $i=>$line) {
             $lines[$i] = $line;
@@ -82,7 +66,7 @@ class LineReadIteratorTest extends \Ems\IntegrationTest
     {
         $file = $this->dataFile('ascii-data-eol-l.txt');
 
-        $reader = $this->newReader($file)->setChunkSize(1024);
+        $reader = $this->newReader($file, $this->stream($file, 1024));
 
         $lines = [];
 
@@ -98,11 +82,6 @@ class LineReadIteratorTest extends \Ems\IntegrationTest
         $this->assertCount(11, $reader);
 
 
-    }
-
-    protected function newReader($path='', FSContract $filesystem=null)
-    {
-        return new LineReadIterator($path, $filesystem);
     }
 
     public function test_reads_filled_windows_txt_file()
@@ -126,4 +105,17 @@ class LineReadIteratorTest extends \Ems\IntegrationTest
 
     }
 
+    protected function newReader($path='', Stream $stream=null)
+    {
+        return new LineReadIterator($path, $stream ?: $this->stream($path));
+    }
+
+    protected function stream($path, $chunkSize=0)
+    {
+        $stream = new FileStream($path);
+        if ($chunkSize) {
+            $stream->setChunkSize($chunkSize);
+        }
+        return $stream;
+    }
 }

@@ -2,8 +2,11 @@
 
 namespace Ems\Core\Filesystem;
 
+use Countable;
 use Ems\Contracts\Core\Content;
-use Ems\Contracts\Core\Filesystem;
+use Ems\Contracts\Core\Stream;
+use Ems\Contracts\Core\Url;
+use Ems\Core\Exceptions\UnConfiguredException;
 use Ems\Core\Support\StringableTrait;
 use Iterator;
 use LogicException;
@@ -14,9 +17,9 @@ class BinaryContent implements Content
     use StringableTrait;
 
     /**
-     * @var Filesystem
-     **/
-    protected $filesystem;
+     * @var Stream
+     */
+    protected $stream;
 
     /**
      * @var Url
@@ -33,9 +36,9 @@ class BinaryContent implements Content
      **/
     protected $iteratorCreator;
 
-    public function __construct(Filesystem $filesystem)
+    public function __construct(Stream $stream=null)
     {
-        $this->filesystem = $filesystem;
+        $this->stream = $stream;
     }
 
     /**
@@ -72,7 +75,15 @@ class BinaryContent implements Content
      **/
     public function url()
     {
-        return $this->url;
+        if ($this->url) {
+            return $this->url;
+        }
+
+        if ($this->stream) {
+            return $this->stream->url();
+        }
+
+        return new \Ems\Core\Url();
     }
 
     /**
@@ -89,7 +100,11 @@ class BinaryContent implements Content
         if ($this->url && $url != $this->url) {
             throw new LogicException('You can only configure a content once');
         }
-        $this->url = $url;
+
+        $this->url = new \Ems\Core\Url($url);
+
+
+
         return $this;
     }
 
@@ -100,7 +115,13 @@ class BinaryContent implements Content
      **/
     public function count()
     {
-        return $this->getIterator()->count($this->url);
+        $iterator = $this->getIterator();
+
+        if ($iterator instanceof Countable) {
+            return count($iterator);
+        }
+
+        return strlen($this->toString());
     }
 
     /**
@@ -111,7 +132,7 @@ class BinaryContent implements Content
     public function getIterator()
     {
         if ($this->iteratorCreator) {
-            return call_user_func($this->iteratorCreator, $this, $this->filesystem);
+            return call_user_func($this->iteratorCreator, $this, $this->stream);
         }
 
         return $this->createIterator();
@@ -138,7 +159,25 @@ class BinaryContent implements Content
      **/
     public function toString()
     {
-        return $this->filesystem->read($this->url);
+        return (string)$this->getStream();
+    }
+
+    /**
+     * Return the used stream,
+     *
+     * @return Stream
+     */
+    public function getStream()
+    {
+        if ($this->stream) {
+            return $this->stream;
+        }
+
+        if (!$this->url) {
+            throw new UnConfiguredException('No stream, no url. No idea how to create a stream.');
+        }
+
+        return new FileStream($this->url());
     }
 
     /**
@@ -148,6 +187,6 @@ class BinaryContent implements Content
      **/
     protected function createIterator()
     {
-        return new BinaryReadIterator($this->url, $this->filesystem);
+        return $this->getStream();
     }
 }

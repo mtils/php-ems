@@ -7,18 +7,20 @@ namespace Ems\Core\Filesystem;
 
 
 use Ems\Contracts\Core\Exceptions\TypeException;
+use Ems\Contracts\Core\None;
 use Ems\Contracts\Core\Stream;
 use Ems\Contracts\Core\Type;
 use Ems\Contracts\Core\Url as UrlContract;
-use Ems\Core\Exceptions\NotImplementedException;
 use Ems\Core\Exceptions\ResourceLockedException;
+use Ems\Core\Exceptions\UnsupportedUsageException;
 use Ems\Core\Helper;
 use Ems\Core\Support\StringableTrait;
 use Ems\Core\Url;
-use function function_exists;
 use LogicException;
+use function feof;
 use function flock;
 use function fseek;
+use function function_exists;
 use function get_resource_type;
 use function is_resource;
 use function str_replace;
@@ -281,7 +283,7 @@ abstract class AbstractStream implements Stream
         $this->timeout = $timeout;
 
         if($this->hasValidResource() && $this->timeout !== -1) {
-            stream_set_timeout($this->resource, $timeout);
+            $this->applyTimeout($this->resource);
         }
 
         return $this;
@@ -321,11 +323,10 @@ abstract class AbstractStream implements Stream
         $this->failOnWriteOnly();
 
         $this->onRewind();
-        $this->currentValue = $this->readNext(
-            $this->initHandle(),
-            $this->chunkSize
-        );
-        $this->position = $this->currentValue === null ? -1 : 0;
+        $this->initHandle();
+        $this->position = 0;
+        $this->currentValue = new None();
+
     }
 
     /**
@@ -333,6 +334,9 @@ abstract class AbstractStream implements Stream
      **/
     public function current()
     {
+        if ($this->position === 0 && $this->currentValue instanceof None) {
+            $this->currentValue = $this->readNext($this->resource(), $this->chunkSize);
+        }
         return $this->currentValue;
     }
 
@@ -351,6 +355,11 @@ abstract class AbstractStream implements Stream
     }
 
     /**
+     * This code leads to empty strings being valid for one iteration because
+     * feof is not called. This is currently by design. I am not sure what the
+     * right behaviour is. In general the iterator is valid because it is on
+     * position 0 but current() returns an empty string.
+     *
      * @return bool
      **/
     public function valid()
@@ -381,7 +390,7 @@ abstract class AbstractStream implements Stream
     public function seek($position, $whence=SEEK_SET)
     {
         if (!$this->isSeekable()) {
-            throw new NotImplementedException(Type::of($this) . ' is not seekable.');
+            throw new UnsupportedUsageException(Type::of($this) . ' is not seekable.');
         }
         fseek($this->resource(), $position, $whence);
         $this->next();
@@ -504,9 +513,7 @@ abstract class AbstractStream implements Stream
             return null;
         }
 
-        if (!$meta = stream_get_meta_data($this->resource)) {
-            return null;
-        }
+        $meta = stream_get_meta_data($this->resource);
 
         if (!$key) {
             return $meta;
@@ -642,11 +649,7 @@ abstract class AbstractStream implements Stream
             return false;
         }
 
-        if (!$type = get_resource_type($this->resource)) {
-            return false;
-        }
-
-        return $type != 'Unknown';
+        return get_resource_type($this->resource) != 'Unknown';
     }
 
     /**

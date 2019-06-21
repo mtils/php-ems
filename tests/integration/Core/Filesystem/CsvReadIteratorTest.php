@@ -2,19 +2,23 @@
 
 namespace Ems\Core\Filesystem;
 
+use Countable;
 use Ems\Contracts\Core\Filesystem as FSContract;
-use Ems\Contracts\Core\ContentIterator;
 use Ems\Contracts\Core\StringConverter;
-use Ems\Core\LocalFilesystem;
-use Ems\Testing\FilesystemMethods;
+use Iterator;
+use Ems\IntegrationTest;
 
-class CsvReadIteratorTest extends \Ems\IntegrationTest
+class CsvReadIteratorTest extends IntegrationTest
 {
 
-    public function test_implements_interface()
+    public function test_implements_interfaces()
     {
         $this->assertInstanceOf(
-            ContentIterator::class,
+            Iterator::class,
+            $this->newReader()
+        );
+        $this->assertInstanceOf(
+            Countable::class,
             $this->newReader()
         );
     }
@@ -242,7 +246,7 @@ class CsvReadIteratorTest extends \Ems\IntegrationTest
 
     }
 
-    public function test_setting_new_file_on_same_reader()
+    public function _test_setting_new_file_on_same_reader()
     {
         $reader = $this->newReader($this->dataFile('Countries-ISO-3166-2.csv'));
 

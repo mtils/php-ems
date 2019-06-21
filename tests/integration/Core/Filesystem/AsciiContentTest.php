@@ -2,13 +2,10 @@
 
 namespace Ems\Core\Filesystem;
 
-use Ems\Contracts\Core\Filesystem as FSContract;
 use Ems\Contracts\Core\AsciiContent as AsciiContentContract;
+use Ems\Contracts\Core\Stream;
 use Ems\Core\LocalFilesystem;
-use Ems\Testing\FilesystemMethods;
 use Ems\Testing\LoggingCallable;
-
-use Iterator;
 
 class AsciiContentTest extends \Ems\IntegrationTest
 {
@@ -28,7 +25,6 @@ class AsciiContentTest extends \Ems\IntegrationTest
 
         $iterator = $content->lines();
         $this->assertInstanceOf(LineReadIterator::class, $iterator);
-        $this->assertEquals($file, $iterator->getFilePath());
     }
 
     public function test_lines_count_returns_lineCount()
@@ -53,7 +49,7 @@ class AsciiContentTest extends \Ems\IntegrationTest
         $content = $this->newContent($file)->setMimeType('text/plain');
         $iterator = $content->getIterator();
 
-        $this->assertInstanceOf(BinaryReadIterator::class, $iterator);
+        $this->assertInstanceOf(Stream::class, $iterator);
         $this->assertEquals($file, $iterator->getFilePath());
     }
 
@@ -75,9 +71,10 @@ class AsciiContentTest extends \Ems\IntegrationTest
         $this->assertSame($fs, $callable->arg(1));
     }
 
-    protected function newContent($url='', FSContract $filesystem=null)
+    protected function newContent($url='', Stream $stream=null)
     {
-        return (new AsciiContent($filesystem ?: new LocalFilesystem))->setUrl($url);
+        $content = new AsciiContent($stream ?: new FileStream($url));
+        return $content;
     }
 
 }

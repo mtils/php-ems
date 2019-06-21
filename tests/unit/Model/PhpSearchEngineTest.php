@@ -8,8 +8,7 @@ use Ems\Contracts\Model\Result;
 use Ems\Contracts\Model\SearchEngine;
 use Ems\Core\Collections\StringList;
 use Ems\Core\Filesystem\CsvContent;
-use Ems\Core\LocalFilesystem;
-use Ems\Core\Url;
+use Ems\Core\Filesystem\FileStream;
 use Ems\Expression\Matcher;
 use Ems\TestCase;
 use Ems\TestData;
@@ -258,8 +257,8 @@ class PhpSearchEngineTest extends TestCase
 
         static::$items = [];
 
-        $rows = new CsvContent(new LocalFilesystem());
-        $rows->setUrl(new Url($this->dataFile('Countries-ISO-3166-2.csv')));
+        $rows = new CsvContent(new FileStream($this->dataFile('Countries-ISO-3166-2.csv')));
+        //$rows->setUrl(new Url($this->dataFile('Countries-ISO-3166-2.csv')));
 
         /** @var array $row */
         foreach ($rows->rows() as $row) {

@@ -2,18 +2,18 @@
 
 namespace Ems\Core\Filesystem;
 
-use Ems\Contracts\Core\Filesystem;
 use Ems\Contracts\Core\AsciiContent as AsciiContentContract;
+use Iterator;
 
 class AsciiContent extends BinaryContent implements AsciiContentContract
 {
     /**
      * {@inheritdoc}
      *
-     * @return ContentIterator
+     * @return Iterator|string[]
      **/
     public function lines()
     {
-        return new LineReadIterator($this->url, $this->filesystem);
+        return new LineReadIterator($this->url(), $this->getStream());
     }
 }

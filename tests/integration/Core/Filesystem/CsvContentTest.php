@@ -2,13 +2,7 @@
 
 namespace Ems\Core\Filesystem;
 
-use Ems\Contracts\Core\Filesystem as FSContract;
 use Ems\Contracts\Core\RowContent;
-use Ems\Core\LocalFilesystem;
-use Ems\Testing\FilesystemMethods;
-use Ems\Testing\LoggingCallable;
-
-use Iterator;
 
 class CsvContentTest extends \Ems\IntegrationTest
 {
@@ -39,9 +33,9 @@ class CsvContentTest extends \Ems\IntegrationTest
         $this->assertEquals($file, $iterator->getFilePath());
     }
 
-    protected function newContent($url='', FSContract $filesystem=null)
+    protected function newContent($url='', Stream $stream=null)
     {
-        return (new CsvContent($filesystem ?: new LocalFilesystem))->setUrl($url);
+        return (new CsvContent($stream ?: new FileStream($url)))->setUrl($url);
     }
 
 }

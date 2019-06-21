@@ -2,16 +2,14 @@
 
 namespace Ems\Core\Filesystem;
 
-use Ems\Contracts\Core\Filesystem;
-use Ems\Contracts\Core\ContentIterator;
-use Ems\Contracts\Core\Configurable;
+use Countable;
+use Ems\Contracts\Core\Stream;
 use Ems\Contracts\Core\StringConverter;
-use Ems\Core\Exceptions\DetectionFailedException;
-use Ems\Core\StringConverter\MBStringConverter;
-use Ems\Core\StringConverter\CharsetGuard;
 use Ems\Core\ConfigurableTrait;
-use Ems\Core\LocalFilesystem;
-use Ems\Core\Helper;
+use Ems\Core\Exceptions\DetectionFailedException;
+use Ems\Core\StringConverter\CharsetGuard;
+use Ems\Core\StringConverter\MBStringConverter;
+use Iterator;
 
 
 /**
@@ -29,7 +27,7 @@ use Ems\Core\Helper;
  * separator: The column separator (,;|)
  * delimiter: The string delimiter if strings contain the separator or \n
  **/
-class CsvReadIterator implements ContentIterator
+class CsvReadIterator implements Iterator, Countable
 {
     use ReadIteratorTrait;
     use ConfigurableTrait;
@@ -135,18 +133,17 @@ class CsvReadIterator implements ContentIterator
 
     /**
      * @param string           $filePath   (optional)
-     * @param Filesystem       $filesystem (optional)
+     * @param Stream           $stream (optional)
      * @param CsvDetector      $detector   (optional)
      * @param LineReadIterator $lineReader (optional)
      **/
-    public function __construct($filePath = '', Filesystem $filesystem = null, CsvDetector $detector = null, LineReadIterator $lineReader = null)
+    public function __construct($filePath = '', Stream $stream = null, CsvDetector $detector = null, LineReadIterator $lineReader = null)
     {
         $this->position = 0;
         $this->filePath = $filePath;
-        $this->chunkSize = 0;
-        $this->setFilesystem($filesystem ?: new LocalFilesystem());
+        $this->stream = $stream ?: new FileStream($filePath);
         $this->setDetector($detector ?: new CsvDetector());
-        $this->setLineReader($lineReader ?: new LineReadIterator());
+        $this->lineReader = $lineReader ?: new LineReadIterator($filePath, $stream);
         $this->stringConverter = new MBStringConverter;
     }
 
@@ -541,7 +538,7 @@ class CsvReadIterator implements ContentIterator
     {
         $instance = new static(
             $this->getFilePath(),
-            $this->getFilesystem(),
+            $this->stream,
             $this->getDetector(),
             clone $this->getLineReader()
         );

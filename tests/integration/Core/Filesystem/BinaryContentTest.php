@@ -2,13 +2,13 @@
 
 namespace Ems\Core\Filesystem;
 
-use Ems\Contracts\Core\Filesystem as FSContract;
 use Ems\Contracts\Core\Content;
-use Ems\Core\LocalFilesystem;
-use Ems\Testing\FilesystemMethods;
+use Ems\Contracts\Core\Stream;
+use Ems\Core\Url;
 use Ems\Testing\LoggingCallable;
-
-use Iterator;
+use function fclose;
+use function file_get_contents;
+use function filesize;
 
 class BinaryContentTest extends \Ems\IntegrationTest
 {
@@ -91,14 +91,14 @@ class BinaryContentTest extends \Ems\IntegrationTest
         $content = $this->newContent($file)->setMimeType('text/plain');
         $iterator = $content->getIterator();
 
-        $this->assertInstanceOf(BinaryReadIterator::class, $iterator);
-        $this->assertEquals($file, $iterator->getFilePath());
+        $this->assertInstanceOf(FileStream::class, $iterator);
+        $this->assertEquals($file, (string)$iterator->url());
     }
 
     public function test_getIterator_creates_iterator_by_custom_callable()
     {
         $file = $this->dataFile('ascii-data-eol-l.txt');
-        $fs = new LocalFilesystem;
+        $fs = new FileStream($file);
         $content = $this->newContent($file, $fs)->setMimeType('text/plain');
 
         $callable = new LoggingCallable(function ($content, $fileSystem) {
@@ -113,9 +113,54 @@ class BinaryContentTest extends \Ems\IntegrationTest
         $this->assertSame($fs, $callable->arg(1));
     }
 
-    protected function newContent($url='', FSContract $filesystem=null)
+    public function test_url_takes_url_from_stream()
     {
-        return (new BinaryContent($filesystem ?: new LocalFilesystem))->setUrl($url);
+        $file = $this->dataFile('ascii-data-eol-l.txt');
+        $fs = new FileStream($file);
+        $content = $this->newContent('', $fs)->setMimeType('text/plain');
+
+        $this->assertSame($fs->url(), $content->url());
+
+    }
+
+    public function test_count_with_uncountable_stream()
+    {
+        $file = $this->dataFile('ascii-data-eol-l.txt');
+        $resource = fopen($file, 'r');
+        $fs = new ResourceStream($resource);
+        $content = $this->newContent('', $fs)->setMimeType('text/plain');
+
+        $this->assertCount(strlen(file_get_contents($file)), $content);
+        fclose($resource);
+
+    }
+
+    public function test_url_returns_url_object_if_non_passed()
+    {
+        $content = $this->newContent('')->setMimeType('text/plain');
+
+        $this->assertInstanceOf(Url::class, $content->url());
+
+    }
+
+    /**
+     * @expectedException \Ems\Contracts\Core\Errors\ConfigurationError
+     */
+    public function test_iterate_throws_exception_if_no_stream_and_no_url()
+    {
+        $content = $this->newContent('')->setMimeType('text/plain');
+
+        $content->getIterator();
+
+    }
+
+    protected function newContent($url='', Stream $stream=null)
+    {
+        $content = new BinaryContent($stream);
+        if ($url) {
+            return $content->setUrl($url);
+        }
+        return $content;
     }
 
 }
