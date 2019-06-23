@@ -181,6 +181,23 @@ class BinaryContent implements Content
     }
 
     /**
+     * Create content from a string.
+     *
+     * @param string $string
+     * @param string $mimeType (optional)
+     *
+     * @return static
+     */
+    public static function forString($string, $mimeType='')
+    {
+        $content = new static(new StringStream($string));
+        if ($mimeType) {
+            $content->setMimeType($mimeType);
+        }
+        return $content;
+    }
+
+    /**
      * Create the iterator
      *
      * @return Iterator
