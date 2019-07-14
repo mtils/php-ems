@@ -257,8 +257,8 @@ class PhpSearchEngineTest extends TestCase
 
         static::$items = [];
 
-        $rows = new CsvContent(new FileStream($this->dataFile('Countries-ISO-3166-2.csv')));
-        //$rows->setUrl(new Url($this->dataFile('Countries-ISO-3166-2.csv')));
+        $rows = new CsvContent(new FileStream(static::dataFile('Countries-ISO-3166-2.csv')));
+        //$rows->setUrl(new Url(static::dataFile('Countries-ISO-3166-2.csv')));
 
         /** @var array $row */
         foreach ($rows->rows() as $row) {

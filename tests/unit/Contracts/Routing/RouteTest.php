@@ -16,8 +16,8 @@ class RouteTest extends TestCase
      */
     public function it_can_be_constructed_without_parameters()
     {
-        $this->assertInstanceOf(Route::class, new Route());
-        $this->assertInstanceOf(Arrayable::class, new Route());
+        $this->assertInstanceOf(Route::class, $this->newRoute());
+        $this->assertInstanceOf(Arrayable::class, $this->newRoute());
     }
 
     /**
@@ -25,8 +25,7 @@ class RouteTest extends TestCase
      */
     public function method_sets_method_by_string()
     {
-        $this->assertEquals(['GET'], $this->newRoute()->method('GET')->methods);
-        $this->assertEquals(['GET', 'HEAD'], $this->newRoute()->method('GET', 'HEAD')->methods);
+        $this->assertEquals(['GET'], $this->newRoute('GET')->methods);
         $this->assertEquals(['PUT'], $this->newRoute('PUT')->methods);
     }
 
@@ -35,18 +34,17 @@ class RouteTest extends TestCase
      */
     public function method_sets_method_by_array()
     {
-        $this->assertEquals(['GET'], $this->newRoute()->method(['GET'])->methods);
-        $this->assertEquals(['GET', 'HEAD'], $this->newRoute()->method(['GET', 'HEAD'])->methods);
+        $this->assertEquals(['GET'], $this->newRoute(['GET'])->methods);
+        $this->assertEquals(['GET', 'HEAD'], $this->newRoute(['GET', 'HEAD'])->methods);
         $this->assertEquals(['PUT'], $this->newRoute(['PUT'])->methods);
     }
 
     /**
      * @test
      */
-    public function uri_sets_uri()
+    public function pattern_sets_pattern()
     {
-        $this->assertEquals('/foo', $this->newRoute()->uri('/foo')->uri);
-        $this->assertEquals('/foo', $this->newRoute('', '/foo')->uri);
+        $this->assertEquals('/foo', $this->newRoute('GET', '/foo')->pattern);
     }
 
     /**
@@ -55,7 +53,7 @@ class RouteTest extends TestCase
     public function handler_sets_handler()
     {
         $handler = [static::class, 'index'];
-        $this->assertSame($handler, $this->newRoute()->handler($handler)->handler);
+        $this->assertSame($handler, $this->newRoute('GET', '/foo', $handler)->handler);
         $this->assertSame($handler, $this->newRoute('','',$handler)->handler);
     }
 
@@ -182,21 +180,21 @@ class RouteTest extends TestCase
      */
     public function toArray_returns_data()
     {
-        $route = $this->newRoute();
-        $data = $route->uri('/foo')->toArray();
-        $this->assertEquals('/foo', $data['uri']);
+        $route = $this->newRoute('GET', '/foo');
+        $data = $route->toArray();
+        $this->assertEquals('/foo', $data['pattern']);
 
     }
 
     /**
      * @param string|array $method
-     * @param string       $uri
+     * @param string       $pattern
      * @param mixed        $handler
      *
      * @return Route
      */
-    protected function newRoute($method=[], $uri='', $handler=null)
+    protected function newRoute($method=[], $pattern='', $handler=null)
     {
-        return new Route($method, $uri, $handler);
+        return new Route($method, $pattern, $handler);
     }
 }

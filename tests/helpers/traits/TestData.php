@@ -8,13 +8,39 @@ namespace Ems;
 
 trait TestData
 {
-    protected function dataFile($file)
+    /**
+     * Return the full path to a data file.
+     *
+     * @param string $file
+     * @return bool|string
+     */
+    protected static function dataFile($file)
     {
         return realpath(__DIR__."/../../data/$file");
     }
 
-    protected function dataFileContent($file)
+    /**
+     * Get the contents of a data file
+     *
+     * @param string $file
+     *
+     * @return false|string
+     */
+    protected static function dataFileContent($file)
     {
-        return file_get_contents($this->dataFile($file));
+        return file_get_contents(static::dataFile($file));
     }
+
+    /**
+     * @param string $file
+     *
+     * @return array
+     */
+    protected static function includeDataFile($file)
+    {
+        /** @noinspection PhpIncludeInspection */
+        return include(static::dataFile($file));
+    }
+
+
 }

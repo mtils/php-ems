@@ -11,7 +11,7 @@ class CsvDetectorTest extends \Ems\IntegrationTest
 
     public function test_separator_returns_right_separator_with_simple_format()
     {
-        $csv = $this->dataFileContent('simple-pipe-placeholder.csv');
+        $csv = static::dataFileContent('simple-pipe-placeholder.csv');
 
         $detector = $this->newDetector();
 
@@ -215,7 +215,7 @@ class CsvDetectorTest extends \Ems\IntegrationTest
     {
         $csvContent = isset($this->csvContents[$file]) ?
                       $this->csvContents[$file] :
-                      $this->dataFileContent($file);
+                      static::dataFileContent($file);
 
         return str_replace(' | ', $separator, $csvContent);
     }

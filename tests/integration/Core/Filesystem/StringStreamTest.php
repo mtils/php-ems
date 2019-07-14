@@ -67,7 +67,7 @@ class StringStreamTest extends \Ems\IntegrationTest
      */
     public function reads_string_in_chunks()
     {
-        $file = $this->dataFile('ascii-data-eol-l.txt');
+        $file = static::dataFile('ascii-data-eol-l.txt');
 
         $content = file_get_contents($file);
 
@@ -108,7 +108,7 @@ class StringStreamTest extends \Ems\IntegrationTest
      */
     public function read_chunk()
     {
-        $fileContent = file_get_contents($this->dataFile('ascii-data-eol-l.txt'));
+        $fileContent = file_get_contents(static::dataFile('ascii-data-eol-l.txt'));
 
         $stream = $this->newStream($fileContent);
         $content = "$stream";
@@ -122,7 +122,7 @@ class StringStreamTest extends \Ems\IntegrationTest
      */
     public function reads_in_toString()
     {
-        $fileContent = file_get_contents($this->dataFile('ascii-data-eol-l.txt'));
+        $fileContent = file_get_contents(static::dataFile('ascii-data-eol-l.txt'));
 
         $stream = $this->newStream($fileContent);
 
@@ -152,7 +152,7 @@ class StringStreamTest extends \Ems\IntegrationTest
      */
     public function count_returns_strlen()
     {
-        $fileContent = $this->dataFileContent('ascii-data-eol-l.txt');
+        $fileContent = static::dataFileContent('ascii-data-eol-l.txt');
 
         $stream = $this->newStream($fileContent);
         $this->assertCount(strlen($fileContent), $stream);
@@ -173,7 +173,7 @@ class StringStreamTest extends \Ems\IntegrationTest
      */
     public function write_file_in_one_row()
     {
-        $content = $this->dataFileContent('ascii-data-eol-l.txt');
+        $content = static::dataFileContent('ascii-data-eol-l.txt');
 
         $stream = $this->newStream('', 'r+');
 
@@ -190,7 +190,7 @@ class StringStreamTest extends \Ems\IntegrationTest
      */
     public function write_file_in_chunks()
     {
-        $content = $this->dataFileContent('ascii-data-eol-l.txt');
+        $content = static::dataFileContent('ascii-data-eol-l.txt');
 
         $readStream = $this->newStream($content)->setChunkSize(256);
 

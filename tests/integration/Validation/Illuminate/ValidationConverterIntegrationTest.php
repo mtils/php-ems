@@ -465,7 +465,7 @@ class ValidationConverterIntegrationTest extends \Ems\LaravelIntegrationTest
     protected function messages()
     {
         if (!$this->messages) {
-            $this->messages = include($this->dataFile('validation/illuminate/validation.php'));
+            $this->messages = include(static::dataFile('validation/illuminate/validation.php'));
         }
         return $this->messages;
     }

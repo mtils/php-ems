@@ -25,7 +25,7 @@ class CsvContentTest extends \Ems\IntegrationTest
 
     public function test_rows_returns_configured_iterator()
     {
-        $file = $this->dataFile('simple-pipe-placeholder-no-header.csv');
+        $file = static::dataFile('simple-pipe-placeholder-no-header.csv');
         $content = $this->newContent($file);
 
         $iterator = $content->rows();

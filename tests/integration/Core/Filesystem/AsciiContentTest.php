@@ -20,7 +20,7 @@ class AsciiContentTest extends \Ems\IntegrationTest
 
     public function test_lines_returns_configured_iterator()
     {
-        $file = $this->dataFile('ascii-data-eol-l.txt');
+        $file = static::dataFile('ascii-data-eol-l.txt');
         $content = $this->newContent($file);
 
         $iterator = $content->lines();
@@ -29,7 +29,7 @@ class AsciiContentTest extends \Ems\IntegrationTest
 
     public function test_lines_count_returns_lineCount()
     {
-        $file = $this->dataFile('ascii-data-eol-l.txt');
+        $file = static::dataFile('ascii-data-eol-l.txt');
         $content = $this->newContent($file);
         $iterator = new LineReadIterator($file);
         $count = count($iterator);
@@ -38,14 +38,14 @@ class AsciiContentTest extends \Ems\IntegrationTest
 
     public function _test_toString_returns_content()
     {
-        $file = $this->dataFile('ascii-data-eol-l.txt');
+        $file = static::dataFile('ascii-data-eol-l.txt');
         $content = $this->newContent($file);
         $this->assertEquals(file_get_contents($file), "$content");
     }
 
     public function _test_getIterator_returns_configured_iterator()
     {
-        $file = $this->dataFile('ascii-data-eol-l.txt');
+        $file = static::dataFile('ascii-data-eol-l.txt');
         $content = $this->newContent($file)->setMimeType('text/plain');
         $iterator = $content->getIterator();
 
@@ -54,7 +54,7 @@ class AsciiContentTest extends \Ems\IntegrationTest
 
     public function _test_getIterator_creates_iterator_by_custom_callable()
     {
-        $file = $this->dataFile('ascii-data-eol-l.txt');
+        $file = static::dataFile('ascii-data-eol-l.txt');
         $fs = new LocalFilesystem;
         $content = $this->newContent($file, $fs)->setMimeType('text/plain');
 

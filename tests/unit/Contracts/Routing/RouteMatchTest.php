@@ -83,7 +83,7 @@ class RouteMatchTest extends TestCase
 
     protected function newMatch(Route $route=null, $method='GET', UrlContract $url=null, array $parameters=[])
     {
-        $route = $route ?: new Route($method, '/');
+        $route = $route ?: new Route($method, '/', 'handle');
         $url = $url ?: new Url('https://web-utils.de');
         return new RouteMatch($route, $method, $url, $parameters);
     }

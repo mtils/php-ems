@@ -8,9 +8,10 @@ namespace Ems\Routing;
 
 use Ems\Contracts\Core\Input;
 use Ems\Contracts\Core\SupportsCustomFactory;
+use Ems\Contracts\Routing\Route;
 use Ems\Contracts\Routing\RouteCollection;
 use Ems\Contracts\Routing\RouteMatch;
-use Ems\Contracts\Routing\RouteMatcher;
+use Ems\Contracts\Routing\Interpreter;
 use Ems\Contracts\Routing\Router as RouterContract;
 use Ems\Core\Support\CustomFactorySupport;
 
@@ -19,12 +20,12 @@ class Router implements RouterContract, SupportsCustomFactory
     use CustomFactorySupport;
 
     /**
-     * @var RouteCollection
+     * @var Dispatcher
      */
     protected $routes;
 
     /**
-     * @var RouteMatcher
+     * @var Interpreter
      */
     protected $matcher;
 
@@ -34,11 +35,17 @@ class Router implements RouterContract, SupportsCustomFactory
     protected $routableProvider;
 
     /**
+     * @var \Ems\Contracts\Routing\Dispatcher
+     */
+    protected $registry;
+
+    /**
      * @param Input $input
      * @return mixed
      */
     public function handle(Input $input)
     {
+        $this->registry->
         $routes = $this->routes->getByClientType($input->clientType())
                                ->getByScope($input->routeScope());
 
@@ -48,7 +55,7 @@ class Router implements RouterContract, SupportsCustomFactory
     }
 
     /**
-     * @return RouteCollection
+     * @return Dispatcher|Route[]
      */
     public function routes()
     {

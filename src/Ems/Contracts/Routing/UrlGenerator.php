@@ -10,7 +10,7 @@ use Ems\Contracts\Core\Entity;
  * etc can be setted on the returned object instead of passing the to the
  * method.
  **/
-interface UrlGenerator
+interface  UrlGenerator
 {
     /**
      * The to method accepts all kind of parameters. Passing an Entity

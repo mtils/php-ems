@@ -176,7 +176,7 @@ class ResourceStreamTest extends \Ems\IntegrationTest
      */
     public function reads_filled_txt_file_in_chunks()
     {
-        $file = $this->dataFile('ascii-data-eol-l.txt');
+        $file = static::dataFile('ascii-data-eol-l.txt');
 
         $resource = fopen($file, 'r');
 
@@ -219,7 +219,7 @@ class ResourceStreamTest extends \Ems\IntegrationTest
      */
     public function reads_filled_txt_file_in_toString()
     {
-        $file = $this->dataFile('ascii-data-eol-l.txt');
+        $file = static::dataFile('ascii-data-eol-l.txt');
         $resource = fopen($file, 'r');
 
         $stream = $this->newStream($resource);
@@ -235,7 +235,7 @@ class ResourceStreamTest extends \Ems\IntegrationTest
      */
     public function instantiate_with_non_resource_throws_TypeException()
     {
-        $file = $this->dataFile('ascii-data-eol-l.txt');
+        $file = static::dataFile('ascii-data-eol-l.txt');
 
         $this->newStream($file, false);
     }
@@ -246,7 +246,7 @@ class ResourceStreamTest extends \Ems\IntegrationTest
     public function isOpen_returns_right_state()
     {
 
-        $file = $this->dataFile('ascii-data-eol-l.txt');
+        $file = static::dataFile('ascii-data-eol-l.txt');
         $resource = fopen($file, 'r');
 
         $stream = $this->newStream($resource);
@@ -265,7 +265,7 @@ class ResourceStreamTest extends \Ems\IntegrationTest
      */
     public function seek_moves_cursor()
     {
-        $file = $this->dataFile('ascii-data-eol-l.txt');
+        $file = static::dataFile('ascii-data-eol-l.txt');
         $resource = fopen($file, 'r');
 
         $stream = $this->newStream($resource)->setChunkSize(128);
@@ -299,7 +299,7 @@ class ResourceStreamTest extends \Ems\IntegrationTest
      */
     public function write_file_in_one_row()
     {
-        $inFile = $this->dataFile('ascii-data-eol-l.txt');
+        $inFile = static::dataFile('ascii-data-eol-l.txt');
 
         $content = file_get_contents($inFile);
 
@@ -322,7 +322,7 @@ class ResourceStreamTest extends \Ems\IntegrationTest
      */
     public function write_file_in_chunks()
     {
-        $inFile = $this->dataFile('ascii-data-eol-l.txt');
+        $inFile = static::dataFile('ascii-data-eol-l.txt');
         $content = file_get_contents($inFile);
 
         $readStream = $this->newStream(fopen($inFile, 'r'));
@@ -348,7 +348,7 @@ class ResourceStreamTest extends \Ems\IntegrationTest
      */
     public function write_file_by_other_stream()
     {
-        $inFile = $this->dataFile('ascii-data-eol-l.txt');
+        $inFile = static::dataFile('ascii-data-eol-l.txt');
         $content = file_get_contents($inFile);
 
         $inFileResource = fopen($inFile, 'r');
@@ -376,7 +376,7 @@ class ResourceStreamTest extends \Ems\IntegrationTest
      */
     public function isLocal()
     {
-        $inFile = $this->dataFile('ascii-data-eol-l.txt');
+        $inFile = static::dataFile('ascii-data-eol-l.txt');
         $inFileResource = fopen($inFile, 'r');
 
         $stream = $this->newStream($inFileResource);
@@ -393,7 +393,7 @@ class ResourceStreamTest extends \Ems\IntegrationTest
      */
     public function setTimeout()
     {
-        $inFile = $this->dataFile('ascii-data-eol-l.txt');
+        $inFile = static::dataFile('ascii-data-eol-l.txt');
         $inFileResource = fopen($inFile, 'r');
 
         $stream = $this->newStream($inFileResource);
@@ -410,7 +410,7 @@ class ResourceStreamTest extends \Ems\IntegrationTest
      */
     public function type()
     {
-        $inFile = $this->dataFile('ascii-data-eol-l.txt');
+        $inFile = static::dataFile('ascii-data-eol-l.txt');
         $inFileResource = fopen($inFile, 'r');
 
         $stream = $this->newStream($inFileResource);
@@ -427,7 +427,7 @@ class ResourceStreamTest extends \Ems\IntegrationTest
      */
     public function isTerminalType()
     {
-        $inFile = $this->dataFile('ascii-data-eol-l.txt');
+        $inFile = static::dataFile('ascii-data-eol-l.txt');
         $inFileResource = fopen($inFile, 'r');
 
         $stream = $this->newStream($inFileResource);
@@ -479,5 +479,5 @@ class ResourceStreamTest extends \Ems\IntegrationTest
         return new ResourceStream($resource ?: fopen($uri, 'r'));
     }
 
-    
+
 }

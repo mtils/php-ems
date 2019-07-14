@@ -236,7 +236,7 @@ class InputTest extends TestCase
     {
         $input = $this->newInput();
         $this->assertNull($input->matchedRoute());
-        $route = new Route();
+        $route = new Route('GET', 'foo', 'sleep');
         $this->assertSame($input, $input->setMatchedRoute($route));
         $this->assertSame($route, $input->matchedRoute());
     }

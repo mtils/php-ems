@@ -24,7 +24,7 @@ class LineReadIteratorTest extends IntegrationTest
 
     public function test_reads_filled_txt_file()
     {
-        $file = $this->dataFile('ascii-data-eol-l.txt');
+        $file = static::dataFile('ascii-data-eol-l.txt');
 
         $reader = $this->newReader($file, $this->stream($file, 1024));
 
@@ -57,7 +57,7 @@ class LineReadIteratorTest extends IntegrationTest
 
     public function test_count_returns_same_count_as_lines()
     {
-        $file = $this->dataFile('ascii-data-eol-l.txt');
+        $file = static::dataFile('ascii-data-eol-l.txt');
 
         $reader = $this->newReader($file, $this->stream($file, 1024));
 
@@ -79,7 +79,7 @@ class LineReadIteratorTest extends IntegrationTest
 
     public function test_reads_filled_windows_txt_file()
     {
-        $file = $this->dataFile('ascii-data-eol-w.txt');
+        $file = static::dataFile('ascii-data-eol-w.txt');
 
         $reader = $this->newReader($file);
 

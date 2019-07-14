@@ -73,21 +73,21 @@ class BinaryContentTest extends \Ems\IntegrationTest
 
     public function test_count_returns_filesize()
     {
-        $file = $this->dataFile('ascii-data-eol-l.txt');
+        $file = static::dataFile('ascii-data-eol-l.txt');
         $content = $this->newContent($file);
         $this->assertCount(filesize($file), $content);
     }
 
     public function test_toString_returns_content()
     {
-        $file = $this->dataFile('ascii-data-eol-l.txt');
+        $file = static::dataFile('ascii-data-eol-l.txt');
         $content = $this->newContent($file);
         $this->assertEquals(file_get_contents($file), "$content");
     }
 
     public function test_getIterator_returns_configured_iterator()
     {
-        $file = $this->dataFile('ascii-data-eol-l.txt');
+        $file = static::dataFile('ascii-data-eol-l.txt');
         $content = $this->newContent($file)->setMimeType('text/plain');
         $iterator = $content->getIterator();
 
@@ -97,7 +97,7 @@ class BinaryContentTest extends \Ems\IntegrationTest
 
     public function test_getIterator_creates_iterator_by_custom_callable()
     {
-        $file = $this->dataFile('ascii-data-eol-l.txt');
+        $file = static::dataFile('ascii-data-eol-l.txt');
         $fs = new FileStream($file);
         $content = $this->newContent($file, $fs)->setMimeType('text/plain');
 
@@ -115,7 +115,7 @@ class BinaryContentTest extends \Ems\IntegrationTest
 
     public function test_url_takes_url_from_stream()
     {
-        $file = $this->dataFile('ascii-data-eol-l.txt');
+        $file = static::dataFile('ascii-data-eol-l.txt');
         $fs = new FileStream($file);
         $content = $this->newContent('', $fs)->setMimeType('text/plain');
 
@@ -125,7 +125,7 @@ class BinaryContentTest extends \Ems\IntegrationTest
 
     public function test_count_with_uncountable_stream()
     {
-        $file = $this->dataFile('ascii-data-eol-l.txt');
+        $file = static::dataFile('ascii-data-eol-l.txt');
         $resource = fopen($file, 'r');
         $fs = new ResourceStream($resource);
         $content = $this->newContent('', $fs)->setMimeType('text/plain');

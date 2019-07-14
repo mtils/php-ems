@@ -46,7 +46,7 @@ class FileStreamTest extends \Ems\IntegrationTest
     {
         $this->assertEquals('stream', $this->newStream()->type());
 
-        $file = $this->dataFile('ascii-data-eol-l.txt');
+        $file = static::dataFile('ascii-data-eol-l.txt');
 
         $stream = $this->newStream($file)->setChunkSize(1024);
 
@@ -129,7 +129,7 @@ class FileStreamTest extends \Ems\IntegrationTest
      */
     public function reads_filled_txt_file_in_chunks()
     {
-        $file = $this->dataFile('ascii-data-eol-l.txt');
+        $file = static::dataFile('ascii-data-eol-l.txt');
 
         $stream = $this->newStream($file)->setChunkSize(1024);
 
@@ -170,7 +170,7 @@ class FileStreamTest extends \Ems\IntegrationTest
      */
     public function read_chunk()
     {
-        $file = $this->dataFile('ascii-data-eol-l.txt');
+        $file = static::dataFile('ascii-data-eol-l.txt');
 
         $stream = $this->newStream($file);
         $content = "$stream";
@@ -184,7 +184,7 @@ class FileStreamTest extends \Ems\IntegrationTest
      */
     public function reads_filled_txt_file_in_toString()
     {
-        $file = $this->dataFile('ascii-data-eol-l.txt');
+        $file = static::dataFile('ascii-data-eol-l.txt');
 
         $stream = $this->newStream($file);
         $fileContent = file_get_contents($file);
@@ -198,7 +198,7 @@ class FileStreamTest extends \Ems\IntegrationTest
      */
     public function reads_empty_file()
     {
-        $file = $this->dataFile('empty.txt');
+        $file = static::dataFile('empty.txt');
 
         $stream = $this->newStream($file)->setChunkSize(1024);
 
@@ -218,7 +218,7 @@ class FileStreamTest extends \Ems\IntegrationTest
      */
     public function read_complete_string_throws_exception_if_write_only()
     {
-        $file = $this->dataFile('ascii-data-eol-l.txt');
+        $file = static::dataFile('ascii-data-eol-l.txt');
 
         $stream = $this->newStream($file, 'w');
         $stream->toString();
@@ -231,7 +231,7 @@ class FileStreamTest extends \Ems\IntegrationTest
      */
     public function read_string_in_chunks_throws_exception_if_write_only()
     {
-        $file = $this->dataFile('ascii-data-eol-l.txt');
+        $file = static::dataFile('ascii-data-eol-l.txt');
 
         $stream = $this->newStream($file, 'w');
 
@@ -257,7 +257,7 @@ class FileStreamTest extends \Ems\IntegrationTest
      */
     public function count_returns_filesize()
     {
-        $file = $this->dataFile('ascii-data-eol-l.txt');
+        $file = static::dataFile('ascii-data-eol-l.txt');
 
         $stream = $this->newStream($file);
         $this->assertCount(filesize($file), $stream);
@@ -269,7 +269,7 @@ class FileStreamTest extends \Ems\IntegrationTest
      */
     public function open_creates_handle()
     {
-        $file = $this->dataFile('ascii-data-eol-l.txt');
+        $file = static::dataFile('ascii-data-eol-l.txt');
 
         $stream = $this->newStream($file);
 
@@ -284,7 +284,7 @@ class FileStreamTest extends \Ems\IntegrationTest
      */
     public function seek_moves_cursor()
     {
-        $file = $this->dataFile('ascii-data-eol-l.txt');
+        $file = static::dataFile('ascii-data-eol-l.txt');
 
         $stream = $this->newStream($file)->setChunkSize(128);
 
@@ -326,7 +326,7 @@ class FileStreamTest extends \Ems\IntegrationTest
      */
     public function metaData_returns_data()
     {
-        $file = $this->dataFile('ascii-data-eol-l.txt');
+        $file = static::dataFile('ascii-data-eol-l.txt');
 
         $stream = $this->newStream($file)->setChunkSize(128);
 
@@ -380,7 +380,7 @@ class FileStreamTest extends \Ems\IntegrationTest
      */
     public function write_file_in_one_row()
     {
-        $inFile = $this->dataFile('ascii-data-eol-l.txt');
+        $inFile = static::dataFile('ascii-data-eol-l.txt');
         $content = file_get_contents($inFile);
 
         $outFile = $this->tempFileName();
@@ -399,7 +399,7 @@ class FileStreamTest extends \Ems\IntegrationTest
      */
     public function write_file_in_chunks()
     {
-        $inFile = $this->dataFile('ascii-data-eol-l.txt');
+        $inFile = static::dataFile('ascii-data-eol-l.txt');
         $content = file_get_contents($inFile);
 
         $readStream = $this->newStream($inFile);
@@ -424,7 +424,7 @@ class FileStreamTest extends \Ems\IntegrationTest
      */
     public function write_file_by_other_stream()
     {
-        $inFile = $this->dataFile('ascii-data-eol-l.txt');
+        $inFile = static::dataFile('ascii-data-eol-l.txt');
         $content = file_get_contents($inFile);
 
         $readStream = $this->newStream($inFile);

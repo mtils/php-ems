@@ -25,20 +25,20 @@ class CsvReadIteratorTest extends IntegrationTest
 
     public function test_getSeparator_detects_separator_if_non_setted()
     {
-        $reader = $this->newReader($this->dataFile('simple-pipe-placeholder-normalized.csv'));
+        $reader = $this->newReader(static::dataFile('simple-pipe-placeholder-normalized.csv'));
         $this->assertEquals('|', $reader->getSeparator());
     }
 
     public function test_getSeparator_returns_setted_separator()
     {
-        $reader = $this->newReader($this->dataFile('simple-pipe-placeholder-normalized.csv'));
+        $reader = $this->newReader(static::dataFile('simple-pipe-placeholder-normalized.csv'));
         $this->assertSame($reader, $reader->setSeparator(';'));
         $this->assertEquals(';', $reader->getSeparator());
     }
 
     public function test_setDelimiter_sets_delimiter()
     {
-        $reader = $this->newReader($this->dataFile('simple-pipe-placeholder-normalized.csv'));
+        $reader = $this->newReader(static::dataFile('simple-pipe-placeholder-normalized.csv'));
         $this->assertSame($reader, $reader->setDelimiter("'"));
         $this->assertEquals("'", $reader->getDelimiter());
     }
@@ -50,7 +50,7 @@ class CsvReadIteratorTest extends IntegrationTest
 
     public function test_getHeader_detects_header_if_not_setted()
     {
-        $reader = $this->newReader($this->dataFile('simple-pipe-placeholder-normalized.csv'));
+        $reader = $this->newReader(static::dataFile('simple-pipe-placeholder-normalized.csv'));
         $this->assertEquals(
             ['id', 'name', 'last_name', 'age', 'street'],
             $reader->getHeader()
@@ -72,7 +72,7 @@ class CsvReadIteratorTest extends IntegrationTest
 
     public function test_read_simple_csv_file()
     {
-        $reader = $this->newReader($this->dataFile('simple-pipe-placeholder-normalized.csv'));
+        $reader = $this->newReader(static::dataFile('simple-pipe-placeholder-normalized.csv'));
 
         $result = [];
 
@@ -102,7 +102,7 @@ class CsvReadIteratorTest extends IntegrationTest
 
     public function test_read_simple_csv_file_when_no_header_setted()
     {
-        $reader = $this->newReader($this->dataFile('simple-pipe-placeholder-no-header.csv'));
+        $reader = $this->newReader(static::dataFile('simple-pipe-placeholder-no-header.csv'));
 
         $result = [];
 
@@ -133,7 +133,7 @@ class CsvReadIteratorTest extends IntegrationTest
 
     public function test_read_country_csv_file()
     {
-        $reader = $this->newReader($this->dataFile('Countries-ISO-3166-2.csv'));
+        $reader = $this->newReader(static::dataFile('Countries-ISO-3166-2.csv'));
 
         $firstRowShouldBe = [
             'Sort Order'               => '1',
@@ -185,7 +185,7 @@ class CsvReadIteratorTest extends IntegrationTest
 
     public function test_read_country_csv_file_with_skippable_lines()
     {
-        $reader = $this->newReader($this->dataFile('Countries-ISO-3166-2-semicolon-blank-lines.csv'));
+        $reader = $this->newReader(static::dataFile('Countries-ISO-3166-2-semicolon-blank-lines.csv'));
 
         $firstRowShouldBe = [
             'Sort Order'               => '1',
@@ -237,7 +237,7 @@ class CsvReadIteratorTest extends IntegrationTest
 
     public function test_read_with_different_encoding()
     {
-        $reader = $this->newReader($this->dataFile('simple-semicolon-placeholder-iso.csv'));
+        $reader = $this->newReader(static::dataFile('simple-semicolon-placeholder-iso.csv'));
 
         $reader->setOption('encoding', 'iso-8859-1');
 
@@ -279,7 +279,7 @@ class CsvReadIteratorTest extends IntegrationTest
     public function test_read_with_wrong_encoding_throws_InvalidCharsetException()
     {
 
-        $reader = $this->newReader($this->dataFile('simple-semicolon-placeholder-iso.csv'));
+        $reader = $this->newReader(static::dataFile('simple-semicolon-placeholder-iso.csv'));
         $reader->setDetector((new CsvDetector)->setOption(CsvDetector::FORCE_HEADER_LINE, true));
 
         $this->assertEquals(
@@ -320,7 +320,7 @@ class CsvReadIteratorTest extends IntegrationTest
     public function test_read_undetectable_header_throws_DetectionFailedException()
     {
 
-        $reader = $this->newReader($this->dataFile('simple-pipe-placeholder-no-header.csv'));
+        $reader = $this->newReader(static::dataFile('simple-pipe-placeholder-no-header.csv'));
         $reader->setDetector((new CsvDetector)->setOption(CsvDetector::FORCE_HEADER_LINE, true));
 
         $reader->getHeader();
@@ -329,27 +329,27 @@ class CsvReadIteratorTest extends IntegrationTest
 
     public function test_count_returns_count_of_simple_file()
     {
-        $reader = $this->newReader($this->dataFile('simple-pipe-placeholder-normalized.csv'));
+        $reader = $this->newReader(static::dataFile('simple-pipe-placeholder-normalized.csv'));
         $this->assertCount(2, $reader);
 
     }
 
     public function test_count_returns_count_of_simple_file_without_header()
     {
-        $reader = $this->newReader($this->dataFile('simple-pipe-placeholder-no-header.csv'));
+        $reader = $this->newReader(static::dataFile('simple-pipe-placeholder-no-header.csv'));
         $this->assertCount(2, $reader);
 
     }
 
     public function test_count_returns_count_of_country_file()
     {
-        $reader = $this->newReader($this->dataFile('Countries-ISO-3166-2.csv'));
+        $reader = $this->newReader(static::dataFile('Countries-ISO-3166-2.csv'));
         $this->assertCount(268, $reader);
     }
 
     public function test_count_returns_count_of_country_file_with_skippable_lines()
     {
-        $reader = $this->newReader($this->dataFile('Countries-ISO-3166-2-semicolon-blank-lines.csv'));
+        $reader = $this->newReader(static::dataFile('Countries-ISO-3166-2-semicolon-blank-lines.csv'));
         $this->assertCount(268, $reader);
     }
 

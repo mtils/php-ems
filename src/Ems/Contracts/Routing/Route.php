@@ -8,7 +8,9 @@ namespace Ems\Contracts\Routing;
 
 use function array_values;
 use Ems\Contracts\Core\Arrayable;
+use Ems\Core\Support\ObjectReadAccess;
 use function func_get_args;
+use function is_array;
 
 /**
  * Class Route
@@ -26,7 +28,7 @@ use function func_get_args;
  * @package Ems\Contracts\Routing
  *
  * @property-read array     $methods     (http)-methods The assigned methods of this route
- * @property-read string    $uri         The route uri
+ * @property-read string    $pattern     The route pattern
  * @property-read mixed     $handler     The assigned (whatever) handler
  * @property-read string    $name        The unique name of this route
  * @property-read array     $middlewares The middlewares of this route
@@ -36,12 +38,14 @@ use function func_get_args;
  */
 class Route implements Arrayable
 {
+    use ObjectReadAccess;
+
     /**
      * @var array
      */
-    protected $properties = [
+    protected $_properties = [
         'methods'     => [],
-        'uri'         => '',
+        'pattern'     => '',
         'handler'     => null,
         'name'        => '',
         'middlewares' => [],
@@ -53,55 +57,15 @@ class Route implements Arrayable
     /**
      * RouteConfiguration constructor.
      *
-     * @param string|array $method (optional)
-     * @param string       $uri (optional)
-     * @param mixed        $handler (optional)
+     * @param string|array $method
+     * @param string       $pattern
+     * @param mixed        $handler
      */
-    public function __construct($method=[], $uri='', $handler=null)
+    public function __construct($method, $pattern, $handler)
     {
-        $this->method($method);
-        $this->uri($uri);
-        if ($handler) {
-            $this->handler($handler);
-        }
-    }
-
-    /**
-     * Assign the http method(s) which should handled by this route
-     *
-     * @param $method
-     *
-     * @return $this
-     */
-    public function method($method)
-    {
-        $this->properties['methods'] = is_array($method) ? $method : func_get_args();
-        return $this;
-    }
-
-    /**
-     * Assign the url of this route.
-     *
-     * @param string $uri
-     * @return $this
-     */
-    public function uri($uri)
-    {
-        $this->properties['uri'] = $uri;
-        return $this;
-    }
-
-    /**
-     * Assign a handler for this route
-     *
-     * @param mixed $handler
-     *
-     * @return $this
-     */
-    public function handler($handler)
-    {
-        $this->properties['handler'] = $handler;
-        return $this;
+        $this->setMethod($method);
+        $this->setPattern($pattern);
+        $this->setHandler($handler);
     }
 
     /**
@@ -112,7 +76,7 @@ class Route implements Arrayable
      */
     public function name($name)
     {
-        $this->properties['name'] = $name;
+        $this->_properties['name'] = $name;
         return $this;
     }
 
@@ -131,14 +95,14 @@ class Route implements Arrayable
     public function middleware($middleware=null)
     {
         if ($middleware === null) {
-            $this->properties['middlewares'] = [];
+            $this->_properties['middlewares'] = [];
             return $this;
         }
 
         $middlewares = is_array($middleware) ? array_values($middleware) : func_get_args();
 
         foreach ($middlewares as $singleMiddleware) {
-            $this->properties['middlewares'][] = $singleMiddleware;
+            $this->_properties['middlewares'][] = $singleMiddleware;
         }
         return $this;
     }
@@ -153,7 +117,7 @@ class Route implements Arrayable
      */
     public function clientType($type)
     {
-        $this->properties['clientTypes'] = is_array($type) ? $type : func_get_args();
+        $this->_properties['clientTypes'] = is_array($type) ? $type : func_get_args();
         return $this;
     }
 
@@ -166,7 +130,7 @@ class Route implements Arrayable
      */
     public function scope($scope)
     {
-        $this->properties['scopes'] = is_array($scope) ? $scope : func_get_args();
+        $this->_properties['scopes'] = is_array($scope) ? $scope : func_get_args();
         return $this;
     }
 
@@ -181,21 +145,11 @@ class Route implements Arrayable
     public function defaults($key, $value=null)
     {
         if (is_array($key)) {
-            $this->properties['defaults'] = $key;
+            $this->_properties['defaults'] = $key;
             return $this;
         }
-        $this->properties['defaults'][$key] = $value;
+        $this->_properties['defaults'][$key] = $value;
         return $this;
-    }
-
-    /**
-     * @param string $name
-     *
-     * @return mixed
-     */
-    public function __get($name)
-    {
-        return $this->properties[$name];
     }
 
     /**
@@ -205,8 +159,45 @@ class Route implements Arrayable
      **/
     public function toArray()
     {
-        return $this->properties;
+        return $this->_properties;
     }
 
+    /**
+     * Assign the http method(s) which should handled by this route
+     *
+     * @param $method
+     *
+     * @return $this
+     */
+    protected function setMethod($method)
+    {
+        $this->_properties['methods'] = is_array($method) ? $method : func_get_args();
+        return $this;
+    }
+
+    /**
+     * Assign the url of this route.
+     *
+     * @param string $pattern
+     * @return $this
+     */
+    protected function setPattern($pattern)
+    {
+        $this->_properties['pattern'] = $pattern;
+        return $this;
+    }
+
+    /**
+     * Assign a handler for this route
+     *
+     * @param mixed $handler
+     *
+     * @return $this
+     */
+    protected function setHandler($handler)
+    {
+        $this->_properties['handler'] = $handler;
+        return $this;
+    }
 
 }

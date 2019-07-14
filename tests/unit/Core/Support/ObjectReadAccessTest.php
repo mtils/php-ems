@@ -3,7 +3,9 @@
 
 namespace Ems\Core\Support;
 
-class ObjectReadAccessTest extends \Ems\TestCase
+use Ems\TestCase;
+
+class ObjectReadAccessTest extends TestCase
 {
 
     /**
