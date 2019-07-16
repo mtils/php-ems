@@ -8,11 +8,8 @@
 
 namespace Ems\Contracts\Http;
 
-use Ems\Contracts\Core\Stringable;
-use Ems\Contracts\Core\ArrayData;
+use Ems\Contracts\Core\Response as CoreResponse;
 use Ems\Contracts\Core\Serializer;
-use IteratorAggregate;
-use Countable;
 
 /**
  * Interface Response
@@ -28,22 +25,14 @@ use Countable;
  *
  * @package Ems\Contracts\Http
  */
-interface Response extends Stringable, ArrayData, Countable, IteratorAggregate
+interface Response extends CoreResponse
 {
-
     /**
      * Return the HTTP status code
      *
      * @return int
      */
     public function status();
-
-    /**
-     * Return the content type of this response.
-     *
-     * @return string
-     */
-    public function contentType();
 
     /**
      * Return the headers.
@@ -73,17 +62,6 @@ interface Response extends Stringable, ArrayData, Countable, IteratorAggregate
      * @return string
      */
     public function raw();
-
-    /**
-     * Returns the native php data which should be sent with the response.
-     * So if you have a view, which could be rendered the view should be assigned
-     * to the payload and its __toString() output should be assigned to body.
-     * If you have an api which passes data arround you would add the objects
-     * or arrays to the payload. They will then be serialized into the body.
-     *
-     * @return mixed
-     */
-    public function payload();
 
     /**
      * Return the serializer to auto serialize or deserialize the payload.

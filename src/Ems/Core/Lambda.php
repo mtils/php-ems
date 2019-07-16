@@ -3,32 +3,37 @@
 
 namespace Ems\Core;
 
-use function call_user_func;
-use function class_exists;
 use Closure;
 use Ems\Contracts\Core\Stringable;
+use Ems\Contracts\Core\StringableTrait;
+use Ems\Contracts\Core\Type;
+use Ems\Core\Exceptions\KeyNotFoundException;
 use Ems\Core\Exceptions\UnsupportedParameterException;
-use Ems\Core\Support\StringableTrait;
+use LogicException;
+use ReflectionException;
+use ReflectionFunction;
+use ReflectionFunctionAbstract;
+use ReflectionMethod;
+use UnexpectedValueException;
+use function array_merge;
+use function call_user_func;
+use function class_exists;
+use function explode;
+use function func_get_args;
 use function function_exists;
 use function is_array;
 use function is_callable;
 use function is_object;
 use function is_string;
-use LogicException;
 use function method_exists;
-use ReflectionException;
-use UnexpectedValueException;
-use ReflectionMethod;
-use ReflectionFunction;
-use ReflectionFunctionAbstract;
-use Ems\Core\Exceptions\KeyNotFoundException;
+use function strpos;
 
 /**
  * This class is a helper class to allow inline evaluation of
  * parameters in dynamic calls like Container::call
  *
  * It also allows you to add additional parameters to your
- * callables which you don't know when registering them.
+ * callable which you don't know when registering them.
  *
  * The best way to understand how it is used look into its unit test.
  **/
@@ -97,6 +102,16 @@ class Lambda implements Stringable
     protected $injections = [];
 
     /**
+     * @var bool
+     */
+    protected $autoInject = false;
+
+    /**
+     * @var bool
+     */
+    protected $wasAutoInjected = false;
+
+    /**
      * @var array
      **/
     protected static $reflectionCache = [];
@@ -112,9 +127,12 @@ class Lambda implements Stringable
      * resolve this classes. (An IOCContainer or something similar)
      *
      * @param array|string|callable $call
-     * @param callable              $instanceResolver (optional)
-     **/
-    public function __construct($call, callable $instanceResolver=null)
+     * @param callable $instanceResolver (optional)
+     * @param bool $autoInject (default:false)
+     *
+     * @throws ReflectionException
+     */
+    public function __construct($call, callable $instanceResolver=null, $autoInject=false)
     {
         if ($call instanceof self) {
             throw new UnexpectedValueException("You cannot make a lambda to forward a lambda.");
@@ -122,6 +140,7 @@ class Lambda implements Stringable
 
         $this->call = $call;
         $this->instanceResolver = $instanceResolver;
+        $this->autoInject($autoInject);
 
     }
 
@@ -130,17 +149,50 @@ class Lambda implements Stringable
      *
      * @return mixed
      *
-     * @throws \ReflectionException
+     * @throws ReflectionException
      **/
     public function __invoke()
     {
         $callable = $this->getCallable();
+
+        if ($this->autoInject) {
+            return static::callFast([$this, 'trigger'], func_get_args());
+        }
 
         if ($this->injections) {
             return static::callNamed($callable, $this->injections, func_get_args());
         }
         $args = array_merge(func_get_args(), $this->additionalArgs);
         return static::call($callable, $args);
+    }
+
+    /**
+     * Same as __invoke but prefer to insert the passed arguments at positions
+     * were no (auto) injected arguments are.
+     *
+     * @see self::mergeArguments()
+     *
+     * @return mixed
+     *
+     * @throws ReflectionException
+     */
+    public function trigger()
+    {
+        $callable = $this->getCallable();
+
+        $args = array_merge(func_get_args(), $this->additionalArgs);
+
+        if ($this->autoInject && !$this->wasAutoInjected) {
+            $this->performAutoInjection();
+        }
+
+        if (!$this->injections) {
+            return static::call($callable, $args);
+        }
+
+        $allArgs = Lambda::mergeArguments($callable, $this->injections, $args);
+
+        return static::callFast($callable, $allArgs);
     }
 
     /**
@@ -159,14 +211,17 @@ class Lambda implements Stringable
     }
 
     /**
-     * Same as append, but replace all callables with lambdas.
-     *
-     * @see self::append()
+     * Same as append, but replace all callable values with lambdas.
      *
      * @param mixed $parameters
      *
      * @return self
-     **/
+     *
+     * @throws ReflectionException
+     *
+     * @see self::append()
+     *
+     */
     public function curry($parameters)
     {
         $parameters = is_array($parameters) ? $parameters : func_get_args();
@@ -185,6 +240,55 @@ class Lambda implements Stringable
     {
         $this->injections = $injections;
         return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getInjections()
+    {
+        return $this->injections;
+    }
+
+    /**
+     * Auto inject the parameters. If false is passed disable the auto
+     * injection. If $now is true perform the type resolution now and write it
+     * into the $injections array.
+     *
+     * @param bool $autoInject (default:true)
+     * @param bool $now (default:false)
+     *
+     * @return $this
+     *
+     * @throws ReflectionException
+     */
+    public function autoInject($autoInject=true, $now=false)
+    {
+        $this->autoInject = $autoInject;
+
+        if (!$this->autoInject) {
+            return $this;
+        }
+
+        if (!$this->instanceResolver) {
+            throw new LogicException('You have to assign a instance resolver to support auto injection');
+        }
+
+        if ($now) {
+            $this->performAutoInjection();
+        }
+
+        return $this;
+    }
+
+    /**
+     * Return true if the parameters should be automatically injected.
+     *
+     * @return bool
+     */
+    public function shouldAutoInject()
+    {
+        return $this->autoInject;
     }
 
     /**
@@ -335,7 +439,6 @@ class Lambda implements Stringable
 
     }
 
-
     /**
      * Just call a callable without parsing any lambdas
      *
@@ -400,7 +503,7 @@ class Lambda implements Stringable
      *
      * @return array
      *
-     * @throws \ReflectionException
+     * @throws ReflectionException
      **/
     public static function callNamed(callable $callable, array $inject, array $callArgs=[])
     {
@@ -421,7 +524,7 @@ class Lambda implements Stringable
      *
      * @return array
      *
-     * @throws \ReflectionException
+     * @throws ReflectionException
      **/
     public static function callMerged(callable $callable, array $inject, array $callArgs=[])
     {
@@ -454,12 +557,14 @@ class Lambda implements Stringable
     }
 
     /**
-     * Replace all callables in an array with lambdas
+     * Replace all callable values in an array with lambdas
      *
      * @param array $args
      *
      * @return array
-     **/
+     *
+     * @throws ReflectionException
+     */
     public static function currify(array $args)
     {
         $curried = [];
@@ -482,7 +587,9 @@ class Lambda implements Stringable
      * @param callable              $instanceResolver (optional)
      *
      * @return self
-     **/
+     *
+     * @throws ReflectionException
+     */
     public static function f($callable, callable $instanceResolver=null)
     {
         return new static($callable, $instanceResolver);
@@ -499,7 +606,7 @@ class Lambda implements Stringable
      *
      * @return array
      *
-     * @throws \ReflectionException
+     * @throws ReflectionException
      **/
     public static function reflect($callable)
     {
@@ -541,7 +648,7 @@ class Lambda implements Stringable
      *
      * @return array
      *
-     * @throws \ReflectionException
+     * @throws ReflectionException
      **/
     public static function toArguments($callable, array $inject, array $callArgs=[])
     {
@@ -587,7 +694,7 @@ class Lambda implements Stringable
      *
      * @return array
      *
-     * @throws \ReflectionException
+     * @throws ReflectionException
      **/
     public static function mergeArguments($callable, array $inject, array $callArgs=[])
     {
@@ -603,6 +710,39 @@ class Lambda implements Stringable
         }
 
         return $arguments;
+    }
+
+    /**
+     * This method builds the arguments to call a method with its dependencies.
+     * You have to built the array with static::reflect($callable) to call this
+     * method.
+     *
+     * @param array    $reflectedArgs
+     * @param callable $instanceResolver (optional)
+     *
+     * @return array
+     */
+    public static function buildHintedArguments(array $reflectedArgs, callable $instanceResolver=null)
+    {
+        $args = [];
+
+        $instanceResolver = $instanceResolver ?: function ($class) { return new $class(); };
+
+        foreach ($reflectedArgs as $name=>$info) {
+
+            if (!$info['type']) {
+                continue;
+            }
+
+            if (!Type::isCustom($info['type'])) {
+                continue;
+            }
+
+            $args[$name] = $instanceResolver($info['type']);
+        }
+
+        return $args;
+
     }
 
     /**
@@ -730,10 +870,8 @@ class Lambda implements Stringable
             return [$call, '__invoke'];
         }
 
-        foreach (static::$methodSeparators as $separator) {
-            if (strpos($call, $separator)) {
-                return explode($separator, $call, 2);
-            }
+        if($separator = static::findMethodSeparator($call)) {
+            return static::listClassAndMethod($call, $separator);
         }
 
         throw new UnsupportedParameterException("Cannot parse '$call'.");
@@ -752,6 +890,22 @@ class Lambda implements Stringable
             return new $class();
         }
         return call_user_func($this->instanceResolver, $class);
+    }
+
+    /**
+     * Automatically calculate the injections
+     *
+     * @throws ReflectionException
+     */
+    protected function performAutoInjection()
+    {
+        if ($this->wasAutoInjected) {
+            return;
+        }
+        $argumentTypes = static::reflect($this->getCallable());
+        $injections = Lambda::buildHintedArguments($argumentTypes, $this->instanceResolver);
+        $this->inject($injections);
+        $this->wasAutoInjected = true;
     }
 
     /**
@@ -787,7 +941,7 @@ class Lambda implements Stringable
      *
      * @return string
      *
-     * @throws \ReflectionException
+     * @throws ReflectionException
      **/
     protected static function cacheId($callable)
     {
@@ -801,7 +955,7 @@ class Lambda implements Stringable
             return $callable;
         }
 
-        if (!$callable instanceof \Closure) {
+        if (!$callable instanceof Closure) {
             return get_class($callable);
         }
 
@@ -818,7 +972,7 @@ class Lambda implements Stringable
      *
      * @return ReflectionFunctionAbstract
      *
-     * @throws \ReflectionException
+     * @throws ReflectionException
      **/
     protected static function getReflection($callable)
     {
@@ -827,7 +981,7 @@ class Lambda implements Stringable
             return new ReflectionMethod($callable[0], $callable[1]);
         }
 
-        if ($callable instanceof \Closure) {
+        if ($callable instanceof Closure) {
             return new ReflectionFunction($callable);
         }
 
@@ -836,12 +990,43 @@ class Lambda implements Stringable
         }
 
         // Should be a string until here
-        if (strpos($callable, '::')) {
-            list($class, $method) = explode('::', $callable);
+        if ($separator = static::findMethodSeparator($callable)) {
+            list($class, $method) = explode($separator, $callable);
             return new ReflectionMethod($class, $method);
         }
 
         return new ReflectionFunction($callable);
     }
 
+    /**
+     * Find the used method separator in $methodString
+     *
+     * @param string $methodString
+     *
+     * @return string
+     */
+    protected static function findMethodSeparator($methodString)
+    {
+        foreach (static::$methodSeparators as $separator) {
+            if (strpos($methodString, $separator)) {
+                return $separator;
+            }
+        }
+        return '';
+    }
+
+    /**
+     * Return the class and method in 2 array values. If you don't know the
+     * separator let it guess it.
+     *
+     * @param string $methodString
+     * @param string $separator (optional)
+     *
+     * @return array
+     */
+    protected static function listClassAndMethod($methodString, $separator='')
+    {
+        $separator = $separator ?: static::findMethodSeparator($methodString);
+        return explode($separator, $methodString, 2);
+    }
 }

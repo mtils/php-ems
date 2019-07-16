@@ -31,7 +31,6 @@ class DispatcherTest extends TestCase
         static::$testRoutes = static::includeDataFile('routing/basic-routes.php');
     }
 
-
     /**
      * @test
      */

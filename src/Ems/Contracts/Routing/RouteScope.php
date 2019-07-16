@@ -10,9 +10,10 @@ use Ems\Contracts\Core\Stringable;
 
 /**
  * A RouteScope is one scope for routes. It could be a domain, subdomain or
- * the first subfolder. It is used to seperate sets of routes from each other.
+ * the first subfolder. It is used to separate sets of routes from each other.
  * So in scope A you have this paths (routes) and in scope B you have another
- * set.
+ * set. In most cases you will have the same application routes in every scope
+ * but different cms/page paths in every scope (/en or /us or europe.mydomain.com)
  *
  * @package Ems\Contracts\Routing
  */

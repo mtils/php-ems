@@ -6,13 +6,16 @@
 namespace Ems\Contracts\Core;
 
 use function array_unique;
+use function class_exists;
 use Countable;
 use Ems\Contracts\Core\Exceptions\TypeException;
 use function get_parent_class;
+use function interface_exists;
 use function is_array;
 use function is_bool;
 use function is_numeric;
 use function iterator_to_array;
+use function trait_exists;
 use Traversable;
 use ArrayAccess;
 
@@ -107,6 +110,21 @@ class Type
     public static function isStringable($value)
     {
         return static::isStringLike($value) || is_numeric($value) || is_bool($value) || is_null($value);
+    }
+
+    /**
+     * Return true if the passed string is a class, interface or trait name.
+     * For me all this things are custom types. So Type::isCustom($foo) made
+     * sense as a name.
+     *
+     * @param string $type
+     * @param bool   $autoload (default:true)
+     *
+     * @return bool
+     */
+    public static function isCustom($type, $autoload=true)
+    {
+        return class_exists($type, $autoload) || interface_exists($type, $autoload) || trait_exists($type, $autoload);
     }
 
     /**

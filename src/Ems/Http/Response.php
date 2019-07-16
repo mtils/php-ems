@@ -9,32 +9,24 @@
 namespace Ems\Http;
 
 use Ems\Contracts\Core\Arrayable;
-use Ems\Contracts\Core\Stringable;
 use Ems\Contracts\Core\Serializer as SerializerContract;
+use Ems\Contracts\Core\Stringable;
 use Ems\Contracts\Http\Response as ResponseContract;
 use Ems\Core\Exceptions\NotImplementedException;
 use Ems\Core\Exceptions\UnConfiguredException;
+use Ems\Core\Response as CoreResponse;
 use Ems\Core\Serializer\JsonSerializer;
-use Ems\Core\Support\BootingArrayData;
-use Ems\Core\Support\StringableTrait;
-use function is_string;
-use Traversable;
 use UnexpectedValueException;
+use Traversable;
+use stdClass;
+use Ems\Contracts\Core\Content;
 
-class Response implements ResponseContract
+class Response extends CoreResponse implements ResponseContract
 {
-    use BootingArrayData;
-    use StringableTrait;
-
     /**
      * @var int
      */
     protected $status;
-
-    /**
-     * @var string
-     */
-    protected $contentType;
 
     /**
      * @var array
@@ -50,16 +42,6 @@ class Response implements ResponseContract
      * @var string
      */
     protected $rawDocument;
-
-    /**
-     * @var mixed
-     */
-    protected $payload;
-
-    /**
-     * @var bool
-     */
-    protected $payloadCreated = false;
 
     /**
      * @var bool
@@ -93,19 +75,6 @@ class Response implements ResponseContract
     }
 
     /**
-     * {@inheritdoc}
-     *
-     * @return mixed
-     */
-    public function status()
-    {
-        if (!$this->status) {
-            return $this->findStatusInHeaders($this->headers());
-        }
-        return $this->status;
-    }
-
-    /**
      * @inheritdoc
      *
      * @return string
@@ -119,16 +88,16 @@ class Response implements ResponseContract
     }
 
     /**
-     * Explicitly set the content type. Otherwise it gets detected from headers.
+     * {@inheritdoc}
      *
-     * @param $contentType
-     *
-     * @return self
+     * @return mixed
      */
-    public function setContentType($contentType)
+    public function status()
     {
-        $this->contentType = $contentType;
-        return $this;
+        if (!$this->status) {
+            return $this->findStatusInHeaders($this->headers());
+        }
+        return $this->status;
     }
 
     /**
@@ -157,7 +126,7 @@ class Response implements ResponseContract
     /**
      * {@inheritdoc}
      *
-     * @return \Ems\Contracts\Core\Content
+     * @return Content
      */
     public function content()
     {
@@ -214,50 +183,6 @@ class Response implements ResponseContract
     }
 
     /**
-     * @inheritdoc
-     *
-     * @return mixed
-     */
-    public function payload()
-    {
-        if (!$this->payloadCreated) {
-            $this->payload = $this->createPayload();
-            $this->payloadCreated = true;
-        }
-        return $this->payload;
-    }
-
-    /**
-     * Manually set the payload.
-     *
-     * @param $payload
-     *
-     * @return $this
-     */
-    public function setPayload($payload)
-    {
-        $this->payload = $payload;
-        $this->payloadCreated = true;
-        return $this;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getIterator()
-    {
-        return new \ArrayIterator($this->toArray());
-    }
-
-    /**
-     * @return mixed
-     */
-    public function count()
-    {
-        return count($this->toArray());
-    }
-
-    /**
      * Return the assigned serializer.
      *
      * @return SerializerContract
@@ -306,11 +231,11 @@ class Response implements ResponseContract
             return $this->fillAttributes($payload->toArray());
         }
 
-        if ($payload instanceof \Traversable) {
+        if ($payload instanceof Traversable) {
             return $this->fillAttributes(iterator_to_array($payload));
         }
 
-        if ($payload instanceof \stdClass) {
+        if ($payload instanceof stdClass) {
             return $this->fillAttributes(json_decode(json_encode($payload), true));
         }
 

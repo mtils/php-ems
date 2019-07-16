@@ -9,9 +9,15 @@ namespace Ems\Core\Support;
 use ArrayAccess;
 use Ems\Contracts\Core\Url;
 use Ems\Contracts\Routing\GenericRouteScope;
+use Ems\Contracts\Routing\Routable;
 use Ems\Contracts\Routing\Route;
 use Ems\Contracts\Routing\RouteScope;
 
+/**
+ * Trait RoutableTrait
+ * @package Ems\Core\Support
+ * @see Routable
+ */
 trait RoutableTrait
 {
     /**
@@ -75,8 +81,6 @@ trait RoutableTrait
     }
 
     /**
-     *
-     *
      * @param Url $url
      *
      * @return $this
@@ -117,7 +121,7 @@ trait RoutableTrait
     }
 
     /**
-     * @param $clientType
+     * @param string $clientType
      *
      * @return $this
      */

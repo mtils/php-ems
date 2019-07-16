@@ -76,14 +76,35 @@ interface Routable
     const ALL = '*';
 
     /**
+     * Return the route scope. This is an artificial subset of routes to explicitly
+     * allow routes in one scope vs another.
+     *
+     * @see RouteScope
+     *
      * @return RouteScope|null
      **/
     public function routeScope();
 
     /**
+     * @param string|RouteScope $scope
+     *
+     * @return $this
+     */
+    public function setRouteScope($scope);
+
+    /**
+     * Return the completely routed url. (Not only the path)
+     *
      * @return Url
      **/
     public function url();
+
+    /**
+     * @param Url $url
+     *
+     * @return $this
+     */
+    public function setUrl(Url $url);
 
     /**
      * Return the access method (get, post, console, scheduled,...)
@@ -93,18 +114,54 @@ interface Routable
     public function method();
 
     /**
+     * @param string $method
+     *
+     * @return self
+     */
+    public function setMethod($method);
+
+    /**
+     * Return the type of client. web|api|console...
+     *
      * @return string
+     *
+     * @see static::CLIENT_WEB...
      */
     public function clientType();
 
     /**
+     * @param string $clientType
+     *
+     * @return $this
+     */
+    public function setClientType($clientType);
+
+    /**
+     * If this method returns something you can assume the routable is routed.
+     *
      * @return Route|null
      */
     public function matchedRoute();
 
     /**
+     * @param Route $route
+     *
+     * @return $this
+     */
+    public function setMatchedRoute(Route $route);
+
+    /**
+     * Return the parameters that were assigned by the route pattern.
+     * (/users/{user_id/ + /users/112 = ['user_id' => 112])
+     *
      * @return ArrayAccess|array
      */
     public function routeParameters();
 
+    /**
+     * @param array $parameters
+     *
+     * @return $this
+     */
+    public function setRouteParameters(array $parameters);
 }

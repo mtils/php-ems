@@ -12,7 +12,6 @@ interface Dispatcher extends IteratorAggregate
 {
     /**
      * @param callable $registrar
-     * @return mixed
      */
     public function register(callable $registrar);
 

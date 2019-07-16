@@ -55,21 +55,24 @@ class Dispatcher implements DispatcherContract
      */
     protected $interpreterFactory;
 
-    public function __construct(Dispatcher $parent=null, $allRoutes=[])
+    public function __construct()
     {
-        $this->addRoutes($allRoutes);
         $this->installInterpreterFactory();
     }
 
     /**
      * @param callable $registrar
-     * @return mixed
      */
     public function register(callable $registrar)
     {
         $collector = $this->newCollector();
         $registrar($collector);
+
+        // Cast to Route[] :-)
+        /** @var Route[] $collector */
+
         $this->addRoutes($collector);
+
     }
 
     /**
