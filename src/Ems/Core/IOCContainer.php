@@ -3,10 +3,12 @@
 namespace Ems\Core;
 
 use Ems\Contracts\Core\IOCContainer as ContainerContract;
-use Ems\Core\Support\ResolvingListenerTrait;
 use Ems\Core\Support\IOCHelperMethods;
+use Ems\Core\Support\ResolvingListenerTrait;
 use InvalidArgumentException;
 use ReflectionClass;
+use ReflectionException;
+use OutOfBoundsException;
 
 class IOCContainer implements ContainerContract
 {
@@ -43,12 +45,13 @@ class IOCContainer implements ContainerContract
      * {@inheritdoc}
      *
      * @param string $abstract
-     * @param array  $parameters (optional)
-     *
-     * @throws \OutOfBoundsException
+     * @param array $parameters (optional)
      *
      * @return object
-     **/
+     * @throws ReflectionException
+     *
+     * @throws OutOfBoundsException
+     */
     public function __invoke($abstract, array $parameters = [])
     {
         if (isset($this->sharedInstances[$abstract])) {
@@ -99,7 +102,7 @@ class IOCContainer implements ContainerContract
         $this->sharedInstances[$abstract] = $instance;
 
         // This will never be called, but makes resolved, bound etc. easier
-        $this->storeBinding($abstract, function ($container) use ($instance) {
+        $this->storeBinding($abstract, function () use ($instance) {
             return $instance;
         }, true);
 
@@ -167,20 +170,7 @@ class IOCContainer implements ContainerContract
      **/
     public function call($callback, array $parameters = [])
     {
-        switch (count($parameters)) {
-            case 0:
-                return call_user_func($callback);
-            case 1:
-                return call_user_func($callback, $parameters[0]);
-            case 2:
-                return call_user_func($callback, $parameters[0], $parameters[1]);
-            case 3:
-                return call_user_func($callback, $parameters[0], $parameters[1], $parameters[2]);
-            case 4:
-                return call_user_func($callback, $parameters[0], $parameters[1], $parameters[2], $parameters[3]);
-        }
-
-        return call_user_func_array($callback, $parameters);
+        return Lambda::callFast($callback, $parameters);
     }
 
     /**
@@ -202,12 +192,16 @@ class IOCContainer implements ContainerContract
      * Resolves the $abstract via assigned bindings.
      *
      * @param string $abstract
-     * @param array  $parameters (optional)
+     * @param array $parameters (optional)
      *
      * @return object
-     **/
+     *
+     * @throws ReflectionException
+     */
     protected function resolve($abstract, array $parameters = [])
     {
+        $abstract = $this->getAliasOrSame($abstract);
+
         if ($this->bound($abstract)) {
             array_unshift($parameters, $this);
 
@@ -224,10 +218,34 @@ class IOCContainer implements ContainerContract
 
         $callParams = [];
 
-        foreach ($constructorParams as $param) {
-            if ($param->getClass()) {
-                $callParams[] = $this->__invoke($param->getClass()->getName());
+
+        foreach ($constructorParams as $i=>$param) {
+
+            $name = $param->getName();
+
+            // We only support class/interface hinted arguments here.
+            if (!$class = $param->getClass()) {
+                continue;
             }
+
+            $class = $class->getName();
+
+            // An array key with this name exists and contains an object of this class
+            if (isset($parameters[$name]) && $parameters[$name] instanceof $class) {
+                $callParams[] = $parameters[$name];
+                unset($parameters[$name]);
+                continue;
+            }
+
+            // A positional parameter was passed and contains an object of this class
+            if (isset($parameters[$i]) && $parameters[$i] instanceof $class) {
+                $callParams[] = $parameters[$i];
+                unset($parameters[$i]);
+                continue;
+            }
+
+            $callParams[] = $this->__invoke($class);
+
         }
 
         foreach ($parameters as $key => $value) {
@@ -279,5 +297,15 @@ class IOCContainer implements ContainerContract
         }
 
         return $callback;
+    }
+
+    /**
+     * @param string $abstract
+     *
+     * @return string
+     */
+    protected function getAliasOrSame($abstract)
+    {
+        return isset($this->aliases[$abstract]) ? $this->getAliasOrSame($this->aliases[$abstract]) : $abstract;
     }
 }

@@ -49,6 +49,19 @@ class IOCContainerTest extends \Ems\TestCase
         $this->assertSame($container, $container('foo'));
     }
 
+    public function test_aliased_invoke_calls_binding()
+    {
+        $container = $this->newContainer();
+        $container->alias('foo', 'bar');
+        $container->alias('foo', 'baz');
+        $container->bind('foo', function (ContainerContract $container) {
+            return $container;
+        });
+
+        $this->assertSame($container, $container('bar'));
+        $this->assertSame($container, $container('baz'));
+    }
+
     public function test_make_calls_binding()
     {
         $container = $this->newContainer();
@@ -381,6 +394,50 @@ class IOCContainerTest extends \Ems\TestCase
         $this->assertSame($interfaceImplementor, $result->interface);
         $this->assertInstanceOf('Ems\Core\ContainerTest_Class', $result->classObject);
         $this->assertInstanceOf('Ems\Core\ContainerTest_Class2', $result->class2Object);
+    }
+
+    public function test_invoke_resolves_constructor_parameters_and_overwrites_with_all_positioned_parameters()
+    {
+        $container = $this->newContainer();
+        $class = 'Ems\Core\ContainerTest_ClassDependencies';
+
+        $interfaceImplementor = new ContainerTest_Class();
+
+        $classObject = $container(ContainerTest_Class::class);
+        $class2Object = $container(ContainerTest_Class2::class);
+
+        //$container->instance('Ems\Core\ContainerTest_Interface', $interfaceImplementor);
+
+        $result = $container($class, [$interfaceImplementor, $classObject, $class2Object]);
+
+        $this->assertInstanceOf($class, $result);
+        $this->assertSame($interfaceImplementor, $result->interface);
+        $this->assertSame($classObject, $result->classObject);
+        $this->assertSame($class2Object, $result->class2Object);
+    }
+
+    public function test_invoke_resolves_constructor_parameters_and_overwrites_with_all_named_parameters()
+    {
+        $container = $this->newContainer();
+        $class = 'Ems\Core\ContainerTest_ClassDependencies';
+
+        $interfaceImplementor = new ContainerTest_Class();
+
+        $classObject = $container(ContainerTest_Class::class);
+        $class2Object = $container(ContainerTest_Class2::class);
+
+        //$container->instance('Ems\Core\ContainerTest_Interface', $interfaceImplementor);
+
+        $result = $container($class, [
+            'interface' => $interfaceImplementor,
+            'classObject' => $classObject,
+            'class2Object' => $class2Object
+        ]);
+
+        $this->assertInstanceOf($class, $result);
+        $this->assertSame($interfaceImplementor, $result->interface);
+        $this->assertSame($classObject, $result->classObject);
+        $this->assertSame($class2Object, $result->class2Object);
     }
 
     public function test_bind_string_will_bind_bound_class()
