@@ -3,14 +3,15 @@
 namespace Ems\Core\Laravel;
 
 use Closure;
-use InvalidArgumentException;
-use Illuminate\Container\Container as IlluminateContainer;
 use Ems\Contracts\Core\IOCContainer as ContainerContract;
-use Ems\Core\Support\ResolvingListenerTrait;
 use Ems\Core\Support\IOCHelperMethods;
+use Ems\Core\Support\ResolvingListenerTrait;
 use Ems\Testing\Cheat;
+use Illuminate\Container\Container as IlluminateContainer;
+use InvalidArgumentException;
+use OutOfBoundsException;
 use ReflectionClass;
-use ReflectionParameter;
+use ReflectionException;
 
 class IOCContainer implements ContainerContract
 {
@@ -37,12 +38,14 @@ class IOCContainer implements ContainerContract
      * {@inheritdoc}
      *
      * @param string $abstract
-     * @param array  $parameters (optional)
-     *
-     * @throws \OutOfBoundsException
+     * @param array $parameters (optional)
      *
      * @return object
-     **/
+     *
+     **@throws ReflectionException
+     *
+     * @throws OutOfBoundsException
+     */
     public function __invoke($abstract, array $parameters = [])
     {
         if (!$parameters) {
@@ -54,6 +57,7 @@ class IOCContainer implements ContainerContract
             return $this->laravel->makeWith($abstract, $this->convertParameters($abstract, $parameters));
         }
 
+        /** @noinspection PhpMethodParametersCountMismatchInspection */
         return $this->laravel->make($abstract, $parameters);
     }
 
@@ -198,7 +202,7 @@ class IOCContainer implements ContainerContract
     {
         $originalCallable = $this->checkAndReturnCallable($originalCallable);
 
-        return function ($laravel) use ($originalCallable) {
+        return function () use ($originalCallable) {
             return call_user_func($originalCallable, $this);
         };
     }
@@ -217,7 +221,7 @@ class IOCContainer implements ContainerContract
     {
         $originalCallable = $this->checkAndReturnCallable($originalCallable);
 
-        return function ($resolved, $laravel) use ($originalCallable) {
+        return function ($resolved) use ($originalCallable) {
             call_user_func($originalCallable, $resolved, $this);
         };
     }
@@ -252,7 +256,9 @@ class IOCContainer implements ContainerContract
      * @param array $parameters
      *
      * @return array
-     **/
+     *
+     * @throws \ReflectionException
+     */
     protected function convertParameters($abstract, array $parameters)
     {
 
@@ -268,8 +274,12 @@ class IOCContainer implements ContainerContract
         $named = [];
 
         foreach ($constructor->getParameters() as $i=>$parameter) {
+            $name = $parameter->getName();
             if (isset($parameters[$i])) {
-                $named[$parameter->getName()] = $parameters[$i];
+                $named[$name] = $parameters[$i];
+            }
+            if (isset($parameters[$name])) {
+                $named[$name] = $parameters[$name];
             }
         }
 

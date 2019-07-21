@@ -426,8 +426,6 @@ class IOCContainerTest extends \Ems\TestCase
         $classObject = $container(ContainerTest_Class::class);
         $class2Object = $container(ContainerTest_Class2::class);
 
-        //$container->instance('Ems\Core\ContainerTest_Interface', $interfaceImplementor);
-
         $result = $container($class, [
             'interface' => $interfaceImplementor,
             'classObject' => $classObject,
