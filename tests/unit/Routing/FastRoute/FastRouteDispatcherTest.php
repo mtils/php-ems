@@ -6,16 +6,15 @@
 namespace Ems\Routing\FastRoute;
 
 
-use Ems\Contracts\Routing\Interpreter;
 use Ems\Contracts\Routing\RouteHit;
 use Ems\Routing\CurlyBraceRouteCompiler;
 use Ems\TestCase;
 use Ems\TestData;
 use Ems\Testing\Cheat;
 use FastRoute\DataGenerator;
-use FastRoute\Dispatcher;
+use FastRoute\Dispatcher as FastRouteDispatcherContract;
 
-class FastRouteInterpreterTest extends TestCase
+class FastRouteDispatcherTest extends TestCase
 {
     use TestData;
 
@@ -35,7 +34,7 @@ class FastRouteInterpreterTest extends TestCase
      */
     public function it_implements_interface()
     {
-        $this->assertInstanceOf(Interpreter::class, $this->make());
+        $this->assertInstanceOf(FastRouteDispatcher::class, $this->make());
     }
 
     /**
@@ -43,13 +42,13 @@ class FastRouteInterpreterTest extends TestCase
      */
     public function add_adds_route()
     {
-        $interpreter = $this->make();
+        $dispatcher = $this->make();
         $method = 'GET';
         $pattern = 'users';
         $handler = 'UserController@index';
 
-        $interpreter->add($method, $pattern, $handler);
-        $hit = $interpreter->match($method, $pattern);
+        $dispatcher->add($method, $pattern, $handler);
+        $hit = $dispatcher->match($method, $pattern);
         $this->assertInstanceOf(RouteHit::class, $hit);
         $this->assertEquals($method, $hit->method);
         $this->assertEquals($pattern, $hit->pattern);
@@ -64,8 +63,8 @@ class FastRouteInterpreterTest extends TestCase
      */
     public function match_throws_exception_if_route_did_not_match()
     {
-        $interpreter = $this->make();
-        $interpreter->match('GET', 'cars');
+        $dispatcher = $this->make();
+        $dispatcher->match('GET', 'cars');
     }
 
     /**
@@ -74,10 +73,10 @@ class FastRouteInterpreterTest extends TestCase
      */
     public function match_throws_exception_if_method_did_not_match()
     {
-        $interpreter = $this->make();
-        $interpreter->add('GET', 'cars', 'CarController@index');
-        $interpreter->add('POST', 'cars', 'CarController@store');
-        $interpreter->match('PUT', 'cars');
+        $dispatcher = $this->make();
+        $dispatcher->add('GET', 'cars', 'CarController@index');
+        $dispatcher->add('POST', 'cars', 'CarController@store');
+        $dispatcher->match('PUT', 'cars');
     }
 
     /**
@@ -86,21 +85,21 @@ class FastRouteInterpreterTest extends TestCase
      */
     public function match_throws_exception_if_handler_not_wellformed()
     {
-        $interpreter = $this->make();
-        $dispatcher = $this->mock(Dispatcher::class);
+        $dispatcher = $this->make();
+        $fDispatcher = $this->mock(FastRouteDispatcherContract::class);
 
-        Cheat::set($interpreter, 'dispatcher', $dispatcher);
+        Cheat::set($dispatcher, 'dispatcher', $fDispatcher);
         $method = 'GET';
         $uri = 'orders';
 
-        $dispatcher->shouldReceive('dispatch')
+        $fDispatcher->shouldReceive('dispatch')
                    ->with($method, $uri)
                    ->andReturn([
-                       0 => Dispatcher::FOUND,
+                       0 => FastRouteDispatcherContract::FOUND,
                        1 => 'Not what he expect'
                    ]);
 
-        $interpreter->match($method, $uri);
+        $dispatcher->match($method, $uri);
     }
 
     /**
@@ -108,20 +107,20 @@ class FastRouteInterpreterTest extends TestCase
      */
     public function match_various_routes()
     {
-        $interpreter = $this->make();
+        $dispatcher = $this->make();
 
         foreach (static::$testRoutes as $test) {
-            $interpreter->add($test['method'], $test['pattern'], $test['handler']);
+            $dispatcher->add($test['method'], $test['pattern'], $test['handler']);
         }
 
         foreach (static::$testRoutes as $test) {
-            $hit = $interpreter->match($test['method'], $test['uri']);
+            $hit = $dispatcher->match($test['method'], $test['uri']);
             $this->assertInstanceOf(RouteHit::class, $hit);
             $this->assertEquals($test['method'], $hit->method);
             $this->assertEquals($test['pattern'], $hit->pattern);
             $this->assertEquals($test['handler'], $hit->handler);
             $this->assertEquals($test['parameters'], $hit->parameters);
-            $this->assertEquals($test['uri'], $interpreter->compile($test['pattern'], $test['parameters']));
+            $this->assertEquals($test['uri'], $dispatcher->compile($test['pattern'], $test['parameters']));
         }
     }
 
@@ -130,24 +129,24 @@ class FastRouteInterpreterTest extends TestCase
      */
     public function store_and_restore_state_by_toArray_and_fill()
     {
-        $interpreterForRegister = $this->make();
+        $dispatcherForRegister = $this->make();
 
         foreach (static::$testRoutes as $test) {
-            $interpreterForRegister->add($test['method'], $test['pattern'], $test['handler']);
+            $dispatcherForRegister->add($test['method'], $test['pattern'], $test['handler']);
         }
 
-        $interpreter = $this->make();
+        $dispatcher = $this->make();
 
-        $interpreter->fill($interpreterForRegister->toArray());
+        $dispatcher->fill($dispatcherForRegister->toArray());
 
         foreach (static::$testRoutes as $test) {
-            $hit = $interpreter->match($test['method'], $test['uri']);
+            $hit = $dispatcher->match($test['method'], $test['uri']);
             $this->assertInstanceOf(RouteHit::class, $hit);
             $this->assertEquals($test['method'], $hit->method);
             $this->assertEquals($test['pattern'], $hit->pattern);
             $this->assertEquals($test['handler'], $hit->handler);
             $this->assertEquals($test['parameters'], $hit->parameters);
-            $this->assertEquals($test['uri'], $interpreter->compile($test['pattern'], $test['parameters']));
+            $this->assertEquals($test['uri'], $dispatcher->compile($test['pattern'], $test['parameters']));
         }
 
     }
@@ -158,13 +157,13 @@ class FastRouteInterpreterTest extends TestCase
     public function CharCountBasedDispatcher()
     {
 
-        $interpreter = $this->make(new DataGenerator\CharCountBased());
+        $dispatcher = $this->make(new DataGenerator\CharCountBased());
         $method = 'GET';
         $pattern = 'users';
         $handler = 'UserController@index';
 
-        $interpreter->add($method, $pattern, $handler);
-        $hit = $interpreter->match($method, $pattern);
+        $dispatcher->add($method, $pattern, $handler);
+        $hit = $dispatcher->match($method, $pattern);
         $this->assertInstanceOf(RouteHit::class, $hit);
         $this->assertEquals($method, $hit->method);
         $this->assertEquals($pattern, $hit->pattern);
@@ -179,13 +178,13 @@ class FastRouteInterpreterTest extends TestCase
     public function GroupPosBasedDispatcher()
     {
 
-        $interpreter = $this->make(new DataGenerator\GroupPosBased());
+        $dispatcher = $this->make(new DataGenerator\GroupPosBased());
         $method = 'GET';
         $pattern = 'users';
         $handler = 'UserController@index';
 
-        $interpreter->add($method, $pattern, $handler);
-        $hit = $interpreter->match($method, $pattern);
+        $dispatcher->add($method, $pattern, $handler);
+        $hit = $dispatcher->match($method, $pattern);
         $this->assertInstanceOf(RouteHit::class, $hit);
         $this->assertEquals($method, $hit->method);
         $this->assertEquals($pattern, $hit->pattern);
@@ -200,13 +199,13 @@ class FastRouteInterpreterTest extends TestCase
     public function MarkBasedDispatcher()
     {
 
-        $interpreter = $this->make(new DataGenerator\MarkBased());
+        $dispatcher = $this->make(new DataGenerator\MarkBased());
         $method = 'GET';
         $pattern = 'users';
         $handler = 'UserController@index';
 
-        $interpreter->add($method, $pattern, $handler);
-        $hit = $interpreter->match($method, $pattern);
+        $dispatcher->add($method, $pattern, $handler);
+        $hit = $dispatcher->match($method, $pattern);
         $this->assertInstanceOf(RouteHit::class, $hit);
         $this->assertEquals($method, $hit->method);
         $this->assertEquals($pattern, $hit->pattern);
@@ -227,13 +226,13 @@ class FastRouteInterpreterTest extends TestCase
         $dataGenerator->shouldReceive('addRoute');
         $dataGenerator->shouldReceive('getData')->andReturn([]);
 
-        $interpreter = $this->make($dataGenerator);
+        $dispatcher = $this->make($dataGenerator);
         $method = 'GET';
         $pattern = 'users';
         $handler = 'UserController@index';
 
-        $interpreter->add($method, $pattern, $handler);
-        $hit = $interpreter->match($method, $pattern);
+        $dispatcher->add($method, $pattern, $handler);
+        $hit = $dispatcher->match($method, $pattern);
         $this->assertInstanceOf(RouteHit::class, $hit);
         $this->assertEquals($method, $hit->method);
         $this->assertEquals($pattern, $hit->pattern);
@@ -244,6 +243,6 @@ class FastRouteInterpreterTest extends TestCase
 
     protected function make(DataGenerator $dataGenerator=null, CurlyBraceRouteCompiler $compiler=null)
     {
-        return new FastRouteInterpreter($dataGenerator, $compiler);
+        return new FastRouteDispatcher($dataGenerator, $compiler);
     }
 }

@@ -71,7 +71,7 @@ interface Routable
     const CLIENT_TASK = 'task';
 
     /**
-     * This is just a shortcut to note that you want to add a route for all clienTypes/scopes
+     * This is just a shortcut to note that you want to add a route for all clientTypes/scopes
      */
     const ALL = '*';
 
@@ -164,4 +164,29 @@ interface Routable
      * @return $this
      */
     public function setRouteParameters(array $parameters);
+
+    /**
+     * Return the actual handler for the route. If you call this handler the
+     * request will be considered as "handled".
+     * In contrast to matchedRoute()->handler this one here is callable.
+     *
+     * @return callable|null
+     */
+    public function getHandler();
+
+    /**
+     * Assign the handler that will handle the request.
+     *
+     * @param callable $handler
+     *
+     * @return $this
+     */
+    public function setHandler(callable $handler);
+
+    /**
+     * Return true if this object was routed. (Handler and route was assigned)
+     *
+     * @return bool
+     */
+    public function isRouted();
 }

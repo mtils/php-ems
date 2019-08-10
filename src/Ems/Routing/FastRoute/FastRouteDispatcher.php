@@ -9,20 +9,24 @@ namespace Ems\Routing\FastRoute;
 use Ems\Contracts\Core\Type;
 use Ems\Contracts\Routing\Exceptions\MethodNotAllowedException;
 use Ems\Contracts\Routing\Exceptions\RouteNotFoundException;
-use Ems\Contracts\Routing\Interpreter;
+use Ems\Contracts\Routing\Dispatcher;
 use Ems\Contracts\Routing\RouteHit;
 use Ems\Core\Exceptions\DataIntegrityException;
 use Ems\Core\Exceptions\UnsupportedUsageException;
 use Ems\Routing\CurlyBraceRouteCompiler;
 use FastRoute\DataGenerator;
-use FastRoute\Dispatcher;
+use FastRoute\Dispatcher as FastRouteDispatcherContract;
 use FastRoute\RouteCollector;
 use FastRoute\RouteParser;
 use FastRoute\RouteParser\Std;
+use FastRoute\Dispatcher\GroupCountBased as GroupCountBasedDispatcher;
+use FastRoute\Dispatcher\CharCountBased as CharCountBasedDispatcher;
+use FastRoute\Dispatcher\GroupPosBased as GroupPosBasedDispatcher;
+use FastRoute\Dispatcher\MarkBased as MarkBasedDispatcher;
 use function implode;
 
 
-class FastRouteInterpreter implements Interpreter
+class FastRouteDispatcher implements Dispatcher
 {
     /**
      * @var DataGenerator
@@ -35,7 +39,7 @@ class FastRouteInterpreter implements Interpreter
     protected $collector;
 
     /**
-     * @var Dispatcher
+     * @var FastRouteDispatcherContract
      */
     protected $dispatcher;
 
@@ -54,7 +58,6 @@ class FastRouteInterpreter implements Interpreter
         $this->dataGenerator = $dataGenerator ?: new DataGenerator\GroupCountBased();
         $this->collector = $this->createCollector(new Std(), $this->dataGenerator);
         $this->compiler = $compiler ?: new CurlyBraceRouteCompiler();
-
     }
 
     /**
@@ -85,11 +88,11 @@ class FastRouteInterpreter implements Interpreter
     {
         $routeInfo = $this->dispatcher()->dispatch($method, $uri);
 
-        if ($routeInfo[0] === Dispatcher::NOT_FOUND) {
+        if ($routeInfo[0] === FastRouteDispatcherContract::NOT_FOUND) {
             throw new RouteNotFoundException("No route did match uri '$uri'");
         }
 
-        if ($routeInfo[0] === Dispatcher::METHOD_NOT_ALLOWED) {
+        if ($routeInfo[0] === FastRouteDispatcherContract::METHOD_NOT_ALLOWED) {
             $allowedMethods = $routeInfo[1];
             throw new MethodNotAllowedException("Method $method is not allowed on uri '$uri' only " . implode(',', $allowedMethods));
         }
@@ -140,7 +143,7 @@ class FastRouteInterpreter implements Interpreter
     }
 
     /**
-     * @return Dispatcher
+     * @return FastRouteDispatcherContract
      */
     protected function dispatcher()
     {
@@ -165,24 +168,24 @@ class FastRouteInterpreter implements Interpreter
     /**
      * @param array $data
      *
-     * @return Dispatcher
+     * @return FastRouteDispatcherContract
      */
     protected function createDispatcher(array $data)
     {
         if ($this->dataGenerator instanceof DataGenerator\GroupCountBased) {
-            return new Dispatcher\GroupCountBased($data);
+            return new GroupCountBasedDispatcher($data);
         }
 
         if ($this->dataGenerator instanceof DataGenerator\CharCountBased) {
-            return new Dispatcher\CharCountBased($data);
+            return new CharCountBasedDispatcher($data);
         }
 
         if ($this->dataGenerator instanceof DataGenerator\GroupPosBased) {
-            return new Dispatcher\GroupPosBased($data);
+            return new GroupPosBasedDispatcher($data);
         }
 
         if ($this->dataGenerator instanceof DataGenerator\MarkBased) {
-            return new Dispatcher\MarkBased($data);
+            return new MarkBasedDispatcher($data);
         }
 
         throw new UnsupportedUsageException('Cannot create Dispatcher for DataGenerator ' . Type::of($this->dataGenerator));

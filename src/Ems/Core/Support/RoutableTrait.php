@@ -51,6 +51,11 @@ trait RoutableTrait
     protected $_routeParameters = [];
 
     /**
+     * @var callable
+     */
+    protected $_handler;
+
+    /**
      * @return RouteScope
      **/
     public function routeScope()
@@ -167,5 +172,38 @@ trait RoutableTrait
     {
         $this->_routeParameters = $parameters;
         return $this;
+    }
+
+    /**
+     * Return the actual handler
+     *
+     * @return callable|null
+     */
+    public function getHandler()
+    {
+        return $this->_handler;
+    }
+
+    /**
+     * Assign the actual handler.
+     *
+     * @param callable $handler
+     *
+     * @return $this
+     */
+    public function setHandler(callable $handler)
+    {
+        $this->_handler = $handler;
+        return $this;
+    }
+
+    /**
+     * Returns true if this object is routed.
+     *
+     * @return bool
+     */
+    public function isRouted()
+    {
+        return $this->_matchedRoute && $this->_handler;
     }
 }

@@ -8,9 +8,8 @@ namespace Ems\Contracts\Routing;
 
 use Countable;
 use Ems\Contracts\Core\ArrayData;
-use Ems\Contracts\Core\Input;
+use Ems\Contracts\Core\InputHandler;
 use Ems\Contracts\Core\Positioner;
-use Ems\Contracts\Core\Response;
 use Ems\Contracts\Core\SupportsCustomFactory;
 use IteratorAggregate;
 
@@ -55,7 +54,7 @@ use IteratorAggregate;
  *
  * @package Ems\Contracts\Routing
  */
-interface MiddlewareCollection extends ArrayData, Countable, IteratorAggregate, SupportsCustomFactory
+interface MiddlewareCollection extends InputHandler, ArrayData, Countable, IteratorAggregate, SupportsCustomFactory
 {
     /**
      * Add a middleware to the stack.
@@ -67,15 +66,6 @@ interface MiddlewareCollection extends ArrayData, Countable, IteratorAggregate, 
      * @return Positioner
      */
     public function add($name, $middleware, $parameters=null);
-
-    /**
-     * Run the middleware stack/pipe/queue.
-     *
-     * @param Input $input
-     *
-     * @return Response
-     */
-    public function __invoke(Input $input);
 
     /**
      * Return the middleware instance named $name. In opposite to offsetGet()

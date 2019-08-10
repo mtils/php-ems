@@ -1,48 +1,65 @@
 <?php
 /**
- *  * Created by mtils on 30.06.19 at 10:54.
+ *  * Created by mtils on 19.08.18 at 11:28.
  **/
 
 namespace Ems\Contracts\Routing;
 
 
-use IteratorAggregate;
+use Ems\Contracts\Core\Arrayable;
 
-interface Dispatcher extends IteratorAggregate
+/**
+ * Interface Dispatcher
+ *
+ * The Dispatcher is the most important part of the routing process. You add
+ * the route definitions by ->add() and the Interpreter collects that in its own
+ * (array) format.
+ * Then in match() it returns the whatever handler you put into it.
+ * The toArray() returns some array of all added routes. This must be in a format
+ * that allows to fill it with that routes in fill().
+ * This is needed to cache routes and omit the repeating compile/add tasks.
+ *
+ *
+ * @package Ems\Contracts\Routing
+ */
+interface Dispatcher extends Arrayable
 {
     /**
-     * @param callable $registrar
-     */
-    public function register(callable $registrar);
-
-    /**
-     * @param string $method
-     * @param string $path
-     * @param string $clientType
-     * @param string $scope
+     * Add a route (definition). Whatever you put into it as $handler you will
+     * get returned in match.
      *
-     * @return Routable
+     * @param string $method
+     * @param string $pattern
+     * @param mixed  $handler
      */
-    public function dispatch($method, $path, $clientType=Routable::CLIENT_WEB, $scope='default');
+    public function add($method, $pattern, $handler);
 
     /**
-     * Get all routes that have $pattern. Optionally pass a (http) $method to
-     * further narrow down the result.
+     * Find the handler for $method and $uri that someone did add().
+     *
+     * @param string   $method
+     * @param string   $uri
+     *
+     * @return RouteHit
+     */
+    public function match($method, $uri);
+
+    /**
+     * Fill the interpreter with route definitions that he did export by toArray()
+     *
+     * @param array $data
+     *
+     * @return bool
+     */
+    public function fill(array $data);
+
+    /**
+     * Render an uri by the route pattern and parameters.
      *
      * @param string $pattern
-     * @param string $method (optional)
+     * @param array $parameters (optional)
      *
-     * @return Route[]
+     * @return string
      */
-    public function getByPattern($pattern, $method=null);
-
-    /**
-     * Get a route by its name.
-     *
-     * @param string $name
-     *
-     * @return Route
-     */
-    public function getByName($name);
-
+    public function compile($pattern, array $parameters=[]);
 }

@@ -253,6 +253,32 @@ class InputTest extends TestCase
         $this->assertEquals($parameters, $input->routeParameters());
     }
 
+    /**
+     * @test
+     */
+    public function get_and_set_handler()
+    {
+        $input = $this->newInput();
+        $this->assertNull($input->getHandler());
+        $handler = function () {};
+        $this->assertSame($input, $input->setHandler($handler));
+        $this->assertEquals($handler, $input->getHandler());
+    }
+
+    /**
+     * @test
+     */
+    public function isRouted_returns_only_true_if_route_and_handler_assigned()
+    {
+        $input = $this->newInput();
+        $this->assertFalse($input->isRouted());
+        $handler = function () {};
+        $this->assertSame($input, $input->setHandler($handler));
+        $this->assertFalse($input->isRouted());
+        $input->setMatchedRoute(new Route('GET', 'foo', 'FooHandler::bar'));
+        $this->assertTrue($input->isRouted());
+    }
+
     protected function newInput()
     {
         return new Input();

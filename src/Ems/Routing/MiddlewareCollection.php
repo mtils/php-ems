@@ -14,13 +14,13 @@ use Ems\Contracts\Routing\MiddlewareCollection as MiddlewareCollectionContract;
 use Ems\Core\Collections\StringList;
 use Ems\Core\Exceptions\KeyNotFoundException;
 use Ems\Core\Support\CustomFactorySupport;
+use ReflectionException;
 use Traversable;
 use function array_filter;
 use function array_slice;
 use function func_get_args;
 use function is_array;
 use function is_string;
-use ReflectionException;
 
 class MiddlewareCollection implements MiddlewareCollectionContract
 {
