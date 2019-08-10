@@ -4,6 +4,7 @@ namespace Ems\Core;
 
 use Closure;
 use Ems\Testing\LoggingCallable;
+use stdClass;
 use function func_get_args;
 
 class LambdaTest extends \Ems\TestCase
@@ -539,6 +540,19 @@ class LambdaTest extends \Ems\TestCase
     {
         Lambda::addMethodSeparator('|||');
         $this->assertContains('|||', Lambda::methodSeparators());
+    }
+
+    public function test_get_and_set_instanceResolver()
+    {
+        $f = $this->lambda(LambdaTestObject::class.'->process');
+        $resolver = function ($class) {
+            return (object)['clazz' => $class];
+        };
+        $this->assertSame($f, $f->setInstanceResolver($resolver));
+        $this->assertSame($resolver, $f->getInstanceResolver());
+        $this->assertInstanceOf(stdClass::class, $f->getCallInstance());
+        $this->assertEquals(LambdaTestObject::class, $f->getCallInstance()->clazz);
+
     }
 
     protected function lambda($callable=null)

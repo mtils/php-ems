@@ -52,11 +52,6 @@ class Lambda implements Stringable
     protected $callable;
 
     /**
-     * @var array
-     */
-    protected $parsedCall;
-
-    /**
      * @var string
      */
     protected $callClass;
@@ -409,6 +404,30 @@ class Lambda implements Stringable
             $this->parseCall();
         }
         return $this->isClosure;
+    }
+
+    /**
+     * Return the factory to create instances of class names.
+     *
+     * @return callable|null
+     */
+    public function getInstanceResolver()
+    {
+        return $this->instanceResolver;
+    }
+
+
+    /**
+     * Set the factory that makes the instance out of a class name.
+     *
+     * @param callable $instanceResolver
+     *
+     * @return Lambda
+     */
+    public function setInstanceResolver(callable $instanceResolver)
+    {
+        $this->instanceResolver = $instanceResolver;
+        return $this;
     }
 
     /**
