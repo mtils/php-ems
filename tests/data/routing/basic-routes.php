@@ -64,7 +64,7 @@ return [
         'uri'    => 'users/35988/parent/65/addresses/177849',
         'method' => 'GET',
         'pattern' => 'users/{user_id}/parent/{parent_id}/addresses/{address_id}',
-        'handler' => 'UserAddresssController@editParent',
+        'handler' => 'UserAddressController@editParent',
         'parameters' => ['user_id' => 35988, 'parent_id' => 65, 'address_id' => 177849],
         'name' => 'users.parent.addresses.show'
     ]

@@ -11,14 +11,13 @@ use Ems\Contracts\Routing\Exceptions\RouteNotFoundException;
 use Ems\Contracts\Routing\Routable;
 use Ems\Contracts\Routing\Route;
 use Ems\Contracts\Routing\RouteCollector;
+use Ems\Contracts\Routing\Router as RouterContract;
 use Ems\Contracts\Routing\RouteScope;
 use Ems\Core\Input;
 use Ems\Core\Lambda;
 use Ems\Core\Url;
+use Ems\RoutingTrait;
 use Ems\TestCase;
-
-use Ems\Contracts\Routing\Router as RouterContract;
-use Ems\TestData;
 use function func_get_args;
 use function implode;
 use function is_callable;
@@ -26,16 +25,7 @@ use function iterator_to_array;
 
 class RouterTest extends TestCase
 {
-    use TestData;
-    protected static $testRoutes;
-
-    /**
-     * This method is called before the first test of this test class is run.
-     */
-    public static function setUpBeforeClass()
-    {
-        static::$testRoutes = static::includeDataFile('routing/basic-routes.php');
-    }
+    use RoutingTrait;
 
     /**
      * @test
@@ -492,21 +482,6 @@ class RouterTest extends TestCase
     public function getByName_throws_exception_if_route_not_found()
     {
         $this->make(true)->getByName('foo');
-    }
-
-    protected function fill(RouterContract $router)
-    {
-        $router->register(function (RouteCollector $collector) {
-            $this->fillCollector($collector);
-        });
-    }
-
-    protected function fillCollector(RouteCollector $collector)
-    {
-        foreach (static::$testRoutes as $routeData) {
-            $collector->on($routeData['method'], $routeData['pattern'], $routeData['handler'])
-                ->name($routeData['name']);
-        }
     }
 
     protected function make($filled=false)

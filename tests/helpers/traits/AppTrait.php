@@ -6,6 +6,7 @@ use Ems\Assets\Skeleton\AssetsBootstrapper;
 use Ems\Cache\Skeleton\CacheBootstrapper;
 use Ems\Core\IOCContainer;
 use Ems\Core\Skeleton\CoreBootstrapper;
+use Ems\Routing\Skeleton\RoutingBootstrapper;
 use Ems\XType\Skeleton\XTypeBootstrapper;
 use Ems\Core\Application;
 use Ems\Skeleton\BootManager;
@@ -124,6 +125,7 @@ trait AppTrait
             CacheBootstrapper::class,
             AssetsBootstrapper::class,
             XTypeBootstrapper::class,
+            RoutingBootstrapper::class
         ];
     }
 }

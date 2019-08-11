@@ -48,10 +48,18 @@ class InputHandler implements InputHandlerContract, SupportsCustomFactory
         try {
             return $this->middleware->__invoke($input);
         } catch (Exception $e) {
-            call_user_func($this->exceptionHandler, $e);
+            return call_user_func($this->exceptionHandler, $e);
         } catch (Throwable $e) {
-            call_user_func($this->exceptionHandler, $e);
+            return call_user_func($this->exceptionHandler, $e);
         }
+    }
+
+    /**
+     * @return MiddlewareCollectionContract
+     */
+    public function middleware()
+    {
+        return $this->middleware;
     }
 
     /**

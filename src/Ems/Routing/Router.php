@@ -6,6 +6,9 @@
 namespace Ems\Routing;
 
 use ArrayIterator;
+use Ems\Contracts\Core\Input;
+use Ems\Contracts\Core\Response;
+use Ems\Contracts\Core\SupportsCustomFactory;
 use Ems\Contracts\Routing\Exceptions\RouteNotFoundException;
 use Ems\Contracts\Routing\Dispatcher;
 use Ems\Contracts\Routing\Routable;
@@ -20,7 +23,7 @@ use Traversable;
 use ReflectionException;
 use function call_user_func;
 
-class Router implements RouterContract
+class Router implements RouterContract, SupportsCustomFactory
 {
     use CustomFactorySupport;
 
@@ -159,6 +162,21 @@ class Router implements RouterContract
             return $this->byName[$name];
         }
         throw new KeyNotFoundException("Route named '$name' not found.");
+    }
+
+    /**
+     * Use the router as normal middleware.
+     *
+     * @param Input $input
+     * @param callable $next
+     *
+     * @return Response
+     * @throws ReflectionException
+     */
+    public function __invoke(Input $input, callable $next)
+    {
+        $this->route($input);
+        return $next($input);
     }
 
     /**
