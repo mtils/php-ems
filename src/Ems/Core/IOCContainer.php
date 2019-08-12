@@ -225,8 +225,14 @@ class IOCContainer implements ContainerContract
         $callParams = [];
 
         foreach ($constructorParams as $param) {
-            if ($param->getClass()) {
-                $callParams[] = $this->__invoke($param->getClass()->getName());
+            if (!$class = $param->getClass()) {
+                continue;
+            }
+
+            $className = $class->getName();
+
+            if (!$param->isOptional() || $this->bound($className)) {
+                $callParams[] = $this->__invoke($className);
             }
         }
 
