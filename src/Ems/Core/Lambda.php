@@ -97,6 +97,11 @@ class Lambda implements Stringable
     protected $injections = [];
 
     /**
+     * @var array
+     */
+    protected $bindings = [];
+
+    /**
      * @var bool
      */
     protected $autoInject = false;
@@ -243,6 +248,21 @@ class Lambda implements Stringable
     public function getInjections()
     {
         return $this->injections;
+    }
+
+    /**
+     * This method does allow to skip resolving a type by the assigned factory.
+     * It forces to use the assigned object to be passed to the callable.
+     *
+     * @param string $abstract an interface or class name.
+     * @param object $instance The actual instance (not closure or factory)
+     *
+     * @return $this
+     */
+    public function bind($abstract, $instance)
+    {
+        $this->bindings[$abstract] = $instance;
+        return $this;
     }
 
     /**
@@ -735,13 +755,17 @@ class Lambda implements Stringable
      * This method builds the arguments to call a method with its dependencies.
      * You have to built the array with static::reflect($callable) to call this
      * method.
+     * Pass the third argument to force a distinct object to be used for a
+     * type. For example [CacheInterface::class => $myCustomCache] would lead to
+     * not asking the instance resolver and using $myCustomCache.
      *
      * @param array    $reflectedArgs
      * @param callable $instanceResolver (optional)
+     * @param array    $customBindings (optional)
      *
      * @return array
      */
-    public static function buildHintedArguments(array $reflectedArgs, callable $instanceResolver=null)
+    public static function buildHintedArguments(array $reflectedArgs, callable $instanceResolver=null, $customBindings=[])
     {
         $args = [];
 
@@ -754,6 +778,11 @@ class Lambda implements Stringable
             }
 
             if (!Type::isCustom($info['type'])) {
+                continue;
+            }
+
+            if (isset($customBindings[$info['type']])) {
+                $args[$name] = $customBindings[$info['type']];
                 continue;
             }
 
@@ -922,7 +951,7 @@ class Lambda implements Stringable
             return;
         }
         $argumentTypes = static::reflect($this->getCallable());
-        $injections = Lambda::buildHintedArguments($argumentTypes, $this->instanceResolver);
+        $injections = Lambda::buildHintedArguments($argumentTypes, $this->instanceResolver, $this->bindings);
         $this->inject($injections);
         $this->wasAutoInjected = true;
     }
