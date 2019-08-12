@@ -97,7 +97,7 @@ class StringStreamTest extends \Ems\IntegrationTest
         }
 
         $this->assertEquals($content, $readContent2);
-        $this->assertCount(6, $chunks2);
+        $this->assertGreaterThanOrEqual(6, $chunks2);
         $this->assertFalse($stream->valid());
         $this->assertEquals(-1, $stream->key());
 
