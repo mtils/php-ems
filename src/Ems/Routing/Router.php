@@ -299,7 +299,7 @@ class Router implements RouterContract, SupportsCustomFactory
         $lambda = new Lambda($handler, $this->_customFactory);
 
         if ($this->_customFactory) {
-            $lambda->autoInject(true, true);
+            $lambda->autoInject(true, false);
         }
 
         return $lambda;

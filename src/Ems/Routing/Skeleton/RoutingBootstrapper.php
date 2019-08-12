@@ -17,24 +17,30 @@ use Ems\Routing\InputHandler;
 use Ems\Routing\MiddlewareCollection;
 use Ems\Contracts\Routing\Router as RouterContract;
 use Ems\Routing\RoutedInputHandler;
+use Ems\Routing\RouteMiddleware;
 use Ems\Routing\Router;
 use function php_sapi_name;
 
 class RoutingBootstrapper extends Bootstrapper
 {
     protected $singletons = [
-        MiddlewareCollection::class => MiddlewareCollectionContract::class,
         InputHandler::class         => InputHandlerContract::class,
         Router::class               => RouterContract::class
     ];
 
     protected $bindings = [
-        FastRouteDispatcher::class => Dispatcher::class
+        FastRouteDispatcher::class => Dispatcher::class,
+        MiddlewareCollection::class => MiddlewareCollectionContract::class,
     ];
 
     public function bind()
     {
         parent::bind();
+
+        $this->app->bind(Input::class, function () {
+
+        });
+
         $this->app->afterResolving(InputHandler::class, function (InputHandler $handler) {
             $this->addDefaultMiddleware($handler->middleware());
         });
@@ -45,7 +51,8 @@ class RoutingBootstrapper extends Bootstrapper
     {
         $this->addClientTypeMiddleware($collection);
         $this->addRouteScopeMiddleware($collection);
-        $this->addRouterMiddleware($collection);
+        $this->addRouterToMiddleware($collection);
+        $this->addRouteMiddleware($collection);
         $this->addRouteHandlerMiddleware($collection);
     }
 
@@ -69,9 +76,14 @@ class RoutingBootstrapper extends Bootstrapper
         });
     }
 
-    protected function addRouterMiddleware(MiddlewareCollectionContract $collection)
+    protected function addRouterToMiddleware(MiddlewareCollectionContract $collection)
     {
         $collection->add('router', RouterContract::class);
+    }
+
+    protected function addRouteMiddleware(MiddlewareCollectionContract $collection)
+    {
+        $collection->add('route-middleware', RouteMiddleware::class);
     }
 
     protected function addRouteHandlerMiddleware(MiddlewareCollectionContract $collection)

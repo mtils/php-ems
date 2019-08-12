@@ -8,6 +8,7 @@ namespace Ems\Routing;
 use ArgumentCountError;
 use Ems\Cache\Exception\CacheMissException;
 use Ems\Contracts\Core\Filesystem;
+use Ems\Contracts\Core\Input;
 use Ems\Contracts\Core\InputHandler as HandlerContract;
 use Ems\Contracts\Core\Response;
 use Ems\Contracts\Core\StringConverter;
@@ -18,6 +19,7 @@ use Ems\Contracts\Routing\RouteCollector;
 use Ems\Contracts\Routing\Router as RouterContract;
 use Ems\Core\Url;
 use Ems\RoutingTrait;
+use Ems\Testing\LoggingCallable;
 use Illuminate\Contracts\Container\Container;
 use function array_filter;
 use function array_values;
@@ -191,6 +193,60 @@ class InputHandlerIntegrationTest extends \Ems\IntegrationTest
         $this->assertSame($exception, $response->payload());
     }
 
+    /**
+     * @test
+     */
+    public function route_middleware_runs_assigned_middleware()
+    {
+        $handler = $this->makeHandler();
+        $router = $this->makeRouter(false);
+        $app = $this->app();
+
+        $app->bind('require-auth', function () {
+            return function (Input $input, callable $next) {
+                $input['i_was_here'] = 'require-auth';
+                $next($input);
+            };
+        });
+
+        $router->register(function (RouteCollector $routes) {
+            $routes->get('my-account', function (Input $input) {
+                return 'my-account was called and ' . $input['i_was_here'];
+            })->middleware('require-auth');
+        });
+
+        $response = $handler($this->input('my-account'));
+
+        $this->assertEquals('my-account was called and require-auth', $response->payload());
+
+    }
+
+    /**
+     * @test
+     */
+    public function route_middleware_skips_routed_if_response_returned()
+    {
+        $handler = $this->makeHandler();
+        $router = $this->makeRouter(false);
+        $app = $this->app();
+
+        $app->bind('require-token', function () {
+            return function (Input $input, callable $next) {
+                return 'I dont care about the next middlewares';
+            };
+        });
+
+        $router->register(function (RouteCollector $routes) {
+            $routes->get('my-account', function (Input $input) {
+                return 'my-account was called';
+            })->middleware('require-token');
+        });
+
+        $response = $handler($this->input('my-account'));
+
+        $this->assertEquals('I dont care about the next middlewares', $response->payload());
+
+    }
     /**
      * @param Container|null $container
      *

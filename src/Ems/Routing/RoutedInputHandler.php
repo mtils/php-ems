@@ -5,7 +5,8 @@
 
 namespace Ems\Routing;
 
-use Ems\Contracts\Core\Input;
+use Ems\Contracts\Core\Input as InputContract;
+use Ems\Core\Input;
 use Ems\Contracts\Core\InputHandler as InputHandlerContract;
 use Ems\Contracts\Core\Response;
 use Ems\Contracts\Core\SupportsCustomFactory;
@@ -39,11 +40,11 @@ class RoutedInputHandler implements InputHandlerContract, SupportsCustomFactory
     /**
      * Handle the input and return a corresponding response
      *
-     * @param Input $input
+     * @param InputContract $input
      *
      * @return Response
      */
-    public function __invoke(Input $input)
+    public function __invoke(InputContract $input)
     {
         if (!$input->isRouted()) {
             throw new UnConfiguredException('The input has to be routed to get handled by ' . static::class . '.');
@@ -55,7 +56,9 @@ class RoutedInputHandler implements InputHandlerContract, SupportsCustomFactory
             throw new UnConfiguredException('The input says it is routed but missing a callable handler. getHandler() returned a ' . Type::of($handler));
         }
 
-        $this->assignFactoryIfLambdaAndHasNone($handler);
+        if ($handler instanceof Lambda) {
+            $this->configureLambda($handler, $input);
+        }
 
         return $this->respond($input, $this->call($handler, $input));
 
@@ -77,12 +80,12 @@ class RoutedInputHandler implements InputHandlerContract, SupportsCustomFactory
     /**
      * Create the response from the handlers output.
      *
-     * @param Input $input
+     * @param InputContract $input
      * @param mixed $result
      *
      * @return Response
      */
-    protected function respond(Input $input, $result)
+    protected function respond(InputContract $input, $result)
     {
         if($result instanceof Response) {
             return $result;
@@ -96,12 +99,17 @@ class RoutedInputHandler implements InputHandlerContract, SupportsCustomFactory
     }
 
     /**
-     * @param callable $handler
+     * @param Lambda        $handler
+     * @param InputContract $input
      */
-    protected function assignFactoryIfLambdaAndHasNone(callable $handler)
+    protected function configureLambda(Lambda $handler, InputContract $input)
     {
-        if ($handler instanceof Lambda && !$handler->getInstanceResolver() && $this->_customFactory) {
+        if ($this->_customFactory && !$handler->getInstanceResolver()) {
             $handler->setInstanceResolver($this->_customFactory);
         }
+        // Manually bind the current input to explicitly use the input of this
+        // application call
+        $handler->bind(InputContract::class, $input);
+        $handler->bind(Input::class, $input);
     }
 }

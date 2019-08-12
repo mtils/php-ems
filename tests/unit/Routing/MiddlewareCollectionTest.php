@@ -542,6 +542,36 @@ class MiddlewareCollectionTest extends TestCase
 
     /**
      * @test
+     * @throws \ReflectionException
+     */
+    public function invoke_with_multiple_creating_middleware_returns_first_created_response()
+    {
+        $c = $this->make();
+        $c->add('a', MiddlewareCollectionTest_AMiddleware::class, 'a');
+        $c->add('b', MiddlewareCollectionTest_AMiddleware::class, 'b');
+        $c->add('c', MiddlewareCollectionTest_AMiddleware::class, 'c');
+        $c->add('d', MiddlewareCollectionTest_AMiddleware::class, ['d', 4]);
+        $c->add('e', MiddlewareCollectionTest_AMiddleware::class, 'e');
+        $c->add('f', MiddlewareCollectionTest_AMiddleware::class, 'createResponse', 'first');
+        $c->add('g', MiddlewareCollectionTest_AMiddleware::class, 'createResponse', 'second');
+        $c->add('h', MiddlewareCollectionTest_AMiddleware::class, ['modifyResponse', 1]);
+        $c->add('i', MiddlewareCollectionTest_AMiddleware::class, ['modifyResponse', 2]);
+        $c->add('j', MiddlewareCollectionTest_AMiddleware::class, ['modifyResponse', 3]);
+
+        /** @var Response $response */
+        $response = $c($this->makeInput());
+        $this->assertInstanceOf(Response::class, $response);
+        $this->assertEquals('first', $response['arg']);
+        $input = $response->payload();
+
+        $this->assertEquals($input[MiddlewareCollectionTest_AMiddleware::class.'(a)'], ['a']);
+        $this->assertEquals($response[MiddlewareCollectionTest_AMiddleware::class.'(modifyResponse,1)'], ['modifyResponse',1]);
+        $this->assertEquals($response[MiddlewareCollectionTest_AMiddleware::class.'(modifyResponse,2)'], ['modifyResponse',2]);
+        $this->assertEquals($response[MiddlewareCollectionTest_AMiddleware::class.'(modifyResponse,3)'], ['modifyResponse',3]);
+    }
+
+    /**
+     * @test
      * @expectedException \Ems\Core\Exceptions\HandlerNotFoundException
      * @throws \ReflectionException
      */
@@ -595,7 +625,11 @@ class MiddlewareCollectionTest_AMiddleware
         $input[$requestKey] = $this->args;
 
         if (isset($this->args[0]) && $this->args[0] == 'createResponse') {
-            return (new Response())->setPayload($input);
+            $response = (new Response())->setPayload($input);
+            if (isset($this->args[1])) {
+                $response->offsetSet('arg', $this->args[1]);
+            }
+            return $response;
         }
 
         if (isset($this->args[0]) && $this->args[0] == 'modifyResponse') {
