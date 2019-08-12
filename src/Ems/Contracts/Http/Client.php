@@ -84,11 +84,12 @@ interface Client
      * $contentType.
      *
      * @param Url    $url
-     * @param mixed  $data
+     * @param array  $data
+     * @param string $method (default: POST)
      *
      * @return Response
      */
-    public function submit(Url $url, array $data);
+    public function submit(Url $url, array $data, $method=Connection::POST);
 
     /**
      * Set headers before sending the request.
