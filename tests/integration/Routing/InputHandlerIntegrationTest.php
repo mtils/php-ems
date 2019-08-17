@@ -240,11 +240,19 @@ class InputHandlerIntegrationTest extends \Ems\IntegrationTest
             $routes->get('my-account', function (Input $input) {
                 return 'my-account was called';
             })->middleware('require-token');
+
+            $routes->get('home', function (Input $input) {
+                return 'home was called';
+            });
         });
 
         $response = $handler($this->input('my-account'));
 
         $this->assertEquals('I dont care about the next middlewares', $response->payload());
+
+        $response = $handler($this->input('home'));
+
+        $this->assertEquals('home was called', $response->payload());
 
     }
     /**
