@@ -17,6 +17,8 @@ use Ems\Core\Exceptions\NotImplementedException;
 use Ems\Core\Url;
 use Ems\Contracts\Http\Client as ClientContract;
 use Ems\Core\Expression;
+use Ems\Http\Serializer\UrlEncodeSerializer;
+use function json_encode;
 
 class ClientTest extends \Ems\TestCase
 {
@@ -243,12 +245,24 @@ class ClientTest extends \Ems\TestCase
 
         $this->assertSame($response, $client->header('Accept-Encoding', 'gzip,deflate')->get($url, 'application/json'));
     }
-    /**
-     * @expectedException \Ems\Core\Exceptions\NotImplementedException
-     */
-    public function test_submit_throws_NotImplementedException_because_it_is_not_implemented_and_when_i_implement_it_i_have_to_implement_this_test_new()
+
+    public function test_submit_submits_data()
     {
-        $this->newClient()->submit(new Url, []);
+        $con = $this->con();
+        $client = $this->newClient($this->pool($con));
+        $serializer = new UrlEncodeSerializer();
+
+        $url = new Url('http://web-utils.de/api/v1/slots/email.sent');
+        $response = new Response([0=>'HTTP/1.1 200 OK']);
+        $data = ['a', 'b'];
+        $serialized = $serializer->serialize($data);
+
+        $con->shouldReceive('send')
+            ->with('POST', ['Accept: application/json'], $serialized)
+            ->once()
+            ->andReturn($response);
+
+        $this->assertSame($response, $client->submit($url, $data));
     }
 
     protected function newClient(ConnectionPool $pool=null)

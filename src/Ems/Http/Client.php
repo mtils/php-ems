@@ -8,17 +8,17 @@
 
 namespace Ems\Http;
 
-use Ems\Contracts\Core\Stringable;
-use Ems\Contracts\Http\Connection as HttpConnection;
 use Ems\Contracts\Core\ConnectionPool;
+use Ems\Contracts\Core\Serializer as SerializerContract;
+use Ems\Contracts\Core\Stringable;
 use Ems\Contracts\Core\Url as UrlContract;
 use Ems\Contracts\Http\Client as ClientContract;
+use Ems\Contracts\Http\Connection as HttpConnection;
 use Ems\Contracts\Http\Response;
 use Ems\Core\Exceptions\MisConfiguredException;
-use Ems\Core\Exceptions\NotImplementedException;
-use Ems\Contracts\Core\Serializer as SerializerContract;
-use Ems\Core\Helper;
 use Ems\Core\Serializer\JsonSerializer;
+use Ems\Http\Serializer\UrlEncodeSerializer;
+use UnexpectedValueException;
 
 
 class Client implements ClientContract
@@ -33,6 +33,11 @@ class Client implements ClientContract
      * @var SerializerContract
      */
     protected $serializer;
+
+    /**
+     * @var UrlEncodeSerializer
+     */
+    protected $formSerializer;
 
     /**
      * @var array
@@ -51,13 +56,14 @@ class Client implements ClientContract
     {
         $this->connections = $connections;
         $this->serializer = $serializer ?: new JsonSerializer();
+        $this->formSerializer = new UrlEncodeSerializer();
         $this->headers = $headers;
     }
 
     /**
      * @inheritDoc
      *
-     * @param Url  $url
+     * @param UrlContract  $url
      *
      * @return Response
      */
@@ -69,7 +75,7 @@ class Client implements ClientContract
     /**
      * @inheritDoc
      *
-     * @param Url  $url
+     * @param UrlContract  $url
      * @param null $contentType
      *
      * @return Response
@@ -84,9 +90,9 @@ class Client implements ClientContract
     /**
      * @inheritDoc
      *
-     * @param Url    $url
-     * @param mixed  $data
-     * @param string $contentType (optional)
+     * @param UrlContract $url
+     * @param mixed       $data
+     * @param string      $contentType (optional)
      *
      * @return Response
      */
@@ -101,9 +107,9 @@ class Client implements ClientContract
     /**
      * @inheritDoc
      *
-     * @param Url    $url
-     * @param mixed  $data
-     * @param string $contentType (optional)
+     * @param UrlContract $url
+     * @param mixed       $data
+     * @param string      $contentType (optional)
      *
      * @return Response
      */
@@ -118,9 +124,9 @@ class Client implements ClientContract
     /**
      * @inheritDoc
      *
-     * @param Url    $url
-     * @param mixed  $data
-     * @param string $contentType (optional)
+     * @param UrlContract $url
+     * @param mixed       $data
+     * @param string      $contentType (optional)
      *
      * @return Response
      */
@@ -135,9 +141,9 @@ class Client implements ClientContract
     /**
      * @inheritDoc
      *
-     * @param Url    $url
-     * @param mixed  $data
-     * @param string $contentType (optional)
+     * @param UrlContract $url
+     * @param mixed       $data
+     * @param string      $contentType (optional)
      *
      * @return Response
      */
@@ -152,15 +158,18 @@ class Client implements ClientContract
     /**
      * @inheritDoc
      *
-     * @param Url    $url
-     * @param mixed  $data
+     * @param UrlContract    $url
+     * @param array  $data
+     * @param string $method (default: POST)
      *
      * @return Response
      */
-    public function submit(UrlContract $url, array $data)
+    public function submit(UrlContract $url, array $data, $method=HttpConnection::POST)
     {
-        // TODO: Implement submit()
-        throw new NotImplementedException('Submitting is currently not supported');
+        $headers = $this->buildHeaders($this->serializer->mimeType());
+        $data = $this->formSerializer->serialize($data);
+        $response = $this->con($url)->send($method, $headers, $data);
+        return $this->configure($response, $this->formSerializer->mimeType());
     }
 
     /**
@@ -194,7 +203,7 @@ class Client implements ClientContract
         $con = $this->connections->connection($url);
 
         if (!$con instanceof HttpConnection) {
-            throw new \UnexpectedValueException("The connection returned for $url is no HttpConnection");
+            throw new UnexpectedValueException("The connection returned for $url is no HttpConnection");
         }
 
         return $con;
