@@ -11,6 +11,7 @@ use Ems\Contracts\Core\SupportsCustomFactory;
 use Ems\Contracts\Routing\MiddlewareCollection as MiddlewareCollectionContract;
 use Ems\Core\Exceptions\HandlerNotFoundException;
 use Ems\Core\Exceptions\UnConfiguredException;
+use Ems\Core\ProxyInputHandler;
 use Ems\Core\Support\CustomFactorySupport;
 use Ems\Expression\ConstraintParsingMethods;
 
@@ -36,6 +37,15 @@ class RouteMiddleware implements SupportsCustomFactory
         $this->middlewareCollection = $middlewareCollection ?: new MiddlewareCollection();
     }
 
+    /**
+     * Run the request trough the assigned route middlewares.
+     *
+     * @param Input $input
+     * @param callable $next
+     * @return \Ems\Contracts\Core\Response
+     *
+     * @throws \ReflectionException
+     */
     public function __invoke(Input $input, callable $next)
     {
         if (!$input->isRouted()) {
@@ -57,9 +67,6 @@ class RouteMiddleware implements SupportsCustomFactory
         } catch (Termination $termination) {
             return $next($input);
         }
-//        catch (HandlerNotFoundException $e) {
-//            return $next($input);
-//        }
 
     }
 
@@ -73,16 +80,9 @@ class RouteMiddleware implements SupportsCustomFactory
             }
         }
 
-        $this->middlewareCollection->add('termination', function (Input $input, callable $next) {
-            try {
-                if ($response = $next($input)) {
-                    return $response;
-                }
-            } catch (HandlerNotFoundException $e) {
-                //
-            }
+        $this->middlewareCollection->add('termination', new ProxyInputHandler(function (Input $input) {
             throw new Termination();
-        });
+        }));
     }
 
     /**

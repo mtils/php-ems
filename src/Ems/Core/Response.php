@@ -31,6 +31,13 @@ class Response implements ResponseContract
      */
     protected $payloadCreated = false;
 
+    public function __construct($payload='')
+    {
+        if ($payload) {
+            $this->setPayload($payload);
+        }
+    }
+
     /**
      * @inheritdoc
      *

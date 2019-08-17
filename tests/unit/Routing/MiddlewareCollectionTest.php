@@ -6,8 +6,8 @@
 namespace Ems\Routing;
 
 
-use function array_slice;
 use Ems\Contracts\Core\Input;
+use Ems\Contracts\Routing\MiddlewareCollection as CollectionContract;
 use Ems\Contracts\Routing\Routable;
 use Ems\Core\Collections\StringList;
 use Ems\Core\Exceptions\KeyNotFoundException;
@@ -15,10 +15,11 @@ use Ems\Core\IOCContainer;
 use Ems\Core\Response;
 use Ems\Core\Url;
 use Ems\TestCase;
-use Ems\Contracts\Routing\MiddlewareCollection as CollectionContract;
+use LogicException;
+use ReflectionException;
+use function array_slice;
 use function func_get_args;
 use function func_num_args;
-use function print_r;
 
 class MiddlewareCollectionTest extends TestCase
 {
@@ -42,6 +43,7 @@ class MiddlewareCollectionTest extends TestCase
 
     /**
      * @test
+     * @throws ReflectionException
      */
     public function middleware_makes_middleware()
     {
@@ -59,6 +61,7 @@ class MiddlewareCollectionTest extends TestCase
 
     /**
      * @test
+     * @throws ReflectionException
      */
     public function parameters_returns_assigned_parameters()
     {
@@ -104,6 +107,7 @@ class MiddlewareCollectionTest extends TestCase
 
     /**
      * @test
+     * @throws ReflectionException
      */
     public function offsetUnset_clears_everything_added()
     {
@@ -138,6 +142,7 @@ class MiddlewareCollectionTest extends TestCase
 
     /**
      * @test
+     * @throws ReflectionException
      */
     public function add_with_same_name_deletes_original_stuff()
     {
@@ -357,7 +362,7 @@ class MiddlewareCollectionTest extends TestCase
 
     /**
      * @test
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function invoke_without_container_utilizes_runner()
     {
@@ -367,13 +372,13 @@ class MiddlewareCollectionTest extends TestCase
         $c->add('c', MiddlewareCollectionTest_AMiddleware::class, 'c');
         $c->add('d', MiddlewareCollectionTest_AMiddleware::class, ['d', 4]);
         $c->add('e', MiddlewareCollectionTest_AMiddleware::class, 'e');
-        $c->add('f', MiddlewareCollectionTest_AMiddleware::class, 'createResponse');
+        $c->add('handle', MiddlewareCollectionTest_InputHandler::class);
         $c($this->makeInput());
     }
 
     /**
      * @test
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function invoke_with_ems_container_utilizes_runner()
     {
@@ -384,13 +389,13 @@ class MiddlewareCollectionTest extends TestCase
         $c->add('c', MiddlewareCollectionTest_AMiddleware::class, 'c');
         $c->add('d', MiddlewareCollectionTest_AMiddleware::class, ['d', 4]);
         $c->add('e', MiddlewareCollectionTest_AMiddleware::class, 'e');
-        $c->add('f', MiddlewareCollectionTest_AMiddleware::class, 'createResponse');
+        $c->add('handle', MiddlewareCollectionTest_InputHandler::class);
         $c($this->makeInput());
     }
 
     /**
      * @test
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function invoke_with_laravel_container_utilizes_runner()
     {
@@ -401,13 +406,13 @@ class MiddlewareCollectionTest extends TestCase
         $c->add('c', MiddlewareCollectionTest_AMiddleware::class, 'c');
         $c->add('d', MiddlewareCollectionTest_AMiddleware::class, ['d', 4]);
         $c->add('e', MiddlewareCollectionTest_AMiddleware::class, 'e');
-        $c->add('f', MiddlewareCollectionTest_AMiddleware::class, 'createResponse');
+        $c->add('handle', MiddlewareCollectionTest_InputHandler::class);
         $c($this->makeInput());
     }
 
     /**
      * @test
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function invoke_creates_response()
     {
@@ -417,7 +422,7 @@ class MiddlewareCollectionTest extends TestCase
         $c->add('c', MiddlewareCollectionTest_AMiddleware::class, 'c');
         $c->add('d', MiddlewareCollectionTest_AMiddleware::class, ['d', 4]);
         $c->add('e', MiddlewareCollectionTest_AMiddleware::class, 'e');
-        $c->add('f', MiddlewareCollectionTest_AMiddleware::class, 'createResponse');
+        $c->add('handle', MiddlewareCollectionTest_InputHandler::class);
 
         /** @var Response $response */
         $response = $c($this->makeInput());
@@ -429,12 +434,12 @@ class MiddlewareCollectionTest extends TestCase
         $this->assertEquals($input[MiddlewareCollectionTest_AMiddleware::class.'(c)'], ['c']);
         $this->assertEquals($input[MiddlewareCollectionTest_AMiddleware::class.'(d,4)'], ['d','4']);
         $this->assertEquals($input[MiddlewareCollectionTest_AMiddleware::class.'(e)'], ['e']);
-        $this->assertEquals($input[MiddlewareCollectionTest_AMiddleware::class.'(createResponse)'], ['createResponse']);
+        $this->assertEquals($input['handle'], 1);
     }
 
     /**
      * @test
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function invoke_with_manipulating_middleware()
     {
@@ -444,7 +449,7 @@ class MiddlewareCollectionTest extends TestCase
         $c->add('c', MiddlewareCollectionTest_AMiddleware::class, 'c');
         $c->add('d', MiddlewareCollectionTest_AMiddleware::class, ['d', 4]);
         $c->add('e', MiddlewareCollectionTest_AMiddleware::class, 'e');
-        $c->add('f', MiddlewareCollectionTest_AMiddleware::class, 'createResponse');
+        $c->add('handle', MiddlewareCollectionTest_InputHandler::class);
         $c->add('g', MiddlewareCollectionTest_AMiddleware::class, ['modifyResponse', 1]);
 
         /** @var Response $response */
@@ -458,7 +463,7 @@ class MiddlewareCollectionTest extends TestCase
 
     /**
      * @test
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function invoke_with_multiple_manipulating_middleware()
     {
@@ -468,7 +473,7 @@ class MiddlewareCollectionTest extends TestCase
         $c->add('c', MiddlewareCollectionTest_AMiddleware::class, 'c');
         $c->add('d', MiddlewareCollectionTest_AMiddleware::class, ['d', 4]);
         $c->add('e', MiddlewareCollectionTest_AMiddleware::class, 'e');
-        $c->add('f', MiddlewareCollectionTest_AMiddleware::class, 'createResponse');
+        $c->add('handle', MiddlewareCollectionTest_InputHandler::class);
         $c->add('g', MiddlewareCollectionTest_AMiddleware::class, ['modifyResponse', 1]);
         $c->add('h', MiddlewareCollectionTest_AMiddleware::class, ['modifyResponse', 2]);
         $c->add('i', MiddlewareCollectionTest_AMiddleware::class, ['modifyResponse', 3]);
@@ -486,7 +491,7 @@ class MiddlewareCollectionTest extends TestCase
 
     /**
      * @test
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function invoke_with_multiple_manipulating_middleware_if_middleware_was_assigned_before()
     {
@@ -499,7 +504,7 @@ class MiddlewareCollectionTest extends TestCase
         $c->add('g', MiddlewareCollectionTest_AMiddleware::class, ['modifyResponse', 1]);
         $c->add('h', MiddlewareCollectionTest_AMiddleware::class, ['modifyResponse', 2]);
         $c->add('i', MiddlewareCollectionTest_AMiddleware::class, ['modifyResponse', 3]);
-        $c->add('f', MiddlewareCollectionTest_AMiddleware::class, 'createResponse');
+        $c->add('handle', MiddlewareCollectionTest_InputHandler::class);
 
         /** @var Response $response */
         $response = $c($this->makeInput());
@@ -514,7 +519,7 @@ class MiddlewareCollectionTest extends TestCase
 
     /**
      * @test
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function invoke_with_multiple_manipulating_middleware_if_middleware_was_assigned_before_and_after()
     {
@@ -526,7 +531,7 @@ class MiddlewareCollectionTest extends TestCase
         $c->add('e', MiddlewareCollectionTest_AMiddleware::class, 'e');
         $c->add('g', MiddlewareCollectionTest_AMiddleware::class, ['modifyResponse', 1]);
         $c->add('i', MiddlewareCollectionTest_AMiddleware::class, ['modifyResponse', 3]);
-        $c->add('f', MiddlewareCollectionTest_AMiddleware::class, 'createResponse');
+        $c->add('handle', MiddlewareCollectionTest_InputHandler::class);
         $c->add('h', MiddlewareCollectionTest_AMiddleware::class, ['modifyResponse', 2]);
 
         /** @var Response $response */
@@ -542,7 +547,7 @@ class MiddlewareCollectionTest extends TestCase
 
     /**
      * @test
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function invoke_with_multiple_creating_middleware_returns_first_created_response()
     {
@@ -554,28 +559,100 @@ class MiddlewareCollectionTest extends TestCase
         $c->add('e', MiddlewareCollectionTest_AMiddleware::class, 'e');
         $c->add('f', MiddlewareCollectionTest_AMiddleware::class, 'createResponse', 'first');
         $c->add('g', MiddlewareCollectionTest_AMiddleware::class, 'createResponse', 'second');
+        $c->add('handle', MiddlewareCollectionTest_InputHandler::class);
         $c->add('h', MiddlewareCollectionTest_AMiddleware::class, ['modifyResponse', 1]);
         $c->add('i', MiddlewareCollectionTest_AMiddleware::class, ['modifyResponse', 2]);
         $c->add('j', MiddlewareCollectionTest_AMiddleware::class, ['modifyResponse', 3]);
 
+        $input = $this->makeInput();
         /** @var Response $response */
-        $response = $c($this->makeInput());
+        $response = $c($input);
+
         $this->assertInstanceOf(Response::class, $response);
         $this->assertEquals('first', $response['arg']);
         $input = $response->payload();
+
+
 
         $this->assertEquals($input[MiddlewareCollectionTest_AMiddleware::class.'(a)'], ['a']);
         $this->assertEquals($response[MiddlewareCollectionTest_AMiddleware::class.'(modifyResponse,1)'], ['modifyResponse',1]);
         $this->assertEquals($response[MiddlewareCollectionTest_AMiddleware::class.'(modifyResponse,2)'], ['modifyResponse',2]);
         $this->assertEquals($response[MiddlewareCollectionTest_AMiddleware::class.'(modifyResponse,3)'], ['modifyResponse',3]);
+
     }
 
     /**
      * @test
-     * @expectedException \Ems\Core\Exceptions\HandlerNotFoundException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
-    public function invoke_invoke_without_response_throws_HandlerNotFoundException()
+    public function invoke_with_multiple_creating_middleware_returns_first_created_response_if_next_is_inputHandler()
+    {
+        $c = $this->make();
+        $c->add('a', MiddlewareCollectionTest_AMiddleware::class, 'a');
+        $c->add('b', MiddlewareCollectionTest_AMiddleware::class, 'b');
+        $c->add('c', MiddlewareCollectionTest_AMiddleware::class, 'c');
+        $c->add('d', MiddlewareCollectionTest_AMiddleware::class, ['d', 4]);
+        $c->add('e', MiddlewareCollectionTest_AMiddleware::class, 'e');
+        $c->add('f', MiddlewareCollectionTest_AMiddleware::class, 'modifyResponse', 0);
+        $c->add('g', MiddlewareCollectionTest_AMiddleware::class, 'createResponse', 'first');
+        $c->add('handle', MiddlewareCollectionTest_InputHandler::class);
+        $c->add('h', MiddlewareCollectionTest_AMiddleware::class, ['modifyResponse', 1]);
+        $c->add('i', MiddlewareCollectionTest_AMiddleware::class, ['modifyResponse', 2]);
+        $c->add('j', MiddlewareCollectionTest_AMiddleware::class, ['modifyResponse', 3]);
+
+        $input = $this->makeInput();
+        /** @var Response $response */
+        $response = $c($input);
+
+        $this->assertInstanceOf(Response::class, $response);
+        $this->assertEquals('first', $response['arg']);
+        $input = $response->payload();
+
+
+
+        $this->assertEquals($input[MiddlewareCollectionTest_AMiddleware::class.'(a)'], ['a']);
+        $this->assertEquals($response[MiddlewareCollectionTest_AMiddleware::class.'(modifyResponse,1)'], ['modifyResponse',1]);
+        $this->assertEquals($response[MiddlewareCollectionTest_AMiddleware::class.'(modifyResponse,2)'], ['modifyResponse',2]);
+        $this->assertEquals($response[MiddlewareCollectionTest_AMiddleware::class.'(modifyResponse,3)'], ['modifyResponse',3]);
+
+    }
+
+    /**
+     * @test
+     * @throws ReflectionException
+     */
+    public function invoke_with_multiple_creating_middleware_returns_first_created_response_if_inputHandler_is_last()
+    {
+        $c = $this->make();
+        $c->add('a', MiddlewareCollectionTest_AMiddleware::class, 'a');
+        $c->add('b', MiddlewareCollectionTest_AMiddleware::class, 'b');
+        $c->add('c', MiddlewareCollectionTest_AMiddleware::class, 'c');
+        $c->add('d', MiddlewareCollectionTest_AMiddleware::class, ['d', 4]);
+        $c->add('e', MiddlewareCollectionTest_AMiddleware::class, 'e');
+        $c->add('f', MiddlewareCollectionTest_AMiddleware::class, 'modifyResponse', 0);
+        $c->add('g', MiddlewareCollectionTest_AMiddleware::class, 'createResponse', 'first');
+        $c->add('handle', MiddlewareCollectionTest_InputHandler::class);
+
+        $input = $this->makeInput();
+        /** @var Response $response */
+        $response = $c($input);
+
+        $this->assertInstanceOf(Response::class, $response);
+        $this->assertEquals('first', $response['arg']);
+        $input = $response->payload();
+
+
+        $this->assertEquals($input[MiddlewareCollectionTest_AMiddleware::class . '(a)'], ['a']);
+
+
+    }
+
+    /**
+     * @test
+     * @expectedException \Ems\Contracts\Routing\Exceptions\NoInputHandlerException
+     * @throws ReflectionException
+     */
+    public function invoke_invoke_without_InputHandler_throws_NoInputHandlerException()
     {
         $c = $this->make();
         $c->add('a', MiddlewareCollectionTest_AMiddleware::class, 'a');
@@ -585,6 +662,54 @@ class MiddlewareCollectionTest extends TestCase
         $c->add('e', MiddlewareCollectionTest_AMiddleware::class, 'e');
 
         $c($this->makeInput());
+    }
+
+    /**
+     * @test
+     * @expectedException LogicException
+     * @throws ReflectionException
+     */
+    public function invoke_invoke_with_more_then_one_InputHandler_throws_LogicException()
+    {
+        $c = $this->make();
+        $c->add('a', MiddlewareCollectionTest_AMiddleware::class, 'a');
+        $c->add('b', MiddlewareCollectionTest_AMiddleware::class, 'b');
+        $c->add('c', MiddlewareCollectionTest_AMiddleware::class, 'c');
+        $c->add('d', MiddlewareCollectionTest_AMiddleware::class, ['d', 4]);
+        $c->add('e', MiddlewareCollectionTest_AMiddleware::class, 'e');
+        $c->add('handle', MiddlewareCollectionTest_InputHandler::class);
+        $c->add('handle_double', MiddlewareCollectionTest_InputHandler::class);
+
+        $c($this->makeInput());
+    }
+
+    /**
+     * @test
+     * @throws ReflectionException
+     * @expectedException \Ems\Core\Exceptions\HandlerNotFoundException
+     */
+    public function invoke_without_a_response_throws_HandlerNotFoundException()
+    {
+        $c = $this->make();
+        $c->add('a', MiddlewareCollectionTest_AMiddleware::class, 'a');
+        $c->add('b', MiddlewareCollectionTest_AMiddleware::class, 'b');
+        $c->add('c', MiddlewareCollectionTest_AMiddleware::class, 'c');
+        $c->add('d', MiddlewareCollectionTest_AMiddleware::class, ['d', 4]);
+        $c->add('e', MiddlewareCollectionTest_AMiddleware::class, 'e');
+        $c->add('g', MiddlewareCollectionTest_AMiddleware::class, ['modifyResponse', 1]);
+        $c->add('h', MiddlewareCollectionTest_AMiddleware::class, ['modifyResponse', 2]);
+        $c->add('i', MiddlewareCollectionTest_AMiddleware::class, ['modifyResponse', 3]);
+        $c->add('handle', new MiddlewareCollectionTest_InputHandler('handle-not', false));
+
+        /** @var Response $response */
+        $response = $c($this->makeInput());
+        $this->assertInstanceOf(Response::class, $response);
+        $input = $response->payload();
+
+        $this->assertEquals($input[MiddlewareCollectionTest_AMiddleware::class.'(a)'], ['a']);
+        $this->assertEquals($response[MiddlewareCollectionTest_AMiddleware::class.'(modifyResponse,1)'], ['modifyResponse',1]);
+        $this->assertEquals($response[MiddlewareCollectionTest_AMiddleware::class.'(modifyResponse,2)'], ['modifyResponse',2]);
+        $this->assertEquals($response[MiddlewareCollectionTest_AMiddleware::class.'(modifyResponse,3)'], ['modifyResponse',3]);
     }
 
     protected function make(callable $instanceResolver=null)
@@ -601,7 +726,7 @@ class MiddlewareCollectionTest extends TestCase
      */
     protected function makeInput($path='/foo', array $parameters=[], $clientType=Routable::CLIENT_WEB)
     {
-        $input = new \Ems\Core\Input();
+        $input = new MiddlewareCollectionTest_Input();
         foreach ($parameters as $key=>$value) {
             $input[$key] = $value;
         }
@@ -617,11 +742,17 @@ class MiddlewareCollectionTest_AMiddleware
 
     public function __invoke(Input $input, callable $next)
     {
+
         $requestKey = static::class;
         if (func_num_args() > 2) {
             $this->args = array_slice(func_get_args(), 2);
             $requestKey .= '(' . implode(',', $this->args) . ')';
         }
+
+        if ($input instanceof MiddlewareCollectionTest_Input) {
+            $input->wares[] = $this->getName();
+        }
+
         $input[$requestKey] = $this->args;
 
         if (isset($this->args[0]) && $this->args[0] == 'createResponse') {
@@ -633,6 +764,7 @@ class MiddlewareCollectionTest_AMiddleware
         }
 
         if (isset($this->args[0]) && $this->args[0] == 'modifyResponse') {
+            /** @var Response $response */
             $response = $next($input);
             $response->offsetSet($requestKey, $this->args);
             return $response;
@@ -640,6 +772,57 @@ class MiddlewareCollectionTest_AMiddleware
 
         return $next($input);
     }
+
+    protected function getName()
+    {
+        if (!$this->args) {
+            return 'default';
+        }
+        if (in_array($this->args[0], ['createResponse', 'modifyResponse'])) {
+            return isset($this->args[1]) ? $this->args[1] : 'default';
+        }
+        return $this->args[0];
+    }
+}
+
+class MiddlewareCollectionTest_Input extends \Ems\Core\Input
+{
+    public $wares = [];
+}
+
+class MiddlewareCollectionTest_InputHandler implements \Ems\Contracts\Core\InputHandler
+{
+
+    public $args;
+
+    public $name;
+
+    public $respond;
+
+    public function __construct($name='handle', $respond=true)
+    {
+        $this->name = $name;
+        $this->respond = $respond;
+    }
+
+    /**
+     * Handle the input and return a corresponding
+     *
+     * @param Input $input
+     *
+     * @return \Ems\Contracts\Core\Response
+     */
+    public function __invoke(Input $input)
+    {
+        $input[$this->name] = func_num_args();
+        $this->args = func_get_args();
+        if (!$this->respond) {
+            return null;
+        }
+        $response = (new Response())->setPayload($input);
+        return $response;
+    }
+
 }
 
 class MiddlewareCollectionTest_BMiddleware extends MiddlewareCollectionTest_AMiddleware

@@ -25,6 +25,17 @@ use IteratorAggregate;
  * The name also allows to add the same class multiple times (with different
  * parameters)
  *
+ * The "main input handler" has to be a instance of Ems\Contracts\Core\InputHandler.
+ * If some handler returns a response the MiddlewareCollection must skip all
+ * handlers that implement this interface.
+ *
+ * You can add as many InputHandler objects as handlers as you want. The middleware
+ * will skip just all of them after receiving a response from any handler.
+ * Just to clear this up: The middleware does not have to be an instance of
+ * InputHandler to return responses. It just marks itself as "I am not processing
+ * the response, if no $next parameter". And due this fact the middleware stack
+ * knows that it must not call it after receiving a response.
+ *
  * Use parameters($name) to get the assigned parameters.
  *
  * To position a middleware call add($name, $middleware)->before($otherName)
@@ -57,11 +68,12 @@ use IteratorAggregate;
 interface MiddlewareCollection extends InputHandler, ArrayData, Countable, IteratorAggregate, SupportsCustomFactory
 {
     /**
-     * Add a middleware to the stack.
+     * Add a middleware to the stack. Add the main handler by adding an InputHandler
+     * object.
      *
-     * @param string          $name
-     * @param callable|string $middleware
-     * @param string|array    $parameters (optional)
+     * @param string                        $name
+     * @param callable|string|InputHandler  $middleware
+     * @param string|array                  $parameters (optional)
      *
      * @return Positioner
      */

@@ -232,7 +232,7 @@ class InputHandlerIntegrationTest extends \Ems\IntegrationTest
 
         $app->bind('require-token', function () {
             return function (Input $input, callable $next) {
-                return 'I dont care about the next middlewares';
+                return new \Ems\Core\Response('I dont care about the next middlewares');
             };
         });
 
