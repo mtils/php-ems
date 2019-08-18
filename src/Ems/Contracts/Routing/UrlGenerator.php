@@ -7,7 +7,7 @@ use Ems\Contracts\Core\Entity;
 /**
  * The Url Generator generates urls to parts of your application
  * It returns url objects so every extra parameter, path segment, fragment
- * etc can be setted on the returned object instead of passing the to the
+ * etc can be set on the returned object instead of passing them to the
  * method.
  **/
 interface  UrlGenerator

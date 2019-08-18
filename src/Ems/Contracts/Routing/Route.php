@@ -86,7 +86,7 @@ class Route implements Arrayable
      * middlewares.
      * If you just call middleware() without a parameter it resets the middleware
      * to no middleware for this route.
-     * You can alco call it multiple times for multiple middleware.
+     * You can also call it multiple times for multiple middleware.
      *
      * @param string|array|null $middleware (optional)
      *

@@ -9,7 +9,6 @@ use Ems\Contracts\Core\Exceptions\Termination;
 use Ems\Contracts\Core\Input;
 use Ems\Contracts\Core\SupportsCustomFactory;
 use Ems\Contracts\Routing\MiddlewareCollection as MiddlewareCollectionContract;
-use Ems\Core\Exceptions\HandlerNotFoundException;
 use Ems\Core\Exceptions\UnConfiguredException;
 use Ems\Core\ProxyInputHandler;
 use Ems\Core\Support\CustomFactorySupport;

@@ -224,6 +224,69 @@ class InputHandlerIntegrationTest extends \Ems\IntegrationTest
     /**
      * @test
      */
+    public function route_middleware_runs_assigned_middleware_with_parameters()
+    {
+        $handler = $this->makeHandler();
+        $router = $this->makeRouter(false);
+        $app = $this->app();
+
+        $app->bind('require-auth', function () {
+            return function (Input $input, callable $next, $a, $b='') {
+                $input['i_was_here'] = 'require-auth ' . $a . '|' . $b;
+                $next($input);
+            };
+        });
+
+        $router->register(function (RouteCollector $routes) {
+            $routes->get('my-account', function (Input $input) {
+                return 'my-account was called and ' . $input['i_was_here'];
+            })->middleware('require-auth:a,b');
+        });
+
+        $response = $handler($this->input('my-account'));
+
+        $this->assertEquals('my-account was called and require-auth a|b', $response->payload());
+
+    }
+
+    /**
+     * @test
+     */
+    public function route_middleware_runs_multiple_assigned_middleware_with_parameters()
+    {
+        $handler = $this->makeHandler();
+        $router = $this->makeRouter(false);
+        $app = $this->app();
+
+        $app->bind('require-auth', function () {
+            return function (Input $input, callable $next, $a, $b='') {
+                $input['i_was_here'] = 'require-auth ' . $a . '|' . $b;
+                $next($input);
+            };
+        });
+
+        $app->bind('require-role', function () {
+            return function (Input $input, callable $next, $role, $force='force') {
+                $input['i_was_here2'] = 'require-role ' . $role . '|' . $force;
+                $next($input);
+            };
+        });
+
+        $router->register(function (RouteCollector $routes) {
+            $routes->get('my-account', function (Input $input) {
+                return 'my-account was called and ' . $input['i_was_here'] . '--' . $input['i_was_here2'];
+            })->middleware('require-auth:a,b', 'require-role:moderator');
+        });
+
+        $response = $handler($this->input('my-account'));
+
+        $this->assertEquals('my-account was called and require-auth a|b--require-role moderator|force', $response->payload());
+
+    }
+
+    /**
+     * @test
+     */
     public function route_middleware_skips_routed_if_response_returned()
     {
         $handler = $this->makeHandler();
