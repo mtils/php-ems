@@ -19,6 +19,15 @@ class Input implements InputContract
     use RoutableTrait;
     use InputTrait;
 
+    /**
+     * Input constructor.
+     *
+     * @param array $parameters
+     */
+    public function __construct($parameters=[])
+    {
+        $this->_attributes = $parameters;
+    }
 
     /**
      * {@inheritDoc}
