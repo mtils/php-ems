@@ -9,8 +9,8 @@ use ArrayIterator;
 use Ems\Contracts\Core\Input;
 use Ems\Contracts\Core\Response;
 use Ems\Contracts\Core\SupportsCustomFactory;
-use Ems\Contracts\Routing\Exceptions\RouteNotFoundException;
 use Ems\Contracts\Routing\Dispatcher;
+use Ems\Contracts\Routing\Exceptions\RouteNotFoundException;
 use Ems\Contracts\Routing\Routable;
 use Ems\Contracts\Routing\Route;
 use Ems\Contracts\Routing\RouteCollector;
@@ -19,8 +19,8 @@ use Ems\Core\Exceptions\KeyNotFoundException;
 use Ems\Core\Lambda;
 use Ems\Core\Support\CustomFactorySupport;
 use Ems\Routing\FastRoute\FastRouteDispatcher;
-use Traversable;
 use ReflectionException;
+use Traversable;
 use function call_user_func;
 
 class Router implements RouterContract, SupportsCustomFactory
@@ -52,6 +52,10 @@ class Router implements RouterContract, SupportsCustomFactory
      */
     protected $interpreterFactory;
 
+    /**
+     * The divider between middleware name and parameters
+     * @var string
+     */
     public function __construct()
     {
         $this->installInterpreterFactory();
@@ -59,16 +63,19 @@ class Router implements RouterContract, SupportsCustomFactory
 
     /**
      * @param callable $registrar
+     * @param array    $attributes (optional)
      */
-    public function register(callable $registrar)
+    public function register(callable $registrar, array $attributes=[])
     {
-        $collector = $this->newCollector();
+
+        $collector = $this->newCollector($attributes);
         $registrar($collector);
 
         // Cast to Route[] :-)
         /** @var Route[] $collector */
-
-        $this->addRoutes($collector);
+        foreach ($collector as $route) {
+            $this->addRoute($route);
+        }
 
     }
 
@@ -180,19 +187,9 @@ class Router implements RouterContract, SupportsCustomFactory
     }
 
     /**
-     * @param Route[] $routes
-     */
-    protected function addRoutes($routes)
-    {
-        foreach ($routes as $route) {
-            $this->addRoute($route);
-        }
-    }
-
-    /**
      * Add a route to all places were it is needed.
      *
-     * @param Route $route
+     * @param Route   $route
      */
     protected function addRoute(Route $route)
     {
@@ -260,11 +257,13 @@ class Router implements RouterContract, SupportsCustomFactory
     /**
      * Create the collector, which is usually the object registering your routes
      *
+     * @param array $attributes (optional)
+     *
      * @return RouteCollector
      */
-    protected function newCollector()
+    protected function newCollector($attributes=[])
     {
-        return new RouteCollector();
+        return new RouteCollector($attributes);
     }
 
     /**
@@ -304,4 +303,5 @@ class Router implements RouterContract, SupportsCustomFactory
 
         return $lambda;
     }
+
 }

@@ -85,6 +85,30 @@ class MiddlewareCollectionTest extends TestCase
 
     /**
      * @test
+     * @throws ReflectionException
+     */
+    public function parameters_returns_assigned_parameters_in_string_format()
+    {
+        $c = $this->make();
+        $c->add('a', MiddlewareCollectionTest_AMiddleware::class, ['a',1]);
+        $c->add('b', MiddlewareCollectionTest_BMiddleware::class, ['b', 2]);
+        $c->add('c', MiddlewareCollectionTest_BMiddleware::class, 'c');
+
+        $this->assertEquals(MiddlewareCollectionTest_AMiddleware::class, $c['a']);
+        $this->assertEquals(MiddlewareCollectionTest_BMiddleware::class, $c['b']);
+        $this->assertEquals(MiddlewareCollectionTest_BMiddleware::class, $c['c']);
+
+        $this->assertInstanceOf(MiddlewareCollectionTest_AMiddleware::class, $c->middleware('a'));
+        $this->assertInstanceOf(MiddlewareCollectionTest_BMiddleware::class, $c->middleware('b'));
+
+        $this->assertEquals(['a', 1], $c->parameters('a'));
+        $this->assertEquals(['b', 2], $c->parameters('b'));
+        $this->assertEquals(['c'], $c->parameters('c'));
+
+    }
+
+    /**
+     * @test
      */
     public function offsetExists_works()
     {

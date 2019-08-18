@@ -11,6 +11,38 @@ use IteratorAggregate;
 interface Router extends IteratorAggregate
 {
     /**
+     * The key for passing common middleware attributes in register().
+     * Passing middleware per route should add them to common middleware.
+     */
+    const MIDDLEWARE = 'middleware';
+
+    /**
+     * The key for passing common client type attributes in register().
+     * Passing client types per route should replace the common ones.
+     */
+    const CLIENT = 'client';
+
+    /**
+     * The key for passing common route scope attributes in register().
+     * Passing scopes per route should replace the common ones.
+     */
+    const SCOPE = 'scope';
+
+    /**
+     * The key for passing a common path prefix attributes in register().
+     * The common prefix will be (fully) added before the path for each route.
+     */
+    const PREFIX = 'prefix';
+
+    /**
+     * The key for passing a common handler class prefix attributes in register().
+     * The common prefix will be added before the handler string of each route.
+     * So you could add UserController::class as a controller and then only
+     * write edit, create,... in your routes.
+     */
+    const CONTROLLER = 'controller';
+
+    /**
      * Pass a callable that will register routes. The callable will be called
      * with a RouteCollector instance that allows to add your routes.
      *
@@ -23,9 +55,13 @@ interface Router extends IteratorAggregate
      * So be aware to only register inside this callable. The whole code will be
      * skipped on cached requests.
      *
+     * The second parameter is for passing common attributes for all routes
+     * you register in your callable.
+     *
      * @param callable $registrar
+     * @param array    $attributes (optional)
      */
-    public function register(callable $registrar);
+    public function register(callable $registrar, array $attributes=[]);
 
     /**
      * Make the routable routed. At the end find a route and a handler, assign it

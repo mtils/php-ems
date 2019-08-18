@@ -18,6 +18,8 @@ use Ems\Core\Lambda;
 use Ems\Core\Url;
 use Ems\RoutingTrait;
 use Ems\TestCase;
+use ReflectionException;
+use function array_values;
 use function func_get_args;
 use function implode;
 use function is_callable;
@@ -37,6 +39,7 @@ class RouterTest extends TestCase
 
     /**
      * @test
+     * @throws ReflectionException
      */
     public function it_registers_routes()
     {
@@ -97,6 +100,7 @@ class RouterTest extends TestCase
 
     /**
      * @test
+     * @throws ReflectionException
      */
     public function it_registers_routes_with_parameters()
     {
@@ -129,7 +133,7 @@ class RouterTest extends TestCase
         $this->assertCount(3, $routes);
 
         $routable = $this->routable('addresses/112/edit');
-        $result = $router->route($routable);
+        $router->route($routable);
 
         $this->assertEquals(Routable::CLIENT_WEB, $routable->clientType());
         $this->assertEquals('GET', $routable->method());
@@ -156,6 +160,7 @@ class RouterTest extends TestCase
 
     /**
      * @test
+     * @throws ReflectionException
      */
     public function it_registers_routes_with_optional_parameters()
     {
@@ -215,6 +220,7 @@ class RouterTest extends TestCase
 
     /**
      * @test
+     * @throws ReflectionException
      */
     public function it_routes_only_for_registered_clientType()
     {
@@ -251,7 +257,7 @@ class RouterTest extends TestCase
         try {
             $routable = $this->routable('addresses', 'GET', 'api');
             $router->route($routable);
-            $this->fail('addreses should not match in api');
+            $this->fail('addresses should not match in api');
         } catch (RouteNotFoundException $e) {
             $this->assertTrue(true);
         }
@@ -280,6 +286,7 @@ class RouterTest extends TestCase
 
     /**
      * @test
+     * @throws ReflectionException
      */
     public function it_routes_only_for_registered_scope()
     {
@@ -341,6 +348,7 @@ class RouterTest extends TestCase
 
     /**
      * @test
+     * @throws ReflectionException
      */
     public function it_handles_routes()
     {
@@ -432,6 +440,286 @@ class RouterTest extends TestCase
                 ->middleware('auth')
                 ->defaults(['type' => 'main']);
         });
+
+    }
+
+    /**
+     * @test
+     */
+    public function register_with_common_client_type()
+    {
+
+        $router = $this->make();
+
+        $router->register(function (RouteCollector $collector) {
+
+            $collector->get('addresses', 'AddressController::index')
+                ->name('addresses.index')
+                ->scope('default', 'admin')
+                ->middleware('auth');
+
+            $collector->get('addresses/{address}/edit', 'AddressController::edit')
+                ->name('addresses.edit')
+                ->scope('default', 'admin')
+                ->middleware('auth');
+
+            $collector->put('addresses[/{type}]', 'AddressController::updateDelivery')
+                ->name('addresses.update')
+                ->scope('default', 'admin')
+                ->middleware('auth')
+                ->defaults(['type' => 'main']);
+        }, [RouterContract::CLIENT => 'console']);
+
+        foreach (['index', 'edit', 'update'] as $action) {
+            $this->assertEquals(['console'], $router->getByName("addresses.$action")->clientTypes);
+        }
+    }
+
+    /**
+     * @test
+     */
+    public function register_with_common_client_type_and_overwrites()
+    {
+
+        $router = $this->make();
+
+        $router->register(function (RouteCollector $collector) {
+
+            $collector->get('addresses', 'AddressController::index')
+                ->name('addresses.index')
+                ->scope('default', 'admin')
+                ->middleware('auth');
+
+            $collector->get('addresses/{address}/edit', 'AddressController::edit')
+                ->name('addresses.edit')
+                ->scope('default', 'admin')
+                ->clientType('api')
+                ->middleware('auth');
+
+            $collector->put('addresses[/{type}]', 'AddressController::updateDelivery')
+                ->name('addresses.update')
+                ->scope('default', 'admin')
+                ->middleware('auth')
+                ->defaults(['type' => 'main']);
+        }, [RouterContract::CLIENT => ['console', 'ajax']]);
+
+        foreach (['index', 'update'] as $action) {
+            $this->assertEquals(['console', 'ajax'], $router->getByName("addresses.$action")->clientTypes);
+        }
+        $this->assertEquals(['api'], $router->getByName("addresses.edit")->clientTypes);
+    }
+
+    /**
+     * @test
+     */
+    public function register_with_common_scope()
+    {
+
+        $router = $this->make();
+
+        $router->register(function (RouteCollector $collector) {
+
+            $collector->get('addresses', 'AddressController::index')
+                ->name('addresses.index')
+                ->clientType('web')
+                ->middleware('auth');
+
+            $collector->get('addresses/{address}/edit', 'AddressController::edit')
+                ->name('addresses.edit')
+                ->clientType('api')
+                ->middleware('auth');
+
+            $collector->put('delivery-addresses[/{type}]', 'AddressController::updateDelivery')
+                ->name('addresses.update')
+                ->clientType('web', 'api')
+                ->middleware('auth')
+                ->defaults(['type' => 'main']);
+        }, [Router::SCOPE => ['default', 'admin']]);
+
+        foreach (['index', 'edit', 'update'] as $action) {
+            $this->assertEquals(['default', 'admin'], $router->getByName("addresses.$action")->scopes);
+        }
+
+    }
+
+    /**
+     * @test
+     */
+    public function register_with_common_scope_and_overwrites()
+    {
+
+        $router = $this->make();
+
+        $router->register(function (RouteCollector $collector) {
+
+            $collector->get('addresses', 'AddressController::index')
+                ->name('addresses.index')
+                ->clientType('web')
+                ->middleware('auth');
+
+            $collector->get('addresses/{address}/edit', 'AddressController::edit')
+                ->name('addresses.edit')
+                ->clientType('api')
+                ->middleware('auth');
+
+            $collector->put('delivery-addresses[/{type}]', 'AddressController::updateDelivery')
+                ->name('addresses.update')
+                ->clientType('web', 'api')
+                ->middleware('auth')
+                ->scope('master')
+                ->defaults(['type' => 'main']);
+        }, [Router::SCOPE => ['default', 'admin']]);
+
+        foreach (['index', 'edit'] as $action) {
+            $this->assertEquals(['default', 'admin'], $router->getByName("addresses.$action")->scopes);
+        }
+        $this->assertEquals(['master'], $router->getByName("addresses.update")->scopes);
+
+    }
+
+    /**
+     * @test
+     */
+    public function register_with_common_middleware()
+    {
+
+        $router = $this->make();
+
+        $router->register(function (RouteCollector $collector) {
+
+            $collector->get('addresses', 'AddressController::index')
+                ->name('addresses.index')
+                ->clientType('web');
+
+            $collector->get('addresses/{address}/edit', 'AddressController::edit')
+                ->name('addresses.edit')
+                ->clientType('api');
+
+            $collector->put('delivery-addresses[/{type}]', 'AddressController::updateDelivery')
+                ->name('addresses.update')
+                ->clientType('web', 'api')
+                ->defaults(['type' => 'main']);
+        }, [Router::MIDDLEWARE => 'auth']);
+
+        foreach (['index', 'edit', 'update'] as $action) {
+            $this->assertEquals(['auth'], $router->getByName("addresses.$action")->middlewares);
+        }
+
+    }
+
+    /**
+     * @test
+     */
+    public function register_with_common_middleware_and_additional()
+    {
+
+        $router = $this->make();
+
+        $router->register(function (RouteCollector $collector) {
+
+            $collector->get('addresses', 'AddressController::index')
+                ->name('addresses.index')
+                ->clientType('web');
+
+            $collector->get('addresses/{address}/edit', 'AddressController::edit')
+                ->name('addresses.edit')
+                ->clientType('api')
+                ->middleware('has-role:moderator');
+
+            $collector->put('delivery-addresses[/{type}]', 'AddressController::updateDelivery')
+                ->name('addresses.update')
+                ->clientType('web', 'api')
+                ->defaults(['type' => 'main']);
+        }, [Router::MIDDLEWARE => 'auth']);
+
+        foreach (['index', 'update'] as $action) {
+            $this->assertEquals(['auth'], $router->getByName("addresses.$action")->middlewares);
+        }
+
+        $this->assertEquals(['auth', 'has-role:moderator'], $router->getByName("addresses.edit")->middlewares);
+
+    }
+
+    /**
+     * @test
+     */
+    public function register_with_common_middleware_and_same_middleware_with_different_parameters()
+    {
+
+        $router = $this->make();
+
+        $router->register(function (RouteCollector $collector) {
+
+            $collector->get('addresses', 'AddressController::index')
+                ->name('addresses.index')
+                ->clientType('web');
+
+            $collector->get('addresses/{address}/edit', 'AddressController::edit')
+                ->name('addresses.edit')
+                ->clientType('api')
+                ->middleware('auth:moderator');
+
+            $collector->put('delivery-addresses[/{type}]', 'AddressController::updateDelivery')
+                ->name('addresses.update')
+                ->clientType('web', 'api')
+                ->defaults(['type' => 'main']);
+        }, [Router::MIDDLEWARE => ['auth:admin', 'only:granny']]);
+
+        foreach (['index', 'update'] as $action) {
+            $this->assertEquals(['auth:admin', 'only:granny'], $router->getByName("addresses.$action")->middlewares);
+        }
+
+        $this->assertEquals(['auth:moderator', 'only:granny'], $router->getByName("addresses.edit")->middlewares);
+
+    }
+
+    /**
+     * @test
+     */
+    public function register_with_common_path_and_controller_prefix()
+    {
+
+        $router = $this->make();
+
+        $router->register(function (RouteCollector $collector) {
+
+            $collector->get('', 'index')
+                ->name('addresses.index')
+                ->clientType('web')
+                ->middleware('auth');
+
+            $collector->get('/edit', 'edit')
+                ->name('addresses.edit')
+                ->clientType('api')
+                ->middleware('auth');
+
+            $collector->put('/debug', function () {})
+                ->name('addresses.debug')
+                ->clientType('web', 'api')
+                ->middleware('auth')
+                ->defaults(['type' => 'main']);
+
+            $collector->put('/{address_id}', 'update')
+                ->name('addresses.update')
+                ->clientType('web', 'api')
+                ->middleware('auth')
+                ->defaults(['type' => 'main']);
+
+        }, [Router::PREFIX => 'addresses', Router::CONTROLLER => 'AddressController']);
+
+        $awaited = [
+            'index' => '',
+            'edit'  => '/edit',
+            'update' => '/{address_id}'
+        ];
+
+        foreach (['index', 'edit', 'update'] as $action) {
+            $pattern = 'addresses'.$awaited[$action];
+            $this->assertEquals($pattern, $router->getByName("addresses.$action")->pattern);
+
+            $handler = 'AddressController' . RouteCollector::$methodSeparator . $action;
+            $this->assertEquals($handler, $router->getByName("addresses.$action")->handler);
+        }
 
     }
 

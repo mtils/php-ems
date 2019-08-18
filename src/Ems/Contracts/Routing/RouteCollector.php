@@ -9,6 +9,8 @@ namespace Ems\Contracts\Routing;
 use ArrayIterator;
 use IteratorAggregate;
 use Traversable;
+use function array_map;
+use function explode;
 
 class RouteCollector implements IteratorAggregate
 {
@@ -16,6 +18,31 @@ class RouteCollector implements IteratorAggregate
      * @var Route[]
      */
     protected $routes;
+
+    /**
+     * @var array
+     */
+    protected $common = [];
+
+    /**
+     * @var string
+     */
+    public static $methodSeparator = '->';
+
+    /**
+     * @var string
+     */
+    public static $middlewareDelimiter = ':';
+
+    /**
+     * RouteCollector constructor.
+     *
+     * @param array $common
+     */
+    public function __construct($common=[])
+    {
+        $this->common = $common;
+    }
 
     /**
      * Register an handler for a pattern called by $method(s).
@@ -28,7 +55,7 @@ class RouteCollector implements IteratorAggregate
      */
     public function on($method, $pattern, $handler)
     {
-        $route = $this->newRoute($method, $pattern, $handler);
+        $route = $this->newRoute($method, $this->pattern($pattern), $this->handler($handler));
         $this->routes[] = $route;
         return $route;
     }
@@ -121,7 +148,15 @@ class RouteCollector implements IteratorAggregate
      */
     public function getIterator()
     {
-        return new ArrayIterator($this->routes);
+        if (!$this->common) {
+            return new ArrayIterator($this->routes);
+        }
+        return new ArrayIterator(
+            array_map(
+                [$this, 'configureRouteByCommonAttributes'],
+                $this->routes
+            )
+        );
     }
 
     /**
@@ -134,5 +169,116 @@ class RouteCollector implements IteratorAggregate
     protected function newRoute($method, $pattern, $handler)
     {
         return new Route($method, $pattern, $handler);
+    }
+
+    protected function configureRouteByCommonAttributes(Route $route)
+    {
+        if (isset($this->common[Router::CLIENT]) && !$route->clientTypes) {
+            $route->clientType((array)$this->common[Router::CLIENT]);
+        }
+
+        if (isset($this->common[Router::SCOPE]) && !$route->scopes) {
+            $route->scope((array)$this->common[Router::SCOPE]);
+        }
+
+        if (!isset($this->common[Router::MIDDLEWARE])) {
+            return $route;
+        }
+
+        $routeMiddlewares = $route->middlewares;
+
+        $route->middleware(); // clear middleware
+
+        $merged = $this->mergeMiddlewares(
+            $routeMiddlewares,
+            (array)$this->common[Router::MIDDLEWARE]
+        );
+
+        $route->middleware($merged);
+
+        return $route;
+    }
+
+    /**
+     * @param array $routeMiddleware
+     * @param array $commonMiddleware
+     *
+     * @return array
+     */
+    protected function mergeMiddlewares(array $routeMiddleware, array $commonMiddleware)
+    {
+        $routeMiddleware = $this->middlewareByName($routeMiddleware);
+        $commonMiddleware = $this->middlewareByName($commonMiddleware);
+
+        $mergedMiddleware = [];
+
+        foreach ($commonMiddleware as $name=>$parameters) {
+            if (isset($routeMiddleware[$name])) {
+                $mergedMiddleware[] = $this->signature($name, $routeMiddleware[$name]);
+                continue;
+            }
+            $mergedMiddleware[] = $this->signature($name, $parameters);
+        }
+
+        // Now add all middlewares that were not in common middleware
+        foreach ($routeMiddleware as $name=>$parameters) {
+            if (!isset($commonMiddleware[$name])) {
+                $mergedMiddleware[] = $this->signature($name, $parameters);
+            }
+        }
+
+        return $mergedMiddleware;
+
+    }
+
+    /**
+     * @param array $middlewares
+     * @return array
+     */
+    protected function middlewareByName(array $middlewares)
+    {
+        $byName = [];
+
+        foreach ($middlewares as $string) {
+            $parts = explode(static::$middlewareDelimiter, $string, 2);
+            $byName[$parts[0]] = isset($parts[1]) ? $parts[1] : '';
+        }
+
+        return $byName;
+    }
+
+    /**
+     * Build the middleware signature out of its name and parameters.
+     *
+     * @param string $name
+     * @param string $parameters
+     * @return string
+     */
+    protected function signature($name, $parameters='')
+    {
+        return $parameters ? $name . static::$middlewareDelimiter . $parameters : $name;
+    }
+
+    /**
+     * @param string $pattern
+     *
+     * @return string
+     */
+    protected function pattern($pattern)
+    {
+        return isset($this->common[Router::PREFIX]) ? $this->common[Router::PREFIX].$pattern : $pattern;
+    }
+
+    /**
+     * @param string $handler
+     *
+     * @return string|object
+     */
+    protected function handler($handler)
+    {
+        if (!is_string($handler)) {
+            return $handler;
+        }
+        return isset($this->common[Router::CONTROLLER]) ? $this->common[Router::CONTROLLER].static::$methodSeparator.$handler : $handler;
     }
 }
