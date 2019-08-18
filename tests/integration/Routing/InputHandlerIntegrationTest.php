@@ -116,7 +116,6 @@ class InputHandlerIntegrationTest extends \Ems\IntegrationTest
 
     /**
      * @test
-     * @expectedException  \ArgumentCountError
      */
     public function throwables_are_thrown_without_an_assigned_handler()
     {
@@ -134,7 +133,13 @@ class InputHandlerIntegrationTest extends \Ems\IntegrationTest
             });
         });
 
-        $handler($this->input('foo'));
+        try {
+            $handler($this->input('foo'));
+            $this->fail('The exception was not thrown');
+        } catch (ArgumentCountError $e) {
+            $this->assertInstanceOf(ArgumentCountError::class, $e);
+        }
+
 
     }
 
