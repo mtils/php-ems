@@ -23,6 +23,7 @@ use Ems\Testing\LoggingCallable;
 use Illuminate\Contracts\Container\Container;
 use function array_filter;
 use function array_values;
+use function class_exists;
 use function explode;
 use function func_get_args;
 use function implode;
@@ -119,6 +120,10 @@ class InputHandlerIntegrationTest extends \Ems\IntegrationTest
      */
     public function throwables_are_thrown_without_an_assigned_handler()
     {
+        // PHP7.0 has no ArgumentCountError
+        if (!class_exists(ArgumentCountError::class)) {
+            return;
+        }
         $handler = $this->makeHandler();
 
         $router = $this->makeRouter(false);
@@ -168,6 +173,10 @@ class InputHandlerIntegrationTest extends \Ems\IntegrationTest
      */
     public function thrown_throwables_are_passed_to_the_handler()
     {
+        // PHP7.0 has no ArgumentCountError
+        if (!class_exists(ArgumentCountError::class)) {
+            return;
+        }
         $handler = $this->makeHandler();
         $errorHandler = function ($e) {
             $response = new \Ems\Core\Response();
