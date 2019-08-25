@@ -2,8 +2,6 @@
 
 namespace Ems\Contracts\Core;
 
-use Ems\Contracts\Core\Url;
-
 /**
  * This is the base interface for any connection. May it database, ftp, file,...
  * A Connection must *never* open a connection in __construct(), is has

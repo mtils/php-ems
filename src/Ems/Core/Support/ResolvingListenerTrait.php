@@ -2,6 +2,9 @@
 
 namespace Ems\Core\Support;
 
+use function get_class;
+use function is_object;
+
 trait ResolvingListenerTrait
 {
     /**
@@ -22,8 +25,20 @@ trait ResolvingListenerTrait
      */
     protected function callAllListeners($abstract, $instance)
     {
-        $this->callListeners($abstract, $instance, $this->resolvingListeners);
-        $this->callListeners($abstract, $instance, $this->resolvedListeners);
+        $class = is_object($instance) ? get_class($instance) : '';
+
+        $excludeBefore = [];
+        $excludeAfter = [];
+
+        $this->callListeners($abstract, $instance, $this->resolvingListeners, $excludeBefore);
+        $this->callListeners($abstract, $instance, $this->resolvedListeners, $excludeAfter);
+
+        if (!$class || $class == $abstract) {
+            return;
+        }
+
+        $this->callListeners($abstract, $instance, $this->resolvingListeners, $excludeBefore);
+        $this->callListeners($abstract, $instance, $this->resolvedListeners, $excludeAfter);
     }
 
     /**
@@ -68,11 +83,13 @@ trait ResolvingListenerTrait
      * @param string $abstract
      * @param object $result
      * @param array  $listeners
+     * @param array $excludes
      **/
-    protected function callListeners($abstract, $result, array $listeners)
+    protected function callListeners($abstract, $result, array $listeners, array &$excludes)
     {
-        if (isset($listeners[$abstract])) {
+        if (isset($listeners[$abstract]) && !isset($excludes[$abstract])) {
             $this->iterateListeners($listeners[$abstract], $result);
+            $excludes[$abstract] = true;
         }
 
         foreach ($listeners as $classOrInterface => $instanceListeners) {
@@ -82,11 +99,16 @@ trait ResolvingListenerTrait
                 continue;
             }
 
+            if (isset($excludes[$classOrInterface])) {
+                continue;
+            }
+
             if (!$result instanceof $classOrInterface) {
                 continue;
             }
 
             $this->iterateListeners($instanceListeners, $result);
+            $excludes[$classOrInterface] = true;
         }
     }
 

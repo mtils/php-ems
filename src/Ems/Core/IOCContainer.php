@@ -9,6 +9,7 @@ use InvalidArgumentException;
 use ReflectionClass;
 use ReflectionException;
 use OutOfBoundsException;
+use function get_class;
 
 class IOCContainer implements ContainerContract
 {
@@ -58,15 +59,13 @@ class IOCContainer implements ContainerContract
             return $this->sharedInstances[$abstract];
         }
 
-        if (!isset($this->bindings[$abstract])) {
-            return $this->resolve($abstract, $parameters);
-        }
+        $bound = isset($this->bindings[$abstract]);
 
         $concrete = $this->resolve($abstract, $parameters);
 
         $this->callAllListeners($abstract, $concrete);
 
-        if ($this->bindings[$abstract]['shared']) {
+        if ($bound && $this->bindings[$abstract]['shared']) {
             $this->sharedInstances[$abstract] = $concrete;
         }
 

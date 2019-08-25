@@ -10,6 +10,7 @@ use Ems\Contracts\Core\None;
 use Ems\Core\Exceptions\KeyNotFoundException;
 use Ems\Core\Support\FastArrayDataTrait;
 use Ems\Core\Support\InputTrait;
+use Ems\Core\Support\MessageTrait;
 use Ems\Core\Support\RoutableTrait;
 use function array_key_exists;
 
@@ -17,6 +18,7 @@ class Input implements InputContract
 {
     use FastArrayDataTrait;
     use RoutableTrait;
+    use MessageTrait;
     use InputTrait;
 
     /**

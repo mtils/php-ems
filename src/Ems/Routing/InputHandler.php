@@ -31,9 +31,6 @@ class InputHandler implements InputHandlerContract, SupportsCustomFactory
     public function __construct(MiddlewareCollectionContract $middleware)
     {
         $this->middleware = $middleware;
-        $this->exceptionHandler = function ($exception) {
-            throw $exception;
-        };
     }
 
     /**
@@ -45,12 +42,18 @@ class InputHandler implements InputHandlerContract, SupportsCustomFactory
      */
     public function __invoke(Input $input)
     {
+        // Better repeat that stuff than having any type of unwanted exception
+        // trace steps.
+        if (!$this->exceptionHandler) {
+            return $this->middleware->__invoke($input);
+        }
+
         try {
             return $this->middleware->__invoke($input);
         } catch (Exception $e) {
-            return call_user_func($this->exceptionHandler, $e);
+            return call_user_func($this->exceptionHandler, $e, $input);
         } catch (Throwable $e) {
-            return call_user_func($this->exceptionHandler, $e);
+            return call_user_func($this->exceptionHandler, $e, $input);
         }
     }
 

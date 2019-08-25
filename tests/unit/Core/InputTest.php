@@ -6,6 +6,7 @@
 namespace Ems\Core;
 
 
+use Ems\Contracts\Core\Message;
 use Ems\Contracts\Routing\GenericRouteScope;
 use Ems\Contracts\Routing\Route;
 use Ems\Contracts\Routing\RouteScope;
@@ -277,6 +278,40 @@ class InputTest extends TestCase
         $this->assertFalse($input->isRouted());
         $input->setMatchedRoute(new Route('GET', 'foo', 'FooHandler::bar'));
         $this->assertTrue($input->isRouted());
+    }
+
+    /**
+     * @test
+     */
+    public function get_type()
+    {
+        $input = $this->newInput();
+        $this->assertEquals(Message::CUSTOM, $input->type());
+    }
+
+    /**
+     * @test
+     */
+    public function get_source()
+    {
+        $input = $this->newInput();
+        $this->assertEquals(Message::INTERNAL, $input->source());
+    }
+
+    /**
+     * @test
+     */
+    public function accept_and_ignore_returns_correct_state()
+    {
+        $input = $this->newInput();
+        $this->assertFalse($input->isAccepted());
+        $this->assertFalse($input->isIgnored());
+        $input->accept();
+        $this->assertTrue($input->isAccepted());
+        $this->assertFalse($input->isIgnored());
+        $input->ignore();
+        $this->assertFalse($input->isAccepted());
+        $this->assertTrue($input->isIgnored());
     }
 
     protected function newInput()

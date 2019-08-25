@@ -9,7 +9,7 @@ namespace Ems\Contracts\Core;
 
 use Ems\Contracts\Routing\Routable;
 
-interface Input extends ArrayData, Provider, Routable
+interface Input extends Message, Provider, Routable
 {
 
     /**

@@ -50,6 +50,7 @@ use Ems\Expression\Matcher;
 use ReflectionClass;
 use ReflectionMethod;
 use Ems\Contracts\Core\EntityManager as EntityManagerContract;
+use Ems\Contracts\Core\IO;
 
 class CoreBootstrapper extends Bootstrapper
 {
@@ -80,6 +81,10 @@ class CoreBootstrapper extends Bootstrapper
      **/
     protected $bindings = [
         'Ems\Core\AppPath' => 'Ems\Contracts\Core\AppPath',
+    ];
+
+    protected $aliases = [
+        IO::class => [ConnectionPool::class]
     ];
 
     /**
