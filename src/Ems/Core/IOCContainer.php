@@ -217,34 +217,34 @@ class IOCContainer implements ContainerContract
 
         $callParams = [];
 
+        // All parameters seems to be passed
+        if (count($constructorParams) == count($parameters)) {
+            return $reflector->newInstanceArgs($parameters);
+        }
 
         foreach ($constructorParams as $i=>$param) {
 
             $name = $param->getName();
 
-            // We only support class/interface hinted arguments here.
+            if (isset($parameters[$name])) {
+                $callParams[] = $parameters[$name];
+                continue;
+            }
+
             if (!$class = $param->getClass()) {
                 continue;
             }
 
-            $class = $class->getName();
+            $className = $class->getName();
 
-            // An array key with this name exists and contains an object of this class
-            if (isset($parameters[$name]) && $parameters[$name] instanceof $class) {
-                $callParams[] = $parameters[$name];
-                unset($parameters[$name]);
-                continue;
-            }
-
-            // A positional parameter was passed and contains an object of this class
-            if (isset($parameters[$i]) && $parameters[$i] instanceof $class) {
+            if (isset($parameters[$i]) && $parameters[$i] instanceof $className) {
                 $callParams[] = $parameters[$i];
-                unset($parameters[$i]);
                 continue;
             }
 
-            $callParams[] = $this->__invoke($class);
-
+            if (!$param->isOptional() || $this->bound($className)) {
+                $callParams[] = $this->__invoke($className);
+            }
         }
 
         foreach ($parameters as $key => $value) {
