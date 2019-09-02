@@ -2,12 +2,12 @@
 
 namespace Ems\Core;
 
-use DateTime;
-use Ems\Contracts\Core\TextFormatter as FormatterContract;
+use DateTimeInterface;
 use Ems\Contracts\Core\Localizer;
-use Ems\Core\Support\ProvidesNamedCallableChain;
+use Ems\Contracts\Core\PointInTime as PointInTimeContract;
+use Ems\Contracts\Core\TextFormatter as FormatterContract;
 use Ems\Core\Exceptions\HandlerNotFoundException;
-use InvalidArgumentException;
+use Ems\Core\Support\ProvidesNamedCallableChain;
 
 class TextFormatter implements FormatterContract
 {
@@ -306,6 +306,12 @@ class TextFormatter implements FormatterContract
      **/
     protected function isEmptyDate($date)
     {
+        if ($date instanceof PointInTimeContract) {
+            return $date->isValid();
+        }
+        if ($date instanceof DateTimeInterface) {
+            return false;
+        }
         return $date === null | $date === '' | $date == 0;
     }
 
