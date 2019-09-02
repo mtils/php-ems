@@ -54,14 +54,9 @@ class StorageDriver
     protected $selectColumnString = '';
 
     /**
-     * @var string
+     * @var array
      */
-    protected $discriminatorKey = '';
-
-    /**
-     * @var string
-     */
-    protected $discriminator = '';
+    protected $discriminators;
 
     /**
      * @var Prepared[]
@@ -193,8 +188,8 @@ class StorageDriver
     {
         $query = "SELECT {$this->quotedIdKey} FROM {$this->quotedTable}";
 
-        if($this->discriminator) {
-            $query .= ' WHERE ' . $this->dialect->quote($this->discriminatorKey, 'name') . ' = ' . $this->dialect->quote($this->discriminator);
+        if($this->discriminators) {
+            $query .= ' WHERE ' . SQL::renderColumnsForWhere($this->dialect, $this->discriminators);
         }
 
         $keys = [];
@@ -205,15 +200,14 @@ class StorageDriver
 
     }
 
-    public function configure($table, $idKey, $selectColumnString='*', $discriminatorKey='', $discriminator='')
+    public function configure($table, $idKey, $selectColumnString='*', $discriminators=[])
     {
         $this->table = $table;
         $this->quotedTable = $this->dialect->quote($table, 'name');
         $this->idKey = $idKey;
         $this->quotedIdKey = $this->dialect->quote($idKey, 'name');
         $this->selectColumnString = $selectColumnString;
-        $this->discriminatorKey = $discriminatorKey;
-        $this->discriminator = $discriminator;
+        $this->discriminators = $discriminators;
     }
 
     protected function deleteAndOptionallyReturnAffected($keys, $returnAffected=false)
@@ -228,8 +222,8 @@ class StorageDriver
 
         $where = 'WHERE';
 
-        if($this->discriminator) {
-            $query .= ' WHERE ' . $this->dialect->quote($this->discriminatorKey, 'name') . ' = ' . $this->dialect->quote($this->discriminator);
+        if($this->discriminators) {
+            $query .= ' WHERE ' . SQL::renderColumnsForWhere($this->dialect, $this->discriminators);
             $where = 'AND';
         }
 
@@ -272,9 +266,10 @@ class StorageDriver
 
         $query = "SELECT $columnString FROM {$this->quotedTable} WHERE {$this->quotedIdKey} = :id";
 
-        if($this->discriminator) {
-            $query .= ' AND ' . $this->dialect->quote($this->discriminatorKey, 'name') . ' = ' . $this->dialect->quote($this->discriminator);
+        if($this->discriminators) {
+            $query .= ' AND ' . SQL::renderColumnsForWhere($this->dialect, $this->discriminators);
         }
+
         $this->statements[$cacheKey] = $this->connection->prepare($query);
 
         return $this->statements[$cacheKey];
@@ -332,8 +327,8 @@ class StorageDriver
                   SET " . SQL::renderColumnsForUpdate($this->dialect, $columns) . "
                   WHERE {$this->quotedIdKey} = :id";
 
-        if($this->discriminator) {
-            $query .= ' AND ' . $this->dialect->quote($this->discriminatorKey, 'name') . ' = ' . $this->dialect->quote($this->discriminator);
+        if($this->discriminators) {
+            $query .= ' AND ' . SQL::renderColumnsForWhere($this->dialect, $this->discriminators);
         }
 
         $this->statements[$cacheKey] = $this->connection->prepare($query);
@@ -358,8 +353,8 @@ class StorageDriver
 
         $query = "DELETE FROM {$this->quotedTable} WHERE {$this->quotedIdKey} = :id";
 
-        if($this->discriminator) {
-            $query .= ' AND ' . $this->dialect->quote($this->discriminatorKey, 'name') . ' = ' . $this->dialect->quote($this->discriminator);
+        if($this->discriminators) {
+            $query .= ' AND ' . SQL::renderColumnsForWhere($this->dialect, $this->discriminators);
         }
 
         $this->statements[$cacheKey] = $this->connection->prepare($query);
@@ -393,9 +388,11 @@ class StorageDriver
             return ":$key";
         }, $keys);
 
-        if ($this->discriminator) {
-            $quotedColumns[] = $this->dialect->quote($this->discriminatorKey, 'name');
-            $placeHolders[] = $this->dialect->quote($this->discriminator);
+        if ($this->discriminators) {
+            foreach ($this->discriminators as $key=>$value) {
+                $quotedColumns[] = $this->dialect->quote($key, 'name');
+                $placeHolders[] = $this->dialect->quote($value);
+            }
         }
 
         $query  = "$action INTO {$this->quotedTable}\n";

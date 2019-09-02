@@ -13,6 +13,7 @@ use Ems\Expression\Constraint;
 use Ems\Model\Database\Dialects\MySQLDialect;
 use Ems\Model\Database\Dialects\SQLiteDialect;
 use function array_map;
+use function func_get_args;
 use function implode;
 
 class SQL

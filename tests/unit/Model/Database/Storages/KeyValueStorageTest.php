@@ -30,6 +30,13 @@ class KeyValueStorageTest extends TestCase
         `data`       TEXT
     );';
 
+    protected $testTable2 = 'CREATE TABLE `tests_entries` (
+        `key`            PRIMARY KEY,
+        `namespace` TEXT,
+        `resource_name` TEXT,
+        `data`       TEXT
+    );';
+
     public function test_implements_interfaces()
     {
         $this->assertInstanceof(
@@ -578,6 +585,82 @@ class KeyValueStorageTest extends TestCase
 
     }
 
+    public function test_two_storages_on_one_table_do_not_clash_with_multiple_discriminators()
+    {
+
+        $con = $this->con();
+        $con->write($this->testTable2);
+
+        $storageA = $this->newEmptyStorage($con)->setDiscriminators([
+            'namespace'     => 'tenant-a',
+            'resource_name' => 'entries',
+        ]);
+        $storageB = $this->newEmptyStorage($con)->setDiscriminators([
+            'namespace'     => 'tenant-b',
+            'resource_name' => 'entries',
+        ]);
+
+        $this->assertFalse(isset($storageA[1]));
+
+        $this->assertFalse(isset($storageB[1]));
+
+        $aEntries = [];
+        $aIds = [];
+
+        $bEntries = [];
+        $bIds = [];
+
+        for ($i=0;$i<20;$i++) {
+
+            if ($i % 2) {
+                $data = [
+                    'foo' => 'A: foo ' . $i,
+                    'bar' => 'A: ' . $i . '. bar'
+                ];
+                $id = 'completely-random-' . $i;
+                $storageA[$id] = $data;
+                $aIds[] = $id;
+                $aEntries[$id] = $data;
+                continue;
+            }
+
+            $data = [
+                'foo' => 'B: foo ' . $i,
+                'bar' => 'B: ' . $i . '. bar'
+            ];
+
+            $id = 'even-more-random-' . $i;
+
+            $storageB[$id] = $data;
+            $bIds[] = $id;
+            $bEntries[$id] = $data;
+        }
+
+        foreach ($aIds as $id) {
+            $this->assertTrue(isset($storageA[$id]));
+            $this->assertFalse(isset($storageB[$id]));
+        }
+
+        foreach ($bIds as $id) {
+            $this->assertFalse(isset($storageA[$id]));
+            $this->assertTrue(isset($storageB[$id]));
+        }
+
+        $this->assertTrue($storageA->purge());
+
+        // Ensure only the a discriminator entries are deleted!
+        foreach ($aIds as $id) {
+            $this->assertFalse(isset($storageA[$id]));
+            $this->assertFalse(isset($storageB[$id]));
+        }
+
+        foreach ($bIds as $id) {
+            $this->assertFalse(isset($storageA[$id]));
+            $this->assertTrue(isset($storageB[$id]));
+        }
+
+    }
+
     public function test_persist_returns_true()
     {
         $this->assertTrue($this->newStorage()->persist());
@@ -616,6 +699,19 @@ class KeyValueStorageTest extends TestCase
         $storage->setIdKey('key');
         $con->write($this->testTable);
         $storage->setDiscriminator('sql-blob-storage-test');
+        return $storage;
+    }
+
+    protected function newMultiDiscriminatorStorage($con = null, $table=null, $blobKey='data', $serializer=null)
+    {
+        $con = $con ?: $this->con();
+        $storage = new KeyValueStorage($con, $table ?: 'tests_entries', $blobKey);
+        $storage->setIdKey('key');
+        $con->write($this->test2Table);
+        $storage->setDiscriminators([
+            'namespace' => 'tenant-a',
+            'resource_name' => 'sql-blob-storage-test'
+        ]);
         return $storage;
     }
 

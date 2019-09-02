@@ -14,6 +14,7 @@ use Ems\Core\Exceptions\KeyNotFoundException;
 use Ems\Core\Exceptions\UnConfiguredException;
 use Ems\Core\Serializer\JsonSerializer;
 use Ems\Model\Database\SQL;
+use function array_keys;
 
 class KeyValueStorage implements Storage
 {
@@ -33,6 +34,11 @@ class KeyValueStorage implements Storage
      * @var string
      */
     protected $quotedBlobKey = '';
+
+    /**
+     * @var array
+     */
+    protected $discriminators;
 
     /**
      * @var string
@@ -222,11 +228,43 @@ class KeyValueStorage implements Storage
      * be a discriminator to allow multiple storages per table and avoid clashes
      * between them.
      *
+     * @return array
+     */
+    public function getDiscriminators()
+    {
+        return $this->discriminators;
+    }
+
+    /**
+     * @see self::getDiscriminators()
+     *
+     * @param array $discriminators
+     *
+     * @return KeyValueStorage
+     */
+    public function setDiscriminators(array $discriminators)
+    {
+        $this->discriminators = $discriminators;
+        $this->reconfigureDriverIfExists();
+        return $this;
+    }
+
+
+    /**
+     * This storage typically holds data for multiple use cases split them
+     * be a discriminator to allow multiple storages per table and avoid clashes
+     * between them.
+     *
      * @return string
+     *
+     * @deprecated use self::getDiscriminators()
      */
     public function getDiscriminator()
     {
-        return $this->discriminator;
+        if (!$key = $this->getDiscriminatorKey()) {
+            return '';
+        }
+        return $this->discriminators[$key];
     }
 
     /**
@@ -234,21 +272,32 @@ class KeyValueStorage implements Storage
      *
      * @return $this
      *
-     * @see self::getDiscriminator()
+     * @deprecated use self::setDiscriminators()
      */
     public function setDiscriminator($discriminator)
     {
-        $this->discriminator = $discriminator;
+        if (!$this->discriminators) {
+            $this->discriminators['resource_name'] = $discriminator;
+            return $this;
+        }
+        if ($key = $this->getDiscriminatorKey()) {
+            $this->discriminators[$key] = $discriminator;
+        }
         $this->reconfigureDriverIfExists();
         return $this;
     }
 
     /**
      * @return string
+     *
+     * @deprecated use self::getDiscriminators()
      */
     public function getDiscriminatorKey()
     {
-        return $this->discriminatorKey;
+        if (!$this->discriminators) {
+            return $this->discriminatorKey;
+        }
+        return array_keys($this->discriminators)[0];
     }
 
     /**
@@ -258,10 +307,12 @@ class KeyValueStorage implements Storage
      */
     public function setDiscriminatorKey($discriminatorKey)
     {
+        $this->discriminators = [];
         $this->discriminatorKey = $discriminatorKey;
         $this->reconfigureDriverIfExists();
         return $this;
     }
+
 
     /**
      * @return Serializer
@@ -284,14 +335,14 @@ class KeyValueStorage implements Storage
 
 
     /**
-     * @return string
+     * @return array
      */
-    protected function discriminator()
+    protected function discriminators()
     {
-        if ($this->discriminator === null) {
+        if ($this->discriminators === null) {
             throw new UnConfiguredException("For safety reason you have to set a discriminator, if you dont use it set it to an empty string.");
         }
-        return $this->discriminator;
+        return $this->discriminators;
     }
 
     /**
@@ -301,8 +352,11 @@ class KeyValueStorage implements Storage
      */
     protected function restrictIfNeeded(&$columns)
     {
-        if ($discriminator = $this->discriminator()) {
-            $columns[$this->discriminatorKey] = $discriminator;
+        if (!$discriminators = $this->discriminators()) {
+            return;
+        }
+        foreach ($discriminators as $key=>$value) {
+            $columns[$key] = $value;
         }
     }
 
@@ -324,8 +378,7 @@ class KeyValueStorage implements Storage
             $this->table,
             $this->idKey,
             $this->getSelectColumnString(),
-            $this->discriminatorKey,
-            $this->discriminator()
+            $this->discriminators()
         );
     }
 
