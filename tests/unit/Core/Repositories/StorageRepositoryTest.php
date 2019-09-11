@@ -6,6 +6,8 @@
 namespace Ems\Core\Repositories;
 
 
+use Ems\Contracts\Core\AppliesToResource;
+use Ems\Contracts\Core\ChangeTracking;
 use Ems\Contracts\Core\IdGenerator;
 use Ems\Contracts\Core\PushableStorage;
 use Ems\Contracts\Core\Repository;
@@ -44,14 +46,16 @@ class StorageRepositoryTest extends TestCase
         ];
 
         $hans = $repo->make($attributes);
-
-        $this->assertInstanceOf(GenericEntity::class, $hans);
-        $this->assertEquals($attributes['name'], $hans['name']);
-        $this->assertEquals($attributes['age'], $hans['age']);
+        $hansData = $hans->toArray();
+        $this->assertModelInstance($hans);
+        $this->assertEquals($attributes['name'], $hansData['name']);
+        $this->assertEquals($attributes['age'], $hansData['age']);
         $this->assertTrue($hans->isNew());
-        $this->assertTrue($hans->wasModified());
-        $this->assertEquals('data-object', $hans->resourceName());
-        $this->assertEquals('id', $hans->getIdKey());
+        if ($hans instanceof GenericEntity) {
+            $this->assertTrue($hans->wasModified());
+            $this->assertEquals('data-object', $hans->resourceName());
+            $this->assertEquals('id', $hans->getIdKey());
+        }
     }
 
     /**
@@ -103,12 +107,15 @@ class StorageRepositoryTest extends TestCase
         ];
 
         $hans = $repo->store($attributes);
-
-        $this->assertInstanceOf(GenericEntity::class, $hans);
-        $this->assertEquals($attributes['name'], $hans['name']);
-        $this->assertEquals($attributes['age'], $hans['age']);
+        $hansData = $hans->toArray();
+        $this->assertModelInstance($hans);
+        $this->assertEquals($attributes['name'], $hansData['name']);
+        $this->assertEquals($attributes['age'], $hansData['age']);
         $this->assertFalse($hans->isNew());
-        $this->assertFalse($hans->wasModified());
+        if ($hans instanceof GenericEntity) {
+            $this->assertFalse($hans->wasModified());
+        }
+
         $this->assertEquals(1, $hans->getId());
 
         $attributes = [
@@ -117,12 +124,15 @@ class StorageRepositoryTest extends TestCase
         ];
 
         $maggy = $repo->store($attributes);
-
-        $this->assertInstanceOf(GenericEntity::class, $maggy);
-        $this->assertEquals($attributes['name'], $maggy['name']);
-        $this->assertEquals($attributes['age'], $maggy['age']);
+        $maggyData = $maggy->toArray();
+        $this->assertModelInstance($maggy);
+        $this->assertEquals($attributes['name'], $maggyData['name']);
+        $this->assertEquals($attributes['age'], $maggyData['age']);
         $this->assertFalse($maggy->isNew());
-        $this->assertFalse($maggy->wasModified());
+
+        if ($hans instanceof GenericEntity) {
+            $this->assertFalse($maggy->wasModified());
+        }
         $this->assertEquals(2, $maggy->getId());
 
     }
@@ -170,8 +180,8 @@ class StorageRepositoryTest extends TestCase
 
         $maggy = $repo->store($maggyData);
 
-        $this->assertEquals($hansData['name'], $repo->get(1)['name']);
-        $this->assertEquals($maggy['name'], $repo->get(2)['name']);
+        $this->assertEquals($hansData['name'], $repo->get(1)->toArray()['name']);
+        $this->assertEquals($maggyData['name'], $repo->get(2)->toArray()['name']);
 
         $this->assertNull($repo->get(3));
 
@@ -190,14 +200,16 @@ class StorageRepositoryTest extends TestCase
         ];
 
         $hans = $repo->store($attributes);
+        $hansData = $hans->toArray();
 
-        $this->assertEquals($hans['name'], $repo->get(1)['name']);
-
+        $this->assertEquals($hansData['name'], $repo->get(1)->toArray()['name']);
 
         $this->assertTrue($repo->update($hans, ['name' => 'Gustav']));
 
         $gustav = $repo->get(1);
-        $this->assertEquals($gustav['name'], $hans['name']);
+        $gustavData = $gustav->toArray();
+
+        $this->assertEquals($gustavData['name'], $hans->toArray()['name']);
 
         $this->assertFalse($repo->update($gustav, ['name' => 'Gustav']));
 
@@ -216,8 +228,9 @@ class StorageRepositoryTest extends TestCase
         ];
 
         $hans = $repo->store($attributes);
+        $hansData = $hans->toArray();
 
-        $this->assertEquals($hans['name'], $repo->get(1)['name']);
+        $this->assertEquals($hansData['name'], $repo->get(1)->toArray()['name']);
 
 
         $this->assertFalse($repo->update($hans, ['name' => 'Hans']));
@@ -238,7 +251,15 @@ class StorageRepositoryTest extends TestCase
 
         $hans = $repo->store($attributes);
 
-        $this->assertFalse($repo->save($hans));
+        $result = $repo->save($hans);
+
+        // Can only detect changes with ChangeTracking...
+        if ($hans instanceof ChangeTracking) {
+            $this->assertFalse($result);
+        } else {
+            $this->assertTrue($result);
+        }
+
 
     }
 
@@ -255,12 +276,14 @@ class StorageRepositoryTest extends TestCase
         ];
 
         $hans = $repo->store($attributes);
-
-        $this->assertInstanceOf(GenericEntity::class, $hans);
-        $this->assertEquals($attributes['name'], $hans['name']);
-        $this->assertEquals($attributes['age'], $hans['age']);
+        $hansData = $hans->toArray();
+        $this->assertModelInstance($hans);
+        $this->assertEquals($attributes['name'], $hansData['name']);
+        $this->assertEquals($attributes['age'], $hansData['age']);
         $this->assertFalse($hans->isNew());
-        $this->assertFalse($hans->wasModified());
+        if ($hans instanceof GenericEntity) {
+            $this->assertFalse($hans->wasModified());
+        }
         $this->assertEquals(1, $hans->getId());
 
         $attributes = [
@@ -269,18 +292,26 @@ class StorageRepositoryTest extends TestCase
         ];
 
         $maggy = $repo->store($attributes);
+        $maggyData = $maggy->toArray();
 
-        $this->assertInstanceOf(GenericEntity::class, $maggy);
-        $this->assertEquals($attributes['name'], $maggy['name']);
-        $this->assertEquals($attributes['age'], $maggy['age']);
+        $this->assertModelInstance($maggy);
+        $this->assertEquals($attributes['name'], $maggyData['name']);
+        $this->assertEquals($attributes['age'], $maggyData['age']);
         $this->assertFalse($maggy->isNew());
-        $this->assertFalse($maggy->wasModified());
+        if ($maggy instanceof GenericEntity) {
+            $this->assertFalse($maggy->wasModified());
+        }
         $this->assertEquals(2, $maggy->getId());
 
         $this->assertTrue($repo->delete($hans));
 
         $this->assertNull($repo->get(1));
 
+    }
+
+    protected function assertModelInstance($model)
+    {
+        $this->assertInstanceOf(GenericEntity::class, $model);
     }
 
     /**

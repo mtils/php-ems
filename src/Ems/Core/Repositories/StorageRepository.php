@@ -15,14 +15,16 @@ use Ems\Contracts\Core\Identifiable;
 use Ems\Contracts\Core\Provider;
 use Ems\Contracts\Core\PushableStorage;
 use Ems\Contracts\Core\Repository;
+use Ems\Contracts\Core\SupportsCustomFactory;
 use Ems\Contracts\Core\Type;
 use Ems\Contracts\Foundation\InputProcessor as InputProcessorContract;
 use Ems\Core\Exceptions\DataIntegrityException;
 use Ems\Core\Exceptions\ResourceNotFoundException;
 use Ems\Core\GenericEntity;
 use Ems\Foundation\InputProcessor;
+use ReflectionException;
 
-class StorageRepository implements Repository, AllProvider
+class StorageRepository implements Repository, AllProvider, SupportsCustomFactory
 {
     /**
      * @var PushableStorage
@@ -84,7 +86,7 @@ class StorageRepository implements Repository, AllProvider
      *
      * @param mixed $id
      *
-     * @throws \Ems\Contracts\Core\Errors\NotFound
+     * @throws ResourceNotFoundException
      *
      * @return DataObject
      **/
@@ -114,7 +116,9 @@ class StorageRepository implements Repository, AllProvider
      * @param array $attributes
      *
      * @return DataObject The created resource
-     **/
+     *
+     * @throws ReflectionException
+     */
     public function store(array $attributes)
     {
         $model = $this->newInstance($attributes);
@@ -158,10 +162,12 @@ class StorageRepository implements Repository, AllProvider
      * {@inheritdoc}
      *
      * @param DataObject $model
-     * @param array      $newAttributes
+     * @param array $newAttributes
      *
      * @return bool true if it was actually saved, false if not. Look above!
-     **/
+     *
+     * @throws ReflectionException
+     */
     public function update(Identifiable $model, array $newAttributes)
     {
         if (!$this->fill($model, $newAttributes)) {
@@ -176,7 +182,9 @@ class StorageRepository implements Repository, AllProvider
      * @param DataObject $model
      *
      * @return bool if the model was actually saved
-     **/
+     *
+     * @throws ReflectionException
+     */
     public function save(Identifiable $model)
     {
         $model = $this->checkTypeAndReturn($model);
@@ -253,7 +261,7 @@ class StorageRepository implements Repository, AllProvider
     /**
      * Return an iterable of all known named objects of this provider.
      *
-     * @return array|\Traversable<\Ems\Contracts\Core\Identifiable>
+     * @return Identifiable[]
      **/
     public function all()
     {
