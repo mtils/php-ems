@@ -16,11 +16,11 @@ interface InputProcessor extends NamedCallableChain
      * Sort. rearrange, cast, whatever do with the input array.
      *
      * @param array             $input
-     * @param AppliesToResource $resource (optional)
+     * @param object $resource (optional)
      * @param string $locale (optional)
      *
      * @return array
      **/
-    public function process(array $input, AppliesToResource $resource = null, $locale=null);
+    public function process(array $input, $resource = null, $locale=null);
 
 }
