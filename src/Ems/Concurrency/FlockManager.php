@@ -70,13 +70,13 @@ class FlockManager extends AbstractManager implements Manager
      *
      *
      * @param string $uri
-     * @param int $ttlMilliseconds (default:0)
+     * @param int $timeout (default:0)
      *
      * @return Handle|null
      *
      * @throws \Exception
      */
-    public function lock($uri, $ttlMilliseconds = null)
+    public function lock($uri, $timeout = null)
     {
 
         $lockFilePath = $this->lockFilePath($uri);
@@ -97,7 +97,7 @@ class FlockManager extends AbstractManager implements Manager
 
         $this->streams[$token] = $stream;
 
-        return $this->createHandle($uri, $token, $ttlMilliseconds);
+        return $this->createHandle($uri, $token, $timeout);
 
     }
 
@@ -125,8 +125,6 @@ class FlockManager extends AbstractManager implements Manager
         $stream->close();
 
         $this->filesystem->delete($this->lockFilePath($handle->uri));
-
-        $this->failIfTtlExceeded($handle);
 
     }
 

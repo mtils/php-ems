@@ -62,18 +62,18 @@ abstract class AbstractManager implements Manager
      * {@inheritDoc}
      *
      * @param callable $run
-     * @param int $ttlMilliseconds (default:0)
+     * @param int $timeout (default:0)
      *
      * @return mixed
      * @throws \ReflectionException
      * @throws ReleaseException
      * @throws Throwable
      */
-    public function run(callable $run, $ttlMilliseconds = null)
+    public function run(callable $run, $timeout = null)
     {
         $uri = Lambda::cacheId($run);
 
-        $handle = $this->lock($uri, $ttlMilliseconds);
+        $handle = $this->lock($uri, $timeout);
         $runResult = null;
         $runException = null;
 

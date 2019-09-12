@@ -63,15 +63,15 @@ class MySQLLockManager extends AbstractManager implements Manager
      * {@inheritDoc}
      *
      * @param string $uri
-     * @param int $ttlMilliseconds (optional)
+     * @param int $timeout (optional)
      *
      * @return Handle|null
      *
      * @throws \Exception
      */
-    public function lock($uri, $ttlMilliseconds = null)
+    public function lock($uri, $timeout = null)
     {
-        $seconds = !$ttlMilliseconds ? static::ENDLESS_TIMEOUT : $ttlMilliseconds/1000;
+        $seconds = !$timeout ? static::ENDLESS_TIMEOUT : $timeout/1000;
         $uriKey = $this->uriKey($uri);
 
         $result = $this->loop(function () use ($uriKey, $seconds) {
@@ -79,7 +79,7 @@ class MySQLLockManager extends AbstractManager implements Manager
         });
 
         if ($result) {
-            return $this->createHandle($uri, $uriKey, $ttlMilliseconds);
+            return $this->createHandle($uri, $uriKey, $timeout);
         }
 
         return null;
@@ -108,8 +108,6 @@ class MySQLLockManager extends AbstractManager implements Manager
         if (!$result) {
             throw new ReleaseException("The lock '$handle->token' seems to was created outside of this thread");
         }
-
-        $this->failIfTtlExceeded($handle);
 
     }
 

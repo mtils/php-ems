@@ -21,29 +21,16 @@ namespace Ems\Contracts\Concurrency;
 interface Manager
 {
     /**
-     * Lock the uri for $ttlMilliseconds. Uri is just some resource name or
-     * something you named. A process name, command, action...
-     * Return null if the resource is already locked.
-     *
-     * If $ttlMilliseconds === null use the default. Put it to 0 to set it to
-     * infinite.
-     *
-     * Giving the lock an expiry (ttl) results in:
-     *
-     * Depending on the backend the lock will just disappear and outside
-     * of the script that created the (now expired) lock there is no chance to
-     * catch that state
-     *
-     * 2. Unlock should therefore check if it was expired and record that error
-     * because other processes then potentially did collide with the too long
-     * running process.
+     * Lock the uri. Give up after $timeout (in msecs) expire. Just to clear this
+     * up: timeout means the second try to lock should be considered as failed
+     * after the timeout. The first lock() is not affected by the timeout.
      *
      * @param string $uri
-     * @param int    $ttlMilliseconds (optional)
+     * @param int    $timeout (optional)
      *
      * @return Handle|null
      */
-    public function lock($uri, $ttlMilliseconds=null);
+    public function lock($uri, $timeout=null);
 
     /**
      * Release the handle you got from self::lock()
@@ -80,11 +67,11 @@ interface Manager
      * Run the callable locked. Return its return value.
      *
      * @param callable $run
-     * @param int $ttlMilliseconds (default:0)
+     * @param int $timeout (default:0)
      *
      * @return mixed
      */
-    public function run(callable $run, $ttlMilliseconds=null);
+    public function run(callable $run, $timeout=null);
 
     /**
      * Do a double check lock operation.
