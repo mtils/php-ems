@@ -121,14 +121,10 @@ abstract class AbstractManager implements Manager
         $sleepTime = $this->retryDelay*1000;
 
         for ($i=0; $i<$this->tries; $i++) {
-            $try = $i+1;
-            echo "\nPerforming try $try/$this->tries";
             if ($result = $lockFunction($i)) {
                 return $result;
             }
-
             usleep($sleepTime);
-
         }
     }
 
