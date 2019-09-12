@@ -9,12 +9,12 @@ namespace Ems\Core\Filesystem;
 use Ems\Contracts\Core\Exceptions\TypeException;
 use Ems\Contracts\Core\None;
 use Ems\Contracts\Core\Stream;
+use Ems\Contracts\Core\StringableTrait;
 use Ems\Contracts\Core\Type;
 use Ems\Contracts\Core\Url as UrlContract;
 use Ems\Core\Exceptions\ResourceLockedException;
 use Ems\Core\Exceptions\UnsupportedUsageException;
 use Ems\Core\Helper;
-use Ems\Core\Support\StringableTrait;
 use Ems\Core\Url;
 use LogicException;
 use function feof;
@@ -22,6 +22,7 @@ use function flock;
 use function fseek;
 use function function_exists;
 use function get_resource_type;
+use function is_int;
 use function is_resource;
 use function str_replace;
 use function stream_copy_to_stream;
@@ -32,6 +33,8 @@ use function stream_set_blocking;
 use function stream_set_timeout;
 use function stream_supports_lock;
 use const LOCK_EX;
+use const LOCK_NB;
+use const LOCK_SH;
 use const LOCK_UN;
 use const SEEK_END;
 use const SEEK_SET;
@@ -203,19 +206,21 @@ abstract class AbstractStream implements Stream
     /**
      * {@inheritdoc}
      *
-     * @param bool $mode
+     * @param bool|int $mode
      *
      * @return bool
      */
     public function lock($mode = true)
     {
-        $this->shouldLock = $mode;
+        if (!is_int($mode) || $mode === LOCK_UN) {
+            $this->shouldLock = $mode === LOCK_UN ? false : true;
+        }
 
         if (!$handle = $this->resource()) {
             return false;
         }
 
-        return $this->applyLock($handle);
+        return $this->applyLock($handle, is_int($mode) ? $mode : null);
 
     }
 
@@ -683,26 +688,43 @@ abstract class AbstractStream implements Stream
 
     /**
      * @param resource $resource
+     * @param int      $mode (optional)
      *
      * @return bool
      */
-    protected function applyLock($resource)
+    protected function applyLock($resource, $mode=null)
     {
-        if ($this->shouldLock === false) {
+        if ($this->shouldLock === false && $mode === null) {
             $this->lockApplied = false;
             return flock($resource, LOCK_UN);
         }
 
-        $lock = $this->shouldLock === true ? $this->getLockMode() : $this->shouldLock;
+        if ($mode === null) {
+            $mode = $this->shouldLock === true ? $this->getLockMode() : $this->shouldLock;
+        }
 
+        $wouldBlock = null;
 
-        if (!flock($resource, $lock)) {
+        $result = flock($resource, $mode, $wouldBlock);
+
+        // If we are blocking a false return value means failed to lock
+        // A successful return value of flock() always means success
+        if (!$this->isNonBlockingMode($mode) || $result) {
+            $this->lockApplied = $result;
+            return $result;
+        }
+
+        // In non blocking mode flock will return false if another process is
+        // holding the lock too.
+        // $wouldBlock tells us that the lock did fail because it would have
+        // blocked another process that acquired the lock previously
+        if ($wouldBlock) {
             return false;
         }
 
-        $this->lockApplied = true;
-
-        return true;
+        // So that should be the only valid reason not to getting the lock
+        // (Would be the case if another process blocks exclusively??)
+        throw new ResourceLockedException('Failed to acquire a non blocking lock');
     }
 
     /**
@@ -804,5 +826,17 @@ abstract class AbstractStream implements Stream
         if (!$this->isReadable()) {
             throw new LogicException('Cannot read from a write only stream');
         }
+    }
+
+    /**
+     * Return if the lock mode is blocking.
+     *
+     * @param int $lockMode
+     *
+     * @return bool
+     */
+    protected function isNonBlockingMode($lockMode)
+    {
+        return $lockMode === (LOCK_EX | LOCK_NB) || $lockMode === (LOCK_SH | LOCK_NB);
     }
 }

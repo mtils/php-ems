@@ -830,6 +830,36 @@ class Lambda implements Stringable
     }
 
     /**
+     * Return a cache id for the passed callable
+     *
+     * @param callable|array $callable
+     *
+     * @return string
+     *
+     * @throws ReflectionException
+     **/
+    public static function cacheId($callable)
+    {
+
+        if (is_array($callable)) {
+            $class = is_string($callable[0]) ? $callable[0] : get_class($callable[0]);
+            return "$class::" . $callable[1];
+        }
+
+        if (is_string($callable)) {
+            return $callable;
+        }
+
+        if (!$callable instanceof Closure) {
+            return get_class($callable);
+        }
+
+        $r = new ReflectionFunction($callable);
+        return 'Closure:' . $r->getFileName() . ':' . $r->getStartLine() . ':' . $r->getEndLine();
+
+    }
+
+    /**
      * Make the (eventually not) callable base arg of this class callable.
      *
      * @return callable
@@ -980,36 +1010,6 @@ class Lambda implements Stringable
     {
         static::$reflectionCache[$cacheId] = $reflection;
         return $reflection;
-    }
-
-    /**
-     * Return a cache id for the passed callable
-     *
-     * @param callable|array $callable
-     *
-     * @return string
-     *
-     * @throws ReflectionException
-     **/
-    protected static function cacheId($callable)
-    {
-
-        if (is_array($callable)) {
-            $class = is_string($callable[0]) ? $callable[0] : get_class($callable[0]);
-            return "$class::" . $callable[1];
-        }
-
-        if (is_string($callable)) {
-            return $callable;
-        }
-
-        if (!$callable instanceof Closure) {
-            return get_class($callable);
-        }
-
-        $r = new ReflectionFunction($callable);
-        return 'Closure:' . $r->getFileName() . ':' . $r->getStartLine() . ':' . $r->getEndLine();
-
     }
 
     /**

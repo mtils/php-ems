@@ -46,4 +46,27 @@ class Map
         }
         return false;
     }
+
+    /**
+     * Return the first value of a key in $items.
+     * This means iterate over items, get the first and return the first value
+     * of this item. This means that the item has to be \Traversable.
+     *
+     * @param array|Traversable $items
+     *
+     * @return mixed
+     */
+    public static function firstItemValue($items)
+    {
+        Type::force($items, Traversable::class);
+
+        foreach ($items as $item) {
+            Type::force($item, Traversable::class);
+            foreach ($item as $key=>$value) {
+                return $value;
+            }
+        }
+        return null;
+    }
+
 }
