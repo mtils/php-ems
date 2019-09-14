@@ -4,6 +4,7 @@ namespace Ems\Core\Patterns;
 
 use Ems\Core\Exceptions\HandlerNotFoundException;
 use Ems\Core\Helper;
+use function call_user_func;
 
 /**
  * @see \Ems\Contracts\Core\Extendable
@@ -100,7 +101,7 @@ trait ExtendableTrait
      **/
     protected function callExtension($name, $params = [])
     {
-        return Helper::call($this->getExtension($name), $params);
+        return call_user_func($this->getExtension($name), ...(array)$params);
     }
 
     /**

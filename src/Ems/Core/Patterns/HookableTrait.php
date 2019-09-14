@@ -5,7 +5,7 @@ namespace Ems\Core\Patterns;
 use Ems\Contracts\Core\HasMethodHooks;
 use Ems\Core\Exceptions\NotImplementedException;
 use Ems\Core\Exceptions\UnsupportedParameterException;
-use Ems\Core\Helper;
+use function call_user_func;
 
 /**
  * @see \Ems\Contracts\Core\Hookable
@@ -138,7 +138,7 @@ trait HookableTrait
     {
         $called = false;
         foreach ($listeners as $listener) {
-            Helper::call($listener, is_array($args) ? $args : [$args]);
+            call_user_func($listener, ...(array)$args);
             $called = true;
         }
 

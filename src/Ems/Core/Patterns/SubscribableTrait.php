@@ -3,7 +3,7 @@
 namespace Ems\Core\Patterns;
 
 use Ems\Core\Exceptions\UnsupportedParameterException;
-use Ems\Core\Helper;
+use function call_user_func;
 
 /**
  * @see \Ems\Contracts\Core\Subscribable
@@ -83,7 +83,7 @@ trait SubscribableTrait
     {
         $result = false;
         foreach ($this->getOnListeners($event) as $listener) {
-            Helper::call($listener, $args);
+            $result = call_user_func($listener, ...(array)$args);
         }
         return $result;
     }
