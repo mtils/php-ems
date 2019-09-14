@@ -40,7 +40,9 @@ class StringList extends OrderedList implements Stringable
      **/
     public function __construct($source = null, $glue = ' ', $prefix = '', $suffix = '')
     {
-        $this->setGlue($glue)->setPrefix($prefix)->setSuffix($suffix);
+        $this->glue = $glue;
+        $this->prefix = $prefix;
+        $this->suffix = $suffix;
         parent::__construct($source);
     }
 
@@ -189,7 +191,7 @@ class StringList extends OrderedList implements Stringable
     }
     /**
      * Copies the list or its extended class.
-     * 
+     *
      * @return self
      */
     public function copy()

@@ -2,9 +2,11 @@
 
 namespace Ems\Core\Patterns;
 
+use Ems\Core\Lambda;
 use InvalidArgumentException;
 use ReflectionClass;
 use Ems\Core\Exceptions\HandlerNotFoundException;
+use function call_user_func;
 
 
 trait TraitOfResponsibility
@@ -102,7 +104,7 @@ trait TraitOfResponsibility
         $method = array_shift($args);
 
         foreach ($this->candidates as $candidate) {
-            if (call_user_func_array([$candidate, $method], $args)) {
+            if (Lambda::callFast([$candidate, $method], $args)) {
                 return $candidate;
             }
         }
@@ -122,7 +124,7 @@ trait TraitOfResponsibility
      **/
     protected function findReturningTrueOrFail($method)
     {
-        if (!$candidate = call_user_func_array([$this, 'findReturningTrue'], func_get_args())) {
+        if (!$candidate = call_user_func([$this, 'findReturningTrue'], ...func_get_args())) {
             throw new HandlerNotFoundException("No matching handler by $method found in ".get_class($this));
         }
 
@@ -131,7 +133,7 @@ trait TraitOfResponsibility
 
     /**
      * Call $method on every extension. Return the first not null
-     * result. this is 
+     * result. this is
      *
      * @param string $method
      *
@@ -145,7 +147,7 @@ trait TraitOfResponsibility
 
         foreach ($this->candidates as $candidate) {
 
-            $result = call_user_func_array([$candidate, $method], $args);
+            $result = call_user_func([$candidate, $method], ...$args);
 
             if ($result !== null) {
                 return $result;
@@ -166,7 +168,7 @@ trait TraitOfResponsibility
      **/
     protected function firstNotNullResultOrFail($method)
     {
-        $result = call_user_func_array([$this, 'firstNotNullResult'], func_get_args());
+        $result = call_user_func([$this, 'firstNotNullResult'], ...func_get_args());
         if ($result === null) {
             throw new HandlerNotFoundException("No handler returned a value by $method");
         }
@@ -269,7 +271,9 @@ trait TraitOfResponsibility
      * finally just return the class of this object.
      *
      * @return string
-     **/
+     *
+     * @throws \ReflectionException
+     */
     protected function detectType()
     {
         if (property_exists($this, 'allow')) {

@@ -3,6 +3,8 @@
 namespace Ems\Core\Patterns;
 
 use Ems\Core\Exceptions\HandlerNotFoundException;
+use function call_user_func;
+use function func_get_args;
 
 trait StaticExtendable
 {
@@ -111,23 +113,7 @@ trait StaticExtendable
      **/
     public static function callExtension($name, array $params = [])
     {
-        $extension = static::getExtension($name);
-
-        // call_user_func_array seems to be slow
-        switch (count($params)) {
-            case 0:
-                return call_user_func($extension);
-            case 1:
-                return call_user_func($extension, $params[0]);
-            case 2:
-                return call_user_func($extension, $params[0], $params[1]);
-            case 3:
-                return call_user_func($extension, $params[0], $params[1], $params[2]);
-            case 4:
-                return call_user_func($extension, $params[0], $params[1], $params[2], $params[3]);
-            default:
-                return call_user_func_array($extension, $params);
-        }
+        return call_user_func(static::getExtension($name), ...$params);
     }
 
     /**
@@ -141,24 +127,7 @@ trait StaticExtendable
     protected static function buildForward($method, $object)
     {
         return function () use ($method, $object) {
-
-             $args = func_get_args();
-
-             switch (count($args)) {
-                case 0:
-                    return $object->$method();
-                case 1:
-                    return $object->$method($args[0]);
-                case 2:
-                    return $object->$method($args[0], $args[1]);
-                case 3:
-                    return $object->$method($args[0], $args[1], $args[2]);
-                case 4:
-                    return $object->$method($args[0], $args[1], $args[2], $args[3]);
-                default:
-                    return call_user_func_array([$object, $method], $args);
-             }
-
+             return call_user_func([$object, $method], ...func_get_args());
         };
     }
 

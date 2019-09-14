@@ -2,6 +2,7 @@
 
 namespace Ems\Core\Support;
 
+use Ems\Contracts\Core\Map;
 use function get_class;
 use function is_object;
 
@@ -88,40 +89,21 @@ trait ResolvingListenerTrait
     protected function callListeners($abstract, $result, array $listeners, array &$excludes)
     {
         if (isset($listeners[$abstract]) && !isset($excludes[$abstract])) {
-            $this->iterateListeners($listeners[$abstract], $result);
+            Map::callVoid($listeners[$abstract], [$result, $this]);
             $excludes[$abstract] = true;
         }
 
         foreach ($listeners as $classOrInterface => $instanceListeners) {
 
             // We already called them above
-            if ($classOrInterface == $abstract) {
+            if ($classOrInterface == $abstract || isset($excludes[$classOrInterface]) || !$result instanceof $classOrInterface) {
                 continue;
             }
 
-            if (isset($excludes[$classOrInterface])) {
-                continue;
-            }
+            Map::callVoid($instanceListeners, [$result, $this]);
 
-            if (!$result instanceof $classOrInterface) {
-                continue;
-            }
-
-            $this->iterateListeners($instanceListeners, $result);
             $excludes[$classOrInterface] = true;
         }
     }
 
-    /**
-     * Remove one level of indention in callListeners ;-).
-     *
-     * @param array  $listeners
-     * @param object $result
-     **/
-    protected function iterateListeners(array $listeners, $result)
-    {
-        foreach ($listeners as $listener) {
-            call_user_func($listener, $result, $this);
-        }
-    }
 }

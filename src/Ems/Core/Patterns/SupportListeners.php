@@ -2,6 +2,8 @@
 
 namespace Ems\Core\Patterns;
 
+use Ems\Core\Lambda;
+
 trait SupportListeners
 {
     /**
@@ -83,19 +85,6 @@ trait SupportListeners
      **/
     protected function callListener(callable $listener, array $args = [])
     {
-        switch (count($args)) {
-            case 0:
-                return call_user_func($listener);
-            case 1:
-                return call_user_func($listener, $args[0]);
-            case 2:
-                return call_user_func($listener, $args[0], $args[1]);
-            case 3:
-                return call_user_func($listener, $args[0], $args[1], $args[2]);
-            case 4:
-                return call_user_func($listener, $args[0], $args[1], $args[2], $args[3]);
-        }
-
-        return call_user_func_array($listener, $args);
+        return Lambda::callFast($listener, $args);
     }
 }

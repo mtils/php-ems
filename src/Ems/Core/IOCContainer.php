@@ -9,6 +9,7 @@ use InvalidArgumentException;
 use ReflectionClass;
 use ReflectionException;
 use OutOfBoundsException;
+use ReflectionMethod;
 use function get_class;
 
 class IOCContainer implements ContainerContract
@@ -35,6 +36,11 @@ class IOCContainer implements ContainerContract
      * @var array
      **/
     protected $resolvedAbstracts = [];
+
+    /**
+     * @var array
+     */
+    protected static $reflectionClasses = [];
 
     public function __construct()
     {
@@ -204,12 +210,15 @@ class IOCContainer implements ContainerContract
         if ($this->bound($abstract)) {
             array_unshift($parameters, $this);
 
-            return call_user_func_array($this->bindings[$abstract]['concrete'], $parameters);
+            return call_user_func($this->bindings[$abstract]['concrete'], ...$parameters);
         }
 
-        $reflector = new ReflectionClass($abstract);
+        if (!isset(self::$reflectionClasses[$abstract])) {
+            self::$reflectionClasses[$abstract] = new ReflectionClass($abstract);
+        }
 
-        if (!$constructor = $reflector->getConstructor()) {
+        /** @var ReflectionMethod $constructor */
+        if (!$constructor = self::$reflectionClasses[$abstract]->getConstructor()) {
             return new $abstract($parameters);
         }
 
@@ -219,7 +228,7 @@ class IOCContainer implements ContainerContract
 
         // All parameters seems to be passed
         if (count($constructorParams) == count($parameters)) {
-            return $reflector->newInstanceArgs($parameters);
+            return self::$reflectionClasses[$abstract]->newInstanceArgs($parameters);
         }
 
         foreach ($constructorParams as $i=>$param) {
@@ -251,7 +260,7 @@ class IOCContainer implements ContainerContract
             $callParams[] = $value;
         }
 
-        return $reflector->newInstanceArgs($callParams);
+        return self::$reflectionClasses[$abstract]->newInstanceArgs($callParams);
     }
 
     /**

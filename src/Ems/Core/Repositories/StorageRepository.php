@@ -15,7 +15,6 @@ use Ems\Contracts\Core\Identifiable;
 use Ems\Contracts\Core\Provider;
 use Ems\Contracts\Core\PushableStorage;
 use Ems\Contracts\Core\Repository;
-use Ems\Contracts\Core\SupportsCustomFactory;
 use Ems\Contracts\Core\Type;
 use Ems\Contracts\Foundation\InputProcessor as InputProcessorContract;
 use Ems\Core\Exceptions\DataIntegrityException;
@@ -24,7 +23,7 @@ use Ems\Core\GenericEntity;
 use Ems\Foundation\InputProcessor;
 use ReflectionException;
 
-class StorageRepository implements Repository, AllProvider, SupportsCustomFactory
+class StorageRepository implements Repository, AllProvider
 {
     /**
      * @var PushableStorage

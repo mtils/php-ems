@@ -261,11 +261,11 @@ class TextFormatter implements FormatterContract
         }
 
         if (method_exists($this, $filter)) {
-            return $this->callFast([$this, $filter], $params);
+            return Lambda::callFast([$this, $filter], $params);
         }
 
         if (function_exists($filter)) {
-            return $this->callFast($filter, $params);
+            return Lambda::callFast($filter, $params);
         }
 
         throw new HandlerNotFoundException("Filter '$filter' not found");
@@ -315,29 +315,4 @@ class TextFormatter implements FormatterContract
         return $date === null | $date === '' | $date == 0;
     }
 
-    /**
-     * Call a method.
-     *
-     * @param string $name
-     * @param array  $params (optional)
-     *
-     * @return mixed
-     **/
-    protected function callFast(callable $callable, array $params = [])
-    {
-
-        // call_user_func_array seems to be slow
-        switch (count($params)) {
-            case 1:
-                return call_user_func($callable, $params[0]);
-            case 2:
-                return call_user_func($callable, $params[0], $params[1]);
-            case 3:
-                return call_user_func($callable, $params[0], $params[1], $params[2]);
-            case 4:
-                return call_user_func($callable, $params[0], $params[1], $params[2], $params[3]);
-            default:
-                return call_user_func_array($callable, $params);
-        }
-    }
 }

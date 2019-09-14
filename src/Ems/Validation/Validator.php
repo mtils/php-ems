@@ -507,18 +507,20 @@ abstract class Validator implements ValidatorContract, HasInjectMethods
      * Perform the validation by an own validator method.
      *
      * @param string $ruleName
-     * @param array  $vars       The validation variables (input, value, key, resource, locale)
-     * @param array  $parameters The rule parameters (in rules array)
+     * @param array $vars The validation variables (input, value, key, resource, locale)
+     * @param array $parameters The rule parameters (in rules array)
      *
      * @return bool
-     **/
+     *
+     * @throws \ReflectionException
+     */
     protected function validateByOwnMethod($ruleName, array $vars, array $parameters)
     {
         $method = $this->getMethodBySnakeCaseName($ruleName);
 
         $methodParams = Lambda::mergeArguments([$this, $method], $vars, $parameters);
 
-        return call_user_func_array([$this, $method], $methodParams);
+        return call_user_func([$this, $method], ...$methodParams);
     }
 
     /**
@@ -545,7 +547,7 @@ abstract class Validator implements ValidatorContract, HasInjectMethods
 
     }
 
-    /** 
+    /**
      * Return the relation name of a key. Just pop the last segment
      *
      * @param string $key

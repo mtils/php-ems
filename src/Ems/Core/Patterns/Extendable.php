@@ -3,10 +3,11 @@
 namespace Ems\Core\Patterns;
 
 use OutOfBoundsException;
+use function call_user_func;
 
 /**
  * The Extendable trait allows to extend objects.
- * 
+ *
  * For example:
  * $myObject = new MyObject;
  * $myObject->extend('myFunc', function($foo){});
@@ -75,27 +76,7 @@ trait Extendable
     {
         $extension = $this->getExtension($name);
 
-        // call_user_func_array seems to be slow
-        switch (count($params)) {
-            case 0:
-                $result = call_user_func($extension);
-                break;
-            case 1:
-                $result = call_user_func($extension, $params[0]);
-                break;
-            case 2:
-                $result = call_user_func($extension, $params[0], $params[1]);
-                break;
-            case 3:
-                $result = call_user_func($extension, $params[0], $params[1], $params[2]);
-                break;
-            case 4:
-                $result = call_user_func($extension, $params[0], $params[1], $params[2], $params[3]);
-                break;
-            default:
-                $result = call_user_func_array($extension, $params);
-                break;
-        }
+        $result = call_user_func($extension, ...$params);
 
         $this->callListeners($name, $result);
 

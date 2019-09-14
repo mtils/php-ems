@@ -39,7 +39,7 @@ class LoggingCallable implements Countable
     {
         $this->calls[] = func_get_args();
         if ($this->handler) {
-            return call_user_func_array($this->handler, func_get_args());
+            return call_user_func($this->handler, ...func_get_args());
         }
         return null;
     }

@@ -6,6 +6,7 @@
 namespace Ems\Contracts\Core;
 
 use Traversable;
+use function call_user_func;
 
 class Map
 {
@@ -45,6 +46,21 @@ class Map
             }
         }
         return false;
+    }
+
+    /**
+     * This is like array_map but faster, works with \Traversable.
+     * It throws all results away.
+     *
+     * @param callable[] $items
+     *
+     * @param mixed|array $args (optional)
+     */
+    public static function callVoid($items, $args=null)
+    {
+        foreach ($items as $callable) {
+            call_user_func($callable, ...(array)$args);
+        }
     }
 
     /**

@@ -9,7 +9,6 @@ namespace Ems\Core;
 use Ems\Contracts\Core\IdGenerator;
 use Ems\TestCase;
 use Ems\Testing\Cheat;
-use function call_user_func_array;
 use function func_get_args;
 use const PHP_INT_MAX;
 
@@ -170,7 +169,7 @@ class AbstractIdGeneratorTest_Generator extends AbstractIdGenerator
         $asciiOnly = true
     ) {
         if ($this->handler) {
-            return call_user_func_array($this->handler, func_get_args());
+            return call_user_func($this->handler, ...func_get_args());
         }
         return $salt;
     }

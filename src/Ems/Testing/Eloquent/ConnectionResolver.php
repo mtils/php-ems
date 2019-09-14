@@ -89,6 +89,6 @@ class ConnectionResolver implements ConnectionResolverInterface
      **/
     public function __call($method, $params)
     {
-        return call_user_func_array([$this->connection(), $method], $params);
+        return call_user_func([$this->connection(), $method], ...$params);
     }
 }
