@@ -7,7 +7,10 @@ namespace Ems\Routing;
 
 
 use Ems\Contracts\Core\Url as UrlContract;
+use Ems\Contracts\Routing\Argument;
+use Ems\Contracts\Routing\Command;
 use Ems\Contracts\Routing\Exceptions\RouteNotFoundException;
+use Ems\Contracts\Routing\Option;
 use Ems\Contracts\Routing\Routable;
 use Ems\Contracts\Routing\Route;
 use Ems\Contracts\Routing\RouteCollector;
@@ -121,7 +124,7 @@ class RouterTest extends TestCase
                 ->clientType('web', 'api')
                 ->middleware('auth');
 
-            $collector->put('addresses/{address}/edit', 'AddressController::update')
+            $collector->post('addresses/{address}/edit', 'AddressController::update')
                 ->name('addresses.update')
                 ->scope('default', 'admin')
                 ->clientType('web', 'api')
@@ -180,7 +183,7 @@ class RouterTest extends TestCase
                 ->clientType('web', 'api')
                 ->middleware('auth');
 
-            $collector->put('delivery-addresses[/{type}]', 'AddressController::updateDelivery')
+            $collector->patch('delivery-addresses[/{type}]', 'AddressController::updateDelivery')
                 ->name('delivery-addresses.update')
                 ->scope('default', 'admin')
                 ->clientType('web', 'api')
@@ -192,11 +195,11 @@ class RouterTest extends TestCase
 
         $this->assertCount(3, $routes);
 
-        $routable = $this->routable('delivery-addresses', 'PUT');
+        $routable = $this->routable('delivery-addresses', 'PATCH');
         $router->route($routable);
 
         $this->assertEquals(Routable::CLIENT_WEB, $routable->clientType());
-        $this->assertEquals('PUT', $routable->method());
+        $this->assertEquals('PATCH', $routable->method());
         $this->assertEquals('default', (string)$routable->routeScope());
         $this->assertInstanceOf(RouteScope::class, $routable->routeScope());
         $this->assertInstanceOf(UrlContract::class, $routable->url());
@@ -208,7 +211,7 @@ class RouterTest extends TestCase
         $this->assertEquals('AddressController::updateDelivery', $route->handler);
         $this->assertEquals('delivery-addresses.update', $route->name);
         $this->assertEquals(['type' => 'main'], $route->defaults);
-        $this->assertEquals(['PUT'], $route->methods);
+        $this->assertEquals(['PATCH'], $route->methods);
         $this->assertEquals(['web', 'api'], $route->clientTypes);
         $this->assertEquals(['auth'], $route->middlewares);
         $this->assertEquals(['default', 'admin'], $route->scopes);
@@ -216,6 +219,124 @@ class RouterTest extends TestCase
         $this->assertTrue($routable->isRouted());
         $this->assertTrue(is_callable($routable->getHandler()));
 
+    }
+
+    /**
+     * @test
+     * @throws ReflectionException
+     */
+    public function it_registers_commands()
+    {
+
+        $router = $this->make();
+
+        $router->register(function (RouteCollector $collector) {
+
+            $collector->get('addresses', 'AddressController::index')
+                ->name('addresses.index')
+                ->scope('default', 'admin')
+                ->clientType('web', 'api')
+                ->middleware('auth');
+
+            $collector->get('addresses/{address}/edit', 'AddressController::edit')
+                ->name('addresses.edit')
+                ->scope('default', 'admin')
+                ->clientType('web', 'api')
+                ->middleware('auth');
+
+            $collector->command('import:run', 'ImportController::run')
+                ->argument('file', 'Import this file (url)')
+                ->argument('email?', 'Send result to this email')
+                ->option('dryrun', 'Do not write changes', 'd')
+                ->option('timeout=5000', 'Kill if too long');
+
+
+        });
+
+        $routes = iterator_to_array($router);
+
+        $this->assertCount(3, $routes);
+
+        $routable = $this->routable('addresses');
+        $this->assertFalse($routable->isRouted());
+        $router->route($routable);
+
+        $this->assertEquals(Routable::CLIENT_WEB, $routable->clientType());
+        $this->assertEquals('GET', $routable->method());
+        $this->assertEquals('default', (string)$routable->routeScope());
+        $this->assertInstanceOf(RouteScope::class, $routable->routeScope());
+        $this->assertInstanceOf(UrlContract::class, $routable->url());
+        $this->assertEquals('addresses', (string)$routable->url());
+        $this->assertEquals([], $routable->routeParameters());
+
+        $route = $routable->matchedRoute();
+
+        $this->assertEquals('AddressController::index', $route->handler);
+        $this->assertEquals('addresses.index', $route->name);
+        $this->assertEquals([], $route->defaults);
+        $this->assertEquals(['GET'], $route->methods);
+        $this->assertEquals(['web', 'api'], $route->clientTypes);
+        $this->assertEquals(['auth'], $route->middlewares);
+        $this->assertEquals(['default', 'admin'], $route->scopes);
+        $this->assertEquals('addresses', $route->pattern);
+        $this->assertTrue($routable->isRouted());
+        $this->assertTrue(is_callable($routable->getHandler()));
+
+        // According to RFC 3986 Section 3 without an authority no slashes are
+        // needed after the scheme so I decided to make the console scheme
+        // without slashes
+        $routable = $this->routable('console:import:run', Routable::CONSOLE, Routable::CLIENT_CONSOLE);
+
+        $this->assertFalse($routable->isRouted());
+        $router->route($routable);
+
+        $route = $routable->matchedRoute();
+
+        $this->assertEquals('ImportController::run', $route->handler);
+        $this->assertEquals('import:run', $route->pattern);
+        $this->assertEquals('import:run', $route->name);
+        $this->assertEquals([], $route->defaults);
+        $this->assertEquals([Routable::CONSOLE], $route->methods);
+        $this->assertEquals([Routable::CLIENT_CONSOLE], $route->clientTypes);
+        $this->assertTrue($routable->isRouted());
+
+        $command = $route->command;
+
+        $this->assertInstanceOf(Command::class, $command);
+
+        $firstArg = $command->arguments[0];
+        $this->assertInstanceOf(Argument::class, $firstArg);
+        $this->assertEquals('file', $firstArg->name);
+        $this->assertEquals('Import this file (url)', $firstArg->description);
+        $this->assertTrue($firstArg->required);
+        $this->assertNull($firstArg->default);
+        $this->assertEquals('string', $firstArg->type);
+
+        $secondArg = $command->arguments[1];
+        $this->assertInstanceOf(Argument::class, $secondArg);
+        $this->assertEquals('email', $secondArg->name);
+        $this->assertEquals('Send result to this email', $secondArg->description);
+        $this->assertFalse($secondArg->required);
+        $this->assertNull($secondArg->default);
+        $this->assertEquals('string', $secondArg->type);
+
+        $option = $command->options[0];
+        $this->assertInstanceOf(Option::class, $option);
+        $this->assertEquals('dryrun', $option->name);
+        $this->assertEquals('Do not write changes', $option->description);
+        $this->assertFalse($option->required);
+        $this->assertNull($option->default);
+        $this->assertEquals('bool', $option->type);
+        $this->assertEquals('d', $option->shortcut);
+
+        $option = $command->options[1];
+        $this->assertInstanceOf(Option::class, $option);
+        $this->assertEquals('timeout', $option->name);
+        $this->assertEquals('Kill if too long', $option->description);
+        $this->assertFalse($option->required);
+        $this->assertEquals('5000', $option->default);
+        $this->assertEquals('string', $option->type);
+        $this->assertEquals('', $option->shortcut);
     }
 
     /**

@@ -67,5 +67,4 @@ class Input implements InputContract
         return $result;
     }
 
-
 }

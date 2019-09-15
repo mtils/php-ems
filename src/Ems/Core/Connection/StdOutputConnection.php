@@ -61,9 +61,13 @@ class StdOutputConnection extends AbstractConnection implements OutputConnection
 
         if ($output instanceof HttpResponse) {
             $this->outputHttpHeaders($output);
+            echo $output->body();
+            return null;
         }
 
-        echo $output->body();
+        echo $output->payload();
+        return null;
+
     }
 
     /**

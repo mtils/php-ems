@@ -20,6 +20,11 @@ class RouteCollector implements IteratorAggregate
     protected $routes;
 
     /**
+     * @var Command[]
+     */
+    protected $commands;
+
+    /**
      * @var array
      */
     protected $common = [];
@@ -139,6 +144,22 @@ class RouteCollector implements IteratorAggregate
     }
 
     /**
+     * @param $pattern
+     * @param $handler
+     *
+     * @return Command
+     */
+    public function command($pattern, $handler)
+    {
+        $command = $this->newCommand($pattern);
+        $route = $this->on(Routable::CONSOLE, $pattern, $handler);
+        $route->clientType(Routable::CLIENT_CONSOLE);
+        $route->name($pattern);
+        $route->command($command);
+        return $command;
+    }
+
+    /**
      * Retrieve an external iterator
      *
      * @link https://php.net/manual/en/iteratoraggregate.getiterator.php
@@ -169,6 +190,16 @@ class RouteCollector implements IteratorAggregate
     protected function newRoute($method, $pattern, $handler)
     {
         return new Route($method, $pattern, $handler);
+    }
+
+    /**
+     * @param string  $pattern
+     *
+     * @return Command
+     */
+    protected function newCommand($pattern)
+    {
+        return new Command($pattern);
     }
 
     protected function configureRouteByCommonAttributes(Route $route)

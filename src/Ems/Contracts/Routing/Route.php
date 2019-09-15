@@ -22,8 +22,8 @@ use function is_array;
  *
  * Registrar::get('users', function () {})->name('users.index')
  *
- * Like in Ems\Contracts\Url: properties are for read access, methods for write
- * access.
+ * Like in Ems\Contracts\Core\Url: Properties are for read access, methods for
+ * write access.
  *
  * @package Ems\Contracts\Routing
  *
@@ -35,6 +35,7 @@ use function is_array;
  * @property-read string[]  $clientTypes The types of client which have access to this route
  * @property-read string[]  $scopes      The RouteScopes in which this route applies
  * @property-read array     $defaults    The default route parameters
+ * @property-read Command   command      An associated console command (or null)
  */
 class Route implements Arrayable
 {
@@ -51,7 +52,8 @@ class Route implements Arrayable
         'middlewares' => [],
         'clientTypes' => [],
         'scopes'      => [],
-        'defaults'    => []
+        'defaults'    => [],
+        'command'     => null
     ];
 
     /**
@@ -149,6 +151,19 @@ class Route implements Arrayable
             return $this;
         }
         $this->_properties['defaults'][$key] = $value;
+        return $this;
+    }
+
+    /**
+     * Associate a console command with this route.
+     *
+     * @param Command $command
+     *
+     * @return $this
+     */
+    public function command(Command $command)
+    {
+        $this->_properties['command'] = $command;
         return $this;
     }
 

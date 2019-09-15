@@ -9,6 +9,7 @@ use ArrayIterator;
 use Ems\Contracts\Core\Input;
 use Ems\Contracts\Core\Response;
 use Ems\Contracts\Core\SupportsCustomFactory;
+use Ems\Contracts\Routing\Command;
 use Ems\Contracts\Routing\Dispatcher;
 use Ems\Contracts\Routing\Exceptions\RouteNotFoundException;
 use Ems\Contracts\Routing\Routable;
@@ -106,6 +107,10 @@ class Router implements RouterContract, SupportsCustomFactory
               ->middleware($routeData['middlewares'])
               ->defaults($routeData['defaults'])
               ->name($routeData['name']);
+
+        if (isset($routeData['command']) && $routeData['command'] instanceof Command) {
+            $route->command($routeData['command']);
+        }
 
         $routable->setMatchedRoute($route);
 
@@ -249,7 +254,10 @@ class Router implements RouterContract, SupportsCustomFactory
      */
     protected function installInterpreterFactory(callable $factory=null)
     {
-        $this->interpreterFactory = $factory ?: function () {
+        $this->interpreterFactory = $factory ?: function ($clientType) {
+            if (in_array($clientType, [Routable::CLIENT_CONSOLE, Routable::CLIENT_TASK])) {
+                return new ConsoleDispatcher();
+            }
             return new FastRouteDispatcher();
         };
     }

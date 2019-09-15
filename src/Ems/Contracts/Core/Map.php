@@ -49,6 +49,38 @@ class Map
     }
 
     /**
+     * Take every item $listOfArguments and call $callable with it.
+     *
+     * @param array $listOfArguments
+     * @param callable $callable
+     *
+     * @return array (all results)
+     *
+     * @example $listOfArguments = [
+     *     [$user1, true]
+     *     [$user2, false]
+     *     [$user3, true]
+     * ];
+     *
+     * Map::apply($listOfArguments, [$registrar, 'activate']);
+     *
+     * interface Registrar {
+     *     function activate(User $user, $sendMail=false);
+     * }
+     *
+     */
+    public static function apply(array $listOfArguments, callable $callable)
+    {
+        $results = [];
+
+        foreach ($listOfArguments as $arguments) {
+            $results[] = call_user_func($callable, ...(array)$arguments);
+        }
+
+        return $results;
+    }
+
+    /**
      * This is like array_map but faster, works with \Traversable.
      * It throws all results away.
      *

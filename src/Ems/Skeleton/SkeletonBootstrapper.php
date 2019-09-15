@@ -6,6 +6,7 @@
 namespace Ems\Skeleton;
 
 
+use Ems\Console\ConsoleInputConnection;
 use Ems\Contracts\Core\Url;
 use Ems\Core\Application;
 use Ems\Core\Connection\GlobalsHttpInputConnection;
@@ -14,6 +15,7 @@ use Ems\Core\ConnectionPool;
 use Ems\Core\Skeleton\Bootstrapper;
 use Ems\Core\Support\StreamLogger;
 use function file_exists;
+use function php_sapi_name;
 
 class SkeletonBootstrapper extends Bootstrapper
 {
@@ -27,21 +29,29 @@ class SkeletonBootstrapper extends Bootstrapper
     protected function addConnections(ConnectionPool $pool)
     {
         $pool->extend(ConnectionPool::STDIN, function (Url $url) {
-            if ($url->equals(ConnectionPool::STDIN)) {
-                return new GlobalsHttpInputConnection();
+            if (!$url->equals(ConnectionPool::STDIN)) {
+                return null;
             }
+
+            if (php_sapi_name() == 'cli') {
+                return new ConsoleInputConnection();
+            }
+
+            return new GlobalsHttpInputConnection();
         });
 
         $pool->extend(ConnectionPool::STDOUT, function (Url $url) {
             if ($url->equals(ConnectionPool::STDOUT)) {
                 return new StdOutputConnection();
             }
+            return null;
         });
 
         $pool->extend(ConnectionPool::STDERR, function (Url $url) {
             if ($url->equals(ConnectionPool::STDERR)) {
                 return $this->createLogger();
             }
+            return null;
         });
     }
 
