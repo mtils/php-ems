@@ -2,7 +2,7 @@
 
 namespace Ems\Contracts\Assets;
 
-use Ems\Contracts\Model\Repository;
+use Ems\Contracts\Core\Repository;
 
 interface BuildConfigRepository extends Repository
 {

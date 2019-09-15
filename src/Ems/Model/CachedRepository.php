@@ -10,7 +10,7 @@ namespace Ems\Model;
 
 use Ems\Contracts\Cache\Cache;
 use Ems\Contracts\Core\Identifiable;
-use Ems\Contracts\Model\Repository;
+use Ems\Contracts\Core\Repository;
 use Ems\Core\Exceptions\ResourceNotFoundException;
 use Ems\Contracts\Core\Type;
 

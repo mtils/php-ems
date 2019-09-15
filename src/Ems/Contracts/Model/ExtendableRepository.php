@@ -2,12 +2,14 @@
 
 namespace Ems\Contracts\Model;
 
+use Ems\Contracts\Core\Repository as CoreRepository;
+
 /**
  * An extendable repository allows to hooks in every crud
  * action. Assign a callable.
  * @deprecated Use Hookable
  **/
-interface ExtendableRepository extends Repository
+interface ExtendableRepository extends CoreRepository
 {
     /**
      * This is called before getting a record.

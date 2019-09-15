@@ -4,12 +4,12 @@ namespace Ems\Assets;
 
 use Ems\Contracts\Assets\BuildConfig as BuildConfigContract;
 use Ems\Contracts\Assets\Collection as CollectionContract;
-use Ems\Contracts\Model\Repository;
+use Ems\Contracts\Core\Repository;
 
 class BuildConfig implements BuildConfigContract
 {
     /**
-     * @var \Ems\Contracts\Model\Repository
+     * @var Repository
      **/
     protected $repository;
 
@@ -290,8 +290,8 @@ class BuildConfig implements BuildConfigContract
      * This is typehinted against the core repository because it only needs the
      * fill method.
      *
-     * @param \Ems\Contracts\Model\Repository $repository
-     * @param array                           $attributes
+     * @param Repository $repository
+     * @param array      $attributes
      *
      * @return self
      **/
