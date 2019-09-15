@@ -2,17 +2,17 @@
 
 namespace Ems\Core;
 
-use Ems\Contracts\Core\Url as UrlContract;
-use function func_get_args;
-use function http_build_query;
-use InvalidArgumentException;
-use Ems\Core\Support\StringableTrait;
-use Ems\Core\Collections\StringList;
 use ArrayIterator;
-use function is_array;
-use function parse_str;
+use Ems\Contracts\Core\StringableTrait;
+use Ems\Contracts\Core\Url as UrlContract;
+use Ems\Core\Collections\StringList;
+use InvalidArgumentException;
 use Psr\Http\Message\UriInterface;
 use RuntimeException;
+use function func_get_args;
+use function http_build_query;
+use function is_array;
+use function parse_str;
 
 /**
  * Class Url
@@ -50,6 +50,7 @@ class Url implements UrlContract, UriInterface
         'news'   => true,
         'nntp'   => true,
         'telnet' => true,
+        'console'=> true
     ];
 
     /**
@@ -78,7 +79,7 @@ class Url implements UrlContract, UriInterface
     protected $port = 0;
 
     /**
-     * @var \Ems\Core\Collections\StringList
+     * @var StringList
      **/
     protected $path;
 
@@ -352,9 +353,10 @@ class Url implements UrlContract, UriInterface
     public function toString()
     {
         $string = '';
+        $isFlat = $this->isFlat();
 
         if ($this->scheme) {
-            $slashes = $this->isFlat() ? '' : '//';
+            $slashes = $isFlat ? '' : '//';
             $string .= "{$this->scheme}:$slashes";
         }
 
@@ -362,8 +364,8 @@ class Url implements UrlContract, UriInterface
             $string .= $authority;
         }
 
-        if ($this->path->count() && !$this->isFlat()) {
-            $prefix = $authority || $this->path->getPrefix() ? '/' : '';
+        if ($this->path->count()) {
+            $prefix = !$isFlat && ($authority || $this->path->getPrefix()) ? '/' : '';
             $string .= $prefix.ltrim((string) $this->path, '/');
         }
 
@@ -631,7 +633,7 @@ class Url implements UrlContract, UriInterface
      *
      * @param string $scheme The scheme to use with the new instance.
      * @return static A new instance with the specified scheme.
-     * @throws \InvalidArgumentException for invalid or unsupported schemes.
+     * @throws InvalidArgumentException for invalid or unsupported schemes.
      */
     public function withScheme($scheme)
     {
@@ -659,7 +661,7 @@ class Url implements UrlContract, UriInterface
      *
      * @param string $host The hostname to use with the new instance.
      * @return static A new instance with the specified host.
-     * @throws \InvalidArgumentException for invalid hostnames.
+     * @throws InvalidArgumentException for invalid hostnames.
      */
     public function withHost($host)
     {
@@ -672,7 +674,7 @@ class Url implements UrlContract, UriInterface
      * @param null|int $port The port to use with the new instance; a null value
      *     removes the port information.
      * @return static A new instance with the specified port.
-     * @throws \InvalidArgumentException for invalid ports.
+     * @throws InvalidArgumentException for invalid ports.
      */
     public function withPort($port)
     {
@@ -684,7 +686,7 @@ class Url implements UrlContract, UriInterface
      *
      * @param string $path The path to use with the new instance.
      * @return static A new instance with the specified path.
-     * @throws \InvalidArgumentException for invalid paths.
+     * @throws InvalidArgumentException for invalid paths.
      */
     public function withPath($path)
     {
@@ -696,7 +698,7 @@ class Url implements UrlContract, UriInterface
      *
      * @param string $query The query string to use with the new instance.
      * @return static A new instance with the specified query string.
-     * @throws \InvalidArgumentException for invalid query strings.
+     * @throws InvalidArgumentException for invalid query strings.
      */
     public function withQuery($query)
     {
@@ -775,8 +777,7 @@ class Url implements UrlContract, UriInterface
         if (!$this->scheme) {
             return false;
         }
-
-        return isset(static::$flatSchemes[$this->scheme]) && static::$flatSchemes[$this->scheme];
+        return static::isFlatScheme($this->scheme);
     }
 
     /**
@@ -842,7 +843,7 @@ class Url implements UrlContract, UriInterface
 
         $this->path->setSource($path);
 
-        $prefix = $hasLeadingSlash || $this->scheme ? '/' : '';
+        $prefix = $hasLeadingSlash || ($this->scheme && !static::isFlatScheme($this->scheme)) ? '/' : '';
         $suffix = $hasTrailingSlash ? '/' : '';
 
         $this->path->setPrefix($prefix);
@@ -939,5 +940,15 @@ class Url implements UrlContract, UriInterface
             $parsed['password'] = $parsed['pass'];
         }
         return $parsed;
+    }
+
+    /**
+     * @param string $scheme
+     *
+     * @return bool
+     */
+    protected static function isFlatScheme($scheme)
+    {
+        return isset(static::$flatSchemes[$scheme]) && static::$flatSchemes[$scheme];
     }
 }
