@@ -9,6 +9,8 @@ use Ems\Contracts\Core\Exceptions\Termination;
 use Ems\Contracts\Core\Input;
 use Ems\Contracts\Core\IO;
 use Ems\Contracts\Core\Response as ResponseContract;
+use Ems\Contracts\Core\Type;
+use Ems\Contracts\Routing\Exceptions\RouteNotFoundException;
 use Ems\Contracts\Routing\Routable;
 use Ems\Core\Application;
 use Ems\Core\Response;
@@ -62,7 +64,9 @@ class ErrorHandler
             return $this->render($e, $input);
         }
 
-        return $this->makeResponse('No Content.', $input, 204);
+        $shortClass = Type::short($e);
+
+        return $this->makeResponse("No Content ($shortClass)", $input, 500);
     }
 
     /**
@@ -143,6 +147,9 @@ class ErrorHandler
      */
     protected function shouldLogError(Exception $e, Input $input)
     {
+        if ($e instanceof RouteNotFoundException) {
+            return false;
+        }
         return $this->environment() == Application::PRODUCTION;
     }
 

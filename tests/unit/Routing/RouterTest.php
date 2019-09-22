@@ -304,7 +304,7 @@ class RouterTest extends TestCase
 
         $this->assertInstanceOf(Command::class, $command);
 
-        $firstArg = $command->arguments[0];
+        $firstArg = $command->arguments[1];
         $this->assertInstanceOf(Argument::class, $firstArg);
         $this->assertEquals('file', $firstArg->name);
         $this->assertEquals('Import this file (url)', $firstArg->description);
@@ -312,7 +312,7 @@ class RouterTest extends TestCase
         $this->assertNull($firstArg->default);
         $this->assertEquals('string', $firstArg->type);
 
-        $secondArg = $command->arguments[1];
+        $secondArg = $command->arguments[2];
         $this->assertInstanceOf(Argument::class, $secondArg);
         $this->assertEquals('email', $secondArg->name);
         $this->assertEquals('Send result to this email', $secondArg->description);

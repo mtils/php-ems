@@ -10,7 +10,6 @@ use Ems\Contracts\Core\Arrayable;
 use Ems\Contracts\Core\Map;
 use Ems\Core\Helper;
 use Ems\Core\Support\ObjectReadAccess;
-use ReflectionException;
 use function explode;
 use function is_array;
 use function substr;
@@ -31,6 +30,7 @@ use function trim;
  * @property-read mixed      handler The assigned (whatever) handler
  * @property-read Argument[] arguments The console arguments (./console config:get $argument1 $argument2)
  * @property-read Option[]   options The console options (./console assets:copy --option1 --option2=value
+ * @property-read string     description
  *
  * @package Ems\Contracts\Routing
  */
@@ -45,11 +45,19 @@ class Command implements Arrayable
         'pattern'      => '',
         'arguments'   => [],
         'options'   => [],
+        'description'  => '',
     ];
 
-    public function __construct($pattern)
+    /**
+     * Command constructor.
+     *
+     * @param string $pattern
+     * @param string $description
+     */
+    public function __construct($pattern, $description='')
     {
         $this->setPattern($pattern);
+        $this->description($description);
 
     }
 
@@ -60,7 +68,6 @@ class Command implements Arrayable
      * @param string $description (optional)
      *
      * @return $this
-     * @throws ReflectionException
      *
      * @example ./console import:run $file
      *
@@ -96,7 +103,6 @@ class Command implements Arrayable
      * @param string $shortcut (optional)
      *
      * @return $this
-     * @throws ReflectionException
      *
      * @example ./console queue:work
      *
@@ -121,6 +127,19 @@ class Command implements Arrayable
         }
 
         $this->_properties['options'][] = $signature;
+        return $this;
+    }
+
+    /**
+     * Set a description for the command.
+     *
+     * @param string $description
+     *
+     * @return $this
+     */
+    public function description($description)
+    {
+        $this->_properties['description'] = $description;
         return $this;
     }
 
@@ -156,7 +175,6 @@ class Command implements Arrayable
      * @param string $signature
      *
      * @return Argument
-     * @throws ReflectionException
      */
     protected function parseArgumentSignature($signature)
     {
@@ -197,8 +215,6 @@ class Command implements Arrayable
      * @param string $signature
      *
      * @return Option
-     *
-     * @throws ReflectionException
      */
     protected function parseOptionSignature($signature)
     {

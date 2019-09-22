@@ -144,18 +144,23 @@ class RouteCollector implements IteratorAggregate
     }
 
     /**
-     * @param $pattern
-     * @param $handler
+     * Create a console command.
+     *
+     * @param string $pattern
+     * @param mixed $handler
+     * @param string $description (optional)
      *
      * @return Command
      */
-    public function command($pattern, $handler)
+    public function command($pattern, $handler, $description='')
     {
-        $command = $this->newCommand($pattern);
+        $command = $this->newCommand($pattern, $description);
         $route = $this->on(Routable::CONSOLE, $pattern, $handler);
         $route->clientType(Routable::CLIENT_CONSOLE);
         $route->name($pattern);
         $route->command($command);
+        // The command is also the first argument
+        $command->argument('command', 'The command name that should be executed');
         return $command;
     }
 
@@ -194,12 +199,13 @@ class RouteCollector implements IteratorAggregate
 
     /**
      * @param string  $pattern
+     * @param string  $description (optional)
      *
      * @return Command
      */
-    protected function newCommand($pattern)
+    protected function newCommand($pattern, $description='')
     {
-        return new Command($pattern);
+        return new Command($pattern, $description);
     }
 
     protected function configureRouteByCommonAttributes(Route $route)

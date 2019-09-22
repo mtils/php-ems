@@ -5,6 +5,7 @@
 
 namespace Ems\Routing;
 
+use Ems\Console\ArgvInput;
 use Ems\Contracts\Core\Input as InputContract;
 use Ems\Core\Input;
 use Ems\Contracts\Core\InputHandler as InputHandlerContract;
@@ -110,6 +111,7 @@ class RoutedInputHandler implements InputHandlerContract, SupportsCustomFactory
         // Manually bind the current input to explicitly use the input of this
         // application call
         $handler->bind(InputContract::class, $input);
+        $handler->bind(ArgvInput::class, $input);
         $handler->bind(Input::class, $input);
     }
 }

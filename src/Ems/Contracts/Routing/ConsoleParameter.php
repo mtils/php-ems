@@ -66,8 +66,6 @@ abstract class ConsoleParameter implements Arrayable
      * @param array $data
      *
      * @return $this
-     *
-     * @throws ReflectionException
      */
     public function fill(array $data)
     {
@@ -82,9 +80,7 @@ abstract class ConsoleParameter implements Arrayable
 
     /**
      * @return array
-     *
-     * @throws ReflectionException
-     */
+     **/
     public function toArray()
     {
         $array = [];
@@ -95,9 +91,9 @@ abstract class ConsoleParameter implements Arrayable
     }
 
     /**
-     * @return string[]
+     * @noinspection PhpDocMissingThrowsInspection
      *
-     * @throws ReflectionException
+     * @return string[]
      */
     protected static function propertyNames()
     {
