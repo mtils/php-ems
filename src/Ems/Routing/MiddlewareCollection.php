@@ -8,15 +8,17 @@ namespace Ems\Routing;
 use ArrayIterator;
 use Closure;
 use Ems\Contracts\Core\Input;
-use Ems\Contracts\Core\Positioner;
 use Ems\Contracts\Core\Response;
 use Ems\Contracts\Routing\MiddlewareCollection as MiddlewareCollectionContract;
+use Ems\Contracts\Routing\MiddlewarePlacer;
 use Ems\Core\Collections\StringList;
 use Ems\Core\Exceptions\KeyNotFoundException;
+use Ems\Core\Lambda;
 use Ems\Core\Support\CustomFactorySupport;
 use ReflectionException;
 use Traversable;
 use function array_filter;
+use function array_merge;
 use function array_slice;
 use function func_get_args;
 use function is_array;
@@ -47,16 +49,6 @@ class MiddlewareCollection implements MiddlewareCollectionContract
     protected $after = [];
 
     /**
-     * @var Closure
-     */
-    protected $beforeAdder;
-
-    /**
-     * @var Closure
-     */
-    protected $afterAdder;
-
-    /**
      * MiddlewareCollection constructor.
      *
      * @param callable $instanceResolver (optional)
@@ -64,13 +56,6 @@ class MiddlewareCollection implements MiddlewareCollectionContract
     public function __construct(callable $instanceResolver=null)
     {
         $this->_customFactory = $instanceResolver;
-
-        $this->beforeAdder = function ($addThis, $before) {
-            $this->addBefore($before, $addThis);
-        };
-        $this->afterAdder = function ($addThis, $after) {
-            $this->addAfter($after, $addThis);
-        };
     }
 
     /**
@@ -99,13 +84,7 @@ class MiddlewareCollection implements MiddlewareCollectionContract
      */
     public function middleware($name)
     {
-        $middleware = $this->middlewares[$name];
-        if (!is_string($middleware)) {
-            return $middleware;
-        }
-        /** @var callable $middleware */
-        $middleware = $this->createObject($middleware);
-        return $middleware;
+        return $this->getOrCreateMiddleware($this->middlewares[$name]);
     }
 
 
@@ -116,7 +95,7 @@ class MiddlewareCollection implements MiddlewareCollectionContract
      * @param callable|string $middleware
      * @param string|array $parameters (optional)
      *
-     * @return Positioner
+     * @return MiddlewarePlacer
      */
     public function add($name, $middleware, $parameters = null)
     {
@@ -130,7 +109,22 @@ class MiddlewareCollection implements MiddlewareCollectionContract
         $parameters = is_array($parameters) ? $parameters : array_slice(func_get_args(),2);
         $this->parameters[$name] = $parameters;
 
-        return new Positioner($name, $this->beforeAdder, $this->afterAdder);
+        $handle = [
+            'name'          => $name,
+            'scopes'        => [],
+            'clientTypes'   => [],
+            'middleware'     => $middleware
+        ];
+
+        $placer = new MiddlewarePlacer(
+            $handle,
+            $this->beforeAdder(),
+            $this->afterAdder(),
+            $this->invoker(),
+            $this->replacer($name)
+        );
+
+        return $placer;
 
     }
 
@@ -375,31 +369,76 @@ class MiddlewareCollection implements MiddlewareCollectionContract
     }
 
     /**
+     * @return Closure
+     */
+    protected function beforeAdder()
+    {
+        return function ($addThis, $before) {
+            $this->addBefore($before, $addThis);
+        };
+    }
+
+    /**
+     * @return Closure
+     */
+    protected function afterAdder()
+    {
+        return function ($addThis, $before) {
+            $this->addAfter($before, $addThis);
+        };
+    }
+
+    /**
+     * @return Closure
+     */
+    protected function invoker()
+    {
+        return function ($middleware, $input, callable $next, ...$args) {
+            $middleware = $this->getOrCreateMiddleware($middleware);
+            return Lambda::callFast($middleware, array_merge([$input, $next], $args));
+        };
+    }
+
+    /**
+     * @param string $name
+     *
+     * @return Closure
+     */
+    protected function replacer($name)
+    {
+        return function (MiddlewarePlacer $placer) use ($name) {
+            if (!$this->middlewares[$name] instanceof MiddlewarePlacer) {
+                $this->middlewares[$name] = $placer;
+            }
+        };
+    }
+
+    /**
      * This is used by the Positioner.
      *
      * @param string $beforeThis
-     * @param string $addThat
+     * @param array $addThat
      */
-    protected function addBefore($beforeThis, $addThat)
+    protected function addBefore($beforeThis, array $addThat)
     {
         if (!isset($this->before[$beforeThis])) {
             $this->before[$beforeThis] = [];
         }
-        $this->before[$beforeThis][] = $addThat;
+        $this->before[$beforeThis][] = $addThat['name'];
     }
 
     /**
      * This is used by the Positioner.
      *
      * @param string $afterThis
-     * @param string $addThat
+     * @param array $addThat
      */
-    protected function addAfter($afterThis, $addThat)
+    protected function addAfter($afterThis, array $addThat)
     {
         if (!isset($this->after[$afterThis])) {
             $this->after[$afterThis] = [];
         }
-        $this->after[$afterThis][] = $addThat;
+        $this->after[$afterThis][] = $addThat['name'];
     }
 
     /**
@@ -410,5 +449,17 @@ class MiddlewareCollection implements MiddlewareCollectionContract
         if (!isset($this->middlewares[$name])) {
             throw new KeyNotFoundException("Middleware '$name' does not exist.");
         }
+    }
+
+    /**
+     * @param string|callable $middleware
+     *
+     * @return callable
+     *
+     * @throws ReflectionException
+     */
+    protected function getOrCreateMiddleware($middleware)
+    {
+        return is_string($middleware) ? $this->createObject($middleware) : $middleware;
     }
 }

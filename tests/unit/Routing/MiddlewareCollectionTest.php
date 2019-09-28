@@ -736,6 +736,124 @@ class MiddlewareCollectionTest extends TestCase
         $this->assertEquals($response[MiddlewareCollectionTest_AMiddleware::class.'(modifyResponse,3)'], ['modifyResponse',3]);
     }
 
+    /**
+     * @test
+     * @throws ReflectionException
+     */
+    public function invoke_with_selected_clientType_does_not_call_on_other_clientType()
+    {
+
+        $c = $this->make();
+        $c->add('a', MiddlewareCollectionTest_AMiddleware::class, 'a');
+        $c->add('b', MiddlewareCollectionTest_AMiddleware::class, 'b');
+        $c->add('c', MiddlewareCollectionTest_AMiddleware::class, 'c')->clientType('api');
+        $c->add('d', MiddlewareCollectionTest_AMiddleware::class, ['d', 4]);
+        $c->add('e', MiddlewareCollectionTest_AMiddleware::class, 'e');
+        $c->add('handle', MiddlewareCollectionTest_InputHandler::class);
+
+        /** @var Response $response */
+        $response = $c($this->makeInput());
+        $this->assertInstanceOf(Response::class, $response);
+        $input = $response->payload();
+
+        $this->assertEquals($input[MiddlewareCollectionTest_AMiddleware::class.'(a)'], ['a']);
+        $this->assertEquals($input[MiddlewareCollectionTest_AMiddleware::class.'(b)'], ['b']);
+
+        $this->assertEquals($input[MiddlewareCollectionTest_AMiddleware::class.'(d,4)'], ['d','4']);
+        $this->assertEquals($input[MiddlewareCollectionTest_AMiddleware::class.'(e)'], ['e']);
+        $this->assertEquals($input['handle'], 1);
+
+        $this->assertFalse(isset($input[MiddlewareCollectionTest_AMiddleware::class.'(c)']));
+    }
+
+    /**
+     * @test
+     * @throws ReflectionException
+     */
+    public function invoke_with_selected_clientType_call_on_matching_clientType()
+    {
+
+        $c = $this->make();
+        $c->add('a', MiddlewareCollectionTest_AMiddleware::class, 'a');
+        $c->add('b', MiddlewareCollectionTest_AMiddleware::class, 'b');
+        $c->add('c', MiddlewareCollectionTest_AMiddleware::class, 'c')->clientType('api');
+        $c->add('d', MiddlewareCollectionTest_AMiddleware::class, ['d', 4]);
+        $c->add('e', MiddlewareCollectionTest_AMiddleware::class, 'e');
+        $c->add('handle', MiddlewareCollectionTest_InputHandler::class);
+
+        /** @var Response $response */
+        $response = $c($this->makeInput('/foo', [], 'api'));
+        $this->assertInstanceOf(Response::class, $response);
+        $input = $response->payload();
+
+        $this->assertEquals($input[MiddlewareCollectionTest_AMiddleware::class.'(a)'], ['a']);
+        $this->assertEquals($input[MiddlewareCollectionTest_AMiddleware::class.'(b)'], ['b']);
+        $this->assertEquals($input[MiddlewareCollectionTest_AMiddleware::class.'(c)'], ['c']);
+        $this->assertEquals($input[MiddlewareCollectionTest_AMiddleware::class.'(d,4)'], ['d','4']);
+        $this->assertEquals($input[MiddlewareCollectionTest_AMiddleware::class.'(e)'], ['e']);
+        $this->assertEquals($input['handle'], 1);
+
+    }
+
+    /**
+     * @test
+     * @throws ReflectionException
+     */
+    public function invoke_with_selected_scope_does_not_call_on_other_scope()
+    {
+
+        $c = $this->make();
+        $c->add('a', MiddlewareCollectionTest_AMiddleware::class, 'a');
+        $c->add('b', MiddlewareCollectionTest_AMiddleware::class, 'b');
+        $c->add('c', MiddlewareCollectionTest_AMiddleware::class, 'c')->scope('admin');
+        $c->add('d', MiddlewareCollectionTest_AMiddleware::class, ['d', 4]);
+        $c->add('e', MiddlewareCollectionTest_AMiddleware::class, 'e');
+        $c->add('handle', MiddlewareCollectionTest_InputHandler::class);
+
+        /** @var Response $response */
+        $response = $c($this->makeInput());
+        $this->assertInstanceOf(Response::class, $response);
+        $input = $response->payload();
+
+        $this->assertEquals($input[MiddlewareCollectionTest_AMiddleware::class.'(a)'], ['a']);
+        $this->assertEquals($input[MiddlewareCollectionTest_AMiddleware::class.'(b)'], ['b']);
+
+        $this->assertEquals($input[MiddlewareCollectionTest_AMiddleware::class.'(d,4)'], ['d','4']);
+        $this->assertEquals($input[MiddlewareCollectionTest_AMiddleware::class.'(e)'], ['e']);
+        $this->assertEquals($input['handle'], 1);
+
+        $this->assertFalse(isset($input[MiddlewareCollectionTest_AMiddleware::class.'(c)']));
+    }
+
+    /**
+     * @test
+     * @throws ReflectionException
+     */
+    public function invoke_with_selected_scope_call_on_matching_scope()
+    {
+
+        $c = $this->make();
+        $c->add('a', MiddlewareCollectionTest_AMiddleware::class, 'a');
+        $c->add('b', MiddlewareCollectionTest_AMiddleware::class, 'b');
+        $c->add('c', MiddlewareCollectionTest_AMiddleware::class, 'c')->scope('admin');
+        $c->add('d', MiddlewareCollectionTest_AMiddleware::class, ['d', 4]);
+        $c->add('e', MiddlewareCollectionTest_AMiddleware::class, 'e');
+        $c->add('handle', MiddlewareCollectionTest_InputHandler::class);
+
+        /** @var Response $response */
+        $response = $c($this->makeInput('/foo', [], 'web')->setRouteScope('admin'));
+        $this->assertInstanceOf(Response::class, $response);
+        $input = $response->payload();
+
+        $this->assertEquals($input[MiddlewareCollectionTest_AMiddleware::class.'(a)'], ['a']);
+        $this->assertEquals($input[MiddlewareCollectionTest_AMiddleware::class.'(b)'], ['b']);
+        $this->assertEquals($input[MiddlewareCollectionTest_AMiddleware::class.'(c)'], ['c']);
+        $this->assertEquals($input[MiddlewareCollectionTest_AMiddleware::class.'(d,4)'], ['d','4']);
+        $this->assertEquals($input[MiddlewareCollectionTest_AMiddleware::class.'(e)'], ['e']);
+        $this->assertEquals($input['handle'], 1);
+
+    }
+
     protected function make(callable $instanceResolver=null)
     {
         return new MiddlewareCollection($instanceResolver);

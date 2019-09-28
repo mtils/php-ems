@@ -75,7 +75,7 @@ interface MiddlewareCollection extends InputHandler, ArrayData, Countable, Itera
      * @param callable|string|InputHandler  $middleware
      * @param string|array                  $parameters (optional)
      *
-     * @return Positioner
+     * @return MiddlewarePlacer
      */
     public function add($name, $middleware, $parameters=null);
 
