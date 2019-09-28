@@ -13,6 +13,7 @@ use Ems\Contracts\Routing\MiddlewareCollection as MiddlewareCollectionContract;
 use Ems\Contracts\Routing\Routable;
 use Ems\Contracts\Routing\Router as RouterContract;
 use Ems\Core\Skeleton\Bootstrapper;
+use Ems\Routing\ConsoleDispatcher;
 use Ems\Routing\FastRoute\FastRouteDispatcher;
 use Ems\Routing\InputHandler;
 use Ems\Routing\MiddlewareCollection;
@@ -39,6 +40,10 @@ class RoutingBootstrapper extends Bootstrapper
 
         $this->app->bind(Input::class, function () {
 
+        });
+
+        $this->app->afterResolving(ConsoleDispatcher::class, function (ConsoleDispatcher $dispatcher) {
+            $dispatcher->setFallbackCommand('commands');
         });
 
         $this->app->afterResolving(InputHandler::class, function (InputHandler $handler) {

@@ -18,6 +18,11 @@ class ConsoleDispatcher implements Dispatcher
     private $routesByPattern = [];
 
     /**
+     * @var string
+     */
+    private $fallbackCommand = '';
+
+    /**
      * Add a route (definition). Whatever you put into it as $handler you will
      * get returned in match.
      *
@@ -40,10 +45,21 @@ class ConsoleDispatcher implements Dispatcher
      */
     public function match($method, $uri)
     {
-        if (!isset($this->routesByPattern[$uri])) {
-            throw new RouteNotFoundException("No route did match $uri");
+
+        if (!$uri && $this->fallbackCommand) {
+            $uri = $this->fallbackCommand;
         }
-        return new RouteHit($method, $uri, $this->routesByPattern[$uri]);
+
+        if (isset($this->routesByPattern[$uri])) {
+            return new RouteHit($method, $uri, $this->routesByPattern[$uri]);
+        }
+
+        if (!$uri) {
+            throw new RouteNotFoundException("No uri (command) passed and no fallback command set.");
+        }
+
+        throw new RouteNotFoundException("No route did match $uri");
+
     }
 
     /**
@@ -81,5 +97,28 @@ class ConsoleDispatcher implements Dispatcher
     {
         RETURN $this->routesByPattern;
     }
+
+    /**
+     * @return string
+     */
+    public function getFallbackCommand()
+    {
+        return $this->fallbackCommand;
+    }
+
+    /**
+     * Set a command that will be executed if none was passed.
+     * (Something like your command list)
+     *
+     * @param string $fallbackCommand
+     *
+     * @return ConsoleDispatcher
+     */
+    public function setFallbackCommand($fallbackCommand)
+    {
+        $this->fallbackCommand = $fallbackCommand;
+        return $this;
+    }
+
 
 }

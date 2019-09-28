@@ -256,9 +256,9 @@ class Router implements RouterContract, SupportsCustomFactory
     {
         $this->interpreterFactory = $factory ?: function ($clientType) {
             if (in_array($clientType, [Routable::CLIENT_CONSOLE, Routable::CLIENT_TASK])) {
-                return new ConsoleDispatcher();
+                return $this->createObject(ConsoleDispatcher::class);
             }
-            return new FastRouteDispatcher();
+            return $this->createObject(FastRouteDispatcher::class);
         };
     }
 
