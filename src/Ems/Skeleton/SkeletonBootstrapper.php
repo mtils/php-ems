@@ -7,6 +7,9 @@ namespace Ems\Skeleton;
 
 
 use Ems\Console\ConsoleInputConnection;
+use Ems\Contracts\Core\ConnectionPool as ConnectionPoolContract;
+use Ems\Contracts\Core\InputConnection;
+use Ems\Contracts\Core\OutputConnection;
 use Ems\Contracts\Core\Url;
 use Ems\Core\Application;
 use Ems\Core\Connection\GlobalsHttpInputConnection;
@@ -21,6 +24,18 @@ class SkeletonBootstrapper extends Bootstrapper
 {
     public function bind()
     {
+        $this->app->bind(InputConnection::class, function () {
+            /** @var ConnectionPoolContract $connectionPool */
+            $connectionPool = $this->app->make(ConnectionPoolContract::class);
+            return $connectionPool->connection(ConnectionPool::STDIN);
+        });
+
+        $this->app->bind(OutputConnection::class, function () {
+            /** @var ConnectionPoolContract $connectionPool */
+            $connectionPool = $this->app->make(ConnectionPoolContract::class);
+            return $connectionPool->connection(ConnectionPool::STDOUT);
+        });
+
         $this->app->afterResolving(ConnectionPool::class, function ($pool) {
             $this->addConnections($pool);
         });
