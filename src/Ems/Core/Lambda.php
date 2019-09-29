@@ -709,6 +709,9 @@ class Lambda implements Stringable
      * a injected value is missing.
      * The typehint is removed to support protected methods.
      *
+     * You can pass an assoc array as the first parameter instead of a callable
+     * to pass already built reflected parameters.
+     *
      * @param callable|array $callable
      * @param array          $inject
      * @param array          $callArgs (optional)
@@ -721,7 +724,9 @@ class Lambda implements Stringable
     {
         $arguments = [];
 
-        foreach (static::reflect($callable) as $paramName=>$methodData) {
+        $reflection = is_array($callable) && !isset($callable[0]) ? $callable : static::reflect($callable);
+
+        foreach ($reflection as $paramName=>$methodData) {
             if (isset($inject[$paramName])) {
                 $arguments[] = $inject[$paramName];
                 continue;

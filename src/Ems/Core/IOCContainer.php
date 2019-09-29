@@ -6,10 +6,11 @@ use Ems\Contracts\Core\IOCContainer as ContainerContract;
 use Ems\Core\Support\IOCHelperMethods;
 use Ems\Core\Support\ResolvingListenerTrait;
 use InvalidArgumentException;
+use OutOfBoundsException;
 use ReflectionClass;
 use ReflectionException;
-use OutOfBoundsException;
 use ReflectionMethod;
+use function call_user_func;
 use function get_class;
 
 class IOCContainer implements ContainerContract
@@ -169,13 +170,49 @@ class IOCContainer implements ContainerContract
     /**
      * {@inheritdoc}
      *
+     * You can either pass numeric parameters to insert not injected params
+     * positional or pass an assoc array with $parameterName=>$value to manually
+     * inject a view parameters on your own.
+     * Passing BOTH (numeric and assoc arrays) is not supported.
+     *
      * @param callable $callback
      *
      * @return mixed The method result
-     **/
+     *
+     * @throws ReflectionException
+     */
     public function call($callback, array $parameters = [])
     {
-        return Lambda::callFast($callback, $parameters);
+
+        $argsReflection = Lambda::reflect($callback);
+        $args = [];
+
+        foreach ($argsReflection as $name=>$info) {
+
+            // If someone manually added the parameter by name just use that
+            if (isset($parameters[$name])) {
+                $args[$name] = $parameters[$name];
+                continue;
+            }
+
+            if (!$info['type']) {
+                continue;
+            }
+
+            if (!$info['optional']) {
+                $args[$name] = $this->make($info['type']);
+            }
+
+        }
+
+        // If no args were built and no or numeric parameters were passed
+        // Take the fast version
+        if (!$args && (isset($parameters[0]) || !$parameters)) {
+            return call_user_func($callback, ...$parameters);
+        }
+
+        $merged = Lambda::mergeArguments($argsReflection, $args, isset($parameters[0]) ? $parameters : []);
+        return Lambda::call($callback, $merged);
     }
 
     /**

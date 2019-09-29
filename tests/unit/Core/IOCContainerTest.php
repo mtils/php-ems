@@ -6,6 +6,7 @@ use stdClass;
 use Ems\Contracts\Core\IOCContainer as ContainerContract;
 use Ems\Contracts\Core\ContainerCallable;
 use Ems\Testing\LoggingCallable;
+use function func_get_args;
 
 class IOCContainerTest extends \Ems\TestCase
 {
@@ -416,6 +417,9 @@ class IOCContainerTest extends \Ems\TestCase
         $this->assertSame($class2Object, $result->class2Object);
     }
 
+    /**
+     * @throws \ReflectionException
+     */
     public function test_invoke_resolves_constructor_parameters_and_overwrites_with_all_named_parameters()
     {
         $container = $this->newContainer();
@@ -425,6 +429,7 @@ class IOCContainerTest extends \Ems\TestCase
 
         $classObject = $container(ContainerTest_Class::class);
         $class2Object = $container(ContainerTest_Class2::class);
+
 
         $result = $container($class, [
             'interface' => $interfaceImplementor,
@@ -448,6 +453,119 @@ class IOCContainerTest extends \Ems\TestCase
         $this->assertInstanceOf(ContainerTest_Class::class, $result);
     }
 
+    public function test_call_injects_dependencies()
+    {
+        $container = $this->newContainer();
+        $object1 = new ContainerTest_Class();
+
+        $container->instance(ContainerTest_Class::class, $object1);
+
+        $invoke = $container->make(ContainerTest_Class2::class);
+
+        $this->assertSame([$object1], $container->call([$invoke, 'need']));
+
+    }
+
+    public function test_call_injects_double_dependencies()
+    {
+        $container = $this->newContainer();
+        $object1 = new ContainerTest_Class();
+
+        $container->instance(ContainerTest_Class::class, $object1);
+
+        $invoke = $container->make(ContainerTest_Class2::class);
+
+        $this->assertSame([$object1, $object1], $container->call([$invoke, 'needDouble']));
+
+    }
+
+    public function test_call_injects_multiple_dependencies()
+    {
+        $container = $this->newContainer();
+        $object1 = new ContainerTest_Class();
+        $object2 = new ContainerTest_Class2();
+
+        $container->instance(ContainerTest_Class::class, $object1);
+        $container->instance(ContainerTest_Interface::class, $object2);
+
+        $invoke = $container->make(ContainerTest_Class2::class);
+
+        $result = $container->call([$invoke, 'needMany']);
+        $this->assertCount(2, $result);
+        $this->assertSame($object1, $result[0]);
+        $this->assertSame($object2, $result[1]);
+
+    }
+
+    public function test_call_injects_dependencies_and_parameters()
+    {
+        $container = $this->newContainer();
+        $object1 = new ContainerTest_Class();
+        $parameter = 12;
+
+        $container->instance(ContainerTest_Class::class, $object1);
+
+        $invoke = $container->make(ContainerTest_Class2::class);
+
+        $this->assertSame([$object1, $parameter], $container->call([$invoke, 'needParameter'], [$parameter]));
+
+    }
+
+    public function test_call_injects_multiple_dependencies_and_parameters()
+    {
+        $container = $this->newContainer();
+        $object1 = new ContainerTest_Class();
+        $object2 = new ContainerTest_Class2();
+        $parameter1 = 12;
+        $parameter2 = 88;
+
+        $container->instance(ContainerTest_Class::class, $object1);
+        $container->instance(ContainerTest_Interface::class, $object2);
+
+        $invoke = $container->make(ContainerTest_Class2::class);
+
+        $awaitedArgs = [$object1, $parameter1, $object2, $parameter2];
+        $this->assertSame($awaitedArgs, $container->call([$invoke, 'needManyParameters'], [$parameter1, $parameter2]));
+
+    }
+
+    public function test_call_injects_multiple_dependencies_and_parameters_in_different_order()
+    {
+        $container = $this->newContainer();
+        $object1 = new ContainerTest_Class();
+        $object2 = new ContainerTest_Class2();
+        $parameter1 = 12;
+        $parameter2 = 88;
+
+        $container->instance(ContainerTest_Class::class, $object1);
+        $container->instance(ContainerTest_Interface::class, $object2);
+
+        $invoke = $container->make(ContainerTest_Class2::class);
+
+        $awaitedArgs = [$parameter1, $object1, $parameter2, $object2];
+        $this->assertSame($awaitedArgs, $container->call([$invoke, 'needManyParametersReversed'], [$parameter1, $parameter2]));
+
+    }
+
+    public function test_call_takes_passed_parameters_and_not_injected()
+    {
+        $container = $this->newContainer();
+        $object1 = new ContainerTest_Class();
+        $object2 = new ContainerTest_Class2();
+        $object3 = new ContainerTest_Class();
+
+        $container->instance(ContainerTest_Class::class, $object1);
+        $container->instance(ContainerTest_Interface::class, $object2);
+
+        $invoke = $container->make(ContainerTest_Class2::class);
+
+        $result = $container->call([$invoke, 'needMany'], ['object2' => $object3]);
+        $this->assertCount(2, $result);
+        $this->assertSame($object1, $result[0]);
+        $this->assertSame($object3, $result[1]);
+
+    }
+
     protected function newContainer()
     {
         return new IOCContainer();
@@ -464,6 +582,35 @@ class ContainerTest_Class implements ContainerTest_Interface
 
 class ContainerTest_Class2 extends ContainerTest_Class
 {
+    public function need(ContainerTest_Class $object)
+    {
+        return func_get_args();
+    }
+
+    public function needDouble(ContainerTest_Class $object, ContainerTest_Class $object2)
+    {
+        return func_get_args();
+    }
+
+    public function needMany(ContainerTest_Class $object, ContainerTest_Interface $object2)
+    {
+        return func_get_args();
+    }
+
+    public function needParameter(ContainerTest_Class $object, $objectId)
+    {
+        return func_get_args();
+    }
+
+    public function needManyParameters(ContainerTest_Class $object, $objectId, ContainerTest_Interface $object2, $object2Id)
+    {
+        return func_get_args();
+    }
+
+    public function needManyParametersReversed($objectId, ContainerTest_Class $object, $object2Id, ContainerTest_Interface $object2)
+    {
+        return func_get_args();
+    }
 }
 
 class ContainerTest_ClassDependencies
@@ -489,3 +636,4 @@ class ContainerTest_ClassParameter
         $this->args = func_get_args();
     }
 }
+
