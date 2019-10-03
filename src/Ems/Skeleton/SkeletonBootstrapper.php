@@ -7,8 +7,10 @@ namespace Ems\Skeleton;
 
 
 use Ems\Console\ConsoleInputConnection;
+use Ems\Console\ConsoleOutputConnection;
 use Ems\Contracts\Core\ConnectionPool as ConnectionPoolContract;
 use Ems\Contracts\Core\InputConnection;
+use Ems\Contracts\Core\IO;
 use Ems\Contracts\Core\OutputConnection;
 use Ems\Contracts\Core\Url;
 use Ems\Core\Application;
@@ -18,7 +20,11 @@ use Ems\Core\ConnectionPool;
 use Ems\Core\Skeleton\Bootstrapper;
 use Ems\Core\Support\StreamLogger;
 use function file_exists;
+use function getenv;
+use function memory_get_peak_usage;
 use function php_sapi_name;
+use function register_shutdown_function;
+
 
 class SkeletonBootstrapper extends Bootstrapper
 {
@@ -39,6 +45,8 @@ class SkeletonBootstrapper extends Bootstrapper
         $this->app->afterResolving(ConnectionPool::class, function ($pool) {
             $this->addConnections($pool);
         });
+
+        $this->installBenchmarkPrinter();
     }
 
     protected function addConnections(ConnectionPool $pool)
@@ -49,17 +57,20 @@ class SkeletonBootstrapper extends Bootstrapper
             }
 
             if (php_sapi_name() == 'cli') {
-                return new ConsoleInputConnection();
+                return $this->app->make(ConsoleInputConnection::class);
             }
 
-            return new GlobalsHttpInputConnection();
+            return $this->app->make(GlobalsHttpInputConnection::class);
         });
 
         $pool->extend(ConnectionPool::STDOUT, function (Url $url) {
-            if ($url->equals(ConnectionPool::STDOUT)) {
-                return new StdOutputConnection();
+            if (!$url->equals(ConnectionPool::STDOUT)) {
+                return null;
             }
-            return null;
+            if (php_sapi_name() == 'cli') {
+                return $this->app->make(ConsoleOutputConnection::class);
+            }
+            return $this->app->make(StdOutputConnection::class);
         });
 
         $pool->extend(ConnectionPool::STDERR, function (Url $url) {
@@ -85,5 +96,25 @@ class SkeletonBootstrapper extends Bootstrapper
         }
 
         return new StreamLogger($logPath);
+    }
+
+    protected function installBenchmarkPrinter()
+    {
+        if(!getenv('EMS_BENCHMARK')) {
+            return;
+        }
+
+        register_shutdown_function(function () {
+            /** @var IO $io */
+            $io = $this->app->make(IO::class);
+            $usage = memory_get_peak_usage(true);
+            $usageOutput = $this->memoryFormat($usage);
+            $io->log()->debug("Usage: $usageOutput");
+        });
+    }
+
+    function memoryFormat($size) {
+        $unit=array('B','KB','MB','GB','TB','PB');
+        return @round($size/pow(1024,($i=floor(log($size,1024)))),2).' '.$unit[$i];
     }
 }

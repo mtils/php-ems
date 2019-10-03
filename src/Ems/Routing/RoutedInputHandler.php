@@ -7,13 +7,13 @@ namespace Ems\Routing;
 
 use Ems\Console\ArgvInput;
 use Ems\Contracts\Core\Input as InputContract;
-use Ems\Core\Input;
 use Ems\Contracts\Core\InputHandler as InputHandlerContract;
 use Ems\Contracts\Core\Response;
 use Ems\Contracts\Core\SupportsCustomFactory;
 use Ems\Contracts\Core\Type;
 use Ems\Contracts\Routing\Routable;
 use Ems\Core\Exceptions\UnConfiguredException;
+use Ems\Core\Input;
 use Ems\Core\Lambda;
 use Ems\Core\Response as CoreResponse;
 use Ems\Core\Support\CustomFactorySupport;
@@ -111,7 +111,9 @@ class RoutedInputHandler implements InputHandlerContract, SupportsCustomFactory
         // Manually bind the current input to explicitly use the input of this
         // application call
         $handler->bind(InputContract::class, $input);
-        $handler->bind(ArgvInput::class, $input);
         $handler->bind(Input::class, $input);
+        if ($input instanceof ArgvInput) {
+            $handler->bind(ArgvInput::class, $input);
+        }
     }
 }
