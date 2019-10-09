@@ -9,8 +9,10 @@ namespace Ems\Console;
 use Ems\Contracts\Core\Input;
 use Ems\Contracts\Core\InputConnection;
 use Ems\Contracts\Core\Url as UrlContract;
+use Ems\Contracts\Routing\Routable;
 use Ems\Core\Connection\AbstractConnection;
 use Ems\Core\Url;
+use function strpos;
 
 class ConsoleInputConnection extends AbstractConnection implements InputConnection
 {
@@ -68,7 +70,8 @@ class ConsoleInputConnection extends AbstractConnection implements InputConnecti
      */
     protected function createInput(array $argv)
     {
-        return new ArgvInput($argv);
+        $input = new ArgvInput($argv);
+        return $input->setMethod(Routable::CONSOLE);
     }
 
     /**
@@ -78,7 +81,17 @@ class ConsoleInputConnection extends AbstractConnection implements InputConnecti
      */
     protected function createUrl(array $argv)
     {
-        $command = isset($argv[1]) ? $argv[1] : '';
+        $command = '';
+
+        foreach ($argv as $i=>$arg) {
+            // Skip php filename and options
+            if ($i < 1 || strpos($arg, '-') === 0) {
+                continue;
+            }
+            $command = $arg;
+            break;
+        }
+
         return new Url("console:$command");
     }
 }

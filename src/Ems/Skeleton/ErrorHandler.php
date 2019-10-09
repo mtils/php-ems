@@ -5,18 +5,19 @@
 
 namespace Ems\Skeleton;
 
+use Ems\Console\ArgvInput;
+use Ems\Console\ConsoleOutputConnection;
 use Ems\Contracts\Core\Exceptions\Termination;
 use Ems\Contracts\Core\Input;
 use Ems\Contracts\Core\IO;
 use Ems\Contracts\Core\Response as ResponseContract;
 use Ems\Contracts\Core\Type;
 use Ems\Contracts\Routing\Exceptions\RouteNotFoundException;
-use Ems\Contracts\Routing\Routable;
 use Ems\Core\Application;
 use Ems\Core\Response;
 use Ems\Http\Response as HttpResponse;
 use Exception;
-use function in_array;
+use Psr\Log\LoggerInterface as LoggerInterfaceAlias;
 
 class ErrorHandler
 {
@@ -101,7 +102,28 @@ class ErrorHandler
      */
     protected function render(Exception $e, Input $input)
     {
+        if ($input instanceof ArgvInput) {
+            $this->renderConsoleException($e, $input);
+            return new Response('');
+        }
         return $this->makeResponse($e, $input);
+    }
+
+    /**
+     * @param Exception $e
+     * @param ArgvInput $input
+     */
+    protected function renderConsoleException(Exception $e, ArgvInput $input)
+    {
+        /** @var ConsoleOutputConnection $out */
+        $out = $this->app->make(ConsoleOutputConnection::class);
+        $out->line('<error>' . $e->getMessage() . '</error>');
+
+        if(!$input->wantsVerboseOutput()) {
+            return;
+        }
+
+        $out->write($e->getTraceAsString() . PHP_EOL);
     }
 
     /**
@@ -113,10 +135,6 @@ class ErrorHandler
      */
     protected function makeResponse($payload, Input $input, $status=500)
     {
-
-        if (in_array($input->method(), [Routable::CONSOLE, Routable::SCHEDULED])) {
-            return new Response($payload);
-        }
 
         $response = new HttpResponse();
 
@@ -169,7 +187,7 @@ class ErrorHandler
     }
 
     /**
-     * @return \Psr\Log\LoggerInterface
+     * @return LoggerInterfaceAlias
      */
     protected function logger()
     {

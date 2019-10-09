@@ -14,6 +14,7 @@ use Ems\Core\Exceptions\UnConfiguredException;
 use Ems\Core\Input;
 use LogicException;
 use function array_key_exists;
+use function strpos;
 
 class ArgvInput extends Input
 {
@@ -79,6 +80,22 @@ class ArgvInput extends Input
     {
         $this->parseIfNotParsed();
         return isset($this->options[$name]) ? $this->options[$name] : $default;
+    }
+
+    /**
+     * @return bool
+     */
+    public function wantsVerboseOutput()
+    {
+        foreach ($this->getArgv() as $value) {
+            if (strpos($value, '-v') === 0) {
+                return true;
+            }
+            if ($value === '--verbose') {
+                return true;
+            }
+        }
+        return false;
     }
 
     protected function parseIfNotParsed()
