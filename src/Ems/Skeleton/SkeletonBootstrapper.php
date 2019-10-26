@@ -8,7 +8,6 @@ namespace Ems\Skeleton;
 
 use Ems\Console\ConsoleInputConnection;
 use Ems\Console\ConsoleOutputConnection;
-use Ems\Contracts\Core\ConnectionPool as ConnectionPoolContract;
 use Ems\Contracts\Core\InputConnection;
 use Ems\Contracts\Core\IO;
 use Ems\Contracts\Core\OutputConnection;
@@ -31,16 +30,12 @@ class SkeletonBootstrapper extends Bootstrapper
     public function bind()
     {
         $this->app->bind(InputConnection::class, function () {
-            /** @var ConnectionPoolContract $connectionPool */
-            $connectionPool = $this->app->make(ConnectionPoolContract::class);
-            return $connectionPool->connection(ConnectionPool::STDIN);
-        });
+            return $this->createInputConnection();
+        }, true);
 
         $this->app->bind(OutputConnection::class, function () {
-            /** @var ConnectionPoolContract $connectionPool */
-            $connectionPool = $this->app->make(ConnectionPoolContract::class);
-            return $connectionPool->connection(ConnectionPool::STDOUT);
-        });
+            return $this->createOutputConnection();
+        }, true);
 
         $this->app->afterResolving(ConnectionPool::class, function ($pool) {
             $this->addConnections($pool);
@@ -49,28 +44,46 @@ class SkeletonBootstrapper extends Bootstrapper
         $this->installBenchmarkPrinter();
     }
 
+    /**
+     * @return InputConnection|object
+     */
+    protected function createInputConnection()
+    {
+        if (php_sapi_name() == 'cli') {
+            return $this->app->make(ConsoleInputConnection::class);
+        }
+
+        return $this->app->make(GlobalsHttpInputConnection::class);
+    }
+
+    /**
+     * @return OutputConnection|object
+     */
+    protected function createOutputConnection()
+    {
+        if (php_sapi_name() == 'cli') {
+            return $this->app->make(ConsoleOutputConnection::class);
+        }
+        return $this->app->make(StdOutputConnection::class);
+    }
+
+    /**
+     * @param ConnectionPool $pool
+     */
     protected function addConnections(ConnectionPool $pool)
     {
         $pool->extend(ConnectionPool::STDIN, function (Url $url) {
             if (!$url->equals(ConnectionPool::STDIN)) {
                 return null;
             }
-
-            if (php_sapi_name() == 'cli') {
-                return $this->app->make(ConsoleInputConnection::class);
-            }
-
-            return $this->app->make(GlobalsHttpInputConnection::class);
+            return $this->app->make(InputConnection::class);
         });
 
         $pool->extend(ConnectionPool::STDOUT, function (Url $url) {
             if (!$url->equals(ConnectionPool::STDOUT)) {
                 return null;
             }
-            if (php_sapi_name() == 'cli') {
-                return $this->app->make(ConsoleOutputConnection::class);
-            }
-            return $this->app->make(StdOutputConnection::class);
+            return $this->app->make(OutputConnection::class);
         });
 
         $pool->extend(ConnectionPool::STDERR, function (Url $url) {
@@ -81,6 +94,9 @@ class SkeletonBootstrapper extends Bootstrapper
         });
     }
 
+    /**
+     * @return StreamLogger
+     */
     protected function createLogger()
     {
         /** @var Application $app */
@@ -113,8 +129,9 @@ class SkeletonBootstrapper extends Bootstrapper
         });
     }
 
-    function memoryFormat($size) {
-        $unit=array('B','KB','MB','GB','TB','PB');
-        return @round($size/pow(1024,($i=floor(log($size,1024)))),2).' '.$unit[$i];
+    protected function memoryFormat($size)
+    {
+        $unit=['B','KB','MB','GB','TB','PB'];
+        return @round($size/pow(1024,($i=floor(log($size,1024)))),2).' '.$unit[(int)$i];
     }
 }
