@@ -18,11 +18,14 @@ use Ems\Core\Connection\StdOutputConnection;
 use Ems\Core\ConnectionPool;
 use Ems\Core\Skeleton\Bootstrapper;
 use Ems\Core\Support\StreamLogger;
+use Ems\Testing\Benchmark;
+use function defined;
 use function file_exists;
 use function getenv;
 use function memory_get_peak_usage;
 use function php_sapi_name;
 use function register_shutdown_function;
+use const APPLICATION_START;
 
 
 class SkeletonBootstrapper extends Bootstrapper
@@ -120,18 +123,16 @@ class SkeletonBootstrapper extends Bootstrapper
             return;
         }
 
+        if (defined('APPLICATION_START')) {
+            Benchmark::raw(['name' => 'Application Start', 'time' => APPLICATION_START]);
+        }
+
         register_shutdown_function(function () {
             /** @var IO $io */
             $io = $this->app->make(IO::class);
-            $usage = memory_get_peak_usage(true);
-            $usageOutput = $this->memoryFormat($usage);
+            $usageOutput = Benchmark::memoryFormat(memory_get_peak_usage(true));
             $io->log()->debug("Usage: $usageOutput");
         });
     }
 
-    protected function memoryFormat($size)
-    {
-        $unit=['B','KB','MB','GB','TB','PB'];
-        return @round($size/pow(1024,($i=floor(log($size,1024)))),2).' '.$unit[(int)$i];
-    }
 }
