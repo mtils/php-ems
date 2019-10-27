@@ -6,6 +6,7 @@
 namespace Ems\Routing;
 
 use Ems\Console\ArgvInput;
+use Ems\Contracts\Core\HasMethodHooks;
 use Ems\Contracts\Core\Input as InputContract;
 use Ems\Contracts\Core\InputHandler as InputHandlerContract;
 use Ems\Contracts\Core\Response;
@@ -15,6 +16,7 @@ use Ems\Contracts\Routing\Routable;
 use Ems\Core\Exceptions\UnConfiguredException;
 use Ems\Core\Input;
 use Ems\Core\Lambda;
+use Ems\Core\Patterns\HookableTrait;
 use Ems\Core\Response as CoreResponse;
 use Ems\Core\Support\CustomFactorySupport;
 use Ems\Http\Response as HttpResponse;
@@ -29,9 +31,10 @@ use function is_callable;
  *
  * @package Ems\Routing
  */
-class RoutedInputHandler implements InputHandlerContract, SupportsCustomFactory
+class RoutedInputHandler implements InputHandlerContract, SupportsCustomFactory, HasMethodHooks
 {
     use CustomFactorySupport;
+    use HookableTrait;
 
     public function __construct(callable $customFactory=null)
     {
@@ -61,9 +64,26 @@ class RoutedInputHandler implements InputHandlerContract, SupportsCustomFactory
             $this->configureLambda($handler, $input);
         }
 
-        return $this->respond($input, $this->call($handler, $input));
+        $this->callBeforeListeners('call', [$handler, $input]);
+
+        $response = $this->respond($input, $this->call($handler, $input));
+
+        $this->callAfterListeners('call', [$handler, $input, $response]);
+
+        return $response;
 
     }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @return array
+     **/
+    public function methodHooks()
+    {
+        return ['call'];
+    }
+
 
     /**
      * Call the handler.

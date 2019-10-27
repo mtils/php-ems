@@ -9,7 +9,6 @@ namespace Ems\Skeleton;
 use Ems\Console\ConsoleInputConnection;
 use Ems\Console\ConsoleOutputConnection;
 use Ems\Contracts\Core\InputConnection;
-use Ems\Contracts\Core\IO;
 use Ems\Contracts\Core\OutputConnection;
 use Ems\Contracts\Core\Url;
 use Ems\Core\Application;
@@ -18,13 +17,12 @@ use Ems\Core\Connection\StdOutputConnection;
 use Ems\Core\ConnectionPool;
 use Ems\Core\Skeleton\Bootstrapper;
 use Ems\Core\Support\StreamLogger;
+use Ems\Routing\RoutedInputHandler;
 use Ems\Testing\Benchmark;
 use function defined;
 use function file_exists;
 use function getenv;
-use function memory_get_peak_usage;
 use function php_sapi_name;
-use function register_shutdown_function;
 use const APPLICATION_START;
 
 
@@ -127,11 +125,19 @@ class SkeletonBootstrapper extends Bootstrapper
             Benchmark::raw(['name' => 'Application Start', 'time' => APPLICATION_START]);
         }
 
-        register_shutdown_function(function () {
-            /** @var IO $io */
-            $io = $this->app->make(IO::class);
-            $usageOutput = Benchmark::memoryFormat(memory_get_peak_usage(true));
-            $io->log()->debug("Usage: $usageOutput");
+        /** @var Application $app */
+        $app = $this->app->make('app');
+        $app->onAfter('boot', function() {
+            Benchmark::mark('Booted');
+        });
+
+        $this->app->afterResolving(RoutedInputHandler::class, function (RoutedInputHandler $handler) {
+            $handler->onBefore('call', function () {
+                Benchmark::mark('Routed');
+            });
+            $handler->onAfter('call', function () {
+                Benchmark::mark('Performed');
+            });
         });
     }
 
