@@ -2,8 +2,9 @@
 
 namespace Ems\Core\Skeleton;
 
-use Ems\Contracts\Core\ConnectionPool as ConnectionPoolContract;
 use Ems\Contracts\Core\Checker as CheckerContract;
+use Ems\Contracts\Core\ConnectionPool as ConnectionPoolContract;
+use Ems\Contracts\Core\EntityManager as EntityManagerContract;
 use Ems\Contracts\Core\Extractor as ExtractorContract;
 use Ems\Contracts\Core\Filesystem;
 use Ems\Contracts\Core\Formatter as FormatterContract;
@@ -20,13 +21,16 @@ use Ems\Contracts\Core\TextFormatter as TextFormatterContract;
 use Ems\Contracts\Core\TextParser;
 use Ems\Contracts\Core\TextProvider;
 use Ems\Contracts\Core\Url as UrlContract;
+use Ems\Core\AnythingProvider;
 use Ems\Core\Application;
 use Ems\Core\ArrayLocalizer;
 use Ems\Core\ArrayProvider;
 use Ems\Core\ArrayTextProvider;
 use Ems\Core\Checker;
+use Ems\Core\ConnectionPool;
 use Ems\Core\EntityManager;
 use Ems\Core\Extractor;
+use Ems\Core\FilesystemConnection;
 use Ems\Core\Formatter;
 use Ems\Core\InputCaster;
 use Ems\Core\InputCorrector;
@@ -34,23 +38,18 @@ use Ems\Core\LocalFilesystem;
 use Ems\Core\ManualMimeTypeProvider;
 use Ems\Core\PathFinder;
 use Ems\Core\Storages\NestedFileStorage;
-use Ems\Core\TextFormatter;
-use Ems\Core\StringConverterChain;
-use Ems\Core\StringConverter\MBStringConverter;
-use Ems\Core\StringConverter\IconvStringConverter;
 use Ems\Core\StringConverter\AsciiStringConverter;
+use Ems\Core\StringConverter\IconvStringConverter;
+use Ems\Core\StringConverter\MBStringConverter;
+use Ems\Core\StringConverterChain;
 use Ems\Core\Support\RendererChain;
+use Ems\Core\TextFormatter;
 use Ems\Core\TextParserQueue;
 use Ems\Core\Url;
 use Ems\Core\VariablesTextParser;
-use Ems\Core\AnythingProvider;
-use Ems\Core\ConnectionPool;
-use Ems\Core\FilesystemConnection;
 use Ems\Expression\Matcher;
 use ReflectionClass;
 use ReflectionMethod;
-use Ems\Contracts\Core\EntityManager as EntityManagerContract;
-use Ems\Contracts\Core\IO;
 
 class CoreBootstrapper extends Bootstrapper
 {
@@ -83,9 +82,7 @@ class CoreBootstrapper extends Bootstrapper
         'Ems\Core\AppPath' => 'Ems\Contracts\Core\AppPath',
     ];
 
-    protected $aliases = [
-        IO::class => [ConnectionPool::class]
-    ];
+    protected $aliases = [];
 
     /**
      * @var Url

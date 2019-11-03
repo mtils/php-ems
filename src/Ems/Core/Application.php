@@ -4,13 +4,18 @@ namespace Ems\Core;
 
 use ArrayAccess;
 use Ems\Contracts\Core\HasMethodHooks;
+use Ems\Contracts\Core\Input;
+use Ems\Contracts\Core\InputConnection;
 use Ems\Contracts\Core\IOCContainer as ContainerContract;
+use Ems\Contracts\Core\OutputConnection;
+use Ems\Contracts\Core\Stringable;
 use Ems\Core\Exceptions\KeyNotFoundException;
 use Ems\Core\Exceptions\UnsupportedUsageException;
 use Ems\Core\Support\IOCContainerProxyTrait;
 use Ems\Core\Patterns\HookableTrait;
 use Ems\Contracts\Core\Url as UrlContract;
 use Ems\Contracts\Core\Type;
+use Psr\Log\LoggerInterface;
 
 /**
  * This application is a minimal version optimized
@@ -456,6 +461,52 @@ class Application implements ContainerContract, HasMethodHooks
     }
     //</editor-fold>
 
+    //<editor-fold desc="IO Shortcuts">
+
+    /**
+     * This is a shortcut to read from the input connection
+     *
+     * @param callable|null $into
+     *
+     * @return Input
+     *
+     * @see InputConnection::read()
+     */
+    public function read(callable $into=null)
+    {
+        return $this->container->make(InputConnection::class)->read($into);
+    }
+
+    /**
+     * This is a shortcut to write to stdout (echo)
+     *
+     * @param string|Stringable $output
+     * @param bool $lock
+     *
+     * @return mixed
+     *
+     * @see OutputConnection::write()
+     */
+    public function write($output, $lock=false)
+    {
+        return $this->container->make(OutputConnection::class)->write($output, $lock);
+    }
+
+    /**
+     * Logs an entry.
+     *
+     * @param string $level
+     * @param string $message
+     * @param array  $context (optional)
+     *
+     * @see LoggerInterface
+     */
+    public function log($level, $message, array $context = [])
+    {
+        $this->container->make(LoggerInterface::class)->log($level, $message, $context);
+    }
+    //</editor-fold>
+
     //<editor-fold desc="Static Helpers">
     /**
      * This is a static alias to the make (or __invoke) method of the
@@ -515,7 +566,6 @@ class Application implements ContainerContract, HasMethodHooks
         $concrete = static::get($name);
         return $arguments ? $concrete(...$arguments) : $concrete;
     }
-    //</editor-fold>
 
     /**
      * Alias for $this->path()
@@ -543,6 +593,7 @@ class Application implements ContainerContract, HasMethodHooks
     {
         return static::$staticInstance->config($key, $default);
     }
+    //</editor-fold>
 
     /**
      * Splits the name and path of a path query.

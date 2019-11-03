@@ -9,15 +9,14 @@ use Ems\Console\ArgvInput;
 use Ems\Console\ConsoleOutputConnection;
 use Ems\Contracts\Core\Exceptions\Termination;
 use Ems\Contracts\Core\Input;
-use Ems\Contracts\Core\IO;
 use Ems\Contracts\Core\Response as ResponseContract;
 use Ems\Contracts\Core\Type;
 use Ems\Contracts\Routing\Exceptions\RouteNotFoundException;
 use Ems\Core\Application;
 use Ems\Core\Response;
 use Ems\Http\Response as HttpResponse;
-use Exception;
 use Psr\Log\LoggerInterface as LoggerInterfaceAlias;
+use Throwable;
 
 class ErrorHandler
 {
@@ -46,13 +45,14 @@ class ErrorHandler
     /**
      * Handle the input.
      *
-     * @param Exception $e
+     * @param Throwable $e
      * @param Input $input
      *
      * @return ResponseContract
      */
-    public function handle(Exception $e, Input $input)
+    public function handle(Throwable $e, Input $input)
     {
+
         if ($this->isIgnored($e)) {
             return $this->makeResponse('', $input, 204);
         }
@@ -73,21 +73,21 @@ class ErrorHandler
     /**
      * Use it as an input handler exception handler.
      *
-     * @param Exception $e
+     * @param Throwable $e
      * @param Input     $input
      *
      * @return ResponseContract
      */
-    public function __invoke(Exception $e, Input $input)
+    public function __invoke(Throwable $e, Input $input)
     {
         return $this->handle($e, $input);
     }
 
     /**
-     * @param Exception $e
+     * @param Throwable $e
      * @param Input     $input
      */
-    protected function log(Exception $e, Input $input)
+    protected function log(Throwable $e, Input $input)
     {
         $this->logger()->error($e);
     }
@@ -95,12 +95,12 @@ class ErrorHandler
     /**
      * Make a nice presentation of $e.
      *
-     * @param Exception $e
+     * @param Throwable $e
      * @param Input     $input
      *
      * @return ResponseContract
      */
-    protected function render(Exception $e, Input $input)
+    protected function render(Throwable $e, Input $input)
     {
         if ($input instanceof ArgvInput) {
             $this->renderConsoleException($e, $input);
@@ -110,10 +110,10 @@ class ErrorHandler
     }
 
     /**
-     * @param Exception $e
+     * @param Throwable $e
      * @param ArgvInput $input
      */
-    protected function renderConsoleException(Exception $e, ArgvInput $input)
+    protected function renderConsoleException(Throwable $e, ArgvInput $input)
     {
         /** @var ConsoleOutputConnection $out */
         $out = $this->app->make(ConsoleOutputConnection::class);
@@ -147,11 +147,11 @@ class ErrorHandler
     /**
      * Overwrite this method to control error display
      *
-     * @param Exception $e
+     * @param Throwable $e
      * @param Input     $input
      * @return bool
      */
-    protected function shouldDisplayError(Exception $e, Input $input)
+    protected function shouldDisplayError(Throwable $e, Input $input)
     {
         return $this->environment() != Application::PRODUCTION;
     }
@@ -159,11 +159,11 @@ class ErrorHandler
     /**
      * Overwrite this method to control error logging
      *
-     * @param Exception $e
+     * @param Throwable $e
      * @param Input     $input
      * @return bool
      */
-    protected function shouldLogError(Exception $e, Input $input)
+    protected function shouldLogError(Throwable $e, Input $input)
     {
         if ($e instanceof RouteNotFoundException) {
             return false;
@@ -172,11 +172,11 @@ class ErrorHandler
     }
 
     /**
-     * @param Exception $e
+     * @param Throwable $e
      *
      * @return bool
      */
-    protected function isIgnored(Exception $e)
+    protected function isIgnored(Throwable $e)
     {
         foreach ($this->ignored as $abstract) {
             if ($e instanceof $abstract) {
@@ -191,9 +191,9 @@ class ErrorHandler
      */
     protected function logger()
     {
-        /** @var IO $io */
-        $io = $this->app->make(IO::class);
-        return $io->log();
+        /** @var LoggerInterfaceAlias $logger **/
+        $logger = $this->app->make(LoggerInterfaceAlias::class);
+        return $logger;
     }
 
     /**

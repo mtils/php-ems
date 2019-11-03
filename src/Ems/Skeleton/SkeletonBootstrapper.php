@@ -19,6 +19,7 @@ use Ems\Core\Skeleton\Bootstrapper;
 use Ems\Core\Support\StreamLogger;
 use Ems\Routing\RoutedInputHandler;
 use Ems\Testing\Benchmark;
+use Psr\Log\LoggerInterface;
 use function defined;
 use function file_exists;
 use function getenv;
@@ -28,6 +29,10 @@ use const APPLICATION_START;
 
 class SkeletonBootstrapper extends Bootstrapper
 {
+    protected $aliases = [
+        LoggerInterface::class => [StreamLogger::class]
+    ];
+
     public function bind()
     {
         $this->app->bind(InputConnection::class, function () {
@@ -36,6 +41,10 @@ class SkeletonBootstrapper extends Bootstrapper
 
         $this->app->bind(OutputConnection::class, function () {
             return $this->createOutputConnection();
+        }, true);
+
+        $this->app->bind(LoggerInterface::class, function () {
+            return $this->createLogger();
         }, true);
 
         $this->app->afterResolving(ConnectionPool::class, function ($pool) {
@@ -89,7 +98,7 @@ class SkeletonBootstrapper extends Bootstrapper
 
         $pool->extend(ConnectionPool::STDERR, function (Url $url) {
             if ($url->equals(ConnectionPool::STDERR)) {
-                return $this->createLogger();
+                return $this->app->make(StreamLogger::class);
             }
             return null;
         });
@@ -102,11 +111,12 @@ class SkeletonBootstrapper extends Bootstrapper
     {
         /** @var Application $app */
         $app = $this->app->make('app');
+
         if ($app->environment() != 'production') {
             return new StreamLogger('php://stdout');
         }
 
-        $logPath = $this->app->make('app')->path('local/log/app.log');
+        $logPath = $app->path('local/log/app.log');
 
         if (!file_exists($logPath)) {
             return new StreamLogger('php://stderr');

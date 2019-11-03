@@ -6,10 +6,16 @@
 namespace unit\Core\Support;
 
 
+use Ems\Contracts\Core\Chatty;
+use Ems\Contracts\Core\Stream;
 use Ems\Core\Filesystem\StringStream;
+use Ems\Core\Support\ChattySupport;
 use Ems\Core\Support\StreamLogger;
+use Ems\Core\Url;
 use Ems\TestCase;
 use Psr\Log\LoggerInterface;
+use stdClass;
+use function strtolower;
 
 class StreamLoggerTest extends TestCase
 {
@@ -143,8 +149,106 @@ class StreamLoggerTest extends TestCase
 
     }
 
+    /**
+     * @test
+     */
+    public function it_forwards_write_to_stream()
+    {
+        $stream = $this->mock(Stream::class);
+        $output = 'foo';
+        $stream->shouldReceive('write')->with($output)->andReturn('bar');
+        $logger = $this->make($stream);
+        $this->assertEquals('bar', $logger->write($output));
+    }
+
+    /**
+     * @test
+     */
+    public function it_forwards_url_to_stream()
+    {
+        $stream = $this->mock(Stream::class);
+        $url = new Url('https://foo.org');
+        $stream->shouldReceive('url')->andReturn($url);
+        $logger = $this->make($stream);
+        $this->assertSame($url, $logger->url());
+    }
+
+    /**
+     * @test
+     */
+    public function it_forwards_isOpen_to_stream()
+    {
+        $stream = $this->mock(Stream::class);
+        $url = new Url('https://foo.org');
+        $stream->shouldReceive('isOpen')->andReturn(true);
+        $logger = $this->make($stream);
+        $this->assertTrue($logger->isOpen());
+    }
+
+    /**
+     * @test
+     */
+    public function it_forwards_open_to_stream()
+    {
+        $stream = $this->mock(Stream::class);
+        $stream->shouldReceive('open')->once()->andReturn($stream);
+        $logger = $this->make($stream);
+        $this->assertSame($logger, $logger->open());
+    }
+
+    /**
+     * @test
+     */
+    public function it_forwards_close_to_stream()
+    {
+        $stream = $this->mock(Stream::class);
+        $stream->shouldReceive('close')->once()->andReturn($stream);
+        $logger = $this->make($stream);
+        $this->assertSame($logger, $logger->close());
+    }
+
+    /**
+     * @test
+     */
+    public function it_forwards_resource_to_stream()
+    {
+        $resource = new stdClass();
+        $stream = $this->mock(Stream::class);
+        $stream->shouldReceive('resource')->andReturn($resource);
+        $logger = $this->make($stream);
+        $this->assertSame($resource, $logger->resource());
+    }
+
+    /**
+     * @test
+     */
+    public function it_forwards_chatty_to_log()
+    {
+        $string = '';
+        $stream = new StringStream($string);
+        $logger = $this->make($stream);
+
+        $chatty = new StreamLoggerTest_Chatty();
+        $logger->forward($chatty);
+
+        $chatty->trigger('Hello', Chatty::INFO);
+
+        $this->assertContains('hello', strtolower($stream));
+
+    }
+
     protected function make($target='php://temp')
     {
         return new StreamLogger($target);
+    }
+}
+
+class StreamLoggerTest_Chatty implements Chatty
+{
+    use ChattySupport;
+
+    public function trigger($message, $level=Chatty::INFO)
+    {
+        $this->emitMessage($message, $level);
     }
 }

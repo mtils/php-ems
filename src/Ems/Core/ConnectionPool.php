@@ -8,26 +8,18 @@
 
 namespace Ems\Core;
 
-use Ems\Contracts\Core\ConnectionPool as ConnectionPoolContract;
 use Ems\Contracts\Core\Connection;
-use Ems\Contracts\Core\Exceptions\TypeException;
-use Ems\Contracts\Core\InputConnection;
-use Ems\Contracts\Core\IO;
-use Ems\Contracts\Core\OutputConnection;
-use Ems\Contracts\Core\Type;
+use Ems\Contracts\Core\ConnectionPool as ConnectionPoolContract;
 use Ems\Contracts\Core\Url as UrlContract;
 use Ems\Core\Exceptions\HandlerNotFoundException;
 use Ems\Core\Patterns\ExtendableTrait;
-use Psr\Log\LoggerInterface;
-use UnexpectedValueException;
 
-class ConnectionPool implements ConnectionPoolContract, IO
+class ConnectionPool implements ConnectionPoolContract
 {
     use ExtendableTrait;
 
     /**
-     * PHP does not always define the constants STDIN, STDOUT and STDERR, so
-     * here are they it manually
+     * PHP does not always define the constants STDIN, STDOUT and STDERR.
      */
     const STDIN = 'stdin';
 
@@ -44,16 +36,6 @@ class ConnectionPool implements ConnectionPoolContract, IO
      * @var array
      **/
     protected $connections = [];
-
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger;
-
-    /**
-     * @var callable
-     */
-    protected $logExtension;
 
     /**
      * {@inheritdoc}
@@ -89,67 +71,6 @@ class ConnectionPool implements ConnectionPoolContract, IO
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * @return InputConnection
-     */
-    public function in()
-    {
-        if (isset($this->connections[static::STDIN])) {
-            return $this->connections[static::STDIN];
-        }
-        $connection = $this->connection(static::STDIN);
-        if (!$connection instanceof InputConnection) {
-            throw new UnexpectedValueException('The handler for stdin must return an instance of InputConnection not ' . Type::of($connection));
-        }
-        return $connection;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @return OutputConnection
-     */
-    public function out()
-    {
-        if (isset($this->connections[static::STDOUT])) {
-            return $this->connections[static::STDOUT];
-        }
-        $connection = $this->connection(static::STDOUT);
-        if (!$connection instanceof OutputConnection) {
-            throw new UnexpectedValueException('The handler for stdout must return an instance of OutputConnection not ' . Type::of($connection));
-        }
-        return $connection;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @return LoggerInterface
-     */
-    public function log()
-    {
-        if ($this->logger) {
-            return $this->logger;
-        }
-
-        if (!$this->logExtension) {
-            throw new HandlerNotFoundException("No stderr extension was assigned");
-        }
-
-        $logger = Lambda::callFast($this->logExtension, [new Url(static::STDERR)]);
-
-        if (!$logger instanceof LoggerInterface) {
-            throw new TypeException('Logger has to be instanceof LoggerInterface not ' . Type::of($logger));
-        }
-
-        $this->logger = $logger;
-
-        return $this->logger;
-    }
-
-
-    /**
      * {@inheritdoc}
      *
      * @return string
@@ -171,25 +92,5 @@ class ConnectionPool implements ConnectionPoolContract, IO
         $this->defaultConnectionName = $name;
         return $this;
     }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @param string $name
-     * @param callable $callable
-     *
-     * @return self
-     **/
-    public function extend($name, callable $callable)
-    {
-        if ($name == static::STDERR) {
-            $this->logExtension = $callable;
-            $this->logger = null;
-            return $this;
-        }
-        $this->_extensions[$name] = $callable;
-        return $this;
-    }
-
 
 }
