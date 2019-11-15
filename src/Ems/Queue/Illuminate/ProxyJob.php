@@ -7,13 +7,13 @@ namespace Ems\Queue\Illuminate;
 
 
 use Ems\Contracts\Core\IOCContainer;
-use Ems\Contracts\Core\Type;
 use Ems\Core\Lambda;
 use Ems\Queue\ArgumentSerializer;
-use function func_get_args;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\Jobs\Job as NativeJob;
 use ReflectionException;
 use UnderflowException;
+use function method_exists;
 
 class ProxyJob implements ShouldQueue
 {
@@ -42,7 +42,7 @@ class ProxyJob implements ShouldQueue
     /**
      * Perform the serialized operation.
      *
-     * @param object $nativeJob
+     * @param NativeJob $nativeJob
      * @param array $data
      *
      * @return mixed
@@ -59,7 +59,11 @@ class ProxyJob implements ShouldQueue
         $arguments = isset($data['arguments']) ? $this->decodeArguments($data['arguments']) : [];
         $lambda = new Lambda($data['operation'], $this->ioc);
 
-        return $this->ioc->call($lambda->getCallable(), $arguments);
+        $result = $this->ioc->call($lambda->getCallable(), $arguments);
+        if (method_exists($nativeJob, 'delete')) {
+            $nativeJob->delete();
+        }
+        return $result;
 
     }
 

@@ -10,12 +10,10 @@ use Ems\Contracts\Queue\Driver;
 use Ems\Contracts\Queue\Job;
 use Ems\Contracts\Queue\Queue;
 use Ems\Core\Lambda;
+use Ems\Queue\ArgumentSerializer;
+use Ems\Queue\Queue as QueueObject;
 use Illuminate\Contracts\Queue\Factory as IlluminateQueueFactory;
 use Illuminate\Contracts\Queue\Queue as IlluminateQueue;
-use Illuminate\Queue\Jobs\Job as IlluminateJob;
-use Ems\Queue\ArgumentSerializer;
-use function is_array;
-use function json_decode;
 
 class QueueDriver implements Driver
 {
@@ -56,6 +54,8 @@ class QueueDriver implements Driver
      * @param string $queueName (optional)
      *
      * @return string (The Job state)
+     *
+     * @throws \ReflectionException
      */
     public function push(Job $job, $queueName = '')
     {
@@ -66,7 +66,11 @@ class QueueDriver implements Driver
         $data['operation'] = $operation;
         $data['arguments'] = $this->serializer->encode($arguments);
 
-         $queue->push(ProxyJob::class, $data,  $queueName ?: null);
+        if (!$queueName || $queueName == QueueObject::$defaultChannel) {
+            $queueName = null;
+        }
+
+        $queue->push(ProxyJob::class, $data,  $queueName);
 
         return Queue::QUEUED;
     }

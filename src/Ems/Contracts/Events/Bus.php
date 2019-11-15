@@ -2,6 +2,7 @@
 
 namespace Ems\Contracts\Events;
 
+use Ems\Contracts\Core\HasListeners;
 use Ems\Contracts\Core\Hookable;
 use Ems\Contracts\Core\Subscribable;
 
@@ -10,7 +11,7 @@ use Ems\Contracts\Core\Subscribable;
  * via a fire method.
  * The EMS Event Bus has no listen priority, listen onBefore, on or
  * onAfter. These are 3 priorities, what makes this class much simpler and the
- * usage of it (a least for me) more ovbious while using the bus.
+ * usage of it (a least for me) more obvious while using the bus.
  * You can use onBefore('*'), on('*') and onAfter('*') to listen to all events.
  * But be careful: This is going very expensive if done a lot.
  *
@@ -24,7 +25,7 @@ use Ems\Contracts\Core\Subscribable;
  * If for example you use a broadcaster to broadcast events to another server,
  * you would mark them to not broadcast them again.
  * Or in some batch operation you would mark the events as "in-batch", so that
- * listeners can deceide to only listen on single updates and so on.
+ * listeners can decide to only listen on single updates and so on.
  *
  * Solving this with wildcards would not be the best idea, because wildcards are
  * making everything slower.
@@ -107,7 +108,7 @@ interface Bus extends Hookable, Subscribable
     public function fire($event, $payload = [], $halt = false);
 
     /**
-     * Alias for self::fire(). If you really doto need a fire dependency in
+     * Alias for self::fire(). If you really do need a fire dependency in
      * your class typehint against callable and you can use this object as your
      * firing callable.
      *
@@ -174,7 +175,7 @@ interface Bus extends Hookable, Subscribable
     public function registerMark($mark);
 
     /**
-     * Returns a callabe to be used to forward hooks on ths bus.
+     * Returns a callable to be used to forward hooks on ths bus.
      *
      * @example Storage::onAfter('persist', self::forward('storage.persist'))
      *
