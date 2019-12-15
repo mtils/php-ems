@@ -83,7 +83,7 @@ class ConsoleDispatcher implements Dispatcher
      *
      * @return string
      */
-    public function compile($pattern, array $parameters = [])
+    public function path($pattern, array $parameters = [])
     {
         return $pattern . ' ' . implode(' ', $parameters);
     }

@@ -46,6 +46,11 @@ class Router implements RouterContract, SupportsCustomFactory
     /**
      * @var array
      */
+    protected $clientTypes = [];
+
+    /**
+     * @var array
+     */
     protected $dispatchers = [];
 
     /**
@@ -89,7 +94,7 @@ class Router implements RouterContract, SupportsCustomFactory
      */
     public function route(Routable $routable)
     {
-        $interpreter = $this->getInterpreter($routable->clientType());
+        $interpreter = $this->getDispatcher($routable->clientType());
         $hit = $interpreter->match($routable->method(), (string)$routable->url()->path);
         $routeData = $hit->handler;
 
@@ -117,7 +122,6 @@ class Router implements RouterContract, SupportsCustomFactory
         $routable->setHandler($this->makeHandler($routable));
 
     }
-
 
     /**
      * Retrieve an external iterator
@@ -177,6 +181,31 @@ class Router implements RouterContract, SupportsCustomFactory
     }
 
     /**
+     * Return all known unique client types (by route registrations)
+     *
+     * @return string[]
+     */
+    public function clientTypes()
+    {
+        return array_keys($this->clientTypes);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param string $clientType
+     *
+     * @return Dispatcher
+     */
+    public function getDispatcher($clientType)
+    {
+        if (!isset($this->dispatchers[$clientType])) {
+            $this->dispatchers[$clientType] = call_user_func($this->interpreterFactory, $clientType);
+        }
+        return $this->dispatchers[$clientType];
+    }
+
+    /**
      * Use the router as normal middleware.
      *
      * @param Input $input
@@ -211,8 +240,8 @@ class Router implements RouterContract, SupportsCustomFactory
         $this->allRoutes[] = $route;
 
         foreach ($data['clientTypes'] as $clientType) {
-
-            $interpreter = $this->getInterpreter($clientType);
+            $this->clientTypes[$clientType] = true;
+            $interpreter = $this->getDispatcher($clientType);
 
             foreach ($data['methods'] as $method) {
                 $interpreter->add($method, $data['pattern'], $data);
@@ -232,19 +261,6 @@ class Router implements RouterContract, SupportsCustomFactory
 
         $this->byName[$data['name']] = $route;
 
-    }
-
-    /**
-     * @param string $clientType
-     *
-     * @return Dispatcher
-     */
-    protected function getInterpreter($clientType)
-    {
-        if (!isset($this->dispatchers[$clientType])) {
-            $this->dispatchers[$clientType] = call_user_func($this->interpreterFactory, $clientType);
-        }
-        return $this->dispatchers[$clientType];
     }
 
     /**

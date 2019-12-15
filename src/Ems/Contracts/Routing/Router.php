@@ -91,4 +91,22 @@ interface Router extends IteratorAggregate
      */
     public function getByName($name);
 
+    /**
+     * Return all known unique client types (by route registrations)
+     *
+     * @return string[]
+     */
+    public function clientTypes();
+
+    /**
+     * Return the dispatcher for $clientType. This is needed for the UrlGenerator
+     * to compile the urls by the dispatcher (who should now his urls) and compilation
+     * of routes by a cached proxy.
+     *
+     * @param string $clientType
+     *
+     * @return Dispatcher
+     */
+    public function getDispatcher($clientType);
+
 }

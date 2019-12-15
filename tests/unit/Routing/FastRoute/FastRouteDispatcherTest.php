@@ -120,7 +120,7 @@ class FastRouteDispatcherTest extends TestCase
             $this->assertEquals($test['pattern'], $hit->pattern);
             $this->assertEquals($test['handler'], $hit->handler);
             $this->assertEquals($test['parameters'], $hit->parameters);
-            $this->assertEquals($test['uri'], $dispatcher->compile($test['pattern'], $test['parameters']));
+            $this->assertEquals($test['uri'], $dispatcher->path($test['pattern'], $test['parameters']));
         }
     }
 
@@ -146,7 +146,7 @@ class FastRouteDispatcherTest extends TestCase
             $this->assertEquals($test['pattern'], $hit->pattern);
             $this->assertEquals($test['handler'], $hit->handler);
             $this->assertEquals($test['parameters'], $hit->parameters);
-            $this->assertEquals($test['uri'], $dispatcher->compile($test['pattern'], $test['parameters']));
+            $this->assertEquals($test['uri'], $dispatcher->path($test['pattern'], $test['parameters']));
         }
 
     }

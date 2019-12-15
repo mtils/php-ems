@@ -54,12 +54,12 @@ interface Dispatcher extends Arrayable
     public function fill(array $data);
 
     /**
-     * Render an uri by the route pattern and parameters.
+     * Render a path by the route pattern and parameters.
      *
      * @param string $pattern
      * @param array $parameters (optional)
      *
      * @return string
      */
-    public function compile($pattern, array $parameters=[]);
+    public function path($pattern, array $parameters=[]);
 }

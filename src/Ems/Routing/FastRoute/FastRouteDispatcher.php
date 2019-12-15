@@ -137,7 +137,7 @@ class FastRouteDispatcher implements Dispatcher
      *
      * @return string
      */
-    public function compile($pattern, array $parameters = [])
+    public function path($pattern, array $parameters = [])
     {
         return $this->compiler->compile($pattern, $parameters);
     }

@@ -893,7 +893,51 @@ class RouterTest extends TestCase
         $this->make(true)->getByName('foo');
     }
 
-    protected function make($filled=false)
+    /**
+     * @test
+     * @throws ReflectionException
+     */
+    public function clientTypes_returns_all_registered_clientTypes()
+    {
+
+        $router = $this->make();
+        $router->createObjectsBy(function ($class) {
+            return new $class;
+        });
+
+        $router->register(function (RouteCollector $collector) {
+
+            $collector->get('addresses',
+                RouterTest_TestController::class . '->index')
+                ->name('addresses.index')
+                ->scope('default', 'admin')
+                ->clientType('web', 'api')
+                ->middleware('auth');
+
+            $collector->get('addresses/{address}/edit',
+                RouterTest_TestController::class . '->edit')
+                ->name('addresses.edit')
+                ->scope('default', 'admin')
+                ->clientType('web', 'api')
+                ->middleware('auth');
+
+            $collector->put('addresses/{address}/edit',
+                RouterTest_TestController::class . '->update')
+                ->name('addresses.update')
+                ->scope('default', 'admin')
+                ->clientType('web', 'api')
+                ->middleware('auth');
+        });
+
+        $routes = iterator_to_array($router);
+
+        $this->assertCount(3, $routes);
+
+        $this->assertEquals(['web', 'api'], $router->clientTypes());
+
+
+    }
+        protected function make($filled=false)
     {
         $router = new Router();
         if ($filled) {
