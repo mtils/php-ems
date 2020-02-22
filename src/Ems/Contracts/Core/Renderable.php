@@ -14,14 +14,14 @@ interface Renderable extends Stringable
     /**
      * Return the assigned Renderer.
      *
-     * @return \Ems\Contracts\Core\Renderer
+     * @return Renderer
      **/
     public function getRenderer();
 
     /**
      * Set the renderer to render this renderable.
      *
-     * @param \Ems\Contracts\Core\Renderer $renderer
+     * @param Renderer $renderer
      *
      * @return self
      **/

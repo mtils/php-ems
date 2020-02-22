@@ -7,7 +7,7 @@ interface Renderer
     /**
      * Return true if this renderer can render $item.
      *
-     * @param \Ems\Contracts\Core\Renderable
+     * @param Renderable
      *
      * @return bool
      **/
@@ -16,7 +16,7 @@ interface Renderer
     /**
      * Renders $item.
      *
-     * @param \Ems\Contracts\Core\Renderable $item
+     * @param Renderable $item
      *
      * @return string
      **/
