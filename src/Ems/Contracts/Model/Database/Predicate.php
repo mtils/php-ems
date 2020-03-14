@@ -49,19 +49,25 @@ class Predicate
     protected $right;
 
     /**
-     * @var bool
+     * @var boolean
      */
     protected $rightIsKey = false;
 
-    public function __construct($left='', $operatorOrRight='', $right='')
+    public function __construct($left = '', $operatorOrRight = '', $right = null)
     {
         $numArgs = func_num_args();
 
-        if ($numArgs == 0) {
+        if ($numArgs === 0) {
             return;
         }
 
-        if ($numArgs < 3) {
+        if ($numArgs === 1) {
+            $this->left = $left;
+            $this->operator = '';
+            return;
+        }
+
+        if ($numArgs === 2) {
             $this->left = $left;
             $this->right = $operatorOrRight;
             return;
@@ -79,7 +85,7 @@ class Predicate
      */
     public function __get($name)
     {
-        switch($name) {
+        switch ($name) {
             case 'left':
                 return $this->left;
             case 'operator':
@@ -97,7 +103,7 @@ class Predicate
      *
      * @return $this
      */
-    public function rightIsKey($isKey=true)
+    public function rightIsKey($isKey = true)
     {
         $this->rightIsKey = $isKey;
         return $this;

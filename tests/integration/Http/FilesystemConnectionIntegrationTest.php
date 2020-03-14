@@ -9,66 +9,15 @@ namespace Ems\Http;
 use Ems\Contracts\Http\Connection;
 use Ems\Core\Helper;
 use Ems\Core\Url;
+use Ems\HttpMockTest;
 use Ems\IntegrationTest;
 use Ems\Testing\LoggingCallable;
 use function file_get_contents;
 use InterNations\Component\HttpMock\PHPUnit\HttpMockTrait;
 use function var_dump;
 
-class FilesystemConnectionIntegrationTest extends IntegrationTest
+class FilesystemConnectionIntegrationTest extends HttpMockTest
 {
-    use HttpMockTrait;
-
-    /**
-     * @var string
-     */
-    protected static $host = 'localhost';
-
-    /**
-     * @var int
-     */
-    protected static $port = 8082;
-
-    /**
-     * @beforeClass
-     */
-    public static function bootHttpMock()
-    {
-        static::setUpHttpMockBeforeClass(static::$port, static::$host);
-    }
-
-    /**
-     * @afterClass
-     */
-    public static function shutdownHttpMock()
-    {
-        static::tearDownHttpMockAfterClass();
-    }
-
-    /**
-     * @before
-     */
-    public function setUpHttp()
-    {
-        $this->setUpHttpMock();
-    }
-
-    /**
-     * @after
-     */
-    public function tearDownHttp()
-    {
-        $this->tearDownHttpMock();
-    }
-
-    /**
-     * @test
-     */
-    public function implements_Interface()
-    {
-        $this->assertInstanceOf(Connection::class, $this->con('http://bla.de'));
-    }
-
     /**
      * @test
      */

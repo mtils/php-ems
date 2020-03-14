@@ -4,6 +4,7 @@ use Ems\Core\ConnectionPool;
 use Ems\Core\Url;
 use Ems\Http\Client;
 use Ems\Http\FilesystemConnection;
+use Ems\HttpMockTest;
 use Ems\IntegrationTest;
 use InterNations\Component\HttpMock\PHPUnit\HttpMockTrait;
 
@@ -11,52 +12,8 @@ use InterNations\Component\HttpMock\PHPUnit\HttpMockTrait;
  *  * Created by mtils on 12.08.19 at 15:32.
  **/
 
-class ClientIntegrationTest extends IntegrationTest
+class ClientIntegrationTest extends HttpMockTest
 {
-    use HttpMockTrait;
-
-    /**
-     * @var string
-     */
-    protected static $host = 'localhost';
-
-    /**
-     * @var int
-     */
-    protected static $port = 8082;
-
-    /**
-     * @beforeClass
-     */
-    public static function bootHttpMock()
-    {
-        static::setUpHttpMockBeforeClass(static::$port, static::$host);
-    }
-
-    /**
-     * @afterClass
-     */
-    public static function shutdownHttpMock()
-    {
-        static::tearDownHttpMockAfterClass();
-    }
-
-    /**
-     * @before
-     */
-    public function setUpHttp()
-    {
-        $this->setUpHttpMock();
-    }
-
-    /**
-     * @after
-     */
-    public function tearDownHttp()
-    {
-        $this->tearDownHttpMock();
-    }
-
     /**
      * @test
      */
@@ -136,4 +93,5 @@ class ClientIntegrationTest extends IntegrationTest
             ->port(static::$port)
             ->path($path);
     }
+
 }

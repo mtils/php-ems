@@ -9,6 +9,8 @@ use Countable;
 use Ems\Contracts\Expression\Queryable;
 use Ems\TestCase;
 use IteratorAggregate;
+use stdClass;
+
 use function iterator_to_array;
 
 
@@ -53,6 +55,17 @@ class ParenthesesTest extends TestCase
         $this->assertSame($test, $test->where($predicate));
         $first = $test->first();
         $this->assertSame($predicate, $first);
+    }
+
+    /**
+     * @test
+     * @expectedException \Ems\Core\Exceptions\UnsupportedParameterException
+     */
+    public function where_with_unsupported_type_throws_exception()
+    {
+        $predicate = new Predicate();
+        $test = $this->newParentheses();
+        $test->where(new stdClass());
     }
 
     /**

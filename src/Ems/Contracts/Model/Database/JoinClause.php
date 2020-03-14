@@ -6,11 +6,17 @@
 namespace Ems\Contracts\Model\Database;
 
 
+use Closure;
+use Ems\Contracts\Core\Expression;
 use Ems\Contracts\Core\Stringable;
+use Ems\Model\Database\Query as ModelQuery;
+
 use function func_get_args;
+use function is_string;
 
 /**
  * Class JoinClause
+ *
  * @package Ems\Contracts\Model\Database
  *
  * @property      string|Stringable    table
@@ -19,7 +25,6 @@ use function func_get_args;
  * @property      string               unification (INNER|OUTER|CROSS)
  * @property-read Parentheses          conditions
  * @property-read string               id Either the table or its alias
- *
  */
 class JoinClause
 {
@@ -59,7 +64,7 @@ class JoinClause
      * @param string $table (optional)
      * @param Query  $query (optional)
      */
-    public function __construct($table='', Query $query=null)
+    public function __construct($table = '', Query $query = null)
     {
         $this->table = $table;
         $this->query = $query;
@@ -75,7 +80,7 @@ class JoinClause
      *
      * @return $this
      */
-    public function on($left, $operatorOrRight='', $right='')
+    public function on($left, $operatorOrRight = '', $right = '')
     {
         if ($left instanceof Predicate) {
             $this->conditions->where($left);
@@ -90,16 +95,37 @@ class JoinClause
      * Append a new braced group of expressions to the on clause.
      * Either use a callable to add your expressions or use the return value.
      *
-     * @see Parentheses::__invoke()
-     *
      * @param string   $boolean (and|or)
      * @param callable $builder (optional)
      *
      * @return Parentheses
+     *
+     * @see Parentheses::__invoke()
      */
-    public function __invoke($boolean='AND', callable $builder=null)
+    public function __invoke($boolean = 'AND', callable $builder = null)
     {
-        return $this->conditions->__invoke($boolean, $builder);
+
+        $countBefore = count($this->conditions);
+        $group = $this->conditions->__invoke($boolean, $builder);
+
+        if ($countBefore !== 0) {
+            return $group;
+        }
+        // There were no condition before this call
+        // So we assume the on() method was not called and only
+        // $clause('AND', f()) was called
+        $first = $group->first();
+
+        if (!$first instanceof Predicate) {
+            return $group;
+        }
+
+        // ...and if the right operand is just a string it's probably a column
+        if (is_string($first->right)) {
+            $first->rightIsKey();
+        }
+
+        return $group;
     }
 
     /**
@@ -216,5 +242,136 @@ class JoinClause
                 $this->unification = $value;
                 return;
         }
+    }
+
+    // The following method are just to allow a fluid syntax if you work with
+    // $query->join
+
+    /**
+     * Perform the select call on the passed query.
+     *
+     * @param string[]|Stringable[] ...$columns
+     *
+     * @return Query|ModelQuery
+     */
+    public function select(...$columns)
+    {
+        return $this->query->select(...$columns);
+    }
+
+    /**
+     * Set the table on the passed query.
+     *
+     * @param string|Expression $table
+     *
+     * @return Query|ModelQuery
+     */
+    public function from($table)
+    {
+        return $this->query->from($table);
+    }
+
+    /**
+     * Perform a join call on the passed query.
+     *
+     * @param string|Expression|JoinClause $table
+     *
+     * @return JoinClause
+     */
+    public function join($table)
+    {
+        return $this->query->join($table);
+    }
+
+    /**
+     * Call where on the passed query.
+     *
+     * @param string|Expression|Closure $operand
+     * @param mixed $operatorOrValue (optional)
+     * @param mixed $value (optional)
+     *
+     * @return Query|ModelQuery
+     **/
+    public function where($operand, $operatorOrValue = null, $value = null)
+    {
+        return $this->query->where(...func_get_args());
+    }
+
+    /**
+     * Call groupBy on the passed query.
+     *
+     * @param mixed ...$column
+     *
+     * @return Query|ModelQuery
+     */
+    public function groupBy(...$column)
+    {
+        return $this->query->groupBy(...$column);
+    }
+
+    /**
+     * Call orderBy on the passed query
+     *
+     * @param string|Stringable|array $column
+     * @param string                  $direction (default:ASC)
+     *
+     * @return Query|ModelQuery
+     */
+    public function orderBy($column, $direction = 'ASC')
+    {
+        return $this->query->orderBy($column, $direction);
+    }
+
+    /**
+     * Call having() on the passed query.
+     *
+     * @param string|Expression|Closure $operand
+     * @param mixed                     $operatorOrValue (optional)
+     * @param mixed                     $value (optional)
+     *
+     * @return Query|ModelQuery
+     */
+    public function having($operand, $operatorOrValue = null, $value = null)
+    {
+        return $this->query->having(...func_get_args());
+    }
+
+    /**
+     * Call offset() on the passed query.
+     *
+     * @param int|string|Stringable|null $offset
+     * @param int|string|Stringable      $limit (optional)
+     *
+     * @return Query|ModelQuery
+     */
+    public function offset($offset, $limit = null)
+    {
+        return $this->query->offset(...func_get_args());
+    }
+
+    /**
+     * Call limit() on the passed query.
+     *
+     * @param int|string|Stringable|null $offset
+     * @param int|string|Stringable      $limit (optional)
+     *
+     * @return Query|ModelQuery
+     */
+    public function limit($limit, $offset = null)
+    {
+        return $this->query->limit(...func_get_args());
+    }
+
+    /**
+     * Call values() on the passed query.
+     *
+     * @param string|array $key
+     * @param mixed        $value (optional)
+     *
+     * @return Query|ModelQuery
+     */
+    public function values($key, $value = null)
+    {
+        return $this->query->values(...func_get_args());
     }
 }

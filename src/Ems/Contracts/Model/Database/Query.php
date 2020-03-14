@@ -10,6 +10,7 @@ use Closure;
 use Ems\Contracts\Core\Expression;
 use Ems\Contracts\Core\Stringable;
 use Ems\Contracts\Expression\Queryable;
+
 use function count;
 use function func_get_args;
 use function func_num_args;
@@ -28,15 +29,15 @@ use function is_array;
  *
  * @property      string[]|Stringable[] columns
  * @property      string|Expression     table
- * @property-read Parentheses           conditions
- * @property-read JoinClause[]          joins
  * @property      string[]|Stringable[] groupBys
  * @property      string[]|Stringable[] orderBys
- * @property-read Parentheses           havings
  * @property      int|string|Stringable offset
  * @property      int|string|Stringable limit
  * @property      array                 values
  * @property      string                operation (SELECT|INSERT|UPDATE|DELETE|ALTER|CREATE)
+ * @property-read Parentheses           havings
+ * @property-read Parentheses           conditions
+ * @property-read JoinClause[]          joins
  */
 class Query implements Queryable
 {
@@ -97,6 +98,9 @@ class Query implements Queryable
      */
     protected $operation = '';
 
+    /**
+     * Query constructor
+     */
     public function __construct()
     {
         $this->conditions = new Parentheses('AND');
@@ -141,13 +145,13 @@ class Query implements Queryable
     }
 
     /**
-     * @param string|Expression $table
+     * @param string|Expression|JoinClause $table
      *
      * @return JoinClause
      */
     public function join($table)
     {
-        $join = new JoinClause($table, $this);
+        $join = $table instanceof JoinClause ? $table : new JoinClause($table, $this);
         $this->joins[] = $join;
         return $join;
     }
@@ -171,14 +175,14 @@ class Query implements Queryable
      * Append a new braced group of expressions to the where clause.
      * Either use a callable to add your expressions or use the return value.
      *
-     * @see Parentheses::__invoke()
-     *
      * @param string   $boolean (and|or)
      * @param callable $builder (optional)
      *
      * @return Parentheses
+     *
+     * @see Parentheses::__invoke()
      */
-    public function __invoke($boolean, callable $builder=null)
+    public function __invoke($boolean, callable $builder = null)
     {
         return $this->conditions->__invoke($boolean, $builder);
     }
@@ -211,7 +215,7 @@ class Query implements Queryable
      *
      * @return $this
      */
-    public function orderBy($column, $direction='ASC')
+    public function orderBy($column, $direction = 'ASC')
     {
 
         if ($column instanceof Expression) {
@@ -223,7 +227,7 @@ class Query implements Queryable
             return $this->orderBy([$column => $direction]);
         }
 
-        foreach ($column as $key=>$direction) {
+        foreach ($column as $key => $direction) {
             $this->orderBys[$key] = $direction;
         }
 
@@ -233,13 +237,13 @@ class Query implements Queryable
     /**
      * Same as where but for having statements (aggregated result).
      *
-     * @see Queryable::where()
-     *
      * @param string|Expression|Closure $operand
      * @param mixed                     $operatorOrValue (optional)
      * @param mixed                     $value (optional)
      *
      * @return self
+     *
+     * @see Queryable::where()
      */
     public function having($operand, $operatorOrValue = null, $value = null)
     {
@@ -255,7 +259,7 @@ class Query implements Queryable
      *
      * @return $this
      */
-    public function offset($offset, $limit=null)
+    public function offset($offset, $limit = null)
     {
         $this->offset = $offset;
         if (func_num_args() > 1) {
@@ -272,7 +276,7 @@ class Query implements Queryable
      *
      * @return $this
      */
-    public function limit($limit, $offset=null)
+    public function limit($limit, $offset = null)
     {
         $this->limit = $limit;
         if ($offset !== null) {
@@ -290,14 +294,14 @@ class Query implements Queryable
      *
      * @return $this
      */
-    public function values($key, $value=null)
+    public function values($key, $value = null)
     {
         if (!is_array($key)) {
             $this->values[$key] = $value;
             return $this;
         }
         $this->values = [];
-        foreach($key as $column=>$value) {
+        foreach ($key as $column => $value) {
             $this->values[$column] = $value;
         }
         return $this;
@@ -338,6 +342,10 @@ class Query implements Queryable
         return null;
     }
 
+    /**
+     * @param string $name
+     * @param mixed  $value
+     */
     public function __set($name, $value)
     {
         switch ($name) {
@@ -368,7 +376,7 @@ class Query implements Queryable
             case 'limit':
                 $this->limit($value);
                 break;
-        }
+        }//end switch
     }
 
     /**

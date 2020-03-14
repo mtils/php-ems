@@ -127,23 +127,20 @@ class MySQLiteDialectTest extends PDOBaseTest
 
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     **/
     public function test_render_with_unsupported_expression_throws_exception()
     {
 
         $bindings = [];
 
-        $c = $this->where('n', new MySQLDialectTest_Expression);
+        $c = $this->where('n', new MySQLDialectTest_Expression('test'));
         $d = $this->newDialect();
 
-        $sql = $d->render($c, $bindings);
+        $this->assertEquals('`n` = test', $d->render($c, $bindings));
 
     }
 
     /**
-     * @expectedException Ems\Contracts\Core\Errors\Unsupported
+     * @expectedException \Ems\Contracts\Core\Errors\Unsupported
      **/
     public function test_render_without_constraint_parameters_throws_exception()
     {

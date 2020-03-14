@@ -136,18 +136,15 @@ class SQLiteDialectTest extends PDOBaseTest
 
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     **/
     public function test_render_with_unsupported_expression_throws_exception()
     {
 
         $bindings = [];
 
-        $c = $this->where('n', new SQLiteDialectTest_Expression);
+        $c = $this->where('n', new SQLiteDialectTest_Expression('test'));
         $d = $this->newDialect();
 
-        $sql = $d->render($c, $bindings);
+        $this->assertEquals('"n" = test',  $d->render($c, $bindings));
 
     }
 

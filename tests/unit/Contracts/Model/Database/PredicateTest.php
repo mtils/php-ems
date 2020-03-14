@@ -26,8 +26,8 @@ class PredicateTest extends TestCase
     {
         $predicate = $this->newPredicate('name');
         $this->assertEquals('name', $predicate->left);
-        $this->assertEquals('=', $predicate->operator);
-        $this->assertEquals('', $predicate->right);
+        $this->assertSame('', $predicate->operator);
+        $this->assertNull($predicate->right);
     }
 
     /**

@@ -1,13 +1,14 @@
 <?php
+
 /**
  *  * Created by mtils on 23.05.19 at 11:35.
  **/
 
 namespace Ems\Model\Database\Dialects;
 
-
 use DateTime;
 use Ems\Contracts\Core\Expression as ExpressionContract;
+use Ems\Contracts\Core\StringableTrait;
 use Ems\Contracts\Core\Type;
 use Ems\Contracts\Expression\Condition;
 use Ems\Contracts\Expression\Constraint;
@@ -18,11 +19,12 @@ use Ems\Contracts\Model\Database\SQLException;
 use Ems\Core\Exceptions\UnsupportedParameterException;
 use Ems\Core\Helper;
 use Ems\Core\KeyExpression;
-use Ems\Core\Support\StringableTrait;
 use Ems\Model\Database\SQLNameNotFoundException;
 use Ems\Model\Database\SQLSyntaxException;
 use Exception;
-use InvalidArgumentException;
+
+use function explode;
+use function strpos;
 
 abstract class AbstractDialect implements Dialect
 {
@@ -43,6 +45,35 @@ abstract class AbstractDialect implements Dialect
     ];
 
     /**
+     * Quote a string or table/column/database name
+     *
+     * @param string $string
+     * @param string $type (default: string) Can be string|name
+     *
+     * @return string
+     **/
+    public function quote($string, $type = 'string')
+    {
+        if ($type === 'string') {
+            return $this->quoteString($string);
+        }
+
+        if (!strpos($string, '.')) {
+            return $this->quoteName($string, $type);
+        }
+
+        $parts = explode('.', $string);
+        $segments = [];
+
+        foreach ($parts as $segment) {
+            $segments[] = $this->quoteName($segment, $type);
+        }
+
+        return implode('.', $segments);
+    }
+
+
+    /**
      * {@inheritdoc}
      *
      * @param ExpressionContract $expression
@@ -50,7 +81,7 @@ abstract class AbstractDialect implements Dialect
      *
      * @return string
      **/
-    public function render(ExpressionContract $expression, array &$bindings=[])
+    public function render(ExpressionContract $expression, array &$bindings = [])
     {
 
         if ($expression instanceof KeyExpression) {
@@ -66,13 +97,13 @@ abstract class AbstractDialect implements Dialect
         }
 
         if (!$expression instanceof LogicalGroup) {
-            throw new InvalidArgumentException("Cannot render a " . Type::of($expression));
+            return $expression->toString();
+//            throw new InvalidArgumentException("Cannot render a " . Type::of($expression));
         }
 
         $parts = [];
 
         foreach ($expression->expressions() as $e) {
-
             if ($e instanceof LogicalGroup) {
                 $parts[] = "(" . $this->render($e, $bindings) . ')';
                 continue;
@@ -92,13 +123,27 @@ abstract class AbstractDialect implements Dialect
      *
      * @return SQLException
      **/
-    public function createException(NativeError $error, Exception $original=null)
+    public function createException(NativeError $error, Exception $original = null)
     {
         return $this->exceptionByMessage($error, $original);
     }
 
+    /**
+     * @param string $string
+     *
+     * @return string
+     */
+    abstract protected function quoteString($string);
 
-    protected function exceptionByMessage(NativeError $error, Exception $original=null)
+    /**
+     * @param string $name
+     * @param string $type
+     *
+     * @return string
+     */
+    abstract protected function quoteName($name, $type = 'name');
+
+    protected function exceptionByMessage(NativeError $error, Exception $original = null)
     {
         if (Helper::contains($error->message, ['no such table'])) {
             $e = new SQLNameNotFoundException($error->message, $error, 0, $original);
@@ -166,7 +211,6 @@ abstract class AbstractDialect implements Dialect
         }
 
         return implode(' ', $parts);
-
     }
 
     protected function renderCondition(Condition $c, array &$bindings)
@@ -190,7 +234,6 @@ abstract class AbstractDialect implements Dialect
         }
 
         return implode(' ', $parts);
-
     }
 
     protected function renderConstraintParameters(array $parameters, array &$bindings)
@@ -199,7 +242,6 @@ abstract class AbstractDialect implements Dialect
         $parts = [];
 
         foreach ($parameters as $parameter) {
-
             if ($parameter instanceof ExpressionContract) {
                 $parts[] = $this->render($parameter, $bindings);
                 continue;
@@ -218,10 +260,9 @@ abstract class AbstractDialect implements Dialect
             $parameter = array_values($parameter);
             $last = count($parameter) - 1;
 
-            foreach ($parameter as $i=>$sub) {
-
+            foreach ($parameter as $i => $sub) {
                 if ($i == 0) {
-                    $parts[] = '('.$this->renderAtomic($sub, $bindings);
+                    $parts[] = '(' . $this->renderAtomic($sub, $bindings);
                     continue;
                 }
 
@@ -238,7 +279,7 @@ abstract class AbstractDialect implements Dialect
         return implode(',', $parts);
     }
 
-    protected function renderAtomic($value, &$bindings=[])
+    protected function renderAtomic($value, &$bindings = [])
     {
         if ($value === null) {
             return 'NULL';
@@ -260,6 +301,21 @@ abstract class AbstractDialect implements Dialect
         }
 
         return '';
+    }
 
+    /**
+     * Quote each identifier if the string contains many.
+     *
+     * @param $string
+     *
+     * @return string
+     */
+    protected function quoteEachSegment($string)
+    {
+        if (!strpos($string, '.')) {
+            return $this->quote($string, Dialect::NAME);
+        }
+
+        $parts = explode('.', $string);
     }
 }

@@ -15,6 +15,7 @@ use Ems\Core\Exceptions\DataIntegrityException;
 use Ems\Core\Exceptions\KeyNotFoundException;
 use Ems\Model\Database\SQL;
 use function implode;
+use function is_array;
 
 class StorageDriver
 {
@@ -174,7 +175,8 @@ class StorageDriver
         }
 
         if ($result == 0) {
-            throw new KeyNotFoundException("The key {$keys[0]} does not exist");
+            $keyString = is_array($keys) ? implode(',', $keys) : $keys;
+            throw new KeyNotFoundException("The key '$keyString' does not exist");
         }
 
         if ($result != $forceAffected) {

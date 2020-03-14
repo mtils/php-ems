@@ -11,6 +11,7 @@ use Ems\Model\Database\SQLIOException;
 use Ems\Model\Database\SQLLockException;
 use Exception;
 use InvalidArgumentException;
+use function str_replace;
 
 
 class SQLiteDialect extends AbstractDialect
@@ -50,27 +51,6 @@ class SQLiteDialect extends AbstractDialect
     /**
      * {@inheritdoc}
      *
-     * @param string $string
-     * @param string $type (default: string) Can be string|name
-     *
-     * @return string
-     **/
-    public function quote($string, $type='string')
-    {
-        if ($type == 'string') {
-            return "'" . str_replace("'", "''", $string) . "'";
-        }
-
-        if ($type != 'name') {
-            throw new InvalidArgumentException("type has to be either string|name, not $type");
-        }
-
-        return '"' . str_replace('"', '""', $string) . '"';
-    }
-
-    /**
-     * {@inheritdoc}
-     *
      * @return string
      **/
     public function name()
@@ -96,7 +76,7 @@ class SQLiteDialect extends AbstractDialect
      *
      * @return SQLException
      **/
-    public function createException(NativeError $error, Exception $original=null)
+    public function createException(NativeError $error, Exception $original = null)
     {
         switch ($error->code) {
             case self::PERM:
@@ -133,5 +113,30 @@ class SQLiteDialect extends AbstractDialect
 
         return parent::createException($error, $original);
     }
+
+    /**
+     * @param string $string
+     *
+     * @return string
+     */
+    protected function quoteString($string)
+    {
+        return "'" . str_replace("'", "''", $string) . "'";
+    }
+
+    /**
+     * @param string $name
+     * @param string $type
+     *
+     * @return string
+     */
+    protected function quoteName($name, $type = 'name')
+    {
+        if ($type != 'name') {
+            throw new InvalidArgumentException("type has to be either string|name, not $type");
+        }
+        return '"' . str_replace('"', '""', $name) . '"';
+    }
+
 
 }

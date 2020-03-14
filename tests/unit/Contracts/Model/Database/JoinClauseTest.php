@@ -167,6 +167,148 @@ class JoinClauseTest extends TestCase
         $this->assertNull($this->newClause()->__set('foo', 'bar'));
     }
 
+    /**
+     * @test
+     */
+    public function select_forwards_to_query()
+    {
+        $params = ['a', 'b'];
+        $query = new Query();
+
+        $clause = $this->newClause('users', $query);
+
+        $this->assertSame($query, $clause->select(...$params));
+        $this->assertEquals($params, $query->columns);
+    }
+
+    /**
+     * @test
+     */
+    public function from_forwards_to_query()
+    {
+        $table = 'addresses';
+        $query = new Query();
+
+        $clause = $this->newClause('users', $query);
+
+        $this->assertSame($query, $clause->from($table));
+        $this->assertEquals($table, $query->table);
+    }
+
+    /**
+     * @test
+     */
+    public function join_forwards_to_query()
+    {
+        $table = 'addresses';
+        $testJoin = $this->newClause();
+
+        $query = $this->mock(Query::class);
+        $query->shouldReceive('join')->with($table)->andReturn($testJoin);
+
+        $clause = $this->newClause('users', $query);
+
+        $this->assertSame($testJoin, $clause->join($table));
+        //$this->assertEquals($table, $query->table);
+    }
+
+    /**
+     * @test
+     */
+    public function where_forwards_to_query()
+    {
+        $query = new Query();
+
+        $clause = $this->newClause('users', $query);
+
+        $this->assertSame($query, $clause->where('a', 'b'));
+        $this->assertEquals('a', $query->conditions->first()->left);
+        $this->assertEquals('b', $query->conditions->first()->right);
+    }
+
+    /**
+     * @test
+     */
+    public function groupBy_forwards_to_query()
+    {
+        $params = ['a', 'b'];
+        $query = new Query();
+
+        $clause = $this->newClause('users', $query);
+
+        $this->assertSame($query, $clause->groupBy(...$params));
+        $this->assertEquals($params, $query->groupBys);
+    }
+
+    /**
+     * @test
+     */
+    public function orderBy_forwards_to_query()
+    {
+        $query = new Query();
+
+        $clause = $this->newClause('users', $query);
+
+        $this->assertSame($query, $clause->orderBy('id', 'DESC'));
+        $this->assertEquals(['id' => 'DESC'], $query->orderBys);
+    }
+
+    /**
+     * @test
+     */
+    public function having_forwards_to_query()
+    {
+        $query = new Query();
+
+        $clause = $this->newClause('users', $query);
+
+        $this->assertSame($query, $clause->having('a', 'b'));
+        $this->assertEquals('a', $query->havings->first()->left);
+        $this->assertEquals('b', $query->havings->first()->right);
+    }
+
+    /**
+     * @test
+     */
+    public function offset_forwards_to_query()
+    {
+        $query = new Query();
+
+        $clause = $this->newClause('users', $query);
+
+        $this->assertSame($query, $clause->offset(30, 10));
+        $this->assertEquals(30, $query->offset);
+        $this->assertEquals(10, $query->limit);
+    }
+
+    /**
+     * @test
+     */
+    public function limit_forwards_to_query()
+    {
+        $query = new Query();
+
+        $clause = $this->newClause('users', $query);
+
+        $this->assertSame($query, $clause->limit(30, 10));
+        $this->assertEquals(10, $query->offset);
+        $this->assertEquals(30, $query->limit);
+    }
+
+    /**
+     * @test
+     */
+    public function values_forwards_to_query()
+    {
+        $values = ['a' => 'b'];
+        $query = new Query();
+
+        $clause = $this->newClause('users', $query);
+
+        $this->assertSame($query, $clause->values($values));
+        $this->assertEquals($values, $query->values);
+    }
+
     protected function newClause($table='', Query $query=null)
     {
         return new JoinClause($table, $query);

@@ -109,6 +109,6 @@ class TestCase extends BaseTestCase
             $formattedValue = Type::isStringable($value) ? $value : Type::of($value);
             $items[] = "$key=$formattedValue";
         }
-        return 'criteria (' . implode($items, ', ') . ')';
+        return 'criteria (' . implode(', ', $items) . ')';
     }
 }

@@ -121,7 +121,7 @@ class FileStreamTest extends \Ems\IntegrationTest
      */
     public function test_isSeekable()
     {
-        $this->assertTrue($this->newStream('/dev/null')->open()->isSeekable());
+        $this->assertTrue(is_bool($this->newStream('/dev/null')->open()->isSeekable()));
     }
 
     /**

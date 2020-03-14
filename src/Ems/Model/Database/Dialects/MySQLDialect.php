@@ -19,31 +19,6 @@ class MySQLDialect extends AbstractDialect
     /**
      * {@inheritdoc}
      *
-     * @param string $string
-     * @param string $type (default: string) Can be string|name
-     *
-     * @return string
-     **/
-    public function quote($string, $type='string')
-    {
-        if ($type == 'name') {
-            return '`'.str_replace('`', '``', $string).'`';
-        }
-
-        if ($type != 'string') {
-            throw new InvalidArgumentException("type has to be either string|name, not $type");
-        }
-
-        $search = array("\\",  "\x00", "\n",  "\r",  "'",  '"', "\x1a");
-        $replace = array("\\\\","\\0","\\n", "\\r", "\'", '\"', "\\Z");
-
-        return '"' . str_replace($search, $replace, $string) . '"';
-
-    }
-
-    /**
-     * {@inheritdoc}
-     *
      * @return string
      **/
     public function name()
@@ -60,5 +35,33 @@ class MySQLDialect extends AbstractDialect
     {
         return 'Y-m-d H:i:s';
     }
+
+    /**
+     * @param string $string
+     *
+     * @return string
+     */
+    protected function quoteString($string)
+    {
+        $search = ["\\",  "\x00", "\n",  "\r",  "'",  '"', "\x1a"];
+        $replace = ["\\\\","\\0","\\n", "\\r", "\'", '\"', "\\Z"];
+
+        return '"' . str_replace($search, $replace, $string) . '"';
+    }
+
+    /**
+     * @param string $name
+     * @param string $type
+     *
+     * @return string
+     */
+    protected function quoteName($name, $type = 'name')
+    {
+        if ($type != 'name') {
+            throw new InvalidArgumentException("type has to be either string|name, not $type");
+        }
+        return '`' . str_replace('`', '``', $name) . '`';
+    }
+
 
 }

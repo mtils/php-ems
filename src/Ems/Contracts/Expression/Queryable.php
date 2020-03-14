@@ -29,13 +29,14 @@ interface Queryable
      *     $conditional->orWhere('age', '>=', 5)
      *     $conditional->orWhere('age', '<=', 18)
      * }) // name = 'Ralf' AND (age >= 5 OR age <= 18)
+     * @example where('string') // Does pass thru your statement (like whereRaw() in Eloquent)
      *
      * @param string|\Ems\Contracts\Core\Expression|\Closure $operand
      * @param mixed                                          $operatorOrValue (optional)
-     * @param mixed                                          $value
+     * @param mixed                                          $value           (optional)
      *
      * @return self
      **/
-    public function where($operand, $operatorOrValue=null, $value=null);
+    public function where($operand, $operatorOrValue = null, $value = null);
 
 }
