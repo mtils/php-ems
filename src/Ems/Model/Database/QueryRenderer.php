@@ -6,6 +6,7 @@
 
 namespace Ems\Model\Database;
 
+use DateTimeInterface;
 use Ems\Contracts\Core\Expression;
 use Ems\Contracts\Core\Renderable;
 use Ems\Contracts\Core\Renderer;
@@ -70,21 +71,23 @@ class QueryRenderer implements Renderer
             throw new UnsupportedParameterException($msg);
         }
         /* @var QueryContract $item */
-        return $this->renderToExpression($item)->toString();
-    }
 
-    /**
-     * @param QueryContract $query
-     *
-     * @return SQLExpression
-     *
-     * @throws UnsupportedParameterException
-     */
-    public function renderToExpression(QueryContract $query)
-    {
-        $operation = $query->operation;
+        $operation = $item->operation;
+
         if ($operation == 'SELECT') {
-            return $this->renderSelect($query);
+            return $this->renderSelect($item);
+        }
+        if ($operation == 'INSERT') {
+            return $this->renderInsert($item, $item->values);
+        }
+        if ($operation == 'REPLACE') {
+            return $this->renderInsert($item, $item->values, true);
+        }
+        if ($operation == 'UPDATE') {
+            return $this->renderUpdate($item, $item->values);
+        }
+        if ($operation == 'DELETE') {
+            return $this->renderDelete($item);
         }
         throw new UnsupportedParameterException("Unsupported operation '$operation'");
     }
@@ -133,9 +136,13 @@ class QueryRenderer implements Renderer
             $this->extend($bindings, $orderBy->getBindings());
         }
 
-        // LIMIT
+        if ($limit = $query->limit) {
+            $offset = $query->offset ? ($query->offset . ', ') : '';
+            $sql[] = "LIMIT $offset$limit";
+        }
+
         $string = implode(PHP_EOL, $sql);
-        return new SQLExpression($string, $bindings);
+        return new SQLExpression($string, $this->castBindings($bindings));
     }
 
     /**
@@ -176,7 +183,7 @@ class QueryRenderer implements Renderer
         $sql[] = '(' . implode(', ', $columns) . ')';
         $sql[] = 'VALUES (' . implode(', ', $placeholders) . ')';
 
-        return new SQLExpression(implode("\n", $sql), $bindings);
+        return new SQLExpression(implode("\n", $sql), $this->castBindings($bindings));
     }
 
     /**
@@ -217,7 +224,7 @@ class QueryRenderer implements Renderer
             $sql[] = 'WHERE ' . $wherePart;
         }
 
-        return new SQLExpression(implode("\n", $sql), $bindings);
+        return new SQLExpression(implode("\n", $sql), $this->castBindings($bindings));
     }
 
     /**
@@ -237,7 +244,7 @@ class QueryRenderer implements Renderer
             $sql[] = 'WHERE ' . $wherePart;
         }
 
-        return new SQLExpression(implode("\n", $sql), $bindings);
+        return new SQLExpression(implode("\n", $sql), $this->castBindings($bindings));
     }
 
     /**
@@ -362,6 +369,27 @@ class QueryRenderer implements Renderer
             $lines[] = $this->quote($key, Dialect::NAME) . " $direction";
         }
         return new SQLExpression(implode(',', $lines), $bindings);
+    }
+
+    /**
+     * Cast the bindings so that the database will accept it.
+     *
+     * @param array $bindings
+     *
+     * @return array
+     */
+    public function castBindings(array $bindings)
+    {
+        $casted = [];
+        $dateFormat = $this->dialect ? $this->dialect->timeStampFormat() : 'Y-m-d H:i:s';
+        foreach ($bindings as $key => $value) {
+            if (!$value instanceof DateTimeInterface) {
+                $casted[$key] = $value;
+                continue;
+            }
+            $casted[$key] = $value->format($dateFormat);
+        }
+        return $casted;
     }
 
     /**

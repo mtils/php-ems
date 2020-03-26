@@ -169,7 +169,6 @@ class Paginator implements PaginatorContract
         return $this;
     }
 
-
     /**
      * {@inheritdoc}
      *

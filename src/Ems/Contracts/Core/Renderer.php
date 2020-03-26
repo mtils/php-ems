@@ -18,7 +18,7 @@ interface Renderer
      *
      * @param Renderable $item
      *
-     * @return string
+     * @return string|Stringable
      **/
     public function render(Renderable $item);
 }

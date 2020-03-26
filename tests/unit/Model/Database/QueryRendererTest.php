@@ -71,17 +71,18 @@ class QueryRendererTest extends TestCase
         $renderer = $this->newRenderer();
         $query = $this->newQuery()->from('users');
         $this->assertSql($renderer->render($query), 'SELECT * FROM "users"');
+        $this->assertInstanceOf(SQLExpression::class, $renderer->render($query));
     }
 
     /**
      * @test
      * @expectedException \Ems\Core\Exceptions\UnsupportedParameterException
      */
-    public function test_renderToExpression_throws_exception_if_operation_unknown()
+    public function test_render_throws_exception_if_operation_unknown()
     {
         $query = $this->newQuery();
         $query->operation = 'FOO';
-        $this->newRenderer()->renderToExpression($query);
+        $this->newRenderer()->render($query);
     }
 
     /**
@@ -638,7 +639,7 @@ class QueryRendererTest extends TestCase
         $sql .= ' AND "delivery_service"."valid_until" <= ?';
         $sql .= ' WHERE "users"."id" > ?';
         $this->assertSql($sql, $exp->toString());
-        $this->assertSame([$from, $to, 333], $exp->getBindings());
+        $this->assertSame([$from->format('Y-m-d H:i:s'), $to->format('Y-m-d H:i:s'), 333], $exp->getBindings());
     }
 
     /**

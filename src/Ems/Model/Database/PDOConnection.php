@@ -8,6 +8,7 @@ use Ems\Contracts\Core\Errors\UnSupported;
 use Ems\Contracts\Core\Stringable;
 use Ems\Contracts\Core\Type;
 use Ems\Contracts\Expression\Prepared;
+use Ems\Model\Database\Query as QueryObject;
 use Exception;
 use Ems\Contracts\Core\HasMethodHooks;
 use Ems\Contracts\Core\Url;
@@ -446,6 +447,28 @@ class PDOConnection implements Connection, Configurable, HasMethodHooks
     public function lastInsertId($sequence=null)
     {
         return $this->pdo()->lastInsertId($sequence);
+    }
+
+    /**
+     * Create a new query.
+     *
+     * @param string $table (optional)
+     *
+     * @return QueryObject
+     */
+    public function query($table = null)
+    {
+        $query = new QueryObject();
+        $query->setConnection($this);
+        $renderer = new QueryRenderer();
+        if ($this->dialect instanceof Dialect) {
+            $renderer->setDialect($this->dialect);
+        }
+        $query->setRenderer($renderer);
+        if ($table) {
+            $query->from($table);
+        }
+        return $query;
     }
 
     /**
