@@ -214,7 +214,7 @@ class Query extends BaseQuery implements Renderable, PaginatableResult
     protected function getTotalCount()
     {
         $result = $this->readFromConnection($this->getTotalCountQuery())->first();
-        return $result ? $result['total'] : 0;
+        return $result ? (int)$result['total'] : 0;
     }
 
     /**
