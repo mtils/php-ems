@@ -574,6 +574,9 @@ class QueryRenderer implements Renderer
 
     protected function extend(array &$bindings, array $new)
     {
+        if (!$new) {
+            return;
+        }
         array_push($bindings, ...$new);
     }
 
