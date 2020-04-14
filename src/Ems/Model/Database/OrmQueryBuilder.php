@@ -13,6 +13,15 @@ namespace Ems\Model\Database;
  */
 class OrmQueryBuilder
 {
+    /**
+     * @var
+     */
+    private $from;
+
+    public function from($class)
+    {
+
+    }
 // select
 // from(class)
 // join??

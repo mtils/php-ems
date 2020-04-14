@@ -24,7 +24,7 @@ use function is_string;
 class MapSchemaInspector implements SchemaInspector
 {
     /**
-     * @var []
+     * @var ClassMap[]
      */
     private $maps;
 
@@ -86,10 +86,23 @@ class MapSchemaInspector implements SchemaInspector
         return $this->getMap($class)->getRelation($name);
     }
 
+    /**
+     * Map a class to a ClassMap. Better use class names
+     * or Closures to omit a complete load of the
+     * Schema.
+     *
+     * @param string                   $class
+     * @param string|callable|ClassMap $mapClass
+     *
+     * @return $this
+     */
     public function map($class, $mapClass)
     {
         if ($mapClass instanceof ClassMap) {
             $this->maps[$class] = $mapClass;
+            if (!$mapClass->getOrmClass()) {
+                $mapClass->setOrmClass($class);
+            }
             return $this;
         }
 
