@@ -19,6 +19,10 @@ use Ems\Contracts\Model\Database\SQLException;
 use Ems\Contracts\Model\Database\NativeError;
 use Ems\Core\ConfigurableTrait;
 use Ems\Core\Patterns\HookableTrait;
+use OverflowException;
+use function call_user_func;
+use function is_callable;
+use function is_object;
 use function microtime;
 use PDO;
 use PDOStatement;
@@ -85,6 +89,14 @@ class PDOConnection implements Connection, Configurable, HasMethodHooks
     const RETURN_LAST_AFFECTED = 'RETURN_LAST_AFFECTED';
 
     /**
+     * Set this option to greater that 0 to auto reconnect when the connection
+     * appears to be dropped by the database server or network in between.
+     *
+     * @var string
+     */
+    const AUTO_RECONNECT_TRIES = 'AUTO_RECONNECT_TRIES';
+
+    /**
      * @var PDO
      **/
     protected $resource;
@@ -114,7 +126,8 @@ class PDOConnection implements Connection, Configurable, HasMethodHooks
         self::TIMEOUT               => 0,
         self::FETCH_MODE            => PDO::FETCH_ASSOC,
         self::RETURN_LAST_ID        => true,
-        self::RETURN_LAST_AFFECTED  => true
+        self::RETURN_LAST_AFFECTED  => true,
+        self::AUTO_RECONNECT_TRIES  => 3
     ];
 
     public function __construct(Url $url, array $options=[])
@@ -179,7 +192,7 @@ class PDOConnection implements Connection, Configurable, HasMethodHooks
     }
 
     /**
-     * Return the database dialect. Something like SQLITE, MySQL,...
+     * Return the database dialect. Something like SQLITE, MySQL, ...
      *
      * @return string (or object with __toString()
      **/
@@ -423,17 +436,30 @@ class PDOConnection implements Connection, Configurable, HasMethodHooks
      * Try to perform an operation. If it fails convert the native exception
      * into a SQLException.
      *
-     * @param Closure $run
+     * @param callable $run
      * @param string $query
      *
      * @return mixed
      */
-    protected function attempt(Closure $run, $query='')
+    protected function attempt(callable $run, $query='')
     {
         try {
             return $run();
         } catch (Exception $e) {
-            throw $this->convertException($e, $query);
+
+            if (!$this->getOption(self::AUTO_RECONNECT_TRIES)) {
+                throw $this->convertException($e, $query);
+            }
+
+            if (!NativeError::isLostConnectionError($e)) {
+                throw $this->convertException($e, $query);
+            }
+
+            if (!$this->isRetry($run)) {
+                return $this->attempt($this->makeRetry($run), $query);
+            }
+
+            return $this->attempt($run, $query);
         }
     }
 
@@ -646,7 +672,7 @@ class PDOConnection implements Connection, Configurable, HasMethodHooks
      */
     protected function isClassOption($key)
     {
-        return in_array($key, [static::RETURN_LAST_ID, static::RETURN_LAST_AFFECTED]);
+        return in_array($key, [self::RETURN_LAST_ID, self::RETURN_LAST_AFFECTED, self::AUTO_RECONNECT_TRIES]);
     }
 
     /**
@@ -658,5 +684,50 @@ class PDOConnection implements Connection, Configurable, HasMethodHooks
     protected function getElapsedTime($start)
     {
         return round((microtime(true) - $start) * 1000, 2);
+    }
+
+    /**
+     * @param callable $attempt
+     *
+     * @return callable|object
+     */
+    protected function makeRetry(callable $attempt)
+    {
+        $retry = new class () {
+            public $tries = 1;
+            public $maxTries = 0;
+            public $run;
+            public $connection;
+            public function __invoke()
+            {
+                $this->tries++;
+                if ($this->tries > $this->maxTries) {
+                    throw new OverflowException("Giving up on broken or dropped connection before trying attempt #$this->tries of max:$this->maxTries");
+                }
+
+                $this->connection->close();
+                $this->connection->open();
+                return call_user_func($this->run);
+            }
+        };
+        $retry->run = $attempt;
+        $retry->maxTries = $this->getOption(self::AUTO_RECONNECT_TRIES);
+        $retry->connection = $this;
+        return $retry;
+    }
+
+    /**
+     * Check if the passed callable is a retry callable.
+     *
+     * @param callable $run
+     *
+     * @return bool
+     */
+    protected function isRetry(callable $run)
+    {
+        if ($run instanceof Closure) {
+            return false;
+        }
+        return is_object($run) && isset($run->tries) && isset($run->run) && is_callable($run->run);
     }
 }
