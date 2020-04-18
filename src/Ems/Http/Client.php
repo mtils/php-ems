@@ -167,6 +167,7 @@ class Client implements ClientContract
     public function submit(UrlContract $url, array $data, $method=HttpConnection::POST)
     {
         $headers = $this->buildHeaders($this->serializer->mimeType());
+        $headers[] = 'Content-Type: ' . $this->formSerializer->mimeType();
         $data = $this->formSerializer->serialize($data);
         $response = $this->con($url)->send($method, $headers, $data);
         return $this->configure($response, $this->formSerializer->mimeType());

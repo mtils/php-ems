@@ -9,9 +9,14 @@ use Ems\Contracts\Model\Database\Dialect;
 use Ems\Contracts\Model\Database\NativeError;
 use Ems\Contracts\Model\Database\SQLException;
 use Ems\Contracts\Model\Result;
-use Ems\Model\Database\Dialects\SQLiteDialect;
 use Ems\Core\Url;
 use Ems\Testing\Cheat;
+use Exception;
+use PDOException;
+
+use function call_user_func;
+use function key;
+use function range;
 
 require_once(__DIR__.'/PDOBaseTest.php');
 
@@ -428,8 +433,163 @@ class PDOConnectionTest extends PDOBaseTest
 
     }
 
+    public function test_reconnect_if_dropped()
+    {
+        $con = new PDOConnectionTest_PDOConnection(new Url('sqlite://memory'));
+        $this->createTable($con);
+
+        $result = $con->select('SELECT 1')->first();
+        $this->assertEquals('1', $result[key($result)]);
+
+        $tries = [];
+        $maxTries = (int)$con->getOption(PDOConnection::AUTO_RECONNECT_TRIES);
+
+        $con->runner = function (callable $run, $query='') use ($maxTries, &$tries) {
+            static $try = 0;
+            $try++;
+
+            $tries[] = $try;
+
+            if ($try < $maxTries) {
+                throw new PDOException('MySQL server has gone away.');
+            }
+
+            $e = new PDOConnectionTest_UseOriginalException();
+            $e->run = $run;
+            $e->query = $query;
+            throw $e;
+
+        };
+
+        $result = $con->select('SELECT 1')->first();
+        $this->assertEquals(range(1,3), $tries);
+        $this->assertEquals('1', $result[key($result)]);
+
+    }
+
+    public function test_reconnect_gives_up_if_max_reached()
+    {
+        $con = new PDOConnectionTest_PDOConnection(new Url('sqlite://memory'));
+        $this->createTable($con);
+
+        $result = $con->select('SELECT 1')->first();
+        $this->assertEquals('1', $result[key($result)]);
+
+        $tries = [];
+        $maxTries = (int)$con->getOption(PDOConnection::AUTO_RECONNECT_TRIES);
+
+        $con->runner = function (callable $run, $query='') use ($maxTries, &$tries) {
+            static $try = 0;
+            $try++;
+
+            $tries[] = $try;
+
+            if ($try < $maxTries+1) {
+                throw new PDOException('MySQL server has gone away.');
+            }
+
+            $e = new PDOConnectionTest_UseOriginalException();
+            $e->run = $run;
+            $e->query = $query;
+            throw $e;
+
+        };
+
+        try {
+            $con->select('SELECT 1')->first();
+            $this->fail('The test must fail because max connection tries are exceeded.');
+        } catch (SQLException $e) {
+            $error = $e->nativeError();
+            $this->assertInstanceOf(NativeError::class, $error);
+            $this->assertContains('trying attempt #', $e->getMessage());
+        }
+
+    }
+
+    public function test_does_not_reconnect_if_max_is_zero()
+    {
+        $con = new PDOConnectionTest_PDOConnection(new Url('sqlite://memory'));
+        $this->createTable($con);
+
+        $result = $con->select('SELECT 1')->first();
+        $this->assertEquals('1', $result[key($result)]);
+
+        $tries = [];
+        $con->setOption(PDOConnection::AUTO_RECONNECT_TRIES, 0);
+
+        $exception = new PDOException('MySQL server has gone away.');
+
+        $con->runner = function (callable $run, $query='') use (&$tries, $exception) {
+            static $try = 0;
+            $try++;
+
+            if ($try == 1) {
+                throw $exception;
+            }
+
+            $this->fail("No reconnects should be tried if zero configured");
+
+        };
+
+        try {
+            $con->select('SELECT 1')->first();
+            $this->fail('The connection must not reconnect if tries set to zero');
+        } catch (SQLException $e) {
+            $this->assertSame($exception, $e->getPrevious());
+        }
+
+    }
+
     protected function injectDialect(PDOConnection $connection, Dialect $dialect)
     {
         $connection->setDialect($dialect);
     }
+}
+
+class PDOConnectionTest_PDOConnection extends PDOConnection
+{
+    /**
+     * @var callable
+     */
+    public $runner;
+
+    /**
+     * Try to perform an operation. If it fails convert the native exception
+     * into a SQLException.
+     *
+     * @param callable $run
+     * @param string $query
+     *
+     * @return mixed
+     */
+    protected function attempt(callable $run, $query = '')
+    {
+
+        if (!$this->runner || $this->isRetry($run)) {
+            return parent::attempt($run, $query);
+        }
+
+        return parent::attempt(function () use ($run, $query) {
+            try {
+                return call_user_func($this->runner, $run, $query);
+            } catch (PDOConnectionTest_UseOriginalException $e) {
+                return parent::attempt($e->run, $e->query);
+            }
+        }, $query);
+
+    }
+
+}
+
+class PDOConnectionTest_UseOriginalException extends Exception
+{
+    /**
+     * @var callable
+     */
+    public $run;
+
+    /**
+     * @var string
+     */
+    public $query = '';
 }

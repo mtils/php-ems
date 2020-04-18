@@ -258,7 +258,7 @@ class ClientTest extends \Ems\TestCase
         $serialized = $serializer->serialize($data);
 
         $con->shouldReceive('send')
-            ->with('POST', ['Accept: application/json'], $serialized)
+            ->with('POST', ['Accept: application/json', 'Content-Type: ' . $serializer->mimeType()], $serialized)
             ->once()
             ->andReturn($response);
 
