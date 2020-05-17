@@ -12,7 +12,7 @@ interface Relation
      * Return the orm object this relation belongs to. This is just mostly an
      * empty object of the class.
      *
-     * @return OrmObject
+     * @return object
      */
     public function getParent();
 

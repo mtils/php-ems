@@ -25,6 +25,11 @@ use function is_array;
  * the criteria in properties.
  *
  * @package Ems\Contracts\Model\Database
+ *
+ * @property-read string      ormClass
+ * @property-read Parentheses conditions
+ * @property-read array       orderBys A property=>direction array
+ * @property-read string[]    withs
  */
 class OrmQuery implements Queryable
 {
@@ -160,5 +165,19 @@ class OrmQuery implements Queryable
         }
 
         return $this;
+    }
+
+    public function __get($name)
+    {
+        switch ($name) {
+            case 'ormClass':
+                return $this->ormClass;
+            case 'conditions':
+                return $this->conditions;
+            case 'orderBys':
+                return $this->orderBys;
+            case 'withs':
+                return $this->withs;
+        }
     }
 }

@@ -22,7 +22,7 @@ class DbOrmQueryRunner implements OrmQueryRunner
     private $inspector;
 
     /**
-     * @var \Ems\Contracts\Model\Database\OrmQueryBuilder
+     * @var OrmQueryBuilder
      */
     private $builder;
 

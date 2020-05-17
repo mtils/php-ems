@@ -209,6 +209,21 @@ class Query extends BaseQuery implements Renderable, PaginatableResult
     }
 
     /**
+     * {@inheritdoc}
+     * Reimplemented to ensure string return value.
+     *
+     * @return string
+     **/
+    public function __toString()
+    {
+        $rendered = $this->tryToRender();
+        if ($rendered instanceof SQLExpression) {
+            return SQL::render($rendered, $rendered->getBindings());
+        }
+        return (string)$rendered;
+    }
+
+    /**
      * @return int
      */
     protected function getTotalCount()

@@ -12,25 +12,52 @@ use Ems\Core\Url;
 use ReflectionClass;
 use ReflectionMethod;
 
+use ReflectionType;
+
 use function call_user_func;
 use function in_array;
 
 abstract class StaticClassMap extends ClassMap
 {
     /**
-     * @var array
+     * Overwrite this constant to assign the orm class that is described by your
+     * your extended map.
      */
-    private static $classConstants;
+    const ORM_CLASS = '';
+
+    /**
+     * Overwrite this constant to assign the storage name. This is the table
+     * name or a resource endpoint name.
+     */
+    const STORAGE_NAME = '';
+
+    /**
+     * Overwrite this class constant to set the url to storage.
+     */
+    const STORAGE_URL = '';
 
     /**
      * @var array
      */
-    private static $methodRelations;
+    private static $classConstants = [];
+
+    /**
+     * @var array
+     */
+    private static $methodRelations = [];
 
     /**
      * @var string[]
      */
     private static $keyCache;
+
+    /**
+     * @var string[]
+     */
+    private static $relationReturnTypes = [
+        \Ems\Contracts\Model\Relation::class,
+        Relation::class
+    ];
 
     public function getOrmClass()
     {
@@ -38,7 +65,7 @@ abstract class StaticClassMap extends ClassMap
             return parent::getOrmClass();
         }
 
-        if (!$class = self::constantValue('ORM_CLASS')) {
+        if (!$class = static::constantValue('ORM_CLASS')) {
             throw new UnConfiguredException('ADD ORM_CLASS class constant to ' . static::class);
         }
 
@@ -51,7 +78,7 @@ abstract class StaticClassMap extends ClassMap
             return parent::getStorageName();
         }
 
-        if (!$storageName = self::constantValue('STORAGE_NAME')) {
+        if (!$storageName = static::constantValue('STORAGE_NAME')) {
             throw new UnConfiguredException('ADD STORAGE_NAME class constant to ' . static::class);
         }
 
@@ -64,7 +91,7 @@ abstract class StaticClassMap extends ClassMap
         if ($this->storageUrl) {
             return $this->storageUrl;
         }
-        if (!$storageUrl = self::constantValue('STORAGE_URL')) {
+        if (!$storageUrl = static::constantValue('STORAGE_URL')) {
             throw new UnConfiguredException('ADD STORAGE_URL class constant to ' . static::class);
         }
         return new Url($storageUrl);
@@ -91,7 +118,7 @@ abstract class StaticClassMap extends ClassMap
             return static::$keyCache;
         }
         static::$keyCache = [];
-        foreach (self::classConstants() as $name => $value) {
+        foreach (static::classConstants() as $name => $value) {
             if (static::isKeyConstant($name)) {
                 static::$keyCache[] = $value;
             }
@@ -105,7 +132,30 @@ abstract class StaticClassMap extends ClassMap
         if (isset($relations[$name])) {
             return call_user_func([static::class, $name]);
         }
-        throw new NotImplementedException("No matching method for relation named '$name' found");
+
+        throw new NotImplementedException("No matching method for relation named '$name' found in " . static::class);
+    }
+
+    /**
+     * @param string $type
+     */
+    public static function addRelationReturnType($type)
+    {
+        static::$relationReturnTypes[] = $type;
+    }
+
+    /**
+     * @param object $parent (optional)
+     *
+     * @return Relation
+     */
+    protected static function newRelation($parent=null)
+    {
+        if (!$parent) {
+            $parentClass = static::ORM_CLASS;
+            $parent = new $parentClass();
+        }
+        return (new Relation())->setParent($parent);
     }
 
     /**
@@ -117,7 +167,7 @@ abstract class StaticClassMap extends ClassMap
      */
     protected static function constantValue($name)
     {
-        $constants = self::classConstants();
+        $constants = static::classConstants();
         return isset($constants[$name]) ? $constants[$name] : null;
     }
 
@@ -128,38 +178,43 @@ abstract class StaticClassMap extends ClassMap
      */
     protected static function classConstants()
     {
-        if (static::$classConstants !== null) {
-            return static::$classConstants;
+        $class = static::class;
+
+        if (isset(static::$classConstants[$class])) {
+            return static::$classConstants[$class];
         }
 
-        $reflection = new ReflectionClass(static::class);
-        static::$classConstants = [];
+        $reflection = new ReflectionClass($class);
+        static::$classConstants[$class] = [];
 
-        static::$classConstants = $reflection->getConstants();
+        static::$classConstants[$class] = $reflection->getConstants();
 
 //        foreach ($reflection->getConstants() as $constant) {
 //            static::$classConstants[$constant] = $constant;
 //        }
 
-        return static::$classConstants;
+        return static::$classConstants[$class];
     }
 
     protected static function methodRelations()
     {
-        if (static::$methodRelations !== null) {
-            return static::$methodRelations;
+        $class = static::class;
+        if (isset(static::$methodRelations[$class])) {
+            return static::$methodRelations[$class];
         }
-        static::$methodRelations = [];
+        static::$methodRelations[$class] = [];
 
-        $reflection = new ReflectionClass(static::class);
+        $reflection = new ReflectionClass($class);
         $methods = $reflection->getMethods(ReflectionMethod::IS_PUBLIC | ReflectionMethod::IS_STATIC);
 
         foreach ($methods as $method) {
-            if ($method->getReturnType() == \Ems\Contracts\Model\Relation::class) {
-                static::$methodRelations[$method->name] = true;
+            $type = $method->getReturnType();
+            $typeName = $type instanceof ReflectionType ? $type->getName() : '';
+            if (in_array($typeName, static::$relationReturnTypes)) {
+                static::$methodRelations[$class][$method->name] = true;
             }
         }
-        return static::$methodRelations;
+        return static::$methodRelations[$class];
     }
 
     protected static function isKeyConstant($constantName)

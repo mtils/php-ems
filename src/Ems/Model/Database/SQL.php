@@ -2,6 +2,7 @@
 
 namespace Ems\Model\Database;
 
+use DateTime;
 use Ems\Contracts\Core\Stringable;
 use Ems\Contracts\Model\Database\Dialect;
 use Ems\Core\Exceptions\NotImplementedException;
@@ -50,6 +51,10 @@ class SQL
         # build a regular expression for each parameter
         foreach ($bindings as $key=>$value) {
             $keys[] = is_string($key) ? '/:'.$key.'/' : '/[?]/';
+            if ($value instanceof DateTime) {
+                $values[] = $value->format('Y-m-d H:i:s');
+                continue;
+            }
             $values[] = is_numeric($value) ? (int)$value : "$quoteChar$value$quoteChar";
         }
 

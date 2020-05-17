@@ -11,7 +11,7 @@ use Ems\Contracts\Model\Relation as RelationContract;
 class Relation implements RelationContract
 {
     /**
-     * @var OrmObjectContract
+     * @var object
      */
     protected $parent;
 
@@ -21,7 +21,7 @@ class Relation implements RelationContract
     protected $parentKey;
 
     /**
-     * @var OrmObjectContract
+     * @var object
      */
     protected $relatedObject;
 
@@ -48,7 +48,7 @@ class Relation implements RelationContract
     /**
      * @inheritdoc
      *
-     * @return OrmObjectContract
+     * @return object
      */
     public function getParent()
     {
@@ -116,11 +116,11 @@ class Relation implements RelationContract
     }
 
     /**
-     * @param OrmObjectContract $parent
+     * @param object $parent
      *
      * @return $this
      */
-    public function setParent(OrmObjectContract $parent)
+    public function setParent($parent)
     {
         $this->parent = $parent;
         return $this;
