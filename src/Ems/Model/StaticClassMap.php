@@ -130,7 +130,9 @@ abstract class StaticClassMap extends ClassMap
     {
         $relations = static::methodRelations();
         if (isset($relations[$name])) {
-            return call_user_func([static::class, $name]);
+            /** @var Relationship $relation */
+            $relation = call_user_func([static::class, $name]);
+            return $relation->name($name);
         }
 
         throw new NotImplementedException("No matching method for relation named '$name' found in " . static::class);

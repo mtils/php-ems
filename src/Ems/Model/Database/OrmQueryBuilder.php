@@ -256,8 +256,8 @@ class OrmQueryBuilder
         foreach ($relationMap as $name=>$map) {
             /** @var Relationship $relation */
             $relation = $map['relation'];
-            // $this->inspector // $ormQuery->ormClass
-            if ($relation->hasMany() || $relation->belongsToMany()) {
+
+            if ($relation->hasMany || $relation->belongsToMany) {
                 $dbQuery->distinct(true);
             }
 
@@ -265,10 +265,11 @@ class OrmQueryBuilder
             $relatedTable = $this->inspector->getStorageName($relatedClass);
             $ownerClass = get_class($relation->owner);
             $ownerTable = $this->inspector->getStorageName($ownerClass);
+            $tableAlias = $relation->name != $relatedTable ? $relation->name : '';
 
-            echo "\n$relatedTable.".$relation->relatedKey . " -> $ownerTable.$relation->ownerKey";
-            $dbQuery->join($relatedTable)
-                ->on("$ownerTable.$relation->ownerKey", "$relatedTable.$relation->relatedKey");
+            $join = $dbQuery->join($relatedTable)
+                    ->as($tableAlias)
+                    ->on("$ownerTable.$relation->ownerKey", "$tableAlias.$relation->relatedKey");
         }
     }
 
