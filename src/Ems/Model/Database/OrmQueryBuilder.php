@@ -13,6 +13,8 @@ use Ems\Contracts\Model\Database\Parentheses;
 use Ems\Contracts\Model\Database\Predicate;
 use Ems\Contracts\Model\Database\Query;
 use Ems\Contracts\Model\OrmQuery;
+use Ems\Contracts\Model\Relation;
+use Ems\Contracts\Model\Relationship;
 use Ems\Contracts\Model\SchemaInspector;
 use Ems\Core\KeyExpression;
 
@@ -21,6 +23,8 @@ use RuntimeException;
 use function array_keys;
 use function array_unique;
 use function class_exists;
+use function get_class;
+use function is_object;
 use function is_string;
 use function str_replace;
 use function strrpos;
@@ -93,6 +97,11 @@ class OrmQueryBuilder
         // not on object level.
         // Then we MUST define a chunk size. In paginator it will be the page
         // size, without it will be something like 100.
+
+        $this->addJoins($query, $dbQuery, $relationMap);
+
+        // After all this join adding we have to append the missing appendings
+        // to the orm query
 
         return $dbQuery;
     }
@@ -227,8 +236,8 @@ class OrmQueryBuilder
             $parentClass = $ormQuery->ormClass;
             $relation = null;
             foreach ($parts as $segment) {
-                $relation = $this->inspector->getRelation($parentClass, $segment);
-                $parentClass = get_class($relation->getParent());
+                $relation = $this->inspector->getRelationship($parentClass, $segment);
+                $parentClass = get_class($relation->owner);
             }
             if (!$relation) {
                 throw new RuntimeException("Relation object $relationName not found.");
@@ -238,8 +247,29 @@ class OrmQueryBuilder
                 'relation'  => $relation
             ];
         }
-        print_r($map);
+
         return $map;
+    }
+
+    protected function addJoins(OrmQuery $ormQuery, Query $dbQuery, array $relationMap)
+    {
+        foreach ($relationMap as $name=>$map) {
+            /** @var Relationship $relation */
+            $relation = $map['relation'];
+            // $this->inspector // $ormQuery->ormClass
+            if ($relation->hasMany() || $relation->belongsToMany()) {
+                $dbQuery->distinct(true);
+            }
+
+            $relatedClass = get_class($relation->related);
+            $relatedTable = $this->inspector->getStorageName($relatedClass);
+            $ownerClass = get_class($relation->owner);
+            $ownerTable = $this->inspector->getStorageName($ownerClass);
+
+            echo "\n$relatedTable.".$relation->relatedKey . " -> $ownerTable.$relation->ownerKey";
+            $dbQuery->join($relatedTable)
+                ->on("$ownerTable.$relation->ownerKey", "$relatedTable.$relation->relatedKey");
+        }
     }
 
     /**

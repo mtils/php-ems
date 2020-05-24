@@ -9,6 +9,7 @@ namespace Ems\Model;
 use Ems\Contracts\Core\Exceptions\TypeException;
 use Ems\Contracts\Core\Url;
 use Ems\Contracts\Model\Relation;
+use Ems\Contracts\Model\Relationship;
 use Ems\Contracts\Model\SchemaInspector;
 use Ems\Core\Exceptions\HandlerNotFoundException;
 
@@ -79,11 +80,11 @@ class MapSchemaInspector implements SchemaInspector
      * @param string $class
      * @param string $name
      *
-     * @return Relation
+     * @return Relationship
      */
-    public function getRelation($class, $name)
+    public function getRelationship($class, $name)
     {
-        return $this->getMap($class)->getRelation($name);
+        return $this->getMap($class)->getRelationship($name);
     }
 
     /**

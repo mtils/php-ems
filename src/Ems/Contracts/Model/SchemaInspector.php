@@ -48,7 +48,7 @@ interface SchemaInspector
      * @param string $class
      * @param string $name
      *
-     * @return Relation
+     * @return Relationship
      */
-    public function getRelation($class, $name);
+    public function getRelationship($class, $name);
 }

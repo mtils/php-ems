@@ -33,6 +33,7 @@ use function is_array;
  * @property      string[]|Stringable[] orderBys
  * @property      int|string|Stringable offset
  * @property      int|string|Stringable limit
+ * @property      bool                  distinct
  * @property      array                 values
  * @property      string                operation (SELECT|INSERT|UPDATE|DELETE|ALTER|CREATE)
  * @property-read Parentheses           havings
@@ -85,6 +86,11 @@ class Query implements Queryable
      * @var int|null
      */
     protected $offset;
+
+    /**
+     * @var string
+     */
+    protected $distinct = false;
 
     /**
      * An associative array of values for insert or update.
@@ -286,6 +292,20 @@ class Query implements Queryable
     }
 
     /**
+     * Make the query distinct.
+     *
+     *
+     * @param bool $distinct
+     *
+     * @return $this
+     */
+    public function distinct($distinct=true)
+    {
+        $this->distinct = $distinct;
+        return $this;
+    }
+
+    /**
      * Set the values for an insert, update or replace query. A passed array
      * clears the previous values, $key and $value will be added.
      *
@@ -337,6 +357,8 @@ class Query implements Queryable
                 return $this->offset;
             case 'limit':
                 return $this->limit;
+            case 'distinct':
+                return $this->distinct;
         }
 
         return null;
@@ -375,6 +397,9 @@ class Query implements Queryable
                 break;
             case 'limit':
                 $this->limit($value);
+                break;
+            case 'distinct':
+                $this->distinct($value);
                 break;
         }//end switch
     }

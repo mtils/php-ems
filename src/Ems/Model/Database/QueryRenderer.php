@@ -101,7 +101,8 @@ class QueryRenderer implements Renderer
     {
         $bindings = [];
 
-        $sql = ['SELECT ' . $this->renderColumns($query->columns)];
+        $prefix = 'SELECT ' . ($query->distinct ? 'DISTINCT ': '');
+        $sql = [$prefix . $this->renderColumns($query->columns)];
 
         $sql[] = "FROM " . $this->quote($query->table, Dialect::NAME);
 

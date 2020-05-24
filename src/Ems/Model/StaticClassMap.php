@@ -6,6 +6,7 @@
 
 namespace Ems\Model;
 
+use Ems\Contracts\Model\Relationship;
 use Ems\Core\Exceptions\NotImplementedException;
 use Ems\Core\Exceptions\UnConfiguredException;
 use Ems\Core\Url;
@@ -55,8 +56,7 @@ abstract class StaticClassMap extends ClassMap
      * @var string[]
      */
     private static $relationReturnTypes = [
-        \Ems\Contracts\Model\Relation::class,
-        Relation::class
+        Relationship::class
     ];
 
     public function getOrmClass()
@@ -107,7 +107,7 @@ abstract class StaticClassMap extends ClassMap
 
     }
 
-    final public function getRelation($name)
+    final public function getRelationship($name)
     {
         return static::relation($name);
     }
@@ -156,6 +156,22 @@ abstract class StaticClassMap extends ClassMap
             $parent = new $parentClass();
         }
         return (new Relation())->setParent($parent);
+    }
+
+    /**
+     * Create a new relationship and return it.
+     *
+     * @param string|object $related
+     * @param string $relatedKey (optional)
+     * @param string $ownerKey (optional)
+     *
+     * @return Relationship
+     */
+    protected static function relateTo($related, $relatedKey='', $ownerKey='')
+    {
+        return (new Relationship())
+            ->relateTo($related, $relatedKey)
+            ->owner(static::ORM_CLASS, $ownerKey);
     }
 
     /**

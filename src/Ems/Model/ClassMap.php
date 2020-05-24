@@ -7,13 +7,13 @@
 namespace Ems\Model;
 
 use Ems\Contracts\Core\Url as UrlContract;
+use Ems\Contracts\Model\Relationship;
 use Ems\Core\Url;
-use Ems\Contracts\Model\Relation as RelationContract;
 
 /**
  * Class ClassMap
  *
- * This class tells MapSchemaInspector informations how to work with your orm
+ * This class tells MapSchemaInspector information how to work with your orm
  * objects.
  *
  * @package Ems\Model
@@ -144,9 +144,9 @@ class ClassMap
      *
      * @param string $name
      *
-     * @return RelationContract
+     * @return Relationship
      */
-    public function getRelation($name)
+    public function getRelationship($name)
     {
         return isset($this->relations[$name]) ? $this->relations[$name] : null;
     }
@@ -154,12 +154,12 @@ class ClassMap
     /**
      * Set the relation for $name.
      *
-     * @param string           $name
-     * @param RelationContract $relation
+     * @param string       $name
+     * @param Relationship $relation
      *
      * @return $this
      */
-    public function setRelation($name, RelationContract $relation)
+    public function setRelationship($name, Relationship $relation)
     {
         $this->relations[$name] = $relation;
         return $this;

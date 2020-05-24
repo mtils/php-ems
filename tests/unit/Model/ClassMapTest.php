@@ -7,6 +7,7 @@ namespace Ems\Model;
 
 
 use Ems\Contracts\Core\Url;
+use Ems\Contracts\Model\Relationship;
 use Ems\TestCase;
 
 class ClassMapTest extends TestCase
@@ -75,11 +76,11 @@ class ClassMapTest extends TestCase
      */
     public function get_and_set_relation()
     {
-        $relation = new Relation();
+        $relation = new Relationship();
         $map = $this->newMap();
-        $this->assertNull($map->getRelation('files'));
-        $this->assertSame($map, $map->setRelation('files', $relation));
-        $this->assertSame($relation, $map->getRelation('files'));
+        $this->assertNull($map->getRelationship('files'));
+        $this->assertSame($map, $map->setRelationship('files', $relation));
+        $this->assertSame($relation, $map->getRelationship('files'));
 
     }
 

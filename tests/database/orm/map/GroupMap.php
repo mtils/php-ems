@@ -6,6 +6,7 @@
 
 namespace Models\Ems;
 
+use Ems\Contracts\Model\Relationship;
 use Ems\Model\Relation;
 use Ems\Model\StaticClassMap;
 use Models\Group;
@@ -22,8 +23,15 @@ class GroupMap extends StaticClassMap
     const STORAGE_NAME = 'groups';
     const STORAGE_URL = 'database://default';
 
-    public static function users() : Relation
+    // Should not bee needed in future
+    public static function users() : Relationship
     {
+        return static::relateTo(User::class, 'id', 'id')
+            ->hasMany(true)
+            ->belongsToMany(true)
+            ->makeOwnerRequiredForRelated(true)
+            ->junction('user_group', 'user_id', 'group_id');
+
         return static::newRelation()
             ->setParent(static::ORM_CLASS)
             ->setRelatedObject(User::class)

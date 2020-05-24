@@ -8,6 +8,12 @@ namespace Ems\Model;
 use Ems\Contracts\Model\OrmObject as OrmObjectContract;
 use Ems\Contracts\Model\Relation as RelationContract;
 
+/**
+ * Class Relation
+ * @package Ems\Model
+ *
+ * @deprecated use Ems\Contracts\Model\Relationship
+ */
 class Relation implements RelationContract
 {
     /**

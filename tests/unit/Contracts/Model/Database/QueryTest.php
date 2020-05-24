@@ -97,6 +97,23 @@ class QueryTest extends TestCase
     /**
      * @test
      */
+    public function distinct_makes_query_distinct()
+    {
+        $query = $this->newQuery();
+        $this->assertFalse($query->distinct);
+        $query->distinct(true);
+        $this->assertTrue($query->distinct);
+        $query->distinct(false);
+        $this->assertFalse($query->distinct);
+        $query->distinct = true;
+        $this->assertTrue($query->distinct);
+        $query->distinct = false;
+        $this->assertFalse($query->distinct);
+    }
+
+    /**
+     * @test
+     */
     public function join_creates_join()
     {
         $query = $this->newQuery();

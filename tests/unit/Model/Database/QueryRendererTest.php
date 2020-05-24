@@ -88,6 +88,17 @@ class QueryRendererTest extends TestCase
     /**
      * @test
      */
+    public function render_simple_distinct_select()
+    {
+        $renderer = $this->newRenderer();
+        $query = $this->newQuery()->from('users')->distinct();
+        $this->assertSql($renderer->render($query), 'SELECT DISTINCT * FROM "users"');
+        $this->assertInstanceOf(SQLExpression::class, $renderer->render($query));
+    }
+
+    /**
+     * @test
+     */
     public function renderColumns_renders_strings()
     {
         $renderer = $this->newRenderer();

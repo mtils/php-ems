@@ -6,6 +6,7 @@
 namespace unit\Model;
 
 
+use Ems\Contracts\Model\Relationship;
 use Ems\Contracts\Model\SchemaInspector;
 use Ems\Model\ClassMap;
 use Ems\Model\MapSchemaInspector;
@@ -87,7 +88,7 @@ class MapSchemaInspectorTest extends TestCase
             ->setStorageName('test-cases')
             ->setStorageUrl('rest://my-domain.de/api/v2')
             ->setKeys(['a', 'b', 'c'])
-            ->setRelation('errors', new Relation());
+            ->setRelationship('errors', new Relationship());
 
         $inspector = $this->make();
         $inspector->map(TestCase::class, $map);
@@ -95,7 +96,7 @@ class MapSchemaInspectorTest extends TestCase
         $this->assertEquals((string)$map->getStorageUrl(), $inspector->getStorageUrl(TestCase::class));
         $this->assertSame($map->getStorageName(), $inspector->getStorageName(TestCase::class));
         $this->assertSame($map->getKeys(), $inspector->getKeys(TestCase::class));
-        $this->assertSame($map->getRelation('errors'), $inspector->getRelation(TestCase::class, 'errors'));
+        $this->assertSame($map->getRelationship('errors'), $inspector->getRelationship(TestCase::class, 'errors'));
     }
 
     /**

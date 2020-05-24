@@ -6,6 +6,7 @@
 
 namespace Models\Ems;
 
+use Ems\Contracts\Model\Relationship;
 use Ems\Model\Relation;
 use Ems\Model\StaticClassMap;
 use Models\Token;
@@ -25,8 +26,11 @@ class TokenMap extends StaticClassMap
     const STORAGE_NAME = 'tokens';
     const STORAGE_URL = 'database://default';
 
-    public static function user() : Relation
+    // Should not be needed in future
+    public static function user() : Relationship
     {
+        return static::relateTo(User::class, 'id', 'user_id')
+            ->required(true);
         return static::newRelation()
             ->setRelatedObject(User::class)
             ->setHasMany(false)
