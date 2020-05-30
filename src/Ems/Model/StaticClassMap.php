@@ -16,6 +16,7 @@ use ReflectionMethod;
 use ReflectionType;
 
 use function call_user_func;
+use function get_class;
 use function in_array;
 
 abstract class StaticClassMap extends ClassMap
@@ -50,7 +51,7 @@ abstract class StaticClassMap extends ClassMap
     /**
      * @var string[]
      */
-    private static $keyCache;
+    private static $keyCache = [];
 
     /**
      * @var string[]
@@ -114,16 +115,17 @@ abstract class StaticClassMap extends ClassMap
 
     public static function keys()
     {
-        if (static::$keyCache !== null) {
-            return static::$keyCache;
+        if (isset(static::$keyCache[static::class])) {
+            return static::$keyCache[static::class];
         }
-        static::$keyCache = [];
+        static::$keyCache[static::class] = [];
+
         foreach (static::classConstants() as $name => $value) {
             if (static::isKeyConstant($name)) {
-                static::$keyCache[] = $value;
+                static::$keyCache[static::class][] = $value;
             }
         }
-        return static::$keyCache;
+        return static::$keyCache[static::class];
     }
 
     public static function relation($name)

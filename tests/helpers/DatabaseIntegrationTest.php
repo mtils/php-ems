@@ -66,7 +66,19 @@ class DatabaseIntegrationTest extends IntegrationTest
     {
         $schemaDir = static::dirOfTests('database/schema');
 
-        foreach (['contacts','users', 'tokens','groups','user_group'] as $basename) {
+        $tables = [
+            'contacts',
+            'users',
+            'tokens',
+            'groups',
+            'user_group',
+            'project_types',
+            'files',
+            'projects',
+            'project_file'
+        ];
+
+        foreach ($tables as $basename) {
             $con->write(file_get_contents("$schemaDir/$basename.sql"));
         }
 

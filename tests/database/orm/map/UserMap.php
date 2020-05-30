@@ -11,6 +11,7 @@ use Ems\Model\Relation;
 use Ems\Model\StaticClassMap;
 use Models\Contact;
 use Models\Group;
+use Models\Project;
 use Models\Token;
 use Models\User;
 
@@ -33,12 +34,6 @@ class UserMap extends StaticClassMap
     public static function contact() : Relationship
     {
         return static::relateTo(Contact::class, 'id', 'contact_id');
-        return static::newRelation()
-            ->setRelatedObject(Contact::class)
-            ->setHasMany(false)
-            ->setRequired(false)
-            ->setParentKey(static::CONTACT_ID)
-            ->setParentRequired(false);
     }
 
     public static function tokens() : Relationship
@@ -46,11 +41,6 @@ class UserMap extends StaticClassMap
         return static::relateTo(Token::class, 'user_id', 'id')
             ->hasMany(true)
             ->makeOwnerRequiredForRelated(true);
-        return static::newRelation()
-            ->setRelatedObject(Token::class)
-            ->setHasMany(true)
-            ->setRequired(false)
-            ->setParentRequired(true);
     }
 
     public static function groups() : Relationship
@@ -60,12 +50,12 @@ class UserMap extends StaticClassMap
             ->belongsToMany(true)
             ->makeRequired(true)
             ->junction('user_group', 'user_id', 'group_id');
-        return static::newRelation()
-            ->setRelatedObject(Group::class)
-            ->setHasMany(true)
-            ->setRequired(false)
-            ->setParentKey(static::ID)
-            ->setParentRequired(false)
-            ->setBelongsToMany(true);
+    }
+
+    public static function projects() : Relationship
+    {
+        return static::relateTo(Project::class, ProjectMap::ID, self::ID)
+            ->hasMany(true)
+            ->makeOwnerRequiredForRelated(true);
     }
 }

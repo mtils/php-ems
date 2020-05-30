@@ -13,20 +13,19 @@ use Ems\Contracts\Model\Database\Parentheses;
 use Ems\Contracts\Model\Database\Predicate;
 use Ems\Contracts\Model\Database\Query;
 use Ems\Contracts\Model\OrmQuery;
-use Ems\Contracts\Model\Relation;
 use Ems\Contracts\Model\Relationship;
 use Ems\Contracts\Model\SchemaInspector;
 use Ems\Core\KeyExpression;
-
 use RuntimeException;
 
 use function array_keys;
 use function array_unique;
 use function class_exists;
 use function get_class;
-use function is_object;
+use function implode;
 use function is_string;
 use function str_replace;
+use function strpos;
 use function strrpos;
 use function substr;
 
@@ -102,6 +101,8 @@ class OrmQueryBuilder
 
         // After all this join adding we have to append the missing appendings
         // to the orm query
+        // AAAAAND if the query did affect the relation the appendings have to
+        // be affected too (not like in laravel)
 
         return $dbQuery;
     }
@@ -235,17 +236,26 @@ class OrmQueryBuilder
             $parts = explode('.', $relationName);
             $parentClass = $ormQuery->ormClass;
             $relation = null;
+
+            $nameStack = [];
             foreach ($parts as $segment) {
+
+                $nameStack[] = $segment;
+                $currentRelationName = implode('.', $nameStack);
+
                 $relation = $this->inspector->getRelationship($parentClass, $segment);
-                $parentClass = get_class($relation->owner);
+                $parentClass = get_class($relation->related);
+
+                if (!$relation) {
+                    throw new RuntimeException("Relation object $currentRelationName not found.");
+                }
+
+                $map[$currentRelationName] = [
+                    'path'      => $this->keyToColumn($currentRelationName),
+                    'relation'  => $relation
+                ];
             }
-            if (!$relation) {
-                throw new RuntimeException("Relation object $relationName not found.");
-            }
-            $map[$relationName] = [
-                'path'      => $this->keyToColumn($relationName),
-                'relation'  => $relation
-            ];
+
         }
 
         return $map;
@@ -261,16 +271,48 @@ class OrmQueryBuilder
                 $dbQuery->distinct(true);
             }
 
-            $relatedClass = get_class($relation->related);
-            $relatedTable = $this->inspector->getStorageName($relatedClass);
-            $ownerClass = get_class($relation->owner);
-            $ownerTable = $this->inspector->getStorageName($ownerClass);
-            $tableAlias = $relation->name != $relatedTable ? $relation->name : '';
-
-            $join = $dbQuery->join($relatedTable)
-                    ->as($tableAlias)
-                    ->on("$ownerTable.$relation->ownerKey", "$tableAlias.$relation->relatedKey");
+            $this->addJoin($ormQuery, $dbQuery, $relation, $name);
         }
+    }
+
+    protected function addJoin(OrmQuery $ormQuery, Query $dbQuery, Relationship $relation, $name)
+    {
+        $lastPointPos = strrpos($name, '.');
+        $relationParent = $lastPointPos ? substr($name, 0, $lastPointPos) . '__' : '';
+
+        $relationName = $relationParent . $relation->name;
+
+        $relatedClass = get_class($relation->related);
+        $relatedTable = $this->inspector->getStorageName($relatedClass);
+        $ownerClass = get_class($relation->owner);
+        $ownerTable = $this->inspector->getStorageName($ownerClass);
+        $needsAlias = $relationName != $relatedTable;
+        $tableAlias = $needsAlias ? $relationName : $relatedTable;
+
+        if (!$junction = $relation->junction) {
+            $join = $dbQuery->join($relatedTable)
+                ->on("$ownerTable.$relation->ownerKey", "$tableAlias.$relation->relatedKey");
+
+            if ($needsAlias) {
+                $join->as($tableAlias);
+            }
+            return;
+        }
+
+        $junctionTable = $this->junctionIsClass($junction) ? $this->inspector->getStorageName($junction) : $junction;
+        $junctionAlias = $tableAlias . '_pivot';
+
+        $dbQuery->join($junctionTable)
+                ->as($junctionAlias)
+                ->on("$ownerTable.$relation->ownerKey", "$junctionAlias.$relation->junctionOwnerKey");
+
+        $join = $dbQuery->join($relatedTable)
+                        ->on("$junctionAlias.$relation->junctionRelatedKey", "$tableAlias.$relation->relatedKey");
+
+        if ($needsAlias) {
+            $join->as($tableAlias);
+        }
+
     }
 
     /**
@@ -357,5 +399,23 @@ class OrmQueryBuilder
             throw new RuntimeException("RelationMap didnt contain relation '$parent'");
         }
         return $relationMap[$parent]['path'] . ".$key";
+    }
+
+    /**
+     * Check if the junction is a class or a storage name.
+     *
+     * @param string $junction
+     *
+     * @return bool
+     */
+    protected function junctionIsClass($junction)
+    {
+        if (strpos($junction, '_') !== false) {
+            return false;
+        }
+        if (strpos($junction, '\\') !== false) {
+            return true;
+        }
+        return class_exists($junction);
     }
 }
