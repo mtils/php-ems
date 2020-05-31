@@ -24,6 +24,7 @@ class UserMap extends StaticClassMap
     const PASSWORD      = 'password';
     const WEB           = 'web';
     const CONTACT_ID    = 'contact_id';
+    const PARENT_ID     = 'parent_id';
     const CREATED_AT    = 'created_at';
     const UPDATED_AT    = 'updated_at';
 
@@ -33,19 +34,24 @@ class UserMap extends StaticClassMap
 
     public static function contact() : Relationship
     {
-        return static::relateTo(Contact::class, 'id', 'contact_id');
+        return static::relateTo(Contact::class, ContactMap::ID, self::CONTACT_ID);
+    }
+
+    public static function parent() : Relationship
+    {
+        return static::relateTo(self::ORM_CLASS, self::ID, self::PARENT_ID);
     }
 
     public static function tokens() : Relationship
     {
-        return static::relateTo(Token::class, 'user_id', 'id')
+        return static::relateTo(Token::class, TokenMap::USER_ID, self::ID)
             ->hasMany(true)
             ->makeOwnerRequiredForRelated(true);
     }
 
     public static function groups() : Relationship
     {
-        return static::relateTo(Group::class, 'id', 'id')
+        return static::relateTo(Group::class, GroupMap::ID, self::ID)
             ->hasMany(true)
             ->belongsToMany(true)
             ->makeRequired(true)
@@ -54,7 +60,7 @@ class UserMap extends StaticClassMap
 
     public static function projects() : Relationship
     {
-        return static::relateTo(Project::class, ProjectMap::ID, self::ID)
+        return static::relateTo(Project::class, ProjectMap::OWNER_ID, self::ID)
             ->hasMany(true)
             ->makeOwnerRequiredForRelated(true);
     }

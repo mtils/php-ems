@@ -17,15 +17,17 @@ use Models\Contact;
  *
  * @package Models
  *
- * @property int      id
- * @property string   email
- * @property string   password
- * @property string   web
- * @property int      contact_id
- * @property DateTime created_at
- * @property DateTime updated_at
- * @property Contact  contact
- * @property Token[]  tokens
+ * @property int        id
+ * @property string     email
+ * @property string     password
+ * @property string     web
+ * @property int        contact_id
+ * @property int        parent_id
+ * @property DateTime   created_at
+ * @property DateTime   updated_at
+ * @property Contact    contact
+ * @property User|null  parent
+ * @property Token[]    tokens
  */
 class User implements DataObject
 {

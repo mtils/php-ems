@@ -18,6 +18,7 @@ use Ems\Contracts\Model\Database\Predicate;
 use Ems\Contracts\Model\Database\Query as QueryContract;
 use Ems\Contracts\Model\Database\SQLExpression;
 use Ems\Core\Exceptions\UnsupportedParameterException;
+use Ems\Core\KeyExpression;
 use Traversable;
 
 use function array_push;
@@ -265,10 +266,21 @@ class QueryRenderer implements Renderer
         $strings = [];
 
         foreach ($columns as $column) {
+
+            if ($column instanceof KeyExpression) {
+                $string = $this->quote($column->toString(), Dialect::NAME);
+                if ($alias = $column->alias()) {
+                    $string .= ' AS ' . $this->quote($alias, Dialect::STR);
+                }
+                $strings[] = $string;
+                continue;
+            }
+
             if ($column instanceof Expression) {
                 $strings[] = $this->renderExpression($column, $bindings);
                 continue;
             }
+
             // TODO Support (and test) Query objects here too
             $strings[] = $this->quote($column, Dialect::NAME);
         }

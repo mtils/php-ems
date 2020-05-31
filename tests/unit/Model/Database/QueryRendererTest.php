@@ -16,6 +16,7 @@ use Ems\Contracts\Model\Database\Parentheses;
 use Ems\Contracts\Model\Database\Predicate;
 use Ems\Contracts\Model\Database\SQLExpression;
 use Ems\Core\Expression;
+use Ems\Core\KeyExpression;
 use Ems\Model\Database\Dialects\AbstractDialect;
 use Ems\Model\Database\Dialects\SQLiteDialect;
 use Ems\TestCase;
@@ -136,6 +137,24 @@ class QueryRendererTest extends TestCase
         $this->assertEquals('"id", "login", ' . $countString . ', "password"' . ', ' . $subSelectString, $renderer->renderColumns($columns, $bindings));
 
         $this->assertEquals($subSelect->getBindings(), $bindings);
+    }
+
+    /**
+     * @test
+     */
+    public function renderColumns_renders_aliases()
+    {
+        $renderer = $this->newRenderer();
+        $columns = [
+            '*'
+        ];
+        $this->assertEquals('*', $renderer->renderColumns($columns));
+
+        $columns = [
+            'id', 'login', new KeyExpression('password', 'pass')
+        ];
+
+        $this->assertEquals('"id", "login", "password" AS \'pass\'', $renderer->renderColumns($columns));
     }
 
     /**

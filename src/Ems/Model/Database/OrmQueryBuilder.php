@@ -15,14 +15,17 @@ use Ems\Contracts\Model\Database\Query;
 use Ems\Contracts\Model\OrmQuery;
 use Ems\Contracts\Model\Relationship;
 use Ems\Contracts\Model\SchemaInspector;
+use Ems\Core\Exceptions\KeyNotFoundException;
 use Ems\Core\KeyExpression;
 use RuntimeException;
 
 use function array_keys;
+use function array_map;
 use function array_unique;
 use function class_exists;
 use function get_class;
 use function implode;
+use function in_array;
 use function is_string;
 use function str_replace;
 use function strpos;
@@ -79,6 +82,8 @@ class OrmQueryBuilder
 
         $relations = $this->collectRelations($query);
         $relationMap = $this->buildRelationMap($query, $relations);
+
+        $this->addRelationalColumns($query, $dbQuery, $relationMap);
 
         $this->addConditions($query->conditions, $dbQuery->conditions, $relationMap);
 
@@ -157,6 +162,58 @@ class OrmQueryBuilder
         }
         $storageName = $this->inspector->getStorageName($class);
         return (new Query())->from($storageName);
+    }
+
+    protected function addRelationalColumns(OrmQuery $query, Query $dbQuery, array $relationMap)
+    {
+        if (!$query->withs) {
+            return;
+        }
+
+        $added = [];
+
+        foreach ($query->withs as $relationPath) {
+
+            if (in_array($relationPath, $added)) {
+                continue;
+            }
+
+            $segments = explode('.', $relationPath);
+            $segmentStack = [];
+
+
+            foreach ($segments as $segment) {
+
+                $segmentStack[] = $segment;
+                $currentPath = implode('.', $segmentStack);
+
+                if (!isset($relationMap[$currentPath])) {
+                    throw new KeyNotFoundException("Relation $currentPath needed by query but missing in relationMap");
+                }
+
+                /** @var Relationship $relationShip */
+                $relationShip = $relationMap[$currentPath]['relation'];
+
+                // We only add "to one"-relations. "to many" will lead to cartesian
+                // results
+                if ($relationShip->hasMany) {
+                    continue;
+                }
+
+                $relatedKeys = $this->inspector->getKeys(get_class($relationShip->related));
+
+                $relationAlias = $this->keyToColumn($currentPath);
+
+                $relatedColumns = array_map(function ($key) use ($currentPath, $relationAlias) {
+                    return new KeyExpression("$relationAlias.$key", $relationAlias . "__$key");
+                }, $relatedKeys);
+
+                $dbQuery->select(...$relatedColumns);
+                $added[] = $currentPath;
+            }
+
+        }
+
     }
 
     protected function toColumns(array $keys, $tableOrAlias, $relationName='')
@@ -278,20 +335,22 @@ class OrmQueryBuilder
     protected function addJoin(OrmQuery $ormQuery, Query $dbQuery, Relationship $relation, $name)
     {
         $lastPointPos = strrpos($name, '.');
-        $relationParent = $lastPointPos ? substr($name, 0, $lastPointPos) . '__' : '';
+        $relationParent = $lastPointPos ? substr($name, 0, $lastPointPos) : '';
 
-        $relationName = $relationParent . $relation->name;
+        $relationName = $relationParent ? ($relationParent . '__' . $relation->name) : $relation->name;
 
         $relatedClass = get_class($relation->related);
         $relatedTable = $this->inspector->getStorageName($relatedClass);
         $ownerClass = get_class($relation->owner);
         $ownerTable = $this->inspector->getStorageName($ownerClass);
+
         $needsAlias = $relationName != $relatedTable;
         $tableAlias = $needsAlias ? $relationName : $relatedTable;
 
         if (!$junction = $relation->junction) {
+            $leftAlias = $relationParent ? $relationParent : $ownerTable;
             $join = $dbQuery->join($relatedTable)
-                ->on("$ownerTable.$relation->ownerKey", "$tableAlias.$relation->relatedKey");
+                ->on("$leftAlias.$relation->ownerKey", "$tableAlias.$relation->relatedKey");
 
             if ($needsAlias) {
                 $join->as($tableAlias);

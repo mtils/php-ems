@@ -32,6 +32,7 @@ use function class_exists;
  * X join 1:n
  * X join m:n
  * X join m:n -> n:1
+ * X join self (parent, parent.parent)
  *
  * - eager n:1
  * - eager 1:n
@@ -197,6 +198,106 @@ class OrmQueryBuilderIntegrationTest extends DatabaseIntegrationTest
         $this->assertCount(2, $dbQuery->conditions);
         $this->assertCount(4, $dbQuery->joins);
         $this->assertTrue($dbQuery->distinct);
+
+    }
+
+    /**
+     * @test
+     */
+    public function select_from_user_where_parent()
+    {
+        $query = new OrmQuery(User::class);
+        $dbQuery = static::$con->query();
+        $inspector = $this->newInspector();
+
+        $query->where('parent.'.UserMap::WEB, 'like', 'https/%')
+            ->where(UserMap::EMAIL, 'LIKE', '%@outlook.com')
+            ->where(UserMap::CREATED_AT, '>', new DateTime('2020-04-15 00:00:00'));
+
+        /** @var Query $dbQuery */
+        $dbQuery = $this->make($inspector)->toSelect($query, $dbQuery);
+
+        $this->assertInstanceOf(Query::class, $dbQuery);
+        $this->assertCount(count($inspector->getKeys(User::class)), $dbQuery->columns);
+        $this->assertEquals($inspector->getStorageName(User::class), $dbQuery->table);
+
+        $this->assertCount(3, $dbQuery->conditions);
+        $this->assertCount(1, $dbQuery->joins);
+
+    }
+
+    /**
+     * @test
+     */
+    public function select_from_user_where_parent_parent()
+    {
+        $query = new OrmQuery(User::class);
+        $dbQuery = static::$con->query();
+        $inspector = $this->newInspector();
+
+        $query->where('parent.parent.'.UserMap::WEB, 'like', 'https/%')
+            ->where(UserMap::EMAIL, 'LIKE', '%@outlook.com')
+            ->where(UserMap::CREATED_AT, '>', new DateTime('2020-04-15 00:00:00'));
+
+        /** @var Query $dbQuery */
+        $dbQuery = $this->make($inspector)->toSelect($query, $dbQuery);
+
+        $this->assertInstanceOf(Query::class, $dbQuery);
+        $this->assertCount(count($inspector->getKeys(User::class)), $dbQuery->columns);
+        $this->assertEquals($inspector->getStorageName(User::class), $dbQuery->table);
+
+        $this->assertCount(3, $dbQuery->conditions);
+        $this->assertCount(2, $dbQuery->joins);
+
+    }
+
+    /**
+     * @test
+     */
+    public function select_from_user_eager_contact()
+    {
+        $query = (new OrmQuery(User::class))->with('contact');
+        $dbQuery = static::$con->query();
+        $inspector = $this->newInspector();
+
+        $query->where(UserMap::EMAIL, 'LIKE', '%@outlook.com')
+            ->where(UserMap::CREATED_AT, '>', new DateTime('2020-04-15 00:00:00'));
+
+        /** @var Query $dbQuery */
+        $dbQuery = $this->make($inspector)->toSelect($query, $dbQuery);
+
+        $this->assertInstanceOf(Query::class, $dbQuery);
+        $this->assertEquals($inspector->getStorageName(User::class), $dbQuery->table);
+
+        $columnCount = count($inspector->getKeys(User::class)) +  count($inspector->getKeys(Contact::class));
+        $this->assertCount($columnCount, $dbQuery->columns);
+        $this->assertCount(2, $dbQuery->conditions);
+        $this->assertCount(1, $dbQuery->joins);
+
+    }
+
+    /**
+     * @test
+     */
+    public function select_from_user_eager_parent_contact()
+    {
+        $query = (new OrmQuery(User::class))->with('contact', 'parent.contact');
+        $dbQuery = static::$con->query();
+        $inspector = $this->newInspector();
+
+        $query->where(UserMap::EMAIL, 'LIKE', '%@outlook.com')
+            ->where(UserMap::CREATED_AT, '>', new DateTime('2020-04-15 00:00:00'));
+
+        /** @var Query $dbQuery */
+        $dbQuery = $this->make($inspector)->toSelect($query, $dbQuery);
+
+        $this->assertInstanceOf(Query::class, $dbQuery);
+        $this->assertEquals($inspector->getStorageName(User::class), $dbQuery->table);
+
+        $columnCount = count($inspector->getKeys(User::class)) +  count($inspector->getKeys(Contact::class));
+        $this->assertCount($columnCount*2, $dbQuery->columns);
+        $this->assertCount(2, $dbQuery->conditions);
+        $this->assertCount(3, $dbQuery->joins);
 
     }
 
