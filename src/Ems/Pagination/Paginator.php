@@ -12,7 +12,9 @@ use Ems\Contracts\Pagination\Page;
 use Ems\Contracts\Pagination\Pages;
 use Ems\Contracts\Pagination\Paginator as PaginatorContract;
 use Ems\Model\ResultTrait;
+use function call_user_func;
 use function filter_var;
+use function is_callable;
 use function is_numeric;
 use Traversable;
 use function array_slice;
@@ -40,6 +42,11 @@ class Paginator implements PaginatorContract
      * @var int|null
      */
     protected $totalCount;
+
+    /**
+     * @var callable
+     */
+    protected $totalCountProvider;
 
     /**
      * @var UrlContract
@@ -164,7 +171,12 @@ class Paginator implements PaginatorContract
     public function setResult($items, $totalCount = null)
     {
         $this->items = Type::toArray($items);
-        $this->totalCount = $totalCount;
+        if (is_numeric($totalCount)) {
+            $this->totalCount = $totalCount;
+        }
+        if (is_callable($totalCount)) {
+            $this->totalCountProvider = $totalCount;
+        }
         $this->pages = null;
         return $this;
     }
@@ -176,6 +188,9 @@ class Paginator implements PaginatorContract
      */
     public function getTotalCount()
     {
+        if ($this->totalCount === null && $this->totalCountProvider) {
+            $this->totalCount = call_user_func($this->totalCountProvider, $this);
+        }
         return $this->totalCount;
     }
 
@@ -186,6 +201,9 @@ class Paginator implements PaginatorContract
      */
     public function hasTotalCount()
     {
+        if ($this->totalCountProvider) {
+            return true;
+        }
         return $this->totalCount !== null;
     }
 
@@ -368,8 +386,9 @@ class Paginator implements PaginatorContract
             return $this->buildLengthUnaware();
 
         }
-        //echo "\n$this->totalCount $this->perPage: float:" . ($this->totalCount/$this->perPage) . ' ceil: ' . ceil($this->totalCount/$this->perPage);
-        $numberOfPages = $this->totalCount ? ceil($this->totalCount/$this->perPage) : 0;
+
+        $totalCount = $this->getTotalCount();
+        $numberOfPages = $totalCount ? ceil($totalCount/$this->perPage) : 0;
 
         if ($squeezeTo && $numberOfPages > $squeezeTo) {
             return $this->buildSqueezed($squeezeTo, $numberOfPages);
@@ -389,7 +408,9 @@ class Paginator implements PaginatorContract
     {
         $pages = $this->newPages();
 
-        if ($this->totalCount < 1) {
+        $totalCount = $this->getTotalCount();
+
+        if ($totalCount < 1) {
             return $pages;
         }
 
@@ -545,6 +566,7 @@ class Paginator implements PaginatorContract
     {
 
         $items = $from == 1 ? 0 : ($from-1) * $this->perPage;
+        $totalCount = $this->getTotalCount();
 
         for ($page=$from; $page <= $to; $page++) {
 
@@ -557,7 +579,7 @@ class Paginator implements PaginatorContract
                 'is_previous' => $page == $this->currentPageNumber-1,
                 'is_next'     => $page == $this->currentPageNumber+1,
                 'is_first'    => $page == 1,
-                'is_last'     => $items >= $this->totalCount,
+                'is_last'     => $items >= $totalCount,
                 'offset'      => ($page-1) * $this->perPage
             ]);
 

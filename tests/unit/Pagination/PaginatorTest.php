@@ -11,6 +11,11 @@ use Ems\Core\Url;
 use Ems\TestCase;
 use Ems\Contracts\Pagination\Paginator as PaginatorContract;
 
+use RuntimeException;
+
+use function iterator_to_array;
+use function range;
+
 class PaginatorTest extends TestCase
 {
     public function test_implements_interface()
@@ -276,6 +281,128 @@ class PaginatorTest extends TestCase
 
     }
 
+    public function test_pages_with_callable_totalCount()
+    {
+
+        $result = range('a', 'z');
+        $paginator = $this->paginate(1, 10);
+
+        $url = new Url('https://web-utils.de/products');
+        $paginator->setBaseUrl($url);
+
+        $items = $paginator->slice($result);
+        $totalCountGetter = function () use ($result) {
+            return count($result);
+        };
+        $paginator->setResult($items, $totalCountGetter);
+
+        $pages = $paginator->pages();
+
+        $this->assertInstanceOf(Pages::class, $pages);
+        $this->assertFalse($pages->isEmpty());
+        $this->assertFalse($pages->hasOnlyOnePage());
+        $this->assertSame($paginator, $pages->creator());
+        $this->assertFalse($pages->isSqueezed());
+
+        $array = [];
+
+        foreach ($pages as $num=>$page) {
+            $array[$num] = $page;
+        }
+
+        $this->assertCount(3, $array);
+
+
+        $this->assertEquals((string)$url->query('page', 1), (string)$pages->first()->url());
+        $this->assertSame($pages->first(), $pages[1]);
+        $this->assertSame($pages->last(), $pages[3]);
+        $this->assertEquals((string)$url->query('page', 3), (string)$pages->last()->url());
+
+        $this->assertTrue($pages->offsetExists(1));
+        $this->assertTrue($pages->offsetExists(2));
+        $this->assertTrue($pages->offsetExists(3));
+        $this->assertFalse($pages->offsetExists(0));
+
+        $this->assertEquals(1, $pages[1]->number());
+        $this->assertTrue($pages[1]->isFirst());
+        $this->assertTrue($pages[1]->isCurrent());
+        $this->assertFalse($pages[1]->isPrevious());
+        $this->assertFalse($pages[1]->isNext());
+        $this->assertFalse($pages[1]->isLast());
+
+        $this->assertEquals(2, $pages[2]->number());
+        $this->assertFalse($pages[2]->isFirst());
+        $this->assertFalse($pages[2]->isCurrent());
+        $this->assertFalse($pages[2]->isPrevious());
+        $this->assertTrue($pages[2]->isNext());
+        $this->assertFalse($pages[2]->isLast());
+
+        $this->assertEquals(3, $pages[3]->number());
+        $this->assertFalse($pages[3]->isFirst());
+        $this->assertFalse($pages[3]->isCurrent());
+        $this->assertFalse($pages[3]->isPrevious());
+        $this->assertFalse($pages[3]->isNext());
+        $this->assertTrue($pages[3]->isLast());
+
+        $paginator->setPagination(2, 10);
+
+        $pages = $paginator->pages();
+
+        $this->assertSame($pages[2], $pages->current());
+
+        $this->assertEquals(1, $pages[1]->number());
+        $this->assertTrue($pages[1]->isFirst());
+        $this->assertFalse($pages[1]->isCurrent());
+        $this->assertTrue($pages[1]->isPrevious());
+        $this->assertFalse($pages[1]->isNext());
+        $this->assertFalse($pages[1]->isLast());
+
+        $this->assertEquals(2, $pages[2]->number());
+        $this->assertFalse($pages[2]->isFirst());
+        $this->assertTrue($pages[2]->isCurrent());
+        $this->assertFalse($pages[2]->isPrevious());
+        $this->assertFalse($pages[2]->isNext());
+        $this->assertFalse($pages[2]->isLast());
+
+        $this->assertEquals(3, $pages[3]->number());
+        $this->assertFalse($pages[3]->isFirst());
+        $this->assertFalse($pages[3]->isCurrent());
+        $this->assertFalse($pages[3]->isPrevious());
+        $this->assertTrue($pages[3]->isNext());
+        $this->assertTrue($pages[3]->isLast());
+
+        $this->assertSame($pages[1], $pages->previous());
+        $this->assertSame($pages[2], $pages->current());
+        $this->assertSame($pages[3], $pages->next());
+
+
+        $paginator->setPagination(3, 10);
+
+        $pages = $paginator->pages();
+
+        $this->assertEquals(1, $pages[1]->number());
+        $this->assertTrue($pages[1]->isFirst());
+        $this->assertFalse($pages[1]->isCurrent());
+        $this->assertFalse($pages[1]->isPrevious());
+        $this->assertFalse($pages[1]->isNext());
+        $this->assertFalse($pages[1]->isLast());
+
+        $this->assertEquals(2, $pages[2]->number());
+        $this->assertFalse($pages[2]->isFirst());
+        $this->assertFalse($pages[2]->isCurrent());
+        $this->assertTrue($pages[2]->isPrevious());
+        $this->assertFalse($pages[2]->isNext());
+        $this->assertFalse($pages[2]->isLast());
+
+        $this->assertEquals(3, $pages[3]->number());
+        $this->assertFalse($pages[3]->isFirst());
+        $this->assertTrue($pages[3]->isCurrent());
+        $this->assertFalse($pages[3]->isPrevious());
+        $this->assertFalse($pages[3]->isNext());
+        $this->assertTrue($pages[3]->isLast());
+
+    }
+
     public function test_pages_with_totalCount_and_perPage_for_two_pages()
     {
 
@@ -368,6 +495,22 @@ class PaginatorTest extends TestCase
         $this->assertFalse($pages[1]->isNext());
         $this->assertTrue($pages[1]->isLast());
 
+    }
+
+    public function test_totalCount_is_not_triggered_when_not_needed()
+    {
+        $perPage = 10;
+        $paginator = $this->paginate(1, $perPage);
+        $totalCountProvider = function () {
+            throw new RuntimeException('The totalCount provider should never be called.');
+        };
+
+        $result = range('a', 'z');
+        $this->assertCount(0, $paginator);
+        $items = $paginator->slice($result);
+        $paginator->setResult($items, $totalCountProvider);
+        $this->assertCount($perPage, $paginator);
+        $this->assertEquals(range('a', 'j'), iterator_to_array($paginator));
     }
 
     /**

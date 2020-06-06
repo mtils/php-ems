@@ -61,25 +61,32 @@ interface Paginator extends Result, Countable
     public function setPagination($currentPage, $perPage=null);
 
     /**
-     * Set the already limited database result.
+     * Set the already limited database result. Pass the $totalCount to make
+     * this a "length aware" paginator. Passing a callable will not trigger any
+     * further queries until you really need pages. This way you can use a
+     * paginator as a chunked result set without the cost of an additional query.
      *
-     * @param array|\Traversable $items
-     * @param int $totalCount (optional)
+     * @param array|Traversable $items
+     * @param int|callable $totalCount (optional)
      *
      * @return $this
      */
     public function setResult($items, $totalCount=null);
 
     /**
-     * Return if this paginator was constructed with a total count.
+     * Return true if this paginator was constructed with a total count.
      * Without a total count it is not length aware and can just
      * know if it is on the first page.
+     * This method also returns true if you pass a callable in setResult.
      *
      * @return bool
      */
     public function hasTotalCount();
 
     /**
+     * Get the passed totalCount or call the totalCount callable and return its
+     * result.
+     *
      * @return int
      */
     public function getTotalCount();
