@@ -375,6 +375,34 @@ class QueryTest extends TestCase
         $this->assertNull($query->__get('foo'));
     }
 
+    /**
+     * @test
+     */
+    public function attach_and_detach_queries()
+    {
+        $query = $this->newQuery();
+        $countQuery = $this->newQuery();
+
+        $this->assertNull($query->getAttached('count'));
+        $this->assertSame($query, $query->attach('count', $countQuery));
+        $this->assertSame($countQuery, $query->getAttached('count'));
+
+        $this->assertEquals(['count'=>$countQuery], $query->attachments);
+
+        $relatedQuery = $this->newQuery();
+        $this->assertSame($query, $query->attach('related', $relatedQuery));
+        $this->assertSame($relatedQuery, $query->getAttached('related'));
+        $this->assertEquals([
+            'count'     =>  $countQuery,
+            'related'   =>  $relatedQuery
+                            ], $query->attachments);
+
+        $this->assertSame($query, $query->detach('count'));
+        $this->assertEquals([
+                                'related'   =>  $relatedQuery
+                            ], $query->attachments);
+    }
+
     protected function newQuery()
     {
         return new Query();

@@ -36,6 +36,11 @@ class ClassMap
     protected $ormClass = '';
 
     /**
+     * @var string|string[]
+     */
+    protected $primaryKey = 'id';
+
+    /**
      * @var array
      */
     protected $keys = [];
@@ -113,6 +118,24 @@ class ClassMap
     public function setStorageName($name)
     {
         $this->storageName = $name;
+        return $this;
+    }
+
+    /**
+     * @return string|string[]
+     */
+    public function getPrimaryKey()
+    {
+        return $this->primaryKey;
+    }
+
+    /**
+     * @param string|string[] $primaryKey
+     * @return ClassMap
+     */
+    public function setPrimaryKey($primaryKey)
+    {
+        $this->primaryKey = $primaryKey;
         return $this;
     }
 

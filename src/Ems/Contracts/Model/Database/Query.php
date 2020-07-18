@@ -39,6 +39,7 @@ use function is_array;
  * @property-read Parentheses           havings
  * @property-read Parentheses           conditions
  * @property-read JoinClause[]          joins
+ * @property-read Query[]               attachments
  */
 class Query implements Queryable
 {
@@ -103,6 +104,11 @@ class Query implements Queryable
      * @var string
      */
     protected $operation = '';
+
+    /**
+     * @var Query[]
+     */
+    protected $attachedQueries = [];
 
     /**
      * Query constructor
@@ -359,6 +365,8 @@ class Query implements Queryable
                 return $this->limit;
             case 'distinct':
                 return $this->distinct;
+            case 'attachments':
+                return $this->attachedQueries;
         }
 
         return null;
@@ -402,6 +410,53 @@ class Query implements Queryable
                 $this->distinct($value);
                 break;
         }//end switch
+    }
+
+    /**
+     * Attach a query because of $reason. This is handy if one query will not be
+     * enough to solve a problem. If you build queries you can attach further
+     * queries which are "spin-off" of a query generator/builder. This could be
+     * queries of related objects or count queries for a paginator...
+     *
+     * @param string $purpose
+     * @param Query  $query
+     *
+     * @return $this
+     */
+    public function attach($purpose, Query $query)
+    {
+        $this->attachedQueries[$purpose] = $query;
+        return $this;
+    }
+
+    /**
+     * Remove the attached query for $purpose.
+     *
+     * @param string $purpose
+     *
+     * @return $this
+     */
+    public function detach($purpose)
+    {
+        if (isset($this->attachedQueries[$purpose])) {
+            unset($this->attachedQueries[$purpose]);
+        }
+        return $this;
+    }
+
+    /**
+     * Get the query that were attached with $purpose.
+     *
+     * @param string $purpose
+     *
+     * @return Query|null
+     */
+    public function getAttached($purpose)
+    {
+        if (isset($this->attachedQueries[$purpose])) {
+            return $this->attachedQueries[$purpose];
+        }
+        return null;
     }
 
     /**

@@ -32,10 +32,20 @@ interface SchemaInspector
     public function getStorageName($class);
 
     /**
+     * Return the primary key or multiple keys that build the primary key of this
+     * object.
+     *
+     * @param string $class
+     *
+     * @return string|string[]
+     */
+    public function primaryKey($class);
+
+    /**
      * Return all keys of $class. This includes relations. The relation
      * has to be delivered by getRelation().
      *
-     * @param $class
+     * @param string $class
      *
      * @return string[]
      */

@@ -6,17 +6,24 @@
 
 namespace Ems\Model\Database;
 
+use ArrayIterator;
+use Ems\Contracts\Core\Connection;
 use Ems\Contracts\Core\Exceptions\TypeException;
 use Ems\Contracts\Core\Expression;
 use Ems\Contracts\Core\Type;
+use Ems\Contracts\Model\Database\Connection as DbConnection;
 use Ems\Contracts\Model\Database\Parentheses;
 use Ems\Contracts\Model\Database\Predicate;
 use Ems\Contracts\Model\Database\Query;
 use Ems\Contracts\Model\OrmQuery;
+use Ems\Contracts\Model\OrmQueryRunner;
+use Ems\Contracts\Model\PaginatableResult;
 use Ems\Contracts\Model\Relationship;
+use Ems\Contracts\Model\Result;
 use Ems\Contracts\Model\SchemaInspector;
 use Ems\Core\Exceptions\KeyNotFoundException;
 use Ems\Core\KeyExpression;
+use Ems\Model\GenericPaginatableResult;
 use RuntimeException;
 
 use function array_keys;
@@ -27,6 +34,7 @@ use function get_class;
 use function implode;
 use function in_array;
 use function is_string;
+use function iterator_to_array;
 use function str_replace;
 use function strpos;
 use function strrpos;
@@ -37,8 +45,10 @@ use function substr;
  *
  * @package Ems\Model\Database
  */
-class OrmQueryBuilder
+class OrmQueryBuilder implements OrmQueryRunner
 {
+    const TO_MANY = 'to_many';
+
     /**
      * @var SchemaInspector
      */
@@ -55,6 +65,62 @@ class OrmQueryBuilder
     }
 
     /**
+     * {@inheritDoc}
+     *
+     * @param Connection $connection
+     * @param OrmQuery $query
+     *
+     * @return Result
+     */
+    public function retrieve(Connection $connection, OrmQuery $query)
+    {
+        $dbQuery = $this->toSelect($query);
+
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param Connection $connection
+     * @param string|OrmQuery $ormClass
+     * @param array $values
+     *
+     * @return int|string|array
+     */
+    public function create(Connection $connection, $ormClass, array $values)
+    {
+        // TODO: Implement create() method.
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param Connection $connection
+     * @param OrmQuery $query
+     * @param array $values
+     *
+     * @return int
+     */
+    public function update(Connection $connection, OrmQuery $query, array $values)
+    {
+        // TODO: Implement update() method.
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param Connection $connection
+     * @param OrmQuery $query
+     *
+     * @return int
+     */
+    public function delete(Connection $connection, OrmQuery $query)
+    {
+        // TODO: Implement delete() method.
+    }
+
+
+    /**
      * Create a new orm query.
      *
      * @param string $class
@@ -63,10 +129,15 @@ class OrmQueryBuilder
      */
     public function query($class)
     {
-
+        return new OrmQuery($class);
     }
 
     /**
+     * Create a database query that selects according to $query. This method will
+     * create queries that are not distinct to the main object! (cartesian product)
+     * If the query contains hasMany/manyToMany relations you have to split it
+     * by splitIntoMainAndHasMany() in two queries.     *
+     *
      * @param OrmQuery $query
      * @param Query    $useThis (optional)
      *
@@ -76,6 +147,7 @@ class OrmQueryBuilder
     {
         $table = $this->inspector->getStorageName($query->ormClass);
         $dbQuery = $this->dbQuery($query->ormClass, $useThis)->from($table);
+        $toManyQuery = null;
         $keys = $this->inspector->getKeys($query->ormClass);
         $columns = $this->toColumns($keys, $table);
         $dbQuery->select(...$columns);
@@ -109,7 +181,18 @@ class OrmQueryBuilder
         // AAAAAND if the query did affect the relation the appendings have to
         // be affected too (not like in laravel)
 
+        if ($this->containsHasMany($relationMap)) {
+            $toManyQuery = $this->dbQuery($query->ormClass);
+            $columns = $this->toColumns((array)$this->inspector->primaryKey($query->ormClass), $table);
+            $toManyQuery->select(...$columns);
+            $this->addRelationalColumns($query, $toManyQuery, $relationMap, true);
+            $this->addConditions($query->conditions, $toManyQuery->conditions, $relationMap);
+            $this->addJoins($query, $toManyQuery, $relationMap);
+            $dbQuery->attach(self::TO_MANY, $toManyQuery);
+        }
+
         return $dbQuery;
+
     }
 
     /**
@@ -164,7 +247,7 @@ class OrmQueryBuilder
         return (new Query())->from($storageName);
     }
 
-    protected function addRelationalColumns(OrmQuery $query, Query $dbQuery, array $relationMap)
+    protected function addRelationalColumns(OrmQuery $query, Query $dbQuery, RelationMap $relationMap, $withToMany=false)
     {
         if (!$query->withs) {
             return;
@@ -187,16 +270,15 @@ class OrmQueryBuilder
                 $segmentStack[] = $segment;
                 $currentPath = implode('.', $segmentStack);
 
-                if (!isset($relationMap[$currentPath])) {
+                if (!$relationShip = $relationMap->relation($currentPath)) {
                     throw new KeyNotFoundException("Relation $currentPath needed by query but missing in relationMap");
                 }
 
-                /** @var Relationship $relationShip */
-                $relationShip = $relationMap[$currentPath]['relation'];
+                if ($relationShip->hasMany && !$withToMany) {
+                    continue;
+                }
 
-                // We only add "to one"-relations. "to many" will lead to cartesian
-                // results
-                if ($relationShip->hasMany) {
+                if (!$relationShip->hasMany && $withToMany) {
                     continue;
                 }
 
@@ -232,9 +314,9 @@ class OrmQueryBuilder
     /**
      * @param Parentheses|Predicate[] $conditions
      * @param Parentheses             $dbConditions
-     * @param array                   $relationMap (optional)
+     * @param RelationMap             $relationMap
      */
-    protected function addConditions($conditions, Parentheses $dbConditions, array $relationMap=[])
+    protected function addConditions($conditions, Parentheses $dbConditions, RelationMap $relationMap)
     {
         foreach ($conditions as $condition) {
 
@@ -253,7 +335,7 @@ class OrmQueryBuilder
         }
     }
 
-    protected function convertPredicate(Predicate $predicate, array $relationMap=[])
+    protected function convertPredicate(Predicate $predicate, RelationMap $relationMap)
     {
         $leftColumn = $this->translatePath($predicate->left, $relationMap);
         $operator = $predicate->operator;
@@ -284,10 +366,16 @@ class OrmQueryBuilder
         return array_values(array_unique($parents));
     }
 
+    /**
+     * @param OrmQuery $ormQuery
+     * @param array $relations
+     *
+     * @return RelationMap
+     */
     protected function buildRelationMap(OrmQuery $ormQuery, array $relations)
     {
         sort($relations);
-        $map = [];
+        $map = new RelationMap($ormQuery->ormClass);
 
         foreach ($relations as $relationName) {
             $parts = explode('.', $relationName);
@@ -307,10 +395,7 @@ class OrmQueryBuilder
                     throw new RuntimeException("Relation object $currentRelationName not found.");
                 }
 
-                $map[$currentRelationName] = [
-                    'path'      => $this->keyToColumn($currentRelationName),
-                    'relation'  => $relation
-                ];
+                $map->addRelation($currentRelationName, $relation, $this->keyToColumn($currentRelationName));
             }
 
         }
@@ -318,11 +403,21 @@ class OrmQueryBuilder
         return $map;
     }
 
-    protected function addJoins(OrmQuery $ormQuery, Query $dbQuery, array $relationMap)
+    protected function containsHasMany(RelationMap $relationMap)
     {
-        foreach ($relationMap as $name=>$map) {
+        foreach($relationMap as $relation) {
             /** @var Relationship $relation */
-            $relation = $map['relation'];
+            if ($relation->hasMany) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    protected function addJoins(OrmQuery $ormQuery, Query $dbQuery, RelationMap $relationMap)
+    {
+        /** @var Relationship $relation */
+        foreach ($relationMap as $name=>$relation) {
 
             if ($relation->hasMany || $relation->belongsToMany) {
                 $dbQuery->distinct(true);
@@ -448,16 +543,16 @@ class OrmQueryBuilder
         return $column . $this->dbSeparator . implode($this->dbSeparator, $append);
     }
 
-    protected function translatePath($path, array $relationMap)
+    protected function translatePath($path, RelationMap $relationMap)
     {
         list($parent, $key) = $this->parentAndKey($path);
         if (!$parent) {
-            return $key;
+            return $this->inspector->getStorageName($relationMap->getOrmClass()) . ".$key";
         }
-        if (!isset($relationMap[$parent])) {
+        if (!$parentPath = $relationMap->path($parent)) {
             throw new RuntimeException("RelationMap didnt contain relation '$parent'");
         }
-        return $relationMap[$parent]['path'] . ".$key";
+        return "$parentPath.$key";
     }
 
     /**

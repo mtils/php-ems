@@ -7,6 +7,7 @@ namespace Ems\Model;
 
 use Ems\Contracts\Core\ConnectionPool;
 use Ems\Contracts\Core\ObjectDataAdapter;
+use Ems\Contracts\Core\Url;
 use Ems\Contracts\Model\Database\OrmQueryBuilder as QueryBuilderContract;
 use Ems\Contracts\Model\OrmQueryRunner;
 use Ems\Contracts\Model\SchemaInspector;

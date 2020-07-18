@@ -11,6 +11,7 @@ use Ems\Core\Exceptions\NotImplementedException;
 use Ems\Core\Exceptions\UnConfiguredException;
 use Ems\Core\Url;
 use ReflectionClass;
+use ReflectionException;
 use ReflectionMethod;
 
 use ReflectionType;
@@ -37,6 +38,16 @@ abstract class StaticClassMap extends ClassMap
      * Overwrite this class constant to set the url to storage.
      */
     const STORAGE_URL = '';
+
+    /**
+     * Overwrite this class constant with your primary key(s)
+     */
+    const PRIMARY_KEY = 'id';
+
+    /**
+     * @var string|string[]
+     */
+    protected $primaryKey = null;
 
     /**
      * @var array
@@ -97,6 +108,19 @@ abstract class StaticClassMap extends ClassMap
         }
         return new Url($storageUrl);
     }
+
+    /**
+     * @return string|string[]
+     */
+    public function getPrimaryKey()
+    {
+        if (!$this->primaryKey) {
+            $pk = static::constantValue('PRIMARY_KEY');
+            $this->primaryKey = $pk ?: 'id';
+        }
+        return parent::getPrimaryKey();
+    }
+
 
     public function getKeys()
     {
@@ -182,8 +206,6 @@ abstract class StaticClassMap extends ClassMap
      * @param string $name
      *
      * @return string|null
-     *
-     * @throws \ReflectionException
      */
     protected static function constantValue($name)
     {
@@ -193,8 +215,6 @@ abstract class StaticClassMap extends ClassMap
 
     /**
      * @return array
-     *
-     * @throws \ReflectionException
      */
     protected static function classConstants()
     {
@@ -204,14 +224,14 @@ abstract class StaticClassMap extends ClassMap
             return static::$classConstants[$class];
         }
 
-        $reflection = new ReflectionClass($class);
         static::$classConstants[$class] = [];
 
-        static::$classConstants[$class] = $reflection->getConstants();
-
-//        foreach ($reflection->getConstants() as $constant) {
-//            static::$classConstants[$constant] = $constant;
-//        }
+        try {
+            $reflection = new ReflectionClass($class);
+            static::$classConstants[$class] = $reflection->getConstants();
+        } catch (ReflectionException $e) {
+            //
+        }
 
         return static::$classConstants[$class];
     }
@@ -244,7 +264,7 @@ abstract class StaticClassMap extends ClassMap
 
     protected static function isReservedConstant($key)
     {
-        return in_array($key, ['STORAGE_NAME', 'ORM_CLASS', 'STORAGE_URL']);
+        return in_array($key, ['STORAGE_NAME', 'ORM_CLASS', 'STORAGE_URL', 'PRIMARY_KEY']);
     }
 
     protected static function isRelation($key)

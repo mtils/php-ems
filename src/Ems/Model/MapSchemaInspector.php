@@ -61,6 +61,19 @@ class MapSchemaInspector implements SchemaInspector
     }
 
     /**
+     * {@inheritDoc}
+     *
+     * @param string $class
+     *
+     * @return string|string[]
+     */
+    public function primaryKey($class)
+    {
+        return $this->getMap($class)->getPrimaryKey();
+    }
+
+
+    /**
      * Return all keys of $class. This includes relations. The relation
      * has to be delivered by getRelation().
      *

@@ -61,6 +61,22 @@ class ClassMapTest extends TestCase
     /**
      * @test
      */
+    public function get_and_set_primary_key()
+    {
+        $keys = ['id', 'email', 'password'];
+
+        $map = $this->newMap();
+        $this->assertSame('id', $map->getPrimaryKey());
+        $this->assertSame($map, $map->setPrimaryKey($keys[1]));
+        $this->assertSame($keys[1], $map->getPrimaryKey());
+
+        $this->assertSame($map, $map->setPrimaryKey($keys));
+        $this->assertSame($keys, $map->getPrimaryKey());
+    }
+
+    /**
+     * @test
+     */
     public function get_and_set_keys()
     {
         $keys = ['id', 'email', 'password'];
