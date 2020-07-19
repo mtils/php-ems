@@ -52,22 +52,22 @@ abstract class StaticClassMap extends ClassMap
     /**
      * @var array
      */
-    private static $classConstants = [];
+    protected static $classConstants = [];
 
     /**
      * @var array
      */
-    private static $methodRelations = [];
+    protected static $methodRelations = [];
 
     /**
      * @var string[]
      */
-    private static $keyCache = [];
+    protected static $keyCache = [];
 
     /**
      * @var string[]
      */
-    private static $relationReturnTypes = [
+    protected static $relationReturnTypes = [
         Relationship::class
     ];
 
