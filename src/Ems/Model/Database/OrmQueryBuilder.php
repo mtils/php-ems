@@ -6,35 +6,31 @@
 
 namespace Ems\Model\Database;
 
-use ArrayIterator;
 use Ems\Contracts\Core\Connection;
 use Ems\Contracts\Core\Exceptions\TypeException;
 use Ems\Contracts\Core\Expression;
 use Ems\Contracts\Core\Type;
-use Ems\Contracts\Model\Database\Connection as DbConnection;
 use Ems\Contracts\Model\Database\Parentheses;
 use Ems\Contracts\Model\Database\Predicate;
 use Ems\Contracts\Model\Database\Query;
 use Ems\Contracts\Model\OrmQuery;
 use Ems\Contracts\Model\OrmQueryRunner;
-use Ems\Contracts\Model\PaginatableResult;
 use Ems\Contracts\Model\Relationship;
 use Ems\Contracts\Model\Result;
 use Ems\Contracts\Model\SchemaInspector;
 use Ems\Core\Exceptions\KeyNotFoundException;
 use Ems\Core\KeyExpression;
-use Ems\Model\GenericPaginatableResult;
 use RuntimeException;
 
 use function array_keys;
 use function array_map;
 use function array_unique;
 use function class_exists;
+use function explode;
 use function get_class;
 use function implode;
 use function in_array;
 use function is_string;
-use function iterator_to_array;
 use function str_replace;
 use function strpos;
 use function strrpos;
@@ -133,10 +129,9 @@ class OrmQueryBuilder implements OrmQueryRunner
     }
 
     /**
-     * Create a database query that selects according to $query. This method will
-     * create queries that are not distinct to the main object! (cartesian product)
-     * If the query contains hasMany/manyToMany relations you have to split it
-     * by splitIntoMainAndHasMany() in two queries.     *
+     * Create a database query that selects according to $query. If the queried
+     * relations will create multiple rows of the "main queried object" it will
+     * split the query in two. The second query will be attached to the returned.
      *
      * @param OrmQuery $query
      * @param Query    $useThis (optional)
@@ -147,51 +142,18 @@ class OrmQueryBuilder implements OrmQueryRunner
     {
         $table = $this->inspector->getStorageName($query->ormClass);
         $dbQuery = $this->dbQuery($query->ormClass, $useThis)->from($table);
-        $toManyQuery = null;
-        $keys = $this->inspector->getKeys($query->ormClass);
-        $columns = $this->toColumns($keys, $table);
-        $dbQuery->select(...$columns);
+        $relationMap = $this->buildRelationMap($query, $this->collectRelations($query));
 
-        $relations = $this->collectRelations($query);
-        $relationMap = $this->buildRelationMap($query, $relations);
+        $this->buildSelect($query, $dbQuery, $relationMap);
 
-        $this->addRelationalColumns($query, $dbQuery, $relationMap);
-
-        $this->addConditions($query->conditions, $dbQuery->conditions, $relationMap);
-
-        // $neededJoins = addNeededJoins caused by where/orderBy/with/eager
-        // add manually added joins that were added by with()
-        // translate eventually used orm names in where/order by
-        // add columns/aliases caused by with()
-
-        // That is all fine and can be solved, but we need a working
-        // totalCount (not so difficult)
-        // and iff we really want eager load to many relations we need a working
-        // limit query (which I think is not easy)
-        // so in any has many we must append()
-        // just to make that clear: appendings() will be added inside the array
-        // not on object level.
-        // Then we MUST define a chunk size. In paginator it will be the page
-        // size, without it will be something like 100.
-
-        $this->addJoins($query, $dbQuery, $relationMap);
-
-        // After all this join adding we have to append the missing appendings
-        // to the orm query
-        // AAAAAND if the query did affect the relation the appendings have to
-        // be affected too (not like in laravel)
-
-        if ($this->containsHasMany($relationMap)) {
-            $toManyQuery = $this->dbQuery($query->ormClass);
-            $columns = $this->toColumns((array)$this->inspector->primaryKey($query->ormClass), $table);
-            $toManyQuery->select(...$columns);
-            $this->addRelationalColumns($query, $toManyQuery, $relationMap, true);
-            $this->addConditions($query->conditions, $toManyQuery->conditions, $relationMap);
-            $this->addJoins($query, $toManyQuery, $relationMap);
-            $dbQuery->attach(self::TO_MANY, $toManyQuery);
+        if (!$this->containsHasMany($relationMap)) {
+            return $dbQuery;
         }
 
-        return $dbQuery;
+        $toManyQuery = $this->dbQuery($query->ormClass);
+        $this->buildSelect($query, $toManyQuery, $relationMap, true);
+
+        return $dbQuery->attach(self::TO_MANY, $toManyQuery);
 
     }
 
@@ -247,6 +209,17 @@ class OrmQueryBuilder implements OrmQueryRunner
         return (new Query())->from($storageName);
     }
 
+    protected function buildSelect(OrmQuery $query, Query $dbQuery, RelationMap $map, $toMany=false)
+    {
+        $keys = $toMany ? (array)$this->inspector->primaryKey($query->ormClass) : $this->inspector->getKeys($query->ormClass);
+        $columns = $this->toColumns($keys, $dbQuery->table);
+        $dbQuery->select(...$columns);
+
+        $this->addRelationalColumns($query, $dbQuery, $map, $toMany);
+        $this->addConditions($query->conditions, $dbQuery->conditions, $map);
+        $this->addJoins($query, $dbQuery, $map);
+    }
+
     protected function addRelationalColumns(OrmQuery $query, Query $dbQuery, RelationMap $relationMap, $withToMany=false)
     {
         if (!$query->withs) {
@@ -264,26 +237,30 @@ class OrmQueryBuilder implements OrmQueryRunner
             $segments = explode('.', $relationPath);
             $segmentStack = [];
 
-
             foreach ($segments as $segment) {
 
                 $segmentStack[] = $segment;
                 $currentPath = implode('.', $segmentStack);
 
+                if (in_array($currentPath, $added)) {
+                    continue;
+                }
+
                 if (!$relationShip = $relationMap->relation($currentPath)) {
                     throw new KeyNotFoundException("Relation $currentPath needed by query but missing in relationMap");
                 }
 
-                if ($relationShip->hasMany && !$withToMany) {
+                $createsMultipleRows = $this->createsMultipleRows($currentPath, $relationMap);
+
+                if ($createsMultipleRows && !$withToMany) {
                     continue;
                 }
 
-                if (!$relationShip->hasMany && $withToMany) {
+                if (!$createsMultipleRows && $withToMany) {
                     continue;
                 }
 
                 $relatedKeys = $this->inspector->getKeys(get_class($relationShip->related));
-
                 $relationAlias = $this->keyToColumn($currentPath);
 
                 $relatedColumns = array_map(function ($key) use ($currentPath, $relationAlias) {
@@ -292,6 +269,7 @@ class OrmQueryBuilder implements OrmQueryRunner
 
                 $dbQuery->select(...$relatedColumns);
                 $added[] = $currentPath;
+
             }
 
         }
@@ -506,14 +484,6 @@ class OrmQueryBuilder implements OrmQueryRunner
         }
     }
 
-    protected function toStringIfDesired($expression)
-    {
-        if ($expression instanceof KeyExpression) {
-            return $expression->toString();
-        }
-
-    }
-
     /**
      * @param string $key
      *
@@ -543,6 +513,15 @@ class OrmQueryBuilder implements OrmQueryRunner
         return $column . $this->dbSeparator . implode($this->dbSeparator, $append);
     }
 
+    /**
+     * Translate the relational path (projects.files.parent.name) to the
+     * path it will be named in the database (projects__files__parent__name).
+     *
+     * @param string      $path
+     * @param RelationMap $relationMap
+     *
+     * @return string
+     */
     protected function translatePath($path, RelationMap $relationMap)
     {
         list($parent, $key) = $this->parentAndKey($path);
@@ -550,7 +529,7 @@ class OrmQueryBuilder implements OrmQueryRunner
             return $this->inspector->getStorageName($relationMap->getOrmClass()) . ".$key";
         }
         if (!$parentPath = $relationMap->path($parent)) {
-            throw new RuntimeException("RelationMap didnt contain relation '$parent'");
+            throw new RuntimeException("RelationMap did not contain relation '$parent'");
         }
         return "$parentPath.$key";
     }
@@ -571,5 +550,28 @@ class OrmQueryBuilder implements OrmQueryRunner
             return true;
         }
         return class_exists($junction);
+    }
+
+    /**
+     * Check if the join/select of a relation will create multiple rows.
+     *
+     * @param string      $relationPath
+     * @param RelationMap $map
+     *
+     * @return bool
+     */
+    protected function createsMultipleRows($relationPath, RelationMap $map)
+    {
+        $segments = explode('.', $relationPath);
+        $segmentStack = [];
+
+        foreach ($segments as $segment) {
+            $segmentStack[] = $segment;
+            $currentPath = implode('.', $segmentStack);
+            if ($map->relation($currentPath)->hasMany) {
+                return true;
+            }
+        }
+        return false;
     }
 }

@@ -20,8 +20,12 @@ use Ems\Model\StaticClassMap;
 use Ems\OrmIntegrationTest;
 use Models\Contact;
 use Models\Ems\ContactMap;
+use Models\Ems\ProjectMap;
+use Models\Ems\ProjectTypeMap;
 use Models\Ems\UserMap;
+use Models\File;
 use Models\Project;
+use Models\ProjectType;
 use Models\Token;
 use Models\User;
 
@@ -254,7 +258,7 @@ class OrmQueryBuilderIntegrationTest extends OrmIntegrationTest
     /**
      * @test
      */
-    public function select_from_user_eager_contact()
+    public function select_from_user_with_contact()
     {
         $query = (new OrmQuery(User::class))->with('contact');
         $dbQuery = static::$con->query();
@@ -279,7 +283,7 @@ class OrmQueryBuilderIntegrationTest extends OrmIntegrationTest
     /**
      * @test
      */
-    public function select_from_user_eager_parent_contact()
+    public function select_from_user_with_parent_contact()
     {
         $query = (new OrmQuery(User::class))->with('contact', 'parent.contact');
         $dbQuery = static::$con->query();
@@ -304,7 +308,7 @@ class OrmQueryBuilderIntegrationTest extends OrmIntegrationTest
     /**
      * @test
      */
-    public function select_from_user_eager_tokens()
+    public function select_from_user_with_tokens()
     {
         $query = (new OrmQuery(User::class))->with('tokens');
         $dbQuery = static::$con->query();
@@ -328,9 +332,7 @@ class OrmQueryBuilderIntegrationTest extends OrmIntegrationTest
         $toManyQuery = $dbQuery->getAttached(OrmQueryBuilder::TO_MANY);
 
         $columnCount = count($inspector->getKeys(Token::class)) + 1;
-        $renderer = new QueryRenderer();
-        echo "\n$dbQuery\n";
-echo "\n".$renderer->renderSelect($toManyQuery);
+
         $this->assertCount($columnCount, $toManyQuery->columns);
         $this->assertCount(2, $toManyQuery->conditions);
         $this->assertCount(1, $toManyQuery->joins);
@@ -340,33 +342,75 @@ echo "\n".$renderer->renderSelect($toManyQuery);
     /**
      * @test
      */
-    public function splitIntoMainAndHasMany_splits_query()
+    public function select_from_user_with_to_many_that_has_to_one()
     {
-        $query = (new OrmQuery(User::class))->with('tokens');
+        $query = (new OrmQuery(User::class))->with('projects.type', 'projects.files');
         $dbQuery = static::$con->query();
         $inspector = $this->newInspector();
 
         $query->where(UserMap::EMAIL, 'LIKE', '%@outlook.com')
-            ->where(UserMap::CREATED_AT, '>', new DateTime('2020-04-15 00:00:00'));
-
-        $builder = $this->queryBuilder($inspector);
+            ->where('projects.type.'.ProjectTypeMap::NAME, 'like', '%sports%');
 
         /** @var Query $dbQuery */
-        $dbQuery = $builder->toSelect($query, $dbQuery);
+        $dbQuery = $this->queryBuilder($inspector)->toSelect($query, $dbQuery);
 
         $this->assertInstanceOf(Query::class, $dbQuery);
         $this->assertEquals($inspector->getStorageName(User::class), $dbQuery->table);
 
-        $columnCount = count($inspector->getKeys(User::class)) +  count($inspector->getKeys(Token::class));
+        $columnCount = count($inspector->getKeys(User::class));
 
         $this->assertCount($columnCount, $dbQuery->columns);
         $this->assertCount(2, $dbQuery->conditions);
-        $this->assertCount(1, $dbQuery->joins);
+        $this->assertCount(4, $dbQuery->joins);
 
         $toManyQuery = $dbQuery->getAttached(OrmQueryBuilder::TO_MANY);
 
-        echo "\nMain Query: ------------------------------------\n$dbQuery";
-        echo "\nToMany Query: ------------------------------------\n$toManyQuery";
+        $columnCount = count($inspector->getKeys(Project::class)) +
+            count($inspector->getKeys(ProjectType::class)) +
+            count($inspector->getKeys(File::class)) + 1;
+
+        $this->assertCount($columnCount, $toManyQuery->columns);
+        $this->assertCount(2, $toManyQuery->conditions);
+        $this->assertCount(4, $toManyQuery->joins);
 
     }
+
+    /**
+     * @test
+     */
+    public function select_from_user_with_to_one_and_to_many_that_has_to_one()
+    {
+        $query = (new OrmQuery(User::class))->with('projects.type', 'projects.files', 'contact', 'parent');
+        $dbQuery = static::$con->query();
+        $inspector = $this->newInspector();
+
+        $query->where(UserMap::EMAIL, 'LIKE', '%@outlook.com')
+            ->where('projects.type.'.ProjectTypeMap::NAME, 'like', '%sports%');
+
+        /** @var Query $dbQuery */
+        $dbQuery = $this->queryBuilder($inspector)->toSelect($query, $dbQuery);
+
+        $this->assertInstanceOf(Query::class, $dbQuery);
+        $this->assertEquals($inspector->getStorageName(User::class), $dbQuery->table);
+
+        $columnCount = count($inspector->getKeys(User::class)) +
+            count($inspector->getKeys(Contact::class)) +
+            count($inspector->getKeys(User::class));
+
+        $this->assertCount($columnCount, $dbQuery->columns);
+        $this->assertCount(2, $dbQuery->conditions);
+        $this->assertCount(6, $dbQuery->joins);
+
+        $toManyQuery = $dbQuery->getAttached(OrmQueryBuilder::TO_MANY);
+
+        $columnCount = count($inspector->getKeys(Project::class)) +
+            count($inspector->getKeys(ProjectType::class)) +
+            count($inspector->getKeys(File::class)) + 1;
+
+        $this->assertCount($columnCount, $toManyQuery->columns);
+        $this->assertCount(2, $toManyQuery->conditions);
+        $this->assertCount(6, $toManyQuery->joins);
+
+    }
+
 }
