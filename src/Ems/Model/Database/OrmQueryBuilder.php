@@ -10,9 +10,11 @@ use Ems\Contracts\Core\Connection;
 use Ems\Contracts\Core\Exceptions\TypeException;
 use Ems\Contracts\Core\Expression;
 use Ems\Contracts\Core\Type;
+use Ems\Contracts\Model\Database\Dialect;
 use Ems\Contracts\Model\Database\Parentheses;
 use Ems\Contracts\Model\Database\Predicate;
 use Ems\Contracts\Model\Database\Query;
+use Ems\Contracts\Model\Database\SQLExpression;
 use Ems\Contracts\Model\OrmQuery;
 use Ems\Contracts\Model\OrmQueryRunner;
 use Ems\Contracts\Model\Relationship;
@@ -21,6 +23,7 @@ use Ems\Contracts\Model\SchemaInspector;
 use Ems\Core\Exceptions\KeyNotFoundException;
 use Ems\Core\KeyExpression;
 use RuntimeException;
+use Ems\Contracts\Model\Database\Connection as DbConnection;
 
 use function array_keys;
 use function array_map;
@@ -71,6 +74,14 @@ class OrmQueryBuilder implements OrmQueryRunner
     public function retrieve(Connection $connection, OrmQuery $query)
     {
         $dbQuery = $this->toSelect($query);
+        $connection = $this->con($connection);
+
+        $result = $this->newResult($connection, $query, $dbQuery);
+        $result->setPrimaryKey($this->inspector->primaryKey($query->ormClass));
+
+        return $result->provideCountQuery(function () use ($query, $connection, $dbQuery) {
+            return $this->toCountQuery($query, $connection, $dbQuery);
+        });
 
     }
 
@@ -190,6 +201,26 @@ class OrmQueryBuilder implements OrmQueryRunner
     public function toDelete(OrmQuery $query, Query $useThis=null)
     {
 
+    }
+
+    public function toCountQuery(OrmQuery $ormQuery, DbConnection $connection, Query $dbQuery=null)
+    {
+        $primaryKeys = $this->inspector->primaryKey($ormQuery->ormClass);
+        $table = $this->inspector->getStorageName($ormQuery->ormClass);
+        $dbQuery = $dbQuery ?: $this->toSelect($ormQuery);
+        $dialect = $connection->dialect();
+        $dialect = $dialect instanceof Dialect ? $dialect : SQL::dialect($dialect);
+
+        $countQuery = clone $dbQuery;
+        $countQuery->columns = [];
+
+        $quoted = array_map(function ($key) use ($dialect, $table) {
+            return $dialect->quote("$table.$key", Dialect::NAME);
+        }, (array)$primaryKeys);
+
+        $expression = new SQLExpression('COUNT(' . implode(',', $quoted) . ') as total_count');
+
+        return $countQuery->select($expression)->distinct(true);
     }
 
     /**
@@ -573,5 +604,33 @@ class OrmQueryBuilder implements OrmQueryRunner
             }
         }
         return false;
+    }
+
+    /**
+     * @param DbConnection $connection
+     * @param OrmQuery $ormQuery
+     * @param Query $query
+     *
+     * @return DbOrmQueryResult
+     */
+    protected function newResult(DbConnection $connection, OrmQuery $ormQuery, Query $query)
+    {
+        return (new DbOrmQueryResult())
+            ->setOrmQuery($ormQuery)
+            ->setDbQuery($query)
+            ->setConnection($connection);
+    }
+
+    /**
+     * @param Connection $connection
+     *
+     * @return DbConnection
+     */
+    protected function con(Connection $connection)
+    {
+        if (!$connection instanceof DbConnection) {
+            throw new TypeException('I can only work with ' . DbConnection::class);
+        }
+        return $connection;
     }
 }

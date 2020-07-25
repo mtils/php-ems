@@ -36,7 +36,7 @@ require __DIR__.'/tests/helpers/IntegrationTest.php';
 require __DIR__.'/tests/helpers/HttpMockTest.php';
 require __DIR__.'/tests/helpers/LaravelIntegrationTest.php';
 require __DIR__.'/tests/helpers/DatabaseIntegrationTest.php';
-require __DIR__.'/tests/helpers/OrmIntegrationTest.php';
+require __DIR__.'/tests/helpers/TestOrm.php';
 require __DIR__.'/tests/helpers/traits/RoutingTrait.php';
 
 require __DIR__.'/tests/helpers/traits/AssetsFactoryMethods.php';

@@ -6,17 +6,21 @@
 namespace Ems\Model\Database;
 
 
+use ArrayIterator;
+use Ems\Contracts\Model\Database\Dialect;
 use Ems\Contracts\Model\Paginatable;
 use Ems\Contracts\Model\Result;
 use Ems\Core\Collections\NestedArray;
 use Ems\Contracts\Model\Database\Query as QueryContract;
 use Ems\Contracts\Model\OrmQuery;
 use Ems\Contracts\Model\Database\Connection as ConnectionContract;
+use Ems\Model\ChunkIterator;
 use Ems\Model\ResultTrait;
 use Ems\Pagination\Paginator;
 use Exception;
 use Traversable;
 
+use function array_values;
 use function call_user_func;
 use function is_array;
 
@@ -42,11 +46,6 @@ class DbOrmQueryResult implements Result, Paginatable
     private $dbQuery;
 
     /**
-     * @var QueryContract
-     */
-    private $toManyQuery;
-
-    /**
      * @var Query
      */
     private $countQuery;
@@ -62,6 +61,11 @@ class DbOrmQueryResult implements Result, Paginatable
     private $primaryKey;
 
     /**
+     * @var QueryRenderer
+     */
+    private $renderer;
+
+    /**
      * Retrieve an external iterator
      * @link https://php.net/manual/en/iteratoraggregate.getiterator.php
      * @return Traversable An instance of an object implementing <b>Iterator</b> or
@@ -70,63 +74,16 @@ class DbOrmQueryResult implements Result, Paginatable
      */
     public function getIterator()
     {
-
-        // TODO 11.07.2020 Assign Contracts\Query and DbConnection
-        // NEXT STEP IS USING Contracts\Query not Query
-        // Assign the connection
-        // Get the Renderer by direct instantiation and the dialect from
-        // connection (see DbConnection::query())
-        // more or less copy Query::readFromConnection() and runPaginated here
-        // Then let the DbOrmQueryRunner create all three Queries and assign
-        // the connection and Queries to this result
-        // Then perhaps let OrmQueryBuilder implement OrmQueryRunner and
-        // move all the code into it.
-        // It would be nice to NOT create a CountQuery before knowing that someone
-        // likes to paginate. So perhaps we have to realize this by a closure
-
-
-        // Retrieve $chunkSize from "main" query
-        if (!$this->dbQuery->limit) {
-            $this->dbQuery->limit = $this->chunkSize;
-        }
-        $buffer = [];
-        foreach ($this->dbQuery as $mainRow) {
-            $mainId = $this->identify($mainRow);
-            $structured = NestedArray::toNested($mainRow, '__');
-            $buffer[$mainId] = $structured;
+        if (!$this->chunkSize || $this->dbQuery->limit) {
+            return new ArrayIterator($this->run());
         }
 
-        // HasManyQuery is "the opposite" of main query. It contains all columns
-        // of all related objects that are many to main
-        // Its result contains the main objects ID and all (cartesian) has many
-        // relational rows (or many to many)
-        // Basically this just means the main query contains all columns of
-        // hasOne/belongsTo relations (and a distinct)
-        // The HasMyQuery contains all other columns and whereIn mainId ()
-        foreach ($this->toManyQuery as $hasManyRow) {
-            $mainId = $this->identify($hasManyRow);
-            $buffer[$mainId] = $this->mergeHasManyRow($buffer[$mainId], $hasManyRow);
-        }
+        $handler = function ($offset, $limit) {
+            return $this->run($offset, $limit);
+        };
 
+        return new ChunkIterator($handler, $this->chunkSize);
 
-
-        /***********************************************************************
-         * Deprecated from here
-         **********************************************************************/
-        // Its better to implement a separate append() method to the top level
-        // API. Like:
-        // $result = $orm->query(User::class)->where('category.id', 12);
-        // $orm->append($result, ['address', 'projects'], $limit = 100)
-        foreach ($this->appendingsNotInEager as $relationPath) {
-            $ids = [];
-            foreach ($this->findIdsOfRelationPath($relationPath) as $id) {
-                $ids[] = $id;
-            }
-            $rows = $this->queryBuilder->getRelated($relationPath, $ids);
-            $this->mergeRelated($buffer, $rows);
-        }
-
-        // Iterate until end, the same for the next $this->chunkSize
     }
 
     /**
@@ -217,25 +174,6 @@ class DbOrmQueryResult implements Result, Paginatable
     }
 
     /**
-     * @return QueryContract
-     */
-    public function getToManyQuery()
-    {
-        return $this->toManyQuery;
-    }
-
-    /**
-     * @param QueryContract $toManyQuery
-     *
-     * @return DbOrmQueryResult
-     */
-    public function setToManyQuery(QueryContract $toManyQuery)
-    {
-        $this->toManyQuery = $toManyQuery;
-        return $this;
-    }
-
-    /**
      * @return Query
      */
     public function getCountQuery()
@@ -299,6 +237,58 @@ class DbOrmQueryResult implements Result, Paginatable
         return $this;
     }
 
+    /**
+     * @return int
+     */
+    public function getChunkSize()
+    {
+        return $this->chunkSize;
+    }
+
+    /**
+     * @param int $chunkSize
+     * @return DbOrmQueryResult
+     */
+    public function setChunkSize($chunkSize)
+    {
+        $this->chunkSize = $chunkSize;
+        return $this;
+    }
+
+
+    protected function run($offset=null, $chunkSize=null)
+    {
+        $oldOffset = $this->dbQuery->offset;
+        $oldLimit = $this->dbQuery->limit;
+
+        if ($offset !== null) {
+            $this->dbQuery->offset($offset, $chunkSize);
+        }
+
+        $expression = $this->renderer()->renderSelect($this->dbQuery);
+        $this->dbQuery->offset($oldOffset);
+        $this->dbQuery->limit($oldLimit);
+
+        $dbResult = $this->connection->select($expression->toString(), $expression->getBindings());
+        $buffer = [];
+
+        foreach ($dbResult as $mainRow) {
+            $mainId = $this->identify($mainRow);
+            $structured = NestedArray::toNested($mainRow, '__');
+            $buffer[$mainId] = $structured;
+        }
+
+        if (!$toManyQuery = $this->dbQuery->getAttached(OrmQueryBuilder::TO_MANY)) {
+            return array_values($buffer);
+        }
+
+        foreach ($toManyQuery as $hasManyRow) {
+            $mainId = $this->identify($hasManyRow);
+            $buffer[$mainId] = $this->mergeHasManyRow($buffer[$mainId], $hasManyRow);
+        }
+
+        return array_values($buffer);
+    }
 
     /**
      * @param array $row
@@ -318,5 +308,28 @@ class DbOrmQueryResult implements Result, Paginatable
         }
 
         return implode('|', $values);
+    }
+
+    /**
+     * @return QueryRenderer
+     */
+    protected function createRenderer()
+    {
+        $renderer = new QueryRenderer();
+        $dialect = $this->connection->dialect();
+        $dialect = $dialect instanceof Dialect ? $dialect : SQL::dialect($dialect);
+        $renderer->setDialect($dialect);
+        return $renderer;
+    }
+
+    /**
+     * @return QueryRenderer
+     */
+    private function renderer()
+    {
+        if (!$this->renderer) {
+            $this->renderer = $this->createRenderer();
+        }
+        return $this->renderer;
     }
 }

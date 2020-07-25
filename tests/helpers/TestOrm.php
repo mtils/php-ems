@@ -17,7 +17,12 @@ use Models\User;
 
 use function class_exists;
 
-class OrmIntegrationTest extends DatabaseIntegrationTest
+class MapStorage
+{
+    public static $mapClasses = [];
+}
+
+trait TestOrm
 {
     /**
      * @var string[]
@@ -47,7 +52,7 @@ class OrmIntegrationTest extends DatabaseIntegrationTest
 
     protected function configureInspector(MapSchemaInspector $inspector)
     {
-        foreach (static::$mapClasses as $class) {
+        foreach (MapStorage::$mapClasses as $class) {
             /** @var StaticClassMap $map */
             $map = new $class;
             $inspector->map($map->getOrmClass(), $map);
@@ -75,7 +80,7 @@ class OrmIntegrationTest extends DatabaseIntegrationTest
 
         foreach($fs->files($mapDir) as $file) {
             $class = "Models\\Ems\\" . $fs->name($file);
-            static::$mapClasses[] = $class;
+            MapStorage::$mapClasses[] = $class;
             include_once($file);
         }
     }

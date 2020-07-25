@@ -7,20 +7,15 @@ namespace integration\Model\Database;
 
 
 use DateTime;
+use Ems\Contracts\Model\Database\Query as QueryContract;
 use Ems\Contracts\Model\OrmQuery;
-use Ems\Contracts\Model\SchemaInspector;
-use Ems\Core\LocalFilesystem;
-use Ems\DatabaseIntegrationTest;
+use Ems\IntegrationTest;
 use Ems\Model\Database\OrmQueryBuilder;
 use Ems\Model\Database\Query;
-use Ems\Model\Database\QueryRenderer;
-use Ems\Model\Database\QueryRendererTest;
-use Ems\Model\MapSchemaInspector;
-use Ems\Model\StaticClassMap;
 use Ems\OrmIntegrationTest;
+use Ems\TestOrm;
 use Models\Contact;
 use Models\Ems\ContactMap;
-use Models\Ems\ProjectMap;
 use Models\Ems\ProjectTypeMap;
 use Models\Ems\UserMap;
 use Models\File;
@@ -28,9 +23,6 @@ use Models\Project;
 use Models\ProjectType;
 use Models\Token;
 use Models\User;
-
-use function class_exists;
-use function print_r;
 
 /**
  * Class OrmQueryBuilderIntegrationTest
@@ -51,9 +43,9 @@ use function print_r;
  *
  * @package integration\Model\Database
  */
-class OrmQueryBuilderIntegrationTest extends OrmIntegrationTest
+class OrmQueryBuilderIntegrationTest extends IntegrationTest
 {
-
+    use TestOrm;
     /**
      * @test
      */
@@ -68,13 +60,11 @@ class OrmQueryBuilderIntegrationTest extends OrmIntegrationTest
     public function select_from_contact()
     {
         $query = new OrmQuery(Contact::class);
-        $dbQuery = static::$con->query();
         $inspector = $this->newInspector();
 
-        /** @var Query $dbQuery */
-        $dbQuery = $this->queryBuilder($inspector)->toSelect($query, $dbQuery);
+        $dbQuery = $this->queryBuilder($inspector)->toSelect($query);
 
-        $this->assertInstanceOf(Query::class, $dbQuery);
+        $this->assertInstanceOf(QueryContract::class, $dbQuery);
         $this->assertCount(count($inspector->getKeys(Contact::class)), $dbQuery->columns);
         $this->assertEquals($inspector->getStorageName(Contact::class), $dbQuery->table);
         $this->assertCount(0, $dbQuery->conditions);
@@ -87,15 +77,13 @@ class OrmQueryBuilderIntegrationTest extends OrmIntegrationTest
     public function select_from_contact_where()
     {
         $query = new OrmQuery(Contact::class);
-        $dbQuery = static::$con->query();
         $inspector = $this->newInspector();
 
         $query->where(ContactMap::CITY, 'like', 'C%')
               ->where(ContactMap::ID, '>', 200);
 
-        /** @var Query $dbQuery */
-        $dbQuery = $this->queryBuilder($inspector)->toSelect($query, $dbQuery);
-        $this->assertInstanceOf(Query::class, $dbQuery);
+        $dbQuery = $this->queryBuilder($inspector)->toSelect($query);
+        $this->assertInstanceOf(QueryContract::class, $dbQuery);
         $this->assertCount(count($inspector->getKeys(Contact::class)), $dbQuery->columns);
         $this->assertEquals($inspector->getStorageName(Contact::class), $dbQuery->table);
 
@@ -110,17 +98,15 @@ class OrmQueryBuilderIntegrationTest extends OrmIntegrationTest
     public function select_from_user_where_related()
     {
         $query = new OrmQuery(User::class);
-        $dbQuery = static::$con->query();
         $inspector = $this->newInspector();
 
         $query->where('contact.'.ContactMap::CITY, 'like', 'C%')
             ->where(UserMap::EMAIL, 'LIKE', '%@outlook.com')
             ->where(UserMap::CREATED_AT, '>', new DateTime('2020-04-15 00:00:00'));
 
-        /** @var Query $dbQuery */
-        $dbQuery = $this->queryBuilder($inspector)->toSelect($query, $dbQuery);
+        $dbQuery = $this->queryBuilder($inspector)->toSelect($query);
 
-        $this->assertInstanceOf(Query::class, $dbQuery);
+        $this->assertInstanceOf(QueryContract::class, $dbQuery);
         $this->assertCount(count($inspector->getKeys(User::class)), $dbQuery->columns);
         $this->assertEquals($inspector->getStorageName(User::class), $dbQuery->table);
 
@@ -135,7 +121,6 @@ class OrmQueryBuilderIntegrationTest extends OrmIntegrationTest
     public function select_from_user_where_multiple_related()
     {
         $query = new OrmQuery(User::class);
-        $dbQuery = static::$con->query();
         $inspector = $this->newInspector();
 
         $query->where('projects.type.name', 'like', 'C%')
@@ -143,9 +128,9 @@ class OrmQueryBuilderIntegrationTest extends OrmIntegrationTest
             ->where(UserMap::CREATED_AT, '>', new DateTime('2020-04-15 00:00:00'));
 
         /** @var Query $dbQuery */
-        $dbQuery = $this->queryBuilder($inspector)->toSelect($query, $dbQuery);
+        $dbQuery = $this->queryBuilder($inspector)->toSelect($query);
 
-        $this->assertInstanceOf(Query::class, $dbQuery);
+        $this->assertInstanceOf(QueryContract::class, $dbQuery);
         $this->assertCount(count($inspector->getKeys(User::class)), $dbQuery->columns);
         $this->assertEquals($inspector->getStorageName(User::class), $dbQuery->table);
 
@@ -161,16 +146,15 @@ class OrmQueryBuilderIntegrationTest extends OrmIntegrationTest
     public function select_from_projects_where_many_to_many()
     {
         $query = new OrmQuery(Project::class);
-        $dbQuery = static::$con->query();
+
         $inspector = $this->newInspector();
 
         $query->where('files.name', 'like', 'C%')
             ->where('type.name', 'Real Estate');
 
-        /** @var Query $dbQuery */
-        $dbQuery = $this->queryBuilder($inspector)->toSelect($query, $dbQuery);
+        $dbQuery = $this->queryBuilder($inspector)->toSelect($query);
 
-        $this->assertInstanceOf(Query::class, $dbQuery);
+        $this->assertInstanceOf(QueryContract::class, $dbQuery);
         $this->assertCount(count($inspector->getKeys(Project::class)), $dbQuery->columns);
         $this->assertEquals($inspector->getStorageName(Project::class), $dbQuery->table);
 
@@ -186,16 +170,15 @@ class OrmQueryBuilderIntegrationTest extends OrmIntegrationTest
     public function select_from_projects_where_many_to_level2()
     {
         $query = new OrmQuery(User::class);
-        $dbQuery = static::$con->query();
         $inspector = $this->newInspector();
 
         $query->where('projects.files.name', 'like', 'C%')
             ->where('contact.first_name', 'Michael');
 
         /** @var Query $dbQuery */
-        $dbQuery = $this->queryBuilder($inspector)->toSelect($query, $dbQuery);
+        $dbQuery = $this->queryBuilder($inspector)->toSelect($query);
 
-        $this->assertInstanceOf(Query::class, $dbQuery);
+        $this->assertInstanceOf(QueryContract::class, $dbQuery);
         $this->assertCount(count($inspector->getKeys(User::class)), $dbQuery->columns);
         $this->assertEquals($inspector->getStorageName(User::class), $dbQuery->table);
 
@@ -211,7 +194,6 @@ class OrmQueryBuilderIntegrationTest extends OrmIntegrationTest
     public function select_from_user_where_parent()
     {
         $query = new OrmQuery(User::class);
-        $dbQuery = static::$con->query();
         $inspector = $this->newInspector();
 
         $query->where('parent.'.UserMap::WEB, 'like', 'https/%')
@@ -219,9 +201,9 @@ class OrmQueryBuilderIntegrationTest extends OrmIntegrationTest
             ->where(UserMap::CREATED_AT, '>', new DateTime('2020-04-15 00:00:00'));
 
         /** @var Query $dbQuery */
-        $dbQuery = $this->queryBuilder($inspector)->toSelect($query, $dbQuery);
+        $dbQuery = $this->queryBuilder($inspector)->toSelect($query);
 
-        $this->assertInstanceOf(Query::class, $dbQuery);
+        $this->assertInstanceOf(QueryContract::class, $dbQuery);
         $this->assertCount(count($inspector->getKeys(User::class)), $dbQuery->columns);
         $this->assertEquals($inspector->getStorageName(User::class), $dbQuery->table);
 
@@ -236,17 +218,15 @@ class OrmQueryBuilderIntegrationTest extends OrmIntegrationTest
     public function select_from_user_where_parent_parent()
     {
         $query = new OrmQuery(User::class);
-        $dbQuery = static::$con->query();
         $inspector = $this->newInspector();
 
         $query->where('parent.parent.'.UserMap::WEB, 'like', 'https/%')
             ->where(UserMap::EMAIL, 'LIKE', '%@outlook.com')
             ->where(UserMap::CREATED_AT, '>', new DateTime('2020-04-15 00:00:00'));
 
-        /** @var Query $dbQuery */
-        $dbQuery = $this->queryBuilder($inspector)->toSelect($query, $dbQuery);
+        $dbQuery = $this->queryBuilder($inspector)->toSelect($query);
 
-        $this->assertInstanceOf(Query::class, $dbQuery);
+        $this->assertInstanceOf(QueryContract::class, $dbQuery);
         $this->assertCount(count($inspector->getKeys(User::class)), $dbQuery->columns);
         $this->assertEquals($inspector->getStorageName(User::class), $dbQuery->table);
 
@@ -261,16 +241,15 @@ class OrmQueryBuilderIntegrationTest extends OrmIntegrationTest
     public function select_from_user_with_contact()
     {
         $query = (new OrmQuery(User::class))->with('contact');
-        $dbQuery = static::$con->query();
+
         $inspector = $this->newInspector();
 
         $query->where(UserMap::EMAIL, 'LIKE', '%@outlook.com')
             ->where(UserMap::CREATED_AT, '>', new DateTime('2020-04-15 00:00:00'));
 
-        /** @var Query $dbQuery */
-        $dbQuery = $this->queryBuilder($inspector)->toSelect($query, $dbQuery);
+        $dbQuery = $this->queryBuilder($inspector)->toSelect($query);
 
-        $this->assertInstanceOf(Query::class, $dbQuery);
+        $this->assertInstanceOf(QueryContract::class, $dbQuery);
         $this->assertEquals($inspector->getStorageName(User::class), $dbQuery->table);
 
         $columnCount = count($inspector->getKeys(User::class)) +  count($inspector->getKeys(Contact::class));
@@ -286,16 +265,14 @@ class OrmQueryBuilderIntegrationTest extends OrmIntegrationTest
     public function select_from_user_with_parent_contact()
     {
         $query = (new OrmQuery(User::class))->with('contact', 'parent.contact');
-        $dbQuery = static::$con->query();
         $inspector = $this->newInspector();
 
         $query->where(UserMap::EMAIL, 'LIKE', '%@outlook.com')
             ->where(UserMap::CREATED_AT, '>', new DateTime('2020-04-15 00:00:00'));
 
-        /** @var Query $dbQuery */
-        $dbQuery = $this->queryBuilder($inspector)->toSelect($query, $dbQuery);
+        $dbQuery = $this->queryBuilder($inspector)->toSelect($query);
 
-        $this->assertInstanceOf(Query::class, $dbQuery);
+        $this->assertInstanceOf(QueryContract::class, $dbQuery);
         $this->assertEquals($inspector->getStorageName(User::class), $dbQuery->table);
 
         $columnCount = count($inspector->getKeys(User::class)) +  count($inspector->getKeys(Contact::class));
@@ -311,16 +288,15 @@ class OrmQueryBuilderIntegrationTest extends OrmIntegrationTest
     public function select_from_user_with_tokens()
     {
         $query = (new OrmQuery(User::class))->with('tokens');
-        $dbQuery = static::$con->query();
         $inspector = $this->newInspector();
 
         $query->where(UserMap::EMAIL, 'LIKE', '%@outlook.com')
             ->where(UserMap::CREATED_AT, '>', new DateTime('2020-04-15 00:00:00'));
 
         /** @var Query $dbQuery */
-        $dbQuery = $this->queryBuilder($inspector)->toSelect($query, $dbQuery);
+        $dbQuery = $this->queryBuilder($inspector)->toSelect($query);
 
-        $this->assertInstanceOf(Query::class, $dbQuery);
+        $this->assertInstanceOf(QueryContract::class, $dbQuery);
         $this->assertEquals($inspector->getStorageName(User::class), $dbQuery->table);
 
         $columnCount = count($inspector->getKeys(User::class));
@@ -345,16 +321,14 @@ class OrmQueryBuilderIntegrationTest extends OrmIntegrationTest
     public function select_from_user_with_to_many_that_has_to_one()
     {
         $query = (new OrmQuery(User::class))->with('projects.type', 'projects.files');
-        $dbQuery = static::$con->query();
         $inspector = $this->newInspector();
 
         $query->where(UserMap::EMAIL, 'LIKE', '%@outlook.com')
             ->where('projects.type.'.ProjectTypeMap::NAME, 'like', '%sports%');
 
-        /** @var Query $dbQuery */
-        $dbQuery = $this->queryBuilder($inspector)->toSelect($query, $dbQuery);
+        $dbQuery = $this->queryBuilder($inspector)->toSelect($query);
 
-        $this->assertInstanceOf(Query::class, $dbQuery);
+        $this->assertInstanceOf(QueryContract::class, $dbQuery);
         $this->assertEquals($inspector->getStorageName(User::class), $dbQuery->table);
 
         $columnCount = count($inspector->getKeys(User::class));
@@ -381,16 +355,14 @@ class OrmQueryBuilderIntegrationTest extends OrmIntegrationTest
     public function select_from_user_with_to_one_and_to_many_that_has_to_one()
     {
         $query = (new OrmQuery(User::class))->with('projects.type', 'projects.files', 'contact', 'parent');
-        $dbQuery = static::$con->query();
         $inspector = $this->newInspector();
 
         $query->where(UserMap::EMAIL, 'LIKE', '%@outlook.com')
             ->where('projects.type.'.ProjectTypeMap::NAME, 'like', '%sports%');
 
-        /** @var Query $dbQuery */
-        $dbQuery = $this->queryBuilder($inspector)->toSelect($query, $dbQuery);
+        $dbQuery = $this->queryBuilder($inspector)->toSelect($query);
 
-        $this->assertInstanceOf(Query::class, $dbQuery);
+        $this->assertInstanceOf(QueryContract::class, $dbQuery);
         $this->assertEquals($inspector->getStorageName(User::class), $dbQuery->table);
 
         $columnCount = count($inspector->getKeys(User::class)) +
