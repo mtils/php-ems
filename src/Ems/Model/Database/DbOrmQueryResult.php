@@ -7,13 +7,13 @@ namespace Ems\Model\Database;
 
 
 use ArrayIterator;
+use Ems\Contracts\Model\Database\Connection as ConnectionContract;
 use Ems\Contracts\Model\Database\Dialect;
+use Ems\Contracts\Model\Database\Query as QueryContract;
+use Ems\Contracts\Model\OrmQuery;
 use Ems\Contracts\Model\Paginatable;
 use Ems\Contracts\Model\Result;
 use Ems\Core\Collections\NestedArray;
-use Ems\Contracts\Model\Database\Query as QueryContract;
-use Ems\Contracts\Model\OrmQuery;
-use Ems\Contracts\Model\Database\Connection as ConnectionContract;
 use Ems\Model\ChunkIterator;
 use Ems\Model\ResultTrait;
 use Ems\Pagination\Paginator;
@@ -274,8 +274,7 @@ class DbOrmQueryResult implements Result, Paginatable
 
         foreach ($dbResult as $mainRow) {
             $mainId = $this->identify($mainRow);
-            $structured = NestedArray::toNested($mainRow, '__');
-            $buffer[$mainId] = $structured;
+            $buffer[$mainId] = $this->toNested($mainRow);
         }
 
         if (!$toManyQuery = $this->dbQuery->getAttached(OrmQueryBuilder::TO_MANY)) {
@@ -308,6 +307,34 @@ class DbOrmQueryResult implements Result, Paginatable
         }
 
         return implode('|', $values);
+    }
+
+    protected function toNested($row)
+    {
+        $structured = NestedArray::toNested($row, '__');
+        $this->removeEmptyRelations($structured);
+        return $structured;
+    }
+
+    protected function removeEmptyRelations(array &$row)
+    {
+        // No indexed or empty arrays
+        if (isset($row[0]) || !$row) {
+            return;
+        }
+
+        $allEmpty = true;
+        foreach ($row as $key=>$value) {
+            if (is_array($value)) {
+                $this->removeEmptyRelations($row[$key]);
+            }
+            if ($row[$key] !== null && $row[$key] !== '' && $row[$key] !== []) {
+                $allEmpty = false;
+            }
+        }
+        if ($allEmpty) {
+            $row = [];
+        }
     }
 
     /**

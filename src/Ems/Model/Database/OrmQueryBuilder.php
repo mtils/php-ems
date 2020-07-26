@@ -453,7 +453,7 @@ class OrmQueryBuilder implements OrmQueryRunner
 
         if (!$junction = $relation->junction) {
             $leftAlias = $relationParent ? $relationParent : $ownerTable;
-            $join = $dbQuery->join($relatedTable)
+            $join = $dbQuery->join($relatedTable)->left()
                 ->on("$leftAlias.$relation->ownerKey", "$tableAlias.$relation->relatedKey");
 
             if ($needsAlias) {
@@ -467,9 +467,11 @@ class OrmQueryBuilder implements OrmQueryRunner
 
         $dbQuery->join($junctionTable)
                 ->as($junctionAlias)
+                ->left()
                 ->on("$ownerTable.$relation->ownerKey", "$junctionAlias.$relation->junctionOwnerKey");
 
         $join = $dbQuery->join($relatedTable)
+                        ->left()
                         ->on("$junctionAlias.$relation->junctionRelatedKey", "$tableAlias.$relation->relatedKey");
 
         if ($needsAlias) {
