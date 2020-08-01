@@ -13,6 +13,7 @@ use Ems\Contracts\Model\Database\Query as QueryContract;
 use Ems\Contracts\Model\OrmQuery;
 use Ems\Contracts\Model\Paginatable;
 use Ems\Contracts\Model\Result;
+use Ems\Contracts\Model\SchemaInspector;
 use Ems\Core\Collections\NestedArray;
 use Ems\Model\ChunkIterator;
 use Ems\Model\ResultTrait;
@@ -20,6 +21,7 @@ use Ems\Pagination\Paginator;
 use Exception;
 use Traversable;
 
+use function array_keys;
 use function array_values;
 use function call_user_func;
 use function is_array;
@@ -56,14 +58,14 @@ class DbOrmQueryResult implements Result, Paginatable
     private $countQueryProvider;
 
     /**
-     * @var string|string[]
-     */
-    private $primaryKey;
-
-    /**
      * @var QueryRenderer
      */
     private $renderer;
+
+    /**
+     * @var SchemaInspector
+     */
+    private $inspector;
 
     /**
      * Retrieve an external iterator
@@ -101,12 +103,13 @@ class DbOrmQueryResult implements Result, Paginatable
         $paginator = new Paginator($page, $perPage, $this);
 
         $dbQuery->offset($paginator->getOffset(), $perPage);
+        $primaryKey = $this->inspector->primaryKey($this->ormQuery->ormClass);
 
         $buffer = [];
 
 
         foreach ($dbQuery as $row) {
-            $mainId = $this->identify($row);
+            $mainId = $this->identify($row, $primaryKey);
             $structured = NestedArray::toNested($row, '__');
             $buffer[$mainId] = $structured;
         }
@@ -133,6 +136,23 @@ class DbOrmQueryResult implements Result, Paginatable
         return $this;
     }
 
+    /**
+     * @return SchemaInspector
+     */
+    public function getInspector()
+    {
+        return $this->inspector;
+    }
+
+    /**
+     * @param SchemaInspector $inspector
+     * @return DbOrmQueryResult
+     */
+    public function setInspector(SchemaInspector $inspector)
+    {
+        $this->inspector = $inspector;
+        return $this;
+    }
 
     /**
      * @return OrmQuery
@@ -220,24 +240,6 @@ class DbOrmQueryResult implements Result, Paginatable
     }
 
     /**
-     * @return string|string[]
-     */
-    public function getPrimaryKey()
-    {
-        return $this->primaryKey;
-    }
-
-    /**
-     * @param string|string[] $primaryKey
-     * @return DbOrmQueryResult
-     */
-    public function setPrimaryKey($primaryKey)
-    {
-        $this->primaryKey = $primaryKey;
-        return $this;
-    }
-
-    /**
      * @return int
      */
     public function getChunkSize()
@@ -270,10 +272,11 @@ class DbOrmQueryResult implements Result, Paginatable
         $this->dbQuery->limit($oldLimit);
 
         $dbResult = $this->connection->select($expression->toString(), $expression->getBindings());
+        $primaryKey = $this->inspector->primaryKey($this->ormQuery->ormClass);
         $buffer = [];
 
         foreach ($dbResult as $mainRow) {
-            $mainId = $this->identify($mainRow);
+            $mainId = $this->identify($mainRow, $primaryKey);
             $buffer[$mainId] = $this->toNested($mainRow);
         }
 
@@ -281,28 +284,56 @@ class DbOrmQueryResult implements Result, Paginatable
             return array_values($buffer);
         }
 
-        foreach ($toManyQuery as $hasManyRow) {
-            $mainId = $this->identify($hasManyRow);
-            $buffer[$mainId] = $this->mergeHasManyRow($buffer[$mainId], $hasManyRow);
+        // Restrict to the result ids
+        $mainTable = $this->inspector->getStorageName($this->ormQuery->ormClass);
+        $sqlPrimaryKey = "$mainTable.$primaryKey";
+        $toManyQuery->where($sqlPrimaryKey, 'in', array_keys($buffer));
+
+
+//        echo SQL::render($toManyQuery) . "\n$primaryKey\n$sqlPrimaryKey";
+
+        $toManyExpression = $this->renderer()->renderSelect($toManyQuery);
+        $toManyResult = $this->connection->select($toManyExpression->toString(), $toManyExpression->getBindings());
+
+        foreach ($toManyResult as $hasManyRow) {
+            $nested = $this->toNested($hasManyRow);
+            $mainId = $this->identify($hasManyRow, $primaryKey);
+            $buffer[$mainId] = $this->mergeToManyRow($buffer[$mainId], $nested, $primaryKey);
         }
 
         return array_values($buffer);
     }
 
+    protected function mergeToManyRow(array $mainRow, array $toManyRow, $primaryKey)
+    {
+
+        foreach((array)$primaryKey as $key) {
+            unset($toManyRow[$key]);
+        }
+        foreach ($toManyRow as $key=>$value) {
+            if (!isset($mainRow[$key])) {
+                $mainRow[$key] = [];
+            }
+            $mainRow[$key][] = $value;
+        }
+        return $mainRow;
+    }
+
     /**
-     * @param array $row
+     * @param array        $row
+     * @param string|array $primaryKey
      *
      * @return string
      */
-    protected function identify(array $row)
+    protected function identify(array $row, $primaryKey)
     {
-        if (is_string($this->primaryKey)) {
-            return $row[$this->primaryKey];
+        if (is_string($primaryKey)) {
+            return $row[$primaryKey];
         }
 
         $values = [];
 
-        foreach($this->primaryKey as $keyPart) {
+        foreach($primaryKey as $keyPart) {
             $values[] = $row[$keyPart];
         }
 

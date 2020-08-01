@@ -45,6 +45,16 @@ class QueryRenderer implements Renderer
     private $dialect;
 
     /**
+     * QueryRenderer constructor.
+     *
+     * @param Dialect|null $dialect
+     */
+    public function __construct(Dialect $dialect=null)
+    {
+        $this->dialect = $dialect;
+    }
+
+    /**
      * {@inheritDoc}
      *
      * @param Renderable $item
@@ -61,7 +71,7 @@ class QueryRenderer implements Renderer
      *
      * @param Renderable $item
      *
-     * @return string
+     * @return string|SQLExpression
      *
      * @throws UnsupportedParameterException
      **/
@@ -72,23 +82,34 @@ class QueryRenderer implements Renderer
             throw new UnsupportedParameterException($msg);
         }
         /* @var QueryContract $item */
+        return $this->renderQuery($item);
+    }
 
-        $operation = $item->operation;
+    /**
+     * Let a query renderer transform a query to a sql expression (string+bindings)
+     *
+     * @param QueryContract $query
+     *
+     * @return SQLExpression
+     */
+    public function renderQuery(QueryContract $query)
+    {
+        $operation = $query->operation;
 
         if ($operation == 'SELECT') {
-            return $this->renderSelect($item);
+            return $this->renderSelect($query);
         }
         if ($operation == 'INSERT') {
-            return $this->renderInsert($item, $item->values);
+            return $this->renderInsert($query, $query->values);
         }
         if ($operation == 'REPLACE') {
-            return $this->renderInsert($item, $item->values, true);
+            return $this->renderInsert($query, $query->values, true);
         }
         if ($operation == 'UPDATE') {
-            return $this->renderUpdate($item, $item->values);
+            return $this->renderUpdate($query, $query->values);
         }
         if ($operation == 'DELETE') {
-            return $this->renderDelete($item);
+            return $this->renderDelete($query);
         }
         throw new UnsupportedParameterException("Unsupported operation '$operation'");
     }

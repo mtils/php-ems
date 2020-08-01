@@ -8,15 +8,18 @@ namespace integration\Model\Database;
 
 use ArrayIterator;
 use Ems\Contracts\Model\OrmQuery;
+use Ems\Core\Helper;
 use Ems\DatabaseIntegrationTest;
 use Ems\Model\ChunkIterator;
 use Ems\TestOrm;
 use Models\Contact;
 use Models\Ems\ContactMap;
+use Models\Ems\TokenMap;
 use Models\Ems\UserMap;
 use Models\User;
 
 use function array_key_exists;
+use function crc32;
 use function is_array;
 use function iterator_to_array;
 use function var_export;
@@ -140,6 +143,30 @@ class OrmDatabaseIntegrationTest extends DatabaseIntegrationTest
         $this->assertEquals('eringlein@gmail.com', $result[18]['parent']['email']);
         $this->assertEquals('Ringlein', $result[18]['parent']['contact']['last_name']);
         $this->assertCount(19, $result);
+
+    }
+
+    /**
+     * @test
+     */
+    public function select_user_with_to_many_tokens()
+    {
+        $query = (new OrmQuery(User::class))->with('tokens', 'contact');
+        $query->where(UserMap::EMAIL, 'like', 's%');
+        $query->where(UserMap::EMAIL, 'like', '%.com');
+
+        $dbResult = $this->queryBuilder()->retrieve(static::$con, $query);
+        $result = iterator_to_array($dbResult);
+
+        foreach ($result as $user) {
+            $lastDigit = (int)Helper::last($user['contact']['phone1']);
+            $count = $lastDigit == 0 ? 2 : $lastDigit;
+            $this->assertCount($count, $user['tokens']);
+            foreach($user['tokens'] as $tokenArray) {
+                $token = crc32($user['email'] . '-' . $tokenArray[TokenMap::TOKEN_TYPE]);
+                $this->assertEquals($token, $tokenArray['token']);
+            }
+        }
 
     }
 }

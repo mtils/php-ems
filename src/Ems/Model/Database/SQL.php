@@ -5,6 +5,8 @@ namespace Ems\Model\Database;
 use DateTime;
 use Ems\Contracts\Core\Stringable;
 use Ems\Contracts\Model\Database\Dialect;
+use Ems\Contracts\Model\Database\Query as QueryContract;
+use Ems\Contracts\Model\Database\SQLExpression;
 use Ems\Core\Exceptions\NotImplementedException;
 use Ems\Core\Expression;
 use Ems\Core\KeyExpression;
@@ -32,14 +34,19 @@ class SQL
     /**
      * Try to build a readable sql query of a prepared one.
      *
-     * @param string $query
-     * @param array  $bindings
-     * @param string $quoteChar (default:')
+     * @param string|QueryContract $query
+     * @param array                $bindings
+     * @param string               $quoteChar (default:')
      *
      * @return string
      **/
     public static function render($query, array $bindings=[], $quoteChar="'")
     {
+
+        if ($query instanceof QueryContract) {
+            $expression = self::renderQuery($query);
+            return self::render($expression->toString(), $expression->getBindings());
+        }
 
         if (!$bindings) {
             return "$query";
@@ -65,6 +72,28 @@ class SQL
     }
 
     /**
+     * @param QueryContract $query
+     * @param string        $dialect (default: sqlite)
+     *
+     * @return SQLExpression
+     */
+    public static function renderQuery(QueryContract $query, $dialect='')
+    {
+        $renderer = null;
+
+        if ($query instanceof Query && !$dialect) {
+            $renderer = $query->getRenderer();
+        }
+
+        if (!$renderer) {
+            $renderer = new QueryRenderer(self::dialect($dialect ?: self::SQLITE));
+        }
+
+        return $renderer->renderQuery($query);
+
+    }
+
+    /**
      * A shortcut to create a KeyExpression
      *
      * @param string $name
@@ -76,11 +105,11 @@ class SQL
     {
         return new KeyExpression($name);
     }
-
 // Later...
 //     public static function func($name, $parameters)
 //     {
 //         return
+
 //     }
 
     /**

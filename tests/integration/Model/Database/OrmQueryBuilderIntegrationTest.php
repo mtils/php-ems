@@ -12,7 +12,6 @@ use Ems\Contracts\Model\OrmQuery;
 use Ems\IntegrationTest;
 use Ems\Model\Database\OrmQueryBuilder;
 use Ems\Model\Database\Query;
-use Ems\OrmIntegrationTest;
 use Ems\TestOrm;
 use Models\Contact;
 use Models\Ems\ContactMap;

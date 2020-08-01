@@ -77,7 +77,6 @@ class OrmQueryBuilder implements OrmQueryRunner
         $connection = $this->con($connection);
 
         $result = $this->newResult($connection, $query, $dbQuery);
-        $result->setPrimaryKey($this->inspector->primaryKey($query->ormClass));
 
         return $result->provideCountQuery(function () use ($query, $connection, $dbQuery) {
             return $this->toCountQuery($query, $connection, $dbQuery);
@@ -169,9 +168,9 @@ class OrmQueryBuilder implements OrmQueryRunner
     }
 
     /**
-     * @param OrmQuery $query
-     * @param array    $values
-     * @param Query    $useThis (optional)
+     * @param OrmQuery      $query
+     * @param array         $values
+     * @param Query|null    $useThis (optional)
      *
      * @return Query
      */
@@ -617,10 +616,12 @@ class OrmQueryBuilder implements OrmQueryRunner
      */
     protected function newResult(DbConnection $connection, OrmQuery $ormQuery, Query $query)
     {
+
         return (new DbOrmQueryResult())
             ->setOrmQuery($ormQuery)
             ->setDbQuery($query)
-            ->setConnection($connection);
+            ->setConnection($connection)
+            ->setInspector($this->inspector);
     }
 
     /**
