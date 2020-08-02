@@ -24,7 +24,9 @@ use Traversable;
 use function array_keys;
 use function array_values;
 use function call_user_func;
+use function get_class;
 use function is_array;
+use function print_r;
 
 class DbOrmQueryResult implements Result, Paginatable
 {
@@ -66,6 +68,11 @@ class DbOrmQueryResult implements Result, Paginatable
      * @var SchemaInspector
      */
     private $inspector;
+
+    /**
+     * @var array
+     */
+    private $primaryKeyCache = [];
 
     /**
      * Retrieve an external iterator
@@ -289,9 +296,6 @@ class DbOrmQueryResult implements Result, Paginatable
         $sqlPrimaryKey = "$mainTable.$primaryKey";
         $toManyQuery->where($sqlPrimaryKey, 'in', array_keys($buffer));
 
-
-//        echo SQL::render($toManyQuery) . "\n$primaryKey\n$sqlPrimaryKey";
-
         $toManyExpression = $this->renderer()->renderSelect($toManyQuery);
         $toManyResult = $this->connection->select($toManyExpression->toString(), $toManyExpression->getBindings());
 
@@ -304,6 +308,16 @@ class DbOrmQueryResult implements Result, Paginatable
         return array_values($buffer);
     }
 
+    protected function primaryKey($path)
+    {
+        if (isset($this->primaryKeyCache[$path])) {
+            return $this->primaryKeyCache[$path];
+        }
+        $relation = $this->inspector->getRelationship($this->ormQuery->ormClass, $path);
+        $this->primaryKeyCache[$path] = $this->inspector->primaryKey(get_class($relation->related));
+        return $this->primaryKeyCache[$path];
+    }
+
     protected function mergeToManyRow(array $mainRow, array $toManyRow, $primaryKey)
     {
 
@@ -311,8 +325,16 @@ class DbOrmQueryResult implements Result, Paginatable
             unset($toManyRow[$key]);
         }
         foreach ($toManyRow as $key=>$value) {
+
             if (!isset($mainRow[$key])) {
                 $mainRow[$key] = [];
+            }
+            $relatedKey = $this->primaryKey($key);
+            $relatedId = $this->identify($value, $relatedKey);
+            foreach ($mainRow[$key] as $alreadyAdded) {
+                if($this->identify($alreadyAdded, $relatedKey) == $relatedId) {
+                    continue 2;
+                }
             }
             $mainRow[$key][] = $value;
         }

@@ -52,7 +52,7 @@ interface SchemaInspector
     public function getKeys($class);
 
     /**
-     * Return the relation obeject that describes the relation to a foreign
+     * Return the relation object that describes the relation to a foreign
      * object. The other object does not have to be in the same storage.
      *
      * @param string $class

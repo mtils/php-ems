@@ -38,6 +38,16 @@ class DatabaseIntegrationTest extends IntegrationTest
     protected static $data = [];
 
     /**
+     * @var string[][]
+     */
+    protected static $providerToGroups = [
+        'hotmail.com'   => ['Moderator'],
+        'gmail.com'     => ['Support'],
+        'yahoo.com'     => ['Moderator','Support'],
+        'other'         => ['Administrator']
+    ];
+
+    /**
      * @var DateTime
      */
     protected static $created_at;
@@ -124,14 +134,7 @@ class DatabaseIntegrationTest extends IntegrationTest
     protected static function fillDatabase(Connection $con, array $data)
     {
 
-        $providerToGroups = [
-            'hotmail.com'   => ['Moderator'],
-            'gmail.com'     => ['Support'],
-            'yahoo.com'     => ['Moderator','Support'],
-            'other'         => ['Administrator']
-        ];
-
-        $providers = array_keys($providerToGroups);
+        $providers = array_keys(static::$providerToGroups);
 
         $groupTemplate = [
             ['name'    => 'Administrator'],
@@ -150,7 +153,7 @@ class DatabaseIntegrationTest extends IntegrationTest
         $projectTypeIds = [];
         foreach($providers as $provider) {
             $projectTypeId = $con->query('project_types')->insert([
-                'name'  => $provider,
+                'name'          => $provider,
                 'created_at'    => new DateTime(),
                 'updated_at'    => new DateTime(),
             ]);
@@ -181,20 +184,14 @@ class DatabaseIntegrationTest extends IntegrationTest
 
             $userId = $con->query('users')->insert($userData, true);
 
-            $mailProvider = '';
+            $mailHost = explode('@', $userData['email'])[1];
+            $mailProvider = in_array($mailHost, $providers) ? $mailHost : 'other';
 
-            if ($userData['email']) {
-                $mailHost = explode('@', $userData['email'])[0];
-                $mailProvider = in_array($mailHost, $providers) ? $mailHost : 'other';
-            }
-
-            if ($mailProvider) {
-                foreach($providerToGroups[$mailProvider] as $groupName) {
-                    $con->query('user_group')->insert([
-                        'user_id'   =>  $userId,
-                        'group_id'  =>  $groupIds[$groupName]
-                    ]);
-                }
+            foreach(static::groupNames($userData['email']) as $groupName) {
+                $con->query('user_group')->insert([
+                    'user_id'   =>  $userId,
+                    'group_id'  =>  $groupIds[$groupName]
+                ]);
             }
 
             if (Helper::startsWith($userData['email'], 's')) {
@@ -245,6 +242,19 @@ class DatabaseIntegrationTest extends IntegrationTest
 
             }
         }
+    }
+
+    /**
+     * @param string $email
+     *
+     * @return string[]
+     */
+    protected static function groupNames($email)
+    {
+        $providers = array_keys(static::$providerToGroups);
+        $mailHost = explode('@', $email)[1];
+        $mailProvider = in_array($mailHost, $providers) ? $mailHost : 'other';
+        return isset(static::$providerToGroups[$mailProvider]) ? static::$providerToGroups[$mailProvider] : [];
     }
 
     protected static function only(array $keys, array $data)

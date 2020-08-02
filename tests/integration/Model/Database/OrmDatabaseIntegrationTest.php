@@ -11,6 +11,8 @@ use Ems\Contracts\Model\OrmQuery;
 use Ems\Core\Helper;
 use Ems\DatabaseIntegrationTest;
 use Ems\Model\ChunkIterator;
+use Ems\Model\Database\DbOrmQueryResult;
+use Ems\Model\Database\SQL;
 use Ems\TestOrm;
 use Models\Contact;
 use Models\Ems\ContactMap;
@@ -20,6 +22,7 @@ use Models\User;
 
 use function array_key_exists;
 use function crc32;
+use function explode;
 use function is_array;
 use function iterator_to_array;
 use function var_export;
@@ -168,5 +171,83 @@ class OrmDatabaseIntegrationTest extends DatabaseIntegrationTest
             }
         }
 
+    }
+
+    /**
+     * @test
+     */
+    public function select_user_with_m_to_n_groups()
+    {
+        $query = (new OrmQuery(User::class))->with('groups', 'contact');
+        $query->where('contact.last_name', 'like', 's%');
+        $query->where('contact.city', 'like', '% %');
+
+        /** @var DbOrmQueryResult $dbResult */
+        $dbResult = $this->queryBuilder()->retrieve(static::$con, $query);
+
+        $result = iterator_to_array($dbResult);
+
+        $hasGroup = function (array $groups, $name) {
+            foreach ($groups as $groupData) {
+                if ($groupData['name'] == $name) {
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        foreach ($result as $user) {
+
+            foreach (static::groupNames($user['email']) as $groupName) {
+                if (!$hasGroup($user['groups'], $groupName)) {
+                    $this->fail("User is missing group $groupName");
+                }
+            }
+
+        }
+    }
+    /**
+     * @test
+     */
+    public function select_user_with_groups_and_token()
+    {
+        $query = (new OrmQuery(User::class))->with('groups', 'contact', 'tokens');
+        $query->where(UserMap::EMAIL, 'like', 's%');
+        $query->where(UserMap::EMAIL, 'like', '%.com');
+
+        /** @var DbOrmQueryResult $dbResult */
+        $dbResult = $this->queryBuilder()->retrieve(static::$con, $query);
+
+        $result = iterator_to_array($dbResult);
+
+        $hasGroup = function (array $groups, $name) {
+            foreach ($groups as $groupData) {
+                if ($groupData['name'] == $name) {
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        //echo "\n" . SQL::render($dbResult->getDbQuery()->getAttached('to_many'));
+        foreach ($result as $user) {
+
+            print_r($user);
+
+            foreach (static::groupNames($user['email']) as $groupName) {
+                if (!$hasGroup($user['groups'], $groupName)) {
+                    $this->fail("User is missing group $groupName");
+                }
+            }
+
+            $lastDigit = (int)Helper::last($user['contact']['phone1']);
+            $count = $lastDigit == 0 ? 2 : $lastDigit;
+            $this->assertCount($count, $user['tokens']);
+            foreach($user['tokens'] as $tokenArray) {
+                $token = crc32($user['email'] . '-' . $tokenArray[TokenMap::TOKEN_TYPE]);
+                $this->assertEquals($token, $tokenArray['token']);
+            }
+
+        }
     }
 }
