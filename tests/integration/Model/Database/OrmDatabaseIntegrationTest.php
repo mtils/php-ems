@@ -25,6 +25,7 @@ use function crc32;
 use function explode;
 use function is_array;
 use function iterator_to_array;
+use function str_split;
 use function var_export;
 
 class OrmDatabaseIntegrationTest extends DatabaseIntegrationTest
@@ -187,25 +188,17 @@ class OrmDatabaseIntegrationTest extends DatabaseIntegrationTest
 
         $result = iterator_to_array($dbResult);
 
-        $hasGroup = function (array $groups, $name) {
-            foreach ($groups as $groupData) {
-                if ($groupData['name'] == $name) {
-                    return true;
-                }
-            }
-            return false;
-        };
-
         foreach ($result as $user) {
 
             foreach (static::groupNames($user['email']) as $groupName) {
-                if (!$hasGroup($user['groups'], $groupName)) {
+                if (!$this->hasItem($user['groups'], $groupName)) {
                     $this->fail("User is missing group $groupName");
                 }
             }
 
         }
     }
+
     /**
      * @test
      */
@@ -220,22 +213,10 @@ class OrmDatabaseIntegrationTest extends DatabaseIntegrationTest
 
         $result = iterator_to_array($dbResult);
 
-        $hasGroup = function (array $groups, $name) {
-            foreach ($groups as $groupData) {
-                if ($groupData['name'] == $name) {
-                    return true;
-                }
-            }
-            return false;
-        };
-
-        //echo "\n" . SQL::render($dbResult->getDbQuery()->getAttached('to_many'));
         foreach ($result as $user) {
 
-            print_r($user);
-
             foreach (static::groupNames($user['email']) as $groupName) {
-                if (!$hasGroup($user['groups'], $groupName)) {
+                if (!$this->hasItem($user['groups'], $groupName)) {
                     $this->fail("User is missing group $groupName");
                 }
             }
@@ -249,5 +230,265 @@ class OrmDatabaseIntegrationTest extends DatabaseIntegrationTest
             }
 
         }
+    }
+
+    /**
+     * @test
+     */
+    public function select_user_with_m_to_n_to_one_projects_type()
+    {
+        $query = (new OrmQuery(User::class))->with('projects.type', 'contact');
+        $query->where(UserMap::EMAIL, 'like', 's%');
+
+        /** @var DbOrmQueryResult $dbResult */
+        $dbResult = $this->queryBuilder()->retrieve(static::$con, $query);
+
+        $result = iterator_to_array($dbResult);
+
+        foreach ($result as $user) {
+
+            $countyWords = explode(' ', $user['contact']['county']);
+
+            $this->assertCount(count($countyWords), $user['projects']);
+
+            $mailProvider = static::mailProvider($user['email']);
+
+            foreach($countyWords as $countyWord) {
+                $this->assertTrue($this->hasItem($user['projects'], $countyWord));
+            }
+
+            foreach($user['projects'] as $project) {
+                $this->assertEquals($mailProvider, $project['type']['name']);
+            }
+
+        }
+    }
+
+    /**
+     * @test
+     */
+    public function select_user_with_m_to_n_to_many_projects_files()
+    {
+        $query = (new OrmQuery(User::class))->with('projects.files', 'contact');
+        $query->where(UserMap::EMAIL, 'like', 's%');
+
+        /** @var DbOrmQueryResult $dbResult */
+        $dbResult = $this->queryBuilder()->retrieve(static::$con, $query);
+        $result = iterator_to_array($dbResult);
+
+        foreach ($result as $user) {
+            $countyWords = explode(' ', $user['contact']['county']);
+
+            $this->assertCount(count($countyWords), $user['projects']);
+
+            foreach($countyWords as $countyWord) {
+                $this->assertTrue($this->hasItem($user['projects'], $countyWord));
+            }
+
+            foreach($user['projects'] as $project) {
+                $digits = str_split(explode(' ', $user['contact']['address'])[0]);
+                $this->assertCount(count($digits), $project['files']);
+                foreach ($digits as $i=>$digit) {
+                    $name = 'project_file_' . $project['id'] . "_$digit-$i.jpg";
+                    $this->assertTrue($this->hasItem($project['files'], $name));
+                }
+            }
+
+        }
+    }
+
+    /**
+     * @test
+     */
+    public function select_user_with_many_different_relations()
+    {
+        $query = (new OrmQuery(User::class))->with('projects.files', 'projects.type', 'tokens', 'groups', 'contact');
+        $query->where(UserMap::EMAIL, 'like', 's%');
+
+        /** @var DbOrmQueryResult $dbResult */
+        $dbResult = $this->queryBuilder()->retrieve(static::$con, $query);
+        $result = iterator_to_array($dbResult);
+
+        foreach ($result as $user) {
+
+            $countyWords = explode(' ', $user['contact']['county']);
+
+            $this->assertCount(count($countyWords), $user['projects']);
+
+            foreach($countyWords as $countyWord) {
+                $this->assertTrue($this->hasItem($user['projects'], $countyWord));
+            }
+
+            $mailProvider = static::mailProvider($user['email']);
+
+            foreach($user['projects'] as $project) {
+                $this->assertEquals($mailProvider, $project['type']['name']);
+            }
+
+            foreach($user['projects'] as $project) {
+                $digits = str_split(explode(' ', $user['contact']['address'])[0]);
+                $this->assertCount(count($digits), $project['files']);
+                foreach ($digits as $i=>$digit) {
+                    $name = 'project_file_' . $project['id'] . "_$digit-$i.jpg";
+                    $this->assertTrue($this->hasItem($project['files'], $name));
+                }
+            }
+
+            foreach (static::groupNames($user['email']) as $groupName) {
+                if (!$this->hasItem($user['groups'], $groupName)) {
+                    $this->fail("User is missing group $groupName");
+                }
+            }
+
+            $lastDigit = (int)Helper::last($user['contact']['phone1']);
+            $count = $lastDigit == 0 ? 2 : $lastDigit;
+            $this->assertCount($count, $user['tokens']);
+            foreach($user['tokens'] as $tokenArray) {
+                $token = crc32($user['email'] . '-' . $tokenArray[TokenMap::TOKEN_TYPE]);
+                $this->assertEquals($token, $tokenArray['token']);
+            }
+
+        }
+    }
+
+    /**
+     * @test
+     */
+    public function select_to_one_that_has_to_many_contact_user()
+    {
+        $query = (new OrmQuery(Contact::class))->with('user.tokens');
+        $query->where('user.email', 'like', 's%');
+
+        $result = $this->queryBuilder()->retrieve(static::$con, $query);
+        foreach ($result as $contact) {
+
+            $lastDigit = (int)Helper::last($contact['phone1']);
+            $count = $lastDigit == 0 ? 2 : $lastDigit;
+            $this->assertCount($count, $contact['user']['tokens']);
+            foreach($contact['user']['tokens'] as $tokenArray) {
+                $token = crc32($contact['user']['email'] . '-' . $tokenArray[TokenMap::TOKEN_TYPE]);
+                $this->assertEquals($token, $tokenArray['token']);
+            }
+
+        }
+
+    }
+
+    /**
+     * @test
+     */
+    public function select_to_one_that_has_to_many_that_has_to_many_and_to_one_contact_user_project()
+    {
+        $query = (new OrmQuery(Contact::class))->with('user.tokens', 'user.projects.files', 'user.projects.type');
+        $query->where('user.email', 'like', 's%');
+
+        /** @var DbOrmQueryResult $result */
+        $result = $this->queryBuilder()->retrieve(static::$con, $query);
+
+        foreach ($result as $contact) {
+
+            $lastDigit = (int)Helper::last($contact['phone1']);
+            $count = $lastDigit == 0 ? 2 : $lastDigit;
+            $this->assertCount($count, $contact['user']['tokens']);
+            foreach($contact['user']['tokens'] as $tokenArray) {
+                $token = crc32($contact['user']['email'] . '-' . $tokenArray[TokenMap::TOKEN_TYPE]);
+                $this->assertEquals($token, $tokenArray['token']);
+            }
+
+            $countyWords = explode(' ', $contact['county']);
+
+            $this->assertCount(count($countyWords), $contact['user']['projects']);
+
+            foreach($countyWords as $countyWord) {
+                $this->assertTrue($this->hasItem($contact['user']['projects'], $countyWord));
+            }
+
+            $mailProvider = static::mailProvider($contact['user']['email']);
+
+            foreach($contact['user']['projects'] as $project) {
+                $this->assertEquals($mailProvider, $project['type']['name']);
+            }
+
+            foreach($contact['user']['projects'] as $project) {
+                $digits = str_split(explode(' ', $contact['address'])[0]);
+                $this->assertCount(count($digits), $project['files']);
+                foreach ($digits as $i=>$digit) {
+                    $name = 'project_file_' . $project['id'] . "_$digit-$i.jpg";
+                    $this->assertTrue($this->hasItem($project['files'], $name));
+                }
+            }
+        }
+
+    }
+
+    /**
+     * @test
+     */
+    public function select_user_with_many_different_relations_or_none()
+    {
+        $query = (new OrmQuery(User::class))->with('projects.files', 'projects.type', 'tokens', 'groups', 'contact');
+        $query('or')->where(UserMap::EMAIL, 'like', 'st%')
+        ->where(UserMap::EMAIL, 'like', 'u%');
+
+        /** @var DbOrmQueryResult $dbResult */
+        $dbResult = $this->queryBuilder()->retrieve(static::$con, $query);
+        $result = iterator_to_array($dbResult);
+
+        foreach ($result as $user) {
+
+            if ($user['email'][0] != 's') {
+                $this->assertSame([],$user['projects']);
+                $this->assertSame([],$user['tokens']);
+                continue;
+            }
+
+            $countyWords = explode(' ', $user['contact']['county']);
+
+            $this->assertCount(count($countyWords), $user['projects']);
+
+            foreach($countyWords as $countyWord) {
+                $this->assertTrue($this->hasItem($user['projects'], $countyWord));
+            }
+
+            $mailProvider = static::mailProvider($user['email']);
+
+            foreach($user['projects'] as $project) {
+                $this->assertEquals($mailProvider, $project['type']['name']);
+            }
+
+            foreach($user['projects'] as $project) {
+                $digits = str_split(explode(' ', $user['contact']['address'])[0]);
+                $this->assertCount(count($digits), $project['files']);
+                foreach ($digits as $i=>$digit) {
+                    $name = 'project_file_' . $project['id'] . "_$digit-$i.jpg";
+                    $this->assertTrue($this->hasItem($project['files'], $name));
+                }
+            }
+
+            foreach (static::groupNames($user['email']) as $groupName) {
+                if (!$this->hasItem($user['groups'], $groupName)) {
+                    $this->fail("User is missing group $groupName");
+                }
+            }
+
+            $lastDigit = (int)Helper::last($user['contact']['phone1']);
+            $count = $lastDigit == 0 ? 2 : $lastDigit;
+            $this->assertCount($count, $user['tokens']);
+            foreach($user['tokens'] as $tokenArray) {
+                $token = crc32($user['email'] . '-' . $tokenArray[TokenMap::TOKEN_TYPE]);
+                $this->assertEquals($token, $tokenArray['token']);
+            }
+
+        }
+    }
+
+    private function hasItem(array $items, $name, $property='name')
+    {
+        foreach ($items as $itemData) {
+            if ($itemData['name'] == $name) {
+                return true;
+            }
+        }
+        return false;
     }
 }

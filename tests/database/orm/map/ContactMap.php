@@ -6,8 +6,10 @@
 namespace Models\Ems;
 
 
+use Ems\Contracts\Model\Relationship;
 use Ems\Model\StaticClassMap;
 use Models\Contact;
+use Models\User;
 
 class ContactMap extends StaticClassMap
 {
@@ -30,5 +32,9 @@ class ContactMap extends StaticClassMap
 
     const STORAGE_URL = 'database://default';
 
+    public static function user() : Relationship
+    {
+        return static::relateTo(User::class, UserMap::CONTACT_ID, self::ID);
+    }
 
 }

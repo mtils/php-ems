@@ -22,11 +22,12 @@ use Exception;
 use Traversable;
 
 use function array_keys;
+use function array_pop;
 use function array_values;
 use function call_user_func;
+use function explode;
 use function get_class;
 use function is_array;
-use function print_r;
 
 class DbOrmQueryResult implements Result, Paginatable
 {
@@ -68,6 +69,11 @@ class DbOrmQueryResult implements Result, Paginatable
      * @var SchemaInspector
      */
     private $inspector;
+
+    /**
+     * @var RelationMap
+     */
+    private $map;
 
     /**
      * @var array
@@ -224,6 +230,25 @@ class DbOrmQueryResult implements Result, Paginatable
     }
 
     /**
+     * @return RelationMap
+     */
+    public function getMap()
+    {
+        return $this->map;
+    }
+
+    /**
+     * @param RelationMap $map
+     * @return DbOrmQueryResult
+     */
+    public function setMap(RelationMap $map)
+    {
+        $this->map = $map;
+        return $this;
+    }
+
+
+    /**
      * Get the callable that can create the count query.
      *
      * @return callable
@@ -302,7 +327,8 @@ class DbOrmQueryResult implements Result, Paginatable
         foreach ($toManyResult as $hasManyRow) {
             $nested = $this->toNested($hasManyRow);
             $mainId = $this->identify($hasManyRow, $primaryKey);
-            $buffer[$mainId] = $this->mergeToManyRow($buffer[$mainId], $nested, $primaryKey);
+            $this->removePrimaryKey($nested, $primaryKey);
+            $this->mergeToManyRow($buffer[$mainId], $nested);
         }
 
         return array_values($buffer);
@@ -313,32 +339,89 @@ class DbOrmQueryResult implements Result, Paginatable
         if (isset($this->primaryKeyCache[$path])) {
             return $this->primaryKeyCache[$path];
         }
-        $relation = $this->inspector->getRelationship($this->ormQuery->ormClass, $path);
-        $this->primaryKeyCache[$path] = $this->inspector->primaryKey(get_class($relation->related));
+        $parentClass = $this->ormQuery->ormClass;
+        $stack = [];
+        foreach(explode('.', $path) as $segment) {
+            $stack[] = $segment;
+            $currentPath = implode('.', $stack);
+            //if (!isset($this->primaryKeyCache[$currentPath])) {
+                $relation = $this->inspector->getRelationship($parentClass, $segment);
+                $parentClass = get_class($relation->related);
+                $this->primaryKeyCache[$currentPath] = $this->inspector->primaryKey($parentClass);
+
+            //}
+
+        }
+        //$relation = $this->inspector->getRelationship($this->ormQuery->ormClass, $path);
+
         return $this->primaryKeyCache[$path];
     }
 
-    protected function mergeToManyRow(array $mainRow, array $toManyRow, $primaryKey)
+    protected function removePrimaryKey(array &$toManyRow, $primaryKey)
     {
-
         foreach((array)$primaryKey as $key) {
             unset($toManyRow[$key]);
         }
+    }
+
+    protected function mergeToManyRow(array &$mainRow, array $toManyRow, $pathStack=[])
+    {
+
         foreach ($toManyRow as $key=>$value) {
+
+            if (!is_array($value)) {
+                $mainRow[$key] = $value;
+                continue;
+            }
+            $pathStack[] = $key;
+            $currentPath = implode('.', $pathStack);
+
+            $relation = $this->map->relation($currentPath);
 
             if (!isset($mainRow[$key])) {
                 $mainRow[$key] = [];
             }
-            $relatedKey = $this->primaryKey($key);
-            $relatedId = $this->identify($value, $relatedKey);
-            foreach ($mainRow[$key] as $alreadyAdded) {
-                if($this->identify($alreadyAdded, $relatedKey) == $relatedId) {
-                    continue 2;
-                }
+
+            // If it is an empty array we already added an empty array
+            if (!$value) {
+                array_pop($pathStack);
+                continue;
             }
-            $mainRow[$key][] = $value;
+
+            $relatedKey = $this->primaryKey($currentPath);
+            $hasMany = $relation->hasMany;
+
+            if ($hasMany) {
+                $relatedId = $this->identify($value, $relatedKey);
+                if (!isset($mainRow[$key][$relatedId])) {
+                    $mainRow[$key][$relatedId] = [];
+                }
+                $node = &$mainRow[$key][$relatedId];
+            } else {
+                $node = &$mainRow[$key];
+            }
+
+            // Then check each of the keys if one is a relation
+            foreach ($value as $subKey=>$subValue) {
+                if (!is_array($subValue)) {
+                    $node[$subKey] = $subValue;
+                    continue;
+                }
+                $this->mergeToManyRow($node, [$subKey => $subValue], $pathStack);
+            }
+
+            array_pop($pathStack);
         }
-        return $mainRow;
+    }
+
+    protected function wasAlreadyAdded($row, $relatedKey, $relatedId)
+    {
+        foreach ($row as $alreadyAdded) {
+            if($this->identify($alreadyAdded, $relatedKey) == $relatedId) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

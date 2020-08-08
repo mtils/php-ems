@@ -73,10 +73,11 @@ class OrmQueryBuilder implements OrmQueryRunner
      */
     public function retrieve(Connection $connection, OrmQuery $query)
     {
-        $dbQuery = $this->toSelect($query);
+        $relationMap = new RelationMap();
+        $dbQuery = $this->toSelect($query, null, $relationMap);
         $connection = $this->con($connection);
 
-        $result = $this->newResult($connection, $query, $dbQuery);
+        $result = $this->newResult($connection, $query, $dbQuery, $relationMap);
 
         return $result->provideCountQuery(function () use ($query, $connection, $dbQuery) {
             return $this->toCountQuery($query, $connection, $dbQuery);
@@ -143,16 +144,19 @@ class OrmQueryBuilder implements OrmQueryRunner
      * relations will create multiple rows of the "main queried object" it will
      * split the query in two. The second query will be attached to the returned.
      *
-     * @param OrmQuery $query
-     * @param Query    $useThis (optional)
+     * @param OrmQuery          $query
+     * @param Query|null        $useThis
+     * @param RelationMap|null  $relationMap
      *
      * @return Query
      */
-    public function toSelect(OrmQuery $query, Query $useThis=null)
+    public function toSelect(OrmQuery $query, Query $useThis=null, RelationMap $relationMap=null)
     {
         $table = $this->inspector->getStorageName($query->ormClass);
         $dbQuery = $this->dbQuery($query->ormClass, $useThis)->from($table);
-        $relationMap = $this->buildRelationMap($query, $this->collectRelations($query));
+        $relationMap = $relationMap ?: new RelationMap();
+        $relationMap->setOrmClass($query->ormClass);
+        $this->compileRelations($relationMap, $query, $this->collectRelations($query));
 
         $this->buildSelect($query, $dbQuery, $relationMap);
 
@@ -375,15 +379,13 @@ class OrmQueryBuilder implements OrmQueryRunner
     }
 
     /**
+     * @param RelationMap $map
      * @param OrmQuery $ormQuery
      * @param array $relations
-     *
-     * @return RelationMap
      */
-    protected function buildRelationMap(OrmQuery $ormQuery, array $relations)
+    protected function compileRelations(RelationMap $map, OrmQuery $ormQuery, array $relations)
     {
         sort($relations);
-        $map = new RelationMap($ormQuery->ormClass);
 
         foreach ($relations as $relationName) {
             $parts = explode('.', $relationName);
@@ -408,7 +410,6 @@ class OrmQueryBuilder implements OrmQueryRunner
 
         }
 
-        return $map;
     }
 
     protected function containsHasMany(RelationMap $relationMap)
@@ -448,10 +449,10 @@ class OrmQueryBuilder implements OrmQueryRunner
         $ownerTable = $this->inspector->getStorageName($ownerClass);
 
         $needsAlias = $relationName != $relatedTable;
-        $tableAlias = $needsAlias ? $relationName : $relatedTable;
+        $tableAlias = $needsAlias ? str_replace('.', '__', $relationName) : $relatedTable;
 
         if (!$junction = $relation->junction) {
-            $leftAlias = $relationParent ? $relationParent : $ownerTable;
+            $leftAlias = $relationParent ? str_replace('.','__', $relationParent) : $ownerTable;
             $join = $dbQuery->join($relatedTable)->left()
                 ->on("$leftAlias.$relation->ownerKey", "$tableAlias.$relation->relatedKey");
 
@@ -463,11 +464,12 @@ class OrmQueryBuilder implements OrmQueryRunner
 
         $junctionTable = $this->junctionIsClass($junction) ? $this->inspector->getStorageName($junction) : $junction;
         $junctionAlias = $tableAlias . '_pivot';
+        $leftAlias = $relationParent ? str_replace('.','__', $relationParent) : $ownerTable;
 
         $dbQuery->join($junctionTable)
                 ->as($junctionAlias)
                 ->left()
-                ->on("$ownerTable.$relation->ownerKey", "$junctionAlias.$relation->junctionOwnerKey");
+                ->on("$leftAlias.$relation->ownerKey", "$junctionAlias.$relation->junctionOwnerKey");
 
         $join = $dbQuery->join($relatedTable)
                         ->left()
@@ -608,20 +610,22 @@ class OrmQueryBuilder implements OrmQueryRunner
     }
 
     /**
-     * @param DbConnection $connection
-     * @param OrmQuery $ormQuery
-     * @param Query $query
+     * @param DbConnection  $connection
+     * @param OrmQuery      $ormQuery
+     * @param Query         $query
+     * @param RelationMap   $map
      *
      * @return DbOrmQueryResult
      */
-    protected function newResult(DbConnection $connection, OrmQuery $ormQuery, Query $query)
+    protected function newResult(DbConnection $connection, OrmQuery $ormQuery, Query $query, RelationMap $map)
     {
 
         return (new DbOrmQueryResult())
             ->setOrmQuery($ormQuery)
             ->setDbQuery($query)
             ->setConnection($connection)
-            ->setInspector($this->inspector);
+            ->setInspector($this->inspector)
+            ->setMap($map);
     }
 
     /**

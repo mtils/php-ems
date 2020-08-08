@@ -165,7 +165,7 @@ class DatabaseIntegrationTest extends IntegrationTest
             $nextUserId = isset($userId) ? $userId + 1 : 1;
 
             $contactData = static::only(
-                ['first_name', 'last_name', 'company', 'city', 'county', 'postal', 'phone1', 'phone2', 'created_at', 'updated_at'],
+                ['first_name', 'last_name', 'address', 'company', 'city', 'county', 'postal', 'phone1', 'phone2', 'created_at', 'updated_at'],
                 $row
             );
 
@@ -184,8 +184,7 @@ class DatabaseIntegrationTest extends IntegrationTest
 
             $userId = $con->query('users')->insert($userData, true);
 
-            $mailHost = explode('@', $userData['email'])[1];
-            $mailProvider = in_array($mailHost, $providers) ? $mailHost : 'other';
+            $mailProvider = self::mailProvider($userData['email']);
 
             foreach(static::groupNames($userData['email']) as $groupName) {
                 $con->query('user_group')->insert([
@@ -251,10 +250,19 @@ class DatabaseIntegrationTest extends IntegrationTest
      */
     protected static function groupNames($email)
     {
+        $mailProvider = self::mailProvider($email);
+        return isset(static::$providerToGroups[$mailProvider]) ? static::$providerToGroups[$mailProvider] : [];
+    }
+
+    /**
+     * @param string $email
+     * @return string
+     */
+    protected static function mailProvider($email)
+    {
         $providers = array_keys(static::$providerToGroups);
         $mailHost = explode('@', $email)[1];
-        $mailProvider = in_array($mailHost, $providers) ? $mailHost : 'other';
-        return isset(static::$providerToGroups[$mailProvider]) ? static::$providerToGroups[$mailProvider] : [];
+        return in_array($mailHost, $providers) ? $mailHost : 'other';
     }
 
     protected static function only(array $keys, array $data)
