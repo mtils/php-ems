@@ -112,22 +112,9 @@ class DbOrmQueryResult implements Result, Paginatable
      **/
     public function paginate($page = 1, $perPage = 15)
     {
-        $dbQuery = $this->getDbQuery();
         $paginator = new Paginator($page, $perPage, $this);
-
-        $dbQuery->offset($paginator->getOffset(), $perPage);
-        $primaryKey = $this->inspector->primaryKey($this->ormQuery->ormClass);
-
-        $buffer = [];
-
-
-        foreach ($dbQuery as $row) {
-            $mainId = $this->identify($row, $primaryKey);
-            $structured = NestedArray::toNested($row, '__');
-            $buffer[$mainId] = $structured;
-        }
-
-
+        $paginator->setResult($this->run($paginator->getOffset(), $perPage), $this->makeCountRunner());
+        return $paginator;
     }
 
     /**
@@ -185,7 +172,6 @@ class DbOrmQueryResult implements Result, Paginatable
         $this->ormQuery = $ormQuery;
         return $this;
     }
-
 
     /**
      * @return QueryContract
@@ -247,6 +233,23 @@ class DbOrmQueryResult implements Result, Paginatable
         return $this;
     }
 
+    /**
+     * @return QueryRenderer
+     */
+    public function getRenderer()
+    {
+        return $this->renderer;
+    }
+
+    /**
+     * @param QueryRenderer $renderer
+     * @return DbOrmQueryResult
+     */
+    public function setRenderer(QueryRenderer $renderer)
+    {
+        $this->renderer = $renderer;
+        return $this;
+    }
 
     /**
      * Get the callable that can create the count query.
@@ -289,7 +292,6 @@ class DbOrmQueryResult implements Result, Paginatable
         return $this;
     }
 
-
     protected function run($offset=null, $chunkSize=null)
     {
         $oldOffset = $this->dbQuery->offset;
@@ -299,7 +301,7 @@ class DbOrmQueryResult implements Result, Paginatable
             $this->dbQuery->offset($offset, $chunkSize);
         }
 
-        $expression = $this->renderer()->renderSelect($this->dbQuery);
+        $expression = $this->renderer->renderSelect($this->dbQuery);
         $this->dbQuery->offset($oldOffset);
         $this->dbQuery->limit($oldLimit);
 
@@ -321,7 +323,7 @@ class DbOrmQueryResult implements Result, Paginatable
         $sqlPrimaryKey = "$mainTable.$primaryKey";
         $toManyQuery->where($sqlPrimaryKey, 'in', array_keys($buffer));
 
-        $toManyExpression = $this->renderer()->renderSelect($toManyQuery);
+        $toManyExpression = $this->renderer->renderSelect($toManyQuery);
         $toManyResult = $this->connection->select($toManyExpression->toString(), $toManyExpression->getBindings());
 
         foreach ($toManyResult as $hasManyRow) {
@@ -332,6 +334,16 @@ class DbOrmQueryResult implements Result, Paginatable
         }
 
         return array_values($buffer);
+    }
+
+    protected function makeCountRunner()
+    {
+        return function () {
+            $query = $this->getCountQuery();
+            $expression = $this->renderer->renderSelect($query);
+            $dbResult = $this->connection->select($expression->toString(), $expression->getBindings());
+            return (int)$dbResult->first()['total_count'];
+        };
     }
 
     protected function primaryKey($path)
@@ -473,26 +485,4 @@ class DbOrmQueryResult implements Result, Paginatable
         }
     }
 
-    /**
-     * @return QueryRenderer
-     */
-    protected function createRenderer()
-    {
-        $renderer = new QueryRenderer();
-        $dialect = $this->connection->dialect();
-        $dialect = $dialect instanceof Dialect ? $dialect : SQL::dialect($dialect);
-        $renderer->setDialect($dialect);
-        return $renderer;
-    }
-
-    /**
-     * @return QueryRenderer
-     */
-    private function renderer()
-    {
-        if (!$this->renderer) {
-            $this->renderer = $this->createRenderer();
-        }
-        return $this->renderer;
-    }
 }

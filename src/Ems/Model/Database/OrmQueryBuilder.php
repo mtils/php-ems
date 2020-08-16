@@ -9,6 +9,7 @@ namespace Ems\Model\Database;
 use Ems\Contracts\Core\Connection;
 use Ems\Contracts\Core\Exceptions\TypeException;
 use Ems\Contracts\Core\Expression;
+use Ems\Contracts\Core\HasMethodHooks;
 use Ems\Contracts\Core\Type;
 use Ems\Contracts\Model\Database\Dialect;
 use Ems\Contracts\Model\Database\Parentheses;
@@ -22,9 +23,11 @@ use Ems\Contracts\Model\Result;
 use Ems\Contracts\Model\SchemaInspector;
 use Ems\Core\Exceptions\KeyNotFoundException;
 use Ems\Core\KeyExpression;
+use Ems\Core\Patterns\HookableTrait;
 use RuntimeException;
 use Ems\Contracts\Model\Database\Connection as DbConnection;
 
+use function array_filter;
 use function array_keys;
 use function array_map;
 use function array_unique;
@@ -33,6 +36,7 @@ use function explode;
 use function get_class;
 use function implode;
 use function in_array;
+use function is_callable;
 use function is_string;
 use function str_replace;
 use function strpos;
@@ -44,8 +48,10 @@ use function substr;
  *
  * @package Ems\Model\Database
  */
-class OrmQueryBuilder implements OrmQueryRunner
+class OrmQueryBuilder implements OrmQueryRunner, HasMethodHooks
 {
+    use HookableTrait;
+
     const TO_MANY = 'to_many';
 
     /**
@@ -96,7 +102,12 @@ class OrmQueryBuilder implements OrmQueryRunner
      */
     public function create(Connection $connection, $ormClass, array $values)
     {
-        // TODO: Implement create() method.
+        $query = $ormClass instanceof OrmQuery ? $ormClass : $this->query($ormClass);
+        $dbQuery = $this->toInsert($query, $values);
+        $connection = $this->con($connection);
+        $renderer = $this->renderer($connection);
+        $expression = $renderer->renderInsert($dbQuery, $dbQuery->values);
+        return $connection->insert($expression, $expression->getBindings(), true);
     }
 
     /**
@@ -110,7 +121,11 @@ class OrmQueryBuilder implements OrmQueryRunner
      */
     public function update(Connection $connection, OrmQuery $query, array $values)
     {
-        // TODO: Implement update() method.
+        $dbQuery = $this->toUpdate($query, $values);
+        $connection = $this->con($connection);
+        $renderer = $this->renderer($connection);
+        $expression = $renderer->renderUpdate($dbQuery, $dbQuery->values);
+        return $connection->write($expression, $expression->getBindings(), true);
     }
 
     /**
@@ -123,7 +138,11 @@ class OrmQueryBuilder implements OrmQueryRunner
      */
     public function delete(Connection $connection, OrmQuery $query)
     {
-        // TODO: Implement delete() method.
+        $dbQuery = $this->toDelete($query);
+        $connection = $this->con($connection);
+        $renderer = $this->renderer($connection);
+        $expression = $renderer->renderDelete($dbQuery);
+        return $connection->write($expression, $expression->getBindings(), true);
     }
 
 
@@ -152,11 +171,9 @@ class OrmQueryBuilder implements OrmQueryRunner
      */
     public function toSelect(OrmQuery $query, Query $useThis=null, RelationMap $relationMap=null)
     {
-        $table = $this->inspector->getStorageName($query->ormClass);
-        $dbQuery = $this->dbQuery($query->ormClass, $useThis)->from($table);
+        $dbQuery = $this->dbQuery($query->ormClass, $useThis);
         $relationMap = $relationMap ?: new RelationMap();
-        $relationMap->setOrmClass($query->ormClass);
-        $this->compileRelations($relationMap, $query, $this->collectRelations($query));
+        $this->compileRelations($relationMap, $query);
 
         $this->buildSelect($query, $dbQuery, $relationMap);
 
@@ -180,30 +197,46 @@ class OrmQueryBuilder implements OrmQueryRunner
      */
     public function toInsert(OrmQuery $query, array $values, Query $useThis=null)
     {
-
+        $dbQuery = $this->dbQuery($query->ormClass, $useThis);
+        $dbQuery->operation = 'INSERT';
+        return $dbQuery->values($this->restrictToProperties($query->ormClass, $values));
     }
 
     /**
-     * @param OrmQuery $query
-     * @param array    $values
-     * @param Query    $useThis (optional)
+     * @param OrmQuery      $query
+     * @param array         $values
+     * @param Query|null    $useThis (optional)
      *
      * @return Query
      */
     public function toUpdate(OrmQuery $query, array $values, Query $useThis=null)
     {
+        $dbQuery = $this->dbQuery($query->ormClass, $useThis);
+        $dbQuery->operation = 'UPDATE';
 
+        $relationMap = new RelationMap();
+        $this->compileRelations($relationMap, $query);
+        $this->addConditions($query->conditions, $dbQuery->conditions, $relationMap);
+
+        return $dbQuery->values($this->restrictToProperties($query->ormClass, $values));
     }
 
     /**
-     * @param OrmQuery $query
-     * @param Query    $useThis (optional)
+     * @param OrmQuery      $query
+     * @param Query|null    $useThis
      *
      * @return Query
      */
     public function toDelete(OrmQuery $query, Query $useThis=null)
     {
+        $dbQuery = $this->dbQuery($query->ormClass, $useThis);
+        $dbQuery->operation = 'DELETE';
 
+        $relationMap = new RelationMap();
+        $this->compileRelations($relationMap, $query);
+        $this->addConditions($query->conditions, $dbQuery->conditions, $relationMap);
+
+        return $dbQuery;
     }
 
     public function toCountQuery(OrmQuery $ormQuery, DbConnection $connection, Query $dbQuery=null)
@@ -221,26 +254,35 @@ class OrmQueryBuilder implements OrmQueryRunner
             return $dialect->quote("$table.$key", Dialect::NAME);
         }, (array)$primaryKeys);
 
-        $expression = new SQLExpression('COUNT(' . implode(',', $quoted) . ') as total_count');
+        $expression = new SQLExpression('COUNT(DISTINCT ' . implode(',', $quoted) . ') as total_count');
 
-        return $countQuery->select($expression)->distinct(true);
+        return $countQuery->select($expression)->distinct(false);
+    }
+
+    /**
+     * Return an array of methodnames which can be hooked via
+     * onBefore and onAfter.
+     *
+     * @return array
+     **/
+    public function methodHooks()
+    {
+        return ['retrieve', 'create', 'update', 'delete'];
     }
 
     /**
      * Ensure we have a database query to work with.
      *
-     * @param string $class
-     * @param Query  $dbQuery (optional)
+     * @param string        $class
+     * @param Query|null    $dbQuery
      *
      * @return Query
      */
     protected function dbQuery($class, Query $dbQuery=null)
     {
-        if ($dbQuery) {
-            return $dbQuery;
-        }
         $storageName = $this->inspector->getStorageName($class);
-        return (new Query())->from($storageName);
+        $dbQuery = $dbQuery ?: new Query();
+        return $dbQuery->from($storageName);
     }
 
     protected function buildSelect(OrmQuery $query, Query $dbQuery, RelationMap $map, $toMany=false)
@@ -252,6 +294,18 @@ class OrmQueryBuilder implements OrmQueryRunner
         $this->addRelationalColumns($query, $dbQuery, $map, $toMany);
         $this->addConditions($query->conditions, $dbQuery->conditions, $map);
         $this->addJoins($query, $dbQuery, $map);
+    }
+
+    protected function restrictToProperties($ormClass, array $values)
+    {
+        $keys = $this->inspector->getKeys($ormClass);
+        $cleaned = [];
+        foreach($values as $key=>$value) {
+            if (in_array($key, $keys)) {
+                $cleaned[$key] = $value;
+            }
+        }
+        return $cleaned;
     }
 
     protected function addRelationalColumns(OrmQuery $query, Query $dbQuery, RelationMap $relationMap, $withToMany=false)
@@ -381,10 +435,11 @@ class OrmQueryBuilder implements OrmQueryRunner
     /**
      * @param RelationMap $map
      * @param OrmQuery $ormQuery
-     * @param array $relations
      */
-    protected function compileRelations(RelationMap $map, OrmQuery $ormQuery, array $relations)
+    protected function compileRelations(RelationMap $map, OrmQuery $ormQuery)
     {
+        $map->setOrmClass($ormQuery->ormClass);
+        $relations = $this->collectRelations($ormQuery);
         sort($relations);
 
         foreach ($relations as $relationName) {
@@ -625,7 +680,8 @@ class OrmQueryBuilder implements OrmQueryRunner
             ->setDbQuery($query)
             ->setConnection($connection)
             ->setInspector($this->inspector)
-            ->setMap($map);
+            ->setMap($map)
+            ->setRenderer($this->renderer($connection));
     }
 
     /**
@@ -639,5 +695,16 @@ class OrmQueryBuilder implements OrmQueryRunner
             throw new TypeException('I can only work with ' . DbConnection::class);
         }
         return $connection;
+    }
+
+    /**
+     * @param DbConnection $connection
+     * @return QueryRenderer
+     */
+    protected function renderer(DbConnection $connection)
+    {
+        $dialect = $connection->dialect();
+        $dialect = $dialect instanceof Dialect ? $dialect : SQL::dialect($dialect);
+        return (new QueryRenderer())->setDialect($dialect);
     }
 }

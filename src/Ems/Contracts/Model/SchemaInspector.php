@@ -61,4 +61,5 @@ interface SchemaInspector
      * @return Relationship
      */
     public function getRelationship($class, $name);
+
 }

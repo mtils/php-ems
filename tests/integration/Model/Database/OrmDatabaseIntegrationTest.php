@@ -7,6 +7,7 @@ namespace integration\Model\Database;
 
 
 use ArrayIterator;
+use DateTime;
 use Ems\Contracts\Model\OrmQuery;
 use Ems\Core\Helper;
 use Ems\DatabaseIntegrationTest;
@@ -23,9 +24,12 @@ use Models\User;
 use function array_key_exists;
 use function crc32;
 use function explode;
+use function in_array;
 use function is_array;
+use function is_numeric;
 use function iterator_to_array;
 use function str_split;
+use function var_dump;
 use function var_export;
 
 class OrmDatabaseIntegrationTest extends DatabaseIntegrationTest
@@ -480,6 +484,139 @@ class OrmDatabaseIntegrationTest extends DatabaseIntegrationTest
             }
 
         }
+    }
+
+    /**
+     * @test
+     */
+    public function create_user()
+    {
+        $data = [
+            UserMap::EMAIL      => 'test@test.de',
+            UserMap::PASSWORD   => '123',
+            UserMap::WEB        => 'https://www.test.de',
+            UserMap::CREATED_AT => new DateTime(),
+            UserMap::UPDATED_AT => new DateTime(),
+        ];
+        $queryBuilder = $this->queryBuilder();
+        $insertedId = $queryBuilder->create(static::$con, User::class, $data);
+        $this->assertTrue(is_numeric($insertedId) && (int)$insertedId > 500);
+
+        $query = $queryBuilder->query(User::class)->where('id', $insertedId);
+        $result = $queryBuilder->retrieve(static::$con, $query)->first();
+
+        foreach($data as $key=>$value) {
+            if (in_array($key, [UserMap::CREATED_AT, UserMap::UPDATED_AT])) {
+                continue;
+            }
+            $this->assertEquals($value, $result[$key]);
+        }
+
+    }
+
+    /**
+     * @test
+     */
+    public function update_user()
+    {
+        $data = [
+            UserMap::EMAIL      => 'test2@test.de',
+            UserMap::PASSWORD   => '123',
+            UserMap::WEB        => 'https://www.test.de',
+            UserMap::CREATED_AT => new DateTime(),
+            UserMap::UPDATED_AT => new DateTime(),
+        ];
+        $queryBuilder = $this->queryBuilder();
+        $insertedId = $queryBuilder->create(static::$con, User::class, $data);
+
+        $query = $queryBuilder->query(User::class)->where('id', $insertedId);
+
+        $updates = [
+            UserMap::PASSWORD => '456',
+            UserMap::WEB      => 'https://www.test2.de'
+        ];
+        $this->assertSame(1, $queryBuilder->update(static::$con, $query, $updates));
+
+        $result = $queryBuilder->retrieve(static::$con, $query)->first();
+
+        foreach ($updates as $key=>$update) {
+            $this->assertEquals($update, $result[$key]);
+        }
+    }
+
+    /**
+     * @test
+     */
+    public function delete_user()
+    {
+        $data = [
+            UserMap::EMAIL      => 'test3@test.de',
+            UserMap::PASSWORD   => '123',
+            UserMap::WEB        => 'https://www.test.de',
+            UserMap::CREATED_AT => new DateTime(),
+            UserMap::UPDATED_AT => new DateTime(),
+        ];
+        $queryBuilder = $this->queryBuilder();
+        $insertedId = $queryBuilder->create(static::$con, User::class, $data);
+        $this->assertTrue(is_numeric($insertedId) && (int)$insertedId > 500);
+
+        $query = $queryBuilder->query(User::class)->where('id', $insertedId);
+        $result = $queryBuilder->retrieve(static::$con, $query)->first();
+
+        foreach($data as $key=>$value) {
+            if (in_array($key, [UserMap::CREATED_AT, UserMap::UPDATED_AT])) {
+                continue;
+            }
+            $this->assertEquals($value, $result[$key]);
+        }
+
+        $this->assertSame(1, $queryBuilder->delete(static::$con, $query));
+
+        $this->assertNull($queryBuilder->retrieve(static::$con, $query)->first());
+    }
+
+    /**
+     * @test
+     */
+    public function paginate_users_with_m_to_n_groups()
+    {
+        $query = (new OrmQuery(User::class))->with('groups', 'contact');
+        $query->where('contact.last_name', 'like', 's%');
+        $query->where('contact.city', 'like', '% %');
+
+        /** @var DbOrmQueryResult $dbResult */
+        $dbResult = $this->queryBuilder()->retrieve(static::$con, $query);
+
+        $perPage = 15;
+
+        $paginator = $dbResult->paginate(1,$perPage);
+
+        $this->assertSame(48, $paginator->getTotalCount());
+
+        $this->assertCount($perPage, $paginator);
+
+        foreach ($paginator as $user) {
+
+            foreach (static::groupNames($user['email']) as $groupName) {
+                if (!$this->hasItem($user['groups'], $groupName)) {
+                    $this->fail("User is missing group $groupName");
+                }
+            }
+
+        }
+
+        $paginator2 = $dbResult->paginate(2,$perPage);
+
+        $this->assertSame(48, $paginator2->getTotalCount());
+        $this->assertCount($perPage, $paginator2);
+        $this->assertNotSame($paginator, $paginator2);
+
+        $paginator3 = $dbResult->paginate(4, $perPage);
+
+        $this->assertSame(48, $paginator3->getTotalCount());
+        $this->assertCount(3, $paginator3);
+
+
     }
 
     private function hasItem(array $items, $name, $property='name')
