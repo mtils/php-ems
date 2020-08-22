@@ -7,14 +7,15 @@ namespace Ems\Model\Database;
 
 
 use ArrayIterator;
+use Ems\Contracts\Core\HasMethodHooks;
 use Ems\Contracts\Model\Database\Connection as ConnectionContract;
-use Ems\Contracts\Model\Database\Dialect;
 use Ems\Contracts\Model\Database\Query as QueryContract;
 use Ems\Contracts\Model\OrmQuery;
 use Ems\Contracts\Model\Paginatable;
 use Ems\Contracts\Model\Result;
 use Ems\Contracts\Model\SchemaInspector;
 use Ems\Core\Collections\NestedArray;
+use Ems\Core\Patterns\HookableTrait;
 use Ems\Model\ChunkIterator;
 use Ems\Model\ResultTrait;
 use Ems\Pagination\Paginator;
@@ -29,9 +30,10 @@ use function explode;
 use function get_class;
 use function is_array;
 
-class DbOrmQueryResult implements Result, Paginatable
+class DbOrmQueryResult implements Result, Paginatable, HasMethodHooks
 {
     use ResultTrait;
+    use HookableTrait;
 
     private $chunkSize = 1000;
 
@@ -292,6 +294,17 @@ class DbOrmQueryResult implements Result, Paginatable
         return $this;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @return array
+     **/
+    public function methodHooks()
+    {
+        return ['run'];
+    }
+
+
     protected function run($offset=null, $chunkSize=null)
     {
         $oldOffset = $this->dbQuery->offset;
@@ -301,11 +314,13 @@ class DbOrmQueryResult implements Result, Paginatable
             $this->dbQuery->offset($offset, $chunkSize);
         }
 
+        $this->callBeforeListeners('run', [$this->ormQuery, $this->dbQuery]);
         $expression = $this->renderer->renderSelect($this->dbQuery);
         $this->dbQuery->offset($oldOffset);
         $this->dbQuery->limit($oldLimit);
 
         $dbResult = $this->connection->select($expression->toString(), $expression->getBindings());
+
         $primaryKey = $this->inspector->primaryKey($this->ormQuery->ormClass);
         $buffer = [];
 
@@ -315,7 +330,9 @@ class DbOrmQueryResult implements Result, Paginatable
         }
 
         if (!$toManyQuery = $this->dbQuery->getAttached(OrmQueryBuilder::TO_MANY)) {
-            return array_values($buffer);
+            $rows = array_values($buffer);
+            $this->callAfterListeners('run', [$this->ormQuery, $this->dbQuery, $rows]);
+            return $rows;
         }
 
         // Restrict to the result ids
@@ -333,7 +350,9 @@ class DbOrmQueryResult implements Result, Paginatable
             $this->mergeToManyRow($buffer[$mainId], $nested);
         }
 
-        return array_values($buffer);
+        $rows = array_values($buffer);
+        $this->callAfterListeners('run', [$this->ormQuery, $this->dbQuery, $rows]);
+        return $rows;
     }
 
     protected function makeCountRunner()

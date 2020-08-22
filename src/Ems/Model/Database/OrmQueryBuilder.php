@@ -80,6 +80,7 @@ class OrmQueryBuilder implements OrmQueryRunner, HasMethodHooks
     public function retrieve(Connection $connection, OrmQuery $query)
     {
         $relationMap = new RelationMap();
+
         $dbQuery = $this->toSelect($query, null, $relationMap);
         $connection = $this->con($connection);
 
@@ -106,8 +107,11 @@ class OrmQueryBuilder implements OrmQueryRunner, HasMethodHooks
         $dbQuery = $this->toInsert($query, $values);
         $connection = $this->con($connection);
         $renderer = $this->renderer($connection);
+        $this->callBeforeListeners('create', [$connection, $query, $dbQuery]);
         $expression = $renderer->renderInsert($dbQuery, $dbQuery->values);
-        return $connection->insert($expression, $expression->getBindings(), true);
+        $result = $connection->insert($expression, $expression->getBindings(), true);
+        $this->callAfterListeners('create', [$connection, $query, $dbQuery, $expression, $result]);
+        return $result;
     }
 
     /**
@@ -124,8 +128,11 @@ class OrmQueryBuilder implements OrmQueryRunner, HasMethodHooks
         $dbQuery = $this->toUpdate($query, $values);
         $connection = $this->con($connection);
         $renderer = $this->renderer($connection);
+        $this->callBeforeListeners('update', [$connection, $query, $dbQuery]);
         $expression = $renderer->renderUpdate($dbQuery, $dbQuery->values);
-        return $connection->write($expression, $expression->getBindings(), true);
+        $result = $connection->write($expression, $expression->getBindings(), true);
+        $this->callAfterListeners('update', [$connection, $query, $dbQuery, $expression, $result]);
+        return $result;
     }
 
     /**
@@ -141,8 +148,11 @@ class OrmQueryBuilder implements OrmQueryRunner, HasMethodHooks
         $dbQuery = $this->toDelete($query);
         $connection = $this->con($connection);
         $renderer = $this->renderer($connection);
+        $this->callBeforeListeners('delete', [$connection, $query, $dbQuery]);
         $expression = $renderer->renderDelete($dbQuery);
-        return $connection->write($expression, $expression->getBindings(), true);
+        $result = $connection->write($expression, $expression->getBindings(), true);
+        $this->callAfterListeners('update', [$connection, $query, $dbQuery, $expression, $result]);
+        return $result;
     }
 
 
@@ -675,13 +685,23 @@ class OrmQueryBuilder implements OrmQueryRunner, HasMethodHooks
     protected function newResult(DbConnection $connection, OrmQuery $ormQuery, Query $query, RelationMap $map)
     {
 
-        return (new DbOrmQueryResult())
+        $result = (new DbOrmQueryResult())
             ->setOrmQuery($ormQuery)
             ->setDbQuery($query)
             ->setConnection($connection)
             ->setInspector($this->inspector)
             ->setMap($map)
             ->setRenderer($this->renderer($connection));
+
+        $result->onBefore('run', function (OrmQuery $ormQuery, Query $dbQuery) use ($result) {
+            $this->callBeforeListeners('retrieve', [$result]);
+        });
+
+        $result->onAfter('run', function (OrmQuery $ormQuery, Query $dbQuery, $dbResult) use ($result) {
+            $this->callBeforeListeners('retrieve', [$result, $dbResult]);
+        });
+
+        return $result;
     }
 
     /**
