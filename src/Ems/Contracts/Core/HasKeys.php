@@ -21,7 +21,7 @@ interface HasKeys
     /**
      * Return an list keys (should be strings)
      *
-     * @return \Ems\Core\Collections\OrderedList
+     * @return string[]
      **/
     public function keys();
 
