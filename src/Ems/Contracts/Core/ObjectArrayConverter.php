@@ -24,10 +24,14 @@ interface ObjectArrayConverter
     public function toArray($object, $depth=0);
 
     /**
-     * @param array $data
-     * @param bool $isFromStorage (default:false)
+     * Create an object of $classOrInterface by the passed array.
+     * Mark it as "new" or "from storage" by the third parameter.
+     *
+     * @param string    $classOrInterface
+     * @param array     $data (optional)
+     * @param bool      $isFromStorage (default:false)
      *
      * @return object
      */
-    public function fromArray(array $data=[], $isFromStorage=false);
+    public function fromArray(string $classOrInterface, array $data=[], $isFromStorage=false);
 }
