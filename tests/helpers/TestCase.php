@@ -2,14 +2,14 @@
 
 namespace Ems;
 
-use function count;
 use Ems\Contracts\Core\Type;
-use function is_callable;
-use function is_scalar;
 use Mockery;
 use PHPUnit\Framework\TestCase as BaseTestCase;
-use function property_exists;
 use Traversable;
+
+use function count;
+use function in_array;
+use function is_callable;
 
 class TestCase extends BaseTestCase
 {
@@ -56,6 +56,29 @@ class TestCase extends BaseTestCase
         $criteria = $this->formatCriteria($criterion);
         $message = $message ?: "Failed asserting that the passed collection contained $count items of the passed $criteria. It contained $realCount.";
         $this->assertTrue($realCount == $count, $message);
+    }
+
+    /**
+     * @param array             $expected
+     * @param object            $actual
+     * @param string|string[]   $except (optional)
+     * @param string            $message (optional)
+     */
+    protected function assertObjectHasData(array $expected, $actual, $except='', $message='')
+    {
+        $except = (array)$except;
+
+        foreach ($expected as $key=>$value) {
+            if (in_array($key, $except)) {
+                continue;
+            }
+            if (!isset($actual->$key)) {
+                $this->fail($message ? $message : "Actual object has no property '$key'");
+            }
+            if ($actual->$key != $value) {
+                $this->fail($message ? $message : "Actual object property '$key' differs from expected");
+            }
+        }
     }
 
     /**
