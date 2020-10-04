@@ -67,7 +67,7 @@ interface Paginator extends Result, Countable
      * paginator as a chunked result set without the cost of an additional query.
      *
      * @param array|Traversable $items
-     * @param int|callable $totalCount (optional)
+     * @param int|callable|null $totalCount (optional)
      *
      * @return $this
      */
