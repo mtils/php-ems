@@ -6,6 +6,7 @@
 namespace Ems\Model;
 
 use Ems\Contracts\Core\ConnectionPool;
+use Ems\Contracts\Core\ObjectArrayConverter;
 use Ems\Contracts\Core\ObjectDataAdapter;
 use Ems\Contracts\Core\Url;
 use Ems\Contracts\Model\OrmQueryRunner;
@@ -25,6 +26,11 @@ class Orm
     private $inspector;
 
     /**
+     * @var ObjectArrayConverter
+     */
+    private $objectFactory;
+
+    /**
      * @param string $class
      *
      * @return OrmQuery
@@ -37,16 +43,11 @@ class Orm
 
         $connection = $this->connections->connection($url);
 
-        $runner = $this->runner($url);
+        $query->setRunner($this->runner($url))
+            ->setConnection($connection)
+            ->setObjectFactory($this->objectFactory);
 
-        $resultWithArrays = $runner->retrieve($connection, $query);
-
-        $converter = $this->objectFactory($url);
-
-        foreach ($resultWithArrays as $array) {
-            //$class = $this->inspector->getRelation()
-            $object = $converter->fromArray($array, true);
-        }
+        return $query;
 
     }
 
@@ -61,11 +62,11 @@ class Orm
     }
 
     /**
-     * @param $url
+     * @param string $class
      *
      * @return ObjectDataAdapter
      */
-    public function objectFactory($url)
+    public function objectFactory($class)
     {
 
     }
