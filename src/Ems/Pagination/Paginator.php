@@ -163,8 +163,8 @@ class Paginator implements PaginatorContract
     /**
      * {@inheritdoc}
      *
-     * @param array|\Traversable $items
-     * @param int $totalCount (optional)
+     * @param array|Traversable $items
+     * @param int|callable|null $totalCount (optional)
      *
      * @return $this
      */
