@@ -108,6 +108,11 @@ class Url implements UrlContract, UriInterface
     ];
 
     /**
+     * @var string|null
+     */
+    protected $toStringCache;
+
+    /**
      * @param string|self|array $url
      **/
     public function __construct($url = null)
@@ -352,32 +357,35 @@ class Url implements UrlContract, UriInterface
      **/
     public function toString()
     {
-        $string = '';
+        if ($this->toStringCache !== null) {
+            return $this->toStringCache;
+        }
+        $this->toStringCache = '';
         $isFlat = $this->isFlat();
 
         if ($this->scheme) {
             $slashes = $isFlat ? '' : '//';
-            $string .= "{$this->scheme}:$slashes";
+            $this->toStringCache .= "{$this->scheme}:$slashes";
         }
 
         if ($authority = $this->getAuthority()) {
-            $string .= $authority;
+            $this->toStringCache .= $authority;
         }
 
         if ($this->path->count()) {
             $prefix = !$isFlat && ($authority || $this->path->getPrefix()) ? '/' : '';
-            $string .= $prefix.ltrim((string) $this->path, '/');
+            $this->toStringCache .= $prefix.ltrim((string) $this->path, '/');
         }
 
         if ($this->query) {
-            $string .= '?'.http_build_query($this->query);
+            $this->toStringCache .= '?'.http_build_query($this->query);
         }
 
         if ($this->fragment) {
-            $string .= "#{$this->fragment}";
+            $this->toStringCache .= "#{$this->fragment}";
         }
 
-        return $string;
+        return $this->toStringCache;
     }
 
     /**
