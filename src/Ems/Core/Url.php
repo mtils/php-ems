@@ -13,6 +13,8 @@ use function func_get_args;
 use function http_build_query;
 use function is_array;
 use function parse_str;
+use function rawurldecode;
+use function rawurlencode;
 
 /**
  * Class Url
@@ -563,7 +565,11 @@ class Url implements UrlContract, UriInterface
      */
     public function getUserInfo()
     {
-        $userinfo = $this->user;
+        if (!$userinfo = $this->user) {
+            return '';
+        }
+
+        $userinfo = rawurlencode($userinfo);
 
         // Mask password, so that in __toString an other places no passwords
         // will be exposed to the outside.
@@ -925,7 +931,7 @@ class Url implements UrlContract, UriInterface
     protected function parseUrl($url)
     {
         if ($parsed = parse_url($url)) {
-            return $this->addPassword($parsed);
+            return $this->addCredentials($parsed);
         }
 
         // A second try for not file:// schemes which does support absolute
@@ -945,13 +951,20 @@ class Url implements UrlContract, UriInterface
 
         $parsed['scheme'] = $parts[0];
 
-        return $this->addPassword($parsed);
+        return $this->addCredentials($parsed);
     }
 
-    protected function addPassword(array $parsed)
+    protected function addCredentials(array $parsed)
     {
         if (isset($parsed['pass'])) {
             $parsed['password'] = $parsed['pass'];
+            unset($parsed['pass']);
+        }
+        if (isset($parsed['password'])) {
+            $parsed['password'] = rawurldecode($parsed['password']);
+        }
+        if (isset($parsed['user'])) {
+            $parsed['user'] = rawurldecode($parsed['user']);
         }
         return $parsed;
     }
