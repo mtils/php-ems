@@ -218,13 +218,33 @@ class IlluminateConnection extends PDOConnection
      * Create a pdo connection NOT by the passed URL.
      *
      * @param UrlContract $url
+     * @param bool        $forceNew
      *
      * @return PDO
      */
-    protected function createPDO(UrlContract $url)
+    protected function createPDO(UrlContract $url, $forceNew=false)
     {
-        return $this->con()->getPdo();
+        $con = $this->con();
+        if ($forceNew) {
+            $con->reconnect();
+        }
+        return $con->getPdo();
     }
+
+    /**
+     * @param callable $attempt
+     *
+     * @return callable|object
+     */
+    protected function makeRetry_(callable $attempt)
+    {
+        $retry = parent::makeRetry($attempt);
+        $retry->reConnector = function () {
+            $this->con()->reconnect();
+        };
+        return $retry;
+    }
+
 
     /**
      * @param string|Stringable $dialect
