@@ -751,6 +751,12 @@ class Url implements UrlContract, UriInterface
 
         if (isset($parts['path'])) {
             $this->setPath($parts['path']);
+            // See https://github.com/mtils/php-ems/issues/15
+            // On hosts with a trailing slash the slash is the
+            // path prefix not suffix
+            if ($parts['path'] == '/' && $this->host) {
+                $this->path->setSuffix('');
+            }
         }
 
         if (isset($parts['query']) && $parts['query']) {

@@ -709,6 +709,25 @@ class UrlTest extends TestCase
 
     }
 
+    public function test_appended_slash_in_domain_does_not_lead_to_appended_slashes_in_path()
+    {
+
+        $url = $this->newUrl('https://google.com/');
+        $url = $url->append('analytics');
+        $this->assertEquals('https://google.com/analytics', "$url");
+        $url = $url->append('graphs', 'line');
+        $this->assertEquals('https://google.com/analytics/graphs/line', "$url");
+    }
+
+    public function test_appended_slash_in_domain_with_path_does_lead_to_appended_slashes_in_path()
+    {
+
+        $url = $this->newUrl('https://google.com/analytics/');
+        $this->assertEquals('https://google.com/analytics/', "$url");
+        $url = $url->append('graphs', 'line');
+        $this->assertEquals('https://google.com/analytics/graphs/line/', "$url");
+    }
+
     public function test_equals()
     {
         $this->assertTrue($this->equals('/home/michi', '/home/michi'));
