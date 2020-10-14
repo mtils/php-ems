@@ -249,6 +249,23 @@ class Url implements UrlContract, UriInterface
     }
 
     /**
+     * {@inheritDoc}
+     *
+     * @param int $count (default: 1)
+     *
+     * @return self
+     */
+    public function shift($count = 1)
+    {
+        $newPath = $this->path->copy();
+        for ($i = 0; $i < $count; ++$i) {
+            $newPath->pop(0);
+        }
+        return $this->replicate(['path' => $newPath]);
+    }
+
+
+    /**
      * {@inheritdoc}
      *
      * @param string|array $key
@@ -954,6 +971,13 @@ class Url implements UrlContract, UriInterface
         return $this->addCredentials($parsed);
     }
 
+    /**
+     * Translate and decode username and password.
+     *
+     * @param array $parsed
+     *
+     * @return array
+     */
     protected function addCredentials(array $parsed)
     {
         if (isset($parsed['pass'])) {

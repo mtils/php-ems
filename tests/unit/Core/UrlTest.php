@@ -403,6 +403,36 @@ class UrlTest extends TestCase
         $this->assertEquals("$scheme://$host/admin/session", "$newUrl");
     }
 
+    public function test_shift_removes_first_path_segment()
+    {
+        $path = 'admin/session/create';
+        $host = 'foo.de';
+        $scheme = 'http';
+
+        $url = $this->newUrl("$scheme://$host/$path");
+
+        $newUrl = $url->shift();
+        $this->assertNotSame($url, $newUrl);
+        $this->assertEquals("/$path", (string)$url->path);
+        $this->assertEquals('/session/create', (string)$newUrl->path);
+        $this->assertEquals("$scheme://$host/session/create", "$newUrl");
+    }
+
+    public function test_shift_removes_first_path_segments()
+    {
+        $path = 'admin/users/144/addresses/104';
+        $host = 'foo.de';
+        $scheme = 'http';
+
+        $url = $this->newUrl("$scheme://$host/$path");
+
+        $newUrl = $url->shift(3);
+        $this->assertNotSame($url, $newUrl);
+        $this->assertEquals("/$path", (string)$url->path);
+        $this->assertEquals('/addresses/104', (string)$newUrl->path);
+        $this->assertEquals("$scheme://$host/addresses/104", "$newUrl");
+    }
+
     public function test_query_adds_query_param()
     {
         $path = 'admin/session/create';
