@@ -10,6 +10,8 @@ use Traversable;
 use function count;
 use function in_array;
 use function is_callable;
+use function realpath;
+use function rtrim;
 
 class TestCase extends BaseTestCase
 {
@@ -133,5 +135,16 @@ class TestCase extends BaseTestCase
             $items[] = "$key=$formattedValue";
         }
         return 'criteria (' . implode(', ', $items) . ')';
+    }
+
+    /**
+     * @notest
+     *
+     * @param string $dir
+     * @return string
+     */
+    protected static function dirOfTests($dir='')
+    {
+        return rtrim(realpath(__DIR__."/../../tests/" . $dir),'/');
     }
 }

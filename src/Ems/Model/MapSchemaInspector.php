@@ -8,14 +8,19 @@ namespace Ems\Model;
 
 use Ems\Contracts\Core\Exceptions\TypeException;
 use Ems\Contracts\Core\Url;
-use Ems\Contracts\Model\Relation;
 use Ems\Contracts\Model\Relationship;
 use Ems\Contracts\Model\SchemaInspector;
 use Ems\Core\Exceptions\HandlerNotFoundException;
+use Ems\Core\Exceptions\NotImplementedException;
 
+use function array_pop;
 use function call_user_func;
+use function explode;
+use function get_class;
+use function in_array;
 use function is_callable;
 use function is_string;
+use function strpos;
 
 /**
  * Class MapSchemaInspector
@@ -153,5 +158,63 @@ class MapSchemaInspector implements SchemaInspector
         }
         $this->maps[$class] = call_user_func($this->mapFactories[$class]);
         return $this->getMap($class);
+    }
+
+    /**
+     * Use the MapSchemaInspector as a type provider. This works as
+     * \Ems\Core\Extractor::extend(new MapSchemaInspector()) or for its primary
+     * usage in \Ems\Core\ObjectArrayConverter::setTypeProvider(new MapSchemaInspector()).
+     *
+     * @param string $class
+     * @param string $path
+     *
+     * @return string
+     */
+    public function type(string $class, string $path)
+    {
+        try {
+
+            $map = $this->getMap($class);
+
+            if (strpos($path, '.')) {
+                return $this->typeFromNested($map, $path);
+            }
+
+            $keys = $map->getKeys();
+
+            if (in_array($path, $keys)) {
+                return 'string';
+            }
+
+            if (!$relation = $map->getRelationship($path)) {
+                return null;
+            }
+            $type = get_class($relation->related);
+            return $relation->hasMany ? $type.'[]' : $type;
+
+        } catch (HandlerNotFoundException $e) {
+            return null;
+        } catch (NotImplementedException $e) {
+            return null;
+        }
+    }
+
+    /**
+     * @param ClassMap $map
+     * @param string $path
+     * @return string|null
+     */
+    protected function typeFromNested(ClassMap $map, string $path)
+    {
+        $parentClass = $map->getOrmClass();
+        $parts = explode('.', $path);
+        $last = array_pop($parts);
+
+        foreach ($parts as $segment) {
+            $relation = $this->getRelationship($parentClass, $segment);
+            $parentClass = get_class($relation->related);
+        }
+
+        return $this->type($parentClass, $last);
     }
 }
