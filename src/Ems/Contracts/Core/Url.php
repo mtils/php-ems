@@ -95,11 +95,20 @@ interface Url extends Stringable, ArrayAccess, IteratorAggregate, Copyable, Arra
     /**
      * Remove the last $count segments from the path.
      *
-     * @param int $count
+     * @param int $count (default: 1)
      *
      * @return self
      **/
     public function pop($count = 1);
+
+    /**
+     * Remove the first $count segments from the path.
+     *
+     * @param int $count (default: 1)
+     *
+     * @return self
+     */
+    public function shift($count = 1);
 
     /**
      * Prepend a segment to the path.

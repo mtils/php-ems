@@ -441,6 +441,12 @@ class HelperTest extends \Ems\TestCase
         // Better reset it, its static
         Helper::setExtractor($extractor);
     }
+
+    public function test_dump()
+    {
+        $this->assertContains("int", Helper::dump(42));
+        $this->assertContains("42", Helper::dump(42));
+    }
 }
 
 class HelperTestArrayAccess implements ArrayAccess

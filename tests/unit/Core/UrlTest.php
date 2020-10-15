@@ -8,6 +8,9 @@ use InvalidArgumentException;
 use RuntimeException;
 use stdClass;
 
+use function rawurlencode;
+use function str_replace;
+
 class UrlTest extends TestCase
 {
     public function test_implements_interface()
@@ -259,6 +262,48 @@ class UrlTest extends TestCase
         $this->assertEquals("$scheme://$user:xxxxxx@$host:$port/$path#$fragment", "$newUrl");
     }
 
+    public function test_user_and_password_are_encoded()
+    {
+        $path = 'admin/session/create';
+        $host = 'foo.de';
+        $scheme = 'http';
+        $user = 'hannah@gmail.com';
+        $password = '123';
+        $port = 88;
+        $fragment = 'top';
+
+        $url = $this->newUrl("/$path");
+
+        $newUrl = $url->scheme($scheme)
+            ->host($host)
+            ->port($port)
+            ->user($user)
+            ->password($password)
+            ->fragment($fragment);
+        $this->assertNotSame($url, $newUrl);
+        $this->assertEquals($user, $newUrl->user);
+        $this->assertEquals($scheme, $newUrl->scheme);
+        $this->assertEquals($host, $newUrl->host);
+        $this->assertEquals($password, $newUrl->password);
+        $encodedUser = rawurlencode($user);
+        $this->assertEquals("$scheme://$encodedUser:xxxxxx@$host:$port/$path#$fragment", "$newUrl");
+    }
+
+    public function test_user_and_password_are_decoded()
+    {
+        $user = 'hannah@gmail.com';
+        $password = 'password 123';
+
+        $address = "http://hannah%40gmail.com:password%20123@foo.de:88/admin/session/create#top";
+        $result = str_replace('password%20123', 'xxxxxx', $address);
+
+        $url = $this->newUrl($address);
+        $this->assertEquals($user, $url->user);
+        $this->assertEquals($password, $url->password);
+        $this->assertEquals($result, $url->toString());
+
+    }
+
     public function test_parses_and_renders_all_properties()
     {
         $path = 'admin/session/create';
@@ -356,6 +401,36 @@ class UrlTest extends TestCase
         $this->assertEquals("/$path", (string)$url->path);
         $this->assertEquals('/admin/session', (string)$newUrl->path);
         $this->assertEquals("$scheme://$host/admin/session", "$newUrl");
+    }
+
+    public function test_shift_removes_first_path_segment()
+    {
+        $path = 'admin/session/create';
+        $host = 'foo.de';
+        $scheme = 'http';
+
+        $url = $this->newUrl("$scheme://$host/$path");
+
+        $newUrl = $url->shift();
+        $this->assertNotSame($url, $newUrl);
+        $this->assertEquals("/$path", (string)$url->path);
+        $this->assertEquals('/session/create', (string)$newUrl->path);
+        $this->assertEquals("$scheme://$host/session/create", "$newUrl");
+    }
+
+    public function test_shift_removes_first_path_segments()
+    {
+        $path = 'admin/users/144/addresses/104';
+        $host = 'foo.de';
+        $scheme = 'http';
+
+        $url = $this->newUrl("$scheme://$host/$path");
+
+        $newUrl = $url->shift(3);
+        $this->assertNotSame($url, $newUrl);
+        $this->assertEquals("/$path", (string)$url->path);
+        $this->assertEquals('/addresses/104', (string)$newUrl->path);
+        $this->assertEquals("$scheme://$host/addresses/104", "$newUrl");
     }
 
     public function test_query_adds_query_param()
@@ -707,6 +782,25 @@ class UrlTest extends TestCase
             $this->assertEquals($path, "$url->path", "Path slash suffix '$url->path' of '$url' is wrong compared to '$path'");
         }
 
+    }
+
+    public function test_appended_slash_in_domain_does_not_lead_to_appended_slashes_in_path()
+    {
+
+        $url = $this->newUrl('https://google.com/');
+        $url = $url->append('analytics');
+        $this->assertEquals('https://google.com/analytics', "$url");
+        $url = $url->append('graphs', 'line');
+        $this->assertEquals('https://google.com/analytics/graphs/line', "$url");
+    }
+
+    public function test_appended_slash_in_domain_with_path_does_lead_to_appended_slashes_in_path()
+    {
+
+        $url = $this->newUrl('https://google.com/analytics/');
+        $this->assertEquals('https://google.com/analytics/', "$url");
+        $url = $url->append('graphs', 'line');
+        $this->assertEquals('https://google.com/analytics/graphs/line/', "$url");
     }
 
     public function test_equals()

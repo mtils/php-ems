@@ -13,6 +13,8 @@ use function func_get_args;
 use function http_build_query;
 use function is_array;
 use function parse_str;
+use function rawurldecode;
+use function rawurlencode;
 
 /**
  * Class Url
@@ -106,6 +108,11 @@ class Url implements UrlContract, UriInterface
         'query'    => [],
         'fragment' => '',
     ];
+
+    /**
+     * @var string|null
+     */
+    protected $toStringCache;
 
     /**
      * @param string|self|array $url
@@ -242,6 +249,23 @@ class Url implements UrlContract, UriInterface
     }
 
     /**
+     * {@inheritDoc}
+     *
+     * @param int $count (default: 1)
+     *
+     * @return self
+     */
+    public function shift($count = 1)
+    {
+        $newPath = $this->path->copy();
+        for ($i = 0; $i < $count; ++$i) {
+            $newPath->pop(0);
+        }
+        return $this->replicate(['path' => $newPath]);
+    }
+
+
+    /**
      * {@inheritdoc}
      *
      * @param string|array $key
@@ -352,32 +376,35 @@ class Url implements UrlContract, UriInterface
      **/
     public function toString()
     {
-        $string = '';
+        if ($this->toStringCache !== null) {
+            return $this->toStringCache;
+        }
+        $this->toStringCache = '';
         $isFlat = $this->isFlat();
 
         if ($this->scheme) {
             $slashes = $isFlat ? '' : '//';
-            $string .= "{$this->scheme}:$slashes";
+            $this->toStringCache .= "{$this->scheme}:$slashes";
         }
 
         if ($authority = $this->getAuthority()) {
-            $string .= $authority;
+            $this->toStringCache .= $authority;
         }
 
         if ($this->path->count()) {
             $prefix = !$isFlat && ($authority || $this->path->getPrefix()) ? '/' : '';
-            $string .= $prefix.ltrim((string) $this->path, '/');
+            $this->toStringCache .= $prefix.ltrim((string) $this->path, '/');
         }
 
         if ($this->query) {
-            $string .= '?'.http_build_query($this->query);
+            $this->toStringCache .= '?'.http_build_query($this->query);
         }
 
         if ($this->fragment) {
-            $string .= "#{$this->fragment}";
+            $this->toStringCache .= "#{$this->fragment}";
         }
 
-        return $string;
+        return $this->toStringCache;
     }
 
     /**
@@ -555,7 +582,11 @@ class Url implements UrlContract, UriInterface
      */
     public function getUserInfo()
     {
-        $userinfo = $this->user;
+        if (!$userinfo = $this->user) {
+            return '';
+        }
+
+        $userinfo = rawurlencode($userinfo);
 
         // Mask password, so that in __toString an other places no passwords
         // will be exposed to the outside.
@@ -751,6 +782,12 @@ class Url implements UrlContract, UriInterface
 
         if (isset($parts['path'])) {
             $this->setPath($parts['path']);
+            // See https://github.com/mtils/php-ems/issues/15
+            // On hosts with a trailing slash the slash is the
+            // path prefix not suffix
+            if ($parts['path'] == '/' && $this->host) {
+                $this->path->setSuffix('');
+            }
         }
 
         if (isset($parts['query']) && $parts['query']) {
@@ -911,7 +948,7 @@ class Url implements UrlContract, UriInterface
     protected function parseUrl($url)
     {
         if ($parsed = parse_url($url)) {
-            return $this->addPassword($parsed);
+            return $this->addCredentials($parsed);
         }
 
         // A second try for not file:// schemes which does support absolute
@@ -931,13 +968,27 @@ class Url implements UrlContract, UriInterface
 
         $parsed['scheme'] = $parts[0];
 
-        return $this->addPassword($parsed);
+        return $this->addCredentials($parsed);
     }
 
-    protected function addPassword(array $parsed)
+    /**
+     * Translate and decode username and password.
+     *
+     * @param array $parsed
+     *
+     * @return array
+     */
+    protected function addCredentials(array $parsed)
     {
         if (isset($parsed['pass'])) {
             $parsed['password'] = $parsed['pass'];
+            unset($parsed['pass']);
+        }
+        if (isset($parsed['password'])) {
+            $parsed['password'] = rawurldecode($parsed['password']);
+        }
+        if (isset($parsed['user'])) {
+            $parsed['user'] = rawurldecode($parsed['user']);
         }
         return $parsed;
     }

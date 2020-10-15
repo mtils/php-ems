@@ -2,11 +2,15 @@
 
 namespace Ems\Core;
 
-use function call_user_func;
-use Traversable;
 use ArrayAccess;
-use Ems\Contracts\Core\Type;
 use Ems\Contracts\Core\Extractor as ExtractorContract;
+use Ems\Contracts\Core\Type;
+use Traversable;
+
+use function mb_strlen;
+use function mb_strpos;
+use function mb_substr;
+use function substr;
 
 class Helper
 {
@@ -423,6 +427,22 @@ class Helper
     public static function forceArrayAccess($value)
     {
         return Type::forceAndReturn($value, ArrayAccess::class);
+    }
+
+    /**
+     * Dump a variable (into a string)
+     *
+     * @param mixed $variable
+     *
+     * @return string
+     */
+    public static function dump($variable)
+    {
+        ob_start();
+        var_dump($variable);
+        $output = ob_get_clean();
+        $withoutFile = mb_substr($output, mb_strlen(__FILE__)+1);
+        return trim(mb_substr($withoutFile, mb_strpos($withoutFile, ':')+1));
     }
 
     public static function offsetExists(array &$array, $key)

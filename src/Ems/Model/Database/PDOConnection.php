@@ -4,30 +4,31 @@
 namespace Ems\Model\Database;
 
 use Closure;
+use Ems\Contracts\Core\Configurable;
 use Ems\Contracts\Core\Errors\UnSupported;
+use Ems\Contracts\Core\HasMethodHooks;
 use Ems\Contracts\Core\Stringable;
 use Ems\Contracts\Core\Type;
-use Ems\Contracts\Expression\Prepared;
-use Ems\Model\Database\Query as QueryObject;
-use Exception;
-use Ems\Contracts\Core\HasMethodHooks;
 use Ems\Contracts\Core\Url;
-use Ems\Contracts\Core\Configurable;
+use Ems\Contracts\Expression\Prepared;
 use Ems\Contracts\Model\Database\Connection;
 use Ems\Contracts\Model\Database\Dialect;
-use Ems\Contracts\Model\Database\SQLException;
 use Ems\Contracts\Model\Database\NativeError;
+use Ems\Contracts\Model\Database\SQLException;
 use Ems\Core\ConfigurableTrait;
 use Ems\Core\Patterns\HookableTrait;
+use Ems\Model\Database\Query as QueryObject;
+use Exception;
+use InvalidArgumentException;
 use OverflowException;
+use PDO;
+use PDOException;
+use PDOStatement;
+
 use function call_user_func;
 use function is_callable;
 use function is_object;
 use function microtime;
-use PDO;
-use PDOStatement;
-use PDOException;
-use InvalidArgumentException;
 use function round;
 
 /**
@@ -102,6 +103,16 @@ class PDOConnection implements Connection, Configurable, HasMethodHooks
     protected $resource;
 
     /**
+     * @var PDO[]
+     **/
+    protected $resources=[];
+
+    /**
+     * @var int
+     */
+    protected $resourceIndex = -1;
+
+    /**
      * @var Url
      **/
     protected $url;
@@ -145,8 +156,11 @@ class PDOConnection implements Connection, Configurable, HasMethodHooks
     public function open()
     {
         if (!$this->isOpen()) {
-            $this->resource = $this->createPDO($this->url);
+            $this->resourceIndex++;
+            $resource = $this->createPDO($this->url, (bool)$this->resourceIndex);
+            $this->resources[$this->resourceIndex] = $resource;
         }
+
         return $this;
     }
 
@@ -157,7 +171,9 @@ class PDOConnection implements Connection, Configurable, HasMethodHooks
      **/
     public function close()
     {
-        $this->resource = null;
+        if (isset($this->resources[$this->resourceIndex])) {
+            $this->resources[$this->resourceIndex] = null;
+        }
         return $this;
     }
 
@@ -168,7 +184,7 @@ class PDOConnection implements Connection, Configurable, HasMethodHooks
      **/
     public function isOpen()
     {
-        return ($this->resource instanceof PDO);
+        return $this->resource() instanceof PDO;
     }
 
     /**
@@ -178,7 +194,7 @@ class PDOConnection implements Connection, Configurable, HasMethodHooks
      **/
     public function resource()
     {
-        return $this->resource;
+        return isset($this->resources[$this->resourceIndex]) ? $this->resources[$this->resourceIndex] : null;
     }
 
     /**
@@ -299,10 +315,10 @@ class PDOConnection implements Connection, Configurable, HasMethodHooks
      **/
     public function isInTransaction()
     {
-        if (!$this->resource) {
+        if (!$resource = $this->resource()) {
             return false;
         }
-        return $this->resource->inTransaction();
+        return $resource->inTransaction();
     }
 
     /**
@@ -342,7 +358,7 @@ class PDOConnection implements Connection, Configurable, HasMethodHooks
      *
      * @param string|Stringable $query
      * @param array             $bindings (optional)
-     * @param bool              $returnLastInsertId (optional)
+     * @param bool|null         $returnLastInsertId (optional)
      *
      * @return int (last inserted id)
      **/
@@ -370,7 +386,7 @@ class PDOConnection implements Connection, Configurable, HasMethodHooks
      *
      * @param string|Stringable $query
      * @param array                                 $bindings (optional)
-     * @param bool                                  $returnAffected (optional)
+     * @param bool|null                             $returnAffected (optional)
      *
      * @return int (Number of affected rows)
      **/
@@ -466,7 +482,7 @@ class PDOConnection implements Connection, Configurable, HasMethodHooks
     /**
      * Return the last inserted id.
      *
-     * @param string $sequence (optional)
+     * @param string|null $sequence (optional)
      *
      * @return int (0 on none)
      **/
@@ -478,7 +494,7 @@ class PDOConnection implements Connection, Configurable, HasMethodHooks
     /**
      * Create a new query.
      *
-     * @param string $table (optional)
+     * @param string|null $table (optional)
      *
      * @return QueryObject
      */
@@ -541,7 +557,7 @@ class PDOConnection implements Connection, Configurable, HasMethodHooks
 
     }
 
-    protected function createPDO(Url $url)
+    protected function createPDO(Url $url, $forceNew=false)
     {
 
         $pdo = new PDO(
@@ -554,6 +570,10 @@ class PDOConnection implements Connection, Configurable, HasMethodHooks
             if (!$this->isClassOption($option)) {
                 $pdo->setAttribute($option, $this->getOption($option));
             }
+        }
+
+        if ($forceNew) {
+            $pdo->setAttribute(PDO::ATTR_PERSISTENT, false);
         }
 
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -604,8 +624,8 @@ class PDOConnection implements Connection, Configurable, HasMethodHooks
     }
 
     /**
-     * @param string $query
-     * @param int    $fetchMode (optional)
+     * @param string    $query
+     * @param int|null  $fetchMode (optional)
      *
      * @return PDOStatement
      **/
@@ -630,7 +650,7 @@ class PDOConnection implements Connection, Configurable, HasMethodHooks
         $code = is_int($code) ? $code : 0;
 
         if (!$e instanceof PDOException) {
-            $msg = 'Unknown exception occured: ' . $e->getMessage();
+            $msg = 'Unknown exception occurred: ' . $e->getMessage();
             return new SQLException($msg, $query, $code, $e);
         }
 
@@ -697,22 +717,23 @@ class PDOConnection implements Connection, Configurable, HasMethodHooks
             public $tries = 1;
             public $maxTries = 0;
             public $run;
-            public $connection;
+            public $reConnector;
             public function __invoke()
             {
                 $this->tries++;
                 if ($this->tries > $this->maxTries) {
                     throw new OverflowException("Giving up on broken or dropped connection before trying attempt #$this->tries of max:$this->maxTries");
                 }
-
-                $this->connection->close();
-                $this->connection->open();
+                call_user_func($this->reConnector);
                 return call_user_func($this->run);
             }
         };
         $retry->run = $attempt;
         $retry->maxTries = $this->getOption(self::AUTO_RECONNECT_TRIES);
-        $retry->connection = $this;
+        $retry->reConnector = function () {
+            $this->close();
+            $this->open();
+        };
         return $retry;
     }
 

@@ -3,7 +3,8 @@
 namespace Ems\Core\Collections;
 
 use Ems\Contracts\Core\Stringable;
-use Ems\Core\Support\StringableTrait;
+use Ems\Contracts\Core\StringableTrait;
+use Traversable;
 
 class StringList extends OrderedList implements Stringable
 {
@@ -31,10 +32,10 @@ class StringList extends OrderedList implements Stringable
     protected $suffix = '';
 
     /**
-     * @param array|\Traversable|int|string $source (optional)
-     * @param string                        $glue (default: ' ')
-     * @param string                        $prefix (optional)
-     * @param string                        $suffix (optional)
+     * @param array|Traversable|int|string|null $source (optional)
+     * @param string                            $glue (default: ' ')
+     * @param string                            $prefix (optional)
+     * @param string                            $suffix (optional)
      *
      * @see self::setSource
      **/
@@ -121,7 +122,7 @@ class StringList extends OrderedList implements Stringable
     /**
      * {@inheritdoc}
      *
-     * @param array|\Traversable|int|string $source (optional)
+     * @param array|Traversable|int|string $source (optional)
      *
      * @return self
      **/
@@ -225,8 +226,8 @@ class StringList extends OrderedList implements Stringable
     }
 
     /**
-     * Returns true if no prefix or suffix setted or if one of them differes
-     * from the glue.
+     * Returns true if no prefix or suffix set or if one of them differs
+     * from glue.
      *
      * @return bool
      */
