@@ -11,6 +11,12 @@ use Ems\XType\Skeleton\XTypeBootstrapper;
 use Ems\Core\Application;
 use Ems\Skeleton\BootManager;
 
+/**
+ * Trait AppTrait
+ * @package Ems
+ *
+ * @property $extraBootstrappers
+ */
 trait AppTrait
 {
 
@@ -120,12 +126,20 @@ trait AppTrait
             return $this->bootstrappers;
         }
 
-        return [
+        $bootstrappers = [
             CoreBootstrapper::class,
             CacheBootstrapper::class,
             AssetsBootstrapper::class,
             XTypeBootstrapper::class,
             RoutingBootstrapper::class
         ];
+
+        if (!isset($this->extraBootstrappers)) {
+            return $bootstrappers;
+        }
+        foreach (($this->extraBootstrappers) as $bootstrapper) {
+            $bootstrappers[] = $bootstrapper;
+        }
+        return $bootstrappers;
     }
 }

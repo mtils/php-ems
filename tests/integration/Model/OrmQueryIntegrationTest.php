@@ -6,20 +6,17 @@
 namespace Ems\Model;
 
 
-use Ems\Contracts\Pagination\Paginator;
-use Models\Contact;
-use Models\ProjectType;
-use Models\User;
 use Ems\Contracts\Core\Connection;
 use Ems\Contracts\Core\ObjectArrayConverter;
 use Ems\Contracts\Model\Inspector;
 use Ems\Contracts\Model\OrmQueryRunner;
+use Ems\Contracts\Pagination\Paginator;
 use Ems\DatabaseIntegrationTest;
 use Ems\TestOrm;
+use Models\Contact;
 use Models\Ems\UserMap;
-
-use function print_r;
-use function var_dump;
+use Models\ProjectType;
+use Models\User;
 
 class OrmQueryIntegrationTest extends DatabaseIntegrationTest
 {

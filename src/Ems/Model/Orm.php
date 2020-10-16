@@ -6,15 +6,18 @@
 namespace Ems\Model;
 
 use Ems\Contracts\Core\ConnectionPool;
+use Ems\Contracts\Core\Extendable;
 use Ems\Contracts\Core\ObjectArrayConverter;
-use Ems\Contracts\Core\ObjectDataAdapter;
 use Ems\Contracts\Core\Url;
 use Ems\Contracts\Model\OrmQueryRunner;
 use Ems\Contracts\Model\SchemaInspector;
-use Ems\Contracts\Model\Database\Connection as DBConnection;
+use Ems\Core\Exceptions\HandlerNotFoundException;
+use Ems\Core\Patterns\ExtendableTrait;
 
-class Orm
+class Orm implements Extendable
 {
+    use ExtendableTrait;
+
     /**
      * @var ConnectionPool
      */
@@ -31,11 +34,23 @@ class Orm
     private $objectFactory;
 
     /**
+     * @var array
+     */
+    private $runnerCache = [];
+
+    public function __construct(ConnectionPool $connections, SchemaInspector $inspector, ObjectArrayConverter $objectFactory)
+    {
+        $this->connections = $connections;
+        $this->inspector = $inspector;
+        $this->objectFactory = $objectFactory;
+    }
+
+    /**
      * @param string $class
      *
      * @return OrmQuery
      */
-    public function query($class)
+    public function query(string $class)
     {
         $query = new OrmQuery($class);
 
@@ -58,16 +73,15 @@ class Orm
      */
     public function runner(Url $url)
     {
+        $cacheId = (string)$url;
+        if (isset($this->runnerCache[$cacheId])) {
+            return $this->runnerCache[$cacheId];
+        }
+        if (!$runner = $this->callUntilNotNull([$url])) {
+            throw new HandlerNotFoundException("No handler found to OrmQueryRunner for url '$url'");
+        }
 
-    }
-
-    /**
-     * @param string $class
-     *
-     * @return ObjectDataAdapter
-     */
-    public function objectFactory($class)
-    {
-
+        $this->runnerCache[$cacheId] = $runner;
+        return $this->runnerCache[$cacheId];
     }
 }

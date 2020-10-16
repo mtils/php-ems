@@ -36,6 +36,7 @@ use Ems\Core\InputCaster;
 use Ems\Core\InputCorrector;
 use Ems\Core\LocalFilesystem;
 use Ems\Core\ManualMimeTypeProvider;
+use Ems\Core\ObjectArrayConverter;
 use Ems\Core\PathFinder;
 use Ems\Core\Storages\NestedFileStorage;
 use Ems\Core\StringConverter\AsciiStringConverter;
@@ -50,6 +51,7 @@ use Ems\Core\VariablesTextParser;
 use Ems\Expression\Matcher;
 use ReflectionClass;
 use ReflectionMethod;
+use Ems\Contracts\Core\ObjectArrayConverter as ObjectArrayConverterContract;
 
 class CoreBootstrapper extends Bootstrapper
 {
@@ -57,22 +59,23 @@ class CoreBootstrapper extends Bootstrapper
      * @var array
      **/
     protected $singletons = [
-        LocalFilesystem::class            => Filesystem::class,
-        ManualMimeTypeProvider::class     => MimeTypeProvider::class,
-        RendererChain::class              => Renderer::class,
-        PathFinder::class                 => PathFinderContract::class,
-        InputCorrector::class             => InputCorrectorContract::class,
-        InputCaster::class                => InputCasterContract::class,
-        StringConverterChain::class       => StringConverter::class,
-        ArrayLocalizer::class             => Localizer::class,
-        TextFormatter::class              => TextFormatterContract::class,
-        TextParserQueue::class            => TextParser::class,
-        Extractor::class                  => ExtractorContract::class,
-        Formatter::class                  => FormatterContract::class,
-        ConnectionPool::class             => ConnectionPoolContract::class,
-        Checker::class                    => CheckerContract::class,
-        EntityManager::class              => EntityManagerContract::class,
-        ArrayTextProvider::class          => TextProvider::class
+        LocalFilesystem::class              => Filesystem::class,
+        ManualMimeTypeProvider::class       => MimeTypeProvider::class,
+        RendererChain::class                => Renderer::class,
+        PathFinder::class                   => PathFinderContract::class,
+        InputCorrector::class               => InputCorrectorContract::class,
+        InputCaster::class                  => InputCasterContract::class,
+        StringConverterChain::class         => StringConverter::class,
+        ArrayLocalizer::class               => Localizer::class,
+        TextFormatter::class                => TextFormatterContract::class,
+        TextParserQueue::class              => TextParser::class,
+        Extractor::class                    => ExtractorContract::class,
+        Formatter::class                    => FormatterContract::class,
+        ConnectionPool::class               => ConnectionPoolContract::class,
+        Checker::class                      => CheckerContract::class,
+        EntityManager::class                => EntityManagerContract::class,
+        ArrayTextProvider::class            => TextProvider::class,
+        ObjectArrayConverter::class         => ObjectArrayConverterContract::class
     ];
 
     /**
