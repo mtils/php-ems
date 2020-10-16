@@ -177,10 +177,6 @@ class MapSchemaInspectorTest extends TestCase
         return new MapSchemaInspector();
     }
 
-    protected function loadClassMaps()
-    {
-
-    }
 }
 
 class MapSchemaInspectorTest_ClassMap extends ClassMap {};
