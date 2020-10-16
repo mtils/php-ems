@@ -71,7 +71,7 @@ class OrmQuery implements Queryable
      *
      * @return $this
      */
-    public function from($ormClass)
+    public function from(string $ormClass)
     {
         $this->ormClass = $ormClass;
         return $this;

@@ -298,7 +298,6 @@ class OrmQueryBuilder implements OrmQueryRunner, HasMethodHooks
         $keys = $toMany ? (array)$this->inspector->primaryKey($query->ormClass) : $this->inspector->getKeys($query->ormClass);
         $columns = $this->toColumns($keys, $dbQuery->table);
         $dbQuery->select(...$columns);
-
         $this->addRelationalColumns($query, $dbQuery, $map, $toMany);
         $this->addConditions($query->conditions, $dbQuery->conditions, $map);
         $this->addJoins($query, $dbQuery, $map);

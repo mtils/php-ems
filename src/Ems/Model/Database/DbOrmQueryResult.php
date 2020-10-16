@@ -344,6 +344,7 @@ class DbOrmQueryResult implements Result, Paginatable, HasMethodHooks
         $toManyResult = $this->connection->select($toManyExpression->toString(), $toManyExpression->getBindings());
 
         foreach ($toManyResult as $hasManyRow) {
+
             $nested = $this->toNested($hasManyRow);
             $mainId = $this->identify($hasManyRow, $primaryKey);
             $this->removePrimaryKey($nested, $primaryKey);

@@ -7,7 +7,6 @@
 namespace Ems\Model;
 
 use ArrayAccess;
-use ArrayIterator;
 use Ems\Contracts\Core\Connection;
 use Ems\Contracts\Core\ObjectArrayConverter;
 use Ems\Contracts\Model\OrmQuery as BaseOrmQuery;
@@ -48,7 +47,6 @@ class OrmQuery extends BaseOrmQuery implements Result, Paginatable
         foreach ($this->createResult() as $item) {
             yield $this->toObject($item);
         }
-
     }
 
     /**
@@ -147,7 +145,7 @@ class OrmQuery extends BaseOrmQuery implements Result, Paginatable
     protected function createResult()
     {
         if (!$this->connection || !$this->runner) {
-            return new ArrayIterator([]);
+            return new GenericResult([]);
         }
         return $this->runner->retrieve($this->connection, $this);
     }

@@ -11,6 +11,7 @@ use Ems\Contracts\Model\SchemaInspector;
 use Ems\Core\LocalFilesystem;
 use Ems\Model\Database\DbOrmQueryRunner;
 use Ems\Model\Database\OrmQueryBuilder;
+use Ems\Core\ObjectArrayConverter as ObjectFactory;
 use Ems\Model\MapSchemaInspector;
 use Ems\Model\StaticClassMap;
 use Models\User;
@@ -43,11 +44,17 @@ trait TestOrm
         return new OrmQueryBuilder($inspector ?: $this->newInspector());
     }
 
-    protected function queryRunner(SchemaInspector $inspector=null, OrmQueryBuilder $queryBuilder=null)
+    protected function objectFactory(callable $typeProvider=null)
     {
-        $inspector = $inspector ?: $this->newInspector();
-        $queryBuilder = $queryBuilder ?: $this->queryBuilder($inspector);
-        return new DbOrmQueryRunner($inspector, $queryBuilder);
+        if (!$typeProvider) {
+            $inspector = $this->newInspector();
+            $typeProvider = function ($class, $path) use ($inspector) {
+                return $inspector->type($class, $path);
+            };
+        }
+        $converter = new ObjectFactory();
+        $converter->setTypeProvider($typeProvider);
+        return $converter;
     }
 
     protected function configureInspector(MapSchemaInspector $inspector)

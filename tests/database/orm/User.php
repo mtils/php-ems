@@ -28,6 +28,7 @@ use Models\Contact;
  * @property Contact    contact
  * @property User|null  parent
  * @property Token[]    tokens
+ * @property Project[]  projects
  */
 class User implements DataObject
 {
