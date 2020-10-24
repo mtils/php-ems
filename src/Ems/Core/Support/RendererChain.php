@@ -13,7 +13,7 @@ class RendererChain implements Renderer
     /**
      * {@inheritdoc}
      *
-     * @param \Ems\Contracts\Core\Renderable
+     * @param Renderable
      *
      * @return bool
      **/
@@ -25,7 +25,7 @@ class RendererChain implements Renderer
     /**
      * {@inheritdoc}
      *
-     * @param \Ems\Contracts\Core\Renderable $item
+     * @param Renderable $item
      *
      * @return string
      **/
@@ -34,7 +34,6 @@ class RendererChain implements Renderer
         if ($renderer = $this->findReturningTrueOrFail('canRender', $item)) {
             return $renderer->render($item);
         }
-
         return '';
     }
 }
