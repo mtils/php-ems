@@ -67,8 +67,19 @@ class RoutingBootstrapper extends Bootstrapper
             if ($input->clientType()) {
                 return $next($input);
             }
-            $clientType = php_sapi_name() == 'cli' ? Routable::CLIENT_CONSOLE : Routable::CLIENT_WEB;
-            $input->setClientType($clientType);
+            if (php_sapi_name() == 'cli') {
+                $input->setClientType(Routable::CLIENT_CONSOLE);
+                return $next($input);
+            }
+            if (!$url = $input->url()) {
+                $input->setClientType(Routable::CLIENT_WEB);
+                return $next($input);
+            }
+            if ($url->path->first() == 'api') {
+                $input->setClientType(Routable::CLIENT_API);
+                return $next($input);
+            }
+            $input->setClientType(Routable::CLIENT_WEB);
             return $next($input);
         });
     }
