@@ -101,8 +101,8 @@ class StdOutputConnection extends AbstractConnection implements OutputConnection
             return;
         }
 
-        foreach ($response->headers() as $name=>$header) {
-            $this->printHeader("$name: $header");
+        foreach ($response->headers() as $header) {
+            $this->printHeader($header);
         }
     }
 

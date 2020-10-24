@@ -61,13 +61,13 @@ class StdOutputConnectionTest extends TestCase
 
         $headers = [];
 
-        $headerPrinter = function ($name, $replace=true) use (&$headers) {
-            $headers[] = $name;
+        $headerPrinter = function ($header, $replace=true) use (&$headers) {
+            $headers[] = $header;
         };
         $con->outputHeaderBy($headerPrinter);
 
         $response = new HttpResponse([
-            'foo' => 'bar'
+            'foo: bar'
         ], 'Hello');
 
         $con->fakeSentHeaders(false);
@@ -95,7 +95,7 @@ class StdOutputConnectionTest extends TestCase
         $con->outputHeaderBy($headerPrinter);
 
         $response = new HttpResponse([
-            'foo' => 'bar'
+            'foo: bar'
         ], 'Hello');
 
         $con->fakeSentHeaders(true);
