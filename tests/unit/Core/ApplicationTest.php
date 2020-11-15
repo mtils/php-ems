@@ -5,6 +5,8 @@ namespace Ems\Core;
 use Ems\Contracts\Core\IOCContainer;
 use Ems\Core\Exceptions\KeyNotFoundException;
 
+use function call_user_func;
+
 class ApplicationTest extends \Ems\TestCase
 {
     public function test_it_instanciates()
@@ -254,45 +256,33 @@ class ApplicationTest extends \Ems\TestCase
 
     }
 
-    public function test_get_returns_instance()
+    public function test_current_returns_instance()
     {
         $app = $this->newApp();
         $app->boot();
 
-        foreach ([null, 'instance', 'app'] as $key) {
-            $this->assertSame($app, Application::get($key));
+        $this->assertSame($app, Application::current());
+    }
+
+    public function test_container_returns_app()
+    {
+        $app = $this->newApp();
+        $app->boot();
+
+        foreach (['app'] as $key) {
+            $this->assertSame($app, Application::container('app'));
         }
     }
 
-    public function test_get_returns_environment()
+    public function test_container_returns_container()
     {
         $app = $this->newApp();
         $app->boot();
         $container = $app->getContainer();
 
         foreach (['container', 'ioc'] as $key) {
-            $this->assertSame($container, Application::get($key));
+            $this->assertSame($container, Application::container($key));
         }
-    }
-
-    public function test_get_returns_container()
-    {
-        $app = $this->newApp();
-        $app->boot();
-
-        $this->assertEquals(Application::PRODUCTION, Application::get('env'));
-    }
-
-    public function test_get_resolves_binding()
-    {
-        $app = $this->newApp();
-
-        $obj = new Application('');
-        $app->bind('foo', function () use ($obj) { return $obj; });
-
-        $app->boot();
-
-        $this->assertSame($obj, Application::get('foo'));
     }
 
     public function test_callStatic_resolves_binding()

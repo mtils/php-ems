@@ -2,39 +2,95 @@
 
 namespace Ems\Contracts\Core;
 
-interface IOCContainer
+use OutOfBoundsException;
+use Psr\Container\ContainerInterface;
+
+/**
+ * Interface IOCContainer
+ *
+ * The ems container tries to fulfill the following main principles:
+ * -> The dependency of the built/resolved classes have to be zero
+ * -> The application building/orchestration classes must have full control
+ *    over bindings, resolving
+ * -> Differentiate between usage as a factory vs. di container
+ *
+ * This interface assumes that you mainly use interface names as keys. Sometimes
+ * classes.
+ * It appears to me PSR-11 sees that differently.
+ *
+ * So here are the recommendations:
+ *
+ * 1. outside bootstrapping (or SupportsCustomFactory) use $ioc() (__invoke)
+ * and do not require the interface at all.
+ * Passing parameters to that method means "create a new object, I use you as a
+ * factory". This is mostly not the case.
+ *
+ * 2. inside bootstrapping: If you just need to get an object from the application
+ * use make(). If the container has a factory for it it uses it, otherwise
+ * it just creates it (and inject its dependencies). Like make in laravel but
+ * without parameters.
+ *
+ * 3. inside bootstrapping: If you need to create a new instance of an object no
+ * matter if they perhaps are registered as singletons for the same identifier
+ * use create(). This is often useful if you use classes in different configurations
+ * but have one main configuration.
+ *
+ * 4. inside bootstrapping: If you want to have an object and you force that it
+ * has to have a factory for it and it must not be created automatically and
+ * you are not willed to call has($binding) before you use PSR get() method.
+ * (in my usage of a di container not so handy but it is important to support
+ * standards)
+ *
+ * @package Ems\Contracts\Core
+ */
+interface IOCContainer extends ContainerInterface
 {
     /**
      * Make a class/abstract definition / Like laravel Container::make()
-     * I prefer to have not typehinted factories because the caller mostly needs
+     * I prefer to have not type-hinted factories because the caller mostly needs
      * a one-method object what can be just a callable. So if you need a factory,
      * typehint against callable and inject the Container.
      * The first parameter of this callable has to be the $abstract.
      * If you dont like to pass the $abstract to a callable use self::provide().
      *
      * @param string $abstract
-     * @param array  $parameters (optional)
-     *
-     * @throws \OutOfBoundsException
+     * @param array  $parameters (optional - means I want to create a new object)
      *
      * @return object
-     **/
+     *
+     * @noinspection PhpMissingParamTypeInspection
+     * @throws OutOfBoundsException
+     */
     public function __invoke($abstract, array $parameters = []);
 
     /**
-     * Alias for self::__invoke.
+     * Make $abstract. If it is bound by a factory, otherwise try to build it
+     * and inject its dependencies.
      *
      * @param string $abstract
-     * @param array  $parameters (optional)
      *
-     * @throws \OutOfBoundsException
+     * @throws OutOfBoundsException
      *
      * @return object
      **/
-    public function make($abstract, array $parameters = []);
+    public function make(string $abstract);
 
     /**
-     * If you have methods to lazyload a class I prefer to use a simple
+     * Create the object of class $abstract. Inject parameters that were not
+     * passed in $parameters. If a binding remaps $abstract to a different
+     * abstract use this. Pass $useExactClass to force to use exactly $abstract
+     * and not any rebound class name.
+     *
+     * @param string    $abstract
+     * @param array     $parameters (optional)
+     * @param bool      $useExactClass (default: false)
+     *
+     * @return object
+     */
+    public function create(string $abstract, array $parameters=[], bool $useExactClass=false);
+
+    /**
+     * If you have methods to lazy-load a class I prefer to use a simple
      * callable. Like this: $request->provideRoute(callable provider)
      * The provide method returns a callable which will resolve
      * the $abstract you pass to the provide method.
@@ -47,19 +103,30 @@ interface IOCContainer
      *
      * @return ContainerCallable
      **/
-    public function provide($abstract, $method = '');
+    public function provide(string $abstract, string $method = '');
 
     /**
      * Bind a callable to create $abstract if requested. If the $abstract should
      * be resolved only once, pass $singleton=true.
      *
-     * @param string   $abstract
-     * @param callable $factory
-     * @param bool     $singleton (optional)
+     * @param string            $abstract
+     * @param callable|string   $factory
+     * @param bool              $singleton (optional)
      *
      * @return self
      **/
-    public function bind($abstract, $factory, $singleton = false);
+    public function bind(string $abstract, $factory, bool $singleton = false);
+
+    /**
+     * Create a shared binding (singleton). Omit the factory to let the container
+     * create one for you.
+     *
+     * @param string               $abstract
+     * @param callable|string|null $factory
+     *
+     * @return void
+     */
+    public function share(string $abstract, $factory=null);
 
     /**
      * Share an instance. If you already created whatever you will use for $abstract
@@ -70,57 +137,48 @@ interface IOCContainer
      *
      * @return self
      **/
-    public function instance($abstract, $instance);
+    public function instance(string $abstract, $instance);
 
     /**
      * Register a listener which will get called if $abstract was resolved.
      *
-     * @param string   $abstract
-     * @param callable $listener
+     * @param string          $abstract
+     * @param callable|string $listener
      *
      * @return self
      **/
-    public function resolving($abstract, $listener);
+    public function resolving(string $abstract, $listener);
 
     /**
      * Register a listener which will get called if $abstract was resolved and
      * resolving() listeners were called.
      *
-     * @param string   $abstract
-     * @param callable $listener
+     * @param string          $abstract
+     * @param callable|string $listener
      *
      * @return self
      **/
-    public function afterResolving($abstract, $listener);
+    public function afterResolving(string $abstract, $listener);
 
     /**
-     * Check if $abstract was is (via bind, share, shareInstance or alias).
+     * Check if $abstract was resolved (via __invoke or make).
      *
      * @param string $abstract
      *
      * @return bool
      **/
-    public function bound($abstract);
-
-    /**
-     * Check if $abstract was resolved (via __invoke).
-     *
-     * @param string $abstract
-     *
-     * @return bool
-     **/
-    public function resolved($abstract);
+    public function resolved(string $abstract);
 
     /**
      * Call $callback with the given parameters. If the callback contains
-     * typehinted params, resolve them an inject them.
+     * type-hinted params, resolve them an inject them.
      *
      * @param callable $callback
      * @param array    $parameters
      *
      * @return mixed The method result
      **/
-    public function call($callback, array $parameters = []);
+    public function call(callable $callback, array $parameters = []);
 
     /**
      * Alias a type. When you call this method you say:
@@ -132,5 +190,6 @@ interface IOCContainer
      *
      * @return self
      **/
-    public function alias($abstract, $alias);
+    public function alias(string $abstract, string $alias);
+
 }

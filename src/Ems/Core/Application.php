@@ -15,7 +15,10 @@ use Ems\Core\Support\IOCContainerProxyTrait;
 use Ems\Core\Patterns\HookableTrait;
 use Ems\Contracts\Core\Url as UrlContract;
 use Ems\Contracts\Core\Type;
+use LogicException;
 use Psr\Log\LoggerInterface;
+
+use function is_callable;
 
 /**
  * This application is a minimal version optimized
@@ -521,15 +524,15 @@ class Application implements ContainerContract, HasMethodHooks
      * 'ioc' or 'container' returns the IOCContainer
      * 'env' returns the current environment (local|production|testing)
      *
-     * @param string $abstract (optional)
-     * @param array  $parameters (optional)
+     * @param string|null $abstract (optional)
+     * @param array       $parameters (optional)
      *
      * @return mixed
      */
-    public static function get($abstract=null, array $parameters=[])
+    public static function container($abstract=null, array $parameters=[])
     {
 
-        if (!$abstract || $abstract == 'instance' || $abstract == 'app') {
+        if ($abstract == 'app') {
             return static::$staticInstance;
         }
 
@@ -537,11 +540,11 @@ class Application implements ContainerContract, HasMethodHooks
             return static::$staticInstance->environment();
         }
 
-        if ($abstract == 'container' || $abstract == 'ioc') {
+        if ($abstract === null || $abstract == 'container' || $abstract == 'ioc') {
             return static::$staticContainer;
         }
 
-        return static::$staticContainer->make($abstract, $parameters);
+        return static::$staticContainer->__invoke($abstract, $parameters);
     }
 
     /**
@@ -563,8 +566,19 @@ class Application implements ContainerContract, HasMethodHooks
      */
     public static function __callStatic($name, array $arguments=[])
     {
-        $concrete = static::get($name);
+        $concrete = static::$staticContainer->make($name);
+        if (!is_callable($concrete) && $arguments) {
+            throw new LogicException("Passed arguments for a not callable object");
+        }
         return $arguments ? $concrete(...$arguments) : $concrete;
+    }
+
+    /**
+     * @return static|null
+     */
+    public static function current()
+    {
+        return static::$staticInstance;
     }
 
     /**

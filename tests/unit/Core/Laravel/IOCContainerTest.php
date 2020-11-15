@@ -10,6 +10,7 @@ use Ems\Core\ContainerTest_Interface;
 use Ems\Core\ContainerTest_Class;
 use Ems\Core\ContainerTest_Class2;
 use Ems\Core\ContainerTest_ClassDependencies;
+use Illuminate\Container\Container;
 
 class IOCContainerTest extends BaseContainerTest
 {
@@ -22,6 +23,27 @@ class IOCContainerTest extends BaseContainerTest
     {
         // Laravel seems to behave differently here...
     }
+
+    public function test_share_does_not_end_in_endless_recursion_when_abstract_and_concrete_is_same()
+    {
+        // I cannot ensure this with laravel
+        // Here you have to use a different string or aliases
+    }
+
+    public function test_laravel_returns_original_container()
+    {
+        $container = $this->newContainer();
+        $this->assertInstanceOf(Container::class, $container->laravel());
+    }
+
+    /**
+     * @expectedException \Ems\Core\Exceptions\UnsupportedUsageException
+     */
+    public function test_create_uses_exact_class_if_forced()
+    {
+        parent::test_create_uses_exact_class_if_forced();
+    }
+
 
     protected function newContainer()
     {

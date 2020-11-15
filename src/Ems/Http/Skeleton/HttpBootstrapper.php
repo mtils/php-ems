@@ -34,7 +34,7 @@ class HttpBootstrapper extends Bootstrapper
 
             $pool->extend('http', function (Url $url) {
                 if ($url->scheme == 'http' || $url->scheme == 'https') {
-                    return $this->app->make(FilesystemConnection::class, [$url]);
+                    return $this->app->create(FilesystemConnection::class, [$url]);
                 }
                 return null;
             });

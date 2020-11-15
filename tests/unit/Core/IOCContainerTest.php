@@ -40,6 +40,12 @@ class IOCContainerTest extends \Ems\TestCase
         $this->assertFalse($container->bound('foo'));
     }
 
+    public function test_has_returns_false_if_binding_doesnt_exist()
+    {
+        $container = $this->newContainer();
+        $this->assertFalse($container->has('foo'));
+    }
+
     public function test_invoke_calls_binding()
     {
         $container = $this->newContainer();
@@ -191,6 +197,108 @@ class IOCContainerTest extends \Ems\TestCase
         $this->assertSame($result, $container('foo'));
 
         $this->assertTrue($container->bound('foo'));
+    }
+
+    public function test_share_creates_singleton()
+    {
+        $container = $this->newContainer();
+
+        $concreteClass = ContainerTest_Class::class;
+        $concrete = new $concreteClass();
+        $factory = new LoggingCallable(function () use ($concrete) {
+            return $concrete;
+        });
+
+        $container->share(ContainerTest_Interface::class, $factory);
+
+        $this->assertSame($concrete, $container->make(ContainerTest_Interface::class));
+        $this->assertCount(1, $factory);
+        $this->assertSame($concrete, $container->make(ContainerTest_Interface::class));
+        $this->assertCount(1, $factory);
+    }
+
+    public function test_share_does_not_end_in_endless_recursion()
+    {
+        $container = $this->newContainer();
+
+        $concreteClass = ContainerTest_Class::class;
+
+        $factory = new LoggingCallable(function () use ($concreteClass, $container) {
+            return $container->make($concreteClass);
+        });
+
+        $container->share(ContainerTest_Interface::class, $factory);
+
+        $concrete = $container->make(ContainerTest_Interface::class);
+        $this->assertInstanceOf($concreteClass, $concrete);
+        $this->assertCount(1, $factory);
+        $this->assertSame($concrete, $container->make(ContainerTest_Interface::class));
+        $this->assertCount(1, $factory);
+    }
+
+    public function test_share_does_not_end_in_endless_recursion_when_abstract_and_concrete_is_same()
+    {
+        $container = $this->newContainer();
+
+        $concreteClass = ContainerTest_Class::class;
+
+        $factory = new LoggingCallable(function () use ($concreteClass, $container) {
+            return $container->create($concreteClass);
+        });
+        $container->share(ContainerTest_Class::class, $factory);
+
+        $this->assertInstanceOf($concreteClass, $container->make(ContainerTest_Class::class));
+        $this->assertCount(1, $factory);
+        $this->assertInstanceOf($concreteClass, $container->make(ContainerTest_Class::class));
+        $this->assertCount(1, $factory);
+    }
+
+    public function test_share_with_interface_and_class()
+    {
+        $container = $this->newContainer();
+
+        $concreteClass = ContainerTest_Class::class;
+        $abstract = ContainerTest_Interface::class;
+
+        $container->share($abstract, $concreteClass);
+
+        $object = $container->make(ContainerTest_Interface::class);
+
+        $this->assertInstanceOf($concreteClass, $object);
+        $this->assertSame($object, $container->make(ContainerTest_Interface::class));
+
+    }
+
+    public function test_share_with_just_a_class()
+    {
+        $container = $this->newContainer();
+
+        $concreteClass = ContainerTest_Class::class;
+        $abstract = ContainerTest_Interface::class;
+
+        $container->share($concreteClass);
+
+        $object = $container->make(ContainerTest_Class::class);
+
+        $this->assertInstanceOf($concreteClass, $object);
+        $this->assertSame($object, $container->make(ContainerTest_Class::class));
+
+    }
+
+    public function test_share_with_just_a_class_and_previously_bound_factory()
+    {
+        $container = $this->newContainer();
+
+        $concreteClass = ContainerTest_Class::class;
+        $abstract = ContainerTest_Interface::class;
+
+        $container->share($concreteClass);
+
+        $object = $container->make(ContainerTest_Class::class);
+
+        $this->assertInstanceOf($concreteClass, $object);
+        $this->assertSame($object, $container->make(ContainerTest_Class::class));
+
     }
 
     public function test_invoke_of_unshared_binding_returns_different_object()
@@ -441,6 +549,40 @@ class IOCContainerTest extends \Ems\TestCase
         $this->assertSame($interfaceImplementor, $result->interface);
         $this->assertSame($classObject, $result->classObject);
         $this->assertSame($class2Object, $result->class2Object);
+    }
+
+    public function test_create_ignores_shared_binding()
+    {
+        $container = $this->newContainer();
+        $container->share(ContainerTest_Class::class);
+
+        $object = $container->create(ContainerTest_Class::class);
+        $this->assertInstanceOf( ContainerTest_Class::class, $object);
+        $singleton = $container->make(ContainerTest_Class::class);
+        $this->assertNotSame($object, $singleton);
+        $this->assertSame($singleton, $container->make(ContainerTest_Class::class));
+        $this->assertNotSame($object, $container->create(ContainerTest_Class::class));
+    }
+
+    public function test_create_uses_overwritten_class_if_one_was_bound()
+    {
+        $container = $this->newContainer();
+        $container->bind(ContainerTest_Class::class, ContainerTest_Class2::class);
+
+        $object = $container->create(ContainerTest_Class::class);
+        $this->assertInstanceOf( ContainerTest_Class::class, $object);
+
+    }
+
+    public function test_create_uses_exact_class_if_forced()
+    {
+        $container = $this->newContainer();
+        $container->bind(ContainerTest_Class::class, ContainerTest_Class2::class);
+
+        $object = $container->create(ContainerTest_Class::class, [], true);
+        $this->assertInstanceOf( ContainerTest_Class::class, $object);
+        $this->assertFalse($object instanceof ContainerTest_Class2);
+
     }
 
     public function test_bind_string_will_bind_bound_class()

@@ -31,17 +31,17 @@ trait AppTrait
     protected $_app;
 
     /**
-     * @param string $binding    (optional)
-     * @param array  $parameters (optional)
+     * @param string|null $binding    (optional)
+     * @param array       $parameters (optional)
      *
-     * @return IOCContainer
+     * @return IOCContainer|object
      */
     public function container($binding = null, array $parameters=[])
     {
         if (!$this->_container) {
             $this->_container = new IOCContainer();
         }
-        return $binding ? $this->_container->make($binding, $parameters) : $this->_container;
+        return $binding ? $this->_container->__invoke($binding, $parameters) : $this->_container;
     }
 
     /**

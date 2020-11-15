@@ -35,8 +35,8 @@ trait CustomFactorySupport
     /**
      * Create the object via the custom callable
      *
-     * @param string $abstract (optional) class or interface name
-     * @param array  $parameters (optional)
+     * @param string|null $abstract   (optional) class or interface name
+     * @param array       $parameters (optional)
      *
      * @return object
      *

@@ -10,8 +10,10 @@ use OutOfBoundsException;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
+
 use function call_user_func;
 use function get_class;
+use function is_string;
 
 class IOCContainer implements ContainerContract
 {
@@ -53,14 +55,12 @@ class IOCContainer implements ContainerContract
      * {@inheritdoc}
      *
      * @param string $abstract
-     * @param array $parameters (optional)
      *
      * @return object
-     * @throws ReflectionException
-     *
      * @throws OutOfBoundsException
+     *
      */
-    public function __invoke($abstract, array $parameters = [])
+    public function make(string $abstract)
     {
         if (isset($this->sharedInstances[$abstract])) {
             return $this->sharedInstances[$abstract];
@@ -68,9 +68,7 @@ class IOCContainer implements ContainerContract
 
         $bound = isset($this->bindings[$abstract]);
 
-        $concrete = $this->resolve($abstract, $parameters);
-
-        $this->callAllListeners($abstract, $concrete);
+        $concrete = $this->makeOrCreate($abstract);
 
         if ($bound && $this->bindings[$abstract]['shared']) {
             $this->sharedInstances[$abstract] = $concrete;
@@ -82,15 +80,86 @@ class IOCContainer implements ContainerContract
     }
 
     /**
+     * {@inheritDoc}
+     *
+     * @param string $abstract
+     * @param array $parameters (optional)
+     * @param bool $useExactClass (default: false)
+     *
+     * @return object
+     * @throws ReflectionException
+     */
+    public function create(string $abstract, array $parameters = [], bool $useExactClass = false)
+    {
+        $implementation = $useExactClass ? $abstract : $this->getAliasOrSame($abstract);
+
+        if (!$useExactClass && isset($this->bindings[$implementation]) && $this->bindings[$implementation]['concreteClass']) {
+            $implementation = class_exists($this->bindings[$implementation]['concreteClass']) ? $this->bindings[$implementation]['concreteClass'] : $implementation;
+        }
+
+        if (!isset(self::$reflectionClasses[$implementation])) {
+            self::$reflectionClasses[$implementation] = new ReflectionClass($implementation);
+        }
+
+        /** @var ReflectionMethod $constructor */
+        if (!$constructor = self::$reflectionClasses[$implementation]->getConstructor()) {
+            return $this->callAllListeners($abstract, new $implementation($parameters));
+        }
+
+        $constructorParams = $constructor->getParameters();
+
+        $callParams = [];
+
+        // All parameters seems to be passed
+        if (count($constructorParams) == count($parameters)) {
+            return self::$reflectionClasses[$implementation]->newInstanceArgs($parameters);
+        }
+
+        foreach ($constructorParams as $i=>$param) {
+
+            $name = $param->getName();
+
+            if (isset($parameters[$name])) {
+                $callParams[] = $parameters[$name];
+                continue;
+            }
+
+            if (!$class = $param->getClass()) {
+                continue;
+            }
+
+            $className = $class->getName();
+
+            if (isset($parameters[$i]) && $parameters[$i] instanceof $className) {
+                $callParams[] = $parameters[$i];
+                continue;
+            }
+
+            if (!$param->isOptional() || $this->bound($className)) {
+                $callParams[] = $this->__invoke($className);
+            }
+        }
+
+        foreach ($parameters as $key => $value) {
+            $callParams[] = $value;
+        }
+
+        $object = self::$reflectionClasses[$implementation]->newInstanceArgs($callParams);
+
+        return $this->callAllListeners($abstract, $object);
+
+    }
+
+    /**
      * {@inheritdoc}
      *
-     * @param string   $abstract
-     * @param callable $callback
-     * @param bool     $singleton (optional)
+     * @param string          $abstract
+     * @param callable|string $callback
+     * @param bool            $singleton (optional)
      *
      * @return self
      **/
-    public function bind($abstract, $callback, $singleton = false)
+    public function bind(string $abstract, $callback, bool $singleton = false)
     {
         return $this->storeBinding($abstract, $callback, $singleton);
     }
@@ -103,7 +172,7 @@ class IOCContainer implements ContainerContract
      *
      * @return self
      **/
-    public function instance($abstract, $instance)
+    public function instance(string $abstract, $instance)
     {
         $this->sharedInstances[$abstract] = $instance;
 
@@ -120,12 +189,12 @@ class IOCContainer implements ContainerContract
     /**
      * {@inheritdoc}
      *
-     * @param string   $abstract
-     * @param callable $listener
+     * @param string          $abstract
+     * @param callable|string $listener
      *
      * @return self
      **/
-    public function resolving($abstract, $listener)
+    public function resolving(string $abstract, $listener)
     {
         return $this->storeResolvingListener($abstract, $listener);
     }
@@ -133,26 +202,41 @@ class IOCContainer implements ContainerContract
     /**
      * {@inheritdoc}
      *
-     * @param string   $abstract
-     * @param callable $listener
+     * @param string          $abstract
+     * @param callable|string $listener
      *
      * @return self
      **/
-    public function afterResolving($abstract, $listener)
+    public function afterResolving(string $abstract, $listener)
     {
         return $this->storeAfterResolvingListener($abstract, $listener);
     }
 
     /**
+     * {@inheritDoc}
+     *
+     * @param string $id Identifier of the entry to look for.
+     *
+     * @return bool
+     * @noinspection PhpMissingParamTypeInspection
+     */
+    public function has($id)
+    {
+        return isset($this->bindings[$id]);
+    }
+
+    /**
      * {@inheritdoc}
      *
      * @param string $abstract
+     *
+     * @deprecated use has($abstract)
      *
      * @return bool
      **/
     public function bound($abstract)
     {
-        return isset($this->bindings[$abstract]);
+        return $this->has($abstract);
     }
 
     /**
@@ -162,7 +246,7 @@ class IOCContainer implements ContainerContract
      *
      * @return bool
      **/
-    public function resolved($abstract)
+    public function resolved(string $abstract)
     {
         return isset($this->resolvedAbstracts[$abstract]) || isset($this->sharedInstances[$abstract]);
     }
@@ -181,7 +265,7 @@ class IOCContainer implements ContainerContract
      *
      * @throws ReflectionException
      */
-    public function call($callback, array $parameters = [])
+    public function call(callable $callback, array $parameters = [])
     {
 
         $argsReflection = Lambda::reflect($callback);
@@ -223,7 +307,7 @@ class IOCContainer implements ContainerContract
      *
      * @return self
      **/
-    public function alias($abstract, $alias)
+    public function alias(string $abstract, string $alias)
     {
         $this->aliases[$alias] = $abstract;
 
@@ -231,80 +315,29 @@ class IOCContainer implements ContainerContract
     }
 
     /**
-     * Resolves the $abstract via assigned bindings.
-     *
      * @param string $abstract
-     * @param array $parameters (optional)
      *
      * @return object
-     *
      * @throws ReflectionException
      */
-    protected function resolve($abstract, array $parameters = [])
+    protected function makeOrCreate(string $abstract)
     {
         $abstract = $this->getAliasOrSame($abstract);
 
-        if ($this->bound($abstract)) {
-            array_unshift($parameters, $this);
-
-            return call_user_func($this->bindings[$abstract]['concrete'], ...$parameters);
+        if (!$this->has($abstract)) {
+            return $this->create($abstract);
         }
 
-        if (!isset(self::$reflectionClasses[$abstract])) {
-            self::$reflectionClasses[$abstract] = new ReflectionClass($abstract);
-        }
+        $object = call_user_func($this->bindings[$abstract]['concrete'], $this);
 
-        /** @var ReflectionMethod $constructor */
-        if (!$constructor = self::$reflectionClasses[$abstract]->getConstructor()) {
-            return new $abstract($parameters);
-        }
-
-        $constructorParams = $constructor->getParameters();
-
-        $callParams = [];
-
-        // All parameters seems to be passed
-        if (count($constructorParams) == count($parameters)) {
-            return self::$reflectionClasses[$abstract]->newInstanceArgs($parameters);
-        }
-
-        foreach ($constructorParams as $i=>$param) {
-
-            $name = $param->getName();
-
-            if (isset($parameters[$name])) {
-                $callParams[] = $parameters[$name];
-                continue;
-            }
-
-            if (!$class = $param->getClass()) {
-                continue;
-            }
-
-            $className = $class->getName();
-
-            if (isset($parameters[$i]) && $parameters[$i] instanceof $className) {
-                $callParams[] = $parameters[$i];
-                continue;
-            }
-
-            if (!$param->isOptional() || $this->bound($className)) {
-                $callParams[] = $this->__invoke($className);
-            }
-        }
-
-        foreach ($parameters as $key => $value) {
-            $callParams[] = $value;
-        }
-
-        return self::$reflectionClasses[$abstract]->newInstanceArgs($callParams);
+        return $this->callAllListeners($abstract, $object);
     }
 
     /**
      * Stores the binding inside the bindings.
      *
-     * @param string abstract
-     * @param callable|object $concrete
+     * @param string          $abstract
+     * @param callable|string $concrete
      * @param bool            $shared
      *
      * @return self
@@ -312,8 +345,9 @@ class IOCContainer implements ContainerContract
     protected function storeBinding($abstract, $concrete, $shared)
     {
         $this->bindings[$abstract] = [
-            'concrete' => $this->checkAndReturnCallable($concrete),
-            'shared'   => $shared,
+            'concrete'      => $this->checkAndReturnCallable($concrete),
+            'shared'        => $shared,
+            'concreteClass' => is_string($concrete) ? $concrete : null
         ];
 
         return $this;
@@ -322,7 +356,7 @@ class IOCContainer implements ContainerContract
     /**
      * Throws an exception if the arg is not callable.
      *
-     * @param callable $callback
+     * @param callable|string $callback
      *
      * @throws InvalidArgumentException
      *

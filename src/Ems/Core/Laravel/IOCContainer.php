@@ -4,14 +4,17 @@ namespace Ems\Core\Laravel;
 
 use Closure;
 use Ems\Contracts\Core\IOCContainer as ContainerContract;
+use Ems\Core\Exceptions\UnsupportedUsageException;
 use Ems\Core\Support\IOCHelperMethods;
 use Ems\Core\Support\ResolvingListenerTrait;
-use Ems\Testing\Cheat;
 use Illuminate\Container\Container as IlluminateContainer;
 use InvalidArgumentException;
 use OutOfBoundsException;
 use ReflectionClass;
-use ReflectionException;
+
+use function get_class;
+use function is_callable;
+use function is_string;
 
 class IOCContainer implements ContainerContract
 {
@@ -19,12 +22,12 @@ class IOCContainer implements ContainerContract
     use IOCHelperMethods;
 
     /**
-     * @var \Illuminate\Container\Container
+     * @var IlluminateContainer
      **/
     protected $laravel;
 
     /**
-     * @param \Illuminate\Container\Container $laravel
+     * @param IlluminateContainer|null $laravel
      **/
     public function __construct(IlluminateContainer $laravel = null)
     {
@@ -38,44 +41,71 @@ class IOCContainer implements ContainerContract
      * {@inheritdoc}
      *
      * @param string $abstract
-     * @param array $parameters (optional)
      *
      * @return object
-     *
-     **@throws ReflectionException
-     *
      * @throws OutOfBoundsException
+     *
      */
-    public function __invoke($abstract, array $parameters = [])
+    public function make(string $abstract)
     {
-        if (!$parameters) {
-            return $this->laravel->make($abstract);
-        }
-
-        // Laravel 5.4
-        if (method_exists($this->laravel, 'makeWith')) {
-            return $this->laravel->makeWith($abstract, $this->convertParameters($abstract, $parameters));
-        }
-
-        /** @noinspection PhpMethodParametersCountMismatchInspection */
-        return $this->laravel->make($abstract, $parameters);
+        return $this->laravel->make($abstract);
     }
+
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param string $abstract
+     * @param array $parameters (optional)
+     * @param bool $useExactClass (default: false)
+     *
+     * @return object
+     */
+    public function create(string $abstract, array $parameters = [], bool $useExactClass = false)
+    {
+        if (!$parameters = $this->convertParameters($abstract, $parameters)) {
+            $parameters = ['some_never_used_parameter_name' => true];
+        }
+        $result = $this->laravel->makeWith($abstract, $parameters);
+        if ($useExactClass && !get_class($result) != $abstract) {
+            throw new UnsupportedUsageException("Laravel backend does not support exact class enforcement");
+        }
+        return $result;
+    }
+
 
     /**
      * {@inheritdoc}
      *
-     * @param string   $abstract
-     * @param callable $callback
-     * @param bool     $singleton (optional)
+     * @param string          $abstract
+     * @param callable|string $callback
+     * @param bool            $singleton (optional)
      *
      * @return self
      **/
-    public function bind($abstract, $callback, $singleton = false)
+    public function bind(string $abstract, $callback, bool $singleton = false)
     {
         $this->laravel->bind($abstract, $this->buildBindingProxy($callback), $singleton);
-
         return $this;
     }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param string $abstract
+     * @param callable|string|null $factory
+     *
+     * @return void
+     */
+    public function share(string $abstract, $factory = null)
+    {
+        if (!$factory || is_string($factory)) {
+            $this->laravel->singleton($abstract, $factory);
+            return;
+        }
+        $this->bind($abstract, $factory, true);
+    }
+
 
     /**
      * {@inheritdoc}
@@ -87,7 +117,7 @@ class IOCContainer implements ContainerContract
      *
      * @return self
      **/
-    public function instance($abstract, $instance)
+    public function instance(string $abstract, $instance)
     {
         $this->laravel->instance($abstract, $instance);
         $this->callAllListeners($abstract, $instance);
@@ -100,12 +130,12 @@ class IOCContainer implements ContainerContract
      * Because laravel does not call listeners on instance() this
      * class has to store them too.
      *
-     * @param string   $abstract
-     * @param callable $listener
+     * @param string          $abstract
+     * @param callable|string $listener
      *
      * @return self
      **/
-    public function resolving($abstract, $listener)
+    public function resolving(string $abstract, $listener)
     {
         $this->laravel->resolving($abstract, $this->buildResolvingCallable($listener));
 
@@ -117,12 +147,12 @@ class IOCContainer implements ContainerContract
      * Because laravel does not call listeners on instance() this
      * class has to store them too.
      *
-     * @param string   $abstract
-     * @param callable $listener
+     * @param string          $abstract
+     * @param callable|string $listener
      *
      * @return self
      **/
-    public function afterResolving($abstract, $listener)
+    public function afterResolving(string $abstract, $listener)
     {
         $this->laravel->afterResolving($abstract, $this->buildResolvingCallable($listener));
 
@@ -130,9 +160,23 @@ class IOCContainer implements ContainerContract
     }
 
     /**
+     * {@inheritDoc}
+     *
+     * @param string $id Identifier of the entry to look for.
+     *
+     * @return bool
+     */
+    public function has($id)
+    {
+        return $this->laravel->bound($id);
+    }
+
+    /**
      * {@inheritdoc}
      *
      * @param string $abstract
+     *
+     * @deprecated use has($abstract)
      *
      * @return bool
      **/
@@ -148,7 +192,7 @@ class IOCContainer implements ContainerContract
      *
      * @return bool
      **/
-    public function resolved($abstract)
+    public function resolved(string $abstract)
     {
         return $this->laravel->resolved($abstract);
     }
@@ -160,7 +204,7 @@ class IOCContainer implements ContainerContract
      *
      * @return mixed The method result
      **/
-    public function call($callback, array $parameters = [])
+    public function call(callable $callback, array $parameters = [])
     {
         return $this->laravel->call($callback, $parameters);
     }
@@ -173,7 +217,7 @@ class IOCContainer implements ContainerContract
      *
      * @return self
      **/
-    public function alias($abstract, $alias)
+    public function alias(string $abstract, string $alias)
     {
         $this->laravel->alias($abstract, $alias);
 
@@ -181,7 +225,7 @@ class IOCContainer implements ContainerContract
     }
 
     /**
-     * @return \Illuminate\Container\Container
+     * @return IlluminateContainer
      **/
     public function laravel()
     {
@@ -262,8 +306,13 @@ class IOCContainer implements ContainerContract
     protected function convertParameters($abstract, array $parameters)
     {
 
-        // TODO Ugly hack to get the concrete class in laravel
-        $concrete = Cheat::call($this->laravel, 'getConcrete', [$abstract]);
+        if (!$parameters) {
+            return [];
+        }
+
+        $bindings = $this->laravel->getBindings();
+
+        $concrete = isset($bindings[$abstract]) ? $bindings[$abstract]['concrete'] : $abstract;
 
         if ($concrete instanceof Closure) {
             return $parameters;

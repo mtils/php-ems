@@ -38,12 +38,8 @@ class EmsValidationServiceProvider extends BootstrapperAsServiceProvider
         $this->app->singleton(ResourceRuleDetector::class, XTypeProviderValidatorFactory::class);
 
         $this->app->singleton(ValidationConverterContract::class, function ($app) {
-
             $textProvider = $app->make(TextProvider::class)->forDomain('validation');
-
-            // Did this binding with the ems container because laravel constructor
-            // injection seems to need an assoc array parameter until 5.4
-            return $this->ems->make(ValidationConverter::class, [$textProvider]);
+            return $app->makeWith(ValidationConverter::class, ['textProvider' => $textProvider]);
         });
     }
 

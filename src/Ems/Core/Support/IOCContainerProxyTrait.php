@@ -3,88 +3,116 @@
 namespace Ems\Core\Support;
 
 use Ems\Contracts\Core\IOCContainer;
+use OutOfBoundsException;
+use Psr\Container\ContainerInterface;
 
 trait IOCContainerProxyTrait
 {
     use IOCHelperMethods;
 
     /**
-     * @var \Ems\Contracts\Core\IOCContainer
+     * @var IOCContainer
      **/
     protected $container;
 
     /**
-     * {@inheritdoc}
+     * @see IOCContainer::make()
      *
      * @param string $abstract
-     * @param array  $parameters (optional)
-     *
-     * @throws \OutOfBoundsException
      *
      * @return object
-     **/
-    public function __invoke($abstract, array $parameters = [])
+     * @throws OutOfBoundsException
+     *
+     */
+    public function make(string $abstract)
     {
-        return $this->container->__invoke($abstract, $parameters);
+        return $this->container->make($abstract);
     }
 
     /**
-     * {@inheritdoc}
+     * @see IOCContainer::create()
      *
-     * @param string   $abstract
-     * @param callable $callback
-     * @param bool     $singleton (optional)
+     * @param string $abstract
+     * @param array $parameters (optional)
+     * @param bool $useExactClass (default: false)
      *
-     * @return self
+     * @return object
+     */
+    public function create(string $abstract, array $parameters = [], bool $useExactClass = false)
+    {
+        return $this->container->create($abstract, $parameters, $useExactClass);
+    }
+
+    /**
+     * @see IOCContainer::bind()
+     *
+     * @param string          $abstract
+     * @param callable|string $factory
+     * @param bool            $singleton (optional)
+     *
+     * @return IOCContainer
      **/
-    public function bind($abstract, $factory, $singleton = false)
+    public function bind(string $abstract, $factory, bool $singleton = false)
     {
         return $this->container->bind($abstract, $factory, $singleton);
     }
 
     /**
-     * {@inheritdoc}
+     * @see IOCContainer::instance()
      *
      * @param string $abstract
      * @param object $instance
      *
-     * @return self
+     * @return IOCContainer
      **/
-    public function instance($abstract, $instance)
+    public function instance(string $abstract, $instance)
     {
         return $this->container->instance($abstract, $instance);
     }
 
     /**
-     * {@inheritdoc}
+     * @see IOCContainer::resolving()
      *
-     * @param string   $abstract
-     * @param callable $listener
+     * @param string          $abstract
+     * @param callable|string $listener
      *
-     * @return self
+     * @return IOCContainer
      **/
-    public function resolving($abstract, $listener)
+    public function resolving(string $abstract, $listener)
     {
         return $this->container->resolving($abstract, $listener);
     }
 
     /**
-     * {@inheritdoc}
+     * @see IOCContainer::afterResolving()
      *
-     * @param string   $abstract
-     * @param callable $listener
+     * @param string          $abstract
+     * @param callable|string $listener
      *
-     * @return self
+     * @return IOCContainer
      **/
-    public function afterResolving($abstract, $listener)
+    public function afterResolving(string $abstract, $listener)
     {
         return $this->container->afterResolving($abstract, $listener);
     }
 
     /**
-     * {@inheritdoc}
+     * @see ContainerInterface::has()
      *
      * @param string $abstract
+     *
+     * @return bool
+     * @noinspection PhpMissingParamTypeInspection
+     */
+    public function has($abstract)
+    {
+        return $this->container->has($abstract);
+    }
+
+    /**
+     * @param string $abstract
+     *
+     * @deprecated use has($abstract)
      *
      * @return bool
      **/
@@ -94,39 +122,39 @@ trait IOCContainerProxyTrait
     }
 
     /**
-     * {@inheritdoc}
+     * @see IOCContainer::resolved()
      *
      * @param string $abstract
      *
      * @return bool
      **/
-    public function resolved($abstract)
+    public function resolved(string $abstract)
     {
         return $this->container->resolved($abstract);
     }
 
     /**
-     * {@inheritdoc}
+     * @see IOCContainer::call()
      *
      * @param callable $callback
      * @param array    $parameters
      *
      * @return mixed The method result
      **/
-    public function call($callback, array $parameters = [])
+    public function call(callable $callback, array $parameters = [])
     {
         return $this->container->call($callback, $parameters);
     }
 
     /**
-     * {@inheritdoc}
+     * @see IOCContainer::alias()
      *
      * @param string $abstract
      * @param string $alias
      *
-     * @return self
+     * @return IOCContainer
      **/
-    public function alias($abstract, $alias)
+    public function alias(string $abstract, string $alias)
     {
         return $this->container->alias($abstract, $alias);
     }
@@ -134,7 +162,7 @@ trait IOCContainerProxyTrait
     /**
      * Get the assigned container.
      *
-     * @return \Ems\Contracts\Core\IOCContainer
+     * @return IOCContainer
      **/
     public function getContainer()
     {
@@ -144,7 +172,7 @@ trait IOCContainerProxyTrait
     /**
      * Set the container.
      *
-     * @param \Ems\Contracts\Core\IOCContainer $container
+     * @param IOCContainer $container
      *
      * @return self
      **/

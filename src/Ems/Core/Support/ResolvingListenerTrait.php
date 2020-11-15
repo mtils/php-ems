@@ -19,10 +19,12 @@ trait ResolvingListenerTrait
     protected $resolvedListeners = [];
 
     /**
-     * Calls all resolving and afterResolving listeners.
+     * Calls all resolving and afterResolving listeners and return the instance.
      *
      * @param string $abstract
      * @param object $instance
+     *
+     * @return object
      */
     protected function callAllListeners($abstract, $instance)
     {
@@ -35,11 +37,13 @@ trait ResolvingListenerTrait
         $this->callListeners($abstract, $instance, $this->resolvedListeners, $excludeAfter);
 
         if (!$class || $class == $abstract) {
-            return;
+            return $instance;
         }
 
         $this->callListeners($abstract, $instance, $this->resolvingListeners, $excludeBefore);
         $this->callListeners($abstract, $instance, $this->resolvedListeners, $excludeAfter);
+
+        return $instance;
     }
 
     /**
@@ -63,12 +67,12 @@ trait ResolvingListenerTrait
     /**
      * Stores a listener in the resolved array.
      *
-     * @param string   $abstract
-     * @param callable $listener
+     * @param string          $abstract
+     * @param callable|string $listener
      *
      * @return self
      **/
-    public function storeAfterResolvingListener($abstract, $listener)
+    public function storeAfterResolvingListener(string $abstract, $listener)
     {
         if (!isset($this->resolvedListeners[$abstract])) {
             $this->resolvedListeners[$abstract] = [];
