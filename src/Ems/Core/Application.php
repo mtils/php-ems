@@ -9,16 +9,19 @@ use Ems\Contracts\Core\InputConnection;
 use Ems\Contracts\Core\IOCContainer as ContainerContract;
 use Ems\Contracts\Core\OutputConnection;
 use Ems\Contracts\Core\Stringable;
+use Ems\Contracts\Core\Type;
+use Ems\Contracts\Core\Url as UrlContract;
 use Ems\Core\Exceptions\KeyNotFoundException;
 use Ems\Core\Exceptions\UnsupportedUsageException;
+use Ems\Core\Patterns\ListenerContainer;
 use Ems\Core\Support\IOCContainerProxyTrait;
-use Ems\Core\Patterns\HookableTrait;
-use Ems\Contracts\Core\Url as UrlContract;
-use Ems\Contracts\Core\Type;
 use LogicException;
 use Psr\Log\LoggerInterface;
 
+use function get_class;
+use function in_array;
 use function is_callable;
+use function is_object;
 
 /**
  * This application is a minimal version optimized
@@ -34,7 +37,7 @@ use function is_callable;
  * Globals are bad, and statics (and therefore singletons) are globals so
  * please avoid putting just everything you need into a singleton instance.
  *
- * The only things which are allowed to be putted into the application are
+ * The only things which are allowed to be put into the application are
  * the things which belong to the application. These are in this case:
  *
  * - bindings (therefore it implements IOCContainer)
@@ -54,7 +57,6 @@ use function is_callable;
 class Application implements ContainerContract, HasMethodHooks
 {
     use IOCContainerProxyTrait;
-    use HookableTrait;
 
     /**
      * @var string
@@ -82,12 +84,12 @@ class Application implements ContainerContract, HasMethodHooks
     protected $version = '';
 
     /**
-     * @var array|\ArrayAccess
+     * @var array|ArrayAccess
      */
     protected $config = [];
 
     /**
-     * @var array|\ArrayAccess
+     * @var array|ArrayAccess
      */
     protected $paths = [];
 
@@ -122,6 +124,11 @@ class Application implements ContainerContract, HasMethodHooks
     protected $wasBooted = false;
 
     /**
+     * @var ListenerContainer
+     */
+    protected $listeners;
+
+    /**
      * @var static
      */
     protected static $staticInstance;
@@ -141,6 +148,7 @@ class Application implements ContainerContract, HasMethodHooks
     public function __construct($path, ContainerContract $container = null, $bindAsApp=true)
     {
         $this->path = new Url($path);
+        $this->listeners = new ListenerContainer();
         $container = $container ?: new IOCContainer();
         $this->setContainer($container);
         if ($bindAsApp) {
@@ -167,7 +175,7 @@ class Application implements ContainerContract, HasMethodHooks
      *
      * @return self
      **/
-    public function setName($name)
+    public function setName(string $name)
     {
         $this->name = $name;
 
@@ -235,7 +243,7 @@ class Application implements ContainerContract, HasMethodHooks
      * Return an array(like) of application paths indexed by a name.
      * (e.g. ['public' => $appRoot/public])
      *
-     * @return array|\ArrayAccess
+     * @return array|ArrayAccess
      */
     public function getPaths()
     {
@@ -262,14 +270,14 @@ class Application implements ContainerContract, HasMethodHooks
      * Without any parameter it returns the root path. This is
      * typically a directory root with a public folder.
      *
-     * This path is setted in __construct() and cannot be changed.
+     * This path is set in __construct() and cannot be changed.
      *
      * To get any other path, just pass a name or an url.
      *
      *
-     * @param string                    $name (optional)
+     * @param string|null $name
      *
-     * @return \Ems\Contracts\Core\Url
+     * @return UrlContract
      */
     public function path($name=null)
     {
@@ -297,7 +305,7 @@ class Application implements ContainerContract, HasMethodHooks
     /**
      * Get the application configuration.
      *
-     * @return array|\ArrayAccess
+     * @return array|ArrayAccess
      */
     public function getConfig()
     {
@@ -307,7 +315,7 @@ class Application implements ContainerContract, HasMethodHooks
     /**
      * Set the application configuration.
      *
-     * @param array|\ArrayAccess $config
+     * @param array|ArrayAccess $config
      *
      * @return self
      */
@@ -330,7 +338,7 @@ class Application implements ContainerContract, HasMethodHooks
      *
      * @return mixed
      */
-    public function config($key, $default=null)
+    public function config(string $key, $default=null)
     {
         if (isset($this->config[$key])) {
             return $this->config[$key];
@@ -378,8 +386,7 @@ class Application implements ContainerContract, HasMethodHooks
      */
     public function boot()
     {
-        $this->callBeforeListeners('boot', [$this]);
-        $this->callAfterListeners('boot', [$this]);
+        $this->listeners->call('boot', [$this], ListenerContainer::POSITIONS);
         $this->wasBooted = true;
         static::$staticInstance = $this;
         static::$staticContainer = $this->container;
@@ -433,7 +440,7 @@ class Application implements ContainerContract, HasMethodHooks
      *
      * @return self
      */
-    public function setEnvironment($env)
+    public function setEnvironment(string $env)
     {
         $this->environment = $env;
         return $this;
@@ -462,6 +469,93 @@ class Application implements ContainerContract, HasMethodHooks
     {
         return ['boot'];
     }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param string|object $event
+     * @param callable $listener
+     *
+     * @return self
+     **/
+    public function onBefore($event, callable $listener)
+    {
+        return $this->storeListener($event, $listener, ListenerContainer::BEFORE);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param string|object $event
+     * @param callable $listener
+     *
+     * @return self
+     **/
+    public function on($event, callable $listener)
+    {
+        return $this->storeListener($event, $listener, ListenerContainer::ON);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param string|object $event
+     * @param callable $listener
+     *
+     * @return self
+     **/
+    public function onAfter($event, callable $listener)
+    {
+        return $this->storeListener($event, $listener, ListenerContainer::AFTER);
+    }
+
+    /**
+     * @param string|object $event
+     * @param callable      $listener
+     * @param string        $position
+     *
+     * @return $this
+     */
+    protected function storeListener($event, callable $listener, string $position)
+    {
+        $abstract = is_object($event) ? get_class($event) : $event;
+        if (in_array($abstract, $this->methodHooks())) {
+            $this->listeners->add($abstract, $listener, $position);
+            return $this;
+        }
+        switch ($position) {
+            case ListenerContainer::BEFORE:
+                $this->container->onBefore($event, $listener);
+                return $this;
+            case ListenerContainer::ON:
+                $this->container->on($event, $listener);
+                return $this;
+            default:
+                $this->container->onAfter($event, $listener);
+        }
+        return $this;
+
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param string|object $event
+     * @param string $position ('after'|'before'|'')
+     *
+     * @return array
+     **/
+    public function getListeners($event, $position = '')
+    {
+        $abstract = is_object($event) ? get_class($event) : $event;
+        if (in_array($abstract, $this->methodHooks())) {
+            return $this->listeners->get($event, $position);
+        }
+        return $this->container->getListeners($event, $position);
+    }
+
+
+
     //</editor-fold>
 
     //<editor-fold desc="IO Shortcuts">
@@ -477,7 +571,7 @@ class Application implements ContainerContract, HasMethodHooks
      */
     public function read(callable $into=null)
     {
-        return $this->container->make(InputConnection::class)->read($into);
+        return $this->container->get(InputConnection::class)->read($into);
     }
 
     /**
@@ -492,7 +586,7 @@ class Application implements ContainerContract, HasMethodHooks
      */
     public function write($output, $lock=false)
     {
-        return $this->container->make(OutputConnection::class)->write($output, $lock);
+        return $this->container->get(OutputConnection::class)->write($output, $lock);
     }
 
     /**
@@ -504,9 +598,9 @@ class Application implements ContainerContract, HasMethodHooks
      *
      * @see LoggerInterface
      */
-    public function log($level, $message, array $context = [])
+    public function log(string $level, string $message, array $context = [])
     {
-        $this->container->make(LoggerInterface::class)->log($level, $message, $context);
+        $this->container->get(LoggerInterface::class)->log($level, $message, $context);
     }
     //</editor-fold>
 
@@ -552,12 +646,12 @@ class Application implements ContainerContract, HasMethodHooks
      * on this class which does neither exist as an instance method or an static
      * method and the name will get resolved through the container.
      *
-     * Application::events() will return $app->make('events')
+     * Application::events() will return $app->get('events')
      *
      * If the object behind this binding supports __invoke(), you can also pass
      * parameters to that method and the method is called.
      *
-     * Application::event(1,2) will return $app->make('event')->__invoke(1,2)
+     * Application::event(1,2) will return $app->get('event')->__invoke(1,2)
      *
      * @param string $name
      * @param array $arguments (optional)
@@ -566,7 +660,8 @@ class Application implements ContainerContract, HasMethodHooks
      */
     public static function __callStatic($name, array $arguments=[])
     {
-        $concrete = static::$staticContainer->make($name);
+        $container = static::$staticContainer;
+        $concrete = $container($name);
         if (!is_callable($concrete) && $arguments) {
             throw new LogicException("Passed arguments for a not callable object");
         }
@@ -584,14 +679,13 @@ class Application implements ContainerContract, HasMethodHooks
     /**
      * Alias for $this->path()
      *
-     * @param string                           $name
-     * @param string|\Ems\Contracts\Core\Url   $value
+     * @param string|null             $name
      *
-     * @return string|\Ems\Contracts\Core\Url
+     * @return string|UrlContract
      */
-    public static function to($name=null, $value=null)
+    public static function to($name=null)
     {
-        return static::$staticInstance->path($name, $value);
+        return static::$staticInstance->path($name);
     }
 
     /**
@@ -603,7 +697,7 @@ class Application implements ContainerContract, HasMethodHooks
      *
      * @return mixed
      */
-    public static function setting($key, $default=null)
+    public static function setting(string $key, $default=null)
     {
         return static::$staticInstance->config($key, $default);
     }
