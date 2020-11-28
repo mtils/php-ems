@@ -19,6 +19,7 @@ use ReflectionClass;
 
 use function get_class;
 use function is_callable;
+use function is_object;
 use function is_string;
 
 class IOCContainer implements ContainerContract
@@ -161,38 +162,69 @@ class IOCContainer implements ContainerContract
     }
 
     /**
-     * {@inheritdoc}
-     * Because laravel does not call listeners on instance() this
-     * class has to store them too.
+     * {@inheritDoc}
      *
-     * @param string          $abstract
-     * @param callable|string $listener
+     * CAUTION There is no difference between on and onBefore with laravel container.
+     *
+     * @param string|object $event
+     * @param callable $listener
      *
      * @return self
      **/
-    public function resolving(string $abstract, $listener)
+    public function onBefore($event, callable $listener)
     {
+        $abstract = is_object($event) ? get_class($event) : $event;
         $this->laravel->resolving($abstract, $this->buildResolvingCallable($listener));
         $this->listeners->add($abstract, $listener, ListenerContainer::BEFORE);
         return $this;
     }
 
     /**
-     * {@inheritdoc}
-     * Because laravel does not call listeners on instance() this
-     * class has to store them too.
+     * {@inheritDoc}
      *
-     * @param string          $abstract
-     * @param callable|string $listener
+     * @param string|object $event
+     * @param callable $listener
      *
      * @return self
      **/
-    public function afterResolving(string $abstract, $listener)
+    public function on($event, callable $listener)
     {
+        return $this->onBefore($event, $listener);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param string|object $event
+     * @param callable $listener
+     *
+     * @return self
+     **/
+    public function onAfter($event, callable $listener)
+    {
+        $abstract = is_object($event) ? get_class($event) : $event;
         $this->laravel->afterResolving($abstract, $this->buildResolvingCallable($listener));
         $this->listeners->add($abstract, $listener, ListenerContainer::AFTER);
         return $this;
     }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param string|object $event
+     * @param string $position ('after'|'before'|'')
+     *
+     * @return array
+     **/
+    public function getListeners($event, $position = '')
+    {
+        if (!$position) {
+            return [];
+        }
+        $abstract = is_object($event) ? get_class($event) : $event;
+        return $this->listeners->get($abstract, $position);
+    }
+
 
     /**
      * {@inheritDoc}
@@ -257,6 +289,38 @@ class IOCContainer implements ContainerContract
         $this->laravel->alias($abstract, $alias);
 
         return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     * Because laravel does not call listeners on instance() this
+     * class has to store them too.
+     *
+     * @param string          $abstract
+     * @param callable|string $listener
+     *
+     * @return self
+     * @deprecated use self::on() or laravel directly
+     **/
+    public function resolving(string $abstract, $listener)
+    {
+        return $this->on($abstract, $listener);
+    }
+
+    /**
+     * {@inheritdoc}
+     * Because laravel does not call listeners on instance() this
+     * class has to store them too.
+     *
+     * @param string          $abstract
+     * @param callable|string $listener
+     *
+     * @return self
+     * @deprecated use self::onAfter() or laravel directly
+     **/
+    public function afterResolving(string $abstract, $listener)
+    {
+        return $this->onAfter($abstract, $listener);
     }
 
     /**

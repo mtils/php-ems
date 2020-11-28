@@ -116,7 +116,7 @@ class ErrorHandler
     protected function renderConsoleException(Throwable $e, ArgvInput $input)
     {
         /** @var ConsoleOutputConnection $out */
-        $out = $this->app->make(ConsoleOutputConnection::class);
+        $out = $this->app->get(ConsoleOutputConnection::class);
         $out->line('<error>' . $e->getMessage() . '</error>');
 
         if(!$input->wantsVerboseOutput()) {
@@ -192,7 +192,7 @@ class ErrorHandler
     protected function logger()
     {
         /** @var LoggerInterfaceAlias $logger **/
-        $logger = $this->app->make(LoggerInterfaceAlias::class);
+        $logger = $this->app->get(LoggerInterfaceAlias::class);
         return $logger;
     }
 

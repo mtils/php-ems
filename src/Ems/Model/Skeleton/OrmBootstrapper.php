@@ -33,7 +33,7 @@ class OrmBootstrapper extends Bootstrapper
         parent::bindBindings();
 
         $this->app->afterResolving(ObjectArrayConverter::class, function (ObjectArrayConverter $converter) {
-            $inspector = $this->app->make(SchemaInspector::class);
+            $inspector = $this->app->get(SchemaInspector::class);
             if (!$inspector instanceof MapSchemaInspector) {
                 return;
             }
@@ -45,13 +45,13 @@ class OrmBootstrapper extends Bootstrapper
         $this->app->resolving(Orm::class, function (Orm $orm) {
             $orm->extend('database', function (Url $url) {
                 if ($url->scheme == 'database') {
-                    return $this->app->make(OrmQueryBuilder::class);
+                    return $this->app->get(OrmQueryBuilder::class);
                 }
                 return null;
             });
         });
 
-        $app = $this->app->make(Application::class);
+        $app = $this->app->get(Application::class);
 
         if (!$mapDirectories = $app->config('orm.directories')) {
             return;

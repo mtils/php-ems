@@ -8,7 +8,7 @@ class Bootstrapper
 {
     /**
      * Put your bindings here,
-     * leads to $app->bind($value, $app->make($key)) !
+     * leads to $app->bind($value, $app->get($key)) !
      *
      * @example [
      *   'MyRouter' => 'RouterInterface',
@@ -20,7 +20,7 @@ class Bootstrapper
     protected $bindings = [];
 
     /**
-     * Put your singletons here, leads to $app->singleton($val, $app->make($key)).
+     * Put your singletons here, leads to $app->singleton($val, $app->get($key)).
      *
      * @see self::bindings
      *

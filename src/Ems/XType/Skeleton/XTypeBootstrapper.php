@@ -33,12 +33,12 @@ class XTypeBootstrapper extends Bootstrapper
     {
         parent::bind();
 
-        $this->app->resolving(TypeProvider::class, function ($provider) {
+        $this->app->on(TypeProvider::class, function ($provider) {
             $this->addEloquentExtensionsIfInstalled($provider);
         });
 
-        $this->app->resolving(TypeFactory::class, function (TypeFactory $factory) {
-            $this->app->make(Aliases::class)->addTo($factory);
+        $this->app->on(TypeFactory::class, function (TypeFactory $factory) {
+            $this->app->get(Aliases::class)->addTo($factory);
         });
     }
 
@@ -71,7 +71,7 @@ class XTypeBootstrapper extends Bootstrapper
         }, true);
 
         $provider->extend(Model::class, function ($model) {
-            return $this->app->make(ModelTypeFactory::class)->toType($model);
+            return $this->app->get(ModelTypeFactory::class)->toType($model);
         });
     }
 

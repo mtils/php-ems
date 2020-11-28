@@ -17,6 +17,7 @@ use ReflectionMethod;
 
 use function call_user_func;
 use function get_class;
+use function is_object;
 use function is_string;
 
 class IOCContainer implements ContainerContract
@@ -224,34 +225,6 @@ class IOCContainer implements ContainerContract
     }
 
     /**
-     * {@inheritdoc}
-     *
-     * @param string          $abstract
-     * @param callable|string $listener
-     *
-     * @return self
-     **/
-    public function resolving(string $abstract, $listener)
-    {
-        $this->listeners->add($abstract, $listener, ListenerContainer::BEFORE);
-        return $this;
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @param string          $abstract
-     * @param callable|string $listener
-     *
-     * @return self
-     **/
-    public function afterResolving(string $abstract, $listener)
-    {
-        $this->listeners->add($abstract, $listener, ListenerContainer::AFTER);
-        return $this;
-    }
-
-    /**
      * {@inheritDoc}
      *
      * @param string $id Identifier of the entry to look for.
@@ -323,7 +296,7 @@ class IOCContainer implements ContainerContract
             }
 
             if (!$info['optional']) {
-                $args[$name] = $this->make($info['type']);
+                $args[$name] = $this->get($info['type']);
             }
 
         }
@@ -352,6 +325,92 @@ class IOCContainer implements ContainerContract
 
         return $this;
     }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param string|object $event
+     * @param callable $listener
+     *
+     * @return self
+     **/
+    public function onBefore($event, callable $listener)
+    {
+        return $this->storeListener($event, $listener, ListenerContainer::BEFORE);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param string|object $event
+     * @param callable $listener
+     *
+     * @return self
+     **/
+    public function on($event, callable $listener)
+    {
+        return $this->storeListener($event, $listener, ListenerContainer::ON);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param string|object $event
+     * @param callable $listener
+     *
+     * @return self
+     **/
+    public function onAfter($event, callable $listener)
+    {
+        return $this->storeListener($event, $listener, ListenerContainer::AFTER);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param string|object $event
+     * @param string $position ('after'|'before'|'')
+     *
+     * @return array
+     **/
+    public function getListeners($event, $position = '')
+    {
+        if (!$position) {
+            return [];
+        }
+        $abstract = is_object($event) ? get_class($event) : $event;
+        return $this->listeners->get($abstract, $position);
+    }
+
+
+    /**
+     * {@inheritdoc}
+     *
+     * @param string          $abstract
+     * @param callable|string $listener
+     *
+     * @return self
+     * @deprecated use self::on($abstract, $listener)
+     **/
+    public function resolving(string $abstract, $listener)
+    {
+        return $this->on($abstract, $listener);
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @param string          $abstract
+     * @param callable|string $listener
+     *
+     * @return self
+     * @deprecated use self::onAfter($abstract, $listener)
+     **/
+    public function afterResolving(string $abstract, $listener)
+    {
+        return $this->onAfter($abstract, $listener);
+    }
+
 
     /**
      * @param string $abstract
@@ -390,6 +449,20 @@ class IOCContainer implements ContainerContract
             'concreteClass' => is_string($concrete) ? $concrete : null
         ];
 
+        return $this;
+    }
+
+    /**
+     * @param string|object $event
+     * @param callable      $listener
+     * @param string        $position
+     *
+     * @return $this
+     */
+    protected function storeListener($event, callable $listener, string $position)
+    {
+        $abstract = is_object($event) ? get_class($event) : $event;
+        $this->listeners->add($abstract, $listener, $position);
         return $this;
     }
 

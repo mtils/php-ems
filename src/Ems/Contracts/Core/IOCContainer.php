@@ -43,7 +43,7 @@ use Psr\Container\ContainerInterface;
  *
  * @package Ems\Contracts\Core
  */
-interface IOCContainer extends ContainerInterface
+interface IOCContainer extends ContainerInterface, Subscribable, Hookable
 {
     /**
      * Make a class/abstract definition / Like laravel Container::make()
@@ -126,27 +126,6 @@ interface IOCContainer extends ContainerInterface
      * @return self
      **/
     public function instance(string $abstract, $instance);
-
-    /**
-     * Register a listener which will get called if $abstract was resolved.
-     *
-     * @param string          $abstract
-     * @param callable|string $listener
-     *
-     * @return self
-     **/
-    public function resolving(string $abstract, $listener);
-
-    /**
-     * Register a listener which will get called if $abstract was resolved and
-     * resolving() listeners were called.
-     *
-     * @param string          $abstract
-     * @param callable|string $listener
-     *
-     * @return self
-     **/
-    public function afterResolving(string $abstract, $listener);
 
     /**
      * Check if $abstract was resolved via get or __invoke without parameters.

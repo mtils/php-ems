@@ -107,7 +107,7 @@ class CoreBootstrapper extends Bootstrapper
             $this->app->instance(Application::class, $this->createPlaceholderApp());
         }
 
-        $this->assignPathsToApp($this->app->make(Application::class));
+        $this->assignPathsToApp($this->app->get(Application::class));
 
         $this->app->resolving(PathFinder::class, function ($paths) {
             $this->assignBaseAppPaths($paths);
@@ -226,7 +226,7 @@ class CoreBootstrapper extends Bootstrapper
 
         foreach ($classes as $class) {
             try {
-                $chain->add($this->app->make($class));
+                $chain->add($this->app->get($class));
             } catch (\RuntimeException $e) {
             }
         }
@@ -257,7 +257,7 @@ class CoreBootstrapper extends Bootstrapper
             return app_path();
         }
 
-        return $this->app->make('app')->path();
+        return $this->app->get('app')->path();
     }
 
     /**

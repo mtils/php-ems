@@ -4,6 +4,7 @@ namespace Ems\Core;
 
 use Ems\Core\Exceptions\BindingNotFoundException;
 use Ems\Core\Exceptions\IOCContainerException;
+use Ems\Core\Patterns\ListenerContainer;
 use RuntimeException;
 use stdClass;
 use Ems\Contracts\Core\IOCContainer as ContainerContract;
@@ -416,7 +417,7 @@ class IOCContainerTest extends \Ems\TestCase
         $callable = new LoggingCallable();
         $container = $this->newContainer();
 
-        $this->assertSame($container, $container->resolving('foo', $callable));
+        $this->assertSame($container, $container->on('foo', $callable));
 
         $container->bind('foo', function (ContainerContract $container) {
             return 'bar';
@@ -434,8 +435,8 @@ class IOCContainerTest extends \Ems\TestCase
         $callable = new LoggingCallable();
         $container = $this->newContainer();
 
-        $this->assertSame($container, $container->resolving('foo', $callable));
-        $this->assertSame($container, $container->afterResolving('foo', $callable));
+        $this->assertSame($container, $container->on('foo', $callable));
+        $this->assertSame($container, $container->onAfter('foo', $callable));
 
         $container->bind('foo', function (ContainerContract $container) {
             return 'bar';
@@ -449,6 +450,38 @@ class IOCContainerTest extends \Ems\TestCase
         $this->assertCount(2, $callable);
     }
 
+    public function test_onBefore_on_onAfter_order()
+    {
+        $callable = new LoggingCallable();
+        $container = $this->newContainer();
+
+        $this->assertSame($container, $container->onBefore('foo', $callable));
+        $this->assertSame($container, $container->on('foo', $callable));
+        $this->assertSame($container, $container->onAfter('foo', $callable));
+
+        $container->bind('foo', function (ContainerContract $container) {
+            return 'bar';
+        });
+
+        $this->assertEquals('bar', $container('foo'));
+
+        $this->assertEquals('bar', $callable->arg(0));
+        $this->assertSame($container, $callable->arg(1));
+
+        $this->assertCount(3, $callable);
+    }
+
+    public function test_getListeners()
+    {
+        $callable = new LoggingCallable();
+        $container = $this->newContainer();
+
+        $this->assertSame([], $container->getListeners('foo'));
+
+        $this->assertSame($container, $container->onBefore('foo', $callable));
+        $this->assertSame($callable, $container->getListeners('foo', ListenerContainer::BEFORE)[0]);
+    }
+
     public function test_resolving_listener_gets_called_on_instance_of_abstract()
     {
         $aliasListener = new LoggingCallable();
@@ -459,11 +492,11 @@ class IOCContainerTest extends \Ems\TestCase
 
         $container = $this->newContainer();
 
-        $container->resolving('foo', $aliasListener);
-        $container->resolving('Ems\Core\ContainerTest_Interface', $interfaceListener);
-        $container->resolving('Ems\Core\ContainerTest_Class', $classListener);
-        $container->resolving('Ems\Core\ContainerTest_Class2', $class2Listener);
-        $container->resolving('Ems\Core\ContainerTest', $otherListener);
+        $container->on('foo', $aliasListener);
+        $container->on('Ems\Core\ContainerTest_Interface', $interfaceListener);
+        $container->on('Ems\Core\ContainerTest_Class', $classListener);
+        $container->on('Ems\Core\ContainerTest_Class2', $class2Listener);
+        $container->on('Ems\Core\ContainerTest', $otherListener);
 
         $container->bind('foo', function (ContainerContract $container) {
             return new ContainerTest_Class2();
@@ -492,7 +525,7 @@ class IOCContainerTest extends \Ems\TestCase
 
         $instance = new stdClass();
 
-        $container->resolving('foo', $callable);
+        $container->on('foo', $callable);
         $container->instance('foo', $instance);
 
         $this->assertSame($instance, $container('foo'));

@@ -60,10 +60,10 @@ class SkeletonBootstrapper extends Bootstrapper
     protected function createInputConnection()
     {
         if (php_sapi_name() == 'cli') {
-            return $this->app->make(ConsoleInputConnection::class);
+            return $this->app->get(ConsoleInputConnection::class);
         }
 
-        return $this->app->make(GlobalsHttpInputConnection::class);
+        return $this->app->get(GlobalsHttpInputConnection::class);
     }
 
     /**
@@ -72,9 +72,9 @@ class SkeletonBootstrapper extends Bootstrapper
     protected function createOutputConnection()
     {
         if (php_sapi_name() == 'cli') {
-            return $this->app->make(ConsoleOutputConnection::class);
+            return $this->app->get(ConsoleOutputConnection::class);
         }
-        return $this->app->make(StdOutputConnection::class);
+        return $this->app->get(StdOutputConnection::class);
     }
 
     /**
@@ -86,19 +86,19 @@ class SkeletonBootstrapper extends Bootstrapper
             if (!$url->equals(ConnectionPool::STDIN)) {
                 return null;
             }
-            return $this->app->make(InputConnection::class);
+            return $this->app->get(InputConnection::class);
         });
 
         $pool->extend(ConnectionPool::STDOUT, function (Url $url) {
             if (!$url->equals(ConnectionPool::STDOUT)) {
                 return null;
             }
-            return $this->app->make(OutputConnection::class);
+            return $this->app->get(OutputConnection::class);
         });
 
         $pool->extend(ConnectionPool::STDERR, function (Url $url) {
             if ($url->equals(ConnectionPool::STDERR)) {
-                return $this->app->make(StreamLogger::class);
+                return $this->app->get(StreamLogger::class);
             }
             return null;
         });
@@ -110,7 +110,7 @@ class SkeletonBootstrapper extends Bootstrapper
     protected function createLogger()
     {
         /** @var Application $app */
-        $app = $this->app->make('app');
+        $app = $this->app->get('app');
 
         if ($app->environment() != 'production') {
             return new StreamLogger('php://stdout');
@@ -136,7 +136,7 @@ class SkeletonBootstrapper extends Bootstrapper
         }
 
         /** @var Application $app */
-        $app = $this->app->make('app');
+        $app = $this->app->get('app');
         $app->onAfter('boot', function() {
             Benchmark::mark('Booted');
         });
