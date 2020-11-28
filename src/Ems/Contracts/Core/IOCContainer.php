@@ -149,7 +149,9 @@ interface IOCContainer extends ContainerInterface
     public function afterResolving(string $abstract, $listener);
 
     /**
-     * Check if $abstract was resolved (via __invoke or make).
+     * Check if $abstract was resolved via get or __invoke without parameters.
+     * It is not true if there is no binding for $abstract and $abstract was
+     * built by the container itself.
      *
      * @param string $abstract
      *
