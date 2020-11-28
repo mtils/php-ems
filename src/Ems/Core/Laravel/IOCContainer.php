@@ -4,12 +4,17 @@ namespace Ems\Core\Laravel;
 
 use Closure;
 use Ems\Contracts\Core\IOCContainer as ContainerContract;
+use Ems\Core\Exceptions\BindingNotFoundException;
+use Ems\Core\Exceptions\IOCContainerException;
 use Ems\Core\Exceptions\UnsupportedUsageException;
 use Ems\Core\Support\IOCHelperMethods;
 use Ems\Core\Support\ResolvingListenerTrait;
+use Exception;
 use Illuminate\Container\Container as IlluminateContainer;
 use InvalidArgumentException;
 use OutOfBoundsException;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use ReflectionClass;
 
 use function get_class;
@@ -44,11 +49,35 @@ class IOCContainer implements ContainerContract
      *
      * @return object
      * @throws OutOfBoundsException
+     * @deprecated use self::get() or laravel directly
      *
      */
     public function make(string $abstract)
     {
         return $this->laravel->make($abstract);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param string $id Identifier of the entry to look for.
+     *
+     * @return mixed Entry.
+     * @throws ContainerExceptionInterface Error while retrieving the entry.
+     *
+     * @throws NotFoundExceptionInterface  No entry was found for **this** identifier.
+     * @noinspection PhpMissingParamTypeInspection
+     */
+    public function get($id)
+    {
+        try {
+            return $this->laravel->make($id);
+        } catch (Exception $e) {
+            if (!$this->laravel->bound($id)) {
+                throw new BindingNotFoundException("Binding $id not found", 0, $e);
+            }
+            throw new IOCContainerException("Error resolving $id", 0, $e);
+        }
     }
 
 

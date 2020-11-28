@@ -4,7 +4,9 @@ namespace Ems\Core\Support;
 
 use Ems\Contracts\Core\IOCContainer;
 use OutOfBoundsException;
+use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 trait IOCContainerProxyTrait
 {
@@ -22,11 +24,29 @@ trait IOCContainerProxyTrait
      *
      * @return object
      * @throws OutOfBoundsException
+     * @deprecated use self::get()
      *
      */
     public function make(string $abstract)
     {
-        return $this->container->make($abstract);
+        return $this->container->get($abstract);
+    }
+
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param string $id Identifier of the entry to look for.
+     *
+     * @return mixed Entry.
+     * @throws ContainerExceptionInterface Error while retrieving the entry.
+     *
+     * @throws NotFoundExceptionInterface  No entry was found for **this** identifier.
+     * @noinspection PhpMissingParamTypeInspection
+     */
+    public function get($id)
+    {
+        return $this->container->get($id);
     }
 
     /**

@@ -2,6 +2,9 @@
 
 namespace Ems\Core;
 
+use Ems\Core\Exceptions\BindingNotFoundException;
+use Ems\Core\Exceptions\IOCContainerException;
+use RuntimeException;
 use stdClass;
 use Ems\Contracts\Core\IOCContainer as ContainerContract;
 use Ems\Contracts\Core\ContainerCallable;
@@ -69,14 +72,30 @@ class IOCContainerTest extends \Ems\TestCase
         $this->assertSame($container, $container('baz'));
     }
 
-    public function test_make_calls_binding()
+    public function test_get_calls_binding()
     {
         $container = $this->newContainer();
         $container->bind('foo', function (ContainerContract $container) {
             return $container;
         });
 
-        $this->assertSame($container, $container->make('foo'));
+        $this->assertSame($container, $container->get('foo'));
+    }
+
+    public function test_get_throws_BindingNotFoundException_if_not_bound()
+    {
+        $this->expectException(BindingNotFoundException::class);
+        $this->newContainer()->get('foo');
+    }
+
+    public function test_get_throws_ContainerException_if_anything_goes_wrong()
+    {
+        $container = $this->newContainer();
+        $this->expectException(IOCContainerException::class);
+        $container->bind('foo', function (ContainerContract $container) {
+            throw new RuntimeException('Failed');
+        });
+        $container->get('foo');
     }
 
     public function test_provide_returns_callable_which_throws_parameters_away()
@@ -211,9 +230,9 @@ class IOCContainerTest extends \Ems\TestCase
 
         $container->share(ContainerTest_Interface::class, $factory);
 
-        $this->assertSame($concrete, $container->make(ContainerTest_Interface::class));
+        $this->assertSame($concrete, $container->get(ContainerTest_Interface::class));
         $this->assertCount(1, $factory);
-        $this->assertSame($concrete, $container->make(ContainerTest_Interface::class));
+        $this->assertSame($concrete, $container->get(ContainerTest_Interface::class));
         $this->assertCount(1, $factory);
     }
 
@@ -224,15 +243,15 @@ class IOCContainerTest extends \Ems\TestCase
         $concreteClass = ContainerTest_Class::class;
 
         $factory = new LoggingCallable(function () use ($concreteClass, $container) {
-            return $container->make($concreteClass);
+            return $container->get($concreteClass);
         });
 
         $container->share(ContainerTest_Interface::class, $factory);
 
-        $concrete = $container->make(ContainerTest_Interface::class);
+        $concrete = $container->get(ContainerTest_Interface::class);
         $this->assertInstanceOf($concreteClass, $concrete);
         $this->assertCount(1, $factory);
-        $this->assertSame($concrete, $container->make(ContainerTest_Interface::class));
+        $this->assertSame($concrete, $container->get(ContainerTest_Interface::class));
         $this->assertCount(1, $factory);
     }
 
@@ -247,9 +266,9 @@ class IOCContainerTest extends \Ems\TestCase
         });
         $container->share(ContainerTest_Class::class, $factory);
 
-        $this->assertInstanceOf($concreteClass, $container->make(ContainerTest_Class::class));
+        $this->assertInstanceOf($concreteClass, $container->get(ContainerTest_Class::class));
         $this->assertCount(1, $factory);
-        $this->assertInstanceOf($concreteClass, $container->make(ContainerTest_Class::class));
+        $this->assertInstanceOf($concreteClass, $container->get(ContainerTest_Class::class));
         $this->assertCount(1, $factory);
     }
 
@@ -262,10 +281,10 @@ class IOCContainerTest extends \Ems\TestCase
 
         $container->share($abstract, $concreteClass);
 
-        $object = $container->make(ContainerTest_Interface::class);
+        $object = $container->get(ContainerTest_Interface::class);
 
         $this->assertInstanceOf($concreteClass, $object);
-        $this->assertSame($object, $container->make(ContainerTest_Interface::class));
+        $this->assertSame($object, $container->get(ContainerTest_Interface::class));
 
     }
 
@@ -278,10 +297,10 @@ class IOCContainerTest extends \Ems\TestCase
 
         $container->share($concreteClass);
 
-        $object = $container->make(ContainerTest_Class::class);
+        $object = $container->get(ContainerTest_Class::class);
 
         $this->assertInstanceOf($concreteClass, $object);
-        $this->assertSame($object, $container->make(ContainerTest_Class::class));
+        $this->assertSame($object, $container->get(ContainerTest_Class::class));
 
     }
 
@@ -294,10 +313,10 @@ class IOCContainerTest extends \Ems\TestCase
 
         $container->share($concreteClass);
 
-        $object = $container->make(ContainerTest_Class::class);
+        $object = $container->get(ContainerTest_Class::class);
 
         $this->assertInstanceOf($concreteClass, $object);
-        $this->assertSame($object, $container->make(ContainerTest_Class::class));
+        $this->assertSame($object, $container->get(ContainerTest_Class::class));
 
     }
 
@@ -329,7 +348,7 @@ class IOCContainerTest extends \Ems\TestCase
         $this->assertSame($shared, $container('foo'));
         $this->assertSame($shared, $container('foo'));
 
-        $this->assertTrue($container->bound('foo'));
+        $this->assertTrue($container->has('foo'));
     }
 
     public function test_resolved_and_bound_returns_correct_values_on_bind()
@@ -558,9 +577,9 @@ class IOCContainerTest extends \Ems\TestCase
 
         $object = $container->create(ContainerTest_Class::class);
         $this->assertInstanceOf( ContainerTest_Class::class, $object);
-        $singleton = $container->make(ContainerTest_Class::class);
+        $singleton = $container->get(ContainerTest_Class::class);
         $this->assertNotSame($object, $singleton);
-        $this->assertSame($singleton, $container->make(ContainerTest_Class::class));
+        $this->assertSame($singleton, $container->get(ContainerTest_Class::class));
         $this->assertNotSame($object, $container->create(ContainerTest_Class::class));
     }
 
@@ -602,7 +621,7 @@ class IOCContainerTest extends \Ems\TestCase
 
         $container->instance(ContainerTest_Class::class, $object1);
 
-        $invoke = $container->make(ContainerTest_Class2::class);
+        $invoke = $container->get(ContainerTest_Class2::class);
 
         $this->assertSame([$object1], $container->call([$invoke, 'need']));
 
@@ -615,7 +634,7 @@ class IOCContainerTest extends \Ems\TestCase
 
         $container->instance(ContainerTest_Class::class, $object1);
 
-        $invoke = $container->make(ContainerTest_Class2::class);
+        $invoke = $container->get(ContainerTest_Class2::class);
 
         $this->assertSame([$object1, $object1], $container->call([$invoke, 'needDouble']));
 
@@ -630,7 +649,7 @@ class IOCContainerTest extends \Ems\TestCase
         $container->instance(ContainerTest_Class::class, $object1);
         $container->instance(ContainerTest_Interface::class, $object2);
 
-        $invoke = $container->make(ContainerTest_Class2::class);
+        $invoke = $container->get(ContainerTest_Class2::class);
 
         $result = $container->call([$invoke, 'needMany']);
         $this->assertCount(2, $result);
@@ -647,7 +666,7 @@ class IOCContainerTest extends \Ems\TestCase
 
         $container->instance(ContainerTest_Class::class, $object1);
 
-        $invoke = $container->make(ContainerTest_Class2::class);
+        $invoke = $container->get(ContainerTest_Class2::class);
 
         $this->assertSame([$object1, $parameter], $container->call([$invoke, 'needParameter'], [$parameter]));
 
@@ -664,7 +683,7 @@ class IOCContainerTest extends \Ems\TestCase
         $container->instance(ContainerTest_Class::class, $object1);
         $container->instance(ContainerTest_Interface::class, $object2);
 
-        $invoke = $container->make(ContainerTest_Class2::class);
+        $invoke = $container->get(ContainerTest_Class2::class);
 
         $awaitedArgs = [$object1, $parameter1, $object2, $parameter2];
         $this->assertSame($awaitedArgs, $container->call([$invoke, 'needManyParameters'], [$parameter1, $parameter2]));
@@ -682,7 +701,7 @@ class IOCContainerTest extends \Ems\TestCase
         $container->instance(ContainerTest_Class::class, $object1);
         $container->instance(ContainerTest_Interface::class, $object2);
 
-        $invoke = $container->make(ContainerTest_Class2::class);
+        $invoke = $container->get(ContainerTest_Class2::class);
 
         $awaitedArgs = [$parameter1, $object1, $parameter2, $object2];
         $this->assertSame($awaitedArgs, $container->call([$invoke, 'needManyParametersReversed'], [$parameter1, $parameter2]));
@@ -699,7 +718,7 @@ class IOCContainerTest extends \Ems\TestCase
         $container->instance(ContainerTest_Class::class, $object1);
         $container->instance(ContainerTest_Interface::class, $object2);
 
-        $invoke = $container->make(ContainerTest_Class2::class);
+        $invoke = $container->get(ContainerTest_Class2::class);
 
         $result = $container->call([$invoke, 'needMany'], ['object2' => $object3]);
         $this->assertCount(2, $result);

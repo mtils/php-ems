@@ -3,10 +3,14 @@
 namespace Ems\Core;
 
 use Ems\Contracts\Core\IOCContainer as ContainerContract;
+use Ems\Core\Exceptions\BindingNotFoundException;
+use Ems\Core\Exceptions\IOCContainerException;
 use Ems\Core\Support\IOCHelperMethods;
 use Ems\Core\Support\ResolvingListenerTrait;
+use Exception;
 use InvalidArgumentException;
-use OutOfBoundsException;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
@@ -57,27 +61,51 @@ class IOCContainer implements ContainerContract
      * @param string $abstract
      *
      * @return object
-     * @throws OutOfBoundsException
-     *
+     * @throws IOCContainerException
+     * @deprecated use self::get()
      */
     public function make(string $abstract)
     {
-        if (isset($this->sharedInstances[$abstract])) {
-            return $this->sharedInstances[$abstract];
+        return $this->get($abstract);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param string $id Identifier of the entry to look for.
+     *
+     * @return mixed Entry.
+     * @throws ContainerExceptionInterface Error while retrieving the entry.
+     *
+     * @throws NotFoundExceptionInterface  No entry was found for **this** identifier.
+     * @noinspection PhpMissingParamTypeInspection
+     */
+    public function get($id)
+    {
+        if (isset($this->sharedInstances[$id])) {
+            return $this->sharedInstances[$id];
         }
 
-        $bound = isset($this->bindings[$abstract]);
+        $bound = isset($this->bindings[$id]);
 
-        $concrete = $this->makeOrCreate($abstract);
-
-        if ($bound && $this->bindings[$abstract]['shared']) {
-            $this->sharedInstances[$abstract] = $concrete;
+        try {
+            $concrete = $this->makeOrCreate($id);
+        } catch (Exception $e) {
+            if (!$this->has($id)) {
+                throw new BindingNotFoundException("Binding $id not found");
+            }
+            throw new IOCContainerException("Error building $id", 0, $e);
         }
 
-        $this->resolvedAbstracts[$abstract] = true;
+        if ($bound && $this->bindings[$id]['shared']) {
+            $this->sharedInstances[$id] = $concrete;
+        }
+
+        $this->resolvedAbstracts[$id] = true;
 
         return $concrete;
     }
+
 
     /**
      * {@inheritDoc}
@@ -176,7 +204,7 @@ class IOCContainer implements ContainerContract
     {
         $this->sharedInstances[$abstract] = $instance;
 
-        // This will never be called, but makes resolved, bound etc. easier
+        // This will never be called, but makes resolved, has etc. easier
         $this->storeBinding($abstract, function () use ($instance) {
             return $instance;
         }, true);

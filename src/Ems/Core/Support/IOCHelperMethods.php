@@ -4,10 +4,7 @@ namespace Ems\Core\Support;
 
 use Ems\Contracts\Core\ContainerCallable;
 use Ems\Contracts\Core\IOCContainer;
-use Ems\Core\Exceptions\BindingNotFoundException;
 use OutOfBoundsException;
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\NotFoundExceptionInterface;
 
 trait IOCHelperMethods
 {
@@ -24,28 +21,9 @@ trait IOCHelperMethods
     public function __invoke($abstract, array $parameters = [])
     {
         if (!$parameters) {
-            return $this->make($abstract);
+            return $this->get($abstract);
         }
         return $this->create($abstract, $parameters);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @param string $id Identifier of the entry to look for.
-     *
-     * @return mixed Entry.
-     * @throws ContainerExceptionInterface Error while retrieving the entry.
-     *
-     * @throws NotFoundExceptionInterface  No entry was found for **this** identifier.
-     * @noinspection PhpMissingParamTypeInspection
-     */
-    public function get($id)
-    {
-        if (!$this->has($id)) {
-            throw new BindingNotFoundException("No factory for '$id' registered");
-        }
-        return $this->make($id);
     }
 
     /**

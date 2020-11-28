@@ -64,18 +64,6 @@ interface IOCContainer extends ContainerInterface
     public function __invoke($abstract, array $parameters = []);
 
     /**
-     * Make $abstract. If it is bound by a factory, otherwise try to build it
-     * and inject its dependencies.
-     *
-     * @param string $abstract
-     *
-     * @throws OutOfBoundsException
-     *
-     * @return object
-     **/
-    public function make(string $abstract);
-
-    /**
      * Create the object of class $abstract. Inject parameters that were not
      * passed in $parameters. If a binding remaps $abstract to a different
      * abstract use this. Pass $useExactClass to force to use exactly $abstract
