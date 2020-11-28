@@ -29,17 +29,17 @@ class CacheBootstrapper extends Bootstrapper
         parent::bind();
 
         // Binding the cache also to its own class name (without recursion)
-        $this->app->resolving(Cache::class, function (Cache $cache, $app) {
+        $this->app->on(Cache::class, function (Cache $cache, $app) {
             if (!$app->bound(Cache::class)) {
                 $app->instance(Cache::class, $cache);
             }
         });
 
-        $this->app->resolving(CategorizerChain::class, function (CategorizerChain $chain, $app) {
+        $this->app->on(CategorizerChain::class, function (CategorizerChain $chain, $app) {
             $this->addCategorizers($chain, $app);
         });
 
-        $this->app->resolving(Cacheable::class, function (Cacheable $cacheable, $app) {
+        $this->app->on(Cacheable::class, function (Cacheable $cacheable, $app) {
             $cacheable->setCache($app(CacheContract::class));
         });
     }

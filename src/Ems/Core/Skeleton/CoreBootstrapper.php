@@ -109,15 +109,15 @@ class CoreBootstrapper extends Bootstrapper
 
         $this->assignPathsToApp($this->app->get(Application::class));
 
-        $this->app->resolving(PathFinder::class, function ($paths) {
+        $this->app->on(PathFinder::class, function ($paths) {
             $this->assignBaseAppPaths($paths);
         });
 
-        $this->app->resolving(StringConverterChain::class, function ($chain) {
+        $this->app->on(StringConverterChain::class, function ($chain) {
             $this->addStringConverters($chain);
         });
 
-        $this->app->resolving(TextFormatter::class, function ($formatter, $app) {
+        $this->app->on(TextFormatter::class, function ($formatter, $app) {
             $formatter->setLocalizer($app('Ems\Contracts\Core\Localizer'));
         });
 
@@ -140,27 +140,27 @@ class CoreBootstrapper extends Bootstrapper
             return new Matcher($ioc(CheckerContract::class), $ioc(ExtractorContract::class));
         }, true);
 
-        $this->app->resolving(Formatter::class, function (Formatter $formatter, $app) {
+        $this->app->on(Formatter::class, function (Formatter $formatter, $app) {
             $formatter->setFormats($app('ems::locale-config'));
         });
 
-        $this->app->resolving(TextParserQueue::class, function ($queue, $app) {
+        $this->app->on(TextParserQueue::class, function ($queue, $app) {
             $queue->add($app(VariablesTextParser::class));
         });
 
-        $this->app->resolving(AnythingProvider::class, function ($provider, $app) {
+        $this->app->on(AnythingProvider::class, function ($provider, $app) {
             $provider->createObjectsWith($app);
         });
 
-        $this->app->resolving(SupportsCustomFactory::class, function ($object) {
+        $this->app->on(SupportsCustomFactory::class, function ($object) {
             $object->createObjectsBy($this->app);
         });
 
-        $this->app->resolving(HasInjectMethods::class, function (HasInjectMethods $object) {
+        $this->app->on(HasInjectMethods::class, function (HasInjectMethods $object) {
             $this->autoInjectDependendies($object);
         });
 
-        $this->app->resolving(ConnectionPoolContract::class, function (ConnectionPoolContract $pool) {
+        $this->app->on(ConnectionPoolContract::class, function (ConnectionPoolContract $pool) {
             /** @return void */
             $pool->extend('php', function (UrlContract $url) {
                 if ($url->scheme == 'php' || $url->scheme == 'file') {

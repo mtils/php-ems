@@ -30,7 +30,7 @@ class FoundationBootstrapper extends Bootstrapper
             return new PhpSearchEngine($ioc(Matcher::class), $ioc(Extractor::class));
         });
 
-        $this->app->resolving(InputNormalizerFactory::class, function (InputNormalizerFactory $factory) {
+        $this->app->on(InputNormalizerFactory::class, function (InputNormalizerFactory $factory) {
             // Assign a default extension to omit the "not-found-errors"
             $factory->extend('*', function () {});
         });

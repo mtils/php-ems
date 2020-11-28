@@ -20,7 +20,7 @@ class ViewBootstrapper extends Bootstrapper
             return new InputRendererFactory();
         }, true);
 
-        $this->app->afterResolving(InputHandler::class, function (InputHandler $handler) {
+        $this->app->onAfter(InputHandler::class, function (InputHandler $handler) {
             $collection = $handler->middleware();
             $collection->add('view-renderer', InputRendererFactory::class);
         });

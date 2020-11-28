@@ -97,10 +97,13 @@ trait IOCContainerProxyTrait
      * @param callable|string $listener
      *
      * @return IOCContainer
+     *
+     * @deprecated use self::on()
      **/
     public function resolving(string $abstract, $listener)
     {
-        return $this->container->resolving($abstract, $listener);
+        $this->container->on($abstract, $listener);
+        return $this;
     }
 
     /**
@@ -110,10 +113,13 @@ trait IOCContainerProxyTrait
      * @param callable|string $listener
      *
      * @return IOCContainer
+     *
+     * @deprecated use self::onAfter()
      **/
     public function afterResolving(string $abstract, $listener)
     {
-        return $this->container->afterResolving($abstract, $listener);
+        $this->container->onAfter($abstract, $listener);
+        return $this;
     }
 
     /**

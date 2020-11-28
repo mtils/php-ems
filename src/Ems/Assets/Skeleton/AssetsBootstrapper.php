@@ -31,31 +31,31 @@ class AssetsBootstrapper extends Bootstrapper
 
         $this->registerViewExtensions();
 
-        $this->app->resolving('Ems\Core\Support\RendererChain', function ($chain) {
+        $this->app->on('Ems\Core\Support\RendererChain', function ($chain) {
             $this->addRenderers($chain);
         });
 
-        $this->app->resolving('Ems\Contracts\Assets\Registry', function ($factory) {
+        $this->app->on('Ems\Contracts\Assets\Registry', function ($factory) {
             $this->registerPathMappings($factory);
         });
 
-        $this->app->resolving('Ems\Assets\Manager', function ($manager, $app) {
+        $this->app->on('Ems\Assets\Manager', function ($manager, $app) {
             $manager->setBuildConfigRepository($app('Ems\Contracts\Assets\BuildConfigRepository'));
         });
 
-        $this->app->afterResolving('Illuminate\Contracts\View\Factory', function ($factory, $app) {
+        $this->app->onAfter('Illuminate\Contracts\View\Factory', function ($factory, $app) {
              AssetsBladeDirectives::injectOriginalViewData($factory);
         });
 
-        $this->app->afterResolving('blade.compiler', function ($compiler, $app) {
+        $this->app->onAfter('blade.compiler', function ($compiler, $app) {
             $app('Ems\Assets\Laravel\AssetsBladeDirectives')->registerDirectives($compiler);
         });
 
-        $this->app->afterResolving('Illuminate\Contracts\Routing\Registrar', function ($router, $app) {
+        $this->app->onAfter('Illuminate\Contracts\Routing\Registrar', function ($router, $app) {
             $this->addRoutes($router);
         });
 
-        $this->app->resolving('Ems\Assets\Compiler', function ($compiler) {
+        $this->app->on('Ems\Assets\Compiler', function ($compiler) {
             $this->addInstalledParsers($compiler);
         });
 

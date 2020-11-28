@@ -42,11 +42,11 @@ class RoutingBootstrapper extends Bootstrapper
 
         });
 
-        $this->app->afterResolving(ConsoleDispatcher::class, function (ConsoleDispatcher $dispatcher) {
+        $this->app->onAfter(ConsoleDispatcher::class, function (ConsoleDispatcher $dispatcher) {
             $dispatcher->setFallbackCommand('commands');
         });
 
-        $this->app->afterResolving(InputHandler::class, function (InputHandler $handler) {
+        $this->app->onAfter(InputHandler::class, function (InputHandler $handler) {
             $this->addDefaultMiddleware($handler->middleware());
         });
 

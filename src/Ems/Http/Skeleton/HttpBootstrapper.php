@@ -30,7 +30,7 @@ class HttpBootstrapper extends Bootstrapper
     {
         parent::bind();
 
-        $this->app->afterResolving(ConnectionPool::class, function (ConnectionPool $pool) {
+        $this->app->onAfter(ConnectionPool::class, function (ConnectionPool $pool) {
 
             $pool->extend('http', function (Url $url) {
                 if ($url->scheme == 'http' || $url->scheme == 'https') {

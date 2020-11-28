@@ -47,7 +47,7 @@ class SkeletonBootstrapper extends Bootstrapper
             return $this->createLogger();
         }, true);
 
-        $this->app->afterResolving(ConnectionPool::class, function ($pool) {
+        $this->app->onAfter(ConnectionPool::class, function ($pool) {
             $this->addConnections($pool);
         });
 
@@ -141,7 +141,7 @@ class SkeletonBootstrapper extends Bootstrapper
             Benchmark::mark('Booted');
         });
 
-        $this->app->afterResolving(RoutedInputHandler::class, function (RoutedInputHandler $handler) {
+        $this->app->onAfter(RoutedInputHandler::class, function (RoutedInputHandler $handler) {
             $handler->onBefore('call', function () {
                 Benchmark::mark('Routed');
             });
