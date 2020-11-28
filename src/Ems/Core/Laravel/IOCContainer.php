@@ -7,8 +7,8 @@ use Ems\Contracts\Core\IOCContainer as ContainerContract;
 use Ems\Core\Exceptions\BindingNotFoundException;
 use Ems\Core\Exceptions\IOCContainerException;
 use Ems\Core\Exceptions\UnsupportedUsageException;
+use Ems\Core\Patterns\ListenerContainer;
 use Ems\Core\Support\IOCHelperMethods;
-use Ems\Core\Support\ResolvingListenerTrait;
 use Exception;
 use Illuminate\Container\Container as IlluminateContainer;
 use InvalidArgumentException;
@@ -23,7 +23,6 @@ use function is_string;
 
 class IOCContainer implements ContainerContract
 {
-    use ResolvingListenerTrait;
     use IOCHelperMethods;
 
     /**
@@ -32,11 +31,17 @@ class IOCContainer implements ContainerContract
     protected $laravel;
 
     /**
+     * @var ListenerContainer
+     */
+    protected $listeners;
+
+    /**
      * @param IlluminateContainer|null $laravel
      **/
     public function __construct(IlluminateContainer $laravel = null)
     {
         $this->laravel = $laravel ? $laravel : new IlluminateContainer();
+        $this->listeners = new ListenerContainer();
         $this->instance('Illuminate\Contracts\Container\Container', $this->laravel);
         $this->instance('Illuminate\Container\Container', $this->laravel);
         $this->instance(ContainerContract::class, $this);
@@ -139,7 +144,7 @@ class IOCContainer implements ContainerContract
     /**
      * {@inheritdoc}
      * Laravel doesnt call its listeners on instance(), this class
-     * emulates it for full compatiblity with the IOC interface.
+     * emulates it for full compatibility with the IOC interface.
      *
      * @param string $abstract
      * @param object $instance
@@ -149,7 +154,8 @@ class IOCContainer implements ContainerContract
     public function instance(string $abstract, $instance)
     {
         $this->laravel->instance($abstract, $instance);
-        $this->callAllListeners($abstract, $instance);
+
+        $this->listeners->callByInheritance($abstract, $instance, [$instance, $this], ListenerContainer::POSITIONS);
 
         return $this;
     }
@@ -167,8 +173,8 @@ class IOCContainer implements ContainerContract
     public function resolving(string $abstract, $listener)
     {
         $this->laravel->resolving($abstract, $this->buildResolvingCallable($listener));
-
-        return $this->storeResolvingListener($abstract, $listener);
+        $this->listeners->add($abstract, $listener, ListenerContainer::BEFORE);
+        return $this;
     }
 
     /**
@@ -184,8 +190,8 @@ class IOCContainer implements ContainerContract
     public function afterResolving(string $abstract, $listener)
     {
         $this->laravel->afterResolving($abstract, $this->buildResolvingCallable($listener));
-
-        return $this->storeAfterResolvingListener($abstract, $listener);
+        $this->listeners->add($abstract, $listener, ListenerContainer::AFTER);
+        return $this;
     }
 
     /**

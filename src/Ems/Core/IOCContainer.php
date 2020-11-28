@@ -5,8 +5,8 @@ namespace Ems\Core;
 use Ems\Contracts\Core\IOCContainer as ContainerContract;
 use Ems\Core\Exceptions\BindingNotFoundException;
 use Ems\Core\Exceptions\IOCContainerException;
+use Ems\Core\Patterns\ListenerContainer;
 use Ems\Core\Support\IOCHelperMethods;
-use Ems\Core\Support\ResolvingListenerTrait;
 use Exception;
 use InvalidArgumentException;
 use Psr\Container\ContainerExceptionInterface;
@@ -21,7 +21,6 @@ use function is_string;
 
 class IOCContainer implements ContainerContract
 {
-    use ResolvingListenerTrait;
     use IOCHelperMethods;
 
     /**
@@ -45,12 +44,18 @@ class IOCContainer implements ContainerContract
     protected $resolvedAbstracts = [];
 
     /**
+     * @var ListenerContainer
+     */
+    protected $listeners;
+
+    /**
      * @var array
      */
     protected static $reflectionClasses = [];
 
     public function __construct()
     {
+        $this->listeners = new ListenerContainer();
         $this->instance('Ems\Contracts\Core\IOCContainer', $this);
         $this->instance('Ems\Core\IOCContainer', $this);
     }
@@ -131,7 +136,9 @@ class IOCContainer implements ContainerContract
 
         /** @var ReflectionMethod $constructor */
         if (!$constructor = self::$reflectionClasses[$implementation]->getConstructor()) {
-            return $this->callAllListeners($abstract, new $implementation($parameters));
+            $concrete = new $implementation($parameters);
+            $this->listeners->callByInheritance($abstract, $concrete, [$concrete, $this], ListenerContainer::POSITIONS);
+            return $concrete;
         }
 
         $constructorParams = $constructor->getParameters();
@@ -174,7 +181,9 @@ class IOCContainer implements ContainerContract
 
         $object = self::$reflectionClasses[$implementation]->newInstanceArgs($callParams);
 
-        return $this->callAllListeners($abstract, $object);
+        $this->listeners->callByInheritance($abstract, $object, [$object, $this], ListenerContainer::POSITIONS);
+
+        return $object;
 
     }
 
@@ -209,7 +218,7 @@ class IOCContainer implements ContainerContract
             return $instance;
         }, true);
 
-        $this->callAllListeners($abstract, $instance);
+        $this->listeners->callByInheritance($abstract, $instance, [$instance, $this], ListenerContainer::POSITIONS);
 
         return $this;
     }
@@ -224,7 +233,8 @@ class IOCContainer implements ContainerContract
      **/
     public function resolving(string $abstract, $listener)
     {
-        return $this->storeResolvingListener($abstract, $listener);
+        $this->listeners->add($abstract, $listener, ListenerContainer::BEFORE);
+        return $this;
     }
 
     /**
@@ -237,7 +247,8 @@ class IOCContainer implements ContainerContract
      **/
     public function afterResolving(string $abstract, $listener)
     {
-        return $this->storeAfterResolvingListener($abstract, $listener);
+        $this->listeners->add($abstract, $listener, ListenerContainer::AFTER);
+        return $this;
     }
 
     /**
@@ -358,7 +369,8 @@ class IOCContainer implements ContainerContract
 
         $object = call_user_func($this->bindings[$abstract]['concrete'], $this);
 
-        return $this->callAllListeners($abstract, $object);
+        $this->listeners->callByInheritance($abstract, $object, [$object, $this], ListenerContainer::POSITIONS);
+        return $object;
     }
 
     /**
