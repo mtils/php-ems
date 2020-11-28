@@ -27,7 +27,7 @@ class Map
         }
 
         // Return false if array is empty
-        return isset($item) ? true : false;
+        return isset($item);
     }
 
     /**
