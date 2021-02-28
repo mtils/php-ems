@@ -15,6 +15,14 @@ use UnexpectedValueException;
 
 use function is_array;
 
+/**
+ * Class Config
+ *
+ * This is an orchestrating container class. Assign traversable objects to read
+ * configurations and callables to post process them.
+ *
+ * @package Ems\Config
+ */
 class Config implements ArrayAccess, IteratorAggregate
 {
     /**

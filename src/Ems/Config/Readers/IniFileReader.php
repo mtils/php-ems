@@ -16,6 +16,15 @@ use function strpos;
 
 use const INI_SCANNER_TYPED;
 
+/**
+ * Class IniFileReader
+ *
+ * A simple class to parse an ini file to an array.
+ * It expands nested section names if you want. Just put dots in your section
+ * name.
+ *
+ * @package Ems\Config\Readers
+ */
 class IniFileReader implements IteratorAggregate
 {
     /**
