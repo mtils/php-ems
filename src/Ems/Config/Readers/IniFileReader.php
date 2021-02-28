@@ -12,10 +12,7 @@ use RuntimeException;
 
 use function explode;
 use function parse_ini_file;
-
-use function print_r;
 use function strpos;
-use function trim;
 
 use const INI_SCANNER_TYPED;
 
@@ -39,7 +36,7 @@ class IniFileReader implements IteratorAggregate
     /**
      * @var bool
      */
-    private $expandNestedKeys = true;
+    private $expandNestedSections = true;
 
     public function __construct(string $path='', int $readMode=INI_SCANNER_TYPED, bool $processSections=true)
     {
@@ -103,25 +100,25 @@ class IniFileReader implements IteratorAggregate
     }
 
     /**
-     * Should nested keys by supported? If yes you can give keys dots and they
+     * Should nested sections by supported? If yes you can give keys dots and they
      * will be converted to multidimensional arrays.
      *
      * @return bool
      */
-    public function shouldExpandNestedKeys(): bool
+    public function shouldExpandNestedSections(): bool
     {
-        return $this->expandNestedKeys;
+        return $this->expandNestedSections;
     }
 
     /**
-     * @see @self::shouldExpandNestedKeys()
-     *
-     * @param bool $expandNestedKeys
+     * @param bool $expandNestedSections
      * @return IniFileReader
+     * @see @self::shouldExpandNestedSections()
+     *
      */
-    public function setExpandNestedKeys(bool $expandNestedKeys): IniFileReader
+    public function setExpandNestedSections(bool $expandNestedSections): IniFileReader
     {
-        $this->expandNestedKeys = $expandNestedKeys;
+        $this->expandNestedSections = $expandNestedSections;
         return $this;
     }
 
@@ -143,24 +140,23 @@ class IniFileReader implements IteratorAggregate
      */
     protected function parseIniFile(string $path) : array
     {
-        $result = parse_ini_file($path, $this->shouldProcessSections(), $this->getReadMode());
+        $result = @parse_ini_file($path, $this->shouldProcessSections(), $this->getReadMode());
         if ($result === false) {
             throw new RuntimeException("Ini file '$path' is not readable");
         }
-        return $this->expandNestedGroups($result, true);
-        if (!$this->shouldExpandNestedKeys()) {
+        if (!$this->shouldProcessSections() || !$this->shouldExpandNestedSections()) {
             return $result;
         }
-        return $this->expandNestedNames($result, $this->shouldProcessSections());
+        return $this->expandNestedSections($result);
     }
 
-    protected function expandNestedGroups(array $iniData, bool $processSections)
+    /**
+     * @param array $iniData
+     * @return array
+     */
+    protected function expandNestedSections(array $iniData)
     {
         $separator = '.';
-
-        if (!$processSections) {
-            $iniData = [$iniData];
-        }
 
         foreach ($iniData as $sectionKey => $section) {
 
@@ -180,51 +176,7 @@ class IniFileReader implements IteratorAggregate
             $node = $sectionData;
             unset($iniData[$sectionKey]);
         }
-        return $processSections ? $iniData : $iniData[0];
+        return $iniData;
     }
 
-    protected function expandNestedNames(array $iniData, bool $processSections)
-    {
-        $separator = '.';
-        $escapeChar = "'";
-
-        if (!$processSections) {
-            $iniData = [$iniData];
-        }
-
-        foreach ($iniData as $sectionKey => $section) {
-            // loop inside the section
-            foreach ($section as $key => $value) {
-
-                if (!strpos($key, $separator)) {
-                    continue;
-                }
-
-                // The key was escaped, we just remove the escape chars
-                if ($key[0] === $escapeChar) {
-                    $new_key = trim($key, $escapeChar);
-                    $iniData[$sectionKey][$new_key] = $value;
-                    unset($iniData[$sectionKey][$key]);
-                    continue;
-                }
-
-                // key has a escapeChar. Explode it, then parse each sub keys
-                // and set value at the right place thanks to references
-                $sub_keys = explode($separator, $key);
-                $subs =& $iniData[$sectionKey];
-                foreach ($sub_keys as $sub_key) {
-                    if (!isset($subs[$sub_key])) {
-                        $subs[$sub_key] = [];
-                    }
-                    $subs =& $subs[$sub_key];
-                }
-                // set the value at the right place
-                $subs = $value;
-                // unset the dotted key, we don't need it anymore
-                unset($iniData[$sectionKey][$key]);
-
-            }
-        }
-        return $processSections ? $iniData : $iniData[0];
-    }
 }
