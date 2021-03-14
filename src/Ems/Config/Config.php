@@ -9,6 +9,7 @@ namespace Ems\Config;
 use ArrayAccess;
 use ArrayIterator;
 use IteratorAggregate;
+use OverflowException;
 use Traversable;
 use UnderflowException;
 use UnexpectedValueException;
@@ -99,6 +100,7 @@ class Config implements ArrayAccess, IteratorAggregate
     public function appendSource($source, $name=null)
     {
         $this->sources[$name ?: $this->makeSourceName()] = $this->checkAndReturnSource($source);
+        $this->clearCompiled();
     }
 
     /**
@@ -119,6 +121,7 @@ class Config implements ArrayAccess, IteratorAggregate
         foreach ($copy as $name=>$source) {
             $this->sources[$name] = $source;
         }
+        $this->clearCompiled();
     }
 
     /**
@@ -139,6 +142,7 @@ class Config implements ArrayAccess, IteratorAggregate
      */
     public function appendPostProcessor(callable $processor)
     {
+        $this->clearCompiled();
         $this->postProcessors[] = $processor;
     }
 
@@ -150,6 +154,7 @@ class Config implements ArrayAccess, IteratorAggregate
      */
     public function prependPostProcessor(callable $processor)
     {
+        $this->clearCompiled();
         $copy = $this->postProcessors;
         $this->postProcessors = [$processor];
         foreach ($copy as $processor) {
@@ -212,7 +217,7 @@ class Config implements ArrayAccess, IteratorAggregate
                 return $name;
             }
         }
-        return '';
+        throw new OverflowException("Giving up after $i iterations to find an unused source name");
     }
 
     /**
