@@ -7,7 +7,9 @@ namespace Ems\Config;
 
 
 use ArrayAccess;
+use ArrayIterator;
 use Ems\Config\Exception\EnvFileException;
+use IteratorAggregate;
 use OutOfBoundsException;
 use RuntimeException;
 
@@ -37,7 +39,7 @@ use function stream_get_contents;
  *
  * @package Ems\Config
  */
-class Env implements ArrayAccess
+class Env implements ArrayAccess, IteratorAggregate
 {
     const NO_SECTION = 0;
     const QUOTED_SECTION = 1;
@@ -149,6 +151,24 @@ class Env implements ArrayAccess
         }
         $string = $this->getString($file);
         return $this->load(explode("\n", $string), $setter);
+    }
+
+    /**
+     * @return ArrayIterator
+     */
+    public function getIterator()
+    {
+        return new ArrayIterator($this->toArray());
+    }
+
+    /**
+     * @return array
+     */
+    public function toArray()
+    {
+        // We use the same order like in self::get()
+        $base = getenv();
+        return array_merge($base, $_SERVER, $_ENV);
     }
 
     /**

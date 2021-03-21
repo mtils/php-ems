@@ -11,17 +11,14 @@ use Closure;
 use Ems\Config\Exception\EnvFileException;
 use Ems\TestCase;
 use Ems\TestData;
-
-use Exception;
 use OutOfBoundsException;
+use Traversable;
 
 use function file_get_contents;
 use function fopen;
 use function getenv;
 use function key;
-use function print_r;
 use function putenv;
-use function var_dump;
 
 class EnvTest extends TestCase
 {
@@ -35,6 +32,7 @@ class EnvTest extends TestCase
         $instance = $this->make();
         $this->assertInstanceOf(Env::class, $instance);
         $this->assertInstanceOf(ArrayAccess::class, $instance);
+        $this->assertInstanceOf(Traversable::class, $instance);
     }
 
     /**
@@ -340,7 +338,51 @@ class EnvTest extends TestCase
         $this->assertFalse(isset($instance['bean']));
         $this->assertFalse(isset($_ENV['bean']));
 
+    }
 
+    /**
+     * @test
+     */
+    public function toArray_returns_all()
+    {
+        $instance = $this->make();
+        $file = $this->dataFile('config/simple.env');
+        $config = $instance->load($file);
+        $this->assertCount(9, $config);
+        $array = $instance->toArray();
+        $this->assertEquals('bar', $array['FOO']);
+        $this->assertEquals('with spaces', $array['SPACED']);
+        $this->assertEquals('a value with a # character', $array['QUOTED']);
+        $this->assertEquals('a value with a # character & a quote " character inside quotes', $array['QUOTESWITHQUOTEDCONTENT']);
+        $this->assertSame('', $array['EMPTY']);
+        $this->assertSame('', $array['EMPTY2']);
+        $this->assertSame('foo', $array['FOOO']);
+        $this->assertSame(true, $array['BOOLEAN']);
+        $this->assertSame('', $array['CNULL']);
+    }
+
+    /**
+     * @test
+     */
+    public function getIterator_iterates_over_values()
+    {
+        $instance = $this->make();
+        $file = $this->dataFile('config/simple.env');
+        $config = $instance->load($file);
+        $this->assertCount(9, $config);
+        $array = [];
+        foreach ($instance as $key=>$value) {
+            $array[$key] = $value;
+        }
+        $this->assertEquals('bar', $array['FOO']);
+        $this->assertEquals('with spaces', $array['SPACED']);
+        $this->assertEquals('a value with a # character', $array['QUOTED']);
+        $this->assertEquals('a value with a # character & a quote " character inside quotes', $array['QUOTESWITHQUOTEDCONTENT']);
+        $this->assertSame('', $array['EMPTY']);
+        $this->assertSame('', $array['EMPTY2']);
+        $this->assertSame('foo', $array['FOOO']);
+        $this->assertSame(true, $array['BOOLEAN']);
+        $this->assertSame('', $array['CNULL']);
     }
 
     protected function make()
