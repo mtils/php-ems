@@ -18,6 +18,8 @@ use Ems\Core\Support\IOCContainerProxyTrait;
 use LogicException;
 use Psr\Log\LoggerInterface;
 
+use Traversable;
+
 use function get_class;
 use function in_array;
 use function is_callable;
@@ -363,7 +365,7 @@ class Application implements ContainerContract, HasMethodHooks
             throw new UnsupportedUsageException('You can only set configuration before boot.');
         }
 
-        if (!is_array($key)) {
+        if (!is_array($key) && !$key instanceof Traversable && $value !== null) {
             $this->config[$key] = $value;
             return $this;
         }
