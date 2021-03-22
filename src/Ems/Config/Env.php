@@ -26,9 +26,12 @@ use function is_resource;
 use function is_string;
 use function mb_str_split;
 use function preg_match;
+use function preg_split;
 use function putenv;
 use function str_replace;
 use function stream_get_contents;
+
+use const PREG_SPLIT_NO_EMPTY;
 
 /**
  * Class Env
@@ -87,6 +90,11 @@ class Env implements ArrayAccess, IteratorAggregate
      * @var bool
      */
     protected static $settersInitialized = false;
+
+    /**
+     * @var bool
+     */
+    private $hideMbStrSplit=false;
 
     /**
      * Set environment variables by this setters.
@@ -413,7 +421,7 @@ class Env implements ArrayAccess, IteratorAggregate
      */
     protected function parseQuotedValue($value)
     {
-        $split = mb_str_split($value);
+        $split = $this->split($value);
         $data = array_reduce($split, function ($data, $char) use ($value) {
             switch ($data[1]) {
                 case self::NO_SECTION:
@@ -512,5 +520,17 @@ class Env implements ArrayAccess, IteratorAggregate
             return (float)$value;
         }
         return (int)$value;
+    }
+
+    /**
+     * @param $string
+     * @return array|false|string[]|null
+     */
+    protected function split($string)
+    {
+        if (function_exists('mb_str_split') && !$this->hideMbStrSplit) {
+            return mb_str_split($string);
+        }
+        return preg_split("//u", $string, -1, PREG_SPLIT_NO_EMPTY);
     }
 }

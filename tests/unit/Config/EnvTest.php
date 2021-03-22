@@ -11,6 +11,7 @@ use Closure;
 use Ems\Config\Exception\EnvFileException;
 use Ems\TestCase;
 use Ems\TestData;
+use Ems\Testing\Cheat;
 use OutOfBoundsException;
 use Traversable;
 
@@ -374,6 +375,28 @@ class EnvTest extends TestCase
         foreach ($instance as $key=>$value) {
             $array[$key] = $value;
         }
+        $this->assertEquals('bar', $array['FOO']);
+        $this->assertEquals('with spaces', $array['SPACED']);
+        $this->assertEquals('a value with a # character', $array['QUOTED']);
+        $this->assertEquals('a value with a # character & a quote " character inside quotes', $array['QUOTESWITHQUOTEDCONTENT']);
+        $this->assertSame('', $array['EMPTY']);
+        $this->assertSame('', $array['EMPTY2']);
+        $this->assertSame('foo', $array['FOOO']);
+        $this->assertSame(true, $array['BOOLEAN']);
+        $this->assertSame('', $array['CNULL']);
+    }
+
+    /**
+     * @test
+     */
+    public function split_without_mb_str_split()
+    {
+        $instance = $this->make();
+        Cheat::set($instance, 'hideMbStrSplit', true);
+        $file = $this->dataFile('config/simple.env');
+        $config = $instance->load($file);
+        $this->assertCount(9, $config);
+        $array = $instance->toArray();
         $this->assertEquals('bar', $array['FOO']);
         $this->assertEquals('with spaces', $array['SPACED']);
         $this->assertEquals('a value with a # character', $array['QUOTED']);
