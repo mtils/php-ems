@@ -3,13 +3,14 @@
 namespace Ems\Core\Support;
 
 use Ems\Contracts\Core\Renderer;
+use Ems\Contracts\Core\StringableTrait as StringableMethods;
 
 /**
  * @see \Ems\Contracts\Core\Renderable
  **/
 trait RenderableTrait
 {
-    use StringableTrait;
+    use StringableMethods;
 
     /**
      * @var \Ems\Contracts\Core\Renderer
@@ -42,7 +43,7 @@ trait RenderableTrait
 
     /**
      * Renders the result. Is just inside its own method to allow easy
-     * overwriding __toString().
+     * overwriting __toString().
      *
      * @return string
      **/

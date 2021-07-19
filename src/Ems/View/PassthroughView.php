@@ -26,6 +26,11 @@ class PassthroughView extends View
     protected $content;
 
     /**
+     * @var string
+     */
+    protected $contentVarName = 'content';
+
+    /**
      * Create a new view.
      *
      * @param string $name     (optional)
@@ -33,8 +38,29 @@ class PassthroughView extends View
      **/
     public function __construct($name = '', $content = '')
     {
-        $this->name = $name;
+        parent::__construct($name);
         $this->content = $content;
+    }
+
+    /**
+     *
+     * @return string
+     */
+    public function toString()
+    {
+        if (!$this->_renderer) {
+            return $this->content;
+        }
+
+        if (!$this->_renderer->canRender($this)) {
+            return '';
+        }
+
+        if (!isset($this->_attributes[$this->contentVarName])) {
+            $this->assign($this->contentVarName, $this->content);
+        }
+
+        return $this->_renderer->render($this);
     }
 
 }
