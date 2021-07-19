@@ -103,6 +103,25 @@ class ArgvInputTest extends TestCase
     }
 
     /**
+     * @test
+     */
+    public function it_assigns_options_as_query_parameters_on_get()
+    {
+        $tenant = '101';
+        $force = '';
+        $input = $this->make(['console', $tenant, '--force']);
+
+        $command = (new Command('users:index'))->argument('tenant')
+        ->option('force');
+        $input->setMatchedRoute((new Route('GET', 'users', ''))
+                                    ->command($command));
+
+        $this->assertTrue($input->get('force'));
+        $this->assertEquals($tenant, $input->get('tenant'));
+
+    }
+
+    /**
      * @param array $argv
      * @return ArgvInput
      */
