@@ -18,7 +18,7 @@ class JavascriptRenderer extends AbstractRenderer
      **/
     protected function renderExternal(Asset $asset, $group)
     {
-        return '<script '.$this->renderAttributes(['src' => $asset->uri()], $asset->attributes()).' "></script>';
+        return '<script '.$this->renderAttributes(['src' => $asset->uri()], $asset->attributes()).'></script>';
     }
 
     /**
