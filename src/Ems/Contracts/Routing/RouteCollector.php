@@ -194,7 +194,7 @@ class RouteCollector implements IteratorAggregate
      */
     protected function newRoute($method, $pattern, $handler)
     {
-        return new Route($method, $pattern, $handler);
+        return new Route($method, $pattern, $handler, $this);
     }
 
     /**
@@ -205,7 +205,7 @@ class RouteCollector implements IteratorAggregate
      */
     protected function newCommand($pattern, $description='')
     {
-        return new Command($pattern, $description);
+        return new Command($pattern, $description, $this);
     }
 
     protected function configureRouteByCommonAttributes(Route $route)

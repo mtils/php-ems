@@ -6,6 +6,7 @@
 namespace Ems\Contracts\Routing;
 
 
+use LogicException;
 use function array_values;
 use Ems\Contracts\Core\Arrayable;
 use Ems\Core\Support\ObjectReadAccess;
@@ -57,17 +58,24 @@ class Route implements Arrayable
     ];
 
     /**
+     * @var RouteCollector
+     */
+    protected $collector;
+
+    /**
      * RouteConfiguration constructor.
      *
      * @param string|array $method
      * @param string       $pattern
      * @param mixed        $handler
+     * @param RouteCollector|null $collector
      */
-    public function __construct($method, $pattern, $handler)
+    public function __construct($method, $pattern, $handler, RouteCollector $collector=null)
     {
         $this->setMethod($method);
         $this->setPattern($pattern);
         $this->setHandler($handler);
+        $this->collector = $collector;
     }
 
     /**
@@ -155,16 +163,30 @@ class Route implements Arrayable
     }
 
     /**
-     * Associate a console command with this route.
+     * Associate a console command with this route. Pass a string to register
+     * a new command pointing to the same handler.
+     * This will create a second route because the command as another pattern.
      *
-     * @param Command $command
+     * @param Command|string $command
+     * @param string $description (optional)
      *
-     * @return $this
+     * @return Command
      */
-    public function command(Command $command)
+    public function command($command, $description='')
     {
-        $this->_properties['command'] = $command;
-        return $this;
+        if ($command instanceof Command) {
+            $this->_properties['command'] = $command;
+            if ($this->pattern) {
+                $command->setRoute($this->pattern, $this);
+            }
+            return $command;
+        }
+
+        if (!$this->collector) {
+            throw new LogicException("No collector assigned to this route to register a new command.");
+        }
+
+        return $this->collector->command($command, $this->handler, $description);
     }
 
     /**

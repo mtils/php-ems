@@ -30,8 +30,9 @@ class ArgvInputTest extends TestCase
         $input = $this->make(['console', $tenant]);
 
         $command = (new Command('users:index'))->argument('tenant');
-        $input->setMatchedRoute((new Route('GET', 'users', ''))
-                                    ->command($command));
+        $route = new Route('GET', 'users', '');
+        $route->command($command);
+        $input->setMatchedRoute($route);
 
         $this->assertEquals($tenant, $input->get('tenant'));
 
@@ -46,8 +47,9 @@ class ArgvInputTest extends TestCase
         $input = $this->make(['console', $tenant]);
 
         $command = (new Command('users:index'))->argument('tenant');
-        $input->setMatchedRoute((new Route('GET', 'users', ''))
-                                    ->command($command));
+        $route = new Route('GET', 'users', '');
+        $route->command($command);
+        $input->setMatchedRoute($route);
 
         $this->assertEquals($tenant, $input->getOrFail('tenant'));
 
@@ -62,8 +64,9 @@ class ArgvInputTest extends TestCase
         $input = $this->make(['console', $tenant]);
 
         $command = (new Command('users:index'))->argument('tenant');
-        $input->setMatchedRoute((new Route('GET', 'users', ''))
-                                    ->command($command));
+        $route = new Route('GET', 'users', '');
+        $route->command($command);
+        $input->setMatchedRoute($route);
 
         $this->assertTrue($input->offsetExists('tenant'));
         $this->assertFalse($input->offsetExists('foo'));
@@ -79,8 +82,9 @@ class ArgvInputTest extends TestCase
         $input = $this->make(['console', $tenant]);
 
         $command = (new Command('users:index'))->argument('tenant');
-        $input->setMatchedRoute((new Route('GET', 'users', ''))
-                                    ->command($command));
+        $route = new Route('GET', 'users', '');
+        $route->command($command);
+        $input->setMatchedRoute($route);
 
         $this->assertEquals($tenant, $input['tenant']);
 
@@ -95,8 +99,9 @@ class ArgvInputTest extends TestCase
         $input = $this->make(['console', $tenant]);
 
         $command = (new Command('users:index'))->argument('tenant');
-        $input->setMatchedRoute((new Route('GET', 'users', ''))
-                                    ->command($command));
+        $route = new Route('GET', 'users', '');
+        $route->command($command);
+        $input->setMatchedRoute($route);
 
         $inputData = $input->toArray();
         $this->assertEquals($tenant, $inputData['tenant']);
@@ -113,8 +118,9 @@ class ArgvInputTest extends TestCase
 
         $command = (new Command('users:index'))->argument('tenant')
         ->option('force');
-        $input->setMatchedRoute((new Route('GET', 'users', ''))
-                                    ->command($command));
+        $route = new Route('GET', 'users', '');
+        $route->command($command);
+        $input->setMatchedRoute($route);
 
         $this->assertTrue($input->get('force'));
         $this->assertEquals($tenant, $input->get('tenant'));

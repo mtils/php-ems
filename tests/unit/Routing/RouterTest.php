@@ -22,6 +22,8 @@ use Ems\Core\Url;
 use Ems\RoutingTrait;
 use Ems\TestCase;
 use ReflectionException;
+use LogicException;
+
 use function array_values;
 use function func_get_args;
 use function implode;
@@ -937,7 +939,151 @@ class RouterTest extends TestCase
 
 
     }
-        protected function make($filled=false)
+
+    /**
+     * @test
+     * @throws ReflectionException
+     */
+    public function it_fails_when_registers_command_and_route_in_one_call_without_collector()
+    {
+        $command = new Command('addresses:index', 'AddressController::index');
+        $this->expectException(LogicException::class);
+        $command->get('addresses');
+    }
+
+    /**
+     * @test
+     * @throws ReflectionException
+     */
+    public function it_registers_command_and_route_in_one_call()
+    {
+
+        $router = $this->make();
+
+        $router->register(function (RouteCollector $collector) {
+
+            $collector->command('addresses:index', 'AddressController::index', 'List addresses')
+                ->get('addresses')
+                ->name('addresses.index')
+                ->scope('default', 'admin')
+                ->clientType('web', 'api')
+                ->middleware('auth');
+        });
+
+        $routes = iterator_to_array($router);
+
+        $this->assertCount(2, $routes);
+
+        $routable = $this->routable('addresses');
+        $this->assertFalse($routable->isRouted());
+        $router->route($routable);
+
+        $this->assertEquals(Routable::CLIENT_WEB, $routable->clientType());
+        $this->assertEquals('GET', $routable->method());
+        $this->assertEquals('default', (string)$routable->routeScope());
+        $this->assertInstanceOf(RouteScope::class, $routable->routeScope());
+        $this->assertInstanceOf(UrlContract::class, $routable->url());
+        $this->assertEquals('addresses', (string)$routable->url());
+        $this->assertEquals([], $routable->routeParameters());
+
+        $route = $routable->matchedRoute();
+
+        $this->assertEquals('AddressController::index', $route->handler);
+        $this->assertEquals('addresses.index', $route->name);
+        $this->assertEquals([], $route->defaults);
+        $this->assertEquals(['GET'], $route->methods);
+        $this->assertEquals(['web', 'api'], $route->clientTypes);
+        $this->assertEquals(['auth'], $route->middlewares);
+        $this->assertEquals(['default', 'admin'], $route->scopes);
+        $this->assertEquals('addresses', $route->pattern);
+        $this->assertTrue($routable->isRouted());
+        $this->assertTrue(is_callable($routable->getHandler()));
+
+
+        $routable = $this->routable('console:addresses:index', Routable::CONSOLE, Routable::CLIENT_CONSOLE);
+
+        $this->assertFalse($routable->isRouted());
+        $router->route($routable);
+
+        $route = $routable->matchedRoute();
+
+        $this->assertEquals('AddressController::index', $route->handler);
+        $this->assertEquals('addresses:index', $route->pattern);
+        $this->assertEquals('addresses:index', $route->name);
+        $this->assertEquals([], $route->defaults);
+        $this->assertEquals([Routable::CONSOLE], $route->methods);
+        $this->assertEquals([Routable::CLIENT_CONSOLE], $route->clientTypes);
+        $this->assertTrue($routable->isRouted());
+
+    }
+
+    /**
+     * @test
+     * @throws ReflectionException
+     */
+    public function it_registers_route_and_command_in_one_call()
+    {
+
+        $router = $this->make();
+
+        $router->register(function (RouteCollector $collector) {
+
+            $collector->get('addresses', 'AddressController::index')
+                ->name('addresses.index')
+                ->scope('default', 'admin')
+                ->clientType('web', 'api')
+                ->middleware('auth')
+                ->command('addresses:index');
+        });
+
+        $routes = iterator_to_array($router);
+
+        $this->assertCount(2, $routes);
+
+        $routable = $this->routable('addresses');
+        $this->assertFalse($routable->isRouted());
+        $router->route($routable);
+
+        $this->assertEquals(Routable::CLIENT_WEB, $routable->clientType());
+        $this->assertEquals('GET', $routable->method());
+        $this->assertEquals('default', (string)$routable->routeScope());
+        $this->assertInstanceOf(RouteScope::class, $routable->routeScope());
+        $this->assertInstanceOf(UrlContract::class, $routable->url());
+        $this->assertEquals('addresses', (string)$routable->url());
+        $this->assertEquals([], $routable->routeParameters());
+
+        $route = $routable->matchedRoute();
+
+        $this->assertEquals('AddressController::index', $route->handler);
+        $this->assertEquals('addresses.index', $route->name);
+        $this->assertEquals([], $route->defaults);
+        $this->assertEquals(['GET'], $route->methods);
+        $this->assertEquals(['web', 'api'], $route->clientTypes);
+        $this->assertEquals(['auth'], $route->middlewares);
+        $this->assertEquals(['default', 'admin'], $route->scopes);
+        $this->assertEquals('addresses', $route->pattern);
+        $this->assertTrue($routable->isRouted());
+        $this->assertTrue(is_callable($routable->getHandler()));
+
+
+        $routable = $this->routable('console:addresses:index', Routable::CONSOLE, Routable::CLIENT_CONSOLE);
+
+        $this->assertFalse($routable->isRouted());
+        $router->route($routable);
+
+        $route = $routable->matchedRoute();
+
+        $this->assertEquals('AddressController::index', $route->handler);
+        $this->assertEquals('addresses:index', $route->pattern);
+        $this->assertEquals('addresses:index', $route->name);
+        $this->assertEquals([], $route->defaults);
+        $this->assertEquals([Routable::CONSOLE], $route->methods);
+        $this->assertEquals([Routable::CLIENT_CONSOLE], $route->clientTypes);
+        $this->assertTrue($routable->isRouted());
+
+    }
+
+    protected function make($filled=false)
     {
         $router = new Router();
         if ($filled) {

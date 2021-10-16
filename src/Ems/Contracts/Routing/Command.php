@@ -10,6 +10,8 @@ use Ems\Contracts\Core\Arrayable;
 use Ems\Contracts\Core\Map;
 use Ems\Core\Helper;
 use Ems\Core\Support\ObjectReadAccess;
+use LogicException;
+
 use function explode;
 use function is_array;
 use function substr;
@@ -27,10 +29,10 @@ use function trim;
  * write access.
  *
  * @property-read string     pattern The pattern/uri/name like import:run or migrate:status
- * @property-read mixed      handler The assigned (whatever) handler
  * @property-read Argument[] arguments The console arguments (./console config:get $argument1 $argument2)
  * @property-read Option[]   options The console options (./console assets:copy --option1 --option2=value
  * @property-read string     description
+ * @property-read Route[]    routes An array of associated routes indexed by its patterns
  *
  * @package Ems\Contracts\Routing
  */
@@ -39,13 +41,19 @@ class Command implements Arrayable
     use ObjectReadAccess;
 
     /**
+     * @var RouteCollector $routeCollector
+     */
+    protected $routeCollector;
+
+    /**
      * @var array
      */
     protected $_properties = [
         'pattern'      => '',
-        'arguments'   => [],
-        'options'   => [],
+        'arguments'    => [],
+        'options'      => [],
         'description'  => '',
+        'routes'       => []
     ];
 
     /**
@@ -53,12 +61,13 @@ class Command implements Arrayable
      *
      * @param string $pattern
      * @param string $description
+     * @param RouteCollector|null $routeCollector
      */
-    public function __construct($pattern, $description='')
+    public function __construct($pattern, $description='', RouteCollector $routeCollector=null)
     {
         $this->setPattern($pattern);
         $this->description($description);
-
+        $this->routeCollector = $routeCollector;
     }
 
     /**
@@ -158,6 +167,18 @@ class Command implements Arrayable
     }
 
     /**
+     * @param string $pattern
+     * @param Route $route
+     *
+     * @return $this
+     */
+    public function setRoute($pattern, Route $route)
+    {
+        $this->_properties['routes'][$pattern] = $route;
+        return $this;
+    }
+
+    /**
      * This is a performance related method. In this method
      * you should implement the fastest was to get every
      * key and value as an array.
@@ -169,6 +190,100 @@ class Command implements Arrayable
     public function toArray()
     {
         return $this->_properties;
+    }
+
+    /**
+     * Register a _new_ GET route to the collector using the same handler.
+     *
+     * @param string $pattern
+     *
+     * @return Route
+     */
+    public function get($pattern)
+    {
+        return $this->on(Routable::GET, $pattern);
+    }
+
+    /**
+     * Register a _new_ POST route to the collector using the same handler.
+     *
+     * @param string $pattern
+     *
+     * @return Route
+     */
+    public function post($pattern)
+    {
+        return $this->on(Routable::POST, $pattern);
+    }
+
+    /**
+     * Register a _new_ PUT route to the collector and using the same handler.
+     *
+     * @param string $pattern
+     *
+     * @return Route
+     */
+    public function put($pattern)
+    {
+        return $this->on(Routable::PUT, $pattern);
+    }
+
+    /**
+     * Register a _new_ DELETE route to the collector using the same handler.
+     *
+     * @param string $pattern
+     *
+     * @return Route
+     */
+    public function delete($pattern)
+    {
+        return $this->on(Routable::DELETE, $pattern);
+    }
+
+    /**
+     * Register a _new_ PATCH route to the collector and using the same handler.
+     *
+     * @param string $pattern
+     *
+     * @return Route
+     */
+    public function patch($pattern)
+    {
+        return $this->on(Routable::PATCH, $pattern);
+    }
+
+    /**
+     * Register a _new_ OPTIONS route to the collector using the same handler.
+     *
+     * @param string $pattern
+     *
+     * @return Route
+     */
+    public function options($pattern)
+    {
+        return $this->on(Routable::OPTIONS, $pattern);
+    }
+
+    /**
+     * Register a NEW route for the given $method using the same handler.
+     * Routable has one pattern, so if you add a route for a command you have
+     * two routes, one with the command string as its pattern and one with the
+     * route path.
+     *
+     * @param string|string[] $method
+     * @param string $pattern
+     *
+     * @return Route
+     */
+    public function on($method, $pattern)
+    {
+        if (!$this->routeCollector) {
+            throw new LogicException('No routeCreator was assigned to create a route in this command');
+        }
+        if (!isset($this->_properties['routes'][$this->pattern])) {
+            throw new LogicException("The route was not assigned to find the handler.");
+        }
+        return $this->routeCollector->on($method, $pattern, $this->_properties['routes'][$this->pattern]->handler);
     }
 
     /**
