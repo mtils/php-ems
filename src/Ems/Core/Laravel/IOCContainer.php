@@ -74,7 +74,7 @@ class IOCContainer implements ContainerContract
      * @throws NotFoundExceptionInterface  No entry was found for **this** identifier.
      * @noinspection PhpMissingParamTypeInspection
      */
-    public function get($id)
+    public function get(string $id)
     {
         try {
             return $this->laravel->make($id);
@@ -233,7 +233,7 @@ class IOCContainer implements ContainerContract
      *
      * @return bool
      */
-    public function has($id)
+    public function has(string $id) : bool
     {
         return $this->laravel->bound($id);
     }

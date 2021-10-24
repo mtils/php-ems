@@ -86,7 +86,7 @@ class IOCContainer implements ContainerContract
      * @throws NotFoundExceptionInterface  No entry was found for **this** identifier.
      * @noinspection PhpMissingParamTypeInspection
      */
-    public function get($id)
+    public function get(string $id)
     {
         if (isset($this->sharedInstances[$id])) {
             return $this->sharedInstances[$id];
@@ -230,9 +230,8 @@ class IOCContainer implements ContainerContract
      * @param string $id Identifier of the entry to look for.
      *
      * @return bool
-     * @noinspection PhpMissingParamTypeInspection
      */
-    public function has($id)
+    public function has(string $id): bool
     {
         return isset($this->bindings[$id]);
     }

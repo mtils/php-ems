@@ -44,7 +44,7 @@ trait IOCContainerProxyTrait
      * @throws NotFoundExceptionInterface  No entry was found for **this** identifier.
      * @noinspection PhpMissingParamTypeInspection
      */
-    public function get($id)
+    public function get(string $id)
     {
         return $this->container->get($id);
     }
@@ -130,7 +130,7 @@ trait IOCContainerProxyTrait
      * @return bool
      * @noinspection PhpMissingParamTypeInspection
      */
-    public function has($abstract)
+    public function has(string $abstract) :  bool
     {
         return $this->container->has($abstract);
     }
