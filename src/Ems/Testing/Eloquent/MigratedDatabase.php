@@ -144,12 +144,18 @@ trait MigratedDatabase
         $app = new Container();
         $app->instance('db', Model::getConnectionResolver());
 
+        $app->bind('db.schema', function () use ($app) {
+            return $app->make('db')->connection()->getSchemaBuilder();
+        });
+
+
         if (!class_exists('Schema')) {
             class_alias('Illuminate\Support\Facades\Schema', 'Schema');
         }
         if (!class_exists('DB')) {
             class_alias('Illuminate\Support\Facades\DB', 'DB');
         }
+
 
         Schema::setFacadeApplication($app);
 
