@@ -7,6 +7,9 @@ use Ems\Contracts\Core\Multilingual;
 use Illuminate\Translation\Translator;
 use Illuminate\Translation\LoaderInterface;
 use Illuminate\Translation\ArrayLoader;
+use Illuminate\Contracts\Translation\Loader;
+
+use function class_exists;
 
 class TranslatorTextProviderTest extends \Ems\TestCase
 {
@@ -111,7 +114,8 @@ class TranslatorTextProviderTest extends \Ems\TestCase
 
     protected function newTranslator($messages=null)
     {
-        $loader = $messages instanceof LoaderInterface ? $messages : $this->newLoader($messages);
+        $interface = class_exists(LoaderInterface::class) ? LoaderInterface::class : Loader::class;
+        $loader = $messages instanceof $interface ? $messages : $this->newLoader($messages);
         return new Translator($loader, 'en');
     }
 
