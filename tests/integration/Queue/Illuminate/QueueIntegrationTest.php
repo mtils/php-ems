@@ -9,6 +9,7 @@ use Ems\Core\Application;
 use Ems\Contracts\Queue\Queue;
 use Ems\LaravelIntegrationTest;
 use Illuminate\Queue\QueueServiceProvider;
+use Illuminate\Config\Repository as ConfigRepository;
 use function func_get_args;
 
 class QueueIntegrationTest extends LaravelIntegrationTest
@@ -60,13 +61,16 @@ class QueueIntegrationTest extends LaravelIntegrationTest
 
     protected function bootApplication(Application $app)
     {
+        $laravel = $app->getContainer()->laravel();
+        $config = new ConfigRepository([
+                                           'app.key' => 'asduh3987d3qiuhsakud7879uh',
+                                           'queue.default' => 'sync',
+                                           'queue.connections.sync' => [
+                                               'driver' => 'sync'
+                                           ]
+                                       ]);
+        $laravel->instance('config', $config, true);
         parent::bootApplication($app);
-        $app->getContainer()->laravel()->instance('config', [
-            'queue.default' => 'sync',
-            'queue.connections.sync' => [
-                'driver' => 'sync'
-            ]
-        ], true);
     }
 }
 
