@@ -2,6 +2,7 @@
 
 namespace Ems\Model\Eloquent;
 
+use Ems\Core\Helper;
 use InvalidArgumentException;
 use Ems\Contracts\Core\Identifiable;
 use Ems\Contracts\Model\ExtendableRepository;
@@ -272,7 +273,7 @@ class Repository implements ExtendableRepository
                 return !is_scalar($value);
             }
 
-            if (ends_with($key, '_id') && trim($value) === '') {
+            if (Helper::endsWith($key, '_id') && trim($value) === '') {
                 return false;
             }
 

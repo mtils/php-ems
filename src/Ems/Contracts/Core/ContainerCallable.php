@@ -68,11 +68,7 @@ class ContainerCallable
             return $instance;
         }
 
-        if ($this->useAppCall) {
-            return $this->container->call([$instance, $this->method], $args);
-        }
-
-        return $instance->{$this->method}(...$args);
+        return $this->callMethod($instance, $args);
     }
 
     /**
@@ -173,4 +169,17 @@ class ContainerCallable
         return $this;
     }
 
+    /**
+     * @param object $instance
+     * @param array $args (optional)
+     *
+     * @return mixed
+     */
+    protected function callMethod($instance, array $args=[])
+    {
+        if ($this->useAppCall) {
+            return $this->container->call([$instance, $this->method], $args);
+        }
+        return $instance->{$this->method}(...$args);
+    }
 }

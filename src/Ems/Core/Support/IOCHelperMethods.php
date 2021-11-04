@@ -5,18 +5,19 @@ namespace Ems\Core\Support;
 use Ems\Contracts\Core\ContainerCallable;
 use Ems\Contracts\Core\IOCContainer;
 use OutOfBoundsException;
+use ReflectionException;
 
 trait IOCHelperMethods
 {
     /**
-     * @see IOCContainer::__invoke()
-     *
      * @param string $abstract
      * @param array $parameters (optional)
      *
      * @return object
      *
-     * @throws OutOfBoundsException
+     * @throws OutOfBoundsException|ReflectionException
+     * @see IOCContainer::__invoke()
+     *
      */
     public function __invoke($abstract, array $parameters = [])
     {

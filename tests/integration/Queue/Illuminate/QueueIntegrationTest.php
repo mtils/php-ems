@@ -78,7 +78,7 @@ class QueueIntegrationTest_Job
 {
     public static $receivedArgs = [];
 
-    public function run()
+    public function run($greeting, $char)
     {
         static::$receivedArgs = func_get_args();
     }

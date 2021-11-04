@@ -3,10 +3,12 @@
 namespace Ems\Core\Laravel;
 
 use Closure;
+use Ems\Contracts\Core\ContainerCallable;
 use Ems\Contracts\Core\IOCContainer as ContainerContract;
 use Ems\Core\Exceptions\BindingNotFoundException;
 use Ems\Core\Exceptions\IOCContainerException;
 use Ems\Core\Exceptions\UnsupportedUsageException;
+use Ems\Core\Lambda;
 use Ems\Core\Patterns\ListenerContainer;
 use Ems\Core\Support\IOCHelperMethods;
 use Exception;
@@ -273,7 +275,22 @@ class IOCContainer implements ContainerContract
      **/
     public function call(callable $callback, array $parameters = [])
     {
-        return $this->laravel->call($callback, $parameters);
+        // Seems to be not indexed or empty parameters
+        if (!isset($parameters[0])) {
+            return $this->laravel->call($callback, $parameters);
+        }
+        $argReflection = Lambda::reflect($callback);
+        $namedArgs = [];
+        $i=0;
+        foreach ($argReflection as $argumentName=>$info) {
+            if ($info['type'] && $this->laravel->bound($info['type'])) {
+                continue;
+            }
+            $namedArgs[$argumentName] = $parameters[$i];
+            $i++;
+        }
+        return $this->laravel->call($callback, $namedArgs);
+
     }
 
     /**

@@ -4,13 +4,17 @@
 namespace Ems\Model\Eloquent;
 
 use DateTime;
-use InvalidArgumentException;
 use Ems\Contracts\Core\Identifiable;
 use Ems\Contracts\Model\HookableRepository as HookableRepositoryContract;
+use Ems\Core\Helper;
 use Ems\Core\Patterns\HookableTrait;
 use Ems\Testing\Cheat;
-use Illuminate\Database\Eloquent\Model as EloquentModel;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model as EloquentModel;
+use InvalidArgumentException;
+
+use function in_array;
+use function is_scalar;
 
 class HookableRepository implements HookableRepositoryContract
 {
@@ -267,7 +271,24 @@ class HookableRepository implements HookableRepositoryContract
      **/
     protected function performFill(EloquentModel $model, array $attributes)
     {
-        $model->fill($attributes);
+        // Since laravel 6.x json is not fillable anymore...
+        $isTotallyGuarded = $model->totallyGuarded();
+        $guarded = $model->getGuarded();
+        $dataForFill = [];
+        $dataForSet = [];
+        foreach ($attributes as $key=>$value) {
+            if (is_scalar($value) || $value === null) {
+                $dataForFill[$key] = $value;
+                continue;
+            }
+            if (!$isTotallyGuarded && !in_array($key, $guarded)) {
+                $dataForSet[$key] = $value;
+            }
+        }
+        $model->fill($dataForFill);
+        foreach ($dataForSet as $key=>$value) {
+            $model->setAttribute($key, $value);
+        }
     }
 
     /**
@@ -354,7 +375,7 @@ class HookableRepository implements HookableRepositoryContract
                 return !is_scalar($value);
             }
 
-            if (ends_with($key, '_id') && trim($value) === '') {
+            if (Helper::endsWith($key, '_id') && trim($value) === '') {
                 return false;
             }
 

@@ -7,6 +7,8 @@ use Ems\Contracts\Model\HookableRepository as HookableRepositoryContract;
 use Ems\Testing\Eloquent\MigratedDatabase;
 use Ems\Core\NamedObject;
 
+use function get_class;
+
 class HookableRepositoryTest extends \Ems\TestCase
 {
     use MigratedDatabase;
@@ -236,6 +238,7 @@ class HookableRepositoryTest extends \Ems\TestCase
             'permissions' => ['cms.access'=>1]
         ];
 
+        /** @var Model $model */
         $model = $repo->make($attributes);
 
         foreach ($attributes as $key=>$value) {
