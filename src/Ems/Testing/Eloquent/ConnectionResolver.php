@@ -3,6 +3,7 @@
 
 namespace Ems\Testing\Eloquent;
 
+use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\ConnectionResolverInterface;
 use Illuminate\Database\Connection;
 
@@ -49,12 +50,12 @@ class ConnectionResolver implements ConnectionResolverInterface
     /**
     * Get a database connection instance.
     *
-    * @param Connection $connection
-    * @param string     $name (optional)
+    * @param ConnectionInterface $connection
+    * @param string|null         $name (optional)
     *
     * @return self
     */
-    public function setConnection(Connection $connection, $name=null)
+    public function setConnection(ConnectionInterface $connection, $name=null)
     {
         $this->connections[$name ?: $this->defaultConnectionName] = $connection;
         return $this;

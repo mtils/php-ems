@@ -2,14 +2,13 @@
 
 namespace Ems\Testing\Eloquent;
 
-use Ems\Core\LocalFilesystem;
+use Illuminate\Container\Container;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Migrations\DatabaseMigrationRepository;
 use Illuminate\Database\Migrations\Migrator;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Container\Container;
 
 trait MigratedDatabase
 {
@@ -156,11 +155,13 @@ trait MigratedDatabase
             class_alias('Illuminate\Support\Facades\DB', 'DB');
         }
 
-
+        Schema::clearResolvedInstance('db.schema');
         Schema::setFacadeApplication($app);
 
+        DB::clearResolvedInstance('db');
         DB::setFacadeApplication($app);
 
     }
+
 
 }
