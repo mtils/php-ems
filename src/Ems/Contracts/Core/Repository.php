@@ -14,6 +14,10 @@ namespace Ems\Contracts\Core;
  * It also must do some basic casting/checking if the data is valid before
  * saving it.
  *
+ * Write your own repository interfaces. You can use this interfaces here as
+ * examples or inside EMS specific classes.
+ * But write every repository from scratch. Nowadays, I would not even write a
+ * base repository and see every storable object repository at its own.
  *
  **/
 interface Repository extends Provider

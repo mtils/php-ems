@@ -11,12 +11,16 @@ use Ems\Contracts\Core\Identifiable;
 use Ems\Contracts\Core\ObjectDataAdapter;
 use Ems\Contracts\Core\Repository;
 use Ems\Core\Exceptions\ResourceNotFoundException;
-
 /**
  * Class GenericRepository
  *
  * This class is just a sample how to build you own repository implementations
  * with the ems base classes.
+ *
+ * This class also shows to drawbacks of reusing repository interfaces. Everything
+ * has to be Identifiable, but often you don't care and just want to type hint
+ * just the model of your repository.
+ * Just write your own repository interfaces and implementations.
  *
  * @package Ems\Core
  */
@@ -33,27 +37,38 @@ class GenericRepository implements Repository
     private $storage;
 
     /**
+     * @var string
+     */
+    private $modelClass = NamedObject::class;
+
+    public function __construct(ObjectDataAdapter $objectAdapter, DataRepository $storage)
+    {
+        $this->objectAdapter = $objectAdapter;
+        $this->storage = $storage;
+    }
+
+    /**
      * Get an object by its id.
      *
      * @param mixed $id
      * @param mixed $default (optional)
      *
-     * @return mixed
+     * @return NamedObject
      **/
     public function get($id, $default = null)
     {
         if (!$data = $this->storage->get($id)) {
             return $default;
         }
-        return $this->objectAdapter->fromArray($data, true);
+        return $this->objectAdapter->fromArray($this->modelClass, $data, true);
     }
 
     /**
-     * Get an object by its id or throw an exception if it cant be found.
+     * Get an object by its id or throw an exception if it can't be found.
      *
      * @param mixed $id
      *
-     * @return mixed
+     * @return NamedObject
      *
      * @throws ResourceNotFoundException
      */
@@ -71,7 +86,7 @@ class GenericRepository implements Repository
      *
      * @param array $attributes
      *
-     * @return Identifiable The instantiated resource
+     * @return NamedObject The instantiated resource
      **/
     public function make(array $attributes = [])
     {
@@ -81,7 +96,7 @@ class GenericRepository implements Repository
     /**
      * Fill the model with attributes $attributes.
      *
-     * @param Identifiable $model
+     * @param NamedObject $model
      * @param array $attributes
      *
      * @return bool if attributes where changed after filling
@@ -98,12 +113,12 @@ class GenericRepository implements Repository
      *
      * @param array $attributes
      *
-     * @return Identifiable The created resource
+     * @return NamedObject The created resource
      **/
     public function store(array $attributes)
     {
         $data = $this->storage->create($attributes);
-        return $this->objectAdapter->fromArray($data, true);
+        return $this->objectAdapter->fromArray($this->modelClass, $data, true);
     }
 
     /**
@@ -111,11 +126,11 @@ class GenericRepository implements Repository
      * Return true if the model was saved, false if not. If an error did occur,
      * throw an exception. Never return false on errors. Return false if for
      * example the attributes did not change. Throw exceptions on errors.
-     * If the save action did alter other attributes that the passed, the have
+     * If the save action did alter other attributes that the passed, they have
      * to be updated inside the passed model. (Timestamps, auto increments,...)
      * The passed model has to be full up to date after updating it.
      *
-     * @param Identifiable $model
+     * @param NamedObject $model
      * @param array $newAttributes
      *
      * @return bool true if it was actually saved, false if not. Look above!
@@ -134,7 +149,7 @@ class GenericRepository implements Repository
      * The model has to be filled (with auto attributes like auto increments or
      * timestamps).
      *
-     * @param Identifiable $model
+     * @param NamedObject $model
      *
      * @return bool if the model was actually saved
      **/
@@ -148,7 +163,7 @@ class GenericRepository implements Repository
     /**
      * Delete the passed model.
      *
-     * @param Identifiable $model
+     * @param NamedObject $model
      *
      * @return bool
      **/
