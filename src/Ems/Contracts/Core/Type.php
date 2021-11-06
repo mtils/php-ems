@@ -5,19 +5,31 @@
 
 namespace Ems\Contracts\Core;
 
-use function array_unique;
-use function class_exists;
+use ArrayAccess;
 use Countable;
 use Ems\Contracts\Core\Exceptions\TypeException;
+use Traversable;
+
+use function array_unique;
+use function class_exists;
+use function fclose;
 use function get_parent_class;
+use function in_array;
 use function interface_exists;
 use function is_array;
 use function is_bool;
 use function is_numeric;
 use function iterator_to_array;
+use function strpos;
+use function token_get_all;
 use function trait_exists;
-use Traversable;
-use ArrayAccess;
+use function trim;
+
+use const T_CLASS;
+use const T_NAMESPACE;
+use const T_NS_SEPARATOR;
+use const T_STRING;
+use const T_WHITESPACE;
 
 class Type
 {
@@ -350,6 +362,71 @@ class Type
         }
 
         return array_unique($allTraits);
+    }
+
+    /**
+     * Find the (one) class that is defined in $file.
+     *
+     * @param string $file
+     *
+     * @return string
+     */
+    public static function classInFile(string $file) : string
+    {
+        $handle = fopen($file, 'r');
+        $namespace = $class = $buffer = '';
+        $startedNamespace = false;
+        $startedClass = false;
+
+        while (!feof($handle)) {
+
+            $buffer .= fread($handle, 512);
+            if (strpos($buffer, '{') === false) {
+                continue;
+            }
+            $tokens = token_get_all($buffer);
+            foreach ($tokens as $token) {
+
+                if (!is_array($token)) {
+                    continue;
+                }
+
+                if ($startedNamespace) {
+                    if (in_array($token[0], [T_STRING, T_NS_SEPARATOR, T_WHITESPACE])) {
+                        $namespace .= trim($token[1]);
+                        continue;
+                    }
+                    $startedNamespace = false;
+
+                }
+
+                if ($startedClass) {
+                    if ($token[0] == T_STRING) {
+                        $class .= trim($token[1]);
+                        continue;
+                    }
+                    if ($token[0] != T_WHITESPACE) {
+                        break 2;
+                    }
+
+                }
+
+                if ($token[0] == T_NAMESPACE && !$namespace) {
+                    $startedNamespace = true;
+                }
+
+                if ($token[0] == T_CLASS) {
+                    $startedClass = true;
+                }
+            }
+
+
+        }
+
+        fclose($handle);
+
+        return $namespace ? $namespace . '\\' . $class : $class;
+
     }
 
     /**

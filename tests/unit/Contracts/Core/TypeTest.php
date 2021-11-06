@@ -122,6 +122,17 @@ class TypeTest extends TestCase
         ], Type::traits(TypeTest_TraitTest4::class, true));
 
     }
+
+    public function test_classInFile_returns_class_with_namespace()
+    {
+        $this->assertEquals(self::class, Type::classInFile(__FILE__));
+    }
+
+    public function test_classInFile_returns_class()
+    {
+        $file = $this->dirOfTests('database/migrations/2014_05_26_092001_create_users_table.php');
+        $this->assertEquals('CreateUsersTable', Type::classInFile($file));
+    }
 }
 
 trait TypeTest_SubTrait_of_SubTrait
