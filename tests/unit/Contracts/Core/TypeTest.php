@@ -133,6 +133,30 @@ class TypeTest extends TestCase
         $file = $this->dirOfTests('database/migrations/2014_05_26_092001_create_users_table.php');
         $this->assertEquals('CreateUsersTable', Type::classInFile($file));
     }
+
+    public function test_classInFile_returns_anonymous_class()
+    {
+        $file = $this->dirOfTests('data/reflection/anonymous-class-returned.php');
+        $this->assertEquals(Type::ANONYMOUS_CLASS, Type::classInFile($file));
+    }
+
+    public function test_classInFile_returns_anonymous_class_after_other_instantiation()
+    {
+        $file = $this->dirOfTests('data/reflection/anonymous-class-after-instantiate-returned.php');
+        $this->assertEquals(Type::ANONYMOUS_CLASS, Type::classInFile($file));
+    }
+
+    public function test_classInFile_returns_real_class_after_other_instantiation()
+    {
+        $file = $this->dirOfTests('data/reflection/class-after-anonymous-returned.php');
+        $this->assertEquals('AfterAnonymous', Type::classInFile($file));
+    }
+    //class-after-function-with-class
+    public function test_classInFile_returns_real_class_after_class_in_function()
+    {
+        $file = $this->dirOfTests('data/reflection/class-after-function-with-class.php');
+        $this->assertEquals('AfterFunctionWithClass', Type::classInFile($file));
+    }
 }
 
 trait TypeTest_SubTrait_of_SubTrait

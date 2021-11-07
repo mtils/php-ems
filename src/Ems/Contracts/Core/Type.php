@@ -11,13 +11,16 @@ use Ems\Contracts\Core\Exceptions\TypeException;
 use Traversable;
 
 use function array_unique;
+use function basename;
 use function class_exists;
 use function fclose;
 use function get_parent_class;
+use function implode;
 use function in_array;
 use function interface_exists;
 use function is_array;
 use function is_bool;
+use function is_int;
 use function is_numeric;
 use function iterator_to_array;
 use function strpos;
@@ -26,13 +29,24 @@ use function trait_exists;
 use function trim;
 
 use const T_CLASS;
+use const T_FUNCTION;
 use const T_NAMESPACE;
+use const T_NEW;
 use const T_NS_SEPARATOR;
+use const T_RETURN;
 use const T_STRING;
 use const T_WHITESPACE;
 
 class Type
 {
+
+    /**
+     * This is the class any anonymous class has. PHP assigns a generated class
+     * name to any anonymous class, but you should not use this string. So Type
+     * returns this string in some cases.
+     */
+    const ANONYMOUS_CLASS = '(anonymous)';
+
     /**
      * @var array
      **/
@@ -113,7 +127,7 @@ class Type
     }
 
     /**
-     * Return true if a value can be casted to string.
+     * Return true if a value can be cast to string.
      *
      * @param mixed $value
      *
@@ -365,7 +379,8 @@ class Type
     }
 
     /**
-     * Find the (one) class that is defined in $file.
+     * Find the (one) class that is defined in $file. Returns self::ANONYMOUS_CLASS
+     * if an anonymous class is returned in $file.
      *
      * @param string $file
      *
@@ -376,7 +391,8 @@ class Type
         $handle = fopen($file, 'r');
         $namespace = $class = $buffer = '';
         $startedNamespace = false;
-        $startedClass = false;
+        $startedFunction = false;
+        $classTokenSequence = [];
 
         while (!feof($handle)) {
 
@@ -385,41 +401,63 @@ class Type
                 continue;
             }
             $tokens = token_get_all($buffer);
+
             foreach ($tokens as $token) {
 
-                if (!is_array($token)) {
+                if (!is_array($token) || $token[0] === T_WHITESPACE) {
+                    continue;
+                }
+
+                $isClassToken = $token[0] === T_CLASS;
+
+                if ($token[0] === T_FUNCTION) {
+                    $startedFunction = true;
+                    continue;
+                }
+
+                if (!$startedFunction && $token[0] === T_RETURN) {
+                    $classTokenSequence = [T_RETURN];
+                    continue;
+                }
+
+                // We add new only if previous was return
+                if ($token[0] === T_NEW) {
+                    $classTokenSequence = $classTokenSequence === [T_RETURN] ? [T_RETURN, T_NEW] : [];
+                    continue;
+                }
+
+                // Current token is class so "return new class"
+                if ($isClassToken && $classTokenSequence === [0=>T_RETURN, 1=>T_NEW]) {
+                    fclose($handle);
+                    return self::ANONYMOUS_CLASS;
+                }
+
+                if ($isClassToken) {
+                    $classTokenSequence = [T_CLASS];
                     continue;
                 }
 
                 if ($startedNamespace) {
-                    if (in_array($token[0], [T_STRING, T_NS_SEPARATOR, T_WHITESPACE])) {
-                        $namespace .= trim($token[1]);
+                    if (in_array($token[0], [T_STRING, T_NS_SEPARATOR])) {
+                        $namespace .= $token[1];
                         continue;
                     }
                     $startedNamespace = false;
-
                 }
 
-                if ($startedClass) {
+                if ($classTokenSequence === [T_CLASS]) {
                     if ($token[0] == T_STRING) {
                         $class .= trim($token[1]);
                         continue;
                     }
-                    if ($token[0] != T_WHITESPACE) {
-                        break 2;
-                    }
-
+                    break 2;
                 }
 
                 if ($token[0] == T_NAMESPACE && !$namespace) {
                     $startedNamespace = true;
                 }
 
-                if ($token[0] == T_CLASS) {
-                    $startedClass = true;
-                }
             }
-
 
         }
 
