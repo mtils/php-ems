@@ -10,6 +10,8 @@ use Illuminate\Database\Connection;
 /**
  * This is a connection resolver which connects only to one connection
  * It is used for tests to inject one connection
+ *
+ * @deprecated Use \Ems\Model\Eloquent\EmsConnectionFactory
  **/
 class ConnectionResolver implements ConnectionResolverInterface
 {
