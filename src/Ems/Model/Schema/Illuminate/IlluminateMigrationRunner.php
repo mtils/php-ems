@@ -37,6 +37,11 @@ class IlluminateMigrationRunner implements MigrationRunner, SupportsCustomFactor
      */
     protected $listenedConnectionHashes = [];
 
+    public function __construct(EmsConnectionFactory $connectionFactory)
+    {
+        $this->connectionFactory = $connectionFactory;
+    }
+
     /**
      * @param string $file
      * @param bool $simulate

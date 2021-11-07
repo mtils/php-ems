@@ -27,7 +27,7 @@ use function max;
 class Migrator implements MigratorContract, Configurable, HasMethodHooks
 {
     use ConfigurableTrait {
-        setOption as traitSetOption;
+        ConfigurableTrait::setOption as traitSetOption;
     }
     use HookableTrait;
 
@@ -125,7 +125,7 @@ class Migrator implements MigratorContract, Configurable, HasMethodHooks
     public function setOption($key, $value)
     {
         $this->traitSetOption($key, $value);
-        $this->configureRepository($this->repository);
+        $this->configureRepository($this->repository, false);
         return $this;
     }
 
@@ -252,7 +252,6 @@ class Migrator implements MigratorContract, Configurable, HasMethodHooks
             return;
         }
         $repository->setOption(MigratorContract::PATHS, $paths);
-
 
     }
 
