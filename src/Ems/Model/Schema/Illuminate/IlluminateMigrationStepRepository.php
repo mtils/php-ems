@@ -37,9 +37,10 @@ class IlluminateMigrationStepRepository implements MigrationStepRepository, Conf
      */
     protected $stepLimit = 5000;
 
-    public function __construct(MigrationRepositoryInterface $nativeRepository)
+    public function __construct(MigrationRepositoryInterface $nativeRepository, Filesystem $fs)
     {
         $this->nativeRepository = $nativeRepository;
+        $this->fs = $fs;
     }
 
     /**
@@ -85,6 +86,14 @@ class IlluminateMigrationStepRepository implements MigrationStepRepository, Conf
         $this->nativeRepository->delete($migration);
 
         return true;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function install(): void
+    {
+        $this->nativeRepository->createRepository();
     }
 
     /**

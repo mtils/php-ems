@@ -104,6 +104,11 @@ class Migrator implements MigratorContract, Configurable, HasMethodHooks
         return $this->repository->all();
     }
 
+    public function install(): void
+    {
+        $this->repository->install();
+    }
+
     /**
      * @return string[]
      */

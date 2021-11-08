@@ -24,4 +24,8 @@ interface MigrationStepRepository
      */
     public function save(MigrationStep $step) : bool;
 
+    /**
+     * Install the migration repository.
+     */
+    public function install() : void;
 }

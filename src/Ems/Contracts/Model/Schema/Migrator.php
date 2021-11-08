@@ -48,4 +48,9 @@ interface Migrator
      * @return MigrationStep[]
      */
     public function migrations(): array;
+
+    /**
+     * Install the migration repository
+     */
+    public function install() : void;
 }

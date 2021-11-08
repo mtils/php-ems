@@ -89,6 +89,16 @@ trait AppTrait
     }
 
     /**
+     * Overwrite this method to configure the application before booting.
+     *
+     * @param Application $app
+     */
+    protected function configureApplication(Application $app)
+    {
+        //
+    }
+
+    /**
      * Boot add the bootstrappers and boot the application.
      *
      * @param Application $app

@@ -354,8 +354,8 @@ class Application implements ContainerContract, HasMethodHooks
      * not be changed after booting. Otherwise somebody will use it as a global
      * variable storage.
      *
-     * @param string|array $key
-     * @param mixed        $value (optional)
+     * @param string|array|ArrayAccess $key
+     * @param mixed                    $value (optional)
      *
      * @return self
      */
