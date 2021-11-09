@@ -7,10 +7,13 @@ namespace Ems\Model\Schema\Illuminate;
 
 use Ems\Contracts\Core\Configurable;
 use Ems\Contracts\Core\Filesystem;
+use Ems\Contracts\Model\Exceptions\MigratorException;
+use Ems\Contracts\Model\Exceptions\MigratorInstallationException;
 use Ems\Contracts\Model\Schema\MigrationStep;
 use Ems\Contracts\Model\Schema\MigrationStepRepository;
 use Ems\Contracts\Model\Schema\Migrator as MigratorContract;
 use Ems\Core\ConfigurableTrait;
+use Exception;
 use Illuminate\Database\Migrations\MigrationRepositoryInterface;
 use stdClass;
 
@@ -112,7 +115,6 @@ class IlluminateMigrationStepRepository implements MigrationStepRepository, Conf
         $this->stepLimit = $stepLimit;
     }
 
-
     /**
      * @return string[]
      */
@@ -133,11 +135,29 @@ class IlluminateMigrationStepRepository implements MigrationStepRepository, Conf
      */
     protected function getNativeMigrations() : array
     {
-        $migrationByFile = [];
-        $migrationEntries = $this->nativeRepository->getMigrations($this->stepLimit);
-        foreach ($migrationEntries as $migrationEntry) {
-            $migrationByFile[$migrationEntry->migration] = $migrationEntry;
+        try {
+            $migrationByFile = [];
+            $migrationEntries = $this->nativeRepository->getMigrations(
+                $this->stepLimit
+            );
+            foreach ($migrationEntries as $migrationEntry) {
+                $migrationByFile[$migrationEntry->migration] = $migrationEntry;
+            }
+            return $migrationByFile;
+        } catch (Exception $e) {
+            throw $this->convertException($e);
         }
-        return $migrationByFile;
+    }
+
+    protected function convertException(Exception $e)
+    {
+        if (!$this->nativeRepository->repositoryExists()) {
+            return new MigratorInstallationException(
+                'Migrator backend is not installed',
+                MigratorInstallationException::NOT_INSTALLED,
+                $e
+            );
+        }
+        return new MigratorException('Common migrator error', 0, $e);
     }
 }

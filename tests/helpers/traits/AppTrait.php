@@ -4,12 +4,13 @@ namespace Ems;
 
 use Ems\Assets\Skeleton\AssetsBootstrapper;
 use Ems\Cache\Skeleton\CacheBootstrapper;
+use Ems\Core\Application;
 use Ems\Core\IOCContainer;
 use Ems\Core\Skeleton\CoreBootstrapper;
 use Ems\Routing\Skeleton\RoutingBootstrapper;
-use Ems\XType\Skeleton\XTypeBootstrapper;
-use Ems\Core\Application;
 use Ems\Skeleton\BootManager;
+use Ems\Skeleton\SkeletonBootstrapper;
+use Ems\XType\Skeleton\XTypeBootstrapper;
 
 /**
  * Trait AppTrait
@@ -55,6 +56,7 @@ trait AppTrait
         $app = $this->appInstance();
 
         if (!$app->wasBooted()) {
+            $this->configureApplication($app);
             $this->bootApplication($app);
         }
         return $binding ? $app->__invoke($binding, $parameters) : $app;
@@ -141,7 +143,8 @@ trait AppTrait
             CacheBootstrapper::class,
             AssetsBootstrapper::class,
             XTypeBootstrapper::class,
-            RoutingBootstrapper::class
+            RoutingBootstrapper::class,
+            SkeletonBootstrapper::class
         ];
 
         if (!isset($this->extraBootstrappers)) {

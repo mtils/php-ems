@@ -23,6 +23,7 @@ use Illuminate\Database\Migrations\MigrationRepositoryInterface;
 use Ems\Contracts\Model\Schema\Migrator as MigratorContract;
 
 use function in_array;
+use function var_dump;
 
 class MigrationBootstrapper extends Bootstrapper
 {
@@ -39,9 +40,19 @@ class MigrationBootstrapper extends Bootstrapper
 
         if (!$this->app->has(ConnectionResolverInterface::class)) {
             $this->app->share(ConnectionResolverInterface::class, function () {
-                return $this->app->create(EmsConnectionFactory::class, [
+                /** @var EmsConnectionFactory $factory */
+                $factory = $this->app->create(EmsConnectionFactory::class, [
                     'connectionPool' => $this->app->get(ConnectionPool::class)
                 ]);
+                /** @var Application $app */
+                $app = $this->app->get(Application::class);
+                if (!$dbConfig = $app->config('database')) {
+                    return $factory;
+                }
+                if (isset($dbConfig['connection']) && $dbConfig['connection']) {
+                    $factory->setDefaultConnection($dbConfig['connection']);
+                }
+                return $factory;
             });
         }
 

@@ -6,6 +6,7 @@
 namespace integration\Model\Schema\Illuminate;
 
 use Ems\Contracts\Model\Schema\MigrationStepRepository;
+use Ems\Contracts\Model\Exceptions\MigratorInstallationException;
 use Ems\Core\Application;
 use Ems\IntegrationTest;
 use Ems\Model\Schema\Illuminate\IlluminateMigrationStepRepository;
@@ -31,7 +32,8 @@ class IlluminateMigrationStepRepositoryTest extends IntegrationTest
     public function it_throws_Exception_if_repository_was_not_installed()
     {
         $repo = $this->make();
-        $steps = $repo->all();
+        $this->expectException(MigratorInstallationException::class);
+        $repo->all();
     }
 
     /**
@@ -41,6 +43,7 @@ class IlluminateMigrationStepRepositoryTest extends IntegrationTest
     {
         return $this->app(MigrationStepRepository::class);
     }
+
     protected function configureApplication(Application $app)
     {
         parent::configureApplication($app);
@@ -57,11 +60,12 @@ class IlluminateMigrationStepRepositoryTest extends IntegrationTest
         $app->configure('migrations', [
             'repository' => 'illuminate',
             'runner'     => 'illuminate',
-            'source'     => 'database://default/migrations',
+            'source'     => 'database://tests/migrations',
             'paths'      => [
                 $this->dirOfTests('database/schema/migrations')
             ]
         ]);
+
     }
 
 }
