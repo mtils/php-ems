@@ -25,7 +25,7 @@ class DB
         if($url->scheme == 'sqlite') {
             return [
                 'driver'    => 'sqlite',
-                'database'  => (string)$url->path
+                'database'  => $url->host == 'memory' ? ':memory:' : (string)$url->path
             ];
         }
         $config = [
@@ -50,6 +50,9 @@ class DB
         if($config['driver'] == 'sqlite') {
             if ($config['database'][0] == '/') {
                 return new UrlObject("sqlite:///{$config['database']}");
+            }
+            if ($config['database'] == ':memory:') {
+                return new UrlObject("sqlite://memory");
             }
             $databasePath = $databasePath ?: self::guessAppPath();
             $path = $databasePath . '/' . ltrim($config['database'], '/');

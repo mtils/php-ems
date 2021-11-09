@@ -17,6 +17,7 @@ use Ems\Core\Connection\StdOutputConnection;
 use Ems\Core\ConnectionPool;
 use Ems\Core\Skeleton\Bootstrapper;
 use Ems\Core\Support\StreamLogger;
+use Ems\Model\Database\DB;
 use Ems\Routing\RoutedInputHandler;
 use Ems\Testing\Benchmark;
 use Psr\Log\LoggerInterface;
@@ -35,17 +36,17 @@ class SkeletonBootstrapper extends Bootstrapper
 
     public function bind()
     {
-        $this->app->bind(InputConnection::class, function () {
+        $this->app->share(InputConnection::class, function () {
             return $this->createInputConnection();
-        }, true);
+        });
 
-        $this->app->bind(OutputConnection::class, function () {
+        $this->app->share(OutputConnection::class, function () {
             return $this->createOutputConnection();
-        }, true);
+        });
 
-        $this->app->bind(LoggerInterface::class, function () {
+        $this->app->share(LoggerInterface::class, function () {
             return $this->createLogger();
-        }, true);
+        });
 
         $this->app->onAfter(ConnectionPool::class, function ($pool) {
             $this->addConnections($pool);
@@ -102,6 +103,17 @@ class SkeletonBootstrapper extends Bootstrapper
             }
             return null;
         });
+
+        /** @var Application $app */
+        $app = $this->app->get(Application::class);
+        if (!$databaseConfig = $app->config('database')) {
+            return;
+        }
+
+        $connections = $databaseConfig['connections'];
+        $handler = DB::makeConnectionHandler(DB::configurationsToUrls($connections));
+        $pool->extend('config.database', $handler);
+
     }
 
     /**

@@ -47,6 +47,20 @@ class DBTest extends TestCase
     /**
      * @test
      */
+    public function configToUrl_creates_a_sqlite_connection_with_memory_database()
+    {
+        $config = [
+            'driver' => 'sqlite',
+            'database' => ':memory:'
+        ];
+        $url = DB::configToUrl($config, dirname($this->dirOfTests()));
+        $this->assertInstanceOf(UrlContract::class, $url);
+        $this->assertEquals($config['driver'] . "://memory", (string)$url);
+    }
+
+    /**
+     * @test
+     */
     public function configToUrl_creates_a_mysql_connection()
     {
         $config = [
@@ -154,6 +168,22 @@ class DBTest extends TestCase
         $absolutePath = $config['database'];
         $urlString = $config['driver'] . "://$absolutePath";
 
+        $url = new Url($urlString);
+        $this->assertEquals($config, Db::urlToConfig($url));
+    }
+
+    /**
+     * @test
+     */
+    public function urlToConfig_creates_a_sqlite_memory_config()
+    {
+        $config = [
+            'driver' => 'sqlite',
+            'database' => ':memory:'
+        ];
+
+        $absolutePath = trim($config['database'],':');
+        $urlString = $config['driver'] . "://$absolutePath";
         $url = new Url($urlString);
         $this->assertEquals($config, Db::urlToConfig($url));
     }
