@@ -122,7 +122,7 @@ class IlluminateMigrationStepRepository implements MigrationStepRepository, Conf
     {
         $files = [];
         foreach ($this->getOption(MigratorContract::PATHS) as $path) {
-            foreach ($this->fs->files($path, '*', 'php') as $file) {
+            foreach ($this->fs->files($path, '*_*', 'php') as $file) {
                 $files[] = $file;
             }
         }
