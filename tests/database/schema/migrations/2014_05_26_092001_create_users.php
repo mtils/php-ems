@@ -6,7 +6,7 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Schema\Builder as Schema;
 
-class CreateUsers
+return new class()
 {
     public function up(Schema $schema)
     {
@@ -33,4 +33,4 @@ class CreateUsers
         $schema->dropIfExists('users');
     }
 
-}
+};

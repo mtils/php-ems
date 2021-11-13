@@ -23,6 +23,7 @@ use Illuminate\Database\Migrations\MigrationRepositoryInterface;
 use Ems\Contracts\Model\Schema\Migrator as MigratorContract;
 
 use function in_array;
+use function spl_object_id;
 use function var_dump;
 
 class MigrationBootstrapper extends Bootstrapper
@@ -54,6 +55,10 @@ class MigrationBootstrapper extends Bootstrapper
                 }
                 return $factory;
             });
+            $this->app->bind(EmsConnectionFactory::class, function () {
+                return $this->app->get(ConnectionResolverInterface::class);
+            });
+
         }
 
         $this->app->share(MigrationStepRepository::class, function () {

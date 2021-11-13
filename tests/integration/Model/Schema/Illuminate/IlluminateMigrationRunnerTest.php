@@ -3,7 +3,7 @@
  *  * Created by mtils on 11.11.2021 at 22:23.
  **/
 
-namespace integration\Model\Schema\Illuminate;
+namespace Model\Schema\Illuminate;
 
 use Closure;
 use Ems\Contracts\Model\Exceptions\MigrationClassNotFoundException;

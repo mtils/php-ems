@@ -400,7 +400,7 @@ class Type
             if (strpos($buffer, '{') === false) {
                 continue;
             }
-            $tokens = token_get_all($buffer);
+            $tokens = @token_get_all($buffer);
 
             foreach ($tokens as $token) {
 
