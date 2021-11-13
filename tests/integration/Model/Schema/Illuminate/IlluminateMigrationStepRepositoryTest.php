@@ -3,7 +3,7 @@
  *  * Created by mtils on 08.11.2021 at 20:56.
  **/
 
-namespace integration\Model\Schema\Illuminate;
+namespace Model\Schema\Illuminate;
 
 use Ems\Contracts\Model\Exceptions\MigratorInstallationException;
 use Ems\Contracts\Model\Schema\MigrationStep;
@@ -13,6 +13,8 @@ use Ems\Core\LocalFilesystem;
 use Ems\IntegrationTest;
 use Ems\Model\Schema\Illuminate\IlluminateMigrationStepRepository;
 use Ems\Model\Skeleton\MigrationBootstrapper;
+
+use function basename;
 
 class IlluminateMigrationStepRepositoryTest extends IntegrationTest
 {
@@ -49,10 +51,11 @@ class IlluminateMigrationStepRepositoryTest extends IntegrationTest
         $steps = $repo->all();
         $this->assertCount(count($files), $steps);
         foreach ($steps as $step) {
+            $baseFile = basename($step->file);
             $this->assertInstanceOf(MigrationStep::class, $step);
             $this->assertEquals(0, $step->batch);
             $this->assertFalse($step->migrated);
-            $this->assertTrue(isset($files[$step->file]));
+            $this->assertTrue(isset($files[$baseFile]));
         }
     }
 

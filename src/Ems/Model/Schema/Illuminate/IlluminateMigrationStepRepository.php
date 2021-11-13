@@ -59,7 +59,7 @@ class IlluminateMigrationStepRepository implements MigrationStepRepository, Conf
 
             $baseFile = $this->fs->basename($file);
             $step = new MigrationStep();
-            $step->file = $baseFile;
+            $step->file = $file;
             if (isset($nativeMigrations[$baseFile])) {
                 $step->migrated = true;
             }
@@ -78,12 +78,12 @@ class IlluminateMigrationStepRepository implements MigrationStepRepository, Conf
     public function save(MigrationStep $step): bool
     {
         if ($step->migrated) {
-            $this->nativeRepository->log($step->file, $step->batch);
+            $this->nativeRepository->log(basename($step->file), $step->batch);
             return true;
         }
 
         $migration = new stdClass();
-        $migration->migration = $step->file;
+        $migration->migration = basename($step->file);
         $migration->batch = $step->batch;
 
         $this->nativeRepository->delete($migration);
