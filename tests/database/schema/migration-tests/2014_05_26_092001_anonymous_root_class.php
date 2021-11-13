@@ -3,7 +3,6 @@
  *  * Created by mtils on 06.11.2021 at 06:58.
  **/
 
-use Ems\Model\Schema\Illuminate\IlluminateMigration as Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Schema\Builder as Schema;
 
