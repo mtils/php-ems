@@ -99,7 +99,7 @@ class MigrationBootstrapper extends Bootstrapper
         if ($runner instanceof Configurable) {
             $this->configure($runner, $config);
         }
-
+        $runner->createObjectsBy($this->app);
         return $runner;
     }
 
