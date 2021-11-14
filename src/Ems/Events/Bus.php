@@ -9,12 +9,13 @@ use Ems\Contracts\Events\EventForward;
 use Ems\Core\Exceptions\UnsupportedParameterException;
 use Ems\Core\Patterns\HookableTrait;
 use Ems\Core\Patterns\SubscribableTrait;
-use Ems\Core\Lambda;
 use Exception;
-use InvalidArgumentException;
-use OutOfBoundsException;
 use LogicException;
+use OutOfBoundsException;
 use OverflowException;
+
+use function call_user_func;
+use function is_object;
 
 /**
  * This event bus supports only events by string
@@ -119,8 +120,15 @@ class Bus implements BusContract
         }
 
         $returnValues = [];
+        $eventName = $event;
 
-        foreach ($this->collectListeners($event, $payload) as $listener) {
+        if (is_object($event)) {
+            $eventName = $this->eventToString($event);
+            array_unshift($payload, $event);
+        }
+
+
+        foreach ($this->collectListeners($eventName, $payload) as $listener) {
             $returnValue = $this->callListener($listener, $event, $payload);
 
             if ($returnValue !== null && $halt) {
@@ -565,15 +573,13 @@ class Bus implements BusContract
     /**
      * Collect all listeners for event $event
      *
-     * @param string|object $event
-     * @param array         $args
+     * @param string $event
+     * @param array  $args
      *
      * @return array
      **/
     protected function collectListeners($event, array $args=[])
     {
-        $event = $this->eventToString($event);
-
         $listeners = [];
 
         // Build args for * listeners
@@ -635,7 +641,7 @@ class Bus implements BusContract
      **/
     protected function callListener(callable $listener, $event, array $args)
     {
-        return Lambda::callFast($listener, $args);
+        return call_user_func($listener, ...$args);
     }
 
     protected function addKnownMarks()

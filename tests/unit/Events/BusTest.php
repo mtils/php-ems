@@ -3,8 +3,10 @@
 namespace Ems\Events;
 
 use Ems\Contracts\Core\Subscribable;
-use Ems\Testing\LoggingCallable;
 use Ems\Core\Patterns\SubscribableTrait;
+use Ems\Testing\LoggingCallable;
+
+use function print_r;
 
 class BusTest extends \Ems\TestCase
 {
@@ -144,6 +146,119 @@ class BusTest extends \Ems\TestCase
                 continue;
             }
             $this->assertEquals($result, $listener('e'));
+        }
+
+    }
+
+    public function test_fire_calls_all_listeners_with_event_object()
+    {
+        $dispatcher = $this->newBus();
+
+        $calls = [];
+
+        $beforeAnyListener = function ($event, $object) {
+
+            if ($event != BusTest_Event::class) {
+                $this->fail('Dispatcher fired wrong event name: ' . $event);
+            }
+
+            if (!$object instanceof BusTest_Event) {
+                $this->fail('Dispatcher fired wrong parameter ' . print_r($object, true));
+            }
+
+            return 'a';
+        };
+
+        $beforeListener = function ($event) {
+
+            if (!$event instanceof BusTest_Event) {
+                $this->fail('Dispatcher did not fire event object');
+            }
+
+            return 'b';
+        };
+
+        $onListener = function ($event) {
+
+            if (!$event instanceof BusTest_Event) {
+                $this->fail('Dispatcher did not fire event object');
+            }
+
+            $this->assertEquals(13, $event->number);
+            $this->assertEquals('fired', $event->code);
+
+            return 'c';
+
+        };
+
+        $allListener = function ($event, $object) {
+
+            if ($event != BusTest_Event::class) {
+                $this->fail('Dispatcher fired wrong event name');
+            }
+
+            if (!$object instanceof BusTest_Event) {
+                $this->fail('Dispatcher fired wrong parameter');
+            }
+
+            return 'd';
+
+        };
+
+        $afterListener = function ($event) {
+
+            if (!$event instanceof BusTest_Event) {
+                $this->fail('Dispatcher did not fire event object');
+            }
+
+            return 'e';
+        };
+
+        $afterAnyListener = function ($event, $object) {
+
+            if ($event != BusTest_Event::class) {
+                $this->fail('Dispatcher fired wrong event name');
+            }
+
+            if (!$object instanceof BusTest_Event) {
+                $this->fail('Dispatcher fired wrong parameter');
+            }
+
+            return 'f';
+
+        };
+
+        $dispatcher->onAfter('*', $afterAnyListener);
+        $dispatcher->onAfter(BusTest_Event::class, $afterListener);
+        $dispatcher->on('*', $allListener);
+        $dispatcher->on(BusTest_Event::class, $onListener);
+        $dispatcher->onBefore(BusTest_Event::class, $beforeListener);
+        $dispatcher->onBefore('*', $beforeAnyListener);
+
+        $event = new BusTest_Event();
+        $event->number = 13;
+        $event->code = 'fired';
+
+        $this->assertEquals(['a', 'b', 'c', 'd', 'e', 'f'], $dispatcher->fire($event));
+
+        $tests = [
+            'a' => ['*', 'before'],
+            'b' => [BusTest_Event::class, 'before'],
+            'c' => [BusTest_Event::class, ''],
+            'd' => ['*', ''],
+            'e' => [BusTest_Event::class, 'after'],
+            'f' => ['*', 'after'],
+        ];
+
+        foreach ($tests as $result=>$args) {
+
+            $listener = $dispatcher->getListeners($args[0], $args[1])[0];
+
+            if ($args[0] == '*') {
+                $this->assertEquals($result, $listener(BusTest_Event::class, $event));
+                continue;
+            }
+            $this->assertEquals($result, $listener($event));
         }
 
     }
@@ -843,9 +958,15 @@ class BusTest extends \Ems\TestCase
 class BusTest_Subscribable implements Subscribable
 {
     use SubscribableTrait;
-    
+
     public function trigger($hook, $args)
     {
         $this->callOnListeners($hook, $args);
     }
+}
+
+class BusTest_Event
+{
+    public $number = 0;
+    public $code = '';
 }

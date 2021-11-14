@@ -3,7 +3,10 @@
 namespace Ems\Core\Patterns;
 
 use Ems\Core\Exceptions\UnsupportedParameterException;
+
 use function call_user_func;
+use function is_object;
+use function strpos;
 
 /**
  * @see \Ems\Contracts\Core\Subscribable
@@ -25,9 +28,7 @@ trait SubscribableTrait
      **/
     public function on($event, callable $listener)
     {
-        if (is_object($event) || strpos($event, '\\')) { // looks like a class
-            throw new UnsupportedParameterException('Only string based events are supported');
-        }
+        $this->checkEvent($event);
 
         if (!isset($this->listeners[$event])) {
             $this->listeners[$event] = [];
@@ -86,5 +87,15 @@ trait SubscribableTrait
             $result = call_user_func($listener, ...(array)$args);
         }
         return $result;
+    }
+
+    /**
+     * @param string|object $event
+     */
+    protected function checkEvent($event)
+    {
+        if (is_object($event) || strpos($event, '\\')) { // looks like a class
+            throw new UnsupportedParameterException('Only string based events are supported');
+        }
     }
 }
