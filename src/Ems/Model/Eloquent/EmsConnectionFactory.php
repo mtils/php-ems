@@ -7,11 +7,17 @@ namespace Ems\Model\Eloquent;
 
 use Ems\Contracts\Core\ConnectionPool;
 use Ems\Core\Exceptions\UnConfiguredException;
+use Ems\Events\Bus;
+use Ems\Events\Laravel\EventDispatcher;
 use Ems\Model\Database\DB;
 use Illuminate\Container\Container;
+use Illuminate\Contracts\Events\Dispatcher as DispatcherContract;
+use Illuminate\Events\Dispatcher;
 use Illuminate\Database\Connection;
 use Illuminate\Database\ConnectionResolverInterface;
 use Illuminate\Database\Connectors\ConnectionFactory;
+
+use function class_exists;
 
 /**
  * Create a separate illuminate connection for a configured ems connection
@@ -42,6 +48,11 @@ class EmsConnectionFactory implements ConnectionResolverInterface
      * @var ConnectionFactory
      */
     private $nativeFactory;
+
+    /**
+     * @var DispatcherContract
+     */
+    private $events;
 
     public function __construct(ConnectionPool $connectionPool=null)
     {
@@ -107,6 +118,52 @@ class EmsConnectionFactory implements ConnectionResolverInterface
     }
 
     /**
+     * @return ConnectionPool
+     */
+    public function getConnectionPool(): ?ConnectionPool
+    {
+        return $this->connectionPool;
+    }
+
+    /**
+     * @param ConnectionPool|null $connectionPool
+     */
+    public function setConnectionPool(?ConnectionPool $connectionPool): void
+    {
+        $this->connectionPool = $connectionPool;
+    }
+
+    /**
+     * @return DispatcherContract|null
+     */
+    public function getEvents(): ?DispatcherContract
+    {
+        if ($this->events) {
+            return $this->events;
+        }
+        // If Ems\Events is installed
+        if (class_exists(Bus::class) && class_exists(EventDispatcher::class)) {
+            $this->events = new EventDispatcher(new Bus());
+            return $this->events;
+        }
+        // If Illuminate\Events is installed
+        if (class_exists(Dispatcher::class)) {
+            $this->events = new Dispatcher();
+        }
+        return $this->events;
+    }
+
+    /**
+     * @param DispatcherContract|null $events
+     * @return EmsConnectionFactory
+     */
+    public function setEvents(?DispatcherContract $events=null): EmsConnectionFactory
+    {
+        $this->events = $events;
+        return $this;
+    }
+
+    /**
      * Convert an ems database configuration into laravel.
      *
      * @param array $emsConfig
@@ -126,22 +183,6 @@ class EmsConnectionFactory implements ConnectionResolverInterface
     }
 
     /**
-     * @return ConnectionPool
-     */
-    public function getConnectionPool(): ?ConnectionPool
-    {
-        return $this->connectionPool;
-    }
-
-    /**
-     * @param ConnectionPool|null $connectionPool
-     */
-    public function setConnectionPool(?ConnectionPool $connectionPool): void
-    {
-        $this->connectionPool = $connectionPool;
-    }
-
-    /**
      * Create illuminate connection from an ems' connection from ConnectionPool.
      *
      * @param string $name
@@ -156,7 +197,11 @@ class EmsConnectionFactory implements ConnectionResolverInterface
         }
         $emsConnection = $this->connectionPool->connection($name);
         $config = static::configToLaravelConfig(DB::urlToConfig($emsConnection->url()));
-        return $this->getNativeFactory()->make($config, $name);
+        $connection = $this->getNativeFactory()->make($config, $name);
+        if ($events = $this->getEvents()) {
+            $connection->setEventDispatcher($events);
+        }
+        return $connection;
     }
 
     /**

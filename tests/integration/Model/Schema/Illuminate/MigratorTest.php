@@ -6,6 +6,7 @@
 namespace Model\Schema\Illuminate;
 
 use Ems\Contracts\Model\Exceptions\MigratorInstallationException;
+use Ems\Contracts\Model\Schema\MigrationStep;
 use Ems\Contracts\Model\Schema\Migrator as MigratorContract;
 use Ems\Core\Application;
 use Ems\Core\LocalFilesystem;
@@ -13,6 +14,7 @@ use Ems\Core\Url;
 use Ems\IntegrationTest;
 use Ems\Model\Schema\Migrator;
 use Ems\Model\Skeleton\MigrationBootstrapper;
+use Ems\Testing\LoggingCallable;
 use Illuminate\Database\Connection;
 use Illuminate\Database\ConnectionResolverInterface;
 
@@ -50,7 +52,7 @@ class MigratorTest extends IntegrationTest
     /**
      * @test
      */
-    public function it_does_migrate()
+    public function it_does_migrate_and_fires_hooks()
     {
         $migrator = $this->make();
         $migrator->install();
@@ -59,7 +61,12 @@ class MigratorTest extends IntegrationTest
             $this->assertFalse($step->migrated);
             $this->assertEquals(0, $step->batch);
         }
-        $migrator->migrate();
+        $beforeListener = new LoggingCallable();
+        $afterListener = new LoggingCallable();
+        $migrator->onBefore('upgrade', $beforeListener);
+        $migrator->onAfter('upgrade', $afterListener);
+        $processed = $migrator->migrate();
+
         $migrationCount = 0;
         foreach ($migrator->migrations() as $step) {
             $this->assertTrue($step->migrated);
@@ -76,7 +83,64 @@ class MigratorTest extends IntegrationTest
         $table = $source->path->first();
         $this->assertTrue($con->getSchemaBuilder()->hasTable($table));
         $this->assertEquals($migrationCount, $con->table($table)->count());
+        $this->assertCount($migrationCount, $beforeListener);
+        $this->assertCount($migrationCount, $afterListener);
+        $this->assertCount($migrationCount, $processed);
 
+        for($i=0; $i<$migrationCount; $i++) {
+            $this->assertInstanceOf(MigrationStep::class, $beforeListener->arg(0, $i));
+            $this->assertInstanceOf(MigrationStep::class, $afterListener->arg(0, $i));
+        }
+    }
+
+    // Test rollback, multiple batches
+
+    /**
+     * @test
+     */
+    public function it_does_simulate_and_fires_queries()
+    {
+
+        $migrator = $this->make();
+        $migrator->install();
+
+        foreach ($migrator->migrations() as $step) {
+            $this->assertFalse($step->migrated);
+            $this->assertEquals(0, $step->batch);
+        }
+
+        $beforeListener = new LoggingCallable();
+        $afterListener = new LoggingCallable();
+
+        $migrator->onBefore('query', $beforeListener);
+        $migrator->onAfter('query', $afterListener);
+
+        $migrator->migrate(false, true);
+        $migrationCount = 0;
+        foreach ($migrator->migrations() as $step) {
+            $this->assertFalse($step->migrated);
+            $this->assertEquals(0, $step->batch);
+            $migrationCount++;
+        }
+
+        $this->assertGreaterThan(0, $migrationCount);
+        $this->assertCount($migrationCount, $this->migrationFiles());
+
+        /** @var Connection $con */
+        $con = $this->app(ConnectionResolverInterface::class)->connection();
+        $source = new Url($this->app()->config('migrations')['source']);
+        $table = $source->path->first();
+        $this->assertTrue($con->getSchemaBuilder()->hasTable($table));
+        $this->assertEquals(0, $con->table($table)->count());
+
+        $foundCreate = false;
+        for ($i=0; $i<count($beforeListener); $i++) {
+            $sql = $beforeListener->arg(0, $i);
+            if (strpos(strtolower(trim($sql)), 'create') === 0) {
+                $foundCreate = true;
+            }
+        }
+        $this->assertTrue($foundCreate);
     }
 
     /**

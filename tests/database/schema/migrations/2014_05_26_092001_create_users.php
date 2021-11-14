@@ -16,6 +16,10 @@ return new class()
             $table->string('login');
             $table->string('email');
             $table->string('password');
+            $table->string('web');
+            $table->integer('contact_id');
+            $table->integer('parent_id');
+
             /** @noinspection PhpUndefinedMethodInspection */
             $table->string('locale',12)->default('de_DE');
             $table->timestamps();
@@ -24,6 +28,9 @@ return new class()
             // support the indexes, other engines aren't affected.
             $table->engine = 'InnoDB';
             $table->unique('login');
+            $table->unique('email');
+            $table->foreign('contact_id')->references('id')->on('contacts');
+            $table->foreign('parent_id')->references('id')->on('users');
 
         });
     }
