@@ -5,18 +5,28 @@
 
 namespace Model\Schema\Illuminate;
 
+use Ems\Contracts\Core\Filesystem;
 use Ems\Contracts\Model\Exceptions\MigratorInstallationException;
+use Ems\Contracts\Model\Schema\MigrationRunner;
 use Ems\Contracts\Model\Schema\MigrationStep;
+use Ems\Contracts\Model\Schema\MigrationStepRepository;
 use Ems\Contracts\Model\Schema\Migrator as MigratorContract;
 use Ems\Core\Application;
 use Ems\Core\LocalFilesystem;
 use Ems\Core\Url;
 use Ems\IntegrationTest;
+use Ems\Model\Schema\Illuminate\IlluminateMigrationStepRepository;
 use Ems\Model\Schema\Migrator;
 use Ems\Model\Skeleton\MigrationBootstrapper;
 use Ems\Testing\LoggingCallable;
 use Illuminate\Database\Connection;
 use Illuminate\Database\ConnectionResolverInterface;
+use Illuminate\Database\Migrations\DatabaseMigrationRepository;
+use Illuminate\Database\Migrations\MigrationRepositoryInterface;
+use Mockery\Mock;
+
+use function array_slice;
+use function basename;
 
 class MigratorTest extends IntegrationTest
 {
@@ -144,11 +154,56 @@ class MigratorTest extends IntegrationTest
     }
 
     /**
+     * @test
+     */
+    public function it_does_migrate_and_rollback()
+    {
+        /** @var Filesystem|Mock $fs */
+        $fs = $this->mock(Filesystem::class);
+
+        /** @var MigrationStepRepository $repository */
+        $repository = $this->app()->create(IlluminateMigrationStepRepository::class, [
+            'nativeRepository' => $this->app()->create(
+                DatabaseMigrationRepository::class,
+                ['table' => 'migrations']
+            ),
+            'fs' => $fs
+        ]);
+
+        $files = $this->migrationFiles();
+
+        $fs->shouldReceive('files')->andReturn(array_slice($files, 0, 2))->once();
+        $fs->shouldReceive('basename')->andReturnUsing(function ($path) {
+            return basename($path);
+        });
+
+        $migrator = $this->make($repository);
+        $migrator->install();
+
+        $processed = $migrator->migrate();
+        $this->assertCount(2, $processed);
+
+        $fs->shouldReceive('files')->andReturn(array_slice($files, 3, 3))->once();
+
+        $processed = $migrator->migrate();
+        $this->assertCount(3, $processed);
+
+    }
+
+    /**
      * @return Migrator
      */
-    protected function make()
+    protected function make(MigrationStepRepository $repository=null)
     {
-        return $this->app(MigratorContract::class);
+        if (!$repository) {
+            return $this->app(MigratorContract::class);
+        }
+        /** @var Migrator $migrator */
+        $migrator =  $this->app()->create(Migrator::class, [
+            'repository' => $repository
+        ]);
+        $migrator->setOption(Migrator::PATHS, $this->app()->config('migrations')['paths']);
+        return $migrator;
     }
 
     protected function configureApplication(Application $app)
