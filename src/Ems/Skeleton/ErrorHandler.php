@@ -18,6 +18,8 @@ use Ems\Http\Response as HttpResponse;
 use Psr\Log\LoggerInterface as LoggerInterfaceAlias;
 use Throwable;
 
+use const PHP_EOL;
+
 class ErrorHandler
 {
     /**
@@ -124,6 +126,20 @@ class ErrorHandler
         }
 
         $out->write($e->getTraceAsString() . PHP_EOL);
+
+        $maxParents = 10;
+        $current = $e;
+        $loop = 1;
+        while ($previous = $current->getPrevious()) {
+            $out->line('<info>Previous Exception:</info>');
+            $out->line('<error>' . $previous->getMessage() . '</error>');
+            $out->write($previous->getTraceAsString());
+            $current = $previous;
+            $loop++;
+            if ($loop >= $maxParents) {
+                break;
+            }
+        }
     }
 
     /**
