@@ -17,7 +17,7 @@ namespace Ems\Contracts\Routing;
 class Option extends ConsoleParameter
 {
     /**
-     * A shortcut to allow a fast access.
+     * A shortcut to allow fast access.
      *
      * @var string
      */

@@ -8,7 +8,6 @@ namespace Ems\Contracts\Routing;
 
 use Ems\Contracts\Core\Arrayable;
 use ReflectionClass;
-use ReflectionException;
 use ReflectionProperty as RP;
 
 /**
@@ -74,6 +73,9 @@ abstract class ConsoleParameter implements Arrayable
             if (isset($data[$key])) {
                 $this->$key = $data[$key];
             }
+        }
+        if (!isset($data[$this->name]) && $this->type == 'bool') {
+            $this->default = false;
         }
         return $this;
     }
