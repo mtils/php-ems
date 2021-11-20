@@ -9,6 +9,8 @@ use Ems\Contracts\Core\Configurable;
 use Ems\Contracts\Core\ConnectionPool;
 use Ems\Contracts\Model\Schema\MigrationRunner;
 use Ems\Contracts\Model\Schema\MigrationStepRepository;
+use Ems\Contracts\Model\Schema\Migrator as MigratorContract;
+use Ems\Contracts\Routing\RouteCollector;
 use Ems\Core\Application;
 use Ems\Core\Exceptions\NotImplementedException;
 use Ems\Core\Skeleton\Bootstrapper;
@@ -20,11 +22,8 @@ use Ems\Model\Schema\Migrator;
 use Illuminate\Database\ConnectionResolverInterface;
 use Illuminate\Database\Migrations\DatabaseMigrationRepository;
 use Illuminate\Database\Migrations\MigrationRepositoryInterface;
-use Ems\Contracts\Model\Schema\Migrator as MigratorContract;
 
 use function in_array;
-use function spl_object_id;
-use function var_dump;
 
 class MigrationBootstrapper extends Bootstrapper
 {
@@ -39,26 +38,12 @@ class MigrationBootstrapper extends Bootstrapper
     {
         parent::bind();
 
-        if (!$this->app->has(ConnectionResolverInterface::class)) {
-            $this->app->share(ConnectionResolverInterface::class, function () {
-                /** @var EmsConnectionFactory $factory */
-                $factory = $this->app->create(EmsConnectionFactory::class, [
-                    'connectionPool' => $this->app->get(ConnectionPool::class)
-                ]);
-                /** @var Application $app */
-                $app = $this->app->get(Application::class);
-                if (!$dbConfig = $app->config('database')) {
-                    return $factory;
-                }
-                if (isset($dbConfig['connection']) && $dbConfig['connection']) {
-                    $factory->setDefaultConnection($dbConfig['connection']);
-                }
-                return $factory;
-            });
-            $this->app->bind(EmsConnectionFactory::class, function () {
-                return $this->app->get(ConnectionResolverInterface::class);
-            });
+        $this->app->onAfter(RouteCollector::class, function (RouteCollector $collector) {
+            $this->addRoutes($collector);
+        });
 
+        if (!$this->app->has(ConnectionResolverInterface::class)) {
+            $this->registerConnectionResolver();
         }
 
         $this->app->share(MigrationStepRepository::class, function () {
@@ -75,6 +60,15 @@ class MigrationBootstrapper extends Bootstrapper
                 $this->configure($migrator, $this->getConfig());
             }
             return $migrator;
+        });
+
+        $this->addRoutes();
+    }
+
+    protected function addRoutes()
+    {
+        $this->addRoutesBy(function (RouteCollector $collector) {
+            $collector->command('migrate:status', MigrationCommand::class.'->status', 'List all migration steps and their state');
         });
     }
 
@@ -145,6 +139,28 @@ class MigrationBootstrapper extends Bootstrapper
 
         return $migrationRepo;
 
+    }
+
+    protected function registerConnectionResolver()
+    {
+        $this->app->share(ConnectionResolverInterface::class, function () {
+            /** @var EmsConnectionFactory $factory */
+            $factory = $this->app->create(EmsConnectionFactory::class, [
+                'connectionPool' => $this->app->get(ConnectionPool::class)
+            ]);
+            /** @var Application $app */
+            $app = $this->app->get(Application::class);
+            if (!$dbConfig = $app->config('database')) {
+                return $factory;
+            }
+            if (isset($dbConfig['connection']) && $dbConfig['connection']) {
+                $factory->setDefaultConnection($dbConfig['connection']);
+            }
+            return $factory;
+        });
+        $this->app->bind(EmsConnectionFactory::class, function () {
+            return $this->app->get(ConnectionResolverInterface::class);
+        });
     }
 
     protected function getConfig($key=null)
