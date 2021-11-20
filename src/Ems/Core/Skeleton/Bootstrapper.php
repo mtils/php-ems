@@ -3,6 +3,9 @@
 namespace Ems\Core\Skeleton;
 
 use Ems\Contracts\Core\IOCContainer;
+use Ems\Contracts\Routing\Router;
+
+use function spl_object_hash;
 
 class Bootstrapper
 {
@@ -41,6 +44,13 @@ class Bootstrapper
     protected $app;
 
     /**
+     * A hash table to store which routers were configured.
+     *
+     * @var array
+     */
+    protected $configuredRouters = [];
+
+    /**
      * @param \Ems\Contracts\Core\IOCContainer $app
      **/
     public function __construct(IOCContainer $app)
@@ -53,6 +63,21 @@ class Bootstrapper
         $this->registerAliases();
         $this->bindBindings();
         $this->bindSingletons();
+    }
+
+    /**
+     * @param callable $adder
+     */
+    protected function addRoutesBy(callable $adder)
+    {
+        $this->app->onAfter(Router::class, function (Router $router) use ($adder) {
+            $routerId = spl_object_hash($router);
+            if (isset($this->configuredRouters[$routerId])) {
+                return;
+            }
+            $this->configuredRouters[$routerId] = true;
+            $router->register($adder);
+        });
     }
 
     /**
