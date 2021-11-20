@@ -38,9 +38,7 @@ class MigrationBootstrapper extends Bootstrapper
     {
         parent::bind();
 
-        $this->app->onAfter(RouteCollector::class, function (RouteCollector $collector) {
-            $this->addRoutes($collector);
-        });
+        $this->addRoutes();
 
         if (!$this->app->has(ConnectionResolverInterface::class)) {
             $this->registerConnectionResolver();
@@ -68,7 +66,17 @@ class MigrationBootstrapper extends Bootstrapper
     protected function addRoutes()
     {
         $this->addRoutesBy(function (RouteCollector $collector) {
+
+            $collector->command('migrate', MigrationCommand::class.'->migrate', 'Run all pending migrations')
+                ->option('simulate', 'Just show the queries but do not change the database.', 't');
+
             $collector->command('migrate:status', MigrationCommand::class.'->status', 'List all migration steps and their state');
+
+            $collector->command('migrate:install', MigrationCommand::class.'->install', 'Install the migration repository');
+
+            $collector->command('migrate:rollback', MigrationCommand::class.'->rollback', 'Rollback last migrations')
+                ->option('simulate', 'Just show the queries but do not change the database.', 't')
+                ->option('limit=0', 'Limit the number of rolled back migrations. By default all migrations of the last batch will be rolled back.', 'l');
         });
     }
 

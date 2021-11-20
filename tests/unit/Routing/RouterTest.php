@@ -327,7 +327,7 @@ class RouterTest extends TestCase
         $this->assertEquals('dryrun', $option->name);
         $this->assertEquals('Do not write changes', $option->description);
         $this->assertFalse($option->required);
-        $this->assertNull($option->default);
+        $this->assertFalse($option->default);
         $this->assertEquals('bool', $option->type);
         $this->assertEquals('d', $option->shortcut);
 
