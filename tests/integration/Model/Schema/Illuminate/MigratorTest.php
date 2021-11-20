@@ -161,18 +161,28 @@ class MigratorTest extends IntegrationTest
         /** @var Filesystem|Mock $fs */
         $fs = $this->mock(Filesystem::class);
 
+        $source = new Url($this->app()->config('migrations')['source']);
+
+        $table = $source->path->first();
+
+        /** @var DatabaseMigrationRepository $laravelRepo */
+        $laravelRepo = $this->app()->create(
+            DatabaseMigrationRepository::class,
+            ['table' => $table]
+        );
+
         /** @var MigrationStepRepository $repository */
         $repository = $this->app()->create(IlluminateMigrationStepRepository::class, [
-            'nativeRepository' => $this->app()->create(
-                DatabaseMigrationRepository::class,
-                ['table' => 'migrations']
-            ),
+            'nativeRepository' => $laravelRepo,
             'fs' => $fs
         ]);
 
         $files = $this->migrationFiles();
+        $firstBatchSize = 2;
 
-        $fs->shouldReceive('files')->andReturn(array_slice($files, 0, 2))->once();
+        $firstBatch = array_slice($files, 0, $firstBatchSize);
+
+        $fs->shouldReceive('files')->andReturn($firstBatch)->once();
         $fs->shouldReceive('basename')->andReturnUsing(function ($path) {
             return basename($path);
         });
@@ -181,12 +191,53 @@ class MigratorTest extends IntegrationTest
         $migrator->install();
 
         $processed = $migrator->migrate();
-        $this->assertCount(2, $processed);
+        foreach ($processed as $step) {
+            $this->assertEquals(1, $step->batch);
+        }
+        $this->assertCount($firstBatchSize, $processed);
 
-        $fs->shouldReceive('files')->andReturn(array_slice($files, 3, 3))->once();
+        $this->assertCount($firstBatchSize, $laravelRepo->getConnection()->table($table)->get());
+
+        $fs->shouldReceive('files')->andReturn(array_slice($files, 0, 5))->once();
 
         $processed = $migrator->migrate();
+
         $this->assertCount(3, $processed);
+
+        $this->assertCount(5, $laravelRepo->getConnection()->table($table)->get());
+
+        foreach ($processed as $step) {
+            $this->assertEquals(2, $step->batch);
+        }
+
+        $fs->shouldReceive('files')->andReturn($files);
+
+        $migrations = $migrator->migrations();
+
+        $this->assertCount(count($files), $migrations);
+
+        $migrated = 0;
+        $notMigrated = 0;
+        foreach ($migrations as $migration) {
+            if ($migration->migrated) {
+                $migrated++;
+                continue;
+            }
+            $notMigrated++;
+        }
+        $this->assertEquals(5, $migrated);
+        $this->assertEquals(count($files)-5, $notMigrated);
+
+        $lastProcessed = $migrator->rollback();
+        $this->assertCount(3, $lastProcessed);
+
+        $this->assertCount($firstBatchSize, $laravelRepo->getConnection()->table($table)->get());
+
+        $processed = $migrator->migrate();
+
+        $this->assertCount(count($files) - $firstBatchSize, $processed);
+
+        $this->assertCount(count($files), $laravelRepo->getConnection()->table($table)->get());
 
     }
 
