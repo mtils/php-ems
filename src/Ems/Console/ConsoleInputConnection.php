@@ -12,7 +12,11 @@ use Ems\Contracts\Core\Url as UrlContract;
 use Ems\Contracts\Routing\Routable;
 use Ems\Core\Connection\AbstractConnection;
 use Ems\Core\Url;
+
+use function fgets;
+use function fopen;
 use function strpos;
+use function strtolower;
 
 class ConsoleInputConnection extends AbstractConnection implements InputConnection
 {
@@ -52,6 +56,31 @@ class ConsoleInputConnection extends AbstractConnection implements InputConnecti
         return $input;
     }
 
+    /**
+     * Get something from terminal.
+     *
+     * @return string
+     */
+    public function interact(): string
+    {
+        $handle = fopen($this->uri, 'r');
+        $input = trim(fgets($handle));
+        fclose($handle);
+        return $input;
+    }
+
+    /**
+     * Return true if the user typed one of the passed values.
+     *
+     * @param string[] $yes
+     *
+     * @return bool
+     */
+    public function confirm($yes=['y','yes','1','true']) : bool
+    {
+        $input = $this->interact();
+        return in_array(strtolower($input), $yes);
+    }
 
     /**
      * @param UrlContract $url
