@@ -12,10 +12,10 @@ use Ems\Events\Laravel\EventDispatcher;
 use Ems\Model\Database\DB;
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Events\Dispatcher as DispatcherContract;
-use Illuminate\Events\Dispatcher;
 use Illuminate\Database\Connection;
 use Illuminate\Database\ConnectionResolverInterface;
 use Illuminate\Database\Connectors\ConnectionFactory;
+use Illuminate\Events\Dispatcher;
 
 use function class_exists;
 
@@ -197,7 +197,14 @@ class EmsConnectionFactory implements ConnectionResolverInterface
         }
         $emsConnection = $this->connectionPool->connection($name);
         $config = static::configToLaravelConfig(DB::urlToConfig($emsConnection->url()));
+        $config['pdo'] = function () use ($emsConnection) {
+            if (!$emsConnection->isOpen()) {
+                $emsConnection->open();
+            }
+            return $emsConnection->resource();
+        };
         $connection = $this->getNativeFactory()->make($config, $name);
+
         if ($events = $this->getEvents()) {
             $connection->setEventDispatcher($events);
         }
@@ -210,7 +217,7 @@ class EmsConnectionFactory implements ConnectionResolverInterface
     protected function getNativeFactory() : ConnectionFactory
     {
         if (!$this->nativeFactory) {
-            $this->nativeFactory = new ConnectionFactory(new Container());
+            $this->nativeFactory = new SharedPdoConnectionFactory(new Container());
         }
         return $this->nativeFactory;
     }
