@@ -273,7 +273,7 @@ class MigratorTest extends IntegrationTest
         $app->configure('migrations', [
             'repository' => 'illuminate',
             'runner'     => 'illuminate',
-            'source'     => 'database://tests/migrations',
+            'source'     => 'database://default/migrations',
             'paths'      => [
                 $this->dirOfTests('database/schema/migrations')
             ]

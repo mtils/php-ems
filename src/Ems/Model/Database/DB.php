@@ -85,13 +85,25 @@ class DB
     }
 
     /**
-     * Make a connection handler for connection pool to create the
+     * Make a connection handler for connection pool to create the connection.
+     *
      * @param array $nameToUrl
+     * @param array $config (optional)
      * @return callable
      */
-    public static function makeConnectionHandler(array $nameToUrl) : callable
+    public static function makeConnectionHandler(array $nameToUrl, array $config=[]) : callable
     {
-        return function ($name) use ($nameToUrl) {
+
+        return function ($name) use ($nameToUrl, $config) {
+
+            if ($name instanceof Url && $name->scheme == 'database') {
+                $name = $name->host;
+            }
+
+            if ($name == 'default' && isset($config['connection'])) {
+                $name = $config['connection'];
+            }
+
             $nameString = (string)$name;
             if (isset($nameToUrl[$nameString])) {
                 return new PDOConnection($nameToUrl[$nameString]);

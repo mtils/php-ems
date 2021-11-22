@@ -153,18 +153,9 @@ class MigrationBootstrapper extends Bootstrapper
     {
         $this->app->share(ConnectionResolverInterface::class, function () {
             /** @var EmsConnectionFactory $factory */
-            $factory = $this->app->create(EmsConnectionFactory::class, [
+            return $this->app->create(EmsConnectionFactory::class, [
                 'connectionPool' => $this->app->get(ConnectionPool::class)
             ]);
-            /** @var Application $app */
-            $app = $this->app->get(Application::class);
-            if (!$dbConfig = $app->config('database')) {
-                return $factory;
-            }
-            if (isset($dbConfig['connection']) && $dbConfig['connection']) {
-                $factory->setDefaultConnection($dbConfig['connection']);
-            }
-            return $factory;
         });
         $this->app->bind(EmsConnectionFactory::class, function () {
             return $this->app->get(ConnectionResolverInterface::class);

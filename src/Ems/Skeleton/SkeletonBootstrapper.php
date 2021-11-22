@@ -110,8 +110,10 @@ class SkeletonBootstrapper extends Bootstrapper
             return;
         }
 
-        $connections = $databaseConfig['connections'];
-        $handler = DB::makeConnectionHandler(DB::configurationsToUrls($connections));
+        $handler = DB::makeConnectionHandler(
+            DB::configurationsToUrls($databaseConfig['connections']),
+            $databaseConfig
+        );
         $pool->extend('config.database', $handler);
 
     }
