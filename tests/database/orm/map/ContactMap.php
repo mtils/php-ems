@@ -32,6 +32,14 @@ class ContactMap extends StaticClassMap
 
     const STORAGE_URL = 'database://default';
 
+    const DEFAULTS = [
+        self::CREATED_AT => self::NOW
+    ];
+
+    public const ON_UPDATE = [
+        self::UPDATED_AT => self::NOW
+    ];
+
     public static function user() : Relationship
     {
         return static::relateTo(User::class, UserMap::CONTACT_ID, self::ID);

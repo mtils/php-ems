@@ -101,6 +101,59 @@ class ClassMapTest extends TestCase
     }
 
     /**
+     * @test
+     */
+    public function get_and_set_defaults()
+    {
+        $defaults = [
+            'foo' => 'bar',
+            'call' => function () { return 'x'; }
+        ];
+        $map = $this->newMap();
+        $map->setDefaults($defaults);
+        $this->assertEquals([
+            'foo' => 'bar',
+            'call' => 'x'
+        ], $map->getDefaults());
+    }
+
+    /**
+     * @test
+     */
+    public function get_and_set_autoUpdates()
+    {
+        $defaults = [
+            'foo' => 'bar',
+            'call' => function () { return 'x'; }
+        ];
+        $map = $this->newMap();
+        $map->setAutoUpdates($defaults);
+        $this->assertEquals([
+                                'foo' => 'bar',
+                                'call' => 'x'
+                            ], $map->getAutoUpdates());
+    }
+
+    /**
+     * @test
+     */
+    public function get_and_set_types()
+    {
+        $types = [
+            'foo' => 'string',
+            'bar' => 'int'
+        ];
+        $map = $this->newMap();
+        $map->setType($types);
+        $this->assertEquals($types['foo'], $map->getType('foo'));
+        $this->assertEquals($types['bar'], $map->getType('bar'));
+
+        $map = $this->newMap();
+        $map->setType('price', 'float');
+        $this->assertEquals('float', $map->getType('price'));
+    }
+
+    /**
      * @return ClassMap
      */
     protected function newMap()

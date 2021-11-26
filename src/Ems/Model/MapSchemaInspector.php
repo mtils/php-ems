@@ -46,7 +46,7 @@ class MapSchemaInspector implements SchemaInspector
      *
      * @return Url
      */
-    public function getStorageUrl($class)
+    public function getStorageUrl(string $class) : Url
     {
         return $this->getMap($class)->getStorageUrl();
     }
@@ -60,7 +60,7 @@ class MapSchemaInspector implements SchemaInspector
      *
      * @return string
      */
-    public function getStorageName($class)
+    public function getStorageName(string $class) : string
     {
         return $this->getMap($class)->getStorageName();
     }
@@ -72,7 +72,7 @@ class MapSchemaInspector implements SchemaInspector
      *
      * @return string|string[]
      */
-    public function primaryKey($class)
+    public function primaryKey(string $class)
     {
         return $this->getMap($class)->getPrimaryKey();
     }
@@ -82,11 +82,11 @@ class MapSchemaInspector implements SchemaInspector
      * Return all keys of $class. This includes relations. The relation
      * has to be delivered by getRelation().
      *
-     * @param $class
+     * @param string $class
      *
      * @return string[]
      */
-    public function getKeys($class)
+    public function getKeys(string $class) : array
     {
         return $this->getMap($class)->getKeys();
     }
@@ -100,7 +100,7 @@ class MapSchemaInspector implements SchemaInspector
      *
      * @return Relationship
      */
-    public function getRelationship($class, $name)
+    public function getRelationship(string $class, string $name) : Relationship
     {
         return $this->getMap($class)->getRelationship($name);
     }
@@ -115,7 +115,7 @@ class MapSchemaInspector implements SchemaInspector
      *
      * @return $this
      */
-    public function map($class, $mapClass)
+    public function map(string $class, $mapClass) : MapSchemaInspector
     {
         if ($mapClass instanceof ClassMap) {
             $this->maps[$class] = $mapClass;
@@ -148,7 +148,7 @@ class MapSchemaInspector implements SchemaInspector
      *
      * @throws HandlerNotFoundException
      */
-    public function getMap($class)
+    public function getMap(string $class) : ClassMap
     {
         if (isset($this->maps[$class])) {
             return $this->maps[$class];
@@ -161,6 +161,25 @@ class MapSchemaInspector implements SchemaInspector
     }
 
     /**
+     * @param string $class
+     * @return array
+     */
+    public function getDefaults(string $class): array
+    {
+        return $this->getMap($class)->getDefaults();
+    }
+
+    /**
+     * @param string $class
+     * @return array
+     */
+    public function getAutoUpdates(string $class): array
+    {
+        return $this->getMap($class)->getAutoUpdates();
+    }
+
+
+    /**
      * Use the MapSchemaInspector as a type provider. This works as
      * \Ems\Core\Extractor::extend(new MapSchemaInspector()) or for its primary
      * usage in \Ems\Core\ObjectArrayConverter::setTypeProvider(new MapSchemaInspector()).
@@ -168,9 +187,9 @@ class MapSchemaInspector implements SchemaInspector
      * @param string $class
      * @param string $path
      *
-     * @return string
+     * @return string|null
      */
-    public function type(string $class, string $path)
+    public function type(string $class, string $path) : ?string
     {
         try {
 
@@ -180,10 +199,8 @@ class MapSchemaInspector implements SchemaInspector
                 return $this->typeFromNested($map, $path);
             }
 
-            $keys = $map->getKeys();
-
-            if (in_array($path, $keys)) {
-                return 'string';
+            if (in_array($path, $map->getKeys())) {
+                return $map->getType($path);
             }
 
             if (!$relation = $map->getRelationship($path)) {

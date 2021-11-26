@@ -201,6 +201,17 @@ class OrmQueryIntegrationTest extends DatabaseIntegrationTest
         $this->assertCount(0, $rows);
     }
 
+    /***************************************************************************
+     * Hier weiter:
+     * -------------------------------------------------------------------------
+     * insert, update, delete. Muss mit auto attributes, defaults und casting
+     * laufen
+     **************************************************************************/
+    public function insert_creates_user()
+    {
+
+    }
+
     protected function make(OrmQueryRunner $runner=null, ObjectArrayConverter $factory=null, Inspector $inspector=null, Connection $connection=null)
     {
         $inspector = $inspector ?: $this->newInspector();

@@ -18,7 +18,7 @@ interface SchemaInspector
      *
      * @return Url
      */
-    public function getStorageUrl($class);
+    public function getStorageUrl(string $class) : Url;
 
     /**
      * Return the name of $class in storage. In ORM/Database objects
@@ -29,7 +29,7 @@ interface SchemaInspector
      *
      * @return string
      */
-    public function getStorageName($class);
+    public function getStorageName(string $class) : string;
 
     /**
      * Return the primary key or multiple keys that build the primary key of this
@@ -39,7 +39,7 @@ interface SchemaInspector
      *
      * @return string|string[]
      */
-    public function primaryKey($class);
+    public function primaryKey(string $class);
 
     /**
      * Return all keys of $class. This includes relations. The relation
@@ -49,7 +49,7 @@ interface SchemaInspector
      *
      * @return string[]
      */
-    public function getKeys($class);
+    public function getKeys(string $class) : array;
 
     /**
      * Return the relation object that describes the relation to a foreign
@@ -60,6 +60,23 @@ interface SchemaInspector
      *
      * @return Relationship
      */
-    public function getRelationship($class, $name);
+    public function getRelationship(string $class, string $name) : Relationship;
 
+    /**
+     * Return a key=>value array of default values for $class. Created at or
+     * generated ids can be implemented here,
+     *
+     * @param string $class
+     * @return array
+     */
+    public function getDefaults(string $class) : array;
+
+    /**
+     * Return a key=>value array of values you want to write on each update.
+     * (updated_at would be written here)
+     *
+     * @param string $class
+     * @return array
+     */
+    public function getAutoUpdates(string $class) : array;
 }

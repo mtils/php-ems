@@ -6,11 +6,13 @@
 
 namespace Ems\Model;
 
+use DateTime;
 use Ems\Contracts\Model\Relationship;
 use Ems\Core\Exceptions\NotImplementedException;
 use Ems\Core\Exceptions\UnConfiguredException;
 use Ems\Core\Url;
 use ReflectionClass;
+use ReflectionClassConstant;
 use ReflectionException;
 use ReflectionMethod;
 
@@ -45,6 +47,26 @@ abstract class StaticClassMap extends ClassMap
     const PRIMARY_KEY = 'id';
 
     /**
+     * Overwrite this constant to set an array of types.
+     */
+    const TYPES = [];
+
+    /**
+     * Overwrite this to set defaults for new objects.
+     */
+    const DEFAULTS = [];
+
+    /**
+     * Overwrite this to generate update values ([updated_at => self::NOW])
+     */
+    const ON_UPDATE = [];
+
+    /**
+     * Use this constant
+     */
+    const NOW = 'NOW()';
+
+    /**
      * @var string|string[]
      */
     protected $primaryKey = null;
@@ -70,6 +92,11 @@ abstract class StaticClassMap extends ClassMap
     protected static $relationReturnTypes = [
         Relationship::class
     ];
+
+    /**
+     * @var array
+     */
+    protected static $ownConstants = [];
 
     public function getOrmClass()
     {
@@ -132,6 +159,50 @@ abstract class StaticClassMap extends ClassMap
 
     }
 
+    public function getType($key): string
+    {
+        if (isset($this->types[$key])) {
+            return parent::getType($key);
+        }
+        if (!$types = static::constantValue('TYPES')) {
+            return parent::getType($key);
+        }
+        return $types[$key] ?? parent::getType($key);
+    }
+
+    public function getDefaults(): array
+    {
+        if ($this->defaults) {
+            return parent::getDefaults();
+        }
+        if (!$defaults = static::constantValue('DEFAULTS')) {
+            return parent::getDefaults();
+        }
+        return $this->evaluateValues($defaults);
+    }
+
+    public function getAutoUpdates(): array
+    {
+        if ($this->autoUpdates) {
+            return parent::getAutoUpdates();
+        }
+        if (!$updates = static::constantValue('ON_UPDATE')) {
+            return parent::getAutoUpdates();
+        }
+        return $this->evaluateValues($updates);
+    }
+
+    protected function evaluateValues(array $template): array
+    {
+        foreach ($template as $key=>$value) {
+            if ($value === self::NOW) {
+                $template[$key] = function () { return new DateTime();};
+            }
+        }
+        return parent::evaluateValues($template);
+    }
+
+
     final public function getRelationship($name)
     {
         return static::relation($name);
@@ -163,6 +234,7 @@ abstract class StaticClassMap extends ClassMap
 
         throw new NotImplementedException("No matching method for relation named '$name' found in " . static::class);
     }
+
 
     /**
      * @param string $type
@@ -205,12 +277,12 @@ abstract class StaticClassMap extends ClassMap
     /**
      * @param string $name
      *
-     * @return string|null
+     * @return string|array|null
      */
     protected static function constantValue($name)
     {
         $constants = static::classConstants();
-        return isset($constants[$name]) ? $constants[$name] : null;
+        return $constants[$name] ?? null;
     }
 
     /**
@@ -262,12 +334,25 @@ abstract class StaticClassMap extends ClassMap
         return !static::isReservedConstant($constantName) && !static::isRelation($constantName);
     }
 
-    protected static function isReservedConstant($key)
+
+    protected static function isReservedConstant($key) : bool
     {
-        return in_array($key, ['STORAGE_NAME', 'ORM_CLASS', 'STORAGE_URL', 'PRIMARY_KEY']);
+        return in_array($key, self::getOwnConstants());
     }
 
-    protected static function isRelation($key)
+    protected static function getOwnConstants()
+    {
+        $class = new ReflectionClass(self::class);
+        if (self::$ownConstants) {
+            return self::$ownConstants;
+        }
+        foreach ($class->getConstants() as $constant=>$value) {
+            self::$ownConstants[] = $constant;
+        }
+        return self::$ownConstants;
+    }
+
+    protected static function isRelation($key) : bool
     {
         $relations = static::methodRelations();
         return isset($relations[$key]);

@@ -96,6 +96,8 @@ class MapSchemaInspectorTest extends TestCase
             ->setStorageUrl('rest://my-domain.de/api/v2')
             ->setKeys(['a', 'b', 'c'])
             ->setRelationship('errors', new Relationship())
+            ->setDefaults(['a' => 'b'])
+            ->setAutoUpdates(['c' => 'd'])
         ->setPrimaryKey('foo');
 
         $inspector = $this->make();
@@ -106,6 +108,8 @@ class MapSchemaInspectorTest extends TestCase
         $this->assertSame($map->getKeys(), $inspector->getKeys(TestCase::class));
         $this->assertSame($map->getRelationship('errors'), $inspector->getRelationship(TestCase::class, 'errors'));
         $this->assertSame($map->getPrimaryKey(), $inspector->primaryKey(TestCase::class));
+        $this->assertSame($map->getDefaults(), $inspector->getDefaults(TestCase::class));
+        $this->assertSame($map->getAutoUpdates(), $inspector->getAutoUpdates(TestCase::class));
     }
 
     /**

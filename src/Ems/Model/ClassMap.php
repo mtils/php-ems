@@ -6,9 +6,12 @@
 
 namespace Ems\Model;
 
+use Closure;
 use Ems\Contracts\Core\Url as UrlContract;
 use Ems\Contracts\Model\Relationship;
 use Ems\Core\Url;
+
+use function is_array;
 
 /**
  * Class ClassMap
@@ -49,6 +52,21 @@ class ClassMap
      * @var array
      */
     protected $relations = [];
+
+    /**
+     * @var array
+     */
+    protected $types = [];
+
+    /**
+     * @var array
+     */
+    protected $defaults = [];
+
+    /**
+     * @var array
+     */
+    protected $autoUpdates = [];
 
     /**
      * Get the url of the connection to the object. This could be a hard coded
@@ -171,7 +189,7 @@ class ClassMap
      */
     public function getRelationship($name)
     {
-        return isset($this->relations[$name]) ? $this->relations[$name] : null;
+        return $this->relations[$name] ?? null;
     }
 
     /**
@@ -186,5 +204,87 @@ class ClassMap
     {
         $this->relations[$name] = $relation;
         return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getDefaults() : array
+    {
+        return $this->evaluateValues($this->defaults);
+    }
+
+    /**
+     * Set the default values of this class. Set a Closure as value to get
+     * real time evaluated values. (Like Timestamps etc.)
+     *
+     * @param array $defaults
+     * @return $this
+     */
+    public function setDefaults(array $defaults) : ClassMap
+    {
+        $this->defaults = $defaults;
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getAutoUpdates() : array
+    {
+        return $this->evaluateValues($this->autoUpdates);
+    }
+
+    /**
+     * Set the auto updated values. Set closures for real time evaulated values.
+     *
+     * @param array $autoUpdates
+     * @return $this
+     */
+    public function setAutoUpdates(array $autoUpdates) : ClassMap
+    {
+        $this->autoUpdates = $autoUpdates;
+        return $this;
+    }
+
+    /**
+     * @param $key
+     * @return string
+     */
+    public function getType($key) : string
+    {
+        return $this->types[$key] ?? 'string';
+    }
+
+    /**
+     * Set the type for $key or set all types.
+     *
+     * @param string|array $key
+     * @param $value
+     * @return $this
+     */
+    public function setType($key, $value=null) : ClassMap
+    {
+        if (is_array($key)) {
+            $this->types = $key;
+            return $this;
+        };
+        $this->types[$key] = $value;
+        return $this;
+    }
+
+    /**
+     * Run closure values or take non closure values.
+     *
+     * @param array $template
+     * @return array
+     */
+    protected function evaluateValues(array $template) : array
+    {
+        $evaluated = [];
+        foreach ($template as $key=>$value) {
+            $evaluated[$key] = ($value instanceof Closure) ? $value() : $value;
+        }
+        return $evaluated;
     }
 }
