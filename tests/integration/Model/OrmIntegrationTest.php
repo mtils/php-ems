@@ -115,11 +115,13 @@ class OrmIntegrationTest extends DatabaseIntegrationTest
         $ormDir = static::dirOfTests('database/orm');
         $namespace = "Models";
 
-        $app->configure('orm.directories',[
-            [
-                'namespace'     => $namespace,
-                'directory'     => $ormDir,
-                'map-namespace' => $namespace.'\\Ems'
+        $app->configure('orm',[
+            'directories' => [
+                [
+                    'namespace'     => $namespace,
+                    'directory'     => $ormDir,
+                    'map-namespace' => $namespace.'\\Ems'
+                ]
             ]
         ]);
 

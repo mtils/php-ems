@@ -60,7 +60,8 @@ class Orm implements Extendable
 
         $query->setRunner($this->runner($url))
             ->setConnection($connection)
-            ->setObjectFactory($this->objectFactory);
+            ->setObjectFactory($this->objectFactory)
+            ->setSchemaInspector($this->inspector);
 
         return $query;
 

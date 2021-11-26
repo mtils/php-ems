@@ -51,11 +51,16 @@ class OrmBootstrapper extends Bootstrapper
             });
         });
 
+        /** @var Application $app */
         $app = $this->app->get(Application::class);
 
-        if (!$mapDirectories = $app->config('orm.directories')) {
+        if (!$ormConfig = $app->config('orm')) {
             return;
         }
+        if (!isset($ormConfig['directories'])) {
+            return;
+        }
+
         /**
          * [
          *   [
@@ -66,8 +71,8 @@ class OrmBootstrapper extends Bootstrapper
          *   ]
          * ]
          */
-        $this->app->on(MapSchemaInspector::class, function (MapSchemaInspector $inspector) use ($mapDirectories) {
-            $this->loadMaps($inspector, $mapDirectories);
+        $this->app->on(MapSchemaInspector::class, function (MapSchemaInspector $inspector) use ($ormConfig) {
+            $this->loadMaps($inspector, $ormConfig['directories']);
         });
     }
 
