@@ -126,7 +126,7 @@ class OrmQuery extends BaseOrmQuery implements Result, Paginatable
      *
      * @return array Return all values sent to the database. (empty if none)
      */
-    public function save($ormObject)
+    public function save($ormObject) : array
     {
         $this->conditions->clear();
 
