@@ -189,6 +189,15 @@ class MapSchemaInspector implements SchemaInspector
         return $this->evaluateValues($this->getMap($class)->getAutoUpdates());
     }
 
+    /**
+     * @param string $class
+     * @param string $path
+     * @return string|null
+     */
+    public function getType(string $class, string $path): ?string
+    {
+        return $this->type($class, $path);
+    }
 
     /**
      * Use the MapSchemaInspector as a type provider. This works as

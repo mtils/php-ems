@@ -6,7 +6,9 @@
 
 namespace Models\Ems;
 
+use DateTime;
 use Ems\Contracts\Model\Relationship;
+use Ems\Model\Generator;
 use Ems\Model\Relation;
 use Ems\Model\StaticClassMap;
 use Models\Group;
@@ -22,6 +24,21 @@ class GroupMap extends StaticClassMap
     const ORM_CLASS = Group::class;
     const STORAGE_NAME = 'groups';
     const STORAGE_URL = 'database://default';
+
+    protected $types = [
+        self::ID         => 'int',
+        self::CREATED_AT => DateTime::class,
+        self::UPDATED_AT => DateTime::class
+    ];
+
+    protected $defaults = [
+        self::CREATED_AT => Generator::NOW,
+        self::UPDATED_AT => Generator::NOW
+    ];
+
+    protected $autoUpdates = [
+        self::UPDATED_AT => Generator::NOW
+    ];
 
     // Should not bee needed in future
     public static function users() : Relationship

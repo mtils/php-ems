@@ -6,16 +6,15 @@
 namespace Models\Ems;
 
 
+use DateTime;
 use Ems\Contracts\Model\Relationship;
-use Ems\Model\Relation;
+use Ems\Model\Generator;
 use Ems\Model\StaticClassMap;
 use Models\Contact;
 use Models\Group;
 use Models\Project;
 use Models\Token;
 use Models\User;
-
-use const TOKEN_PARSE;
 
 class UserMap extends StaticClassMap
 {
@@ -31,6 +30,21 @@ class UserMap extends StaticClassMap
     const ORM_CLASS = User::class;
     const STORAGE_NAME = 'users';
     const STORAGE_URL = 'database://default';
+
+    protected $types = [
+        self::ID         => 'int',
+        self::CREATED_AT => DateTime::class,
+        self::UPDATED_AT => DateTime::class
+    ];
+
+    protected $defaults = [
+        self::CREATED_AT => Generator::NOW,
+        self::UPDATED_AT => Generator::NOW
+    ];
+
+    protected $autoUpdates = [
+        self::UPDATED_AT => Generator::NOW
+    ];
 
     public static function contact() : Relationship
     {

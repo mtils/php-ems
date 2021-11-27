@@ -7,6 +7,8 @@ namespace Ems\Model\Database;
 
 
 use ArrayIterator;
+use Closure;
+use DateTime;
 use Ems\Contracts\Core\HasMethodHooks;
 use Ems\Contracts\Model\Database\Connection as ConnectionContract;
 use Ems\Contracts\Model\Database\Query as QueryContract;
@@ -29,6 +31,7 @@ use function call_user_func;
 use function explode;
 use function get_class;
 use function is_array;
+
 
 class DbOrmQueryResult implements Result, Paginatable, HasMethodHooks
 {
@@ -73,6 +76,11 @@ class DbOrmQueryResult implements Result, Paginatable, HasMethodHooks
     private $inspector;
 
     /**
+     * @var
+     */
+    private $typeProvider;
+
+    /**
      * @var RelationMap
      */
     private $map;
@@ -81,6 +89,16 @@ class DbOrmQueryResult implements Result, Paginatable, HasMethodHooks
      * @var array
      */
     private $primaryKeyCache = [];
+
+    /**
+     * @var array
+     */
+    private $typeCache = [];
+
+    /**
+     * @var string
+     */
+    private $dateFormat = '';
 
     /**
      * Retrieve an external iterator
@@ -110,7 +128,7 @@ class DbOrmQueryResult implements Result, Paginatable, HasMethodHooks
      * @param int $page (optional)
      * @param int $perPage (optional)
      *
-     * @return \Traversable|array A paginator instance or just an array
+     * @return Paginator A paginator instance or just an array
      **/
     public function paginate($page = 1, $perPage = 15)
     {
@@ -305,10 +323,21 @@ class DbOrmQueryResult implements Result, Paginatable, HasMethodHooks
     }
 
 
-    protected function run($offset=null, $chunkSize=null)
+    /**
+     * Run the query and format its result
+     *
+     * @param int|null $offset
+     * @param int|null $chunkSize
+     * @return array
+     */
+    protected function run(int $offset=null, int $chunkSize=null) : array
     {
         $oldOffset = $this->dbQuery->offset;
         $oldLimit = $this->dbQuery->limit;
+
+        // Clear date format cache because we are not sure to have the same
+        // connection
+        $this->dateFormat = '';
 
         if ($offset !== null) {
             $this->dbQuery->offset($offset, $chunkSize);
@@ -326,7 +355,7 @@ class DbOrmQueryResult implements Result, Paginatable, HasMethodHooks
 
         foreach ($dbResult as $mainRow) {
             $mainId = $this->identify($mainRow, $primaryKey);
-            $buffer[$mainId] = $this->toNested($mainRow);
+            $buffer[$mainId] = $this->format($this->ormQuery->ormClass, $mainRow);
         }
 
         if (!$toManyQuery = $this->dbQuery->getAttached(OrmQueryBuilder::TO_MANY)) {
@@ -356,7 +385,12 @@ class DbOrmQueryResult implements Result, Paginatable, HasMethodHooks
         return $rows;
     }
 
-    protected function makeCountRunner()
+    /**
+     * Create a closure that will create the count query.
+     *
+     * @return Closure
+     */
+    protected function makeCountRunner() : Closure
     {
         return function () {
             $query = $this->getCountQuery();
@@ -366,7 +400,13 @@ class DbOrmQueryResult implements Result, Paginatable, HasMethodHooks
         };
     }
 
-    protected function primaryKey($path)
+    /**
+     * Get the primary key of of $path relative to root class.
+     *
+     * @param string $path
+     * @return string|string[]
+     */
+    protected function primaryKey(string $path)
     {
         if (isset($this->primaryKeyCache[$path])) {
             return $this->primaryKeyCache[$path];
@@ -376,19 +416,39 @@ class DbOrmQueryResult implements Result, Paginatable, HasMethodHooks
         foreach(explode('.', $path) as $segment) {
             $stack[] = $segment;
             $currentPath = implode('.', $stack);
-            //if (!isset($this->primaryKeyCache[$currentPath])) {
-                $relation = $this->inspector->getRelationship($parentClass, $segment);
-                $parentClass = get_class($relation->related);
-                $this->primaryKeyCache[$currentPath] = $this->inspector->primaryKey($parentClass);
-
-            //}
-
+            $relation = $this->inspector->getRelationship($parentClass, $segment);
+            $parentClass = get_class($relation->related);
+            $this->primaryKeyCache[$currentPath] = $this->inspector->primaryKey($parentClass);
         }
-        //$relation = $this->inspector->getRelationship($this->ormQuery->ormClass, $path);
 
         return $this->primaryKeyCache[$path];
     }
 
+    /**
+     * Get the type for $key of $class and cache it.
+     *
+     * @param string $class
+     * @param string $key
+     * @return string
+     */
+    protected function getType(string $class, string $key) : string
+    {
+        $cacheId = "$class|$key";
+        if (isset($this->typeCache[$cacheId])) {
+            return $this->typeCache[$cacheId];
+        }
+        if (!$type = $this->inspector->getType($class, $key)) {
+            $type = '';
+        }
+
+        $this->typeCache[$cacheId] = $type;
+        return $this->typeCache[$cacheId];
+    }
+
+    /**
+     * @param array $toManyRow
+     * @param $primaryKey
+     */
     protected function removePrimaryKey(array &$toManyRow, $primaryKey)
     {
         foreach((array)$primaryKey as $key) {
@@ -396,13 +456,20 @@ class DbOrmQueryResult implements Result, Paginatable, HasMethodHooks
         }
     }
 
-    protected function mergeToManyRow(array &$mainRow, array $toManyRow, $pathStack=[])
+    /**
+     * Merge the to-many-result into the top level result row
+     *
+     * @param array $mainRow
+     * @param array $toManyRow
+     * @param array $pathStack
+     */
+    protected function mergeToManyRow(array &$mainRow, array $toManyRow, array $pathStack=[])
     {
 
-        foreach ($toManyRow as $key=>$value) {
+        foreach ($toManyRow as $key=>$objectData) {
 
-            if (!is_array($value)) {
-                $mainRow[$key] = $value;
+            if (!is_array($objectData)) {
+                $mainRow[$key] = $objectData;
                 continue;
             }
             $pathStack[] = $key;
@@ -415,16 +482,21 @@ class DbOrmQueryResult implements Result, Paginatable, HasMethodHooks
             }
 
             // If it is an empty array we already added an empty array
-            if (!$value) {
+            if (!$objectData) {
                 array_pop($pathStack);
                 continue;
             }
 
+            // From here it should be always data for one orm object
             $relatedKey = $this->primaryKey($currentPath);
             $hasMany = $relation->hasMany;
 
+            if ($relatedClass = get_class($relation->related)) {
+                $this->cast($relatedClass, $objectData);
+            }
+
             if ($hasMany) {
-                $relatedId = $this->identify($value, $relatedKey);
+                $relatedId = $this->identify($objectData, $relatedKey);
                 if (!isset($mainRow[$key][$relatedId])) {
                     $mainRow[$key][$relatedId] = [];
                 }
@@ -434,7 +506,7 @@ class DbOrmQueryResult implements Result, Paginatable, HasMethodHooks
             }
 
             // Then check each of the keys if one is a relation
-            foreach ($value as $subKey=>$subValue) {
+            foreach ($objectData as $subKey=>$subValue) {
                 if (!is_array($subValue)) {
                     $node[$subKey] = $subValue;
                     continue;
@@ -444,16 +516,6 @@ class DbOrmQueryResult implements Result, Paginatable, HasMethodHooks
 
             array_pop($pathStack);
         }
-    }
-
-    protected function wasAlreadyAdded($row, $relatedKey, $relatedId)
-    {
-        foreach ($row as $alreadyAdded) {
-            if($this->identify($alreadyAdded, $relatedKey) == $relatedId) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
@@ -477,16 +539,82 @@ class DbOrmQueryResult implements Result, Paginatable, HasMethodHooks
         return implode('|', $values);
     }
 
-    protected function toNested($row)
+    /**
+     * Format each row (make it multidimensional and cast its values)
+     *
+     * @param string $ormClass
+     * @param array $row
+     * @return array
+     */
+    protected function format(string $ormClass, array $row) : array
+    {
+        $nested = $this->toNested($row);
+        $this->cast($ormClass, $nested);
+        return $nested;
+    }
+
+    /**
+     * Convert the __ separated flat result into a nested array.
+     *
+     * @param array $row
+     * @return array
+     */
+    protected function toNested(array $row) : array
     {
         $structured = NestedArray::toNested($row, '__');
         $this->removeEmptyRelations($structured);
         return $structured;
     }
 
+    /**
+     * Cast the values
+     * @param string $class
+     * @param array $row
+     */
+    protected function cast(string $class, array &$row)
+    {
+        $dateFormat = $this->getDateFormat();
+        foreach ($row as $key=>$value) {
+            if (!$type = $this->getType($class, $key)) {
+                continue;
+            }
+
+            if ($type == DateTime::class && !$value instanceof DateTime) {
+                $row[$key] = DateTime::createFromFormat($dateFormat, $value);
+                continue;
+            }
+
+            if (!is_array($value)) {
+                continue;
+            }
+
+            if (!$relation = $this->inspector->getRelationship($class, $key)) {
+                continue;
+            }
+            $this->cast(get_class($relation->related), $row[$key]);
+
+        }
+    }
+
+    /**
+     * @return string
+     */
+    protected function getDateFormat() : string
+    {
+        if (!$this->dateFormat) {
+            $this->dateFormat = $this->connection->dialect()->timeStampFormat();
+        }
+        return $this->dateFormat;
+    }
+
+    /**
+     * Clear the relations that were not loaded from the database.
+     *
+     * @param array $row
+     */
     protected function removeEmptyRelations(array &$row)
     {
-        // No indexed or empty arrays
+        // Remove indexed or empty arrays
         if (isset($row[0]) || !$row) {
             return;
         }

@@ -6,6 +6,7 @@
 namespace Ems\Model;
 
 
+use DateTime;
 use Ems\Contracts\Core\Connection;
 use Ems\Contracts\Core\ObjectArrayConverter;
 use Ems\Contracts\Model\Inspector;
@@ -15,8 +16,11 @@ use Ems\DatabaseIntegrationTest;
 use Ems\TestOrm;
 use Models\Contact;
 use Models\Ems\UserMap;
+use Models\Ems\ContactMap;
 use Models\ProjectType;
 use Models\User;
+
+use function print_r;
 
 class OrmQueryIntegrationTest extends DatabaseIntegrationTest
 {
@@ -165,6 +169,7 @@ class OrmQueryIntegrationTest extends DatabaseIntegrationTest
                 $this->assertInstanceOf(ProjectType::class, $project->type);
             }
             $this->assertTrue($projectsFound, 'No projects found');
+
         }
         $this->assertCount(4, $users);
         $this->assertEquals(19, $result->getTotalCount());
@@ -207,8 +212,34 @@ class OrmQueryIntegrationTest extends DatabaseIntegrationTest
      * insert, update, delete. Muss mit auto attributes, defaults und casting
      * laufen
      **************************************************************************/
-    public function insert_creates_user()
+    /**
+     * @test
+     */
+    public function create_contact()
     {
+        $query = $this->make();
+
+        $data = [
+            ContactMap::FIRST_NAME  => 'Michael',
+            ContactMap::LAST_NAME   => 'Tils',
+            ContactMap::ADDRESS     => 'His home 1',
+            ContactMap::CITY        => 'Old York',
+            ContactMap::POSTAL      => '123456',
+            ContactMap::PHONE1      => '+49 71145 548451'
+        ];
+
+        /** @var Contact $contact */
+        $contact = $query->create(Contact::class, $data);
+
+        print_r($contact);
+
+        $this->assertInstanceOf(Contact::class, $contact);
+        foreach ($data as $key=>$value) {
+            $this->assertEquals($value, $contact->{$key});
+        }
+        $this->assertGreaterThan(0, $contact->id);
+        $this->assertInstanceOf(DateTime::class, $contact->created_at);
+        $this->assertInstanceOf(DateTime::class, $contact->updated_at);
 
     }
 
@@ -227,7 +258,8 @@ class OrmQueryIntegrationTest extends DatabaseIntegrationTest
         $query = new OrmQuery();
         $query->setRunner($runner)
             ->setConnection($connection)
-            ->setObjectFactory($factory);
+            ->setObjectFactory($factory)
+            ->setSchemaInspector($inspector);
 
         return $query;
     }

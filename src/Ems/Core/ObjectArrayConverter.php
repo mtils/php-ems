@@ -84,6 +84,7 @@ class ObjectArrayConverter implements ObjectArrayConverterContract, ListAdapter
                 continue;
             }
             $type = $this->type($classOrInterface, $key, $value);
+
             $typeInfo = $this->typeInfo($type);
             $isClass = $this->isClass($typeInfo['type']);
 

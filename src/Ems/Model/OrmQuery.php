@@ -100,6 +100,13 @@ class OrmQuery extends BaseOrmQuery implements Result, Paginatable
      */
     public function create(string $ormClass, array $values)
     {
+
+        foreach($this->inspector->getDefaults($ormClass) as $key=>$value) {
+            if (!isset($values[$key])) {
+                $values[$key] = $value;
+            }
+        }
+
         $lastInsertedId = $this->getRunner()
                 ->create($this->getConnection(), $ormClass, $values);
 

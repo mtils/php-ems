@@ -79,4 +79,14 @@ interface SchemaInspector
      * @return array
      */
     public function getAutoUpdates(string $class) : array;
+
+    /**
+     * Get the type of $path in $class. This is the same as in Extractor
+     *
+     * @param string $class
+     * @param string $path
+     *
+     * @return string|null
+     */
+    public function getType(string $class, string $path) : ?string;
 }
