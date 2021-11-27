@@ -238,6 +238,7 @@ class OrmQueryIntegrationTest extends DatabaseIntegrationTest
             $this->assertEquals($value, $contact->{$key});
         }
         $this->assertGreaterThan(0, $contact->id);
+        $this->assertInternalType('int', $contact->id);
         $this->assertInstanceOf(DateTime::class, $contact->created_at);
         $this->assertInstanceOf(DateTime::class, $contact->updated_at);
 

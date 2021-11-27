@@ -583,7 +583,18 @@ class DbOrmQueryResult implements Result, Paginatable, HasMethodHooks
                 $row[$key] = DateTime::createFromFormat($dateFormat, $value);
                 continue;
             }
-
+            if ($type == 'int' || $type == 'integer') {
+                $row[$key] = (int)$value;
+                continue;
+            }
+            if ($type == 'float' || $type == 'double') {
+                $row[$key] = (float)$value;
+                continue;
+            }
+            if ($type == 'bool' || $type == 'boolean') {
+                $row[$key] = (bool)$value;
+                continue;
+            }
             if (!is_array($value)) {
                 continue;
             }
