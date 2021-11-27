@@ -7,6 +7,7 @@ namespace Models\Ems;
 
 
 use Ems\Contracts\Model\Relationship;
+use Ems\Model\Generator;
 use Ems\Model\StaticClassMap;
 use Models\Contact;
 use Models\User;
@@ -32,12 +33,12 @@ class ContactMap extends StaticClassMap
 
     const STORAGE_URL = 'database://default';
 
-    const DEFAULTS = [
-        self::CREATED_AT => self::NOW
+    protected $defaults = [
+        self::CREATED_AT => Generator::NOW
     ];
 
-    public const ON_UPDATE = [
-        self::UPDATED_AT => self::NOW
+    protected $autoUpdates = [
+        self::UPDATED_AT => Generator::NOW
     ];
 
     public static function user() : Relationship

@@ -6,6 +6,7 @@
 
 namespace Ems\Model;
 
+use Closure;
 use Ems\Contracts\Core\Exceptions\TypeException;
 use Ems\Contracts\Core\Url;
 use Ems\Contracts\Model\Relationship;
@@ -30,6 +31,11 @@ use function strpos;
 class MapSchemaInspector implements SchemaInspector
 {
     /**
+     * @var Generator
+     */
+    protected $generator;
+
+    /**
      * @var ClassMap[]
      */
     private $maps;
@@ -38,6 +44,11 @@ class MapSchemaInspector implements SchemaInspector
      * @var array
      */
     private $mapFactories = [];
+
+    public function __construct(Generator $generator=null)
+    {
+        $this->generator = $generator ?: new Generator();
+    }
 
     /**
      * Return the storage url.
@@ -166,7 +177,7 @@ class MapSchemaInspector implements SchemaInspector
      */
     public function getDefaults(string $class): array
     {
-        return $this->getMap($class)->getDefaults();
+        return $this->evaluateValues($this->getMap($class)->getDefaults());
     }
 
     /**
@@ -175,7 +186,7 @@ class MapSchemaInspector implements SchemaInspector
      */
     public function getAutoUpdates(string $class): array
     {
-        return $this->getMap($class)->getAutoUpdates();
+        return $this->evaluateValues($this->getMap($class)->getAutoUpdates());
     }
 
 
@@ -233,5 +244,24 @@ class MapSchemaInspector implements SchemaInspector
         }
 
         return $this->type($parentClass, $last);
+    }
+
+    /**
+     * Run closure values or take non closure values.
+     *
+     * @param array $template
+     * @return array
+     */
+    protected function evaluateValues(array $template) : array
+    {
+        $evaluated = [];
+        foreach ($template as $key=>$value) {
+            if ($value instanceof Closure) {
+                $evaluated[$key] = $value();
+                continue;
+            }
+            $evaluated[$key] = $this->generator->makeOrReturn($value);
+        }
+        return $evaluated;
     }
 }

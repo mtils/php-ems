@@ -6,9 +6,11 @@
 namespace unit\Model;
 
 
+use DateTime;
 use Ems\Contracts\Model\Relationship;
 use Ems\Contracts\Model\SchemaInspector;
 use Ems\Model\ClassMap;
+use Ems\Model\Generator;
 use Ems\Model\MapSchemaInspector;
 use Ems\TestCase;
 use Ems\TestOrm;
@@ -110,6 +112,62 @@ class MapSchemaInspectorTest extends TestCase
         $this->assertSame($map->getPrimaryKey(), $inspector->primaryKey(TestCase::class));
         $this->assertSame($map->getDefaults(), $inspector->getDefaults(TestCase::class));
         $this->assertSame($map->getAutoUpdates(), $inspector->getAutoUpdates(TestCase::class));
+    }
+
+    /**
+     * @test
+     */
+    public function defaults_and_updates_support_closures()
+    {
+        $map = new ClassMap();
+        $map->setOrmClass(TestCase::class)
+            ->setStorageName('test-cases')
+            ->setStorageUrl('rest://my-domain.de/api/v2')
+            ->setKeys(['a', 'b', 'c'])
+            ->setRelationship('errors', new Relationship())
+            ->setDefaults(['a' => function () { return 'b';}])
+            ->setAutoUpdates(['c' => function () {return 'd';}])
+            ->setPrimaryKey('foo');
+
+        $defaults = ['a' => 'b'];
+        $updates = ['c' => 'd'];
+        $inspector = $this->make();
+        $inspector->map(TestCase::class, $map);
+
+        $this->assertEquals((string)$map->getStorageUrl(), $inspector->getStorageUrl(TestCase::class));
+        $this->assertSame($map->getStorageName(), $inspector->getStorageName(TestCase::class));
+        $this->assertSame($map->getKeys(), $inspector->getKeys(TestCase::class));
+        $this->assertSame($map->getRelationship('errors'), $inspector->getRelationship(TestCase::class, 'errors'));
+        $this->assertSame($map->getPrimaryKey(), $inspector->primaryKey(TestCase::class));
+        $this->assertSame($defaults, $inspector->getDefaults(TestCase::class));
+        $this->assertSame($updates, $inspector->getAutoUpdates(TestCase::class));
+    }
+
+    /**
+     * @test
+     */
+    public function defaults_and_updates_support_Generator()
+    {
+        $map = new ClassMap();
+        $map->setOrmClass(TestCase::class)
+            ->setStorageName('test-cases')
+            ->setStorageUrl('rest://my-domain.de/api/v2')
+            ->setKeys(['a', 'b', 'c'])
+            ->setRelationship('errors', new Relationship())
+            ->setDefaults(['a' => Generator::NOW])
+            ->setAutoUpdates(['c' => Generator::NOW])
+            ->setPrimaryKey('foo');
+
+        $inspector = $this->make();
+        $inspector->map(TestCase::class, $map);
+
+        $this->assertEquals((string)$map->getStorageUrl(), $inspector->getStorageUrl(TestCase::class));
+        $this->assertSame($map->getStorageName(), $inspector->getStorageName(TestCase::class));
+        $this->assertSame($map->getKeys(), $inspector->getKeys(TestCase::class));
+        $this->assertSame($map->getRelationship('errors'), $inspector->getRelationship(TestCase::class, 'errors'));
+        $this->assertSame($map->getPrimaryKey(), $inspector->primaryKey(TestCase::class));
+        $this->assertInstanceOf(DateTime::class, $inspector->getDefaults(TestCase::class)['a']);
+        $this->assertInstanceOf(DateTime::class, $inspector->getAutoUpdates(TestCase::class)['c']);
     }
 
     /**

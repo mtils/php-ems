@@ -211,7 +211,7 @@ class ClassMap
      */
     public function getDefaults() : array
     {
-        return $this->evaluateValues($this->defaults);
+        return $this->defaults;
     }
 
     /**
@@ -232,7 +232,7 @@ class ClassMap
      */
     public function getAutoUpdates() : array
     {
-        return $this->evaluateValues($this->autoUpdates);
+        return $this->autoUpdates;
     }
 
     /**
@@ -273,18 +273,4 @@ class ClassMap
         return $this;
     }
 
-    /**
-     * Run closure values or take non closure values.
-     *
-     * @param array $template
-     * @return array
-     */
-    protected function evaluateValues(array $template) : array
-    {
-        $evaluated = [];
-        foreach ($template as $key=>$value) {
-            $evaluated[$key] = ($value instanceof Closure) ? $value() : $value;
-        }
-        return $evaluated;
-    }
 }

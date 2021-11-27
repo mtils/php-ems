@@ -107,7 +107,7 @@ class ClassMapTest extends TestCase
     {
         $defaults = [
             'foo' => 'bar',
-            'call' => function () { return 'x'; }
+            'call' => 'x'
         ];
         $map = $this->newMap();
         $map->setDefaults($defaults);
@@ -124,7 +124,7 @@ class ClassMapTest extends TestCase
     {
         $defaults = [
             'foo' => 'bar',
-            'call' => function () { return 'x'; }
+            'call' => 'x'
         ];
         $map = $this->newMap();
         $map->setAutoUpdates($defaults);
