@@ -217,6 +217,41 @@ class OrmQueryIntegrationTest extends DatabaseIntegrationTest
      */
     public function create_contact()
     {
+        $query = $this->make()->from(Contact::class);
+
+        $data = [
+            ContactMap::FIRST_NAME  => 'Michael',
+            ContactMap::LAST_NAME   => 'Tils',
+            ContactMap::ADDRESS     => 'His home 1',
+            ContactMap::CITY        => 'Old York',
+            ContactMap::POSTAL      => '123456',
+            ContactMap::PHONE1      => '+49 71145 548451'
+        ];
+
+        /** @var Contact $contact */
+        $contact = $query->create($data);
+
+        $this->assertInstanceOf(Contact::class, $contact);
+        foreach ($data as $key=>$value) {
+            $this->assertEquals($value, $contact->{$key});
+        }
+        $this->assertGreaterThan(0, $contact->id);
+        $this->assertInternalType('int', $contact->id);
+        $this->assertInstanceOf(DateTime::class, $contact->created_at);
+        $this->assertInstanceOf(DateTime::class, $contact->updated_at);
+
+        $storedContact = $this->make()->from(Contact::class)
+            ->where('id', $contact->id)->first();
+
+        $this->assertEquals($contact->toArray(), $storedContact->toArray());
+
+    }
+
+    /**
+     * @test
+     */
+    public function save_contact()
+    {
         $query = $this->make();
 
         $data = [
@@ -229,9 +264,38 @@ class OrmQueryIntegrationTest extends DatabaseIntegrationTest
         ];
 
         /** @var Contact $contact */
-        $contact = $query->create(Contact::class, $data);
+        $contact = $query->from(Contact::class)->create($data);
 
-        print_r($contact);
+        $this->assertEquals($data[ContactMap::FIRST_NAME], $contact->first_name);
+
+        $contact->first_name = 'Olaf';
+        $updates = $query->from(Contact::class)->save($contact);
+        $this->assertTrue(count($updates) > 1);
+
+        /** @var Contact $dbContact */
+        $dbContact = $this->make()->from(Contact::class)
+            ->where(ContactMap::ID, $contact->id)->first();
+        $this->assertEquals($contact->first_name, $dbContact->first_name);
+    }
+
+    /**
+     * @test
+     */
+    public function create_and_delete_contact()
+    {
+        $query = $this->make()->from(Contact::class);
+
+        $data = [
+            ContactMap::FIRST_NAME  => 'Michael',
+            ContactMap::LAST_NAME   => 'Tils',
+            ContactMap::ADDRESS     => 'His home 1',
+            ContactMap::CITY        => 'Old York',
+            ContactMap::POSTAL      => '123456',
+            ContactMap::PHONE1      => '+49 71145 548451'
+        ];
+
+        /** @var Contact $contact */
+        $contact = $query->create($data);
 
         $this->assertInstanceOf(Contact::class, $contact);
         foreach ($data as $key=>$value) {
@@ -241,6 +305,16 @@ class OrmQueryIntegrationTest extends DatabaseIntegrationTest
         $this->assertInternalType('int', $contact->id);
         $this->assertInstanceOf(DateTime::class, $contact->created_at);
         $this->assertInstanceOf(DateTime::class, $contact->updated_at);
+
+        $storedContact = $this->make()->from(Contact::class)
+            ->where('id', $contact->id)->first();
+
+        $this->assertEquals($contact->toArray(), $storedContact->toArray());
+
+        $this->assertEquals(1, $this->make()->from(Contact::class)->delete($contact));
+
+        $this->assertNull($this->make()->from(Contact::class)
+            ->where('id', $contact->id)->first());
 
     }
 

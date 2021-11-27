@@ -5,6 +5,7 @@
 
 namespace Ems\Core;
 
+use Ems\Contracts\Core\Arrayable;
 use Ems\Contracts\Core\Containers\ByTypeContainer;
 use Ems\Contracts\Core\ListAdapter;
 use Ems\Contracts\Core\ObjectArrayConverter as ObjectArrayConverterContract;
@@ -60,6 +61,9 @@ class ObjectArrayConverter implements ObjectArrayConverterContract, ListAdapter
         /** @var ObjectArrayConverterContract $converter */
         if ($converter = $this->handlers->forInstanceOf($class)) {
             return $converter->toArray($object, $depth);
+        }
+        if ($object instanceof Arrayable) {
+            return $object->toArray();
         }
         return $this->ensureArray(get_object_vars($object), $depth);
     }
