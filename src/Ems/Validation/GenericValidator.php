@@ -3,6 +3,7 @@
 
 namespace Ems\Validation;
 
+use Ems\Contracts\Core\HasMethodHooks;
 use Ems\Contracts\Validation\Validation as ValidationContract;
 use Ems\Contracts\Validation\GenericValidator as GenericValidatorContract;
 use Ems\Contracts\Validation\AlterableValidator as AlterableValidatorContract;
@@ -16,7 +17,7 @@ use Ems\Core\Patterns\HookableTrait;
  * It is normally not allowed to have a generic and alterable validator at
  * once.
  **/
-class GenericValidator extends Validator implements GenericValidatorContract, AlterableValidatorContract
+class GenericValidator extends Validator implements GenericValidatorContract, AlterableValidatorContract, AppliesToResource, HasMethodHooks
 {
     use RuleSettingSupport;
     use RuleMergingSupport;

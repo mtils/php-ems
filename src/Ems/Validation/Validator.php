@@ -4,26 +4,32 @@
 namespace Ems\Validation;
 
 use Ems\Contracts\Core\AppliesToResource;
+use Ems\Contracts\Core\Checker as CheckerContract;
+use Ems\Contracts\Core\Entity;
 use Ems\Contracts\Core\HasInjectMethods;
-use Ems\Contracts\Core\Type;
-use Ems\Contracts\Validation\Validator as ValidatorContract;
+use Ems\Contracts\Core\HasMethodHooks;
+use Ems\Contracts\Expression\Constraint;
+use Ems\Contracts\Expression\ConstraintGroup;
 use Ems\Contracts\Validation\GenericValidator as GenericValidatorContract;
 use Ems\Contracts\Validation\ResourceRuleDetector;
 use Ems\Contracts\Validation\Validation;
+use Ems\Contracts\Validation\Validator as ValidatorContract;
 use Ems\Contracts\XType\TypeProvider;
 use Ems\Contracts\XType\XType;
-use Ems\Core\Exceptions\UnConfiguredException;
-use Ems\Core\Patterns\HookableTrait;
-use Ems\Core\Helper;
-use Ems\Contracts\Core\Entity;
-use Ems\Core\Lambda;
+use Ems\Core\Checker;
 use Ems\Core\Collections\NestedArray;
+use Ems\Core\Exceptions\UnConfiguredException;
+use Ems\Core\Helper;
+use Ems\Core\Lambda;
+use Ems\Core\Patterns\HookableTrait;
 use Ems\Core\Patterns\SnakeCaseCallableMethods;
 use Ems\Expression\ConstraintParsingMethods;
 use Ems\XType\SequenceType;
+use RuntimeException;
+use stdClass;
 
 
-abstract class Validator implements ValidatorContract, HasInjectMethods
+class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
 {
     use HookableTrait;
     use ConstraintParsingMethods;
@@ -74,16 +80,29 @@ abstract class Validator implements ValidatorContract, HasInjectMethods
     protected $snakeCasePrefix = 'validate';
 
     /**
-     * Perform validation by the the base validator. Reimplement this method
-     * to use it with your favourite base validator.
-     *
-     * @param Validation        $validation
-     * @param array             $input
-     * @param array             $baseRules
-     * @param AppliesToResource $resource (optional)
-     * @param string            $locale (optional)
-     **/
-    abstract protected function validateByBaseValidator(Validation $validation, array $input, array $baseRules, AppliesToResource $resource=null, $locale=null);
+     * @var CheckerContract
+     */
+    protected $checker;
+
+    /**
+     * @var string[]
+     */
+    protected $required_rules = ['required', 'required_if', 'required_unless'];
+
+    public function __construct(array $rules=[])
+    {
+        if ($rules) {
+            $this->rules = $rules;
+        }
+    }
+
+    /**
+     * @return stdClass
+     */
+    public function resource()
+    {
+        return new stdClass();
+    }
 
     /**
      * {@inheritdoc}
@@ -110,9 +129,9 @@ abstract class Validator implements ValidatorContract, HasInjectMethods
     /**
      * Validates to true or fails by an exception (with unparsed messages)
      *
-     * @param array             $input
-     * @param AppliesToResource $resource (optional)
-     * @param string            $locale (optional)
+     * @param array                  $input
+     * @param AppliesToResource|null $resource (optional)
+     * @param string                 $locale (optional)
      *
      * @return bool (always true)
      **/
@@ -188,6 +207,37 @@ abstract class Validator implements ValidatorContract, HasInjectMethods
     }
 
     /**
+     * Perform validation by the base validator. Reimplement this method
+     * to use it with your favourite base validator.
+     *
+     * @param Validation             $validation
+     * @param array                  $input
+     * @param array                  $baseRules
+     * @param AppliesToResource|null $resource (optional)
+     * @param string                 $locale (optional)
+     **/
+    protected function validateByBaseValidator(Validation $validation, array $input, array $baseRules, AppliesToResource $resource=null, $locale=null)
+    {
+        foreach ($baseRules as $key=>$rule) {
+
+            if (!$this->checkRequiredRules($rule, $input, $key, $validation)) {
+                continue;
+            }
+
+            $value = $input[$key] ?? null;
+
+            foreach ($rule as $name=>$args) {
+                if (in_array($name, $this->required_rules)) {
+                    continue;
+                }
+                if (!$this->check($value, [$name=>$args], $resource)) {
+                    $validation->addFailure($key, $name, $args);
+                }
+            }
+        }
+    }
+
+    /**
      * A validation rule. It fails if the key was found in the input.
      *
      * @param array $input
@@ -217,17 +267,20 @@ abstract class Validator implements ValidatorContract, HasInjectMethods
     /**
      * Try to detect rules for the resource of this validator.
      *
-     * @param AppliesToResource $resource
+     * @param object $resource
      *
      * @return array
      **/
-    protected function detectRules(AppliesToResource $resource)
+    protected function detectRules($resource)
     {
 
         if (!$this->ruleDetector) {
             throw new UnConfiguredException("You have to assign a rule detector to detect rules");
         }
 
+        if (!$resource instanceof AppliesToResource) {
+            return [];
+        }
         return $this->ruleDetector->detectRules($resource, $this->relations);
     }
 
@@ -236,11 +289,11 @@ abstract class Validator implements ValidatorContract, HasInjectMethods
      * a TypeProvider they contain really all keys, also readonly
      *
      * @param array $rules
-     * @param AppliesToResource $resource
+     * @param object|null $resource
      *
      * @return array
      **/
-    protected function filterDetectedRules(array $rules, AppliesToResource $resource)
+    protected function filterDetectedRules(array $rules, $resource=null)
     {
 
         if (!$this->typeProvider) {
@@ -501,6 +554,124 @@ abstract class Validator implements ValidatorContract, HasInjectMethods
                 $validation->addFailure($key, $ruleName, $parameters);
             }
         }
+    }
+
+    /**
+     * Check if $value matches $rule.
+     *
+     * @param mixed                                   $value
+     * @param ConstraintGroup|Constraint|array|string $rule
+     * @param object|null                             $resource (optional)
+     *
+     * @return bool
+     */
+    protected function check($value, $rule, $resource=null) : bool
+    {
+        if (!$this->checker) {
+            $this->checker = new Checker();
+        }
+        $resource = $resource instanceof AppliesToResource ? $resource : null;
+        return $this->checker->check($value, $rule, $resource);
+    }
+
+    /**
+     * Check all required rules and return true if other rules should be checked
+     * after.
+     *
+     * @param array $rule
+     * @param array $input
+     * @param string $key
+     * @param Validation $validation
+     * @return bool
+     */
+    protected function checkRequiredRules(array $rule, array $input, string $key, Validation $validation) : bool
+    {
+        $value = $input[$key] ?? null;
+        // Check required before others to skip rest if missing
+        if (isset($rule['required']) && !$this->checkRequired($input, $key)) {
+            $validation->addFailure($key, 'required', []);
+            return false;
+        }
+
+        if (isset($rule['required_if']) && !$this->checkRequiredIf($input, $key, $rule['required_if'])) {
+            $validation->addFailure($key, 'required_if', $rule['required_if']);
+            return false;
+        }
+
+        if (isset($rule['required_unless']) && !$this->checkRequiredUnless($input, $key, $rule['required_unless'])) {
+            $validation->addFailure($key, 'required_unless', $rule['required_unless']);
+            return false;
+        }
+
+        // Check if not required other rules are ignored
+        if (!isset($rule['required']) && !$this->checkRequired($input, $key)) {
+            return false;
+        }
+
+
+
+        return true;
+    }
+
+    /**
+     * @param array $input
+     * @param string $key
+     * @return bool
+     */
+    protected function checkRequired(array $input, string $key) : bool
+    {
+        if (!isset($input[$key])) {
+            return false;
+        }
+        return $this->check($input[$key], ['required' => []]);
+    }
+
+    /**
+     * Check if value is present but only if another is also.
+     *
+     * @param array $input
+     * @param string $key
+     * @param array $args
+     * @return bool
+     */
+    protected function checkRequiredIf(array $input, string $key, array $args=[]) : bool
+    {
+        if (!isset($args[0])) {
+            throw new RuntimeException("Validation rules required_if and required_unless need another field name arg as minimum");
+        }
+        $other = $args[0];
+        $otherValue = $input[$other] ?? null;
+
+        $otherMatches = isset($args[1]) ? $args[1] == $otherValue : $this->checkRequired($input, $other);
+
+        if (!$otherMatches) {
+            return true;
+        }
+        return $this->checkRequired($input, $key);
+    }
+
+    /**
+     * Check if value is present but only if other is not.
+     *
+     * @param array $input
+     * @param string $key
+     * @param array $args
+     * @return bool
+     */
+    protected function checkRequiredUnless(array $input, string $key, array $args=[]) : bool
+    {
+        if (!isset($args[0])) {
+            throw new RuntimeException("Validation rules required_if and required_unless need another field name arg as minimum");
+        }
+        $other = $args[0];
+        $otherValue = $input[$other] ?? null;
+
+        $otherMatches = isset($args[1]) ? $args[1] == $otherValue : $this->checkRequired($input, $other);
+
+        if ($otherMatches) {
+            return true;
+        }
+        return $this->checkRequired($input, $key);
     }
 
     /**

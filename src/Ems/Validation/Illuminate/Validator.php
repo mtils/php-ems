@@ -4,6 +4,7 @@ namespace Ems\Validation\Illuminate;
 
 use Ems\Contracts\Core\AppliesToResource;
 use Ems\Contracts\Core\Entity;
+use Ems\Contracts\Core\HasMethodHooks;
 use Ems\Contracts\Core\Type;
 use Ems\Contracts\Validation\Validation;
 use Ems\Core\Collections\NestedArray;
@@ -13,7 +14,7 @@ use Illuminate\Contracts\Validation\Factory as IlluminateFactory;
 use Illuminate\Database\Eloquent\Model as EloquentModel;
 
 
-abstract class Validator extends AbstractValidator
+abstract class Validator extends AbstractValidator implements AppliesToResource, HasMethodHooks
 {
     /**
      * @var IlluminateFactory
