@@ -572,6 +572,21 @@ class CheckerTest extends TestCase
         $this->assertPasses('alph2', 'alpha_num');
     }
 
+    public function test_length()
+    {
+        $this->assertPasses('124','length:3');
+        $this->assertPasses('','length:0');
+        $this->assertFails('124','length:2');
+        $this->assertFails('124','length:4');
+        $this->assertPasses(['a','b','c'],'length:3');
+        $this->assertFails(['a','b','c'],'length:2');
+        $this->assertFails(['a','b','c'],'length:4');
+
+        $this->assertPasses('1245','length:2-5');
+        $this->assertFails('3','length:2-5');
+        $this->assertFails('1234567','length:2-5');
+    }
+
     protected function newChecker()
     {
         return new Checker();

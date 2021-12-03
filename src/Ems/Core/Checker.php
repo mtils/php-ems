@@ -916,6 +916,31 @@ class Checker implements CheckerContract
     }
 
     /**
+     * Check the length. This is useful if you have strings that are numeric but
+     * you want to count chars not the integer value.
+     * Pass a numeric parameter to check $value == $parameter.
+     * Pass a string with two numeric values divided by a minus to check
+     * if the length is between two values ("3-45").
+     *
+     * @param mixed            $value
+     * @param int|float|string $parameter
+     * @return bool
+     */
+    public function checkLength($value, $parameter) : bool
+    {
+        $size = $this->getSize($value, false);
+
+        if (is_numeric($parameter)) {
+            return $size == $parameter;
+        }
+        $parts = explode('-',$parameter);
+        if (count($parts) !== 2) {
+            throw new InvalidArgumentException("checkLength either accepts a numeric value for equal comparison or two numbers divided by a minus.");
+        }
+        return $size >= $parts[0] && $size <= $parts[1];
+    }
+
+    /**
      * Make two values comparable by normal operators.
      *
      * @param $value
@@ -982,12 +1007,13 @@ class Checker implements CheckerContract
      * Try to guess the size of a parameter.
      *
      * @param mixed $value
+     * @param bool $checkNumeric
      *
      * @return int
      */
-    protected function getSize($value)
+    protected function getSize($value, bool $checkNumeric=true)
     {
-        if (is_numeric($value)) {
+        if ($checkNumeric && is_numeric($value)) {
             return $value;
         }
 
