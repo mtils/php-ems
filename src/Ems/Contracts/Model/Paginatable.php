@@ -5,6 +5,9 @@
 
 namespace Ems\Contracts\Model;
 
+use Ems\Contracts\Pagination\Paginator;
+use Traversable;
+
 /**
  * A PaginatableResult allows to paginate the result (later).
  *
@@ -19,7 +22,7 @@ interface Paginatable
      * @param int $page    (optional)
      * @param int $perPage (optional)
      *
-     * @return \Traversable|array A paginator instance or just an array
+     * @return Traversable|array|Paginator A paginator instance or just an array
      **/
     public function paginate($page = 1, $perPage = 15);
 }
