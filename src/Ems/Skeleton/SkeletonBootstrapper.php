@@ -25,6 +25,8 @@ use function defined;
 use function file_exists;
 use function getenv;
 use function php_sapi_name;
+use function spl_object_hash;
+
 use const APPLICATION_START;
 
 
@@ -33,6 +35,11 @@ class SkeletonBootstrapper extends Bootstrapper
     protected $aliases = [
         LoggerInterface::class => [StreamLogger::class]
     ];
+
+    /**
+     * @var array
+     */
+    protected $configuredPools = [];
 
     public function bind()
     {
@@ -49,7 +56,12 @@ class SkeletonBootstrapper extends Bootstrapper
         });
 
         $this->app->onAfter(ConnectionPool::class, function ($pool) {
+            $poolId = spl_object_hash($pool);
+            if (isset($this->configuredPools[$poolId])) {
+                return;
+            }
             $this->addConnections($pool);
+            $this->configuredPools[$poolId] = true;
         });
 
         $this->installBenchmarkPrinter();
@@ -126,7 +138,7 @@ class SkeletonBootstrapper extends Bootstrapper
         /** @var Application $app */
         $app = $this->app->get('app');
 
-        if ($app->environment() != 'production') {
+        if ($app->environment() == Application::TESTING) {
             return new StreamLogger('php://stdout');
         }
 

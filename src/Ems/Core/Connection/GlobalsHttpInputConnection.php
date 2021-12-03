@@ -98,6 +98,7 @@ class GlobalsHttpInputConnection extends AbstractConnection implements InputConn
         $input = new Input($this->request);
         $input->setMethod($this->server['REQUEST_METHOD']);
         $input->setUrl($this->createUrl());
+        $input->setDeterminedContentType('text/html');
         return $input;
     }
 

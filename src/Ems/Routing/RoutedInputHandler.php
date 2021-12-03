@@ -9,9 +9,11 @@ use Ems\Console\ArgvInput;
 use Ems\Contracts\Core\HasMethodHooks;
 use Ems\Contracts\Core\Input as InputContract;
 use Ems\Contracts\Core\InputHandler as InputHandlerContract;
+use Ems\Contracts\Core\IOCContainer;
 use Ems\Contracts\Core\Response;
 use Ems\Contracts\Core\SupportsCustomFactory;
 use Ems\Contracts\Core\Type;
+use Ems\Contracts\Core\UtilizesInput;
 use Ems\Contracts\Routing\Routable;
 use Ems\Core\Exceptions\UnConfiguredException;
 use Ems\Core\Input;
@@ -20,6 +22,7 @@ use Ems\Core\Patterns\HookableTrait;
 use Ems\Core\Response as CoreResponse;
 use Ems\Core\Support\CustomFactorySupport;
 use Ems\Http\Response as HttpResponse;
+
 use function is_callable;
 
 /**
@@ -120,13 +123,19 @@ class RoutedInputHandler implements InputHandlerContract, SupportsCustomFactory,
     }
 
     /**
-     * @param Lambda        $handler
+     * @param Lambda $handler
      * @param InputContract $input
+     * @throws \ReflectionException
      */
     protected function configureLambda(Lambda $handler, InputContract $input)
     {
         if ($this->_customFactory && !$handler->getInstanceResolver()) {
             $handler->setInstanceResolver($this->_customFactory);
+        }
+        if ($this->_customFactory instanceof IOCContainer) {
+            $this->_customFactory->on(UtilizesInput::class, function (UtilizesInput $inputUser) use ($input) {
+                $inputUser->setInput($input);
+            });
         }
         // Manually bind the current input to explicitly use the input of this
         // application call
@@ -135,5 +144,14 @@ class RoutedInputHandler implements InputHandlerContract, SupportsCustomFactory,
         if ($input instanceof ArgvInput) {
             $handler->bind(ArgvInput::class, $input);
         }
+
+        if (!$handler->isInstanceMethod() || !$controller = $handler->getCallInstance()) {
+            return;
+        }
+
+        if ($controller instanceof UtilizesInput) {
+            $controller->setInput($input);
+        }
+
     }
 }

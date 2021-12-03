@@ -22,6 +22,11 @@ class Input implements InputContract
     use InputTrait;
 
     /**
+     * @var string
+     */
+    protected $determinedContentType = 'text/x-ansi';
+
+    /**
      * Input constructor.
      *
      * @param array $parameters
@@ -67,4 +72,21 @@ class Input implements InputContract
         return $result;
     }
 
+    /**
+     * @return string
+     */
+    public function determinedContentType(): string
+    {
+        return $this->determinedContentType;
+    }
+
+    /**
+     * @param string $contentType
+     * @return Input
+     */
+    public function setDeterminedContentType(string $contentType) : Input
+    {
+        $this->determinedContentType = $contentType;
+        return $this;
+    }
 }

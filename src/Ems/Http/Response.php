@@ -9,6 +9,7 @@
 namespace Ems\Http;
 
 use Ems\Contracts\Core\Arrayable;
+use Ems\Contracts\Core\Content;
 use Ems\Contracts\Core\Serializer as SerializerContract;
 use Ems\Contracts\Core\Stringable;
 use Ems\Contracts\Http\Response as ResponseContract;
@@ -16,18 +17,12 @@ use Ems\Core\Exceptions\NotImplementedException;
 use Ems\Core\Exceptions\UnConfiguredException;
 use Ems\Core\Response as CoreResponse;
 use Ems\Core\Serializer\JsonSerializer;
-use UnexpectedValueException;
-use Traversable;
 use stdClass;
-use Ems\Contracts\Core\Content;
+use Traversable;
+use UnexpectedValueException;
 
 class Response extends CoreResponse implements ResponseContract
 {
-    /**
-     * @var int
-     */
-    protected $status;
-
     /**
      * @var array
      */
@@ -75,6 +70,19 @@ class Response extends CoreResponse implements ResponseContract
     }
 
     /**
+     * {@inheritdoc}
+     *
+     * @return mixed
+     */
+    public function status() : int
+    {
+        if (!$this->status) {
+            return $this->findStatusInHeaders($this->headers());
+        }
+        return $this->status;
+    }
+
+    /**
      * @inheritdoc
      *
      * @return string
@@ -90,37 +98,21 @@ class Response extends CoreResponse implements ResponseContract
     /**
      * {@inheritdoc}
      *
-     * @return mixed
-     */
-    public function status()
-    {
-        if (!$this->status) {
-            return $this->findStatusInHeaders($this->headers());
-        }
-        return $this->status;
-    }
-
-    /**
-     * Set the HTTP status
-     *
-     * @param int $status
-     *
-     * @return $this
-     */
-    public function setStatus($status)
-    {
-        $this->status = $status;
-        return $this;
-    }
-
-    /**
-     * {@inheritdoc}
-     *
      * @return array
      */
     public function headers()
     {
-        return $this->headers;
+        $headers = [];
+        if ($contentType = $this->contentType) {
+            $headers[] = "Content-Type:$contentType";
+        }
+        foreach ($this->headers as $line) {
+            if ($contentType && strpos($line, 'Content-Type') === 0) {
+                continue;
+            }
+            $headers[] = $line;
+        }
+        return $headers;
     }
 
     /**

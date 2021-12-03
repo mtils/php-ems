@@ -58,4 +58,12 @@ interface Input extends Message, Provider, Routable
      * @return self|null
      */
     public function next();
+
+    /**
+     * Return the content type that should be returned. This should be accepted
+     * by the client and match the clientType.
+     *
+     * @return string
+     */
+    public function determinedContentType() : string;
 }

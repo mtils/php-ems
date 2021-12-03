@@ -5,6 +5,7 @@
 
 namespace Ems\Core;
 
+use Ems\Contracts\Core\Response as CoreResponseContract;
 use Ems\Contracts\Core\Response as ResponseContract;
 use Ems\Contracts\Core\StringableTrait;
 use Ems\Core\Support\BootingArrayData;
@@ -15,6 +16,11 @@ class Response implements ResponseContract
 {
     use BootingArrayData;
     use StringableTrait;
+
+    /**
+     * @var int
+     */
+    protected $status = 0;
 
     /**
      * @var string
@@ -89,6 +95,29 @@ class Response implements ResponseContract
     {
         $this->payload = $payload;
         $this->payloadCreated = true;
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @return mixed
+     */
+    public function status() : int
+    {
+        return $this->status;
+    }
+
+    /**
+     * Set the HTTP status
+     *
+     * @param int $status
+     *
+     * @return \Ems\Http\Response
+     */
+    public function setStatus(int $status) : ResponseContract
+    {
+        $this->status = $status;
         return $this;
     }
 

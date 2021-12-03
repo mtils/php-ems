@@ -8,10 +8,12 @@ namespace Ems\Routing\Skeleton;
 
 use Ems\Contracts\Core\Input;
 use Ems\Contracts\Core\InputHandler as InputHandlerContract;
+use Ems\Contracts\Core\ResponseFactory as ResponseFactoryContract;
 use Ems\Contracts\Routing\Dispatcher;
 use Ems\Contracts\Routing\MiddlewareCollection as MiddlewareCollectionContract;
 use Ems\Contracts\Routing\Routable;
 use Ems\Contracts\Routing\Router as RouterContract;
+use Ems\Core\ResponseFactory;
 use Ems\Core\Skeleton\Bootstrapper;
 use Ems\Routing\ConsoleDispatcher;
 use Ems\Routing\FastRoute\FastRouteDispatcher;
@@ -20,13 +22,15 @@ use Ems\Routing\MiddlewareCollection;
 use Ems\Routing\RoutedInputHandler;
 use Ems\Routing\RouteMiddleware;
 use Ems\Routing\Router;
+
 use function php_sapi_name;
 
 class RoutingBootstrapper extends Bootstrapper
 {
     protected $singletons = [
         InputHandler::class         => InputHandlerContract::class,
-        Router::class               => RouterContract::class
+        Router::class               => RouterContract::class,
+        ResponseFactory::class      => ResponseFactoryContract::class
     ];
 
     protected $bindings = [
@@ -77,6 +81,7 @@ class RoutingBootstrapper extends Bootstrapper
             }
             if ($url->path->first() == 'api') {
                 $input->setClientType(Routable::CLIENT_API);
+                $input->setUrl($input->url()->shift());
                 return $next($input);
             }
             $input->setClientType(Routable::CLIENT_WEB);

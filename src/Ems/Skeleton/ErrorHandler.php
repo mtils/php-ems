@@ -75,13 +75,14 @@ class ErrorHandler
     /**
      * Use it as an input handler exception handler.
      *
-     * @param Throwable $e
-     * @param Input     $input
+     * @param Throwable  $e
+     * @param Input|null $input
      *
      * @return ResponseContract
      */
-    public function __invoke(Throwable $e, Input $input)
+    public function __invoke(Throwable $e, Input $input=null)
     {
+        $input = $input ?: $this->app->read();
         return $this->handle($e, $input);
     }
 
