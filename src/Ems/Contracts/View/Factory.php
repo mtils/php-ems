@@ -11,7 +11,7 @@ interface Factory
      *
      * @return bool
      **/
-    public function exists($name);
+    public function exists(string $name) : bool;
 
     /**
      * Create an unrendered view.
@@ -19,9 +19,9 @@ interface Factory
      * @param string $name
      * @param array  $data (optional)
      *
-     * @return \Ems\Contracts\View\View
+     * @return View
      **/
-    public function view($name, $data = []);
+    public function view(string $name, array $data = []) : View;
 
     /**
      * Share a variable between all views.
@@ -31,17 +31,6 @@ interface Factory
      *
      * @return self
      **/
-    public function share($key, $value = null);
+    public function share($key, $value = null) : Factory;
 
-    /**
-     * Register a callable on view names $names which
-     * will be called with the view as its first argument and
-     * the factory as its second argument.
-     *
-     * @param array|string
-     * @param callable $listener
-     *
-     * @return self
-     **/
-    public function on($names, callable $listener);
 }

@@ -315,7 +315,7 @@ class MiddlewareCollection implements MiddlewareCollectionContract
      */
     protected function makeRunner(array $keys)
     {
-        /** @var callable $runner */
+        /** @var MiddlewareRunner $runner */
         $runner = $this->createObject(MiddlewareRunner::class, [$this, $keys]);
         return $runner;
     }
