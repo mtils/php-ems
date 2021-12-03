@@ -18,6 +18,8 @@ use Ems\Model\Orm;
 
 use function rtrim;
 
+use const APP_ROOT;
+
 class OrmBootstrapper extends Bootstrapper
 {
     protected $singletons = [
@@ -57,6 +59,7 @@ class OrmBootstrapper extends Bootstrapper
         if (!$ormConfig = $app->config('orm')) {
             return;
         }
+
         if (!isset($ormConfig['directories'])) {
             return;
         }
@@ -83,10 +86,11 @@ class OrmBootstrapper extends Bootstrapper
 
             $namespace = rtrim($configuration['namespace'], '\\');
             $mapNamespace = isset($configuration['map-namespace']) ? rtrim($configuration['map-namespace'], '\\') : $namespace.'\\'.'Maps';
-            $mapSuffix = isset($configuration['map-suffix']) ? $configuration['map-suffix'] : 'Map';
+            $mapSuffix = $configuration['map-suffix'] ?? 'Map';
+            $directory = $configuration['directory'];
+            $directory = $directory[0] == '/' ? $directory : APP_ROOT . '/' . $directory;
 
-            foreach ($fs->files($configuration['directory']) as $file) {
-
+            foreach ($fs->files($directory) as $file) {
                 $shortClass = $fs->name($file);
                 $class = $namespace . '\\' .  $shortClass;
                 $mapClass = $mapNamespace . '\\' . $shortClass . $mapSuffix;
