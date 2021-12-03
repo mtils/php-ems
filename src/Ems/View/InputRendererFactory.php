@@ -20,12 +20,12 @@ class InputRendererFactory implements Extendable
     /**
      * Create a renderer for $input and $renderable.
      *
-     * @param Input             $input
-     * @param Renderable|null   $renderable
+     * @param Input $input
+     * @param Renderable|null $renderable
      *
      * @return Renderer|null
      */
-    public function renderer(Input $input, Renderable $renderable=null)
+    public function renderer(Input $input, Renderable $renderable = null)
     {
         return $this->callUntilNotNull([$input, $renderable]);
     }
@@ -60,8 +60,8 @@ class InputRendererFactory implements Extendable
     /**
      * Create a renderer and assign it to the renderable.
      *
-     * @param Input         $input
-     * @param Renderable    $item
+     * @param Input $input
+     * @param Renderable $item
      */
     protected function assignRenderer(Input $input, Renderable $item)
     {
