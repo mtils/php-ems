@@ -87,7 +87,7 @@ class DB
     /**
      * Make a connection handler for connection pool to create the connection.
      *
-     * @param array $nameToUrl
+     * @param Url[] $nameToUrl
      * @param array $config (optional)
      * @return callable
      */
@@ -105,10 +105,14 @@ class DB
             }
 
             $nameString = (string)$name;
-            if (isset($nameToUrl[$nameString])) {
-                return new PDOConnection($nameToUrl[$nameString]);
+            if (!isset($nameToUrl[$nameString])) {
+                return null;
             }
-            return null;
+            $url = $nameToUrl[$nameString];
+            $connection = new PDOConnection($url);
+            $connection->setDialect(SQL::dialect($url->scheme));
+            return $connection;
+
         };
 
     }
