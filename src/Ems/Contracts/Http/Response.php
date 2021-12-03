@@ -28,13 +28,6 @@ use Ems\Contracts\Core\Serializer;
 interface Response extends CoreResponse
 {
     /**
-     * Return the HTTP status code
-     *
-     * @return int
-     */
-    public function status();
-
-    /**
      * Return the headers.
      *
      * @return mixed

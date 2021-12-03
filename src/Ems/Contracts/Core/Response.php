@@ -36,4 +36,18 @@ interface Response extends Stringable, ArrayData, Countable, IteratorAggregate
      * @return mixed
      */
     public function payload();
+
+    /**
+     * Get the status (command return value or http status)
+     * @return int
+     */
+    public function status() : int;
+
+    /**
+     * Set the status of this response. In console 0 would be succes, in http 200
+     *
+     * @param int $status
+     * @return Response
+     */
+    public function setStatus(int $status) : Response;
 }
