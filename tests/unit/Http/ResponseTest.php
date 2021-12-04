@@ -49,24 +49,6 @@ class ResponseTest extends \Ems\TestCase
 
     }
 
-    /**
-     * @expectedException \UnexpectedValueException
-     */
-    public function test_if_no_status_found_exception_will_throw()
-    {
-        $headers = [
-            'Date: Fri, 10 Nov 2017 20:30:00 GMT',
-            'Server: Apache/2.4.10 (Linux/SUSE)',
-            'X-Powered-By: PHP/5.6.1',
-            'Content-Length: 100',
-            'Connection: close',
-            'Content-Type: application/json'
-        ];
-
-        $this->response($headers)->status();
-
-    }
-
     public function test_contentType_getter_and_setter()
     {
         $response = $this->response();

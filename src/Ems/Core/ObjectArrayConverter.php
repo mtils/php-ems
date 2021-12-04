@@ -55,7 +55,7 @@ class ObjectArrayConverter implements ObjectArrayConverterContract, ListAdapter
      *
      * @return array
      */
-    public function toArray($object, $depth = 0)
+    public function toArray($object, int $depth = 0) : array
     {
         $class = get_class($object);
         /** @var ObjectArrayConverterContract $converter */
@@ -77,7 +77,7 @@ class ObjectArrayConverter implements ObjectArrayConverterContract, ListAdapter
      *
      * @return object
      */
-    public function fromArray(string $classOrInterface, array $data=[], $isFromStorage=false)
+    public function fromArray(string $classOrInterface, array $data=[], bool $isFromStorage=false)
     {
         // We cast from deepest to upper to leave the complexity of recursion
         // in this class and not the extensions

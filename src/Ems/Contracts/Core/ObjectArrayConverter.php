@@ -21,7 +21,7 @@ interface ObjectArrayConverter
      * @param int $depth (default:0)
      * @return array
      */
-    public function toArray($object, $depth=0);
+    public function toArray($object, int $depth=0) : array;
 
     /**
      * Create an object of $classOrInterface by the passed array.
@@ -33,5 +33,5 @@ interface ObjectArrayConverter
      *
      * @return object
      */
-    public function fromArray(string $classOrInterface, array $data=[], $isFromStorage=false);
+    public function fromArray(string $classOrInterface, array $data=[], bool $isFromStorage=false);
 }

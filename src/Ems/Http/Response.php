@@ -21,8 +21,17 @@ use stdClass;
 use Traversable;
 use UnexpectedValueException;
 
+use function explode;
+use function strpos;
+use function trim;
+
 class Response extends CoreResponse implements ResponseContract
 {
+    /**
+     * @var int
+     */
+    protected $status = 200;
+
     /**
      * @var array
      */
@@ -56,7 +65,7 @@ class Response extends CoreResponse implements ResponseContract
      */
     public function __construct(array $headers=[], $body='')
     {
-        $this->headers = $headers;
+        $this->setHeaders($headers);
 
         if ($this->contentType() == 'application/json') {
             $this->serializer = new JsonSerializer();
@@ -113,6 +122,22 @@ class Response extends CoreResponse implements ResponseContract
             $headers[] = $line;
         }
         return $headers;
+    }
+
+    /**
+     * @param array $headers
+     * @return $this
+     */
+    public function setHeaders(array $headers) : Response
+    {
+        $this->headers = $headers;
+        foreach ($headers as $header) {
+            if ($this->isStatusHeaderLine($header)) {
+                $this->setStatus($this->getStatusFromHeaderLine($header));
+                break;
+            }
+        }
+        return $this;
     }
 
     /**
@@ -241,15 +266,32 @@ class Response extends CoreResponse implements ResponseContract
      *
      * @return int
      */
-    protected function findStatusInHeaders($headers)
+    protected function findStatusInHeaders($headers) : int
     {
-        if (!isset($headers[0]) || strpos($headers[0], 'HTTP/') !== 0) {
+        if (!isset($headers[0]) || !$this->isStatusHeaderLine($headers[0])) {
             throw new UnexpectedValueException('Invalid HTTP Headers, missing status line');
         }
+        return $this->getStatusFromHeaderLine($headers[0]);
+    }
 
-        $parts = explode(' ', trim($headers[0]));
+    /**
+     * @param string $statusLine
+     * @return int
+     */
+    protected function getStatusFromHeaderLine(string $statusLine) : int
+    {
+        $parts = explode(' ', trim($statusLine));
 
         return (int)trim($parts[1]);
+    }
+
+    /**
+     * @param string $headerLine
+     * @return bool
+     */
+    protected function isStatusHeaderLine(string $headerLine) : bool
+    {
+        return strpos($headerLine, 'HTTP/') === 0;
     }
 
     /**

@@ -276,4 +276,19 @@ class SQL
 
         return implode($connectBy, $lines);
     }
+
+    /**
+     * Escape a string to search in a like query. Translates asterisk (*) to
+     * percent (%) and safes the original % signs.
+     *
+     * @param string $criterion
+     * @param string $wildcard (default:*)
+     * @return string
+     */
+    public static function wildcardToLike(string $criterion, string $wildcard='*') : string
+    {
+        $level1 = str_replace('%', '<|>', $criterion);
+        $level2 = str_replace($wildcard, '%', $level1);
+        return str_replace('<|>', '\%', $level2);
+    }
 }

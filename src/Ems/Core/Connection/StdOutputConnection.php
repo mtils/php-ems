@@ -12,9 +12,11 @@ use Ems\Contracts\Core\Stringable;
 use Ems\Contracts\Core\Url as UrlContract;
 use Ems\Contracts\Http\Response as HttpResponse;
 use Ems\Core\Url;
+
 use function call_user_func;
 use function fopen;
 use function headers_sent;
+use function http_response_code;
 use function is_bool;
 
 class StdOutputConnection extends AbstractConnection implements OutputConnection
@@ -100,7 +102,7 @@ class StdOutputConnection extends AbstractConnection implements OutputConnection
         if ($this->headersWereSent()) {
             return;
         }
-
+        http_response_code($response->status());
         foreach ($response->headers() as $header) {
             $this->printHeader($header);
         }

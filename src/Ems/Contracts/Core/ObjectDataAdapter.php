@@ -29,7 +29,7 @@ interface ObjectDataAdapter extends ObjectArrayConverter
      *
      * @return object
      */
-    public function fill($object, array $data, $id=null, $isFromStorage=false);
+    public function fill($object, array $data, $id=null, bool $isFromStorage=false);
 
     /**
      * Return true if the passed object is new. (not from storage)
@@ -38,7 +38,7 @@ interface ObjectDataAdapter extends ObjectArrayConverter
      *
      * @return bool
      */
-    public function isNew($object);
+    public function isNew($object) : bool;
 
     /**
      * Return the id of the object. If you have a composite id compose it.
