@@ -3,6 +3,8 @@
 namespace Ems\Core;
 
 use ArrayAccess;
+use Ems\Console\ConsoleInputConnection;
+use Ems\Console\ConsoleOutputConnection;
 use Ems\Contracts\Core\HasMethodHooks;
 use Ems\Contracts\Core\Input;
 use Ems\Contracts\Core\InputConnection;
@@ -11,19 +13,22 @@ use Ems\Contracts\Core\OutputConnection;
 use Ems\Contracts\Core\Stringable;
 use Ems\Contracts\Core\Type;
 use Ems\Contracts\Core\Url as UrlContract;
+use Ems\Core\Connection\GlobalsHttpInputConnection;
+use Ems\Core\Connection\StdOutputConnection;
 use Ems\Core\Exceptions\KeyNotFoundException;
 use Ems\Core\Exceptions\UnsupportedUsageException;
 use Ems\Core\Patterns\ListenerContainer;
 use Ems\Core\Support\IOCContainerProxyTrait;
+use Ems\Core\Support\StreamLogger;
 use LogicException;
 use Psr\Log\LoggerInterface;
-
 use Traversable;
 
 use function get_class;
 use function in_array;
 use function is_callable;
 use function is_object;
+use function php_sapi_name;
 
 /**
  * This application is a minimal version optimized
@@ -157,6 +162,7 @@ class Application implements ContainerContract, HasMethodHooks
             $this->container->instance('app', $this);
         }
         $this->container->instance(static::class, $this);
+        $this->bindBaseClasses();
     }
 
     //<editor-fold desc="Getters and Setters">
@@ -705,6 +711,56 @@ class Application implements ContainerContract, HasMethodHooks
     }
     //</editor-fold>
 
+    //<editor-fold desc="Base bindings">
+    protected function bindBaseClasses()
+    {
+        $this->container->share(InputConnection::class, function () {
+            return $this->createInputConnection();
+        });
+
+        $this->container->share(OutputConnection::class, function () {
+            return $this->createOutputConnection();
+        });
+
+        $this->container->share(LoggerInterface::class, function () {
+            return $this->createLogger();
+        });
+
+    }
+
+    /**
+     * @return InputConnection
+     */
+    protected function createInputConnection() : InputConnection
+    {
+        if (php_sapi_name() == 'cli') {
+            return $this->container->get(ConsoleInputConnection::class);
+        }
+
+        return $this->container->get(GlobalsHttpInputConnection::class);
+    }
+
+    /**
+     * @return OutputConnection
+     */
+    protected function createOutputConnection() : OutputConnection
+    {
+        if (php_sapi_name() == 'cli') {
+            return $this->container->get(ConsoleOutputConnection::class);
+        }
+        return $this->container->get(StdOutputConnection::class);
+    }
+
+    /**
+     * @return StreamLogger
+     */
+    protected function createLogger() : StreamLogger
+    {
+        $wrapper = $this->environment() == self::TESTING ? 'php://stdout' : 'php://stderr';
+        return new StreamLogger($wrapper);
+    }
+    //</editor-fold>
+
     /**
      * Splits the name and path of a path query.
      *
@@ -731,4 +787,6 @@ class Application implements ContainerContract, HasMethodHooks
         return [$end, ''];
 
     }
+
+
 }

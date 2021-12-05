@@ -43,14 +43,6 @@ class SkeletonBootstrapper extends Bootstrapper
 
     public function bind()
     {
-        $this->app->share(InputConnection::class, function () {
-            return $this->createInputConnection();
-        });
-
-        $this->app->share(OutputConnection::class, function () {
-            return $this->createOutputConnection();
-        });
-
         $this->app->share(LoggerInterface::class, function () {
             return $this->createLogger();
         });
@@ -65,29 +57,6 @@ class SkeletonBootstrapper extends Bootstrapper
         });
 
         $this->installBenchmarkPrinter();
-    }
-
-    /**
-     * @return InputConnection|object
-     */
-    protected function createInputConnection()
-    {
-        if (php_sapi_name() == 'cli') {
-            return $this->app->get(ConsoleInputConnection::class);
-        }
-
-        return $this->app->get(GlobalsHttpInputConnection::class);
-    }
-
-    /**
-     * @return OutputConnection|object
-     */
-    protected function createOutputConnection()
-    {
-        if (php_sapi_name() == 'cli') {
-            return $this->app->get(ConsoleOutputConnection::class);
-        }
-        return $this->app->get(StdOutputConnection::class);
     }
 
     /**

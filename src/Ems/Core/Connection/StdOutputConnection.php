@@ -68,6 +68,7 @@ class StdOutputConnection extends AbstractConnection implements OutputConnection
         }
 
         echo $output->payload();
+
         return null;
 
     }

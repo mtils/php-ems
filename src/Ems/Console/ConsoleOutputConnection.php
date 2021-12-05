@@ -7,6 +7,8 @@ namespace Ems\Console;
 
 
 use Ems\Core\Connection\StdOutputConnection;
+use Ems\Core\Response;
+
 use function is_array;
 use function is_bool;
 use function str_replace;
@@ -15,6 +17,9 @@ use const PHP_EOL;
 
 class ConsoleOutputConnection extends StdOutputConnection
 {
+
+    public const LINE_CONTENT_TYPE = 'text/x-console-lines';
+
     /**
      * @var array
      */
@@ -110,6 +115,27 @@ class ConsoleOutputConnection extends StdOutputConnection
     {
         return $this->formattedOutput;
     }
+
+    /**
+     * @param $output
+     * @param $lock
+     * @return bool|mixed|void|null
+     */
+    public function write($output, $lock = false)
+    {
+        if (!$output instanceof Response) {
+            return parent::write($output, $lock);
+        }
+        if ($output->contentType() != self::LINE_CONTENT_TYPE) {
+            return parent::write($output, $lock);
+        }
+        $lines = explode(PHP_EOL, $output->payload());
+
+        foreach ($lines as $line) {
+            $this->line($line);
+        }
+    }
+
 
     /**
      * @param string $string

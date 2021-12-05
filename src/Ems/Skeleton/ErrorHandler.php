@@ -5,34 +5,43 @@
 
 namespace Ems\Skeleton;
 
-use Ems\Console\ArgvInput;
-use Ems\Console\ConsoleOutputConnection;
-use Ems\Contracts\Core\Exceptions\Termination;
+use Ems\Contracts\Core\Extendable;
 use Ems\Contracts\Core\Input;
 use Ems\Contracts\Core\Response as ResponseContract;
 use Ems\Contracts\Core\Type;
 use Ems\Contracts\Routing\Exceptions\RouteNotFoundException;
 use Ems\Core\Application;
+use Ems\Core\Patterns\ExtendableTrait;
 use Ems\Core\Response;
-use Ems\Http\Response as HttpResponse;
-use Psr\Log\LoggerInterface as LoggerInterfaceAlias;
+use ErrorException;
 use Throwable;
 
-use const PHP_EOL;
+use function call_user_func;
+use function error_get_last;
+use function error_reporting;
+use function get_class;
+use function register_shutdown_function;
+use function set_error_handler;
+use function set_exception_handler;
 
-class ErrorHandler
+class ErrorHandler implements Extendable
 {
+    use ExtendableTrait;
+
     /**
      * @var Application
      */
     protected $app;
 
     /**
-     * @var array
+     * @var callable
      */
-    protected $ignored = [
-        Termination::class
-    ];
+    protected $renderer;
+
+    /**
+     * @var null|bool
+     */
+    protected $logDeprecated;
 
     /**
      * ErrorHandler constructor.
@@ -48,19 +57,22 @@ class ErrorHandler
      * Handle the input.
      *
      * @param Throwable $e
-     * @param Input $input
+     * @param Input|null $input
      *
      * @return ResponseContract
      */
-    public function handle(Throwable $e, Input $input)
+    public function handle(Throwable $e, Input $input=null)
     {
 
-        if ($this->isIgnored($e)) {
-            return $this->makeResponse('', $input, 204);
+        $input = $input ?: $this->app->read();
+        $class = get_class($e);
+
+        if ($this->hasExtension($class)) {
+            return $this->callExtension($class, [$e, $input]);
         }
 
         if ($this->shouldLogError($e, $input)) {
-            $this->log($e, $input);
+            $this->log($e);
         }
 
         if ($this->shouldDisplayError($e, $input)) {
@@ -69,7 +81,7 @@ class ErrorHandler
 
         $shortClass = Type::short($e);
 
-        return $this->makeResponse("No Content ($shortClass)", $input, 500);
+        return (new Response("No Content ($shortClass)"))->setStatus(500);
     }
 
     /**
@@ -82,17 +94,124 @@ class ErrorHandler
      */
     public function __invoke(Throwable $e, Input $input=null)
     {
-        $input = $input ?: $this->app->read();
         return $this->handle($e, $input);
     }
 
     /**
-     * @param Throwable $e
-     * @param Input     $input
+     * Install the error handler and register it in php
      */
-    protected function log(Throwable $e, Input $input)
+    public function install()
     {
-        $this->logger()->error($e);
+        error_reporting(-1);
+        set_error_handler([$this, 'handleError']);
+        set_exception_handler([$this, 'handle']);
+        register_shutdown_function([$this, 'checkShutdown']);
+    }
+
+    public function handleError(int $level, string $message, string $file = '', int $line = 0, array $context=[])
+    {
+        if (!(error_reporting() && $level)) {
+            return;
+        }
+        if (in_array($level,[E_DEPRECATED, E_USER_DEPRECATED])) {
+            $this->handleDeprecatedError($message, $file, $line, $context);
+            return;
+        }
+        throw new ErrorException($message, 0, $level, $file, $line);
+    }
+
+    /**
+     * test for errors on shutdown
+     */
+    public function checkShutdown()
+    {
+        if (!$error = error_get_last()) {
+            return;
+        }
+        if (!in_array($error["type"], [E_COMPILE_ERROR, E_CORE_ERROR, E_ERROR, E_PARSE])) {
+            return;
+        }
+        $this->handle(new ErrorException(
+            $error['message'], 0, $error['type'], $error['file'], $error['line']
+        ));
+    }
+
+    /**
+     * @return callable
+     */
+    public function getRenderer(): callable
+    {
+        if (!$this->renderer) {
+            $this->renderer = new ExceptionRenderer();
+        }
+        return $this->renderer;
+    }
+
+    /**
+     * @param callable $renderer
+     * @return ErrorHandler
+     */
+    public function setRenderer(callable $renderer): ErrorHandler
+    {
+        $this->renderer = $renderer;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function shouldLogDeprecated() : bool
+    {
+        if ($this->logDeprecated !== null) {
+            return $this->logDeprecated;
+        }
+        return $this->app->environment() !== Application::PRODUCTION;
+    }
+
+    /**
+     * @param bool $force
+     * @return $this
+     */
+    public function forceLogOfDeprecated(bool $force=true) : ErrorHandler
+    {
+        $this->logDeprecated = $force;
+        return $this;
+    }
+
+    /**
+     * @param string $message
+     * @param string $file
+     * @param int $line
+     * @param array $context
+     * @return void
+     */
+    protected function handleDeprecatedError(string $message, string $file = '', int $line = 0, array $context=[])
+    {
+        if ($this->shouldLogDeprecated()) {
+            $this->app->log('debug',"Deprecated: " . $message . " in $file($line)");
+        }
+    }
+
+    /**
+     * @param Throwable $e
+     */
+    protected function log(Throwable $e)
+    {
+        $this->app->log('error', $this->formatException($e) . "\n");
+    }
+
+    /**
+     * @param Throwable $e
+     * @return string
+     */
+    protected function formatException(Throwable $e) : string
+    {
+        $message = 'Uncaught exception ' . get_class($e) . ' in ' . $e->getFile() . '(' . $e->getLine() . '): ';
+        if ($code = $e->getCode()) {
+            $message .= "Error #$code ";
+        }
+        $message .= $e->getMessage();
+        return $message;
     }
 
     /**
@@ -103,64 +222,11 @@ class ErrorHandler
      *
      * @return ResponseContract
      */
-    protected function render(Throwable $e, Input $input)
+    protected function render(Throwable $e, Input $input) : ResponseContract
     {
-        if ($input instanceof ArgvInput) {
-            $this->renderConsoleException($e, $input);
-            return new Response('');
-        }
-        return $this->makeResponse($e, $input);
+        return call_user_func($this->getRenderer(), $e, $input);
     }
 
-    /**
-     * @param Throwable $e
-     * @param ArgvInput $input
-     */
-    protected function renderConsoleException(Throwable $e, ArgvInput $input)
-    {
-        /** @var ConsoleOutputConnection $out */
-        $out = $this->app->get(ConsoleOutputConnection::class);
-        $out->line('<error>' . $e->getMessage() . '</error>');
-
-        if(!$input->wantsVerboseOutput()) {
-            return;
-        }
-
-        $out->write($e->getTraceAsString() . PHP_EOL);
-
-        $maxParents = 10;
-        $current = $e;
-        $loop = 1;
-        while ($previous = $current->getPrevious()) {
-            $out->line('<info>Previous Exception:</info>');
-            $out->line('<error>' . $previous->getMessage() . '</error>');
-            $out->write($previous->getTraceAsString());
-            $current = $previous;
-            $loop++;
-            if ($loop >= $maxParents) {
-                break;
-            }
-        }
-    }
-
-    /**
-     * @param mixed $payload
-     * @param Input $input
-     * @param int   $status (default:500)
-     *
-     * @return ResponseContract
-     */
-    protected function makeResponse($payload, Input $input, $status=500)
-    {
-
-        $response = new HttpResponse();
-
-        $response->setStatus($status);
-        $response->setPayload($payload);
-
-        return $response;
-
-    }
     /**
      * Overwrite this method to control error display
      *
@@ -168,7 +234,7 @@ class ErrorHandler
      * @param Input     $input
      * @return bool
      */
-    protected function shouldDisplayError(Throwable $e, Input $input)
+    protected function shouldDisplayError(Throwable $e, Input $input) : bool
     {
         return $this->environment() != Application::PRODUCTION;
     }
@@ -180,37 +246,12 @@ class ErrorHandler
      * @param Input     $input
      * @return bool
      */
-    protected function shouldLogError(Throwable $e, Input $input)
+    protected function shouldLogError(Throwable $e, Input $input) : bool
     {
         if ($e instanceof RouteNotFoundException) {
             return false;
         }
         return $this->environment() == Application::PRODUCTION;
-    }
-
-    /**
-     * @param Throwable $e
-     *
-     * @return bool
-     */
-    protected function isIgnored(Throwable $e)
-    {
-        foreach ($this->ignored as $abstract) {
-            if ($e instanceof $abstract) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * @return LoggerInterfaceAlias
-     */
-    protected function logger()
-    {
-        /** @var LoggerInterfaceAlias $logger **/
-        $logger = $this->app->get(LoggerInterfaceAlias::class);
-        return $logger;
     }
 
     /**
@@ -220,4 +261,5 @@ class ErrorHandler
     {
         return $this->app->environment();
     }
+
 }
