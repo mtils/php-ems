@@ -64,6 +64,16 @@ class Paginator implements PaginatorContract
     protected $items = [];
 
     /**
+     * @var bool|null
+     */
+    protected $manuallySetHasPreviousPage = null;
+
+    /**
+     * @var bool|null
+     */
+    protected $manuallySetHasNextPage = null;
+
+    /**
      * @var int
      */
     protected static $perPageDefault = 15;
@@ -110,11 +120,11 @@ class Paginator implements PaginatorContract
     /**
      * {@inheritdoc}
      *
-     * @param int $squeezeTo (optional)
+     * @param int|null $squeezeTo (optional)
      *
      * @return Pages
      */
-    public function pages($squeezeTo=null)
+    public function pages(int $squeezeTo=null) : Pages
     {
         if (!$this->pages) {
             $this->pages = $this->buildPages($squeezeTo === null ? static::$defaultSqueeze : $squeezeTo);
@@ -127,7 +137,7 @@ class Paginator implements PaginatorContract
      *
      * @return int
      */
-    public function getCurrentPageNumber()
+    public function getCurrentPageNumber() : int
     {
         return $this->currentPageNumber;
     }
@@ -137,7 +147,7 @@ class Paginator implements PaginatorContract
      *
      * @return int
      */
-    public function getPerPage()
+    public function getPerPage() : int
     {
         return $this->perPage;
     }
@@ -146,15 +156,15 @@ class Paginator implements PaginatorContract
      * {@inheritdoc}
      *
      * @param int $currentPage
-     * @param int $perPage (optional)
+     * @param int|null $perPage (optional)
      *
      * @return PaginatorContract
      */
-    public function setPagination($currentPage, $perPage = null)
+    public function setPagination(int $currentPage, int $perPage = null) : PaginatorContract
     {
 
         $this->currentPageNumber = $this->isValidPageNumber($currentPage) ? $currentPage : 1;
-        $defaultPerPage = $this->perPage ? $this->perPage : static::$perPageDefault;
+        $defaultPerPage = $this->perPage ?: static::$perPageDefault;
         $this->perPage = $perPage ?: $defaultPerPage;
         $this->pages = null;
         return $this;
@@ -168,15 +178,36 @@ class Paginator implements PaginatorContract
      *
      * @return $this
      */
-    public function setResult($items, $totalCount = null)
+    public function setResult($items, $totalCount = null) : PaginatorContract
     {
         $this->items = Type::toArray($items);
+        $this->manuallySetHasPreviousPage = null;
+        $this->manuallySetHasNextPage = null;
+
         if (is_numeric($totalCount)) {
             $this->totalCount = $totalCount;
         }
         if (is_callable($totalCount)) {
             $this->totalCountProvider = $totalCount;
         }
+        $this->pages = null;
+        return $this;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param array|Traversable $items
+     * @param bool $hasPreviousPage
+     * @param bool $hasNextPage
+     *
+     * @return PaginatorContract
+     */
+    public function setResultAndDirections($items, bool $hasPreviousPage, bool $hasNextPage): PaginatorContract
+    {
+        $this->items = Type::toArray($items);
+        $this->manuallySetHasPreviousPage = $hasPreviousPage;
+        $this->manuallySetHasNextPage = $hasNextPage;
         $this->pages = null;
         return $this;
     }
@@ -199,7 +230,7 @@ class Paginator implements PaginatorContract
      *
      * @return bool
      */
-    public function hasTotalCount()
+    public function hasTotalCount() : bool
     {
         if ($this->totalCountProvider) {
             return true;
@@ -212,7 +243,7 @@ class Paginator implements PaginatorContract
      *
      * @return UrlContract
      */
-    public function getBaseUrl()
+    public function getBaseUrl() : UrlContract
     {
         return $this->baseUrl;
     }
@@ -224,7 +255,7 @@ class Paginator implements PaginatorContract
      *
      * @return PaginatorContract
      */
-    public function setBaseUrl(UrlContract $url)
+    public function setBaseUrl(UrlContract $url) : PaginatorContract
     {
         $this->baseUrl = $url;
         return $this;
@@ -235,7 +266,7 @@ class Paginator implements PaginatorContract
      *
      * @return string
      */
-    public function getPageParameterName()
+    public function getPageParameterName() : string
     {
         return $this->pageParameterName;
     }
@@ -247,7 +278,7 @@ class Paginator implements PaginatorContract
      *
      * @return PaginatorContract
      */
-    public function setPageParameterName($name)
+    public function setPageParameterName(string $name) : PaginatorContract
     {
         $this->pageParameterName = $name;
         return $this;
@@ -262,7 +293,7 @@ class Paginator implements PaginatorContract
      * The return value is cast to an integer.
      * @since 5.1.0
      */
-    public function count()
+    public function count() : int
     {
         return count($this->items);
     }
@@ -273,7 +304,7 @@ class Paginator implements PaginatorContract
      *
      * @return int
      */
-    public function getOffset()
+    public function getOffset() : int
     {
         return ($this->currentPageNumber-1)*$this->perPage;
     }
@@ -285,7 +316,7 @@ class Paginator implements PaginatorContract
      *
      * @return array
      */
-    public function slice($completeResult)
+    public function slice($completeResult) : array
     {
         $all = Type::toArray($completeResult);
         return array_slice($all, $this->getOffset(), $this->perPage);
@@ -297,7 +328,7 @@ class Paginator implements PaginatorContract
      *
      * @return int
      */
-    public static function getPerPageDefault()
+    public static function getPerPageDefault() : int
     {
         return static::$perPageDefault;
     }
@@ -307,7 +338,7 @@ class Paginator implements PaginatorContract
      *
      * @param int $perPage
      */
-    public static function setPerPageDefault($perPage)
+    public static function setPerPageDefault(int $perPage)
     {
         static::$perPageDefault = $perPage;
     }
@@ -317,7 +348,7 @@ class Paginator implements PaginatorContract
      *
      * @return string
      */
-    public static function getDefaultPageParameterName()
+    public static function getDefaultPageParameterName() : string
     {
         return static::$defaultPageParameterName;
     }
@@ -327,7 +358,7 @@ class Paginator implements PaginatorContract
      *
      * @param string $name
      */
-    public static function setDefaultPageParameterName($name)
+    public static function setDefaultPageParameterName(string $name)
     {
         static::$defaultPageParameterName = $name;
     }
@@ -337,7 +368,7 @@ class Paginator implements PaginatorContract
      *
      * @return int
      */
-    public static function getDefaultSqueeze()
+    public static function getDefaultSqueeze() : int
     {
         return static::$defaultSqueeze;
     }
@@ -348,7 +379,7 @@ class Paginator implements PaginatorContract
      *
      * @param int $squeeze
      */
-    public static function setDefaultSqueeze($squeeze)
+    public static function setDefaultSqueeze(int $squeeze)
     {
         static::$defaultSqueeze = $squeeze;
     }
@@ -359,7 +390,7 @@ class Paginator implements PaginatorContract
      *
      * @return int
      */
-    public static function getDefaultSqueezeSpace()
+    public static function getDefaultSqueezeSpace() : int
     {
         return static::$defaultSqueezeSpace;
     }
@@ -370,7 +401,7 @@ class Paginator implements PaginatorContract
      *
      * @param int $space
      */
-    public static function setDefaultSqueezeSpace($space)
+    public static function setDefaultSqueezeSpace(int $space)
     {
         static::$defaultSqueezeSpace = $space;
     }
@@ -380,7 +411,7 @@ class Paginator implements PaginatorContract
      *
      * @return Pages
      */
-    protected function buildPages($squeezeTo)
+    protected function buildPages(int $squeezeTo) : Pages
     {
         if (!$this->hasTotalCount()) {
             return $this->buildLengthUnaware();
@@ -404,7 +435,7 @@ class Paginator implements PaginatorContract
      *
      * @return Pages
      */
-    protected function buildLengthAware($numberOfPages)
+    protected function buildLengthAware(int $numberOfPages) : Pages
     {
         $pages = $this->newPages();
 
@@ -423,7 +454,7 @@ class Paginator implements PaginatorContract
      *
      * @return Pages
      */
-    protected function buildLengthUnaware()
+    protected function buildLengthUnaware() : Pages
     {
         $pages = $this->newPages();
 
@@ -466,7 +497,7 @@ class Paginator implements PaginatorContract
      *
      * @return Pages
      */
-    protected function buildSqueezed($squeezeTo, $numberOfPages)
+    protected function buildSqueezed(int $squeezeTo, int $numberOfPages) : Pages
     {
 
         if ($this->currentPageNumber < $squeezeTo - static::$defaultSqueezeSpace) {
@@ -490,7 +521,7 @@ class Paginator implements PaginatorContract
      *
      * @return Pages
      */
-    protected function buildStartEmphasized($squeezeTo, $numberOfPages)
+    protected function buildStartEmphasized(int $squeezeTo, int $numberOfPages) : Pages
     {
         $pages = $this->newPages($numberOfPages);
 
@@ -513,7 +544,7 @@ class Paginator implements PaginatorContract
      *
      * @return Pages
      */
-    protected function buildEndEmphasized($squeezeTo, $numberOfPages)
+    protected function buildEndEmphasized(int $squeezeTo, int $numberOfPages) : Pages
     {
         $pages = $this->newPages($numberOfPages);
 
@@ -536,7 +567,7 @@ class Paginator implements PaginatorContract
      *
      * @return Pages
      */
-    protected function buildCentered($squeezeTo, $numberOfPages)
+    protected function buildCentered(int $squeezeTo, int $numberOfPages) : Pages
     {
         $pages = $this->newPages($numberOfPages);
 
@@ -562,7 +593,7 @@ class Paginator implements PaginatorContract
      *
      * @return Pages
      */
-    protected function addPages(Pages $pages, $from, $to)
+    protected function addPages(Pages $pages, int $from, int $to) : Pages
     {
 
         $items = $from == 1 ? 0 : ($from-1) * $this->perPage;
@@ -614,7 +645,7 @@ class Paginator implements PaginatorContract
      *
      * @return Page
      */
-    protected function newPage(array $values)
+    protected function newPage(array $values) : Page
     {
         return new Page($values);
     }
@@ -624,7 +655,7 @@ class Paginator implements PaginatorContract
      *
      * @return Pages
      */
-    protected function newPages($totalPageCount=0)
+    protected function newPages(int $totalPageCount=0) : Pages
     {
        return new Pages($this, $totalPageCount);
     }
@@ -634,7 +665,7 @@ class Paginator implements PaginatorContract
      *
      * @return bool
      */
-    protected function isValidPageNumber($page)
+    protected function isValidPageNumber($page) : bool
     {
         return is_numeric($page) && $page >= 1 && filter_var($page, FILTER_VALIDATE_INT) !== false;
     }

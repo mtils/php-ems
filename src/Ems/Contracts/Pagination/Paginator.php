@@ -25,40 +25,40 @@ use Traversable;
 interface Paginator extends Result, Countable
 {
     /**
-     * Return all pages. By default it returns a squeezed list of pages for "..."
+     * Return all pages. By default, it returns a squeezed list of pages for "..."
      * buttons somewhere in the middle. To really get all pages pass 0.
      * Without a total count this is not used.
      *
-     * @param int $squeezeTo (optional)
+     * @param int|null $squeezeTo (optional)
      *
      * @return Pages
      */
-    public function pages($squeezeTo=null);
+    public function pages(int $squeezeTo=null) : Pages;
 
     /**
      * Get the number of the current page.
      *
      * @return int
      */
-    public function getCurrentPageNumber();
+    public function getCurrentPageNumber() : int;
 
     /**
      * Get the number of items per page.
      *
      * @return int
      */
-    public function getPerPage();
+    public function getPerPage() : int;
 
     /**
      * Set current page and perPage. The per page is optional and has to
-     * be set to a default value.
+     * be set to a default value by the paginator itself.
      *
      * @param int $currentPage
-     * @param int $perPage (optional)
+     * @param int|null $perPage (optional)
      *
      * @return $this
      */
-    public function setPagination($currentPage, $perPage=null);
+    public function setPagination(int $currentPage, int $perPage=null) : Paginator;
 
     /**
      * Set the already limited database result. Pass the $totalCount to make
@@ -71,7 +71,19 @@ interface Paginator extends Result, Countable
      *
      * @return $this
      */
-    public function setResult($items, $totalCount=null);
+    public function setResult($items, $totalCount=null) : Paginator;
+
+    /**
+     * If you have no total count, but you know there are previous and next
+     * pages, set the result by this method.
+     *
+     * @param array|Traversable $items
+     * @param bool $hasPreviousPage
+     * @param bool $hasNextPage
+     *
+     * @return $this
+     */
+    public function setResultAndDirections($items, bool $hasPreviousPage, bool $hasNextPage) : Paginator;
 
     /**
      * Return true if this paginator was constructed with a total count.
@@ -81,13 +93,13 @@ interface Paginator extends Result, Countable
      *
      * @return bool
      */
-    public function hasTotalCount();
+    public function hasTotalCount() : bool;
 
     /**
      * Get the passed totalCount or call the totalCount callable and return its
      * result.
      *
-     * @return int
+     * @return int|null
      */
     public function getTotalCount();
 
@@ -96,7 +108,7 @@ interface Paginator extends Result, Countable
      *
      * @return Url
      */
-    public function getBaseUrl();
+    public function getBaseUrl() : Url;
 
     /**
      * Set the base url.
@@ -105,14 +117,14 @@ interface Paginator extends Result, Countable
      *
      * @return $this
      */
-    public function setBaseUrl(Url $url);
+    public function setBaseUrl(Url $url) : Paginator;
 
     /**
      * Get the (GET) parameter name for applying the page.
      *
      * @return string
      */
-    public function getPageParameterName();
+    public function getPageParameterName() : string;
 
     /**
      * Set the (GET) parameter name for applying the page.
@@ -121,7 +133,7 @@ interface Paginator extends Result, Countable
      *
      * @return $this
      */
-    public function setPageParameterName($name);
+    public function setPageParameterName(string $name) : Paginator;
 
     /**
      * Return the offset for a database query (or array_slice) matching the
@@ -129,7 +141,7 @@ interface Paginator extends Result, Countable
      *
      * @return int
      */
-    public function getOffset();
+    public function getOffset() : int;
 
     /**
      * Slice a complete result into the desired page/perPage.
@@ -138,5 +150,5 @@ interface Paginator extends Result, Countable
      *
      * @return array
      */
-    public function slice($completeResult);
+    public function slice($completeResult) : array;
 }

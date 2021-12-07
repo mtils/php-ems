@@ -9,14 +9,14 @@ namespace Ems\Contracts\Pagination;
 use Ems\Contracts\Core\Stringable;
 use Ems\Contracts\Core\Url as UrlContract;
 use Ems\Core\Exceptions\UnConfiguredException;
-use Ems\Core\Support\StringableTrait;
+use Ems\Contracts\Core\StringableTrait;
 use const STR_PAD_LEFT;
 use function str_pad;
 
 /**
  * Class Page
  *
- * A Page is one entry in an paginator. Basically it contains
+ * A Page is one entry in a paginator. Basically it contains
  * a number and an url. All the other methods are just helpers for
  * a cleaner wording when rendering it.
  *
