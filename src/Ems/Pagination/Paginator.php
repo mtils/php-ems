@@ -14,6 +14,7 @@ use Ems\Contracts\Pagination\Paginator as PaginatorContract;
 use Ems\Model\ResultTrait;
 use function call_user_func;
 use function filter_var;
+use function is_bool;
 use function is_callable;
 use function is_numeric;
 use Traversable;
@@ -66,12 +67,7 @@ class Paginator implements PaginatorContract
     /**
      * @var bool|null
      */
-    protected $manuallySetHasPreviousPage = null;
-
-    /**
-     * @var bool|null
-     */
-    protected $manuallySetHasNextPage = null;
+    protected $manuallySetHasMore = null;
 
     /**
      * @var int
@@ -173,41 +169,25 @@ class Paginator implements PaginatorContract
     /**
      * {@inheritdoc}
      *
-     * @param array|Traversable $items
-     * @param int|callable|null $totalCount (optional)
+     * @param array|Traversable      $items
+     * @param int|callable|bool|null $totalOrHasMore (optional)
      *
      * @return $this
      */
-    public function setResult($items, $totalCount = null) : PaginatorContract
+    public function setResult($items, $totalOrHasMore = null) : PaginatorContract
     {
         $this->items = Type::toArray($items);
-        $this->manuallySetHasPreviousPage = null;
-        $this->manuallySetHasNextPage = null;
+        $this->manuallySetHasMore = null;
 
-        if (is_numeric($totalCount)) {
-            $this->totalCount = $totalCount;
+        if (is_numeric($totalOrHasMore)) {
+            $this->totalCount = $totalOrHasMore;
         }
-        if (is_callable($totalCount)) {
-            $this->totalCountProvider = $totalCount;
+        if (is_callable($totalOrHasMore)) {
+            $this->totalCountProvider = $totalOrHasMore;
         }
-        $this->pages = null;
-        return $this;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @param array|Traversable $items
-     * @param bool $hasPreviousPage
-     * @param bool $hasNextPage
-     *
-     * @return PaginatorContract
-     */
-    public function setResultAndDirections($items, bool $hasPreviousPage, bool $hasNextPage): PaginatorContract
-    {
-        $this->items = Type::toArray($items);
-        $this->manuallySetHasPreviousPage = $hasPreviousPage;
-        $this->manuallySetHasNextPage = $hasNextPage;
+        if (is_bool($totalOrHasMore)) {
+            $this->manuallySetHasMore = $totalOrHasMore;
+        }
         $this->pages = null;
         return $this;
     }
@@ -464,7 +444,7 @@ class Paginator implements PaginatorContract
             return $pages;
         }
 
-        $perhapsMorePages = $itemCount >= $this->perPage;
+        $perhapsMorePages = is_bool($this->manuallySetHasMore) ? $this->manuallySetHasMore : $itemCount >= $this->perPage;
         $pageParameter = $this->getPageParameterName();
         $currentPage = $this->currentPageNumber;
         $baseUrl = $this->baseUrl;

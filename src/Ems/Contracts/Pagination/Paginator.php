@@ -65,25 +65,14 @@ interface Paginator extends Result, Countable
      * this a "length aware" paginator. Passing a callable will not trigger any
      * further queries until you really need pages. This way you can use a
      * paginator as a chunked result set without the cost of an additional query.
+     * Or you pass a boolean value to indicate only there are more results.
      *
      * @param array|Traversable $items
-     * @param int|callable|null $totalCount (optional)
+     * @param int|callable|bool|null $totalOrHasMore (optional)
      *
      * @return $this
      */
-    public function setResult($items, $totalCount=null) : Paginator;
-
-    /**
-     * If you have no total count, but you know there are previous and next
-     * pages, set the result by this method.
-     *
-     * @param array|Traversable $items
-     * @param bool $hasPreviousPage
-     * @param bool $hasNextPage
-     *
-     * @return $this
-     */
-    public function setResultAndDirections($items, bool $hasPreviousPage, bool $hasNextPage) : Paginator;
+    public function setResult($items, $totalOrHasMore=null) : Paginator;
 
     /**
      * Return true if this paginator was constructed with a total count.
