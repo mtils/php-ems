@@ -140,4 +140,12 @@ interface Paginator extends Result, Countable
      * @return array
      */
     public function slice($completeResult) : array;
+
+    /**
+     * Add query parameters that will always be added to the url.
+     *
+     * @param array $query
+     * @return Paginator
+     */
+    public function addToUrl(array $query) : Paginator;
 }

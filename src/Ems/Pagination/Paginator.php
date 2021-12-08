@@ -70,6 +70,11 @@ class Paginator implements PaginatorContract
     protected $manuallySetHasMore = null;
 
     /**
+     * @var array
+     */
+    protected $addToQuery = [];
+
+    /**
      * @var int
      */
     protected static $perPageDefault = 15;
@@ -96,7 +101,7 @@ class Paginator implements PaginatorContract
      * @param int $perPage (optional)
      * @param object $creator (optional)
      */
-    public function __construct($currentPage=1, $perPage=null, $creator=null)
+    public function __construct(int $currentPage=1, int $perPage=null, $creator=null)
     {
         $this->setPagination($currentPage, $perPage);
         $this->pageParameterName = static::$defaultPageParameterName;
@@ -302,6 +307,18 @@ class Paginator implements PaginatorContract
         return array_slice($all, $this->getOffset(), $this->perPage);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @param array $query
+     * @return PaginatorContract
+     */
+    public function addToUrl(array $query): PaginatorContract
+    {
+        $this->addToQuery = $query;
+        return $this;
+    }
+
 
     /**
      * Get the default perPage value.
@@ -447,7 +464,11 @@ class Paginator implements PaginatorContract
         $perhapsMorePages = is_bool($this->manuallySetHasMore) ? $this->manuallySetHasMore : $itemCount >= $this->perPage;
         $pageParameter = $this->getPageParameterName();
         $currentPage = $this->currentPageNumber;
-        $baseUrl = $this->baseUrl;
+
+        $baseUrl = $this->baseUrl ?: '';
+        if ($baseUrl && $this->addToQuery) {
+            $baseUrl = $baseUrl->query($this->addToQuery);
+        }
 
         for ($page=1; $page <= ($currentPage+1); $page++) {
 
@@ -578,6 +599,10 @@ class Paginator implements PaginatorContract
 
         $items = $from == 1 ? 0 : ($from-1) * $this->perPage;
         $totalCount = $this->getTotalCount();
+        $baseUrl = $this->baseUrl ?: '';
+        if ($baseUrl && $this->addToQuery) {
+            $baseUrl = $baseUrl->query($this->addToQuery);
+        }
 
         for ($page=$from; $page <= $to; $page++) {
 
@@ -585,7 +610,7 @@ class Paginator implements PaginatorContract
 
             $pageObject = $this->newPage([
                 'number'      => $page,
-                'url'         => $this->baseUrl ? $this->baseUrl->query($this->pageParameterName, $page) : '',
+                'url'         => $baseUrl ? $baseUrl->query($this->pageParameterName, $page) : '',
                 'is_current'  => $page == $this->currentPageNumber,
                 'is_previous' => $page == $this->currentPageNumber-1,
                 'is_next'     => $page == $this->currentPageNumber+1,

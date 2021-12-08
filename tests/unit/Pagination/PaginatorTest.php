@@ -453,7 +453,57 @@ class PaginatorTest extends TestCase
 
     }
 
-    public function test_pages_with_totalCount_and_perPage_for_twelf_pages_and_6_per_page()
+    public function test_pages_with_addToQuery()
+    {
+
+        $result = range('a', 'z');
+        $paginator = $this->paginate(1, 20);
+
+        $url = new Url('https://web-utils.de/products');
+        $paginator->setBaseUrl($url);
+        $paginator->addToUrl(['foo' => 'bar']);
+
+        $items = $paginator->slice($result);
+        $paginator->setResult($items, count($result));
+
+        $pages = $paginator->pages();
+
+        $this->assertInstanceOf(Pages::class, $pages);
+        $this->assertFalse($pages->isEmpty());
+
+        $this->assertEquals(1, $pages[1]->number());
+        $query = $pages[1]->url()->query;
+        $this->assertEquals('bar', $query['foo']);
+        $this->assertEquals('1', $query['page']);
+
+    }
+
+    public function test_pages_with_addToQuery_without_total()
+    {
+
+        $result = range('a', 'z');
+        $paginator = $this->paginate(1);
+
+        $url = new Url('https://web-utils.de/products');
+        $paginator->setBaseUrl($url);
+        $paginator->addToUrl(['foo' => 'bar']);
+
+        $items = $paginator->slice($result);
+        $paginator->setResult($items, true);
+
+        $pages = $paginator->pages();
+
+        $this->assertInstanceOf(Pages::class, $pages);
+        $this->assertFalse($pages->isEmpty());
+
+        $this->assertEquals(1, $pages[1]->number());
+        $query = $pages[1]->url()->query;
+        $this->assertEquals('bar', $query['foo']);
+        $this->assertEquals('1', $query['page']);
+
+    }
+
+    public function test_pages_with_totalCount_and_perPage_for_twelve_pages_and_6_per_page()
     {
 
         $result = range('a', 'l');
