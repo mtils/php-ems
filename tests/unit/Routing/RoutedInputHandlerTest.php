@@ -30,7 +30,7 @@ class RoutedInputHandlerTest extends TestCase
      */
     public function it_implements_interface()
     {
-        $this->assertInstanceOf(\Ems\Contracts\Core\InputHandler::class, $this->make());
+        $this->assertInstanceOf(\Ems\Contracts\Routing\InputHandler::class, $this->make());
     }
 
     /**

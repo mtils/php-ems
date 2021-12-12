@@ -6,7 +6,7 @@
 namespace Ems\Routing;
 
 use Ems\Contracts\Core\Input;
-use Ems\Contracts\Core\InputHandler as InputHandlerContract;
+use Ems\Contracts\Routing\InputHandler as InputHandlerContract;
 use Ems\Contracts\Core\Response;
 use Ems\Contracts\Core\SupportsCustomFactory;
 use Ems\Contracts\Routing\MiddlewareCollection as MiddlewareCollectionContract;

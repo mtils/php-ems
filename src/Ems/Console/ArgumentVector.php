@@ -26,7 +26,7 @@ use function substr;
  * The ARGumentVector class is a class that basically pre parses the parameters.
  * The only thing it needs to know is the name for the short parameters and if
  * they take a value.
- * Unlike Symfony this is more a pre parser. It does not exactly match the input
+ * Unlike in Symfony this is a pre parser. It does not exactly match the input
  * to your definitions and let you mix short and long options without complaining.
  *
  * @package Ems\Console

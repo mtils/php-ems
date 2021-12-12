@@ -3,7 +3,10 @@
  *  * Created by mtils on 21.07.19 at 14:15.
  **/
 
-namespace Ems\Contracts\Core;
+namespace Ems\Contracts\Routing;
+
+use Ems\Contracts\Core\Input;
+use Ems\Contracts\Core\Response;
 
 /**
  * Interface InputHandler
@@ -13,7 +16,7 @@ namespace Ems\Contracts\Core;
  * is just a helper to store the binding in an IOCContainer and to mark that it
  * (should) return a response.
  *
- * @package Ems\Contracts\Core
+ * @package Ems\Contracts\Routing
  */
 interface InputHandler
 {

@@ -8,7 +8,7 @@ namespace Ems\Contracts\Routing;
 
 use Countable;
 use Ems\Contracts\Core\ArrayData;
-use Ems\Contracts\Core\InputHandler;
+use Ems\Contracts\Routing\InputHandler;
 use Ems\Contracts\Core\Positioner;
 use Ems\Contracts\Core\SupportsCustomFactory;
 use IteratorAggregate;
@@ -25,7 +25,7 @@ use IteratorAggregate;
  * The name also allows to add the same class multiple times (with different
  * parameters)
  *
- * The "main input handler" has to be a instance of Ems\Contracts\Core\InputHandler.
+ * The "main input handler" has to be a instance of Ems\Contracts\Routing\InputHandler.
  * If some handler returns a response the MiddlewareCollection must skip all
  * handlers that implement this interface.
  *

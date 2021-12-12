@@ -7,7 +7,7 @@ namespace Ems\Core;
 
 
 use Ems\Contracts\Core\Input;
-use Ems\Contracts\Core\InputHandler;
+use Ems\Contracts\Routing\InputHandler;
 use Ems\Contracts\Core\Response;
 use function call_user_func;
 

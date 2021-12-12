@@ -17,6 +17,8 @@ use Ems\Core\Exceptions\UnsupportedUsageException;
 use Ems\Core\Helper;
 use Ems\Core\Url;
 use LogicException;
+use Psr\Http\Message\StreamInterface;
+
 use function feof;
 use function flock;
 use function fseek;
@@ -46,7 +48,7 @@ use const SEEK_SET;
  *
  * @package Ems\Core\Filesystem
  */
-abstract class AbstractStream implements Stream
+abstract class AbstractStream implements Stream, StreamInterface
 {
     use StringableTrait;
 
@@ -565,6 +567,64 @@ abstract class AbstractStream implements Stream
         return $this->readAll();
 
     }
+
+    /**
+     * @return array|false|int|null
+     */
+    public function getSize()
+    {
+        if (!$resource = $this->resource()) {
+            return null;
+        }
+        if (!$stat = fstat($resource)) {
+            return null;
+        }
+        return $stat['size'] ?? null;
+    }
+
+    /**
+     * @param $key
+     * @return mixed|null
+     */
+    public function getMetadata($key = null)
+    {
+        return $this->metaData();
+    }
+
+    /**
+     * @return int
+     */
+    public function tell() : int
+    {
+        return $this->key();
+    }
+
+    /**
+     * @return bool
+     */
+    public function eof() : bool
+    {
+        return !$this->valid();
+    }
+
+    /**
+     * @return resource|null
+     */
+    public function detach()
+    {
+        $resource = $this->resource;
+        $this->close();
+        return $resource;
+    }
+
+    /**
+     * @return string
+     */
+    public function getContents() : string
+    {
+        return $this->readAll();
+    }
+
 
     /**
      * {@inheritdoc}

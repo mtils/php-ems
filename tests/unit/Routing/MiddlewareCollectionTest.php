@@ -932,7 +932,7 @@ class MiddlewareCollectionTest_Input extends \Ems\Core\Input
     public $wares = [];
 }
 
-class MiddlewareCollectionTest_InputHandler implements \Ems\Contracts\Core\InputHandler
+class MiddlewareCollectionTest_InputHandler implements \Ems\Contracts\Routing\InputHandler
 {
 
     public $args;

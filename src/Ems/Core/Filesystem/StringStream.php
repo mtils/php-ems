@@ -7,6 +7,7 @@ namespace Ems\Core\Filesystem;
 
 
 use Countable;
+use Ems\Contracts\Core\Stringable;
 use Ems\Contracts\Core\Url as UrlContract;
 use Ems\Core\Url;
 use function base64_encode;
@@ -23,7 +24,7 @@ use function stream_get_contents;
 class StringStream extends AbstractStream implements Countable
 {
     /**
-     * @var string
+     * @var string|Stringable
      */
     protected $string;
 
@@ -37,6 +38,10 @@ class StringStream extends AbstractStream implements Countable
      */
     protected $isOwnRewind = false;
 
+    /**
+     * @param string|Stringable $string
+     * @param $mode
+     */
     public function __construct($string, $mode='r+')
     {
         $this->string = $string;
@@ -114,13 +119,21 @@ class StringStream extends AbstractStream implements Countable
     }
 
     /**
+     * @return string|Stringable
+     */
+    public function getString()
+    {
+        return $this->string;
+    }
+
+    /**
      * Re-implement this method to allow fast toString/complete reading.
      *
      * @return string
      */
     protected function readAll()
     {
-        return $this->string !== null ? $this->string : '';
+        return $this->string !== null ? (string)$this->string : '';
     }
 
     /**

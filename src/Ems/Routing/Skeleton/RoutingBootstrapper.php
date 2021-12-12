@@ -7,7 +7,7 @@ namespace Ems\Routing\Skeleton;
 
 
 use Ems\Contracts\Core\Input;
-use Ems\Contracts\Core\InputHandler as InputHandlerContract;
+use Ems\Contracts\Routing\InputHandler as InputHandlerContract;
 use Ems\Contracts\Core\ResponseFactory as ResponseFactoryContract;
 use Ems\Contracts\Routing\Dispatcher;
 use Ems\Contracts\Routing\MiddlewareCollection as MiddlewareCollectionContract;

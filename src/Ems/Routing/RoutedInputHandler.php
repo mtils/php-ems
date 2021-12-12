@@ -8,7 +8,7 @@ namespace Ems\Routing;
 use Ems\Console\ArgvInput;
 use Ems\Contracts\Core\HasMethodHooks;
 use Ems\Contracts\Core\Input as InputContract;
-use Ems\Contracts\Core\InputHandler as InputHandlerContract;
+use Ems\Contracts\Routing\InputHandler as InputHandlerContract;
 use Ems\Contracts\Core\IOCContainer;
 use Ems\Contracts\Core\Response;
 use Ems\Contracts\Core\SupportsCustomFactory;

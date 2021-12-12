@@ -9,7 +9,7 @@ use ArgumentCountError;
 use Ems\Cache\Exception\CacheMissException;
 use Ems\Contracts\Core\Filesystem;
 use Ems\Contracts\Core\Input;
-use Ems\Contracts\Core\InputHandler as HandlerContract;
+use Ems\Contracts\Routing\InputHandler as HandlerContract;
 use Ems\Contracts\Core\Response;
 use Ems\Contracts\Core\StringConverter;
 use Ems\Contracts\Core\TextFormatter;

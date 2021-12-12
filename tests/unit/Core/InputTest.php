@@ -286,7 +286,7 @@ class InputTest extends TestCase
     public function get_type()
     {
         $input = $this->newInput();
-        $this->assertEquals(Message::CUSTOM, $input->type());
+        $this->assertEquals(Message::TYPE_CUSTOM, $input->type());
     }
 
     /**
@@ -295,7 +295,7 @@ class InputTest extends TestCase
     public function get_source()
     {
         $input = $this->newInput();
-        $this->assertEquals(Message::INTERNAL, $input->source());
+        $this->assertEquals(Message::TRANSPORT_APP, $input->source());
     }
 
     /**

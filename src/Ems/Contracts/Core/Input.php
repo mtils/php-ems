@@ -13,12 +13,6 @@ interface Input extends Message, Provider, Routable
 {
 
     /**
-     * The custom attribute "pool". Only custom assgned attributes. Another
-     * would be GET/POST/argv...
-     */
-    const POOL_CUSTOM = 'custom';
-
-    /**
      * Return the *requested* locale.
      *
      * @return string
@@ -30,7 +24,7 @@ interface Input extends Message, Provider, Routable
      *
      * @param string $pool
      *
-     * @return self
+     * @return array
      */
     public function only($pool);
 

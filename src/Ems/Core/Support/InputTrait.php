@@ -81,14 +81,14 @@ trait InputTrait
      *
      * @param string $pool
      *
-     * @return self
+     * @return array
      */
     public function only($pool)
     {
         if ($pool !== static::POOL_CUSTOM) {
             throw new UnsupportedParameterException('The base input class only supports custom attributes.');
         }
-        return clone $this;
+        return $this->_attributes;
     }
 
     /**

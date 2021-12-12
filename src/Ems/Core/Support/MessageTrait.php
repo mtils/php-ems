@@ -21,7 +21,7 @@ trait MessageTrait
     /**
      * @var string
      */
-    protected $_type = Message::CUSTOM;
+    protected $_type = Message::TYPE_CUSTOM;
 
     /**
      * @var bool|null
@@ -31,7 +31,7 @@ trait MessageTrait
     /**
      * @var string
      */
-    protected $_source = Message::INTERNAL;
+    protected $_source = Message::TRANSPORT_APP;
 
     /**
      * Return the type of Message this is. A http request or console input would
