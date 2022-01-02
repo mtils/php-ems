@@ -22,7 +22,7 @@ use Ems\Contracts\Core\TextParser;
 use Ems\Contracts\Core\TextProvider;
 use Ems\Contracts\Core\Url as UrlContract;
 use Ems\Core\AnythingProvider;
-use Ems\Core\Application;
+use Ems\Skeleton\Application;
 use Ems\Core\ArrayLocalizer;
 use Ems\Core\ArrayProvider;
 use Ems\Core\ArrayTextProvider;
@@ -187,7 +187,7 @@ class CoreBootstrapper extends Bootstrapper
     }
 
     /**
-     * @param Application $app
+     * @param \Ems\Skeleton\Application $app
      */
     protected function assignPathsToApp(Application $app)
     {
@@ -204,7 +204,7 @@ class CoreBootstrapper extends Bootstrapper
     }
 
     /**
-     * @return Application
+     * @return \Ems\Skeleton\Application
      */
     protected function createPlaceholderApp()
     {

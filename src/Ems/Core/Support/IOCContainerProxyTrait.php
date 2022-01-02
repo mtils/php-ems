@@ -42,7 +42,6 @@ trait IOCContainerProxyTrait
      * @throws ContainerExceptionInterface Error while retrieving the entry.
      *
      * @throws NotFoundExceptionInterface  No entry was found for **this** identifier.
-     * @noinspection PhpMissingParamTypeInspection
      */
     public function get(string $id)
     {

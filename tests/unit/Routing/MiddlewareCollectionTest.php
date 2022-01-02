@@ -6,9 +6,9 @@
 namespace Ems\Routing;
 
 
-use Ems\Contracts\Core\Input;
+use Ems\Contracts\Core\Message;
+use Ems\Contracts\Routing\Input;
 use Ems\Contracts\Routing\MiddlewareCollection as CollectionContract;
-use Ems\Contracts\Routing\Routable;
 use Ems\Core\Collections\StringList;
 use Ems\Core\Exceptions\KeyNotFoundException;
 use Ems\Core\IOCContainer;
@@ -451,7 +451,7 @@ class MiddlewareCollectionTest extends TestCase
         /** @var Response $response */
         $response = $c($this->makeInput());
         $this->assertInstanceOf(Response::class, $response);
-        $input = $response->payload();
+        $input = $response->payload;
 
         $this->assertEquals($input[MiddlewareCollectionTest_AMiddleware::class.'(a)'], ['a']);
         $this->assertEquals($input[MiddlewareCollectionTest_AMiddleware::class.'(b)'], ['b']);
@@ -479,7 +479,7 @@ class MiddlewareCollectionTest extends TestCase
         /** @var Response $response */
         $response = $c($this->makeInput());
         $this->assertInstanceOf(Response::class, $response);
-        $input = $response->payload();
+        $input = $response->payload;
 
         $this->assertEquals($input[MiddlewareCollectionTest_AMiddleware::class.'(a)'], ['a']);
         $this->assertEquals($response[MiddlewareCollectionTest_AMiddleware::class.'(modifyResponse,1)'], ['modifyResponse',1]);
@@ -505,7 +505,7 @@ class MiddlewareCollectionTest extends TestCase
         /** @var Response $response */
         $response = $c($this->makeInput());
         $this->assertInstanceOf(Response::class, $response);
-        $input = $response->payload();
+        $input = $response->payload;
 
         $this->assertEquals($input[MiddlewareCollectionTest_AMiddleware::class.'(a)'], ['a']);
         $this->assertEquals($response[MiddlewareCollectionTest_AMiddleware::class.'(modifyResponse,1)'], ['modifyResponse',1]);
@@ -533,7 +533,7 @@ class MiddlewareCollectionTest extends TestCase
         /** @var Response $response */
         $response = $c($this->makeInput());
         $this->assertInstanceOf(Response::class, $response);
-        $input = $response->payload();
+        $input = $response->payload;
 
         $this->assertEquals($input[MiddlewareCollectionTest_AMiddleware::class.'(a)'], ['a']);
         $this->assertEquals($response[MiddlewareCollectionTest_AMiddleware::class.'(modifyResponse,1)'], ['modifyResponse',1]);
@@ -561,7 +561,7 @@ class MiddlewareCollectionTest extends TestCase
         /** @var Response $response */
         $response = $c($this->makeInput());
         $this->assertInstanceOf(Response::class, $response);
-        $input = $response->payload();
+        $input = $response->payload;
 
         $this->assertEquals($input[MiddlewareCollectionTest_AMiddleware::class.'(a)'], ['a']);
         $this->assertEquals($response[MiddlewareCollectionTest_AMiddleware::class.'(modifyResponse,1)'], ['modifyResponse',1]);
@@ -594,7 +594,7 @@ class MiddlewareCollectionTest extends TestCase
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertEquals('first', $response['arg']);
-        $input = $response->payload();
+        $input = $response->payload;
 
 
 
@@ -630,7 +630,7 @@ class MiddlewareCollectionTest extends TestCase
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertEquals('first', $response['arg']);
-        $input = $response->payload();
+        $input = $response->payload;
 
 
 
@@ -663,7 +663,7 @@ class MiddlewareCollectionTest extends TestCase
 
         $this->assertInstanceOf(Response::class, $response);
         $this->assertEquals('first', $response['arg']);
-        $input = $response->payload();
+        $input = $response->payload;
 
 
         $this->assertEquals($input[MiddlewareCollectionTest_AMiddleware::class . '(a)'], ['a']);
@@ -754,7 +754,7 @@ class MiddlewareCollectionTest extends TestCase
         /** @var Response $response */
         $response = $c($this->makeInput());
         $this->assertInstanceOf(Response::class, $response);
-        $input = $response->payload();
+        $input = $response->payload;
 
         $this->assertEquals($input[MiddlewareCollectionTest_AMiddleware::class.'(a)'], ['a']);
         $this->assertEquals($input[MiddlewareCollectionTest_AMiddleware::class.'(b)'], ['b']);
@@ -784,14 +784,29 @@ class MiddlewareCollectionTest extends TestCase
         /** @var Response $response */
         $response = $c($this->makeInput('/foo', [], 'api'));
         $this->assertInstanceOf(Response::class, $response);
-        $input = $response->payload();
+        $input = $response->payload;
 
-        $this->assertEquals($input[MiddlewareCollectionTest_AMiddleware::class.'(a)'], ['a']);
-        $this->assertEquals($input[MiddlewareCollectionTest_AMiddleware::class.'(b)'], ['b']);
-        $this->assertEquals($input[MiddlewareCollectionTest_AMiddleware::class.'(c)'], ['c']);
-        $this->assertEquals($input[MiddlewareCollectionTest_AMiddleware::class.'(d,4)'], ['d','4']);
-        $this->assertEquals($input[MiddlewareCollectionTest_AMiddleware::class.'(e)'], ['e']);
-        $this->assertEquals($input['handle'], 1);
+        $this->assertEquals(
+            ['a'],
+            $input[MiddlewareCollectionTest_AMiddleware::class.'(a)']
+        );
+        $this->assertEquals(
+            ['b'],
+            $input[MiddlewareCollectionTest_AMiddleware::class.'(b)']
+        );
+        $this->assertEquals(
+            ['c'],
+            $input[MiddlewareCollectionTest_AMiddleware::class.'(c)']
+        );
+        $this->assertEquals(
+            ['d','4'],
+            $input[MiddlewareCollectionTest_AMiddleware::class.'(d,4)']
+        );
+        $this->assertEquals(
+            ['e'],
+            $input[MiddlewareCollectionTest_AMiddleware::class.'(e)']
+        );
+        $this->assertEquals(1, $input['handle']);
 
     }
 
@@ -813,7 +828,7 @@ class MiddlewareCollectionTest extends TestCase
         /** @var Response $response */
         $response = $c($this->makeInput());
         $this->assertInstanceOf(Response::class, $response);
-        $input = $response->payload();
+        $input = $response->payload;
 
         $this->assertEquals($input[MiddlewareCollectionTest_AMiddleware::class.'(a)'], ['a']);
         $this->assertEquals($input[MiddlewareCollectionTest_AMiddleware::class.'(b)'], ['b']);
@@ -843,7 +858,7 @@ class MiddlewareCollectionTest extends TestCase
         /** @var Response $response */
         $response = $c($this->makeInput('/foo', [], 'web')->setRouteScope('admin'));
         $this->assertInstanceOf(Response::class, $response);
-        $input = $response->payload();
+        $input = $response->payload;
 
         $this->assertEquals($input[MiddlewareCollectionTest_AMiddleware::class.'(a)'], ['a']);
         $this->assertEquals($input[MiddlewareCollectionTest_AMiddleware::class.'(b)'], ['b']);
@@ -864,16 +879,15 @@ class MiddlewareCollectionTest extends TestCase
      * @param array  $parameters (optional)
      * @param string $clientType (optional)
      *
-     * @return \Ems\Core\Input
+     * @return MiddlewareCollectionTest_Input
      */
-    protected function makeInput($path='/foo', array $parameters=[], $clientType=Routable::CLIENT_WEB)
+    protected function makeInput($path='/foo', array $parameters=[], string $clientType=Input::CLIENT_WEB)
     {
-        $input = new MiddlewareCollectionTest_Input();
+        $input = new MiddlewareCollectionTest_Input('GET', new Url($path));
         foreach ($parameters as $key=>$value) {
             $input[$key] = $value;
         }
-        $input->setUrl(new Url($path));
-        return $input->setMethod('GET')->setClientType($clientType);
+        return $input->setUrl(new Url($path))->setClientType($clientType);
     }
 }
 
@@ -898,9 +912,10 @@ class MiddlewareCollectionTest_AMiddleware
         $input[$requestKey] = $this->args;
 
         if (isset($this->args[0]) && $this->args[0] == 'createResponse') {
-            $response = (new Response())->setPayload($input);
+            $response = new Response($input);
             if (isset($this->args[1])) {
-                $response->offsetSet('arg', $this->args[1]);
+                //$response->offsetSet('arg', $this->args[1]);
+                return $response->with('arg', $this->args[1]);
             }
             return $response;
         }
@@ -908,8 +923,7 @@ class MiddlewareCollectionTest_AMiddleware
         if (isset($this->args[0]) && $this->args[0] == 'modifyResponse') {
             /** @var Response $response */
             $response = $next($input);
-            $response->offsetSet($requestKey, $this->args);
-            return $response;
+            return $response->with($requestKey, $this->args);
         }
 
         return $next($input);
@@ -927,9 +941,15 @@ class MiddlewareCollectionTest_AMiddleware
     }
 }
 
-class MiddlewareCollectionTest_Input extends \Ems\Core\Input
+class MiddlewareCollectionTest_Input extends GenericInput
 {
     public $wares = [];
+    public function __construct($method=Input::GET, $url = null)
+    {
+        parent::__construct();
+        $this->method = $method;
+        $this->url = $url;
+    }
 }
 
 class MiddlewareCollectionTest_InputHandler implements \Ems\Contracts\Routing\InputHandler
@@ -952,7 +972,7 @@ class MiddlewareCollectionTest_InputHandler implements \Ems\Contracts\Routing\In
      *
      * @param Input $input
      *
-     * @return \Ems\Contracts\Core\Response
+     * @return \Ems\Core\Response
      */
     public function __invoke(Input $input)
     {
@@ -961,8 +981,7 @@ class MiddlewareCollectionTest_InputHandler implements \Ems\Contracts\Routing\In
         if (!$this->respond) {
             return null;
         }
-        $response = (new Response())->setPayload($input);
-        return $response;
+        return new Response($input);
     }
 
 }

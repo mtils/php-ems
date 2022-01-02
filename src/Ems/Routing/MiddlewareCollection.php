@@ -7,8 +7,8 @@ namespace Ems\Routing;
 
 use ArrayIterator;
 use Closure;
-use Ems\Contracts\Core\Input;
-use Ems\Contracts\Core\Response;
+use Ems\Contracts\Routing\Input;
+use Ems\Core\Response;
 use Ems\Contracts\Routing\MiddlewareCollection as MiddlewareCollectionContract;
 use Ems\Contracts\Routing\MiddlewarePlacer;
 use Ems\Core\Collections\StringList;
@@ -63,7 +63,7 @@ class MiddlewareCollection implements MiddlewareCollectionContract
      *
      * @param Input $input
      *
-     * @return Response
+     * @return \Ems\Core\Response
      *
      * @throws ReflectionException
      */
@@ -371,7 +371,7 @@ class MiddlewareCollection implements MiddlewareCollectionContract
     /**
      * @return Closure
      */
-    protected function beforeAdder()
+    protected function beforeAdder() : Closure
     {
         return function ($addThis, $before) {
             $this->addBefore($before, $addThis);
@@ -381,7 +381,7 @@ class MiddlewareCollection implements MiddlewareCollectionContract
     /**
      * @return Closure
      */
-    protected function afterAdder()
+    protected function afterAdder() : Closure
     {
         return function ($addThis, $before) {
             $this->addAfter($before, $addThis);
@@ -391,7 +391,7 @@ class MiddlewareCollection implements MiddlewareCollectionContract
     /**
      * @return Closure
      */
-    protected function invoker()
+    protected function invoker() : Closure
     {
         return function ($middleware, $input, callable $next, ...$args) {
             $middleware = $this->getOrCreateMiddleware($middleware);
@@ -404,7 +404,7 @@ class MiddlewareCollection implements MiddlewareCollectionContract
      *
      * @return Closure
      */
-    protected function replacer($name)
+    protected function replacer(string $name) : Closure
     {
         return function (MiddlewarePlacer $placer) use ($name) {
             if (!$this->middlewares[$name] instanceof MiddlewarePlacer) {
@@ -419,7 +419,7 @@ class MiddlewareCollection implements MiddlewareCollectionContract
      * @param string $beforeThis
      * @param array $addThat
      */
-    protected function addBefore($beforeThis, array $addThat)
+    protected function addBefore(string $beforeThis, array $addThat)
     {
         if (!isset($this->before[$beforeThis])) {
             $this->before[$beforeThis] = [];
@@ -433,7 +433,7 @@ class MiddlewareCollection implements MiddlewareCollectionContract
      * @param string $afterThis
      * @param array $addThat
      */
-    protected function addAfter($afterThis, array $addThat)
+    protected function addAfter(string $afterThis, array $addThat)
     {
         if (!isset($this->after[$afterThis])) {
             $this->after[$afterThis] = [];
@@ -444,7 +444,7 @@ class MiddlewareCollection implements MiddlewareCollectionContract
     /**
      * @param string $name
      */
-    protected function failOnMissingName($name)
+    protected function failOnMissingName(string $name)
     {
         if (!isset($this->middlewares[$name])) {
             throw new KeyNotFoundException("Middleware '$name' does not exist.");

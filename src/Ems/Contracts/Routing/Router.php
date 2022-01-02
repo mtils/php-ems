@@ -65,11 +65,14 @@ interface Router extends IteratorAggregate
 
     /**
      * Make the routable routed. At the end find a route and a handler, assign it
-     * to the passed routable. After
+     * to the passed routable. It returns the result of Input::makeRouted() so
+     * depending on the input you will get a new instance. (immutable input)
      *
-     * @param Routable $routable
+     * @param Input $routable
+     *
+     * @return Input
      */
-    public function route(Routable $routable);
+    public function route(Input $routable) : Input;
 
     /**
      * Get all routes that have $pattern. Optionally pass a (http) $method to

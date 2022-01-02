@@ -11,7 +11,7 @@ use Ems\Contracts\Model\Schema\MigrationRunner;
 use Ems\Contracts\Model\Schema\MigrationStep;
 use Ems\Contracts\Model\Schema\MigrationStepRepository;
 use Ems\Contracts\Model\Schema\Migrator as MigratorContract;
-use Ems\Core\Application;
+use Ems\Skeleton\Application;
 use Ems\Core\LocalFilesystem;
 use Ems\Core\Url;
 use Ems\IntegrationTest;

@@ -7,13 +7,12 @@ namespace Ems\Routing;
 
 
 use Ems\Contracts\Core\Url as UrlContract;
-use Ems\Contracts\Routing\Routable;
+use Ems\Contracts\Routing\Input;
 use Ems\Contracts\Routing\Route;
-use Ems\Core\Input;
 use Ems\Core\Lambda;
 use Ems\Core\Response as CoreResponse;
 use Ems\Core\Url;
-use Ems\Http\Response as HttpResponse;
+use Ems\Http\HttpResponse;
 use Ems\TestCase;
 use Ems\Testing\LoggingCallable;
 use Mockery;
@@ -71,7 +70,7 @@ class RoutedInputHandlerTest extends TestCase
 
         $response = $handler($input);
         $this->assertInstanceOf(HttpResponse::class, $response);
-        $this->assertEquals('bar', $response->payload());
+        $this->assertEquals('bar', $response->payload);
     }
 
     /**
@@ -84,12 +83,12 @@ class RoutedInputHandlerTest extends TestCase
             return 'bar';
         });
         $input = $this->routedInput('some-url', $f);
-        $input->setClientType(Routable::CLIENT_CONSOLE);
+        $input->setClientType(Input::CLIENT_CONSOLE);
 
         $response = $handler($input);
         $this->assertNotInstanceOf(HttpResponse::class, $response);
         $this->assertInstanceOf(CoreResponse::class, $response);
-        $this->assertEquals('bar', $response->payload());
+        $this->assertEquals('bar', $response->payload);
     }
 
     /**
@@ -98,12 +97,12 @@ class RoutedInputHandlerTest extends TestCase
     public function it_calls_the_route_handler_and_passes_response_if_is_already_Response()
     {
         $handler = $this->make();
-        $awaited = new HttpResponse([], 'hello');
+        $awaited = new HttpResponse('hello');
         $f = new LoggingCallable(function () use ($awaited) {
             return $awaited;
         });
         $input = $this->routedInput('some-url', $f);
-        $input->setClientType(Routable::CLIENT_CONSOLE);
+        $input->setClientType(Input::CLIENT_CONSOLE);
 
         $this->assertSame($awaited, $handler($input));
     }
@@ -125,10 +124,8 @@ class RoutedInputHandlerTest extends TestCase
 
         $f = Lambda::f($handlerString);
 
-        $input = $this->routedInput('some-url', $handlerString);
-        $input->setHandler($f);
-
-        $this->assertSame('show was called: foo', $handler($input)->payload());
+        $input = $this->routedInput('some-url', $handlerString, $f);
+        $this->assertSame('show was called: foo', $handler($input)->payload);
     }
 
     protected function make(callable $factory=null)
@@ -142,11 +139,11 @@ class RoutedInputHandlerTest extends TestCase
      * @param string $clientType
      * @param string $scope
      *
-     * @return INput
+     * @return GenericInput
      */
-    protected function input($url, $method=Routable::GET, $clientType=Routable::CLIENT_WEB, $scope='default')
+    protected function input($url, string $method=Input::GET, string $clientType=Input::CLIENT_WEB, string $scope='default')
     {
-        $routable = new Input();
+        $routable = new GenericInput();
         if (!$url instanceof UrlContract) {
             $url = new Url($url);
         }
@@ -158,15 +155,13 @@ class RoutedInputHandlerTest extends TestCase
      * @param mixed $handler
      * @return Input
      */
-    protected function routedInput($url, $handler)
+    protected function routedInput($url, $handler, callable $realHandler=null)
     {
         $uri = $url instanceof UrlContract ? (string)$url->path : $url;
         $input = $this->input($url);
-        if (is_callable($handler)) {
-            $input->setHandler($handler);
-        }
-        $input->setMatchedRoute(new Route($input->method(), $uri, $handler));
-        return $input;
+        $route = new Route($input->getMethod(), $uri, $handler);
+        $handler = is_callable($handler) ? $handler : function () {};
+        return $input->makeRouted($route, $realHandler ?: $handler);
     }
 }
 

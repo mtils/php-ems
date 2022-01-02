@@ -7,7 +7,7 @@ namespace Ems\Model\Skeleton;
 
 use Ems\Contracts\Core\ConnectionPool as ConnectionPoolContract;
 use Ems\Contracts\Model\Database\Connection;
-use Ems\Core\Application;
+use Ems\Skeleton\Application;
 use Ems\Core\ConnectionPool;
 use Ems\Core\Url;
 use Ems\Model\Database\Dialects\SQLiteDialect;

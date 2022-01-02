@@ -8,7 +8,7 @@ namespace Ems\Testing\Skeleton;
 use Ems\Assets\Skeleton\AssetsBootstrapper;
 use Ems\Cache\Skeleton\CacheBootstrapper;
 use Ems\Contracts\Core\IOCContainer;
-use Ems\Core\Application;
+use Ems\Skeleton\Application;
 
 use Ems\Core\Helper;
 use Ems\Core\Skeleton\CoreBootstrapper;
@@ -24,7 +24,7 @@ use function realpath;
 trait AppInTest
 {
     /**
-     * @var Application
+     * @var \Ems\Skeleton\Application
      */
     protected $app;
 
@@ -38,7 +38,7 @@ trait AppInTest
      *
      * @param null $binding
      * @param array $parameters
-     * @return Application|object
+     * @return \Ems\Skeleton\Application|object
      */
     protected function app($binding=null, array $parameters=[])
     {
@@ -65,7 +65,7 @@ trait AppInTest
     /**
      * Overwrite this to manipulate app before booting or how its booted.
      *
-     * @param Application $app
+     * @param \Ems\Skeleton\Application $app
      */
     protected function bootApplication(Application $app)
     {
@@ -92,7 +92,7 @@ trait AppInTest
     }
 
     /**
-     * @return Application
+     * @return \Ems\Skeleton\Application
      */
     protected function getAppInstance() : Application
     {
@@ -106,7 +106,7 @@ trait AppInTest
      * Creates the application. Overwrite this in your test to create the real
      * application.
      *
-     * @return Application
+     * @return \Ems\Skeleton\Application
      */
     protected function createApplication() : Application
     {
@@ -121,7 +121,7 @@ trait AppInTest
      * Calls all methods with $prefix and pass the application.
      *
      * @param string $prefix
-     * @param Application $app
+     * @param \Ems\Skeleton\Application $app
      */
     protected function callAllBootMethods(string $prefix, Application $app)
     {

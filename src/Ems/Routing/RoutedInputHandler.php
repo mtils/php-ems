@@ -5,23 +5,21 @@
 
 namespace Ems\Routing;
 
-use Ems\Console\ArgvInput;
 use Ems\Contracts\Core\HasMethodHooks;
-use Ems\Contracts\Core\Input as InputContract;
-use Ems\Contracts\Routing\InputHandler as InputHandlerContract;
 use Ems\Contracts\Core\IOCContainer;
-use Ems\Contracts\Core\Response;
 use Ems\Contracts\Core\SupportsCustomFactory;
 use Ems\Contracts\Core\Type;
-use Ems\Contracts\Core\UtilizesInput;
-use Ems\Contracts\Routing\Routable;
+use Ems\Contracts\Routing\UtilizesInput;
+use Ems\Contracts\Routing\Input as InputContract;
+use Ems\Contracts\Routing\InputHandler as InputHandlerContract;
 use Ems\Core\Exceptions\UnConfiguredException;
 use Ems\Core\Input;
 use Ems\Core\Lambda;
 use Ems\Core\Patterns\HookableTrait;
-use Ems\Core\Response as CoreResponse;
+use Ems\Core\Response;
 use Ems\Core\Support\CustomFactorySupport;
-use Ems\Http\Response as HttpResponse;
+use Ems\Http\HttpResponse;
+use ReflectionException;
 
 use function is_callable;
 
@@ -29,7 +27,7 @@ use function is_callable;
  * Class RoutedInputHandler
  *
  * This class does the actual running of the route handler.
- * The Input has to be routed before calling __invoke. Otherwise it will just
+ * The Input has to be routed before calling __invoke. Otherwise, it will just
  * throw an exception.
  *
  * @package Ems\Routing
@@ -50,6 +48,7 @@ class RoutedInputHandler implements InputHandlerContract, SupportsCustomFactory,
      * @param InputContract $input
      *
      * @return Response
+     * @throws ReflectionException
      */
     public function __invoke(InputContract $input)
     {
@@ -80,7 +79,7 @@ class RoutedInputHandler implements InputHandlerContract, SupportsCustomFactory,
     /**
      * {@inheritDoc}
      *
-     * @return array
+     * @return string[]
      **/
     public function methodHooks()
     {
@@ -92,13 +91,13 @@ class RoutedInputHandler implements InputHandlerContract, SupportsCustomFactory,
      * Call the handler.
      *
      * @param callable $handler
-     * @param Routable $routable
+     * @param InputContract $input
      *
      * @return mixed
      */
-    protected function call(callable $handler, Routable $routable)
+    protected function call(callable $handler, InputContract $input)
     {
-        return Lambda::callFast($handler, array_values($routable->routeParameters()));
+        return Lambda::callFast($handler, array_values($input->getRouteParameters()));
     }
 
     /**
@@ -115,17 +114,17 @@ class RoutedInputHandler implements InputHandlerContract, SupportsCustomFactory,
             return $result;
         }
 
-        if (in_array($input->clientType(),[Routable::CLIENT_CONSOLE, Routable::CLIENT_TASK])) {
-            return (new CoreResponse())->setPayload($result);
+        if (in_array($input->getClientType(), [InputContract::CLIENT_CONSOLE, InputContract::CLIENT_TASK])) {
+            return new Response($result);
         }
 
-        return (new HttpResponse())->setPayload($result);
+        return new HttpResponse($result);
     }
 
     /**
      * @param Lambda $handler
      * @param InputContract $input
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     protected function configureLambda(Lambda $handler, InputContract $input)
     {

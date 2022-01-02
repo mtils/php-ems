@@ -70,7 +70,7 @@ class Route implements Arrayable
      * @param mixed        $handler
      * @param RouteCollector|null $collector
      */
-    public function __construct($method, $pattern, $handler, RouteCollector $collector=null)
+    public function __construct($method, string $pattern, $handler, RouteCollector $collector=null)
     {
         $this->setMethod($method);
         $this->setPattern($pattern);
@@ -202,39 +202,31 @@ class Route implements Arrayable
     /**
      * Assign the http method(s) which should handled by this route
      *
-     * @param $method
-     *
-     * @return $this
+     * @param array|string $method
      */
     protected function setMethod($method)
     {
         $this->_properties['methods'] = is_array($method) ? $method : func_get_args();
-        return $this;
     }
 
     /**
      * Assign the url of this route.
      *
      * @param string $pattern
-     * @return $this
      */
-    protected function setPattern($pattern)
+    protected function setPattern(string $pattern)
     {
         $this->_properties['pattern'] = $pattern;
-        return $this;
     }
 
     /**
      * Assign a handler for this route
      *
      * @param mixed $handler
-     *
-     * @return $this
      */
     protected function setHandler($handler)
     {
         $this->_properties['handler'] = $handler;
-        return $this;
     }
 
 }

@@ -6,13 +6,12 @@
 namespace Ems\Routing;
 
 use ArrayIterator;
-use Ems\Contracts\Core\Input;
-use Ems\Contracts\Core\Response;
+use Ems\Contracts\Routing\Input;
+use Ems\Core\Response;
 use Ems\Contracts\Core\SupportsCustomFactory;
 use Ems\Contracts\Routing\Command;
 use Ems\Contracts\Routing\Dispatcher;
 use Ems\Contracts\Routing\Exceptions\RouteNotFoundException;
-use Ems\Contracts\Routing\Routable;
 use Ems\Contracts\Routing\Route;
 use Ems\Contracts\Routing\RouteCollector;
 use Ems\Contracts\Routing\Router as RouterContract;
@@ -88,23 +87,25 @@ class Router implements RouterContract, SupportsCustomFactory
     /**
      * {@inheritDoc}
      *
-     * @param Routable $routable
+     * @param Input $routable
+     *
+     * @return Input
      *
      * @throws ReflectionException
      */
-    public function route(Routable $routable)
+    public function route(Input $routable) : Input
     {
-        $interpreter = $this->getDispatcher($routable->clientType());
-        $hit = $interpreter->match($routable->method(), (string)$routable->url()->path);
+        $interpreter = $this->getDispatcher($routable->getClientType());
+        $hit = $interpreter->match($routable->getMethod(), (string)$routable->getUrl()->path);
         $routeData = $hit->handler;
 
-        $scope = $routable->routeScope();
+        $scope = $routable->getRouteScope();
 
         if ($routeData['scopes'] != ['*'] && !in_array((string)$scope, $routeData['scopes'])) {
             throw new RouteNotFoundException("Route {$hit->pattern} is not allowed in scope $scope");
         }
 
-        $routable->setRouteParameters($this->buildParameters($routeData['defaults'], $hit->parameters));
+        $parameters = $this->buildParameters($routeData['defaults'], $hit->parameters);
 
         $route = new Route($routeData['methods'], $routeData['pattern'], $routeData['handler']);
         $route->scope($routeData['scopes'])
@@ -117,9 +118,7 @@ class Router implements RouterContract, SupportsCustomFactory
             $route->command($routeData['command']);
         }
 
-        $routable->setMatchedRoute($route);
-
-        $routable->setHandler($this->makeHandler($routable));
+        return $routable->makeRouted($route, $this->makeHandler($routable, $route), $parameters);
 
     }
 
@@ -216,8 +215,7 @@ class Router implements RouterContract, SupportsCustomFactory
      */
     public function __invoke(Input $input, callable $next)
     {
-        $this->route($input);
-        return $next($input);
+        return $next($this->route($input));
     }
 
     /**
@@ -271,7 +269,7 @@ class Router implements RouterContract, SupportsCustomFactory
     protected function installInterpreterFactory(callable $factory=null)
     {
         $this->interpreterFactory = $factory ?: function ($clientType) {
-            if (in_array($clientType, [Routable::CLIENT_CONSOLE, Routable::CLIENT_TASK])) {
+            if (in_array($clientType, [Input::CLIENT_CONSOLE, Input::CLIENT_TASK])) {
                 return $this->createObject(ConsoleDispatcher::class);
             }
             return $this->createObject(FastRouteDispatcher::class);
@@ -309,17 +307,16 @@ class Router implements RouterContract, SupportsCustomFactory
     }
 
     /**
-     * @param Routable  $routeData
+     * @param Input  $input
+     * @param Route  $route
      *
      * @return Lambda
      *
      * @throws ReflectionException
      */
-    protected function makeHandler(Routable $routeData)
+    protected function makeHandler(Input $input, Route $route) : Lambda
     {
-        $handler = $routeData->matchedRoute()->handler;
-
-        $lambda = new Lambda($handler, $this->_customFactory);
+        $lambda = new Lambda($route->handler, $this->_customFactory);
 
         if ($this->_customFactory) {
             $lambda->autoInject(true, false);

@@ -5,7 +5,8 @@
     "require": {
         "php": ">=5.4.0",
         "ems/contracts": "0.3.*",
-        "ems/core": "0.3.*"
+        "ems/core": "0.3.*",
+        "ems/http": "0.3.*"
     },
     "autoload": {
         "psr-4": {

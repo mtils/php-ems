@@ -5,8 +5,7 @@
 
 namespace Ems\Contracts\Routing;
 
-use Ems\Contracts\Core\Input;
-use Ems\Contracts\Core\Response;
+use Ems\Core\Response;
 
 /**
  * Interface InputHandler

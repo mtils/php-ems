@@ -3,11 +3,23 @@
 namespace Ems\Core;
 
 
+use Ems\Contracts\Core\Extendable;
 use Ems\Contracts\Core\Serializer as SerializerContract;
 use Ems\Core\Exceptions\UnsupportedParameterException;
+use Ems\Core\Patterns\ExtendableTrait;
 
-class Serializer implements SerializerContract
+use function call_user_func;
+
+/**
+ * This is "THE SERIALIZER". Its normal usage is just to replace serialize()
+ * and unserialize().
+ * But you can also use it as a factory for other formats. Use the extendable
+ * interface for it and call self::forMimeType($mime)->deserialize().
+ */
+class Serializer implements SerializerContract, Extendable
 {
+    use ExtendableTrait;
+
     /**
      * @var bool
      **/
@@ -88,6 +100,17 @@ class Serializer implements SerializerContract
         }
 
         throw new UnsupportedParameterException('Unable to deserialize data');
+    }
+
+    /**
+     * Return a serializer for $mimetype.
+     *
+     * @param string $mimetype
+     * @return SerializerContract
+     */
+    public function forMimeType(string $mimetype) : SerializerContract
+    {
+        return call_user_func($this->getExtension($mimetype));
     }
 
     /**

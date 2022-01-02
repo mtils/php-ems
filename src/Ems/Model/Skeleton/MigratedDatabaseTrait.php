@@ -6,7 +6,7 @@
 namespace Ems\Model\Skeleton;
 
 use Ems\Contracts\Model\Schema\Migrator;
-use Ems\Core\Application;
+use Ems\Skeleton\Application;
 
 use function get_class;
 use function property_exists;

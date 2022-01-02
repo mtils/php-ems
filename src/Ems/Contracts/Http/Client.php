@@ -9,6 +9,9 @@
 namespace Ems\Contracts\Http;
 
 use Ems\Contracts\Core\Url;
+use Ems\Core\ImmutableMessage;
+use Ems\Http\HttpResponse;
+use Psr\Http\Message\ResponseInterface;
 
 interface Client
 {
@@ -17,9 +20,9 @@ interface Client
      *
      * @param Url  $url
      *
-     * @return Response
+     * @return ResponseInterface|ImmutableMessage
      */
-    public function head(Url $url);
+    public function head(Url $url) : ResponseInterface;
 
     /**
      * Perform a get request to $url. You await $contentType.
@@ -27,9 +30,9 @@ interface Client
      * @param Url  $url
      * @param null $contentType
      *
-     * @return Response
+     * @return ResponseInterface|ImmutableMessage
      */
-    public function get(Url $url, $contentType=null);
+    public function get(Url $url, $contentType=null) : ResponseInterface;
 
     /**
      * Perform a post request. Post $data (raw). It should be send in
@@ -39,9 +42,9 @@ interface Client
      * @param mixed  $data
      * @param string $contentType (optional)
      *
-     * @return Response
+     * @return ResponseInterface|ImmutableMessage
      */
-    public function post(Url $url, $data=null, $contentType=null);
+    public function post(Url $url, $data=null, string $contentType=null) : ResponseInterface;
 
     /**
      * Perform a put request. Put $data (raw). It should be send in
@@ -51,9 +54,9 @@ interface Client
      * @param mixed  $data
      * @param string $contentType (optional)
      *
-     * @return Response
+     * @return ResponseInterface|ImmutableMessage
      */
-    public function put(Url $url, $data=null, $contentType=null);
+    public function put(Url $url, $data=null, string $contentType=null) : ResponseInterface;
 
     /**
      * Perform a patch request. Send $data (raw). It should be send in
@@ -63,9 +66,9 @@ interface Client
      * @param mixed  $data
      * @param string $contentType (optional)
      *
-     * @return Response
+     * @return ResponseInterface|ImmutableMessage
      */
-    public function patch(Url $url, $data=null, $contentType=null);
+    public function patch(Url $url, $data=null, string $contentType=null) : ResponseInterface;
 
     /**
      * Perform a patch request. Send $data (raw). It should be send in
@@ -75,9 +78,9 @@ interface Client
      * @param mixed  $data
      * @param string $contentType (optional)
      *
-     * @return Response
+     * @return ResponseInterface|ImmutableMessage
      */
-    public function delete(Url $url, $data=null, $contentType=null);
+    public function delete(Url $url, $data=null, string $contentType=null) : ResponseInterface;
 
     /**
      * Perform a post request. Post $data (raw). It should be send in
@@ -87,9 +90,9 @@ interface Client
      * @param array  $data
      * @param string $method (default: POST)
      *
-     * @return Response
+     * @return ResponseInterface|ImmutableMessage
      */
-    public function submit(Url $url, array $data, $method=Connection::POST);
+    public function submit(Url $url, array $data, string $method=Connection::POST) : ResponseInterface;
 
     /**
      * Set headers before sending the request.
@@ -101,5 +104,5 @@ interface Client
      *
      * @example Client::headers()
      */
-    public function header($header, $value=null);
+    public function header($header, string $value=null) : Client;
 }

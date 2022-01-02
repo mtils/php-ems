@@ -8,7 +8,7 @@ namespace Ems\Routing;
 use ArrayAccess;
 use ArrayIterator;
 use Ems\Contracts\Routing\Dispatcher;
-use Ems\Contracts\Routing\Routable;
+use Ems\Contracts\Routing\Input;
 use Ems\Contracts\Routing\Route;
 use Ems\Contracts\Routing\Router as RouterContract;
 use Ems\Core\Exceptions\KeyNotFoundException;
@@ -83,12 +83,12 @@ class CompilableRouter implements RouterContract
      * Reimplemented to "inject" the compiled data into the dispatcher before
      * the source router uses it.
      *
-     * @param Routable $routable
+     * @param Input $routable
      */
-    public function route(Routable $routable)
+    public function route(Input $routable) : Input
     {
 
-        $clientType = $routable->clientType();
+        $clientType = $routable->getClientType();
 
         // If we now this dispatcher it was already optimized
         if (isset($this->optimizedDispatchers[$clientType]) || !$this->isCompiled()) {

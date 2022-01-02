@@ -8,7 +8,7 @@ namespace Ems\Model\Skeleton;
 
 use Ems\Contracts\Core\Url;
 use Ems\Contracts\Model\SchemaInspector;
-use Ems\Core\Application;
+use Ems\Skeleton\Application;
 use Ems\Core\LocalFilesystem;
 use Ems\Core\ObjectArrayConverter;
 use Ems\Core\Skeleton\Bootstrapper;

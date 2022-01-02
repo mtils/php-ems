@@ -10,14 +10,13 @@
 namespace Ems\Http;
 
 use Ems\Contracts\Core\ConnectionPool;
-use Ems\Contracts\Core\Filesystem;
-use Ems\Contracts\Http\Connection as HttpConnection;
-use Ems\Contracts\Http\Response as ResponseContract;
-use Ems\Core\Exceptions\NotImplementedException;
-use Ems\Core\Url;
 use Ems\Contracts\Http\Client as ClientContract;
+use Ems\Contracts\Http\Connection as HttpConnection;
+use Ems\Core\Exceptions\HandlerNotFoundException;
 use Ems\Core\Expression;
+use Ems\Core\Url;
 use Ems\Http\Serializer\UrlEncodeSerializer;
+
 use function json_encode;
 
 class ClientTest extends \Ems\TestCase
@@ -35,7 +34,7 @@ class ClientTest extends \Ems\TestCase
         $client = $this->newClient($pool);
 
         $url = new Url('http://web-utils.de/api/v1/slots/email.sent');
-        $response = new Response([0=>'HTTP/1.1 200 OK']);
+        $response = new HttpResponse('', ['HTTP/1.1 200 OK']);
 
         $pool->shouldReceive('connection')
             ->with($url)
@@ -74,7 +73,7 @@ class ClientTest extends \Ems\TestCase
         $client = $this->newClient($this->pool($con));
 
         $url = new Url('http://web-utils.de/api/v1/slots/email.sent');
-        $response = new Response([0=>'HTTP/1.1 200 OK']);
+        $response = new HttpResponse('', ['HTTP/1.1 200 OK']);
 
         $con->shouldReceive('send')
             ->with('GET', [])
@@ -90,7 +89,7 @@ class ClientTest extends \Ems\TestCase
         $client = $this->newClient($this->pool($con));
 
         $url = new Url('http://web-utils.de/api/v1/slots/email.sent');
-        $response = new Response([0=>'HTTP/1.1 200 OK']);
+        $response = new HttpResponse(['HTTP/1.1 200 OK']);
 
         $con->shouldReceive('send')
             ->with('GET', ['Accept: application/json'])
@@ -106,7 +105,7 @@ class ClientTest extends \Ems\TestCase
         $client = $this->newClient($this->pool($con));
 
         $url = new Url('http://web-utils.de/api/v1/slots/email.sent');
-        $response = new Response([0=>'HTTP/1.1 200 OK']);
+        $response = new HttpResponse(['HTTP/1.1 200 OK']);
 
         $con->shouldReceive('send')
             ->with('POST', [], 'content')
@@ -122,7 +121,7 @@ class ClientTest extends \Ems\TestCase
         $client = $this->newClient($this->pool($con));
 
         $url = new Url('http://web-utils.de/api/v1/slots/email.sent');
-        $response = new Response([0=>'HTTP/1.1 200 OK']);
+        $response = new HttpResponse(['HTTP/1.1 200 OK']);
 
         $con->shouldReceive('send')
             ->with('POST', [], 'content')
@@ -138,7 +137,7 @@ class ClientTest extends \Ems\TestCase
         $client = $this->newClient($this->pool($con));
 
         $url = new Url('http://web-utils.de/api/v1/slots/email.sent');
-        $response = new Response([0=>'HTTP/1.1 200 OK']);
+        $response = new HttpResponse(['HTTP/1.1 200 OK']);
         $data = ['a', 'b'];
         $serialized = json_encode($data);
 
@@ -151,15 +150,16 @@ class ClientTest extends \Ems\TestCase
     }
 
     /**
-     * @expectedException \Ems\Contracts\Core\Errors\ConfigurationError
+     * @test
      */
-    public function test_post_throws_exception_if_data_not_serializable()
+    public function post_throws_exception_if_data_not_serializable()
     {
         $con = $this->con();
         $client = $this->newClient($this->pool($con));
 
         $url = new Url('http://web-utils.de/api/v1/slots/email.sent');
         $data = ['a', 'b'];
+        $this->expectException(HandlerNotFoundException::class);
         $client->post($url, $data, 'application/json-api');
 
     }
@@ -170,7 +170,7 @@ class ClientTest extends \Ems\TestCase
         $client = $this->newClient($this->pool($con));
 
         $url = new Url('http://web-utils.de/api/v1/slots/email.sent');
-        $response = new Response([0=>'HTTP/1.1 200 OK']);
+        $response = new HttpResponse('',['HTTP/1.1 200 OK']);
 
         $con->shouldReceive('send')
             ->with('PUT', [], 'content')
@@ -186,7 +186,7 @@ class ClientTest extends \Ems\TestCase
         $client = $this->newClient($this->pool($con));
 
         $url = new Url('http://web-utils.de/api/v1/slots/email.sent');
-        $response = new Response([0=>'HTTP/1.1 200 OK']);
+        $response = new HttpResponse('',['HTTP/1.1 200 OK']);
 
         $con->shouldReceive('send')
             ->with('PATCH', [], 'content')
@@ -202,7 +202,7 @@ class ClientTest extends \Ems\TestCase
         $client = $this->newClient($this->pool($con));
 
         $url = new Url('http://web-utils.de/api/v1/slots/email.sent');
-        $response = new Response([0=>'HTTP/1.1 200 OK']);
+        $response = new HttpResponse('',['HTTP/1.1 200 OK']);
 
         $con->shouldReceive('send')
             ->with('DELETE', [], 'content')
@@ -218,7 +218,7 @@ class ClientTest extends \Ems\TestCase
         $client = $this->newClient($this->pool($con));
 
         $url = new Url('http://web-utils.de/api/v1/slots/email.sent');
-        $response = new Response([0=>'HTTP/1.1 200 OK']);
+        $response = new HttpResponse(['HTTP/1.1 200 OK']);
 
         $additionalHeader = 'Accept-Encoding: gzip,deflate';
         $con->shouldReceive('send')
@@ -235,7 +235,7 @@ class ClientTest extends \Ems\TestCase
         $client = $this->newClient($this->pool($con));
 
         $url = new Url('http://web-utils.de/api/v1/slots/email.sent');
-        $response = new Response([0=>'HTTP/1.1 200 OK']);
+        $response = new HttpResponse(['HTTP/1.1 200 OK']);
 
         $additionalHeader = 'Accept-Encoding: gzip,deflate';
         $con->shouldReceive('send')
@@ -253,7 +253,7 @@ class ClientTest extends \Ems\TestCase
         $serializer = new UrlEncodeSerializer();
 
         $url = new Url('http://web-utils.de/api/v1/slots/email.sent');
-        $response = new Response([0=>'HTTP/1.1 200 OK']);
+        $response = new HttpResponse(['HTTP/1.1 200 OK']);
         $data = ['a', 'b'];
         $serialized = $serializer->serialize($data);
 

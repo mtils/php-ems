@@ -6,9 +6,9 @@
 namespace Ems\Routing;
 
 
-use Ems\Contracts\Core\Input;
+use Ems\Contracts\Routing\Input;
 use Ems\Contracts\Routing\InputHandler as InputHandlerContract;
-use Ems\Contracts\Core\Response;
+use Ems\Core\Response;
 use Ems\Contracts\Routing\Exceptions\NoInputHandlerException;
 use Ems\Contracts\Routing\MiddlewareCollection as CollectionContract;
 use Ems\Core\Exceptions\HandlerNotFoundException;
@@ -69,7 +69,7 @@ class MiddlewareRunner
      *
      * @param Input $input
      *
-     * @return Response
+     * @return \Ems\Core\Response
      */
     public function __invoke(Input $input)
     {

@@ -6,13 +6,14 @@
 namespace Ems\Routing;
 
 use Ems\Contracts\Core\Exceptions\Termination;
-use Ems\Contracts\Core\Input;
+use Ems\Contracts\Routing\Input;
 use Ems\Contracts\Core\SupportsCustomFactory;
 use Ems\Contracts\Routing\MiddlewareCollection as MiddlewareCollectionContract;
+use Ems\Core\Response;
 use Ems\Core\Exceptions\UnConfiguredException;
-use Ems\Core\ProxyInputHandler;
 use Ems\Core\Support\CustomFactorySupport;
 use Ems\Expression\ConstraintParsingMethods;
+use Ems\Skeleton\ProxyInputHandler;
 
 /**
  * Class RouteMiddleware
@@ -41,7 +42,7 @@ class RouteMiddleware implements SupportsCustomFactory
      *
      * @param Input $input
      * @param callable $next
-     * @return \Ems\Contracts\Core\Response
+     * @return Response
      *
      * @throws \ReflectionException
      */
@@ -51,7 +52,7 @@ class RouteMiddleware implements SupportsCustomFactory
             throw new UnConfiguredException('The input has to be routed to get handled by ' . static::class . '.');
         }
 
-        $route = $input->matchedRoute();
+        $route = $input->getMatchedRoute();
 
         $middlewares = $route->middlewares;
 

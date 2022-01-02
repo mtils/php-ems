@@ -45,7 +45,9 @@ class FilesystemConnectionIntegrationTest extends HttpMockTest
 
         $response = $con->send($method);
 
-        $this->assertEquals($body, $response->body());
+        $this->assertEquals($body, $response->body);
+        $this->assertNotEmpty($response->raw);
+        $this->assertNotEmpty($response->headers['Host']);
 
     }
 
@@ -140,8 +142,9 @@ class FilesystemConnectionIntegrationTest extends HttpMockTest
 
         $request = $this->http->requests->last();
 
-        $this->assertEquals($body, $response->body());
+        $this->assertEquals($body, $response->payload);
         $this->assertEquals($sendBody, $request->getBody());
+        $this->assertEquals('application/json', $response->headers['Content-Type']);
 
     }
 

@@ -6,7 +6,7 @@
 namespace Ems\Model\Database;
 
 use Ems\Contracts\Core\Url;
-use Ems\Core\Application;
+use Ems\Skeleton\Application;
 use Ems\Core\Url as UrlObject;
 
 use function basename;

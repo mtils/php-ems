@@ -5,12 +5,12 @@
 
 namespace Ems\Model\Skeleton;
 
-use Ems\Console\ConsoleInputConnection;
-use Ems\Console\ConsoleOutputConnection;
+use Ems\Skeleton\ConsoleInputConnection;
+use Ems\Skeleton\Connection\ConsoleOutputConnection;
 use Ems\Contracts\Core\HasMethodHooks;
-use Ems\Contracts\Core\Input;
-use Ems\Contracts\Core\InputConnection;
-use Ems\Contracts\Core\OutputConnection;
+use Ems\Contracts\Routing\Input;
+use Ems\Contracts\Skeleton\InputConnection;
+use Ems\Contracts\Skeleton\OutputConnection;
 use Ems\Contracts\Model\Exceptions\MigratorInstallationException;
 use Ems\Contracts\Model\Schema\MigrationStep;
 use Ems\Contracts\Model\Schema\Migrator;
@@ -39,14 +39,14 @@ class MigrationCommand
     protected $in;
 
     /**
-     * @var OutputConnection
+     * @var \Ems\Contracts\Skeleton\OutputConnection
      */
     protected $out;
 
     /**
      * @param Migrator $migrator
      * @param InputConnection $in
-     * @param OutputConnection $out
+     * @param \Ems\Contracts\Skeleton\OutputConnection $out
      */
     public function __construct(Migrator $migrator, InputConnection $in, OutputConnection $out)
     {

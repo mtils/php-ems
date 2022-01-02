@@ -6,8 +6,8 @@
 namespace Ems\View\Skeleton;
 
 
-use Ems\Contracts\Core\Input;
-use Ems\Core\Application;
+use Ems\Contracts\Routing\Input;
+use Ems\Skeleton\Application;
 use Ems\Core\Skeleton\Bootstrapper;
 use Ems\Routing\InputHandler;
 use Ems\View\InputRendererFactory;
@@ -46,7 +46,7 @@ class ViewBootstrapper extends Bootstrapper
 
         foreach ($viewConfig as $name=>$config) {
             $factory->extend($name, function (Input $input) use ($config) {
-                if ($input->clientType() != $config['client-type']) {
+                if ($input->getClientType() != $config['client-type']) {
                     return null;
                 }
                 if ($config['backend'] == 'php') {

@@ -8,19 +8,18 @@ namespace Ems\Routing;
 use ArgumentCountError;
 use Ems\Cache\Exception\CacheMissException;
 use Ems\Contracts\Core\Filesystem;
-use Ems\Contracts\Core\Input;
-use Ems\Contracts\Routing\InputHandler as HandlerContract;
-use Ems\Contracts\Core\Response;
+use Ems\Core\Response;
 use Ems\Contracts\Core\StringConverter;
 use Ems\Contracts\Core\TextFormatter;
 use Ems\Contracts\Core\Url as UrlContract;
-use Ems\Contracts\Routing\Routable;
+use Ems\Contracts\Routing\Input;
+use Ems\Contracts\Routing\InputHandler as HandlerContract;
 use Ems\Contracts\Routing\RouteCollector;
 use Ems\Contracts\Routing\Router as RouterContract;
 use Ems\Core\Url;
 use Ems\RoutingTrait;
-use Ems\Testing\LoggingCallable;
 use Illuminate\Contracts\Container\Container;
+
 use function array_filter;
 use function array_values;
 use function class_exists;
@@ -62,7 +61,7 @@ class InputHandlerIntegrationTest extends \Ems\IntegrationTest
             $response = $handler($input);
             $this->assertInstanceOf(Response::class, $response);
             $string = InputHandlerIntegrationTest_UserController::buildResponse($routeData);
-            $this->assertEquals($string, $response->payload());
+            $this->assertEquals($string, $response->payload);
         }
 
     }
@@ -87,9 +86,9 @@ class InputHandlerIntegrationTest extends \Ems\IntegrationTest
         foreach (static::$testRoutes as $routeData) {
             $input = $this->input($routeData['uri'], [], $routeData['method']);
             $response = $handler($input);
-            $this->assertInstanceOf(Response::class, $response);
+            $this->assertInstanceOf(\Ems\Core\Response::class, $response);
             $string = InputHandlerIntegrationTest_UserController_Dependencies::buildResponse($routeData);
-            $this->assertEquals($string, $response->payload());
+            $this->assertEquals($string, $response->payload);
         }
 
     }
@@ -150,9 +149,7 @@ class InputHandlerIntegrationTest extends \Ems\IntegrationTest
     {
         $handler = $this->makeHandler();
         $errorHandler = function ($e) {
-            $response = new \Ems\Core\Response();
-            $response->setPayload($e);
-            return $response;
+            return new Response(['payload' => $e]);
         };
 
         $this->assertSame($handler, $handler->setExceptionHandler($errorHandler));
@@ -170,7 +167,7 @@ class InputHandlerIntegrationTest extends \Ems\IntegrationTest
         $response = $handler($this->input('foo'));
 
         $this->assertInstanceOf(Response::class, $response);
-        $this->assertSame($exception, $response->payload());
+        $this->assertSame($exception, $response->payload);
     }
 
     /**
@@ -184,9 +181,9 @@ class InputHandlerIntegrationTest extends \Ems\IntegrationTest
         }
         $handler = $this->makeHandler();
         $errorHandler = function ($e) {
-            $response = new \Ems\Core\Response();
-            $response->setPayload($e);
-            return $response;
+            return new Response([
+                'payload' => $e
+            ]);
         };
 
         $this->assertSame($handler, $handler->setExceptionHandler($errorHandler));
@@ -204,7 +201,7 @@ class InputHandlerIntegrationTest extends \Ems\IntegrationTest
         $response = $handler($this->input('foo'));
 
         $this->assertInstanceOf(Response::class, $response);
-        $this->assertSame($exception, $response->payload());
+        $this->assertSame($exception, $response->payload);
     }
 
     /**
@@ -231,7 +228,7 @@ class InputHandlerIntegrationTest extends \Ems\IntegrationTest
 
         $response = $handler($this->input('my-account'));
 
-        $this->assertEquals('my-account was called and require-auth', $response->payload());
+        $this->assertEquals('my-account was called and require-auth', $response->payload);
 
     }
 
@@ -259,7 +256,7 @@ class InputHandlerIntegrationTest extends \Ems\IntegrationTest
 
         $response = $handler($this->input('my-account'));
 
-        $this->assertEquals('my-account was called and require-auth a|b', $response->payload());
+        $this->assertEquals('my-account was called and require-auth a|b', $response->payload);
 
     }
 
@@ -294,7 +291,7 @@ class InputHandlerIntegrationTest extends \Ems\IntegrationTest
 
         $response = $handler($this->input('my-account'));
 
-        $this->assertEquals('my-account was called and require-auth a|b--require-role moderator|force', $response->payload());
+        $this->assertEquals('my-account was called and require-auth a|b--require-role moderator|force', $response->payload);
 
     }
 
@@ -309,7 +306,7 @@ class InputHandlerIntegrationTest extends \Ems\IntegrationTest
 
         $app->bind('require-token', function () {
             return function (Input $input, callable $next) {
-                return new \Ems\Core\Response('I dont care about the next middlewares');
+                return new Response('I dont care about the next middlewares');
             };
         });
 
@@ -325,11 +322,11 @@ class InputHandlerIntegrationTest extends \Ems\IntegrationTest
 
         $response = $handler($this->input('my-account'));
 
-        $this->assertEquals('I dont care about the next middlewares', $response->payload());
+        $this->assertEquals('I dont care about the next middlewares', $response->payload);
 
         $response = $handler($this->input('home'));
 
-        $this->assertEquals('home was called', $response->payload());
+        $this->assertEquals('home was called', $response->payload);
 
     }
     /**
@@ -355,15 +352,12 @@ class InputHandlerIntegrationTest extends \Ems\IntegrationTest
         return $router;
     }
 
-    protected function input($url, array $parameters=[], $method=Routable::GET, $clientType=Routable::CLIENT_WEB)
+    protected function input($url, array $parameters=[], $method=Input::GET, $clientType=Input::CLIENT_WEB)
     {
-        $input = new \Ems\Core\Input();
+        $input = new GenericInput($parameters);
         $input->setUrl($url instanceof UrlContract ? $url : new Url($url));
         $input->setClientType($clientType);
         $input->setMethod($method);
-        foreach ($parameters as $key=>$value) {
-            $input[$key] = $value;
-        }
         return $input;
     }
 

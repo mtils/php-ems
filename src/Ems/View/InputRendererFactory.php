@@ -7,10 +7,10 @@ namespace Ems\View;
 
 
 use Ems\Contracts\Core\Extendable;
-use Ems\Contracts\Core\Input;
+use Ems\Contracts\Routing\Input;
 use Ems\Contracts\Core\Renderable;
 use Ems\Contracts\Core\Renderer;
-use Ems\Contracts\Core\Response;
+use Ems\Core\Response;
 use Ems\Core\Patterns\ExtendableTrait;
 
 class InputRendererFactory implements Extendable
@@ -25,7 +25,7 @@ class InputRendererFactory implements Extendable
      *
      * @return Renderer|null
      */
-    public function renderer(Input $input, Renderable $renderable = null)
+    public function renderer(Input $input, Renderable $renderable = null): ?Renderer
     {
         return $this->callUntilNotNull([$input, $renderable]);
     }
@@ -42,7 +42,7 @@ class InputRendererFactory implements Extendable
     {
         /** @var Response $response */
         $response = $next($input);
-        $payload = $response->payload();
+        $payload = $response->payload;
 
         if (!$payload instanceof Renderable) {
             return $response;

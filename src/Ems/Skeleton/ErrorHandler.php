@@ -6,13 +6,12 @@
 namespace Ems\Skeleton;
 
 use Ems\Contracts\Core\Extendable;
-use Ems\Contracts\Core\Input;
-use Ems\Contracts\Core\Response as ResponseContract;
+use Ems\Contracts\Routing\Input;
+use Ems\Core\Response;
 use Ems\Contracts\Core\Type;
 use Ems\Contracts\Routing\Exceptions\RouteNotFoundException;
-use Ems\Core\Application;
+use Ems\Skeleton\Application;
 use Ems\Core\Patterns\ExtendableTrait;
-use Ems\Core\Response;
 use ErrorException;
 use Throwable;
 
@@ -59,7 +58,7 @@ class ErrorHandler implements Extendable
      * @param Throwable $e
      * @param Input|null $input
      *
-     * @return ResponseContract
+     * @return Response
      */
     public function handle(Throwable $e, Input $input=null)
     {
@@ -81,7 +80,7 @@ class ErrorHandler implements Extendable
 
         $shortClass = Type::short($e);
 
-        return (new Response("No Content ($shortClass)"))->setStatus(500);
+        return new Response(['payload' => "No Content ($shortClass)", 'status' => 500]);
     }
 
     /**
@@ -90,7 +89,7 @@ class ErrorHandler implements Extendable
      * @param Throwable  $e
      * @param Input|null $input
      *
-     * @return ResponseContract
+     * @return Response
      */
     public function __invoke(Throwable $e, Input $input=null)
     {

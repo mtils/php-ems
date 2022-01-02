@@ -9,6 +9,9 @@ namespace Ems\Contracts\Routing;
 use ArrayAccess;
 use Ems\Contracts\Core\Url;
 
+/**
+ * @deprecated use Input
+ */
 interface Routable
 {
     const GET = 'GET';
@@ -189,4 +192,12 @@ interface Routable
      * @return bool
      */
     public function isRouted();
+
+    /**
+     * Return the content type that should be returned. This should be accepted
+     * by the client and match the clientType.
+     *
+     * @return string
+     */
+    public function determinedContentType() : string;
 }

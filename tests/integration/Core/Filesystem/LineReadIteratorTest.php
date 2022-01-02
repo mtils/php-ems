@@ -7,6 +7,8 @@ use Ems\Contracts\Core\Stream;
 use Ems\IntegrationTest;
 use Iterator;
 
+use function str_replace;
+
 class LineReadIteratorTest extends IntegrationTest
 {
 
@@ -36,8 +38,12 @@ class LineReadIteratorTest extends IntegrationTest
             $lines[$i] = $line;
         }
 
+        $nl = function ($string) {
+            return str_replace("\r","", $string);
+        };
+
         $this->assertCount(11, $lines);
-        $this->assertEquals(rtrim($fileContent, "\n"), implode("\n", $lines));
+        $this->assertEquals(rtrim($nl($fileContent), "\n"), implode("\n", $nl($lines)));
         $this->assertFalse($reader->valid());
         $this->assertEquals(-1, $reader->key());
 
@@ -49,7 +55,7 @@ class LineReadIteratorTest extends IntegrationTest
         }
 
         $this->assertCount(11, $lines2);
-        $this->assertEquals(rtrim($fileContent, "\n"), implode("\n", $lines2));
+        $this->assertEquals(rtrim($nl($fileContent), "\n"), implode("\n", $lines2));
         $this->assertFalse($reader->valid());
         $this->assertEquals(-1, $reader->key());
 

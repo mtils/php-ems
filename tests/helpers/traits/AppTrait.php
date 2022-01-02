@@ -4,7 +4,7 @@ namespace Ems;
 
 use Ems\Assets\Skeleton\AssetsBootstrapper;
 use Ems\Cache\Skeleton\CacheBootstrapper;
-use Ems\Core\Application;
+use Ems\Skeleton\Application;
 use Ems\Core\IOCContainer;
 use Ems\Core\Skeleton\CoreBootstrapper;
 use Ems\Routing\Skeleton\RoutingBootstrapper;
@@ -78,7 +78,7 @@ trait AppTrait
      *
      * @param string $appPath
      *
-     * @return Application
+     * @return \Ems\Skeleton\Application
      **/
     protected function createApplication($appPath)
     {
@@ -93,7 +93,7 @@ trait AppTrait
     /**
      * Overwrite this method to configure the application before booting.
      *
-     * @param Application $app
+     * @param \Ems\Skeleton\Application $app
      */
     protected function configureApplication(Application $app)
     {

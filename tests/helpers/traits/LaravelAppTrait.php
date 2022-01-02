@@ -7,14 +7,14 @@ use Ems\Cache\Skeleton\CacheBootstrapper;
 use Ems\Core\Laravel\IOCContainer;
 use Ems\Core\Skeleton\CoreBootstrapper;
 use Ems\XType\Skeleton\XTypeBootstrapper;
-use Ems\Core\Application;
+use Ems\Skeleton\Application;
 use Ems\Skeleton\BootManager;
 use Illuminate\Contracts\Container\Container as Laravel;
 
 trait LaravelAppTrait
 {
     /**
-     * @var Application
+     * @var \Ems\Skeleton\Application
      **/
     protected $_app;
 
@@ -27,7 +27,7 @@ trait LaravelAppTrait
      * @param string $binding    (optional)
      * @param array  $parameters (optional)
      *
-     * @return Application|mixed
+     * @return \Ems\Skeleton\Application|mixed
      **/
     public function app($binding = null, array $parameters = [])
     {
@@ -56,7 +56,7 @@ trait LaravelAppTrait
      *
      * @param string $appPath
      *
-     * @return Application
+     * @return \Ems\Skeleton\Application
      **/
     protected function createApplication($appPath)
     {
@@ -71,7 +71,7 @@ trait LaravelAppTrait
     /**
      * Boot add the bootstrappers and boot the application.
      *
-     * @param Application $app
+     * @param \Ems\Skeleton\Application $app
      **/
     protected function bootApplication(Application $app)
     {

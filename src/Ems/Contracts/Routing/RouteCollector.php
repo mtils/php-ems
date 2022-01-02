@@ -75,7 +75,7 @@ class RouteCollector implements IteratorAggregate
      */
     public function get($pattern, $handler)
     {
-        return $this->on(Routable::GET, $pattern, $handler);
+        return $this->on(Input::GET, $pattern, $handler);
     }
 
     /**
@@ -88,7 +88,7 @@ class RouteCollector implements IteratorAggregate
      */
     public function post($pattern, $handler)
     {
-        return $this->on(Routable::POST, $pattern, $handler);
+        return $this->on(Input::POST, $pattern, $handler);
     }
 
     /**
@@ -101,7 +101,7 @@ class RouteCollector implements IteratorAggregate
      */
     public function put($pattern, $handler)
     {
-        return $this->on(Routable::PUT, $pattern, $handler);
+        return $this->on(Input::PUT, $pattern, $handler);
     }
 
     /**
@@ -114,7 +114,7 @@ class RouteCollector implements IteratorAggregate
      */
     public function delete($pattern, $handler)
     {
-        return $this->on(Routable::DELETE, $pattern, $handler);
+        return $this->on(Input::DELETE, $pattern, $handler);
     }
 
     /**
@@ -127,7 +127,7 @@ class RouteCollector implements IteratorAggregate
      */
     public function patch($pattern, $handler)
     {
-        return $this->on(Routable::PATCH, $pattern, $handler);
+        return $this->on(Input::PATCH, $pattern, $handler);
     }
 
     /**
@@ -140,7 +140,7 @@ class RouteCollector implements IteratorAggregate
      */
     public function options($pattern, $handler)
     {
-        return $this->on(Routable::OPTIONS, $pattern, $handler);
+        return $this->on(Input::OPTIONS, $pattern, $handler);
     }
 
     /**
@@ -155,8 +155,8 @@ class RouteCollector implements IteratorAggregate
     public function command($pattern, $handler, $description='')
     {
         $command = $this->newCommand($pattern, $description);
-        $route = $this->on(Routable::CONSOLE, $pattern, $handler);
-        $route->clientType(Routable::CLIENT_CONSOLE);
+        $route = $this->on(Input::CONSOLE, $pattern, $handler);
+        $route->clientType(Input::CLIENT_CONSOLE);
         $route->name($pattern);
         $route->command($command);
         // The command is also the first argument

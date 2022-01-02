@@ -5,12 +5,11 @@
 
 namespace Ems\Skeleton;
 
-use Ems\Console\ArgvInput;
-use Ems\Console\ConsoleOutputConnection;
-use Ems\Contracts\Core\Input;
-use Ems\Contracts\Core\Response as ResponseContract;
-use Ems\Contracts\Core\Type;
+use Ems\Routing\ArgvInput;
+use Ems\Skeleton\Connection\ConsoleOutputConnection;
+use Ems\Contracts\Routing\Input;
 use Ems\Core\Response;
+use Ems\Contracts\Core\Type;
 use Ems\Http\Response as HttpResponse;
 use Throwable;
 
@@ -42,9 +41,11 @@ class ExceptionRenderer
     protected function createConsoleExceptionResponse(Throwable $e, Input $input) : Response
     {
         $string = $this->renderConsoleException($e, $input);
-        $response = new Response($string);
-        $response->setContentType(ConsoleOutputConnection::LINE_CONTENT_TYPE);
-        return $response->setStatus(1);
+        return new Response([
+            'payload' => $string,
+            'contentType' => ConsoleOutputConnection::LINE_CONTENT_TYPE,
+            'status' => 1
+        ]);
     }
 
     /**

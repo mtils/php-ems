@@ -8,7 +8,7 @@ namespace Model\Schema\Illuminate;
 use Closure;
 use Ems\Contracts\Model\Exceptions\MigrationClassNotFoundException;
 use Ems\Contracts\Model\Schema\MigrationRunner;
-use Ems\Core\Application;
+use Ems\Skeleton\Application;
 use Ems\IntegrationTest;
 use Ems\Model\Eloquent\EmsConnectionFactory;
 use Ems\Model\Schema\Illuminate\IlluminateMigrationRunner;

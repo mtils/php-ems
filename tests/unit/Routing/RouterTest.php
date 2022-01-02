@@ -11,12 +11,11 @@ use Ems\Contracts\Routing\Argument;
 use Ems\Contracts\Routing\Command;
 use Ems\Contracts\Routing\Exceptions\RouteNotFoundException;
 use Ems\Contracts\Routing\Option;
-use Ems\Contracts\Routing\Routable;
+use Ems\Contracts\Routing\Input;
 use Ems\Contracts\Routing\Route;
 use Ems\Contracts\Routing\RouteCollector;
 use Ems\Contracts\Routing\Router as RouterContract;
 use Ems\Contracts\Routing\RouteScope;
-use Ems\Core\Input;
 use Ems\Core\Lambda;
 use Ems\Core\Url;
 use Ems\RoutingTrait;
@@ -80,15 +79,15 @@ class RouterTest extends TestCase
         $this->assertFalse($routable->isRouted());
         $router->route($routable);
 
-        $this->assertEquals(Routable::CLIENT_WEB, $routable->clientType());
-        $this->assertEquals('GET', $routable->method());
-        $this->assertEquals('default', (string)$routable->routeScope());
-        $this->assertInstanceOf(RouteScope::class, $routable->routeScope());
-        $this->assertInstanceOf(UrlContract::class, $routable->url());
-        $this->assertEquals('addresses', (string)$routable->url());
-        $this->assertEquals([], $routable->routeParameters());
+        $this->assertEquals(Input::CLIENT_WEB, $routable->getClientType());
+        $this->assertEquals('GET', $routable->getMethod());
+        $this->assertEquals('default', (string)$routable->getRouteScope());
+        $this->assertInstanceOf(RouteScope::class, $routable->getRouteScope());
+        $this->assertInstanceOf(UrlContract::class, $routable->getUrl());
+        $this->assertEquals('addresses', (string)$routable->getUrl());
+        $this->assertEquals([], $routable->getRouteParameters());
 
-        $route = $routable->matchedRoute();
+        $route = $routable->getMatchedRoute();
 
         $this->assertEquals('AddressController::index', $route->handler);
         $this->assertEquals('addresses.index', $route->name);
@@ -140,15 +139,15 @@ class RouterTest extends TestCase
         $routable = $this->routable('addresses/112/edit');
         $router->route($routable);
 
-        $this->assertEquals(Routable::CLIENT_WEB, $routable->clientType());
-        $this->assertEquals('GET', $routable->method());
-        $this->assertEquals('default', (string)$routable->routeScope());
-        $this->assertInstanceOf(RouteScope::class, $routable->routeScope());
-        $this->assertInstanceOf(UrlContract::class, $routable->url());
-        $this->assertEquals('addresses/112/edit', (string)$routable->url());
-        $this->assertEquals(['address' => 112], $routable->routeParameters());
+        $this->assertEquals(Input::CLIENT_WEB, $routable->getClientType());
+        $this->assertEquals('GET', $routable->getMethod());
+        $this->assertEquals('default', (string)$routable->getRouteScope());
+        $this->assertInstanceOf(RouteScope::class, $routable->getRouteScope());
+        $this->assertInstanceOf(UrlContract::class, $routable->getUrl());
+        $this->assertEquals('addresses/112/edit', (string)$routable->getUrl());
+        $this->assertEquals(['address' => 112], $routable->getRouteParameters());
 
-        $route = $routable->matchedRoute();
+        $route = $routable->getMatchedRoute();
 
         $this->assertEquals('AddressController::edit', $route->handler);
         $this->assertEquals('addresses.edit', $route->name);
@@ -200,15 +199,15 @@ class RouterTest extends TestCase
         $routable = $this->routable('delivery-addresses', 'PATCH');
         $router->route($routable);
 
-        $this->assertEquals(Routable::CLIENT_WEB, $routable->clientType());
-        $this->assertEquals('PATCH', $routable->method());
-        $this->assertEquals('default', (string)$routable->routeScope());
-        $this->assertInstanceOf(RouteScope::class, $routable->routeScope());
-        $this->assertInstanceOf(UrlContract::class, $routable->url());
-        $this->assertEquals('delivery-addresses', (string)$routable->url());
-        $this->assertEquals(['type' => 'main'], $routable->routeParameters());
+        $this->assertEquals(Input::CLIENT_WEB, $routable->getClientType());
+        $this->assertEquals('PATCH', $routable->getMethod());
+        $this->assertEquals('default', (string)$routable->getRouteScope());
+        $this->assertInstanceOf(RouteScope::class, $routable->getRouteScope());
+        $this->assertInstanceOf(UrlContract::class, $routable->getUrl());
+        $this->assertEquals('delivery-addresses', (string)$routable->getUrl());
+        $this->assertEquals(['type' => 'main'], $routable->getRouteParameters());
 
-        $route = $routable->matchedRoute();
+        $route = $routable->getMatchedRoute();
 
         $this->assertEquals('AddressController::updateDelivery', $route->handler);
         $this->assertEquals('delivery-addresses.update', $route->name);
@@ -263,15 +262,15 @@ class RouterTest extends TestCase
         $this->assertFalse($routable->isRouted());
         $router->route($routable);
 
-        $this->assertEquals(Routable::CLIENT_WEB, $routable->clientType());
-        $this->assertEquals('GET', $routable->method());
-        $this->assertEquals('default', (string)$routable->routeScope());
-        $this->assertInstanceOf(RouteScope::class, $routable->routeScope());
-        $this->assertInstanceOf(UrlContract::class, $routable->url());
-        $this->assertEquals('addresses', (string)$routable->url());
-        $this->assertEquals([], $routable->routeParameters());
+        $this->assertEquals(Input::CLIENT_WEB, $routable->getClientType());
+        $this->assertEquals('GET', $routable->getMethod());
+        $this->assertEquals('default', (string)$routable->getRouteScope());
+        $this->assertInstanceOf(RouteScope::class, $routable->getRouteScope());
+        $this->assertInstanceOf(UrlContract::class, $routable->getUrl());
+        $this->assertEquals('addresses', (string)$routable->getUrl());
+        $this->assertEquals([], $routable->getRouteParameters());
 
-        $route = $routable->matchedRoute();
+        $route = $routable->getMatchedRoute();
 
         $this->assertEquals('AddressController::index', $route->handler);
         $this->assertEquals('addresses.index', $route->name);
@@ -287,19 +286,19 @@ class RouterTest extends TestCase
         // According to RFC 3986 Section 3 without an authority no slashes are
         // needed after the scheme so I decided to make the console scheme
         // without slashes
-        $routable = $this->routable('console:import:run', Routable::CONSOLE, Routable::CLIENT_CONSOLE);
+        $routable = $this->routable('console:import:run', Input::CONSOLE, Input::CLIENT_CONSOLE);
 
         $this->assertFalse($routable->isRouted());
         $router->route($routable);
 
-        $route = $routable->matchedRoute();
+        $route = $routable->getMatchedRoute();
 
         $this->assertEquals('ImportController::run', $route->handler);
         $this->assertEquals('import:run', $route->pattern);
         $this->assertEquals('import:run', $route->name);
         $this->assertEquals([], $route->defaults);
-        $this->assertEquals([Routable::CONSOLE], $route->methods);
-        $this->assertEquals([Routable::CLIENT_CONSOLE], $route->clientTypes);
+        $this->assertEquals([Input::CONSOLE], $route->methods);
+        $this->assertEquals([Input::CLIENT_CONSOLE], $route->clientTypes);
         $this->assertTrue($routable->isRouted());
 
         $command = $route->command;
@@ -509,15 +508,15 @@ class RouterTest extends TestCase
         $routable = $this->routable('addresses/112/edit');
         $router->route($routable);
 
-        $this->assertEquals(Routable::CLIENT_WEB, $routable->clientType());
-        $this->assertEquals('GET', $routable->method());
-        $this->assertEquals('default', (string)$routable->routeScope());
-        $this->assertInstanceOf(RouteScope::class, $routable->routeScope());
-        $this->assertInstanceOf(UrlContract::class, $routable->url());
-        $this->assertEquals('addresses/112/edit', (string)$routable->url());
-        $this->assertEquals(['address' => 112], $routable->routeParameters());
+        $this->assertEquals(Input::CLIENT_WEB, $routable->getClientType());
+        $this->assertEquals('GET', $routable->getMethod());
+        $this->assertEquals('default', (string)$routable->getRouteScope());
+        $this->assertInstanceOf(RouteScope::class, $routable->getRouteScope());
+        $this->assertInstanceOf(UrlContract::class, $routable->getUrl());
+        $this->assertEquals('addresses/112/edit', (string)$routable->getUrl());
+        $this->assertEquals(['address' => 112], $routable->getRouteParameters());
 
-        $route = $routable->matchedRoute();
+        $route = $routable->getMatchedRoute();
 
         $this->assertEquals(RouterTest_TestController::class . '->edit', $route->handler);
         $this->assertEquals('addresses.edit', $route->name);
@@ -530,7 +529,7 @@ class RouterTest extends TestCase
         $this->assertTrue($routable->isRouted());
         $handler = $routable->getHandler();
         $this->assertInstanceOf(Lambda::class, $handler);
-        $this->assertEquals('edit was called: 112' , $handler(...array_values($routable->routeParameters())));
+        $this->assertEquals('edit was called: 112' , $handler(...array_values($routable->getRouteParameters())));
 
     }
 
@@ -978,15 +977,15 @@ class RouterTest extends TestCase
         $this->assertFalse($routable->isRouted());
         $router->route($routable);
 
-        $this->assertEquals(Routable::CLIENT_WEB, $routable->clientType());
-        $this->assertEquals('GET', $routable->method());
-        $this->assertEquals('default', (string)$routable->routeScope());
-        $this->assertInstanceOf(RouteScope::class, $routable->routeScope());
-        $this->assertInstanceOf(UrlContract::class, $routable->url());
-        $this->assertEquals('addresses', (string)$routable->url());
-        $this->assertEquals([], $routable->routeParameters());
+        $this->assertEquals(Input::CLIENT_WEB, $routable->getClientType());
+        $this->assertEquals('GET', $routable->getMethod());
+        $this->assertEquals('default', (string)$routable->getRouteScope());
+        $this->assertInstanceOf(RouteScope::class, $routable->getRouteScope());
+        $this->assertInstanceOf(UrlContract::class, $routable->getUrl());
+        $this->assertEquals('addresses', (string)$routable->getUrl());
+        $this->assertEquals([], $routable->getRouteParameters());
 
-        $route = $routable->matchedRoute();
+        $route = $routable->getMatchedRoute();
 
         $this->assertEquals('AddressController::index', $route->handler);
         $this->assertEquals('addresses.index', $route->name);
@@ -1000,19 +999,19 @@ class RouterTest extends TestCase
         $this->assertTrue(is_callable($routable->getHandler()));
 
 
-        $routable = $this->routable('console:addresses:index', Routable::CONSOLE, Routable::CLIENT_CONSOLE);
+        $routable = $this->routable('console:addresses:index', Input::CONSOLE, Input::CLIENT_CONSOLE);
 
         $this->assertFalse($routable->isRouted());
         $router->route($routable);
 
-        $route = $routable->matchedRoute();
+        $route = $routable->getMatchedRoute();
 
         $this->assertEquals('AddressController::index', $route->handler);
         $this->assertEquals('addresses:index', $route->pattern);
         $this->assertEquals('addresses:index', $route->name);
         $this->assertEquals([], $route->defaults);
-        $this->assertEquals([Routable::CONSOLE], $route->methods);
-        $this->assertEquals([Routable::CLIENT_CONSOLE], $route->clientTypes);
+        $this->assertEquals([Input::CONSOLE], $route->methods);
+        $this->assertEquals([Input::CLIENT_CONSOLE], $route->clientTypes);
         $this->assertTrue($routable->isRouted());
 
     }
@@ -1044,15 +1043,15 @@ class RouterTest extends TestCase
         $this->assertFalse($routable->isRouted());
         $router->route($routable);
 
-        $this->assertEquals(Routable::CLIENT_WEB, $routable->clientType());
-        $this->assertEquals('GET', $routable->method());
-        $this->assertEquals('default', (string)$routable->routeScope());
-        $this->assertInstanceOf(RouteScope::class, $routable->routeScope());
-        $this->assertInstanceOf(UrlContract::class, $routable->url());
-        $this->assertEquals('addresses', (string)$routable->url());
-        $this->assertEquals([], $routable->routeParameters());
+        $this->assertEquals(Input::CLIENT_WEB, $routable->getClientType());
+        $this->assertEquals('GET', $routable->getMethod());
+        $this->assertEquals('default', (string)$routable->getRouteScope());
+        $this->assertInstanceOf(RouteScope::class, $routable->getRouteScope());
+        $this->assertInstanceOf(UrlContract::class, $routable->getUrl());
+        $this->assertEquals('addresses', (string)$routable->getUrl());
+        $this->assertEquals([], $routable->getRouteParameters());
 
-        $route = $routable->matchedRoute();
+        $route = $routable->getMatchedRoute();
 
         $this->assertEquals('AddressController::index', $route->handler);
         $this->assertEquals('addresses.index', $route->name);
@@ -1066,19 +1065,19 @@ class RouterTest extends TestCase
         $this->assertTrue(is_callable($routable->getHandler()));
 
 
-        $routable = $this->routable('console:addresses:index', Routable::CONSOLE, Routable::CLIENT_CONSOLE);
+        $routable = $this->routable('console:addresses:index', Input::CONSOLE, Input::CLIENT_CONSOLE);
 
         $this->assertFalse($routable->isRouted());
         $router->route($routable);
 
-        $route = $routable->matchedRoute();
+        $route = $routable->getMatchedRoute();
 
         $this->assertEquals('AddressController::index', $route->handler);
         $this->assertEquals('addresses:index', $route->pattern);
         $this->assertEquals('addresses:index', $route->name);
         $this->assertEquals([], $route->defaults);
-        $this->assertEquals([Routable::CONSOLE], $route->methods);
-        $this->assertEquals([Routable::CLIENT_CONSOLE], $route->clientTypes);
+        $this->assertEquals([Input::CONSOLE], $route->methods);
+        $this->assertEquals([Input::CLIENT_CONSOLE], $route->clientTypes);
         $this->assertTrue($routable->isRouted());
 
     }
@@ -1098,11 +1097,11 @@ class RouterTest extends TestCase
      * @param string $clientType
      * @param string $scope
      *
-     * @return Routable
+     * @return Input
      */
-    protected function routable($url, $method=Routable::GET, $clientType=Routable::CLIENT_WEB, $scope='default')
+    protected function routable($url, $method=Input::GET, $clientType=Input::CLIENT_WEB, $scope='default')
     {
-        $routable = new Input();
+        $routable = new GenericInput();
         if (!$url instanceof UrlContract) {
             $url = new Url($url);
         }

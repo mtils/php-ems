@@ -5,7 +5,7 @@
 
 namespace Ems\Queue\Illuminate;
 
-use Ems\Core\Application;
+use Ems\Skeleton\Application;
 use Ems\Contracts\Queue\Queue;
 use Ems\LaravelIntegrationTest;
 use Illuminate\Queue\QueueServiceProvider;

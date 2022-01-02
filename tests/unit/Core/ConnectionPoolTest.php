@@ -4,10 +4,6 @@
 namespace Ems\Core;
 
 use Ems\Contracts\Core\ConnectionPool as ConnectionPoolContract;
-use Ems\Core\Connection\GlobalsHttpInputConnection;
-use Ems\Core\Connection\StdOutputConnection;
-use Ems\Core\Support\StreamLogger;
-use Psr\Log\LoggerInterface;
 
 class ConnectionPoolTest extends \Ems\TestCase
 {

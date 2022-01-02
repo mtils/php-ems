@@ -10,7 +10,7 @@ use Ems\Expression\ConstraintParsingMethods;
 use Illuminate\Support\MessageBag;
 use Illuminate\Translation\ArrayLoader;
 use Illuminate\Translation\Translator;
-use Ems\Core\Application;
+use Ems\Skeleton\Application;
 use Ems\Core\Helper;
 use Ems\Validation\ValidationException;
 

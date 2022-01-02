@@ -5,7 +5,7 @@
 
 namespace Ems\Skeleton;
 
-use Ems\Core\Application;
+use Ems\Skeleton\Application;
 use Psr\Log\LoggerInterface;
 
 /**

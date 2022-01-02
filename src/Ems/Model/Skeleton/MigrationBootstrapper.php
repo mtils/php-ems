@@ -11,7 +11,7 @@ use Ems\Contracts\Model\Schema\MigrationRunner;
 use Ems\Contracts\Model\Schema\MigrationStepRepository;
 use Ems\Contracts\Model\Schema\Migrator as MigratorContract;
 use Ems\Contracts\Routing\RouteCollector;
-use Ems\Core\Application;
+use Ems\Skeleton\Application;
 use Ems\Core\Exceptions\NotImplementedException;
 use Ems\Core\Skeleton\Bootstrapper;
 use Ems\Core\Url;

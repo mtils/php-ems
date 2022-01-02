@@ -6,7 +6,6 @@
 namespace Ems\Contracts\Routing;
 
 
-use Ems\Contracts\Core\Input;
 use Ems\Contracts\Core\Positioner;
 use function array_merge;
 use function call_user_func;
@@ -64,11 +63,11 @@ class MiddlewarePlacer extends Positioner
         $clientTypes = $this->handle['clientTypes'];
         $scopes = $this->handle['scopes'];
 
-        if ($clientTypes && !in_array($input->clientType(), $clientTypes)) {
+        if ($clientTypes && !in_array($input->getClientType(), $clientTypes)) {
             return $next($input);
         }
 
-        if ($scopes && !in_array((string)$input->routeScope(), $scopes)) {
+        if ($scopes && !in_array((string)$input->getRouteScope(), $scopes)) {
             return $next($input);
         }
 

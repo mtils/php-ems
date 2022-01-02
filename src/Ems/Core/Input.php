@@ -5,21 +5,45 @@
 
 namespace Ems\Core;
 
-use Ems\Contracts\Core\Input as InputContract;
-use Ems\Contracts\Core\None;
-use Ems\Core\Exceptions\KeyNotFoundException;
-use Ems\Core\Support\FastArrayDataTrait;
-use Ems\Core\Support\InputTrait;
-use Ems\Core\Support\MessageTrait;
-use Ems\Core\Support\RoutableTrait;
-use function array_key_exists;
+use ArrayAccess;
+use Ems\Contracts\Core\Url;
+use Ems\Contracts\Routing\GenericRouteScope;
+use Ems\Core\ImmutableMessage;
+use Ems\Contracts\Routing\Route;
+use Ems\Contracts\Routing\RouteScope;
 
-class Input implements InputContract
+class Input extends ImmutableMessage
 {
-    use FastArrayDataTrait;
-    use RoutableTrait;
-    use MessageTrait;
-    use InputTrait;
+
+    /**
+     * @var RouteScope
+     */
+    protected $routeScope;
+
+    /**
+     * @var Url
+     */
+    protected $url;
+
+    /**
+     * @var string
+     */
+    protected $clientType = '';
+
+    /**
+     * @var Route
+     */
+    protected $matchedRoute;
+
+    /**
+     * @var array
+     */
+    protected $routeParameters = [];
+
+    /**
+     * @var callable
+     */
+    protected $handler;
 
     /**
      * @var string
@@ -33,43 +57,138 @@ class Input implements InputContract
      */
     public function __construct($parameters=[])
     {
-        $this->_attributes = $parameters;
+        $this->custom = $parameters;
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * @param mixed $key
-     * @param mixed $default (optional)
-     *
-     * @return mixed
+     * @return RouteScope
      **/
-    public function get($key, $default = null)
+    public function routeScope()
     {
-        if (array_key_exists($key, $this->_attributes)) {
-            return $this->_attributes[$key];
-        }
-        return $default;
+        return $this->routeScope;
     }
 
     /**
-     * {@inheritDoc}
+     * @param string|RouteScope $scope
      *
-     * @param string $key
-     *
-     * @throws \Ems\Contracts\Core\Errors\NotFound
-     *
-     * @return mixed
-     **/
-    public function getOrFail($key)
+     * @return $this
+     */
+    public function setRouteScope($scope)
     {
-        $result = $this->get($key, new None());
+        $this->routeScope = $scope instanceof RouteScope ? $scope : new GenericRouteScope($scope, $scope);
+        return $this;
+    }
 
-        if ($result instanceof None) {
-            throw new KeyNotFoundException("Key '$key' not found in Input");
+    /**
+     * @return Url
+     **/
+    public function url()
+    {
+        if (!$this->url) {
+            $this->url = new \Ems\Core\Url();
         }
+        return $this->url;
+    }
 
-        return $result;
+    /**
+     * @param Url $url
+     *
+     * @return $this
+     */
+    public function setUrl(Url $url)
+    {
+        $this->url = $url;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function clientType()
+    {
+        return $this->clientType;
+    }
+
+    /**
+     * @param string $clientType
+     *
+     * @return $this
+     */
+    public function setClientType($clientType)
+    {
+        $this->clientType = $clientType;
+        return $this;
+    }
+
+    /**
+     * @return Route
+     */
+    public function matchedRoute()
+    {
+        return $this->matchedRoute;
+    }
+
+    /**
+     * @param Route $route
+     *
+     * @return $this
+     */
+    public function setMatchedRoute(Route $route)
+    {
+        $this->matchedRoute = $route;
+        return $this;
+    }
+
+    /**
+     * @return ArrayAccess|array
+     */
+    public function routeParameters()
+    {
+        return $this->routeParameters;
+    }
+
+    /**
+     * @param array $parameters
+     *
+     * @return $this
+     */
+    public function setRouteParameters(array $parameters)
+    {
+        $this->routeParameters = $parameters;
+        return $this;
+    }
+
+    /**
+     * Return the actual handler
+     *
+     * @return callable|null
+     */
+    public function getHandler()
+    {
+        return $this->handler;
+    }
+
+    /**
+     * Assign the actual handler.
+     *
+     * @param callable $handler
+     *
+     * @return $this
+     */
+    public function setHandler(callable $handler)
+    {
+        $this->handler = $handler;
+        return $this;
+    }
+
+    /**
+     * Returns true if this object is routed.
+     *
+     * @return bool
+     */
+    public function isRouted()
+    {
+        return $this->matchedRoute && $this->handler;
     }
 
     /**

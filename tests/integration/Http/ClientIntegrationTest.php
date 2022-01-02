@@ -67,7 +67,10 @@ class ClientIntegrationTest extends HttpMockTest
         $request = $this->http->requests->last();
 
         $this->assertEquals($data, $request->getPostFields()->toArray());
-        $this->assertEquals($body, $response->body());
+        $this->assertEquals($body, $response->body);
+
+        $this->assertEquals('201', $response['code']);
+        $this->assertEquals('Resource created', $response['message']);
 
 
     }

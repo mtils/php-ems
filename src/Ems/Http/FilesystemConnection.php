@@ -62,7 +62,7 @@ class FilesystemConnection extends BaseConnection implements HttpConnection, Con
      * @param null|string $content
      * @param string      $protocolVersion (default: '1.1')
      *
-     * @return Response
+     * @return HttpResponse
      */
     public function send($method, array $headers = [], $content = null, $protocolVersion = '1.1')
     {
@@ -79,13 +79,16 @@ class FilesystemConnection extends BaseConnection implements HttpConnection, Con
 
         $this->stream = $stream;
 
-        // Currently only stream-less connections are supported
+        // Currently, only stream-less connections are supported
         $raw = $stream->toString();
 
         list($responseHeader, $content) = $this->parseMessage($raw);
 
-        $response = new Response($responseHeader, $content);
-        $response->setRaw($raw);
+        $response = new HttpResponse([
+            'payload' => $content,
+            'headers' => $responseHeader,
+            'raw'     => $raw
+        ]);
 
         $this->callAfterListeners('send', [$this->url, $method, &$headers, $response]);
 

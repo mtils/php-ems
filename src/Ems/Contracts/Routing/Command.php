@@ -201,7 +201,7 @@ class Command implements Arrayable
      */
     public function get($pattern)
     {
-        return $this->on(Routable::GET, $pattern);
+        return $this->on(Input::GET, $pattern);
     }
 
     /**
@@ -213,7 +213,7 @@ class Command implements Arrayable
      */
     public function post($pattern)
     {
-        return $this->on(Routable::POST, $pattern);
+        return $this->on(Input::POST, $pattern);
     }
 
     /**
@@ -225,7 +225,7 @@ class Command implements Arrayable
      */
     public function put($pattern)
     {
-        return $this->on(Routable::PUT, $pattern);
+        return $this->on(Input::PUT, $pattern);
     }
 
     /**
@@ -237,7 +237,7 @@ class Command implements Arrayable
      */
     public function delete($pattern)
     {
-        return $this->on(Routable::DELETE, $pattern);
+        return $this->on(Input::DELETE, $pattern);
     }
 
     /**
@@ -249,7 +249,7 @@ class Command implements Arrayable
      */
     public function patch($pattern)
     {
-        return $this->on(Routable::PATCH, $pattern);
+        return $this->on(Input::PATCH, $pattern);
     }
 
     /**
@@ -261,12 +261,12 @@ class Command implements Arrayable
      */
     public function options($pattern)
     {
-        return $this->on(Routable::OPTIONS, $pattern);
+        return $this->on(Input::OPTIONS, $pattern);
     }
 
     /**
      * Register a NEW route for the given $method using the same handler.
-     * Routable has one pattern, so if you add a route for a command you have
+     * Input has one pattern, so if you add a route for a command you have
      * two routes, one with the command string as its pattern and one with the
      * route path.
      *
@@ -305,7 +305,7 @@ class Command implements Arrayable
 
         $parts = explode('=', $signature);
         $name = $parts[0];
-        $default = isset($parts[1]) ? $parts[1] : null;
+        $default = $parts[1] ?? null;
 
         // If the default value contained a space we assume it is an array
         if ($default && Helper::contains(trim($default), ' ')) {
@@ -345,7 +345,7 @@ class Command implements Arrayable
 
         $parts = explode('=', $signature);
         $name = $parts[0];
-        $default = isset($parts[1]) ? $parts[1] : null;
+        $default = $parts[1] ?? null;
 
         $type = $default === null ? 'bool' : null;
 

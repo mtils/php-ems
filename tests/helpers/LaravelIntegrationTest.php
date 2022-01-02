@@ -4,7 +4,7 @@ namespace Ems;
 
 
 use Ems\Core\LocalFilesystem;
-use Ems\Core\Application;
+use Ems\Skeleton\Application;
 
 /**
  * Use this test if you need a running app

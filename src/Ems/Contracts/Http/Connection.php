@@ -9,6 +9,8 @@
 namespace Ems\Contracts\Http;
 
 use Ems\Contracts\Core\Connection as ConnectionContract;
+use Ems\Core\ImmutableMessage;
+use Psr\Http\Message\ResponseInterface;
 
 interface Connection extends ConnectionContract
 {
@@ -43,16 +45,15 @@ interface Connection extends ConnectionContract
      */
     const DELETE = 'DELETE';
 
-
     /**
-     * Send a HTTP Request to a server. Get the raw response as answer.
+     * Send an HTTP Request to a server. Get the raw response as answer.
      *
      * @param string $method
      * @param array  $headers (optional)
      * @param string $content (optional)
      * @param string $protocolVersion
      *
-     * @return Response
+     * @return ImmutableMessage|ResponseInterface
      */
     public function send($method, array $headers=[], $content=null, $protocolVersion='1.1');
 }

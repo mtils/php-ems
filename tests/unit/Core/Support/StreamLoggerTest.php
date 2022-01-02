@@ -10,7 +10,7 @@ use Ems\Contracts\Core\Chatty;
 use Ems\Contracts\Core\Stream;
 use Ems\Core\Filesystem\StringStream;
 use Ems\Core\Support\ChattySupport;
-use Ems\Core\Support\StreamLogger;
+use Ems\Skeleton\StreamLogger;
 use Ems\Core\Url;
 use Ems\TestCase;
 use Psr\Log\LoggerInterface;
@@ -239,7 +239,7 @@ class StreamLoggerTest extends TestCase
 
     protected function make($target='php://temp')
     {
-        return new StreamLogger($target);
+        return new \Ems\Skeleton\StreamLogger($target);
     }
 }
 

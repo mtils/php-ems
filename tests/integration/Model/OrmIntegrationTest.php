@@ -7,7 +7,7 @@ namespace Ems\Model;
 
 
 use Ems\Contracts\Core\ConnectionPool;
-use Ems\Core\Application;
+use Ems\Skeleton\Application;
 use Ems\Core\Exceptions\HandlerNotFoundException;
 use Ems\Core\LocalFilesystem;
 use Ems\Core\Url;

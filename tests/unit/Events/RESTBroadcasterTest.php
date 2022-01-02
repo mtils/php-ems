@@ -11,6 +11,7 @@ use Ems\Contracts\Http\Client as ClientContract;
 use Ems\Contracts\Events\Broadcaster;
 use Ems\Core\Exceptions\KeyNotFoundException;
 use Ems\Core\Url;
+use Ems\Http\HttpResponse;
 use Ems\Testing\LoggingCallable;
 
 
@@ -506,10 +507,10 @@ class RESTBroadcasterTest extends \Ems\TestCase
         ];
 
         // If it would be fired here, the client mock would fail
-
+        $response = new HttpResponse('blablabla');
         $client->shouldReceive('post')
                ->with($url, ['parameters' => $args], 'application/json')
-               ->andReturn('blablabla');
+               ->andReturn($response);
 
         $bus->fire('users.updated', [$args['id'], $args['values']]);
 

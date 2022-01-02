@@ -6,17 +6,17 @@
 namespace Ems\Skeleton;
 
 
-use Ems\Console\ConsoleInputConnection;
-use Ems\Console\ConsoleOutputConnection;
-use Ems\Contracts\Core\InputConnection;
-use Ems\Contracts\Core\OutputConnection;
+use Ems\Skeleton\ConsoleInputConnection;
+use Ems\Skeleton\Connection\ConsoleOutputConnection;
+use Ems\Contracts\Skeleton\InputConnection;
+use Ems\Contracts\Skeleton\OutputConnection;
 use Ems\Contracts\Core\Url;
-use Ems\Core\Application;
-use Ems\Core\Connection\GlobalsHttpInputConnection;
-use Ems\Core\Connection\StdOutputConnection;
+use Ems\Skeleton\Application;
+use Ems\Skeleton\GlobalsHttpInputConnection;
+use Ems\Skeleton\Connection\StdOutputConnection;
 use Ems\Core\ConnectionPool;
 use Ems\Core\Skeleton\Bootstrapper;
-use Ems\Core\Support\StreamLogger;
+use Ems\Skeleton\StreamLogger;
 use Ems\Model\Database\DB;
 use Ems\Routing\RoutedInputHandler;
 use Ems\Testing\Benchmark;

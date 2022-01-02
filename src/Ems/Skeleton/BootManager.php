@@ -3,7 +3,7 @@
 namespace Ems\Skeleton;
 
 use Ems\Contracts\Core\IOCContainer;
-use Ems\Core\Application as BaseApplication;
+use Ems\Skeleton\Application as BaseApplication;
 
 /**
  * The Bootmanager is the place where to boot your app startup classes
@@ -23,7 +23,7 @@ use Ems\Core\Application as BaseApplication;
 class BootManager
 {
     /**
-     * @var \Ems\Core\Application
+     * @var \Ems\Skeleton\Application
      **/
     protected $ems;
 
@@ -78,7 +78,7 @@ class BootManager
     }
 
     /**
-     * @return \Ems\Core\Application
+     * @return \Ems\Skeleton\Application
      **/
     public function getApplication()
     {
@@ -86,7 +86,7 @@ class BootManager
     }
 
     /**
-     * @param \Ems\Core\Application $ems
+     * @param \Ems\Skeleton\Application $ems
      *
      * @return self
      **/
