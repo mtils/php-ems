@@ -7,13 +7,17 @@ namespace Ems\Skeleton;
 
 
 use Ems\Contracts\Core\Url as UrlContract;
+use Ems\Contracts\Routing\Input;
 use Ems\Contracts\Routing\Input as InputContract;
 use Ems\Contracts\Skeleton\InputConnection;
 use Ems\Core\Connection\AbstractConnection;
 use Ems\Core\Url;
 use Ems\Routing\GenericInput;
 
+use Ems\Routing\HttpInput;
+
 use function fopen;
+use function getallheaders;
 
 class GlobalsHttpInputConnection extends AbstractConnection implements InputConnection
 {
@@ -35,25 +39,39 @@ class GlobalsHttpInputConnection extends AbstractConnection implements InputConn
     /**
      * @var array
      */
-    protected $request;
+    protected $query;
 
     /**
      * @var array
      */
     protected $server;
-
     /**
-     * GlobalsHttpInputConnection constructor.
-     *
-     * @param array $request (optional)
-     * @param array $server (optional)
+     * @var array
      */
-    public function __construct($request=null, $server=null)
+    private $headers;
+    /**
+     * @var array
+     */
+    private $body;
+    /**
+     * @var array
+     */
+    private $cookies;
+    /**
+     * @var array
+     */
+    private $files;
+
+
+    public function __construct(array $query=[], array $server=[], array $headers=[], array $body=[], array $cookies=[], array $files=[])
     {
         parent::__construct();
-        $this->request = $request ?: $_REQUEST;
+        $this->query = $query ?: $_GET;
         $this->server = $server ?: $_SERVER;
-
+        $this->headers = $headers;
+        $this->body = $body ?: $_POST;
+        $this->cookies = $cookies ?: $_COOKIE;
+        $this->files = $files ?: $_FILES;
     }
 
     /**
@@ -93,15 +111,22 @@ class GlobalsHttpInputConnection extends AbstractConnection implements InputConn
     }
 
     /**
-     * @return GenericInput
+     * @return HttpInput
      */
-    protected function createInput() : GenericInput
+    protected function createInput() : HttpInput
     {
-        $input = new GenericInput($this->request);
-        $input->setMethod($this->server['REQUEST_METHOD']);
-        $input->setUrl($this->createUrl());
-        $input->setDeterminedContentType('text/html');
-        return $input;
+        $attributes = [
+            Input::FROM_QUERY       => $this->query,
+            Input::FROM_BODY        => $this->body,
+            Input::FROM_COOKIE      => $this->cookies,
+            Input::FROM_SERVER      => $this->server,
+            Input::FROM_FILES       => $this->files,
+            'uri'                   => $this->createUrl(),
+            'method'                => $this->server['REQUEST_METHOD'],
+            'headers'               => $this->headers ?: getallheaders(),
+            'determinedContentType' => 'text/html'
+        ];
+        return new HttpInput($attributes);
     }
 
     /**

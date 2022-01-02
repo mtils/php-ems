@@ -371,6 +371,27 @@ class HttpInputTest extends TestCase
     /**
      * @test
      */
+    public function url_parameter_in_construct_works()
+    {
+        $url = new Url('https://web-utils.de/api/users');
+
+        $input = $this->input(['url' => $url]);
+        $this->assertSame($url, $input->uri);
+        $this->assertSame($url, $input->url);
+        $this->assertSame($url, $input->getUrl());
+        $this->assertSame($url, $input->getUri());
+
+        $url2 = $url->shift();
+        $fork = $input->withClientType(Input::CLIENT_API)->withUri($url2);
+
+        $this->assertSame($url2, $fork->getUrl());
+
+
+    }
+
+    /**
+     * @test
+     */
     public function withClientType_changes_clientType()
     {
         $attributes = [

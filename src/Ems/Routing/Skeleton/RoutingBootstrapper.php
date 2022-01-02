@@ -71,6 +71,7 @@ class RoutingBootstrapper extends Bootstrapper
     protected function addClientTypeMiddleware(MiddlewareCollectionContract $collection)
     {
         $collection->add('client-type', function (Input $input, callable $next) {
+
             if ($input->getClientType() || !$input instanceof HttpInput) {
                 return $next($input);
             }
@@ -84,7 +85,7 @@ class RoutingBootstrapper extends Bootstrapper
             if ($url->path->first() == 'api') {
                 /** @var RequestInterface|Input $input */
                 $input = $input->withClientType(Input::CLIENT_API)
-                               ->withUri($input->getUrl()->shift());
+                               ->withUrl($url->shift());
                 return $next($input);
             }
             return $next($input->withClientType(Input::CLIENT_WEB));

@@ -81,8 +81,8 @@ class GlobalsHttpInputConnectionTest extends TestCase
         $con->close();
     }
 
-    protected function make($request=null, $server=null)
+    protected function make($query=[], $server=[])
     {
-        return new GlobalsHttpInputConnection($request, $server);
+        return new GlobalsHttpInputConnection($query, $server);
     }
 }

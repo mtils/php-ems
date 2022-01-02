@@ -6,25 +6,19 @@
 namespace Ems\Skeleton;
 
 
-use Ems\Skeleton\ConsoleInputConnection;
-use Ems\Skeleton\Connection\ConsoleOutputConnection;
+use Ems\Contracts\Core\Url;
 use Ems\Contracts\Skeleton\InputConnection;
 use Ems\Contracts\Skeleton\OutputConnection;
-use Ems\Contracts\Core\Url;
-use Ems\Skeleton\Application;
-use Ems\Skeleton\GlobalsHttpInputConnection;
-use Ems\Skeleton\Connection\StdOutputConnection;
 use Ems\Core\ConnectionPool;
 use Ems\Core\Skeleton\Bootstrapper;
-use Ems\Skeleton\StreamLogger;
 use Ems\Model\Database\DB;
 use Ems\Routing\RoutedInputHandler;
 use Ems\Testing\Benchmark;
 use Psr\Log\LoggerInterface;
+
 use function defined;
 use function file_exists;
 use function getenv;
-use function php_sapi_name;
 use function spl_object_hash;
 
 use const APPLICATION_START;

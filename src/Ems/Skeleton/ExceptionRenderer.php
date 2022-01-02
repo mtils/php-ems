@@ -10,7 +10,7 @@ use Ems\Skeleton\Connection\ConsoleOutputConnection;
 use Ems\Contracts\Routing\Input;
 use Ems\Core\Response;
 use Ems\Contracts\Core\Type;
-use Ems\Http\Response as HttpResponse;
+use Ems\Http\HttpResponse;
 use Throwable;
 
 use function array_keys;
@@ -106,12 +106,10 @@ class ExceptionRenderer
     /**
      * @param Throwable $e
      * @param Input $input
-     * @return ResponseContract
+     * @return HttpResponse
      */
-    protected function createHttpResponse(Throwable $e, Input $input) : ResponseContract
+    protected function createHttpResponse(Throwable $e, Input $input) : HttpResponse
     {
-
-        $response = new HttpResponse();
 
         $html = '<html><head><title>Application error occured</title></head>';
         $classShort = Type::short($e);
@@ -146,10 +144,11 @@ class ExceptionRenderer
 
         $html .= '</body></html>';
 
-        $response->setStatus(500);
-        $response->setPayload($html);
-
-        return $response;
+        return new HttpResponse([
+            'contentType' => 'text/html',
+            'payload' => $html,
+            'status' => 500
+                                ]);
 
     }
 }

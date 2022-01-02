@@ -22,6 +22,7 @@ use Ems\Routing\FastRoute\FastRouteDispatcher;
 use ReflectionException;
 use Traversable;
 use function call_user_func;
+use function var_dump;
 
 class Router implements RouterContract, SupportsCustomFactory
 {
@@ -95,7 +96,8 @@ class Router implements RouterContract, SupportsCustomFactory
      */
     public function route(Input $routable) : Input
     {
-        $interpreter = $this->getDispatcher($routable->getClientType());
+        $clientType = $routable->getClientType() ?: Input::CLIENT_WEB;
+        $interpreter = $this->getDispatcher($clientType);
         $hit = $interpreter->match($routable->getMethod(), (string)$routable->getUrl()->path);
         $routeData = $hit->handler;
 

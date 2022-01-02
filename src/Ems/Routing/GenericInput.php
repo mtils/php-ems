@@ -21,6 +21,12 @@ class GenericInput extends Message implements Input
      */
     protected $method = '';
 
+    public function __construct(...$args)
+    {
+        parent::__construct(...$args);
+    }
+
+
     public function setDeterminedContentType(string $contentType) : GenericInput
     {
         $this->determinedContentType = $contentType;

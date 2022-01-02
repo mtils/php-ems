@@ -6,12 +6,11 @@
 namespace Ems\Skeleton;
 
 use Ems\Contracts\Core\Extendable;
-use Ems\Contracts\Routing\Input;
-use Ems\Core\Response;
 use Ems\Contracts\Core\Type;
 use Ems\Contracts\Routing\Exceptions\RouteNotFoundException;
-use Ems\Skeleton\Application;
+use Ems\Contracts\Routing\Input;
 use Ems\Core\Patterns\ExtendableTrait;
+use Ems\Core\Response;
 use ErrorException;
 use Throwable;
 
@@ -219,9 +218,9 @@ class ErrorHandler implements Extendable
      * @param Throwable $e
      * @param Input     $input
      *
-     * @return ResponseContract
+     * @return Response
      */
-    protected function render(Throwable $e, Input $input) : ResponseContract
+    protected function render(Throwable $e, Input $input) : Response
     {
         return call_user_func($this->getRenderer(), $e, $input);
     }

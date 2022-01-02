@@ -34,7 +34,7 @@ class ProxyInputHandler implements InputHandler
      *
      * @param Input $input
      *
-     * @return \Ems\Core\Response
+     * @return Response
      */
     public function __invoke(Input $input)
     {

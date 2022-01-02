@@ -9,6 +9,7 @@ use Ems\Contracts\Core\Message;
 use Ems\Contracts\Routing\Input;
 use Ems\Core\ImmutableMessage;
 use Ems\Core\Url;
+use Ems\Contracts\Core\Url as UrlContract;
 use Ems\Http\Psr\PsrMessageTrait;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\StreamInterface;
@@ -22,8 +23,8 @@ use function is_array;
  * @property-read StreamInterface body
  * @property-read string requestTarget
  * @property-read string method
- * @property-read UriInterface|\Ems\Contracts\Core\Url uri
- * @property-read UriInterface|\Ems\Contracts\Core\Url url
+ * @property-read UriInterface|UrlContract uri
+ * @property-read UriInterface|UrlContract url
  */
 class HttpRequest extends ImmutableMessage implements RequestInterface
 {
@@ -147,7 +148,10 @@ class HttpRequest extends ImmutableMessage implements RequestInterface
 
     protected function apply(array $attributes)
     {
-
+        if (isset($attributes['url']) && !isset($attributes['uri'])) {
+            $attributes['uri'] = $attributes['url'];
+            unset($attributes['url']);
+        }
         if (isset($attributes['protocolVersion'])) {
             $this->protocolVersion = $attributes['protocolVersion'];
         }
@@ -157,13 +161,9 @@ class HttpRequest extends ImmutableMessage implements RequestInterface
         if (isset($attributes['method'])) {
             $this->method = $attributes['method'];
         }
-        if (isset($attributes['uri'])) {
+        if (isset($attributes['uri']) && $attributes['uri'] instanceof UrlContract) {
             $this->uri = $attributes['uri'];
         }
-        if (isset($attributes['url'])) {
-            $this->uri = $attributes['url'];
-        }
-
         parent::apply($attributes);
     }
 
@@ -182,7 +182,7 @@ class HttpRequest extends ImmutableMessage implements RequestInterface
             $attributes['method'] = $this->method;
         }
 
-        if (!isset($attributes['uri']) && !isset($attributes['url'])) {
+        if (!isset($attributes['uri'])) { //} && !isset($attributes['url'])) {
             $attributes['uri'] = $this->uri;
         }
 

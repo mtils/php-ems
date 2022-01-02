@@ -24,7 +24,7 @@ use function realpath;
 trait AppInTest
 {
     /**
-     * @var \Ems\Skeleton\Application
+     * @var Application
      */
     protected $app;
 
@@ -38,7 +38,7 @@ trait AppInTest
      *
      * @param null $binding
      * @param array $parameters
-     * @return \Ems\Skeleton\Application|object
+     * @return Application|object
      */
     protected function app($binding=null, array $parameters=[])
     {
@@ -65,7 +65,7 @@ trait AppInTest
     /**
      * Overwrite this to manipulate app before booting or how its booted.
      *
-     * @param \Ems\Skeleton\Application $app
+     * @param Application $app
      */
     protected function bootApplication(Application $app)
     {
@@ -92,7 +92,7 @@ trait AppInTest
     }
 
     /**
-     * @return \Ems\Skeleton\Application
+     * @return Application
      */
     protected function getAppInstance() : Application
     {
@@ -106,7 +106,7 @@ trait AppInTest
      * Creates the application. Overwrite this in your test to create the real
      * application.
      *
-     * @return \Ems\Skeleton\Application
+     * @return Application
      */
     protected function createApplication() : Application
     {
@@ -121,7 +121,7 @@ trait AppInTest
      * Calls all methods with $prefix and pass the application.
      *
      * @param string $prefix
-     * @param \Ems\Skeleton\Application $app
+     * @param Application $app
      */
     protected function callAllBootMethods(string $prefix, Application $app)
     {
