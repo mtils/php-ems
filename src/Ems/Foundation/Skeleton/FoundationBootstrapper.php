@@ -4,7 +4,7 @@ namespace Ems\Foundation\Skeleton;
 
 
 use Ems\Contracts\Core\Extractor;
-use Ems\Core\Skeleton\Bootstrapper;
+use Ems\Skeleton\Bootstrapper;
 use Ems\Contracts\Foundation\InputNormalizer as InputNormalizerContract;
 use Ems\Contracts\Foundation\InputNormalizerFactory as NormalizerFactoryContract;
 use Ems\Expression\Matcher;
@@ -26,11 +26,11 @@ class FoundationBootstrapper extends Bootstrapper
 
         parent::bind();
 
-        $this->app->bind(PhpSearchEngine::class, function ($ioc) {
+        $this->container->bind(PhpSearchEngine::class, function ($ioc) {
             return new PhpSearchEngine($ioc(Matcher::class), $ioc(Extractor::class));
         });
 
-        $this->app->on(InputNormalizerFactory::class, function (InputNormalizerFactory $factory) {
+        $this->container->on(InputNormalizerFactory::class, function (InputNormalizerFactory $factory) {
             // Assign a default extension to omit the "not-found-errors"
             $factory->extend('*', function () {});
         });

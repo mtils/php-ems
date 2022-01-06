@@ -13,7 +13,7 @@ use Ems\Contracts\Model\Schema\Migrator as MigratorContract;
 use Ems\Contracts\Routing\RouteCollector;
 use Ems\Skeleton\Application;
 use Ems\Core\Exceptions\NotImplementedException;
-use Ems\Core\Skeleton\Bootstrapper;
+use Ems\Skeleton\Bootstrapper;
 use Ems\Core\Url;
 use Ems\Model\Eloquent\EmsConnectionFactory;
 use Ems\Model\Schema\Illuminate\IlluminateMigrationRunner;
@@ -40,20 +40,20 @@ class MigrationBootstrapper extends Bootstrapper
 
         $this->addRoutes();
 
-        if (!$this->app->has(ConnectionResolverInterface::class)) {
+        if (!$this->container->has(ConnectionResolverInterface::class)) {
             $this->registerConnectionResolver();
         }
 
-        $this->app->share(MigrationStepRepository::class, function () {
+        $this->container->share(MigrationStepRepository::class, function () {
             return $this->makeRepository($this->getConfig());
         });
 
-        $this->app->bind(MigrationRunner::class, function () {
+        $this->container->bind(MigrationRunner::class, function () {
             return $this->makeRunner($this->getConfig());
         });
 
-        $this->app->share(MigratorContract::class, function () {
-            $migrator = $this->app->create(Migrator::class);
+        $this->container->share(MigratorContract::class, function () {
+            $migrator = $this->container->create(Migrator::class);
             if ($migrator instanceof Configurable) {
                 $this->configure($migrator, $this->getConfig());
             }
@@ -102,11 +102,11 @@ class MigrationBootstrapper extends Bootstrapper
         }
 
         /** @var IlluminateMigrationRunner $runner */
-        $runner = $this->app->create(IlluminateMigrationRunner::class);
+        $runner = $this->container->create(IlluminateMigrationRunner::class);
         if ($runner instanceof Configurable) {
             $this->configure($runner, $config);
         }
-        $runner->createObjectsBy($this->app);
+        $runner->createObjectsBy($this->container);
         return $runner;
     }
 
@@ -119,12 +119,12 @@ class MigrationBootstrapper extends Bootstrapper
             throw new NotImplementedException("Unknown repository backend '$backend'");
         }
 
-        $this->app->bind(MigrationRepositoryInterface::class, function () use ($source) {
+        $this->container->bind(MigrationRepositoryInterface::class, function () use ($source) {
             return $this->makeLaravelRepository($source);
         });
 
         /** @var IlluminateMigrationStepRepository $repository */
-        $repository = $this->app->create(IlluminateMigrationStepRepository::class);
+        $repository = $this->container->create(IlluminateMigrationStepRepository::class);
 
         if ($repository instanceof Configurable) {
             $this->configure($repository, $config);
@@ -140,7 +140,7 @@ class MigrationBootstrapper extends Bootstrapper
             throw new NotImplementedException("The illuminate repository driver only supports a database.");
         }
         /** @var DatabaseMigrationRepository $migrationRepo */
-        $migrationRepo = $this->app->create(DatabaseMigrationRepository::class, [
+        $migrationRepo = $this->container->create(DatabaseMigrationRepository::class, [
             'table' => $source->path->first()
         ]);
         $migrationRepo->setSource($source->host);
@@ -151,22 +151,20 @@ class MigrationBootstrapper extends Bootstrapper
 
     protected function registerConnectionResolver()
     {
-        $this->app->share(ConnectionResolverInterface::class, function () {
+        $this->container->share(ConnectionResolverInterface::class, function () {
             /** @var EmsConnectionFactory $factory */
-            return $this->app->create(EmsConnectionFactory::class, [
-                'connectionPool' => $this->app->get(ConnectionPool::class)
+            return $this->container->create(EmsConnectionFactory::class, [
+                'connectionPool' => $this->container->get(ConnectionPool::class)
             ]);
         });
-        $this->app->bind(EmsConnectionFactory::class, function () {
-            return $this->app->get(ConnectionResolverInterface::class);
+        $this->container->bind(EmsConnectionFactory::class, function () {
+            return $this->container->get(ConnectionResolverInterface::class);
         });
     }
 
     protected function getConfig($key=null)
     {
-        /** @var Application $app */
-        $app = $this->app->get(Application::class);
-        $config = $app->config('migrations', $this->defaultConfig);
+        $config = $this->app->config('migrations', $this->defaultConfig);
         return $key ? $config[$key] : $config;
     }
 }

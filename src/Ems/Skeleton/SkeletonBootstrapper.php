@@ -10,7 +10,6 @@ use Ems\Contracts\Core\Url;
 use Ems\Contracts\Skeleton\InputConnection;
 use Ems\Contracts\Skeleton\OutputConnection;
 use Ems\Core\ConnectionPool;
-use Ems\Core\Skeleton\Bootstrapper;
 use Ems\Model\Database\DB;
 use Ems\Routing\RoutedInputHandler;
 use Ems\Testing\Benchmark;
@@ -37,11 +36,11 @@ class SkeletonBootstrapper extends Bootstrapper
 
     public function bind()
     {
-        $this->app->share(LoggerInterface::class, function () {
+        $this->container->share(LoggerInterface::class, function () {
             return $this->createLogger();
         });
 
-        $this->app->onAfter(ConnectionPool::class, function ($pool) {
+        $this->container->onAfter(ConnectionPool::class, function ($pool) {
             $poolId = spl_object_hash($pool);
             if (isset($this->configuredPools[$poolId])) {
                 return;
@@ -62,26 +61,24 @@ class SkeletonBootstrapper extends Bootstrapper
             if (!$url->equals(ConnectionPool::STDIN)) {
                 return null;
             }
-            return $this->app->get(InputConnection::class);
+            return $this->container->get(InputConnection::class);
         });
 
         $pool->extend(ConnectionPool::STDOUT, function (Url $url) {
             if (!$url->equals(ConnectionPool::STDOUT)) {
                 return null;
             }
-            return $this->app->get(OutputConnection::class);
+            return $this->container->get(OutputConnection::class);
         });
 
         $pool->extend(ConnectionPool::STDERR, function (Url $url) {
             if ($url->equals(ConnectionPool::STDERR)) {
-                return $this->app->get(StreamLogger::class);
+                return $this->container->get(StreamLogger::class);
             }
             return null;
         });
 
-        /** @var Application $app */
-        $app = $this->app->get(Application::class);
-        if (!$databaseConfig = $app->config('database')) {
+        if (!$databaseConfig = $this->app->config('database')) {
             return;
         }
 
@@ -98,14 +95,11 @@ class SkeletonBootstrapper extends Bootstrapper
      */
     protected function createLogger()
     {
-        /** @var Application $app */
-        $app = $this->app->get('app');
-
-        if ($app->environment() == Application::TESTING) {
+        if ($this->app->environment() == Application::TESTING) {
             return new StreamLogger('php://stdout');
         }
 
-        $logPath = $app->path('local/log/app.log');
+        $logPath = $this->app->path('local/log/app.log');
 
         if (!file_exists($logPath)) {
             return new StreamLogger('php://stderr');
@@ -124,13 +118,11 @@ class SkeletonBootstrapper extends Bootstrapper
             Benchmark::raw(['name' => 'Application Start', 'time' => APPLICATION_START]);
         }
 
-        /** @var Application $app */
-        $app = $this->app->get('app');
-        $app->onAfter('boot', function() {
+        $this->app->onAfter('boot', function() {
             Benchmark::mark('Booted');
         });
 
-        $this->app->onAfter(RoutedInputHandler::class, function (RoutedInputHandler $handler) {
+        $this->container->onAfter(RoutedInputHandler::class, function (RoutedInputHandler $handler) {
             $handler->onBefore('call', function () {
                 Benchmark::mark('Routed');
             });

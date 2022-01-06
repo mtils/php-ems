@@ -49,6 +49,7 @@ use Ems\Core\TextParserQueue;
 use Ems\Core\Url;
 use Ems\Core\VariablesTextParser;
 use Ems\Expression\Matcher;
+use Ems\Skeleton\Bootstrapper;
 use ReflectionClass;
 use ReflectionMethod;
 use Ems\Contracts\Core\ObjectArrayConverter as ObjectArrayConverterContract;
@@ -101,32 +102,24 @@ class CoreBootstrapper extends Bootstrapper
     {
         parent::bind();
 
-        // In environments that are not a skeleton app we use an Application
-        // instance to hold the paths.
-        if (!$this->app->bound(Application::class)) {
-            $this->app->instance(Application::class, $this->createPlaceholderApp());
-        }
+        $this->assignPathsToApp($this->app);
 
-        $this->assignPathsToApp($this->app->get(Application::class));
-
-        $this->app->on(PathFinder::class, function ($paths) {
+        $this->container->on(PathFinder::class, function ($paths) {
             $this->assignBaseAppPaths($paths);
         });
 
-        $this->app->on(StringConverterChain::class, function ($chain) {
+        $this->container->on(StringConverterChain::class, function ($chain) {
             $this->addStringConverters($chain);
         });
 
-        $this->app->on(TextFormatter::class, function ($formatter, $app) {
+        $this->container->on(TextFormatter::class, function ($formatter, $app) {
             $formatter->setLocalizer($app('Ems\Contracts\Core\Localizer'));
         });
 
-        $this->app->bind('ems::locale-config', function ($ioc) {
+        $this->container->bind('ems::locale-config', function ($ioc) {
 
-            /** @var Application $app */
-            $app = $ioc(Application::class);
             $storage = new NestedFileStorage();
-            $storage->setUrl($app->path('ems-resources')->append('lang'));
+            $storage->setUrl($this->app->path('ems-resources')->append('lang'));
             $storage->setNestingLevel(1);
 
             $provider = new ArrayProvider();
@@ -136,31 +129,31 @@ class CoreBootstrapper extends Bootstrapper
 
         }, true);
 
-        $this->app->bind(Matcher::class, function ($ioc) {
+        $this->container->bind(Matcher::class, function ($ioc) {
             return new Matcher($ioc(CheckerContract::class), $ioc(ExtractorContract::class));
         }, true);
 
-        $this->app->on(Formatter::class, function (Formatter $formatter, $app) {
+        $this->container->on(Formatter::class, function (Formatter $formatter, $app) {
             $formatter->setFormats($app('ems::locale-config'));
         });
 
-        $this->app->on(TextParserQueue::class, function ($queue, $app) {
+        $this->container->on(TextParserQueue::class, function ($queue, $app) {
             $queue->add($app(VariablesTextParser::class));
         });
 
-        $this->app->on(AnythingProvider::class, function ($provider, $app) {
+        $this->container->on(AnythingProvider::class, function ($provider, $app) {
             $provider->createObjectsWith($app);
         });
 
-        $this->app->on(SupportsCustomFactory::class, function ($object) {
+        $this->container->on(SupportsCustomFactory::class, function ($object) {
             $object->createObjectsBy($this->app);
         });
 
-        $this->app->on(HasInjectMethods::class, function (HasInjectMethods $object) {
-            $this->autoInjectDependendies($object);
+        $this->container->on(HasInjectMethods::class, function (HasInjectMethods $object) {
+            $this->autoInjectDependencies($object);
         });
 
-        $this->app->on(ConnectionPoolContract::class, function (ConnectionPoolContract $pool) {
+        $this->container->on(ConnectionPoolContract::class, function (ConnectionPoolContract $pool) {
             /** @return void */
             $pool->extend('php', function (UrlContract $url) {
                 if ($url->scheme == 'php' || $url->scheme == 'file') {
@@ -204,14 +197,6 @@ class CoreBootstrapper extends Bootstrapper
     }
 
     /**
-     * @return \Ems\Skeleton\Application
-     */
-    protected function createPlaceholderApp()
-    {
-        return new Application($this->appPath(), $this->app, false);
-    }
-
-    /**
      * Dynamically assign all StringConverters (based on installment)
      *
      * @param StringConverterChain $chain
@@ -246,19 +231,7 @@ class CoreBootstrapper extends Bootstrapper
         return $this->appPath().'/public';
     }
 
-    /**
-     * Return the applications base path (the vcs root directory)
-     *
-     * @return string
-     **/
-    protected function appPath()
-    {
-        if (function_exists('app_path')) {
-            return app_path();
-        }
 
-        return $this->app->get('app')->path();
-    }
 
     /**
      * Return the application url
@@ -291,7 +264,7 @@ class CoreBootstrapper extends Bootstrapper
      *
      * @param HasInjectMethods $object
      **/
-    protected function autoInjectDependendies(HasInjectMethods $object)
+    protected function autoInjectDependencies(HasInjectMethods $object)
     {
 
         $reflection = new ReflectionClass($object);
@@ -303,9 +276,6 @@ class CoreBootstrapper extends Bootstrapper
                 continue;
             }
 
-            // All parameters has to be some sort of class and bound
-            $parameters = $method->getParameters();
-
             foreach ($method->getParameters() as $parameter) {
 
                 // No class|interface typehint, skip the method
@@ -314,7 +284,7 @@ class CoreBootstrapper extends Bootstrapper
                 }
 
                 // class|interface typehint not bound, skip the method
-                if (!$this->app->bound($class->getName())) {
+                if (!$this->app->has($class->getName())) {
                     continue 2;
                 }
             }

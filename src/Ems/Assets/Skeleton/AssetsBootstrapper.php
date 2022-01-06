@@ -2,7 +2,7 @@
 
 namespace Ems\Assets\Skeleton;
 
-use Ems\Core\Skeleton\Bootstrapper;
+use Ems\Skeleton\Bootstrapper;
 use Ems\Contracts\Assets\Registry;
 use Ems\Core\Support\RendererChain;
 use Ems\Assets\Laravel\AssetsBladeDirectives;
@@ -31,31 +31,31 @@ class AssetsBootstrapper extends Bootstrapper
 
         $this->registerViewExtensions();
 
-        $this->app->on('Ems\Core\Support\RendererChain', function ($chain) {
+        $this->container->on('Ems\Core\Support\RendererChain', function ($chain) {
             $this->addRenderers($chain);
         });
 
-        $this->app->on('Ems\Contracts\Assets\Registry', function ($factory) {
+        $this->container->on('Ems\Contracts\Assets\Registry', function ($factory) {
             $this->registerPathMappings($factory);
         });
 
-        $this->app->on('Ems\Assets\Manager', function ($manager, $app) {
+        $this->container->on('Ems\Assets\Manager', function ($manager, $app) {
             $manager->setBuildConfigRepository($app('Ems\Contracts\Assets\BuildConfigRepository'));
         });
 
-        $this->app->onAfter('Illuminate\Contracts\View\Factory', function ($factory, $app) {
+        $this->container->onAfter('Illuminate\Contracts\View\Factory', function ($factory, $app) {
              AssetsBladeDirectives::injectOriginalViewData($factory);
         });
 
-        $this->app->onAfter('blade.compiler', function ($compiler, $app) {
+        $this->container->onAfter('blade.compiler', function ($compiler, $app) {
             $app('Ems\Assets\Laravel\AssetsBladeDirectives')->registerDirectives($compiler);
         });
 
-        $this->app->onAfter('Illuminate\Contracts\Routing\Registrar', function ($router, $app) {
+        $this->container->onAfter('Illuminate\Contracts\Routing\Registrar', function ($router, $app) {
             $this->addRoutes($router);
         });
 
-        $this->app->on('Ems\Assets\Compiler', function ($compiler) {
+        $this->container->on('Ems\Assets\Compiler', function ($compiler) {
             $this->addInstalledParsers($compiler);
         });
 
@@ -67,7 +67,7 @@ class AssetsBootstrapper extends Bootstrapper
 
     protected function registerViewExtensions()
     {
-        $this->app->bind('Ems\Assets\Laravel\AssetsBladeDirectives', function ($app) {
+        $this->container->bind('Ems\Assets\Laravel\AssetsBladeDirectives', function ($app) {
             return new AssetsBladeDirectives($app('Ems\Contracts\Assets\Manager'));
         }, true);
     }
@@ -86,7 +86,7 @@ class AssetsBootstrapper extends Bootstrapper
      **/
     protected function registerPathMappings($factory)
     {
-        $assetPath = $this->app->__invoke(PathFinder::class)->to('assets');
+        $assetPath = $this->container->get(PathFinder::class)->to('assets');
 
         $factory->map('css', $assetPath->absolute('css'), $assetPath->url('css'));
         $factory->map('js', $assetPath->absolute('js'), $assetPath->url('js'));
@@ -94,12 +94,12 @@ class AssetsBootstrapper extends Bootstrapper
 
     protected function addCssRenderer(RendererChain $chain)
     {
-        $chain->add($this->app->__invoke('Ems\Assets\Renderer\CssRenderer'));
+        $chain->add($this->container->get('Ems\Assets\Renderer\CssRenderer'));
     }
 
     protected function addJsRenderer(RendererChain $chain)
     {
-        $chain->add($this->app->__invoke('Ems\Assets\Renderer\JavascriptRenderer'));
+        $chain->add($this->container->get('Ems\Assets\Renderer\JavascriptRenderer'));
     }
 
     protected function addRoutes(Registrar $router)
@@ -113,16 +113,16 @@ class AssetsBootstrapper extends Bootstrapper
     protected function addInstalledParsers($compiler)
     {
         if (class_exists('CssMin')) {
-            $compiler->addParser('cssmin/cssmin', $this->app->__invoke('Ems\Assets\Parser\CssMinParser'));
-            $compiler->addParser('ems/css-url-replace', $this->app->__invoke('Ems\Assets\Parser\CssUrlReplaceParser'));
+            $compiler->addParser('cssmin/cssmin', $this->container->get('Ems\Assets\Parser\CssMinParser'));
+            $compiler->addParser('ems/css-url-replace', $this->container->get('Ems\Assets\Parser\CssUrlReplaceParser'));
         }
 
         if (class_exists('Patchwork\JSqueeze')) {
-            $compiler->addParser('patchwork/jsqueeze', $this->app->__invoke('Ems\Assets\Parser\JSqueezeParser'));
+            $compiler->addParser('patchwork/jsqueeze', $this->container->get('Ems\Assets\Parser\JSqueezeParser'));
         }
 
         if (class_exists('JShrink\Minifier')) {
-            $compiler->addParser('tedivm/jshrink', $this->app->__invoke('Ems\Assets\Parser\JShrinkParser'));
+            $compiler->addParser('tedivm/jshrink', $this->container->get('Ems\Assets\Parser\JShrinkParser'));
         }
     }
 
@@ -135,7 +135,7 @@ class AssetsBootstrapper extends Bootstrapper
             return public_path($subPath);
         }
 
-        $basePath = $this->app->__invoke('app')->path()->append('public');
+        $basePath = $this->app->path()->append('public');
 
         return $subPath ? "$basePath/$subPath" : $basePath;
     }
@@ -146,7 +146,7 @@ class AssetsBootstrapper extends Bootstrapper
             return url($path);
         }
 
-        $url = $this->app->__invoke('app')->url();
+        $url = $this->app->url();
 
         return $path ? "$url/$path" : $url;
     }

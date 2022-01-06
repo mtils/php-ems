@@ -8,17 +8,14 @@ namespace Ems\Model\Skeleton;
 
 use Ems\Contracts\Core\Url;
 use Ems\Contracts\Model\SchemaInspector;
-use Ems\Skeleton\Application;
 use Ems\Core\LocalFilesystem;
 use Ems\Core\ObjectArrayConverter;
-use Ems\Core\Skeleton\Bootstrapper;
 use Ems\Model\Database\OrmQueryBuilder;
 use Ems\Model\MapSchemaInspector;
 use Ems\Model\Orm;
+use Ems\Skeleton\Bootstrapper;
 
 use function rtrim;
-
-use const APP_ROOT;
 
 class OrmBootstrapper extends Bootstrapper
 {
@@ -34,8 +31,8 @@ class OrmBootstrapper extends Bootstrapper
     {
         parent::bindBindings();
 
-        $this->app->onAfter(ObjectArrayConverter::class, function (ObjectArrayConverter $converter) {
-            $inspector = $this->app->get(SchemaInspector::class);
+        $this->container->onAfter(ObjectArrayConverter::class, function (ObjectArrayConverter $converter) {
+            $inspector = $this->container->get(SchemaInspector::class);
             if (!$inspector instanceof MapSchemaInspector) {
                 return;
             }
@@ -44,7 +41,7 @@ class OrmBootstrapper extends Bootstrapper
             });
         });
 
-        $this->app->on(Orm::class, function (Orm $orm) {
+        $this->container->on(Orm::class, function (Orm $orm) {
             $orm->extend('database', function (Url $url) {
                 if ($url->scheme == 'database') {
                     return $this->app->get(OrmQueryBuilder::class);
@@ -53,10 +50,7 @@ class OrmBootstrapper extends Bootstrapper
             });
         });
 
-        /** @var Application $app */
-        $app = $this->app->get(Application::class);
-
-        if (!$ormConfig = $app->config('orm')) {
+        if (!$ormConfig = $this->app->config('orm')) {
             return;
         }
 
@@ -74,7 +68,7 @@ class OrmBootstrapper extends Bootstrapper
          *   ]
          * ]
          */
-        $this->app->on(MapSchemaInspector::class, function (MapSchemaInspector $inspector) use ($ormConfig) {
+        $this->container->on(MapSchemaInspector::class, function (MapSchemaInspector $inspector) use ($ormConfig) {
             $this->loadMaps($inspector, $ormConfig['directories']);
         });
     }
@@ -88,7 +82,7 @@ class OrmBootstrapper extends Bootstrapper
             $mapNamespace = isset($configuration['map-namespace']) ? rtrim($configuration['map-namespace'], '\\') : $namespace.'\\'.'Maps';
             $mapSuffix = $configuration['map-suffix'] ?? 'Map';
             $directory = $configuration['directory'];
-            $directory = $directory[0] == '/' ? $directory : APP_ROOT . '/' . $directory;
+            $directory = $directory[0] == '/' ? $directory : $this->appPath() . '/' . $directory;
 
             foreach ($fs->files($directory) as $file) {
                 $shortClass = $fs->name($file);

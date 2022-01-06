@@ -6,7 +6,7 @@
 namespace Ems\Queue\Skeleton;
 
 
-use Ems\Core\Skeleton\Bootstrapper;
+use Ems\Skeleton\Bootstrapper;
 use Ems\Contracts\Queue\Queue as QueueContract;
 use Ems\Contracts\Queue\Tasker as TaskerContract;
 use Ems\Queue\Queue;

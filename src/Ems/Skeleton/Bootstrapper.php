@@ -1,10 +1,13 @@
 <?php
 
-namespace Ems\Core\Skeleton;
+namespace Ems\Skeleton;
 
 use Ems\Contracts\Core\IOCContainer;
 use Ems\Contracts\Routing\Router;
 
+use function defined;
+use function function_exists;
+use function realpath;
 use function spl_object_hash;
 
 class Bootstrapper
@@ -39,7 +42,12 @@ class Bootstrapper
     protected $aliases = [];
 
     /**
-     * @var \Ems\Contracts\Core\IOCContainer
+     * @var IOCContainer
+     */
+    protected $container;
+
+    /**
+     * @var Application
      **/
     protected $app;
 
@@ -51,11 +59,12 @@ class Bootstrapper
     protected $configuredRouters = [];
 
     /**
-     * @param \Ems\Contracts\Core\IOCContainer $app
-     **/
-    public function __construct(IOCContainer $app)
+     * @param IOCContainer $container
+     */
+    public function __construct(IOCContainer $container)
     {
-        $this->app = $app;
+        $this->assignApplication($container);
+        $this->container = $this->app->getContainer();
     }
 
     public function bind()
@@ -70,7 +79,7 @@ class Bootstrapper
      */
     protected function addRoutesBy(callable $adder)
     {
-        $this->app->onAfter(Router::class, function (Router $router) use ($adder) {
+        $this->container->onAfter(Router::class, function (Router $router) use ($adder) {
             $routerId = spl_object_hash($router);
             if (isset($this->configuredRouters[$routerId])) {
                 return;
@@ -87,7 +96,7 @@ class Bootstrapper
     {
         foreach ($this->aliases as $abstract => $aliases) {
             foreach ((array) $aliases as $alias) {
-                $this->app->alias($alias, $abstract);
+                $this->container->alias($alias, $abstract);
             }
         }
     }
@@ -99,16 +108,16 @@ class Bootstrapper
     {
         foreach ($this->bindings as $concrete => $abstracts) {
             if (!is_array($abstracts)) {
-                $this->app->bind($abstracts, $concrete);
+                $this->container->bind($abstracts, $concrete);
                 continue;
             }
 
             $first = array_shift($abstracts);
 
-            $this->app->bind($first, $concrete);
+            $this->container->bind($first, $concrete);
 
             foreach ($abstracts as $abstract) {
-                $this->app->alias($first, $abstract);
+                $this->container->alias($first, $abstract);
             }
         }
     }
@@ -120,17 +129,61 @@ class Bootstrapper
     {
         foreach ($this->singletons as $concrete => $abstracts) {
             if (!is_array($abstracts)) {
-                $this->app->bind($abstracts, $concrete, true);
+                $this->container->bind($abstracts, $concrete, true);
                 continue;
             }
 
             $first = array_shift($abstracts);
 
-            $this->app->bind($first, $concrete, true);
+            $this->container->bind($first, $concrete, true);
 
             foreach ($abstracts as $abstract) {
-                $this->app->alias($first, $abstract);
+                $this->container->alias($first, $abstract);
             }
         }
+    }
+
+    protected function assignApplication(IOCContainer $app)
+    {
+        if ($app instanceof Application) {
+            $this->app = $app;
+            return;
+        }
+        if ($app->has(Application::class)) {
+            $this->app = $app->get(Application::class);
+            return;
+        }
+        $this->app = $this->createPlaceholderApp($app);
+        $app->instance(Application::class, $this->app);
+
+    }
+
+    /**
+     * @param IOCContainer $container
+     * @return \Ems\Skeleton\Application
+     */
+    protected function createPlaceholderApp(IOCContainer $container) : Application
+    {
+        return new Application($this->appPath(), $container, false);
+    }
+
+    /**
+     * Return the applications base path (the vcs root directory)
+     *
+     * @return string
+     **/
+    protected function appPath() : string
+    {
+        if (defined('APP_ROOT')) {
+            return APP_ROOT;
+        }
+        if (isset($_ENV['APP_BASE_PATH'])) {
+            return $_ENV['APP_BASE_PATH'];
+        }
+        if (function_exists('app_path')) {
+            return app_path();
+        }
+        // Try to guess relative from vendor
+        return realpath(__DIR__.'/../../../../..');
     }
 }

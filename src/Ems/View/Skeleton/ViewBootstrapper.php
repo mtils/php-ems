@@ -8,7 +8,7 @@ namespace Ems\View\Skeleton;
 
 use Ems\Contracts\Routing\Input;
 use Ems\Skeleton\Application;
-use Ems\Core\Skeleton\Bootstrapper;
+use Ems\Skeleton\Bootstrapper;
 use Ems\Routing\InputHandler;
 use Ems\View\InputRendererFactory;
 use Ems\View\PhpRenderer;
@@ -22,13 +22,13 @@ class ViewBootstrapper extends Bootstrapper
     {
         parent::bind();
 
-        $this->app->bind(InputRendererFactory::class, function () {
+        $this->container->bind(InputRendererFactory::class, function () {
             $factory = new InputRendererFactory();
             $this->addRenderers($factory);
             return $factory;
         }, true);
 
-        $this->app->onAfter(InputHandler::class, function (InputHandler $handler) {
+        $this->container->onAfter(InputHandler::class, function (InputHandler $handler) {
             $collection = $handler->middleware();
             $collection->add('view-renderer', InputRendererFactory::class);
         });
@@ -37,10 +37,7 @@ class ViewBootstrapper extends Bootstrapper
 
     protected function addRenderers(InputRendererFactory $factory)
     {
-        /** @var Application $app */
-        $app = $this->app->get(Application::class);
-
-        if (!$viewConfig = $app->config('view')) {
+        if (!$viewConfig = $this->app->config('view')) {
             return;
         }
 
@@ -52,6 +49,7 @@ class ViewBootstrapper extends Bootstrapper
                 if ($config['backend'] == 'php') {
                     return $this->createPhpRenderer($config);
                 }
+                return null;
             });
         }
     }

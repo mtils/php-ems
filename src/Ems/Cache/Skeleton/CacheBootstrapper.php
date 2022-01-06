@@ -2,7 +2,7 @@
 
 namespace Ems\Cache\Skeleton;
 
-use Ems\Core\Skeleton\Bootstrapper;
+use Ems\Skeleton\Bootstrapper;
 use Ems\Contracts\Cache\Cacheable;
 use Ems\Contracts\Cache\Cache as CacheContract;
 use Ems\Contracts\Cache\Categorizer;
@@ -13,7 +13,7 @@ use Ems\Cache\Categorizer\DefaultCategorizer;
 /**
  * @codeCoverageIgnore
  **/
-class CacheBootstrapper extends Bootstrapper
+class CacheBootstrapper extends \Ems\Skeleton\Bootstrapper
 {
     protected $categorizersAdded = false;
 
@@ -29,17 +29,17 @@ class CacheBootstrapper extends Bootstrapper
         parent::bind();
 
         // Binding the cache also to its own class name (without recursion)
-        $this->app->on(Cache::class, function (Cache $cache, $app) {
+        $this->container->on(Cache::class, function (Cache $cache, $app) {
             if (!$app->bound(Cache::class)) {
                 $app->instance(Cache::class, $cache);
             }
         });
 
-        $this->app->on(CategorizerChain::class, function (CategorizerChain $chain, $app) {
+        $this->container->on(CategorizerChain::class, function (CategorizerChain $chain, $app) {
             $this->addCategorizers($chain, $app);
         });
 
-        $this->app->on(Cacheable::class, function (Cacheable $cacheable, $app) {
+        $this->container->on(Cacheable::class, function (Cacheable $cacheable, $app) {
             $cacheable->setCache($app(CacheContract::class));
         });
     }

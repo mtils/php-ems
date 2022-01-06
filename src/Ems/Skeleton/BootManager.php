@@ -23,12 +23,12 @@ use Ems\Skeleton\Application as BaseApplication;
 class BootManager
 {
     /**
-     * @var \Ems\Skeleton\Application
+     * @var Application
      **/
-    protected $ems;
+    protected $app;
 
     /**
-     * @var \Ems\Contracts\Core\IOCContainer
+     * @var IOCContainer
      **/
     protected $container;
 
@@ -78,33 +78,33 @@ class BootManager
     }
 
     /**
-     * @return \Ems\Skeleton\Application
+     * @return Application
      **/
-    public function getApplication()
+    public function getApplication() : Application
     {
-        return $this->ems;
+        return $this->app;
     }
 
     /**
-     * @param \Ems\Skeleton\Application $ems
+     * @param Application $app
      *
      * @return self
      **/
-    public function setApplication(BaseApplication $ems)
+    public function setApplication(Application $app) : BootManager
     {
 
-        if ($ems->wasBooted()) {
+        if ($app->wasBooted()) {
             throw new \RuntimeException('App was already booted. To late for Bootmanager to hook into boot.');
         }
 
-        $this->ems = $ems;
+        $this->app = $app;
 
-        $this->ems->instance('bootManager', $this);
+        $this->app->instance('bootManager', $this);
 
-        $ems->onBefore('boot', function ($ems) {
-            $this->bindPackages($ems);
-            $this->bind($ems);
-            $this->boot($ems);
+        $app->onBefore('boot', function (Application $app) {
+            $this->bindPackages();
+            $this->bind();
+            $this->boot();
         });
 
         return $this;
@@ -113,7 +113,7 @@ class BootManager
     /**
      * Add a class to be booted / Registered. The class can have
      * the following methods: bindPackages, bind and boot
-     * If some of the methods exists it will be called in the corresponding
+     * If some methods exists it will be called in the corresponding
      * boot phase.
      *
      * @param string|object $class
@@ -121,7 +121,7 @@ class BootManager
      *
      * @return self
      **/
-    public function add($class, $provides = [])
+    public function add($class, array $provides = []) : BootManager
     {
         $this->callConfiguratorsOnce();
 
@@ -137,7 +137,15 @@ class BootManager
         return $this;
     }
 
-    public function addPackageBinder($name, callable $binder)
+    /**
+     * Add a callable to bind package bindings, the first called bindings.
+     *
+     * @param string $name
+     * @param callable $binder
+     *
+     * @return $this
+     */
+    public function addPackageBinder(string $name, callable $binder) : BootManager
     {
         $this->callConfiguratorsOnce();
         $this->packageBinders[$name] = $binder;
@@ -145,7 +153,14 @@ class BootManager
         return $this;
     }
 
-    public function addBinder($name, callable $binder)
+    /**
+     * Add a callable to bind your bindings, the second called bindings.
+     *
+     * @param string $name
+     * @param callable $binder
+     * @return $this
+     */
+    public function addBinder(string $name, callable $binder) : BootManager
     {
         $this->callConfiguratorsOnce();
         $this->binders[$name] = $binder;
@@ -153,7 +168,14 @@ class BootManager
         return $this;
     }
 
-    public function addBooter($name, callable $booter)
+    /**
+     * Add a callable to bind your booters, the third called bindings in boot process.
+     *
+     * @param string $name
+     * @param callable $booter
+     * @return $this
+     */
+    public function addBooter(string $name, callable $booter) : BootManager
     {
         $this->callConfiguratorsOnce();
         $this->booters[$name] = $booter;
@@ -161,17 +183,17 @@ class BootManager
         return $this;
     }
 
-    public function bindPackages(IOCContainer $container)
+    public function bindPackages()
     {
         $this->callAll('bindPackages', $this->packageBinders);
     }
 
-    public function bind(IOCContainer $container)
+    public function bind()
     {
         $this->callAll('bind', $this->binders);
     }
 
-    public function boot(IOCContainer $container)
+    public function boot()
     {
         $this->callAll('boot', $this->booters);
     }
@@ -207,12 +229,12 @@ class BootManager
      *
      * @return object
      **/
-    protected function resolveOnce($class)
+    protected function resolveOnce(string $class)
     {
         if (isset($this->instances[$class])) {
             return $this->instances[$class];
         }
-        $this->instances[$class] = call_user_func($this->container, $class);
+        $this->instances[$class] = $this->container->create($class);
 
         return $this->instances[$class];
     }
