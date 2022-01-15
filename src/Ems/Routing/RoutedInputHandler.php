@@ -9,9 +9,9 @@ use Ems\Contracts\Core\HasMethodHooks;
 use Ems\Contracts\Core\IOCContainer;
 use Ems\Contracts\Core\SupportsCustomFactory;
 use Ems\Contracts\Core\Type;
-use Ems\Contracts\Routing\UtilizesInput;
 use Ems\Contracts\Routing\Input as InputContract;
 use Ems\Contracts\Routing\InputHandler as InputHandlerContract;
+use Ems\Contracts\Routing\UtilizesInput;
 use Ems\Core\Exceptions\UnConfiguredException;
 use Ems\Core\Input;
 use Ems\Core\Lambda;
@@ -19,6 +19,7 @@ use Ems\Core\Patterns\HookableTrait;
 use Ems\Core\Response;
 use Ems\Core\Support\CustomFactorySupport;
 use Ems\Http\HttpResponse;
+use Psr\Http\Message\ServerRequestInterface;
 use ReflectionException;
 
 use function is_callable;
@@ -69,6 +70,8 @@ class RoutedInputHandler implements InputHandlerContract, SupportsCustomFactory,
         $this->callBeforeListeners('call', [$handler, $input]);
 
         $response = $this->respond($input, $this->call($handler, $input));
+
+        $response = $this->configureResponse($input, $response);
 
         $this->callAfterListeners('call', [$handler, $input, $response]);
 
@@ -121,6 +124,17 @@ class RoutedInputHandler implements InputHandlerContract, SupportsCustomFactory,
         return new HttpResponse($result);
     }
 
+    protected function configureResponse(InputContract $input, Response $response)
+    {
+        if (!$response instanceof HttpResponse) {
+            return $response;
+        }
+        if ($input->getUrl()->scheme == 'http') {
+            return $response->withSecureCookies(false);
+        }
+        return $response;
+    }
+
     /**
      * @param Lambda $handler
      * @param InputContract $input
@@ -140,6 +154,15 @@ class RoutedInputHandler implements InputHandlerContract, SupportsCustomFactory,
         // application call
         $handler->bind(InputContract::class, $input);
         $handler->bind(Input::class, $input);
+
+        if ($input instanceof ServerRequestInterface) {
+            $handler->bind(ServerRequestInterface::class, $input);
+        }
+
+        if ($input instanceof HttpInput) {
+            $handler->bind(HttpInput::class, $input);
+        }
+
         if ($input instanceof ArgvInput) {
             $handler->bind(ArgvInput::class, $input);
         }

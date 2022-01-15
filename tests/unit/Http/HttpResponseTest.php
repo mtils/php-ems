@@ -5,19 +5,18 @@
 
 namespace Ems\Http;
 
+use DateTime;
 use Ems\Contracts\Core\Message;
 use Ems\Contracts\Core\Stream;
+use Ems\Contracts\Http\Cookie;
 use Ems\Core\Exceptions\UnConfiguredException;
 use Ems\Core\Expression;
 use Ems\Core\KeyExpression;
-use Ems\Core\ManualMimeTypeProvider;
+use Ems\Core\Response as CoreResponse;
 use Ems\Core\Serializer\JsonSerializer;
 use Ems\TestCase;
 use Psr\Http\Message\ResponseInterface;
-use Ems\Core\Response as CoreResponse;
 use Psr\Http\Message\StreamInterface;
-
-use function dd;
 
 class HttpResponseTest extends TestCase
 {
@@ -419,6 +418,86 @@ class HttpResponseTest extends TestCase
 
         $this->assertEquals($data['a'], $response['a']);
 
+    }
+
+    /**
+     * @test
+     */
+    public function withCookie_with_separate_parameters()
+    {
+        $response = $this->response();
+        $this->assertSame([], $response->cookies);
+
+        $cookieResponse = $response->withCookie('foo', 'bar');
+        $this->assertNotSame($cookieResponse, $response);
+        $this->assertInstanceOf(Cookie::class, $cookieResponse->cookies['foo']);
+        $this->assertEquals('bar', $cookieResponse->cookies['foo']->value);
+
+        $expire = new DateTime('2022-01-15 08:36:00');
+        $cookieResponse2 = $cookieResponse->withCookie('a', 'b', $expire, '/users', 'localhost', false, false, Cookie::STRICT);
+
+        $this->assertNotSame($cookieResponse2, $cookieResponse);
+        $this->assertInstanceOf(Cookie::class, $cookieResponse2->cookies['foo']);
+        $this->assertEquals('bar', $cookieResponse2->cookies['foo']->value);
+
+        $cookie = $cookieResponse2->cookies['a'];
+        $this->assertInstanceOf(Cookie::class, $cookie);
+        $this->assertEquals('b', $cookie->value);
+        $this->assertSame($expire, $cookie->expire);
+        $this->assertEquals('/users', $cookie->path);
+        $this->assertEquals('localhost', $cookie->domain);
+        $this->assertFalse($cookie->secure);
+        $this->assertFalse($cookie->httpOnly);
+        $this->assertEquals(Cookie::STRICT, $cookie->sameSite);
+
+    }
+
+    /**
+     * @test
+     */
+    public function withSecureCookies()
+    {
+        $response = $this->response();
+        $this->assertSame([], $response->cookies);
+        $this->assertTrue($response->secureCookies);
+        $cookieResponse = $response->withSecureCookies(false)->withCookie('foo', 'bar');
+        $this->assertFalse($cookieResponse->secureCookies);
+
+        $this->assertNotSame($cookieResponse, $response);
+        $this->assertInstanceOf(Cookie::class, $cookieResponse->cookies['foo']);
+        $this->assertFalse($cookieResponse->cookies['foo']->secure);
+
+    }
+
+    /**
+     * @test
+     */
+    public function withCookie_with_Cookie_object()
+    {
+        $expire = new DateTime('2022-01-15 08:36:00');
+        $cookie = new Cookie('a', 'b', $expire, '/users', 'localhost', false, false, Cookie::STRICT);
+        $response = $this->response();
+        $cookieResponse = $response->withCookie($cookie);
+        $this->assertNotSame($cookieResponse, $response);
+        $this->assertSame($cookie, $cookieResponse->cookies['a']);
+    }
+
+    /**
+     * @test
+     */
+    public function withoutCookie_deletes_cookie()
+    {
+        $response = $this->response();
+        $this->assertSame([], $response->cookies);
+
+        $cookieResponse = $response->withCookie('foo', 'bar');
+        $this->assertInstanceOf(Cookie::class, $cookieResponse->cookies['foo']);
+
+        $cookieResponse2 = $cookieResponse->withoutCookie('foo');
+        $this->assertFalse(isset($cookieResponse2->cookies['foo']));
+        $this->assertTrue(isset($cookieResponse->cookies['foo']));
+        $this->assertSame($cookieResponse, $cookieResponse2->previous);
+        $this->assertSame($cookieResponse->next, $cookieResponse2);
     }
 
     protected function response(...$args) : HttpResponse

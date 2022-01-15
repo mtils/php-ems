@@ -6,18 +6,20 @@
 namespace Ems\Skeleton\Connection;
 
 
-use Ems\Contracts\Skeleton\OutputConnection;
 use Ems\Contracts\Core\Stringable;
 use Ems\Contracts\Core\Url as UrlContract;
+use Ems\Contracts\Http\Cookie;
+use Ems\Contracts\Skeleton\OutputConnection;
 use Ems\Core\Connection\AbstractConnection;
 use Ems\Core\Response;
 use Ems\Core\Url;
+use Ems\Http\HttpResponse;
+use Ems\Http\Serializer\CookieSerializer;
 use Psr\Http\Message\ResponseInterface;
 
 use function call_user_func;
 use function fopen;
 use function headers_sent;
-use function http_response_code;
 use function is_bool;
 
 class StdOutputConnection extends AbstractConnection implements OutputConnection
@@ -46,6 +48,11 @@ class StdOutputConnection extends AbstractConnection implements OutputConnection
      * @var callable
      */
     protected $headerPrinter;
+
+    /**
+     * @var callable
+     */
+    protected $cookieSerializer;
 
     /**
      * Write the output. Usually just echo it
@@ -97,6 +104,18 @@ class StdOutputConnection extends AbstractConnection implements OutputConnection
     }
 
     /**
+     * Set the cookie serializer.
+     *
+     * @param callable $cookieSerializer
+     * @return $this
+     */
+    public function serializeCookieBy(callable $cookieSerializer)
+    {
+        $this->cookieSerializer = $cookieSerializer;
+        return $this;
+    }
+
+    /**
      * @param ResponseInterface $response
      */
     protected function outputHttpHeaders(ResponseInterface $response)
@@ -104,11 +123,21 @@ class StdOutputConnection extends AbstractConnection implements OutputConnection
         if ($this->headersWereSent()) {
             return;
         }
-        http_response_code($response->getStatusCode());
+
+        $this->printHeader($this->getStatusLine($response));
+
         foreach ($response->getHeaders() as $key=>$lines) {
             foreach ($lines as $header) {
                 $this->printHeader("$key: $header");
             }
+        }
+
+        if (!$response instanceof HttpResponse) {
+            return;
+        }
+
+        foreach ($response->cookies as $cookie) {
+            $this->printHeader('Set-Cookie: ' . $this->serializeCookie($cookie));
         }
     }
 
@@ -135,8 +164,37 @@ class StdOutputConnection extends AbstractConnection implements OutputConnection
     /**
      * @return bool
      */
-    protected function headersWereSent()
+    protected function headersWereSent() : bool
     {
         return is_bool($this->fakeSentHeaders) ? $this->fakeSentHeaders : headers_sent();
+    }
+
+    /**
+     * @param Cookie $cookie
+     * @return string
+     */
+    protected function serializeCookie(Cookie $cookie) : string
+    {
+        if (!$this->cookieSerializer) {
+            $this->serializeCookieBy(new CookieSerializer());
+        }
+        return call_user_func($this->cookieSerializer, $cookie);
+    }
+
+    /**
+     * @param ResponseInterface $response
+     * @return string
+     */
+    protected function getStatusLine(ResponseInterface $response) : string
+    {
+        $protocolVersion = $response->getProtocolVersion() ?: '1.1';
+        $statusCode = $response->getStatusCode() ?: 200;
+        $line = "HTTP/$protocolVersion $statusCode";
+
+        if (!$statusPhrase = $response->getReasonPhrase()) {
+            return $line;
+        };
+
+        return "$line $statusPhrase";
     }
 }

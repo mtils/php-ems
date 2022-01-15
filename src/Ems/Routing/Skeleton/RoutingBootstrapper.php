@@ -6,23 +6,22 @@
 namespace Ems\Routing\Skeleton;
 
 
-use Ems\Contracts\Routing\ResponseFactory as ResponseFactoryContract;
 use Ems\Contracts\Routing\Dispatcher;
 use Ems\Contracts\Routing\Input;
 use Ems\Contracts\Routing\InputHandler as InputHandlerContract;
 use Ems\Contracts\Routing\MiddlewareCollection as MiddlewareCollectionContract;
+use Ems\Contracts\Routing\ResponseFactory as ResponseFactoryContract;
 use Ems\Contracts\Routing\Router as RouterContract;
-use Ems\Routing\ResponseFactory;
-use Ems\Skeleton\Bootstrapper;
 use Ems\Routing\ConsoleDispatcher;
 use Ems\Routing\FastRoute\FastRouteDispatcher;
 use Ems\Routing\HttpInput;
 use Ems\Routing\InputHandler;
 use Ems\Routing\MiddlewareCollection;
+use Ems\Routing\ResponseFactory;
 use Ems\Routing\RoutedInputHandler;
 use Ems\Routing\RouteMiddleware;
 use Ems\Routing\Router;
-
+use Ems\Skeleton\Bootstrapper;
 use Psr\Http\Message\RequestInterface;
 
 use function method_exists;
@@ -44,10 +43,6 @@ class RoutingBootstrapper extends Bootstrapper
     public function bind()
     {
         parent::bind();
-
-        $this->container->bind(Input::class, function () {
-
-        });
 
         $this->container->onAfter(ConsoleDispatcher::class, function (ConsoleDispatcher $dispatcher) {
             $dispatcher->setFallbackCommand('commands');

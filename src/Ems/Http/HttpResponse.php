@@ -5,11 +5,13 @@
 
 namespace Ems\Http;
 
+use DateTime;
 use Ems\Contracts\Core\Arrayable;
 use Ems\Contracts\Core\Exceptions\TypeException;
 use Ems\Contracts\Core\Message;
 use Ems\Contracts\Core\Serializer;
 use Ems\Contracts\Core\Type;
+use Ems\Contracts\Http\Cookie;
 use Ems\Core\Exceptions\UnConfiguredException;
 use Ems\Core\Filesystem\AbstractStream;
 use Ems\Core\Filesystem\StringStream;
@@ -36,7 +38,8 @@ use function trim;
  * @property-read array headers
  * @property-read StreamInterface body
  * @property-read string raw The raw http request string with headers and body
- *
+ * @property-read array|Cookie[] cookies
+ * @property-read bool secureCookies
  */
 class HttpResponse extends Response implements ResponseInterface
 {
@@ -61,6 +64,16 @@ class HttpResponse extends Response implements ResponseInterface
      * @var string
      */
     protected $raw;
+
+    /**
+     * @var array|Cookie[]
+     */
+    protected $cookies = [];
+
+    /**
+     * @var bool
+     */
+    protected $secureCookies = true;
 
     public function __construct($data = [], array $headers=[], int $status=200)
     {
@@ -122,6 +135,10 @@ class HttpResponse extends Response implements ResponseInterface
                 return $this->envelope;
             case 'raw':
                 return $this->raw;
+            case 'cookies':
+                return $this->cookies;
+            case 'secureCookies':
+                return $this->secureCookies;
         }
         return parent::__get($key);
     }
@@ -145,7 +162,6 @@ class HttpResponse extends Response implements ResponseInterface
         }
         return $this->serializePayload($this->payload);
     }
-
 
     /**
      * @return array
@@ -208,6 +224,59 @@ class HttpResponse extends Response implements ResponseInterface
         parent::offsetUnset($offset);
     }
 
+    /**
+     * @param string|Cookie $cookie
+     * @param string|null   $value
+     * @param int|DateTime  $expire
+     * @param string        $path
+     * @param string|null   $domain
+     * @param bool|null     $secure
+     * @param bool          $httpOnly
+     * @param string        $sameSite
+     * @return self
+     */
+    public function withCookie($cookie, string $value=null, $expire=null, string $path='/', string $domain=null, bool $secure=null, bool $httpOnly=true, string $sameSite=Cookie::LAX) : HttpResponse
+    {
+        $secure = $secure === null ? $this->secureCookies : $secure;
+        $cookie = $cookie instanceof Cookie ? $cookie : new Cookie($cookie, $value, $expire, $path, $domain, $secure, $httpOnly, $sameSite);
+        $cookies = $this->cookies;
+        $cookies[$cookie->name] = $cookie;
+        return $this->replicate(['cookies' => $cookies]);
+    }
+
+    /**
+     * @param string|Cookie $cookie
+     * @return self
+     */
+    public function withoutCookie($cookie) : HttpResponse
+    {
+        $name = $cookie instanceof Cookie ? $cookie->name : $cookie;
+        $cookies = $this->cookies;
+        if (isset($cookies[$name])) {
+            unset($cookies[$name]);
+        }
+        return $this->replicate(['cookies' => $cookies]);
+    }
+
+    /**
+     * Set the default for created cookies.
+     *
+     * @param bool $secure
+     * @return HttpResponse
+     */
+    public function withSecureCookies(bool $secure) : HttpResponse
+    {
+        if (!$this->cookies) {
+            return $this->replicate(['secureCookies' => $secure]);
+        }
+        $cookies = [];
+        foreach ($this->cookies as $cookie) {
+            $clone = clone $cookie;
+            $clone->secure = $secure;
+            $cookies[$cookie->name] = $clone;
+        }
+        return $this->replicate(['secureCookies' => $secure, 'cookies' => $cookies]);
+    }
 
     /**
      * Assign a callable that creates serializers to serialize and deserialize
@@ -232,6 +301,12 @@ class HttpResponse extends Response implements ResponseInterface
         if (isset($attributes['serializerFactory'])) {
             $this->serializerFactory = $attributes['serializerFactory'];
         }
+        if (isset($attributes['cookies'])) {
+            $this->cookies = $attributes['cookies'];
+        }
+        if (isset($attributes['secureCookies'])) {
+            $this->secureCookies = $attributes['secureCookies'];
+        }
         parent::apply($attributes);
     }
 
@@ -242,6 +317,12 @@ class HttpResponse extends Response implements ResponseInterface
         }
         if (!isset($attributes['protocolVersion'])) {
             $attributes['protocolVersion'] = $this->protocolVersion;
+        }
+        if (!isset($attributes['cookies'])) {
+            $attributes['cookies'] = $this->cookies;
+        }
+        if (!isset($attributes['secureCookies'])) {
+            $attributes['secureCookies'] = $this->secureCookies;
         }
         $attributes['serializerFactory'] = $this->serializerFactory;
         parent::copyStateInto($attributes);
