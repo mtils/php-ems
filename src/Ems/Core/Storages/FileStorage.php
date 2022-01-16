@@ -5,6 +5,7 @@ namespace Ems\Core\Storages;
 
 use Ems\Contracts\Core\Configurable;
 use Ems\Contracts\Core\Filesystem as FilesystemContract;
+use Ems\Contracts\Core\HasKeys;
 use Ems\Contracts\Core\MimeTypeProvider;
 use Ems\Contracts\Core\Serializer as SerializerContract;
 use Ems\Contracts\Core\Storage;
@@ -24,7 +25,7 @@ use RuntimeException;
  * Almost every call to method on it will result in filesystem access.
  * So just use it internally or with a proxy to implement buffering around it.
  **/
-class FileStorage implements Storage, Configurable
+class FileStorage implements Storage, Configurable, HasKeys
 {
     use ConfigurableTrait;
     use SerializeOptions;

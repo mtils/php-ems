@@ -6,6 +6,7 @@
 namespace Ems\Model\Database;
 
 
+use Ems\Contracts\Core\HasKeys;
 use Ems\Contracts\Core\PushableStorage;
 use Ems\Model\Database\Storages\KeyValueStorage;
 
@@ -21,7 +22,7 @@ use Ems\Model\Database\Storages\KeyValueStorage;
  *
  * @package Ems\Model\Database
  */
-class SQLBlobStorage extends KeyValueStorage implements PushableStorage
+class SQLBlobStorage extends KeyValueStorage implements PushableStorage, HasKeys
 {
 
     /**

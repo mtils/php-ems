@@ -6,6 +6,7 @@
 namespace Ems\Model\Database\Storages;
 
 
+use Ems\Contracts\Core\HasKeys;
 use Ems\Contracts\Core\Serializer;
 use Ems\Contracts\Core\Storage;
 use Ems\Contracts\Model\Database\Connection;
@@ -16,7 +17,7 @@ use Ems\Core\Serializer\JsonSerializer;
 use Ems\Model\Database\SQL;
 use function array_keys;
 
-class KeyValueStorage implements Storage
+class KeyValueStorage implements Storage, HasKeys
 {
     use DatabaseStorageTrait;
 

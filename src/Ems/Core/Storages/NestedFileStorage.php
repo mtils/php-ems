@@ -6,6 +6,7 @@ namespace Ems\Core\Storages;
 use BadMethodCallException;
 use Ems\Contracts\Core\Configurable;
 use Ems\Contracts\Core\Filesystem as FilesystemContract;
+use Ems\Contracts\Core\HasKeys;
 use Ems\Contracts\Core\MimeTypeProvider;
 use Ems\Contracts\Core\Serializer as SerializerContract;
 use Ems\Contracts\Core\Storage;
@@ -35,7 +36,7 @@ use RuntimeException;
  * So you can build the typical app configuration stuff
  * or locale stuff into it.
  **/
-class NestedFileStorage implements Storage, Configurable
+class NestedFileStorage implements Storage, Configurable, HasKeys
 {
     use ConfigurableTrait;
     use SerializeOptions;

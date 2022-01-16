@@ -2,6 +2,7 @@
 
 namespace Ems\Model\Database;
 
+use Ems\Contracts\Core\HasKeys;
 use Ems\Contracts\Model\Database\Connection;
 use Ems\Contracts\Model\QueryableStorage;
 use Ems\Core\ArrayWithState;
@@ -24,7 +25,7 @@ use IteratorAggregate;
  * It also does not cache any data from the database, use a Proxy for
  * cache.
  **/
-class SQLStorage extends ArrayWithState implements QueryableStorage, IteratorAggregate
+class SQLStorage extends ArrayWithState implements QueryableStorage, IteratorAggregate, HasKeys
 {
     use DatabaseStorageTrait;
 

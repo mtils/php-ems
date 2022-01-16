@@ -6,10 +6,11 @@
 namespace Ems\Core\Storages;
 
 
+use Ems\Contracts\Core\HasKeys;
 use Ems\Contracts\Core\Storage;
 use Ems\Core\Collections\StringList;
 
-abstract class AbstractProxyStorage implements Storage
+abstract class AbstractProxyStorage implements Storage, HasKeys
 {
     /**
      * @var Storage

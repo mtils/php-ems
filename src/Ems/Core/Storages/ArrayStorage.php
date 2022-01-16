@@ -6,10 +6,11 @@
 namespace Ems\Core\Storages;
 
 
+use Ems\Contracts\Core\HasKeys;
 use Ems\Contracts\Core\Storage;
 use Ems\Core\Support\FastArrayDataTrait;
 
-class ArrayStorage implements Storage
+class ArrayStorage implements Storage, HasKeys
 {
     use FastArrayDataTrait;
 

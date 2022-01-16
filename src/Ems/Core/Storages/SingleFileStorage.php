@@ -5,6 +5,7 @@ namespace Ems\Core\Storages;
 
 use Ems\Contracts\Core\Configurable;
 use Ems\Contracts\Core\Filesystem as FilesystemContract;
+use Ems\Contracts\Core\HasKeys;
 use Ems\Contracts\Core\Serializer as SerializerContract;
 use Ems\Contracts\Core\Storage;
 use Ems\Contracts\Core\Url as UrlContract;
@@ -20,7 +21,7 @@ use Ems\Core\Support\BootingArrayData;
  *
  * @package Ems\Core\Storages
  */
-class SingleFileStorage implements Storage, Configurable
+class SingleFileStorage implements Storage, Configurable, HasKeys
 {
     use BootingArrayData;
     use ConfigurableTrait;
