@@ -98,7 +98,7 @@ interface Input extends ArrayAccess, IteratorAggregate, Countable
     const CLIENT_DESKTOP = 'desktop';
 
     /**
-     * A mobile application (something like jQuery Mobile)
+     * A mobile application (something like jQuery Mobile, not a responsive app)
      */
     const CLIENT_MOBILE = 'mobile';
 

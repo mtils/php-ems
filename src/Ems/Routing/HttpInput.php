@@ -12,6 +12,7 @@ use Ems\Contracts\Routing\Route;
 use Ems\Contracts\Routing\RouteScope;
 use Ems\Core\Filesystem\FileStream;
 use Ems\Http\HttpRequest;
+use Illuminate\Contracts\Session\Session as SessionContract;
 
 use Ems\Http\Psr\UploadedFile;
 use InvalidArgumentException;
@@ -39,6 +40,7 @@ use function is_array;
  * @property-read string                    locale
  * @property-read string                    determinedContentType
  * @property-read string                    apiVersion
+ * @property-read SessionContract           session
  */
 class HttpInput extends HttpRequest implements Input, ServerRequestInterface
 {
@@ -51,6 +53,11 @@ class HttpInput extends HttpRequest implements Input, ServerRequestInterface
         Input::FROM_SERVER  => [],
         Input::FROM_FILES   => []
     ];
+
+    /**
+     * @var SessionContract
+     */
+    protected $session;
 
     public function __construct($dataOrUrl=[], array $headers=[], array $query=[], array $body=[], array $cookies=[], array $files=[], array $server=[], array $custom=[])
     {
@@ -130,6 +137,8 @@ class HttpInput extends HttpRequest implements Input, ServerRequestInterface
                 return $this->getUploadedFiles();
             case 'custom':
                 return $this->custom;
+            case 'session':
+                return $this->session;
         }
         $value = $this->getInputTraitProperty($key);
         if (!$value instanceof None) {
@@ -239,6 +248,11 @@ class HttpInput extends HttpRequest implements Input, ServerRequestInterface
         return $this->replicate(['apiVersion' => $version]);
     }
 
+    public function withSession(Session $session)
+    {
+        return $this->replicate(['session' => $session]);
+    }
+
     public function toArray(): array
     {
         $all = $this->getAttributes();
@@ -272,6 +286,9 @@ class HttpInput extends HttpRequest implements Input, ServerRequestInterface
         if (isset($attributes[Input::FROM_FILES])) {
             $this->applyFiles($attributes[Input::FROM_FILES]);
         }
+        if (isset($attributes['session'])) {
+            $this->session = $attributes['session'];
+        }
 
         $this->applyInputTrait($attributes);
         parent::apply($attributes);
@@ -293,6 +310,9 @@ class HttpInput extends HttpRequest implements Input, ServerRequestInterface
         }
         if (!isset($attributes[Input::FROM_FILES])) {
             $attributes[Input::FROM_FILES] = $this->request[Input::FROM_FILES];
+        }
+        if (!isset($attributes['session'])) {
+            $attributes['session'] = $this->session;
         }
         $this->copyInputTraitStateInto($attributes);
         parent::copyStateInto($attributes);
