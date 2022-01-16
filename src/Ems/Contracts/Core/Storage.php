@@ -95,23 +95,4 @@ interface Storage extends ArrayData
      **/
     public function persist();
 
-    /**
-     * Clears all data if no keys passed. If keys passed remove all the passed
-     * keys. (More or less foreach ($keys as $key) { self::unset($key); }).
-     * The keys are a performance related feature of storages. In some cases the
-     * storage knows a much faster way to remove multiple entries at once.
-     * The keys are by default null, so it cannot happen to unintended delete
-     * all data by an empty array.
-     * Please implement it this way : if ($keys === null) { deleteAll() }
-     *
-     * A call to purge() an unbuffered storage should offsetUnset() them all and
-     * immediately persist the changes. and return true
-     *
-     * @param array $keys (optional)
-     *
-     * @return bool (if successful)
-     **/
-    public function purge(array $keys=null);
-
-
 }

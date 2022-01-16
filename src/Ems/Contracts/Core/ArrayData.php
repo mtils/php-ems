@@ -8,7 +8,7 @@ use ArrayAccess;
 /**
  * This is a container for any data.
  **/
-interface ArrayData extends HasKeys, ArrayAccess, Arrayable
+interface ArrayData extends ArrayAccess, Arrayable
 {
     /**
      * Clears the internal data. Pass an array of keys to only
@@ -17,7 +17,7 @@ interface ArrayData extends HasKeys, ArrayAccess, Arrayable
      * deletions by passing an empty array.
      * So self::clear([]) must do nothing.
      *
-     * @param array $keys (optional)
+     * @param array|null $keys (optional)
      *
      * @return self
      **/
