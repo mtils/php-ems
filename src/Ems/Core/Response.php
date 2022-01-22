@@ -54,6 +54,9 @@ class Response extends ImmutableMessage implements Stringable
     {
         $this->type = AbstractMessage::TYPE_OUTPUT;
         $this->status = $status;
+        if (!$this->contentType) {
+            $this->contentType = ManualMimeTypeProvider::$fallbackMimeType;
+        }
 
         if (func_num_args() < 2) {
             $attributes = $this->isAssociative($attributesOrPayload) ? $attributesOrPayload : ['payload' => $attributesOrPayload];

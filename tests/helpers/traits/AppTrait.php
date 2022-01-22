@@ -111,6 +111,18 @@ trait AppTrait
         $bootManager->setApplication($app);
         $this->addBootstrappers($bootManager);
         $app->boot();
+        $this->boot($app);
+    }
+
+    /**
+     * Overwrite this method for simple boot configurations
+     *
+     * @param Application $app
+     * @return void
+     */
+    protected function boot(Application $app)
+    {
+        //
     }
 
     /**

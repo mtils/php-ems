@@ -12,7 +12,7 @@ use Ems\Contracts\Routing\Route;
 use Ems\Contracts\Routing\RouteScope;
 use Ems\Core\Filesystem\FileStream;
 use Ems\Http\HttpRequest;
-use Illuminate\Contracts\Session\Session as SessionContract;
+use Ems\Contracts\Routing\Session as SessionContract;
 
 use Ems\Http\Psr\UploadedFile;
 use InvalidArgumentException;
@@ -40,7 +40,7 @@ use function is_array;
  * @property-read string                    locale
  * @property-read string                    determinedContentType
  * @property-read string                    apiVersion
- * @property-read SessionContract           session
+ * @property      SessionContract           session
  */
 class HttpInput extends HttpRequest implements Input, ServerRequestInterface
 {

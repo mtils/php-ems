@@ -94,7 +94,7 @@ class Cookie implements Stringable
     /**
      * @param string                $name
      * @param string                $value
-     * @param DateTimeInterface|int $expire
+     * @param DateTimeInterface|int $expire Minutes or an end date
      * @param string|null           $path
      * @param string|null           $domain
      * @param bool|null             $secure

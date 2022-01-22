@@ -204,7 +204,8 @@ class SessionTest extends TestCase
 
     protected function session(SessionHandlerInterface $handler=null, Serializer $serializer=null) : Session
     {
-        $handler = $handler ?: new ArraySessionHandler([]);
+        $data = [];
+        $handler = $handler ?: new ArraySessionHandler($data);
         return new Session($handler, $serializer);
     }
 

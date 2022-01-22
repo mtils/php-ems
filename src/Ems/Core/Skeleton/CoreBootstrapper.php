@@ -146,7 +146,7 @@ class CoreBootstrapper extends Bootstrapper
         });
 
         $this->container->on(SupportsCustomFactory::class, function ($object) {
-            $object->createObjectsBy($this->app);
+            $object->createObjectsBy($this->app->getContainer());
         });
 
         $this->container->on(HasInjectMethods::class, function (HasInjectMethods $object) {
@@ -267,6 +267,8 @@ class CoreBootstrapper extends Bootstrapper
     protected function autoInjectDependencies(HasInjectMethods $object)
     {
 
+        $container = $this->app->getContainer();
+
         $reflection = new ReflectionClass($object);
 
         foreach ($reflection->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
@@ -284,12 +286,12 @@ class CoreBootstrapper extends Bootstrapper
                 }
 
                 // class|interface typehint not bound, skip the method
-                if (!$this->app->has($class->getName())) {
+                if (!$container->has($class->getName())) {
                     continue 2;
                 }
             }
 
-            $this->app->call([$object, $method->getName()]);
+            $container->call([$object, $method->getName()]);
 
         }
 

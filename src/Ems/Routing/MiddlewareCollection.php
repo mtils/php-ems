@@ -8,7 +8,6 @@ namespace Ems\Routing;
 use ArrayIterator;
 use Closure;
 use Ems\Contracts\Routing\Input;
-use Ems\Core\Response;
 use Ems\Contracts\Routing\MiddlewareCollection as MiddlewareCollectionContract;
 use Ems\Contracts\Routing\MiddlewarePlacer;
 use Ems\Core\Collections\StringList;
@@ -17,6 +16,7 @@ use Ems\Core\Lambda;
 use Ems\Core\Support\CustomFactorySupport;
 use ReflectionException;
 use Traversable;
+
 use function array_filter;
 use function array_merge;
 use function array_slice;

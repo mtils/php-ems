@@ -78,7 +78,7 @@ class HttpResponse extends Response implements ResponseInterface
     public function __construct($data = [], array $headers=[], int $status=200)
     {
         $this->transport = Message::TRANSPORT_NETWORK;
-        $this->contentType = ManualMimeTypeProvider::$fallbackMimeType;
+        $this->contentType = 'text/html';
 
         if (!func_num_args()) {
             parent::__construct();

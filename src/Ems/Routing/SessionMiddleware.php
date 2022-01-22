@@ -5,36 +5,56 @@
 
 namespace Ems\Routing;
 
+use Ems\Contracts\Core\Extendable;
 use Ems\Contracts\Http\Cookie;
 use Ems\Contracts\Routing\Input;
+use Ems\Core\Patterns\ExtendableTrait;
 use Ems\Http\HttpResponse;
+use Ems\Routing\SessionHandler\ArraySessionHandler;
+use SessionHandler;
 use UnexpectedValueException;
 
 use function get_class;
+use function session_get_cookie_params;
+use function session_name;
 
-class SessionMiddleware
+class SessionMiddleware implements Extendable
 {
+    use ExtendableTrait;
+
+    public const COOKIE_NAME = 'name';
+
+    public const DRIVER_ARRAY = 'array';
+
+    public const DRIVER_NATIVE = 'native';
+
     /**
      * @var string
      */
-    protected $cookieName = '';
+    protected $driver = self::DRIVER_NATIVE;
+
+    /**
+     * @var int
+     */
+    protected $lifeTime = 120;
 
     /**
      * @var array
      */
-    protected $clientTypes = [Input::CLIENT_WEB, Input::CLIENT_AJAX, Input::CLIENT_CMS, Input::CLIENT_MOBILE];
+    protected $cookieConfig = [];
 
     public function __construct()
     {
-
+        $this->addDefaultDrivers();
     }
 
     public function __invoke(Input $input, callable $next)
     {
-        if (!$input instanceof HttpInput) {
+        if (!$this->shouldHaveSession($input)) {
             return $next($input);
         }
 
+        /** @var HttpInput $input */
         $newRequest = $this->addSession($input);
 
         $response = $next($newRequest);
@@ -47,8 +67,10 @@ class SessionMiddleware
             return $response;
         }
 
-        if (!$this->hasSessionCookie($input)) {
-            $response = $response->withCookie($this->createCookie($input, $newRequest->session->getId()));
+        if (!$this->hasCookie($input, $this->getCookieName())) {
+            $response = $response->withCookie(
+                $this->createCookie($this->getCookieConfig(), $newRequest->session->getId(), $input)
+            );
         }
 
         $newRequest->session->persist();
@@ -56,31 +78,24 @@ class SessionMiddleware
         return $response;
     }
 
-    public function createCookie(HttpInput $input, $sessionId) : Cookie
-    {
-        return new Cookie($this->cookieName, $sessionId);
-    }
-
     /**
-     * Get the client types that should have a session.
-     *
-     * @return string[]
+     * @param array $config
+     * @param string $sessionId
+     * @param HttpInput $input
+     * @return Cookie
      */
-    public function getEnabledClientTypes() : array
+    protected function createCookie(array $config, string $sessionId, HttpInput $input) : Cookie
     {
-        return $this->clientTypes;
-    }
-
-    /**
-     * Set the client types that should have a session.
-     *
-     * @param string[] $clientTypes
-     * @return $this
-     */
-    public function setEnabledClientTypes(array $clientTypes) : SessionMiddleware
-    {
-        $this->clientTypes = $clientTypes;
-        return $this;
+        return new Cookie(
+            $config[self::COOKIE_NAME],
+            $sessionId,
+            $this->lifeTime,
+            $config['path'] ?? null,
+            $config['domain'] ?? null,
+            $config['secure'] ?? null,
+            $config['httponly'] ?? null,
+            $config['samesite'] ?? null
+        );
     }
 
     /**
@@ -89,30 +104,120 @@ class SessionMiddleware
      * @param Input $input
      * @return bool
      */
-    public function isEnabledInput(Input $input) : bool
+    public function shouldHaveSession(Input $input) : bool
     {
-        if (!$input instanceof HttpInput) {
-            return false;
-        }
-        return in_array($input->getClientType(), $this->clientTypes);
+        return $input instanceof HttpInput;
     }
 
-    protected function addSession(HttpInput $input)
+    /**
+     * @return string
+     */
+    public function getCookieName() : string
+    {
+        if (isset($this->cookieConfig[self::COOKIE_NAME]) && $this->cookieConfig[self::COOKIE_NAME]) {
+            return $this->cookieConfig[self::COOKIE_NAME];
+        }
+        return session_name();
+    }
+
+    /**
+     * The session handler
+     *
+     * @return string
+     */
+    public function getDriver(): string
+    {
+        return $this->driver;
+    }
+
+    /**
+     * @param string $driver
+     * @return SessionMiddleware
+     */
+    public function setDriver(string $driver): SessionMiddleware
+    {
+        $this->driver = $driver;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getLifeTime() : int
+    {
+        return $this->lifeTime;
+    }
+
+    /**
+     * @param int $lifeTime
+     * @return SessionMiddleware
+     */
+    public function setLifeTime(int $lifeTime) : SessionMiddleware
+    {
+        $this->lifeTime = $lifeTime;
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getCookieConfig(): array
+    {
+        if ($this->cookieConfig) {
+            return $this->cookieConfig;
+        }
+        $this->cookieConfig = session_get_cookie_params();
+        $this->cookieConfig[self::COOKIE_NAME] = session_name();
+        return $this->cookieConfig;
+    }
+
+    /**
+     * @param array $cookieConfig
+     * @return SessionMiddleware
+     */
+    public function setCookieConfig(array $cookieConfig): SessionMiddleware
+    {
+        $config = $this->getCookieConfig();
+        foreach ($cookieConfig as $key=>$value) {
+            $config[$key] = $value;
+        }
+        $this->cookieConfig = $config;
+        return $this;
+    }
+
+    protected function addSession(HttpInput $input) : HttpInput
     {
         $session = $this->createSession();
-        if ($this->hasSessionCookie($input)) {
-            $session->setId($input->cookie[$this->cookieName]);
+        $cookieName = $this->getCookieName();
+        if ($this->hasCookie($input, $cookieName)) {
+            $session->setId($input->cookie[$cookieName]);
         }
         return $input->withSession($session);
     }
 
+    /**
+     * @return Session
+     */
     protected function createSession() : Session
     {
-        return new Session();
+        $handler = $this->callExtension($this->getDriver(), [$this]);
+        return new Session($handler);
     }
 
-    protected function hasSessionCookie(HttpInput $input) : bool
+    protected function hasCookie(HttpInput $input, string $name) : bool
     {
-        return isset($input->cookie[$this->cookieName]) && $input->cookie[$this->cookieName];
+        $name = $this->getCookieName();
+        return isset($input->cookie[$name]) && $input->cookie[$name];
+    }
+
+    protected function addDefaultDrivers()
+    {
+        $this->extend(self::DRIVER_NATIVE, function () {
+            return new SessionHandler();
+        });
+        $this->extend(self::DRIVER_ARRAY, function () {
+            $data = [];
+            return (new ArraySessionHandler($data))->setLifeTime($this->lifeTime);
+        });
     }
 }

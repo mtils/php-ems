@@ -29,7 +29,7 @@ class ArraySessionHandler implements SessionHandlerInterface
     /**
      * @param ArrayAccess|array $array
      */
-    public function __construct($array)
+    public function __construct(&$array)
     {
         $this->setArray($array);
     }
@@ -103,12 +103,30 @@ class ArraySessionHandler implements SessionHandlerInterface
         return is_array($this->data) ? $this->data : [];
     }
 
-    protected function setArray($array)
+    /**
+     * @return int
+     */
+    public function getLifeTime(): int
+    {
+        return $this->lifeTime;
+    }
+
+    /**
+     * @param int $lifeTime
+     * @return self
+     */
+    public function setLifeTime(int $lifeTime): ArraySessionHandler
+    {
+        $this->lifeTime = $lifeTime;
+        return $this;
+    }
+
+    protected function setArray(&$array)
     {
         if (!$array instanceof ArrayAccess && !is_array($array)) {
             throw new UnexpectedValueException('Data has to be array or ArrayAccess');
         }
-        $this->data = $array;
+        $this->data = &$array;
     }
 
     /**

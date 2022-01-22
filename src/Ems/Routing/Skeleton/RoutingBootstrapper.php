@@ -21,6 +21,7 @@ use Ems\Routing\ResponseFactory;
 use Ems\Routing\RoutedInputHandler;
 use Ems\Routing\RouteMiddleware;
 use Ems\Routing\Router;
+use Ems\Routing\SessionMiddleware;
 use Ems\Skeleton\Bootstrapper;
 use Psr\Http\Message\RequestInterface;
 
@@ -40,6 +41,8 @@ class RoutingBootstrapper extends Bootstrapper
         MiddlewareCollection::class => MiddlewareCollectionContract::class,
     ];
 
+    protected $defaultSessionClients = [Input::CLIENT_WEB, Input::CLIENT_CMS, Input::CLIENT_AJAX, Input::CLIENT_MOBILE];
+
     public function bind()
     {
         parent::bind();
@@ -58,6 +61,7 @@ class RoutingBootstrapper extends Bootstrapper
     {
         $this->addClientTypeMiddleware($collection);
         $this->addRouteScopeMiddleware($collection);
+        $this->addSessionMiddleware($collection);
         $this->addRouterToMiddleware($collection);
         $this->addRouteMiddleware($collection);
         $this->addRouteHandlerMiddleware($collection);
@@ -101,6 +105,20 @@ class RoutingBootstrapper extends Bootstrapper
         });
     }
 
+    protected function addSessionMiddleware(MiddlewareCollectionContract $collection)
+    {
+        $config = $this->app->config('session');
+        $clientTypes = $config['clients'] ?? $this->defaultSessionClients;
+        $collection->add('session', SessionMiddleware::class)->clientType(...$clientTypes);
+
+        if (!$config) {
+            return;
+        }
+        $this->app->on(SessionMiddleware::class, function (SessionMiddleware $middleware) use ($config) {
+            $this->configureSessionMiddleware($middleware, $config);
+        });
+    }
+
     protected function addRouterToMiddleware(MiddlewareCollectionContract $collection)
     {
         $collection->add('router', RouterContract::class);
@@ -115,4 +133,22 @@ class RoutingBootstrapper extends Bootstrapper
     {
         $collection->add('handle', RoutedInputHandler::class);
     }
+
+    protected function configureSessionMiddleware(SessionMiddleware $middleware, array $config)
+    {
+
+        if (isset($config['cookie'])) {
+            $middleware->setCookieConfig($config['cookie']);
+        }
+        if (isset($config['driver']) && $config['driver']) {
+            $middleware->setDriver($config['driver']);
+        }
+        if (isset($config['driver']) && $config['driver']) {
+            $middleware->setDriver($config['driver']);
+        }
+        if (isset($config['lifetime']) && $config['lifetime']) {
+            $middleware->setLifeTime((int)$config['lifetime']);
+        }
+    }
+
 }
