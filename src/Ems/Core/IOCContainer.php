@@ -148,7 +148,9 @@ class IOCContainer implements ContainerContract
 
         // All parameters seems to be passed
         if (count($constructorParams) == count($parameters)) {
-            return self::$reflectionClasses[$implementation]->newInstanceArgs($parameters);
+            $concrete = self::$reflectionClasses[$implementation]->newInstanceArgs($parameters);
+            $this->listeners->callByInheritance($abstract, $concrete, [$concrete, $this], ListenerContainer::POSITIONS);
+            return $concrete;
         }
 
         foreach ($constructorParams as $i=>$param) {

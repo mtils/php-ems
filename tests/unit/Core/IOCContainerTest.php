@@ -471,6 +471,24 @@ class IOCContainerTest extends \Ems\TestCase
         $this->assertCount(3, $callable);
     }
 
+    public function test_on_is_called_if_constructor_is_empty()
+    {
+        $callable = new LoggingCallable();
+        $container = $this->newContainer();
+
+        $container->onBefore(ContainerTest_EmptyConstructor::class, $callable);
+        $container->on(ContainerTest_EmptyConstructor::class, $callable);
+        $container->onAfter(ContainerTest_EmptyConstructor::class, $callable);
+
+        $object = $container(ContainerTest_EmptyConstructor::class);
+        $this->assertInstanceOf(ContainerTest_EmptyConstructor::class, $object);
+
+        $this->assertSame($object, $callable->arg(0, 0));
+        $this->assertSame($object, $callable->arg(0, 1));
+        $this->assertSame($object, $callable->arg(0, 2));
+
+    }
+
     public function test_getListeners()
     {
         $callable = new LoggingCallable();
@@ -828,6 +846,14 @@ class ContainerTest_ClassParameter
     public function __construct($a, $b, $c)
     {
         $this->args = func_get_args();
+    }
+}
+
+class ContainerTest_EmptyConstructor
+{
+    public function __construct()
+    {
+
     }
 }
 
