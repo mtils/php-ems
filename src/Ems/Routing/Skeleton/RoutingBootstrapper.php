@@ -21,6 +21,7 @@ use Ems\Routing\ResponseFactory;
 use Ems\Routing\RoutedInputHandler;
 use Ems\Routing\RouteMiddleware;
 use Ems\Routing\Router;
+use Ems\Routing\SessionHandler\FileSessionHandler;
 use Ems\Routing\SessionMiddleware;
 use Ems\Skeleton\Bootstrapper;
 use Psr\Http\Message\RequestInterface;
@@ -59,6 +60,7 @@ class RoutingBootstrapper extends Bootstrapper
 
     protected function addDefaultMiddleware(MiddlewareCollectionContract $collection)
     {
+
         $this->addClientTypeMiddleware($collection);
         $this->addRouteScopeMiddleware($collection);
         $this->addSessionMiddleware($collection);
@@ -114,6 +116,7 @@ class RoutingBootstrapper extends Bootstrapper
         if (!$config) {
             return;
         }
+
         $this->app->on(SessionMiddleware::class, function (SessionMiddleware $middleware) use ($config) {
             $this->configureSessionMiddleware($middleware, $config);
         });
@@ -136,6 +139,14 @@ class RoutingBootstrapper extends Bootstrapper
 
     protected function configureSessionMiddleware(SessionMiddleware $middleware, array $config)
     {
+        $middleware->extend('files', function () use ($config) {
+            $path = $config['path'] ?? $this->appPath() . '/local/storage/sessions';
+            /** @var FileSessionHandler $handler */
+            $handler = $this->container->create(FileSessionHandler::class);
+            $handler->setPath($path);
+            return $handler;
+        });
+
 
         if (isset($config['cookie'])) {
             $middleware->setCookieConfig($config['cookie']);
@@ -146,8 +157,8 @@ class RoutingBootstrapper extends Bootstrapper
         if (isset($config['driver']) && $config['driver']) {
             $middleware->setDriver($config['driver']);
         }
-        if (isset($config['lifetime']) && $config['lifetime']) {
-            $middleware->setLifeTime((int)$config['lifetime']);
+        if (isset($config['serverside_lifetime']) && $config['serverside_lifetime']) {
+            $middleware->setLifeTime((int)$config['serverside_lifetime']);
         }
     }
 

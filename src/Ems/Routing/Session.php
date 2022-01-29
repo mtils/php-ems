@@ -17,6 +17,9 @@ use UnexpectedValueException;
 use function array_key_exists;
 use function call_user_func;
 use function session_create_id;
+use function session_name;
+use function session_save_path;
+use function session_start;
 
 class Session implements SessionContract
 {
@@ -200,6 +203,9 @@ class Session implements SessionContract
      */
     protected function getDataFromHandler() : array
     {
+        if ($this->handler instanceof SessionHandler) {
+            $this->handler->open(session_save_path(), session_name());
+        }
         if (!$raw = $this->handler->read($this->getId())) {
             return [];
         }

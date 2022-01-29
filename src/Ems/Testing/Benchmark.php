@@ -53,7 +53,7 @@ class Benchmark
      *
      * @param $name
      */
-    public function __construct($name)
+    public function __construct(string $name)
     {
         $this->name = $name;
         $this->storeInitialMark();
@@ -66,7 +66,7 @@ class Benchmark
      * @param string $group    (default:"main")
      * @param string $instance (default:"default")
      */
-    public static function mark($name, $group='main', $instance='default')
+    public static function mark(string $name, string $group='main', string $instance='default')
     {
         static::instance($instance)->addMark($name, $group);
     }
@@ -102,14 +102,14 @@ class Benchmark
      * @param string $instance (default: "default")
      *
      */
-    public static function raw(array $mark, $instance='default')
+    public static function raw(array $mark, string $instance='default')
     {
         static::instance($instance)->storeMark(
             $mark['name'],
-            isset($mark['group']) ? $mark['group'] : 'main',
+            $mark['group'] ?? 'main',
             $mark['time'],
-            isset($mark['memory']) ? $mark['memory'] : 0,
-            isset($mark['duration']) ? $mark['duration'] : 0.0
+            $mark['memory'] ?? 0,
+            $mark['duration'] ?? 0.0
         );
     }
 
@@ -163,9 +163,9 @@ class Benchmark
      *
      * @param string $name
      * @param string $group     (default:main)
-     * @param float  $duration (optional)
+     * @param float $duration (optional)
      */
-    public function addMark($name, $group='main', $duration=0.0)
+    public function addMark(string $name, string $group='main', float $duration=0.0)
     {
         $this->storeMark(
             $name,
@@ -185,7 +185,7 @@ class Benchmark
      * @param string $name
      * @param string $group
      */
-    public function doBegin($name, $group='main')
+    public function doBegin(string $name, string $group='main')
     {
         $this->started["$group.$name"] = [
             'name' => $name,
@@ -198,10 +198,10 @@ class Benchmark
     /**
      * Mark the end of a step you started to measure by doBegin().
      *
-     * @param $name
+     * @param string $name
      * @param string $group
      */
-    public function doEnd($name, $group='main')
+    public function doEnd(string $name, string $group='main')
     {
         $key = "$group.$name";
         if (!isset($this->started[$key])) {
@@ -229,7 +229,7 @@ class Benchmark
      * @param int    $memory
      * @param float  $duration
      */
-    public function storeMark($name, $group, $microTime, $memory, $duration)
+    public function storeMark(string $name, string $group, float $microTime, int $memory, float $duration)
     {
         if (!isset($this->marks[$group])) {
             $this->marks[$group] = [];
@@ -248,7 +248,7 @@ class Benchmark
      *
      * @return array
      */
-    public function getMarks($group='main')
+    public function getMarks(string $group='main'): array
     {
         if ($group) {
             $sorted = static::sortByTime($this->marks[$group]);
@@ -266,7 +266,7 @@ class Benchmark
     /**
      * @return array
      */
-    public function getGroups()
+    public function getGroups(): array
     {
         return array_keys($this->marks);
     }
@@ -278,7 +278,7 @@ class Benchmark
      *
      * @return static
      */
-    public static function instance($name='default')
+    public static function instance(string $name='default'): Benchmark
     {
         if (!isset(static::$instances[$name])) {
             static::$instances[$name] = new static($name);
@@ -290,7 +290,7 @@ class Benchmark
      * Return all creates instances
      * @return static[]
      */
-    public static function instances()
+    public static function instances(): array
     {
         return array_values(static::$instances);
     }
@@ -298,12 +298,14 @@ class Benchmark
     /**
      * @return float
      */
-    public static function initialTime()
+    public static function initialTime(): float
     {
         if (is_float(static::$initialTime)) {
             return static::$initialTime;
         }
-        static::$initialTime = isset($_SERVER['REQUEST_TIME_FLOAT']) ? $_SERVER['REQUEST_TIME_FLOAT'] : microtime(true);
+        static::$initialTime = $_SERVER['REQUEST_TIME_FLOAT'] ?? microtime(
+                true
+            );
         return static::$initialTime;
     }
 

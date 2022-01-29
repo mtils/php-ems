@@ -33,10 +33,10 @@ class RoutingIntegrationTest extends HttpMockTest
      */
     protected static $session = [];
 
-    static $sessionConfig = [
-        'driver'            => 'static-array',
-        'lifetime_minutes'  => 15,
-        'clients'           => ['web', 'cms'],
+    protected static $sessionConfig = [
+        'driver'                => 'static-array',
+        'serverside_lifetime'  => 15,
+        'clients'               => ['web', 'cms'],
         'cookie' => [
             'name'      => 'TEST_SESSION',
             'path'      => '/session',
@@ -57,6 +57,24 @@ class RoutingIntegrationTest extends HttpMockTest
         $this->assertInstanceOf(HttpResponse::class, $response);
         $this->assertEquals('text/html', $response->contentType);
         $this->assertEquals($output, $response->body);
+    }
+
+    /**
+     * @test
+     */
+    public function session_gets_configured()
+    {
+        // Trigger loading of middleware and bindings
+        $this->app(InputHandlerContract::class);
+
+        /** @var SessionMiddleware $middleware */
+        $middleware = $this->app(SessionMiddleware::class);
+
+        $this->assertEquals(self::$sessionConfig['driver'], $middleware->getDriver());
+        $this->assertEquals(self::$sessionConfig['serverside_lifetime'], $middleware->getLifeTime());
+
+
+
     }
 
     /**
@@ -110,8 +128,12 @@ class RoutingIntegrationTest extends HttpMockTest
         // The cookie is not assigned again
         $this->assertFalse(isset($response2->cookies[$cookie->name]));
 
-
     }
+
+    /**************************************************************************
+     * Nächstes wäre eher der Test der SessionMiddleware wirklich die config
+     * umzusetzen (lifetime)
+     **************************************************************************/
 
     protected function get($url, callable $requestHook=null) : Response
     {

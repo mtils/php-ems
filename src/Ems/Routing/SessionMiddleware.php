@@ -89,7 +89,7 @@ class SessionMiddleware implements Extendable
         return new Cookie(
             $config[self::COOKIE_NAME],
             $sessionId,
-            $this->lifeTime,
+            isset($config['lifetime']) ? ($config['lifetime'] =='session' ? 0 : (int)$config['lifetime']) : $this->lifeTime,
             $config['path'] ?? null,
             $config['domain'] ?? null,
             $config['secure'] ?? null,

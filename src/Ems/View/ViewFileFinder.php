@@ -97,6 +97,24 @@ class ViewFileFinder
     }
 
     /**
+     * @return string
+     */
+    public function getExtension(): string
+    {
+        return $this->extension;
+    }
+
+    /**
+     * @param string $extension
+     * @return ViewFileFinder
+     */
+    public function setExtension(string $extension): ViewFileFinder
+    {
+        $this->extension = $extension;
+        return $this;
+    }
+
+    /**
      * Translate the view name $name (foo.bar) to a file name (foo/bar.php)
      *
      * @param string $name

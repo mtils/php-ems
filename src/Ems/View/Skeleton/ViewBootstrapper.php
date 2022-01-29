@@ -14,6 +14,10 @@ use Ems\View\InputRendererFactory;
 use Ems\View\PhpRenderer;
 use Ems\View\ViewFileFinder;
 
+use function ltrim;
+
+use function print_r;
+
 use const APP_ROOT;
 
 class ViewBootstrapper extends Bootstrapper
@@ -47,7 +51,7 @@ class ViewBootstrapper extends Bootstrapper
                     return null;
                 }
                 if ($config['backend'] == 'php') {
-                    return $this->createPhpRenderer($config);
+                    return $this->createPhpRenderer($config)->share('input', $input);
                 }
                 return null;
             });
@@ -61,11 +65,18 @@ class ViewBootstrapper extends Bootstrapper
     protected function createPhpRenderer(array $config) : PhpRenderer
     {
         $paths = [];
+
         foreach ($config['paths'] as $path) {
             $paths[] = $path[0] == '/' ? $path : APP_ROOT . "/$path";
         }
-        $finder = new ViewFileFinder();
-        return new PhpRenderer($finder->setPaths($paths));
+        $finder = (new ViewFileFinder())->setPaths($paths);
+        if (isset($config['extension']) && $config['extension']) {
+            $finder->setExtension('.'.ltrim($config['extension'], '.'));
+        }
+        /** @var PhpRenderer $renderer */
+        $renderer = $this->container->create(PhpRenderer::class, [$finder]);
+        $renderer->setContainer($this->container);
+        return $renderer;
     }
 
 }
