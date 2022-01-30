@@ -98,7 +98,7 @@ class IOCContainer implements ContainerContract
             $concrete = $this->makeOrCreate($id);
         } catch (Exception $e) {
             if (!$this->has($id)) {
-                throw new BindingNotFoundException("Binding $id not found", 0, $e);
+                throw new BindingNotFoundException("Error while creating '$id'. By the way, $id is not bound.", 0, $e);
             }
             throw new IOCContainerException("Error building $id", 0, $e);
         }

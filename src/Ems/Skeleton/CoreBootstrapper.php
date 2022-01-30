@@ -1,6 +1,6 @@
 <?php
 
-namespace Ems\Core\Skeleton;
+namespace Ems\Skeleton;
 
 use Ems\Contracts\Core\Checker as CheckerContract;
 use Ems\Contracts\Core\ConnectionPool as ConnectionPoolContract;
@@ -253,7 +253,7 @@ class CoreBootstrapper extends Bootstrapper
     protected function emsResourcesPath()
     {
         if (!$this->emsResourcePath) {
-            $path = realpath(__DIR__.'/../../../../resources');
+            $path = realpath(__DIR__ . '/../../../resources');
             $this->emsResourcePath = new Url($path);
         }
         return $this->emsResourcePath;

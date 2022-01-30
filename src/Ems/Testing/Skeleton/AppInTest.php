@@ -11,7 +11,7 @@ use Ems\Contracts\Core\IOCContainer;
 use Ems\Skeleton\Application;
 
 use Ems\Core\Helper;
-use Ems\Core\Skeleton\CoreBootstrapper;
+use Ems\Skeleton\CoreBootstrapper;
 use Ems\Routing\Skeleton\RoutingBootstrapper;
 use Ems\Skeleton\BootManager;
 

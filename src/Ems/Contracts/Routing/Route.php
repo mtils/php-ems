@@ -98,7 +98,7 @@ class Route implements Arrayable
      * to no middleware for this route.
      * You can also call it multiple times for multiple middleware.
      *
-     * @param string|array|null $middleware (optional)
+     * @param string|array|null $middleware Add middleware(s) just for this route.
      *
      * @return $this
      */

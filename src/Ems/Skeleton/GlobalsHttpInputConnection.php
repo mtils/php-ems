@@ -72,6 +72,7 @@ class GlobalsHttpInputConnection extends AbstractConnection implements InputConn
         $this->body = $body ?: $_POST;
         $this->cookies = $cookies ?: $_COOKIE;
         $this->files = $files ?: $_FILES;
+        //print_r($this->files); print_r($_FILES); die();
     }
 
     /**

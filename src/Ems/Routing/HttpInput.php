@@ -23,24 +23,25 @@ use Psr\Http\Message\UploadedFileInterface;
 use function array_key_exists;
 use function func_num_args;
 use function is_array;
+use function print_r;
 
 /**
- * @property-read array                     query
- * @property-read array                     bodyParams
- * @property-read array                     cookie
- * @property-read array                     server
- * @property-read UploadedFileInterface[]   files
- * @property-read Route|null                matchedRoute
- * @property-read callable|null             handler
- * @property-read array                     routeParameters
- * @property-read Url                       url
- * @property-read string                    method
- * @property-read string                    clientType
- * @property-read RouteScope                routeScope
- * @property-read string                    locale
- * @property-read string                    determinedContentType
- * @property-read string                    apiVersion
- * @property      SessionContract           session
+ * @property-read array                           query
+ * @property-read array                           bodyParams
+ * @property-read array                           cookie
+ * @property-read array                           server
+ * @property-read UploadedFileInterface[]|array   files
+ * @property-read Route|null                      matchedRoute
+ * @property-read callable|null                   handler
+ * @property-read array                           routeParameters
+ * @property-read Url                             url
+ * @property-read string                          method
+ * @property-read string                          clientType
+ * @property-read RouteScope                      routeScope
+ * @property-read string                          locale
+ * @property-read string                          determinedContentType
+ * @property-read string                          apiVersion
+ * @property      SessionContract                 session
  */
 class HttpInput extends HttpRequest implements Input, ServerRequestInterface
 {
@@ -326,7 +327,6 @@ class HttpInput extends HttpRequest implements Input, ServerRequestInterface
     protected function castFiles(array $files) : array
     {
         $formatted = [];
-
         foreach ($files as $key=>$value) {
             if ($value instanceof UploadedFileInterface) {
                 $formatted[$key] = $value;
@@ -335,28 +335,49 @@ class HttpInput extends HttpRequest implements Input, ServerRequestInterface
             if (!is_array($value)) {
                 throw new InvalidArgumentException('Passed files have to be instanceof UploadedFileInterface or array');
             }
-            if (isset($value['tmp_name'])) {
-                $formatted[$key] = $this->uploadedFile($value);
+            if (!isset($value['tmp_name'])) {
+                $formatted[$key] = $this->castFiles($value);
                 continue;
             }
-            $formatted[$key] = $this->castFiles($value);
+            if (is_string($value['tmp_name']) && $value['tmp_name']) {
+                $formatted[$key] = $this->uploadedFile($value);
+            }
+            if (!is_array($value['tmp_name'])) {
+                continue;
+            }
+            $formatted[$key] = [];
+            foreach($this->reformatFiles($value) as $file) {
+                $formatted[$key][] = $file;
+            }
         }
 
+        return $formatted;
+    }
+
+    protected function reformatFiles(array $rawFiles) : array
+    {
+        $formatted = [];
+        foreach ($rawFiles as $key=>$entries) {
+            foreach ($entries as $index=>$value) {
+                if (!isset($formatted[$index])) {
+                    $formatted[$index] = [];
+                }
+                $formatted[$index][$key] = $value;
+            }
+        }
         return $formatted;
     }
 
     protected function uploadedFile(array $file) : UploadedFileInterface
     {
         if (!is_string($file['tmp_name'])) {
+            print_r($file); die();
             throw new InvalidArgumentException('Unreadable file parameters');
         }
         return new UploadedFile(
             new FileStream($file['tmp_name']),
             isset($file['size']) && is_int($file['size']) ? $file['size'] : -1,
             $file['error'],
-            function (UploadedFile $file, $target) {
-
-            },
             $file['name'] ?? null,
             $file['type'] ?? null
         );

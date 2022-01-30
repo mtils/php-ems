@@ -14,6 +14,7 @@ use function memory_get_usage;
 use function microtime;
 use function pow;
 use function round;
+use function substr;
 use function usort;
 
 class Benchmark
@@ -154,6 +155,35 @@ class Benchmark
     public static function milliSeconds($seconds)
     {
         return round($seconds * 1000, 2);
+    }
+
+    /**
+     * Convert an ini value into bytes. (e.g. 8M)
+     *
+     * @param string $shorthand
+     * @return float|int|string
+     */
+    public static function bytes(string $shorthand) : int
+    {
+        if (!$all = trim($shorthand)) {
+            return -1;
+        }
+        $last = strtolower($all[strlen($all)-1]);
+        $multiplier = 1;
+        switch ($last) {
+            case 'g':
+                $multiplier = (1024 * 1024 * 1024); //1073741824
+                break;
+            case 'm':
+                $multiplier = (1024 * 1024); //1048576
+                break;
+            case 'k':
+                $multiplier = 1024;
+                break;
+        }
+
+        $number = $multiplier == 1 ? (int)$all : (int)substr($all, 0, -1);
+        return $number * $multiplier;
     }
 
     /**

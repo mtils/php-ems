@@ -6,7 +6,7 @@ use Ems\Assets\Skeleton\AssetsBootstrapper;
 use Ems\Cache\Skeleton\CacheBootstrapper;
 use Ems\Skeleton\Application;
 use Ems\Core\IOCContainer;
-use Ems\Core\Skeleton\CoreBootstrapper;
+use Ems\Skeleton\CoreBootstrapper;
 use Ems\Routing\Skeleton\RoutingBootstrapper;
 use Ems\Skeleton\BootManager;
 use Ems\Skeleton\SkeletonBootstrapper;

@@ -3,12 +3,13 @@
 namespace Ems\Core\Laravel;
 
 use Ems\Contracts\Core\TextProvider;
+use Ems\Skeleton\CoreBootstrapper;
 
 class CoreServiceProvider extends BootstrapperAsServiceProvider
 {
     protected function bootClass()
     {
-        return 'Ems\Core\Skeleton\CoreBootstrapper';
+        return CoreBootstrapper::class;
     }
 
     public function register()
