@@ -11,6 +11,7 @@ use Ems\Contracts\Routing\Input;
 use Ems\Contracts\Routing\InputHandler as InputHandlerContract;
 use Ems\Contracts\Routing\MiddlewareCollection as MiddlewareCollectionContract;
 use Ems\Contracts\Routing\ResponseFactory as ResponseFactoryContract;
+use Ems\Contracts\Routing\RouteCollector;
 use Ems\Contracts\Routing\Router as RouterContract;
 use Ems\Routing\ConsoleDispatcher;
 use Ems\Routing\FastRoute\FastRouteDispatcher;
@@ -55,6 +56,8 @@ class RoutingBootstrapper extends Bootstrapper
         $this->container->onAfter(InputHandler::class, function (InputHandler $handler) {
             $this->addDefaultMiddleware($handler->middleware());
         });
+
+        $this->addDefaultRoutes();
 
     }
 
@@ -162,4 +165,21 @@ class RoutingBootstrapper extends Bootstrapper
         }
     }
 
+    protected function addDefaultRoutes()
+    {
+        $this->addRoutesBy(function (RouteCollector $routes) {
+
+            $routes->command(
+                'commands',
+                ConsoleCommandsController::class.'->index',
+                'List all of your console commands.'
+            )->argument('?pattern', 'List only commands matching this pattern');
+
+            $routes->command(
+                'help',
+                ConsoleCommandsController::class.'->show',
+                'Show help for one console command.'
+            )->argument('command_name', 'The name of the command you need help for.');
+        });
+    }
 }
