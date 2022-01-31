@@ -9,17 +9,17 @@ namespace Ems\Routing;
 use Ems\Console\ArgumentVector;
 use Ems\Contracts\Core\None;
 use Ems\Contracts\Core\Url;
-use Ems\Core\Url as UrlObject;
-
 use Ems\Contracts\Routing\Argument;
-use Ems\Contracts\Routing\RouteScope;
-use Ems\Core\ImmutableMessage;
+use Ems\Contracts\Routing\Input;
 use Ems\Contracts\Routing\Option;
 use Ems\Contracts\Routing\Route;
+use Ems\Contracts\Routing\RouteScope;
 use Ems\Core\Exceptions\MissingArgumentException;
 use Ems\Core\Exceptions\UnConfiguredException;
-use Ems\Contracts\Routing\Input;
+use Ems\Core\ImmutableMessage;
+use Ems\Core\Url as UrlObject;
 use LogicException;
+
 use function array_key_exists;
 use function strpos;
 
@@ -233,8 +233,11 @@ class ArgvInput extends ImmutableMessage implements Input
 
         $av = $this->argumentVector($this->argv, $route);
 
-        $this->addArguments($av->arguments(), $route->command->arguments);
+        if (!$args = $av->arguments()) {
+            $args = [$route->pattern];
+        }
 
+        $this->addArguments($args, $route->command->arguments);
         $this->addOptions($av->options(), $route->command->options);
 
         $this->parsed = true;
