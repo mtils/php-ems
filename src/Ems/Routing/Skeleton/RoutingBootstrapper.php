@@ -180,6 +180,13 @@ class RoutingBootstrapper extends Bootstrapper
                 ConsoleCommandsController::class.'->show',
                 'Show help for one console command.'
             )->argument('command_name', 'The name of the command you need help for.');
+
+            $routes->command(
+                'routes:index',
+                RoutesController::class.'->index',
+                'List all your routes (and commands)'
+            )->option('clientType=all', 'Routes of this client types', 'c')
+             ->option('scope=all', 'Routes of this scope', 's');
         });
     }
 }
