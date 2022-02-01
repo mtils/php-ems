@@ -126,10 +126,10 @@ class ConsoleOutputConnection extends StdOutputConnection
         if (!$output instanceof Response) {
             return parent::write($output, $lock);
         }
-        if ($output->contentType() != self::LINE_CONTENT_TYPE) {
+        if ($output->contentType != self::LINE_CONTENT_TYPE) {
             return parent::write($output, $lock);
         }
-        $lines = explode(PHP_EOL, $output->payload());
+        $lines = explode(PHP_EOL, $output->payload);
 
         foreach ($lines as $line) {
             $this->line($line);
