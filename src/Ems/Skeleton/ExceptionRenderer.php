@@ -5,12 +5,12 @@
 
 namespace Ems\Skeleton;
 
-use Ems\Routing\ArgvInput;
-use Ems\Skeleton\Connection\ConsoleOutputConnection;
+use Ems\Contracts\Core\Type;
 use Ems\Contracts\Routing\Input;
 use Ems\Core\Response;
-use Ems\Contracts\Core\Type;
 use Ems\Http\HttpResponse;
+use Ems\Routing\ArgvInput;
+use Ems\Skeleton\Connection\ConsoleOutputConnection;
 use Throwable;
 
 use function array_keys;
@@ -40,7 +40,10 @@ class ExceptionRenderer
      */
     protected function createConsoleExceptionResponse(Throwable $e, Input $input) : Response
     {
-        $string = $this->renderConsoleException($e, $input);
+        $string = 'Unsupported input class for console: ' . get_class($input);
+        if ($input instanceof ArgvInput) {
+            $string = $this->renderConsoleException($e, $input);
+        }
         return new Response([
             'payload' => $string,
             'contentType' => ConsoleOutputConnection::LINE_CONTENT_TYPE,

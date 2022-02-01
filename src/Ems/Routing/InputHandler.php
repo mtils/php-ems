@@ -5,14 +5,15 @@
 
 namespace Ems\Routing;
 
+use Ems\Contracts\Core\SupportsCustomFactory;
 use Ems\Contracts\Routing\Input;
 use Ems\Contracts\Routing\InputHandler as InputHandlerContract;
-use Ems\Core\Response;
-use Ems\Contracts\Core\SupportsCustomFactory;
 use Ems\Contracts\Routing\MiddlewareCollection as MiddlewareCollectionContract;
+use Ems\Core\Response;
 use Ems\Core\Support\CustomFactorySupport;
 use Exception;
 use Throwable;
+
 use function call_user_func;
 
 class InputHandler implements InputHandlerContract, SupportsCustomFactory
