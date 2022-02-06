@@ -69,14 +69,14 @@ class StdOutputConnection extends AbstractConnection implements OutputConnection
             return true;
         }
 
-        if ($output instanceof ResponseInterface) {
-            $this->outputHttpHeaders($output);
-            echo $output->getBody();
+        if (!$output instanceof ResponseInterface) {
+            $this->outputHttpHeadersForCoreResponse($output);
+            echo $output->payload;
             return null;
         }
 
-        echo $output->payload;
-
+        $this->outputHttpHeaders($output);
+        echo $output->getBody();
         return null;
 
     }
@@ -113,6 +113,23 @@ class StdOutputConnection extends AbstractConnection implements OutputConnection
     {
         $this->cookieSerializer = $cookieSerializer;
         return $this;
+    }
+
+    /**
+     * Mimic the output header for a non-http responses.
+     *
+     * @param Response $response
+     * @return void
+     */
+    protected function outputHttpHeadersForCoreResponse(Response $response)
+    {
+        if ($this->headersWereSent()) {
+            return;
+        }
+
+        if ($response->status > 299 && $response->status < 600) {
+            $this->printHeader($this->buildStatusLine($response->status));
+        }
     }
 
     /**
@@ -189,12 +206,22 @@ class StdOutputConnection extends AbstractConnection implements OutputConnection
     {
         $protocolVersion = $response->getProtocolVersion() ?: '1.1';
         $statusCode = $response->getStatusCode() ?: 200;
-        $line = "HTTP/$protocolVersion $statusCode";
+        $statusPhrase = $response->getReasonPhrase() ?: '';
+        return $this->buildStatusLine($statusCode, $protocolVersion, $statusPhrase);
 
-        if (!$statusPhrase = $response->getReasonPhrase()) {
-            return $line;
-        };
+    }
 
-        return "$line $statusPhrase";
+    /**
+     * Build the http status line
+     *
+     * @param int $status
+     * @param string $protocolVersion
+     * @param string $reasonPhrase
+     *
+     * @return string
+     */
+    protected function buildStatusLine(int $status=200, string $protocolVersion='1.1', string $reasonPhrase='') : string
+    {
+        return trim("HTTP/$protocolVersion $status $reasonPhrase");
     }
 }
