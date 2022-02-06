@@ -13,7 +13,7 @@ use RuntimeException;
  * Class MultipleResponsesWithoutInputHandlerException
  *
  * This exception is thrown if multiple middlewares returned a response. The
- * last response returning middlware has to always be instance of InputHandler
+ * last response returning middleware has to always be instanceof InputHandler
  *
  * @package Ems\Contracts\Routing\Exceptions
  */

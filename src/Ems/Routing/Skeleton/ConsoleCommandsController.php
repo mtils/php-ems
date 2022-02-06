@@ -6,6 +6,7 @@
 namespace Ems\Routing\Skeleton;
 
 
+use Ems\Console\AnsiRenderer;
 use Ems\Contracts\Routing\Command;
 use Ems\Contracts\Routing\ConsoleParameter;
 use Ems\Contracts\Routing\Exceptions\RouteNotFoundException;
@@ -67,7 +68,8 @@ class ConsoleCommandsController
     public function show(
         ArgvInput $input,
         Router $router,
-        ConsoleOutputConnection $out
+        ConsoleOutputConnection $out,
+        AnsiRenderer $renderer
     ) {
         $command = $input->argument('command_name');
         $commands = $this->getConsoleCommands($router);
@@ -83,10 +85,10 @@ class ConsoleCommandsController
         $inlineHelp = [];
 
         if ($command->options) {
-            $inlineHelp[] = $out->format('<comment>[options]</comment>');
+            $inlineHelp[] = $renderer->format('<comment>[options]</comment>');
         }
 
-        if ($argLine = $this->buildArgumentLine($command, $out)) {
+        if ($argLine = $this->buildArgumentLine($command, $renderer)) {
             $inlineHelp[] = implode(' ', $argLine);
         }
 
@@ -162,13 +164,13 @@ class ConsoleCommandsController
 
     /**
      * @param Command $command
-     * @param ConsoleOutputConnection $out
+     * @param AnsiRenderer $renderer
      *
      * @return array
      */
     protected function buildArgumentLine(
         Command $command,
-        ConsoleOutputConnection $out
+        AnsiRenderer $renderer
     ): array {
         $argLine = [];
 
@@ -177,7 +179,7 @@ class ConsoleCommandsController
             if ($argument->name == 'command') {
                 continue;
             }
-            $argLine[] = $argument->required ? "<$argument->name>" : $out->format(
+            $argLine[] = $argument->required ? "<$argument->name>" : $renderer->format(
                 "<mute>[<$argument->name>]</mute>"
             );
         }

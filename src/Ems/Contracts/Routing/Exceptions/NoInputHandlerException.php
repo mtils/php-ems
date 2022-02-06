@@ -12,7 +12,7 @@ use RuntimeException;
 /**
  * Class NoInputHandlerException
  *
- * This exception is thrown if the middleware didnt find an InputHandler
+ * This exception is thrown if the middleware didn't find an InputHandler
  *
  * @package Ems\Contracts\Routing\Exceptions
  */

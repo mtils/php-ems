@@ -6,17 +6,17 @@
 namespace Ems\View\Skeleton;
 
 
+use Ems\Console\AnsiRenderer;
+use Ems\Contracts\Core\Renderable;
 use Ems\Contracts\Routing\Input;
-use Ems\Skeleton\Application;
-use Ems\Skeleton\Bootstrapper;
+use Ems\Routing\ArgvInput;
 use Ems\Routing\InputHandler;
+use Ems\Skeleton\Bootstrapper;
 use Ems\View\InputRendererFactory;
 use Ems\View\PhpRenderer;
 use Ems\View\ViewFileFinder;
 
 use function ltrim;
-
-use function print_r;
 
 use const APP_ROOT;
 
@@ -41,6 +41,11 @@ class ViewBootstrapper extends Bootstrapper
 
     protected function addRenderers(InputRendererFactory $factory)
     {
+
+        $factory->extend('console-view-renderer', function (Input $input, Renderable $renderable=null) {
+            return $this->createConsoleRenderer($input, $renderable);
+        });
+
         if (!$viewConfig = $this->app->config('view')) {
             return;
         }
@@ -79,4 +84,13 @@ class ViewBootstrapper extends Bootstrapper
         return $renderer;
     }
 
+    protected function createConsoleRenderer(Input $input, Renderable $renderable=null)
+    {
+        if (!$input instanceof ArgvInput || !$renderable) {
+            return null;
+        }
+        /** @var AnsiRenderer $renderer */
+        $renderer = $this->container->create(AnsiRenderer::class);
+        return $renderer->canRender($renderable) ? $renderer : null;
+    }
 }

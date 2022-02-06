@@ -5,12 +5,12 @@
 
 namespace Ems\Skeleton;
 
+use Ems\Console\AnsiRenderer;
 use Ems\Contracts\Core\Type;
 use Ems\Contracts\Routing\Input;
 use Ems\Core\Response;
 use Ems\Http\HttpResponse;
 use Ems\Routing\ArgvInput;
-use Ems\Skeleton\Connection\ConsoleOutputConnection;
 use Throwable;
 
 use function array_keys;
@@ -46,7 +46,7 @@ class ExceptionRenderer
         }
         return new Response([
             'payload' => $string,
-            'contentType' => ConsoleOutputConnection::LINE_CONTENT_TYPE,
+            'contentType' => AnsiRenderer::LINE_CONTENT_TYPE,
             'status' => 1
         ]);
     }
@@ -114,7 +114,7 @@ class ExceptionRenderer
     protected function createHttpResponse(Throwable $e, Input $input) : HttpResponse
     {
 
-        $html = '<html><head><title>Application error occured</title></head>';
+        $html = '<html lang="en"><head><title>Application error occured</title></head>';
         $classShort = Type::short($e);
         $fileShort = basename($e->getFile());
 

@@ -7,10 +7,14 @@ namespace Ems\Skeleton;
 
 use Ems\Contracts\Core\Extendable;
 use Ems\Contracts\Core\Type;
+use Ems\Contracts\Routing\Exceptions\HttpStatusException;
 use Ems\Contracts\Routing\Exceptions\RouteNotFoundException;
 use Ems\Contracts\Routing\Input;
+use Ems\Contracts\Routing\ResponseFactory;
+use Ems\Contracts\Routing\UtilizesInput;
 use Ems\Core\Patterns\ExtendableTrait;
 use Ems\Core\Response;
+use Ems\Routing\HttpInput;
 use ErrorException;
 use Throwable;
 
@@ -79,7 +83,10 @@ class ErrorHandler implements Extendable
 
         $shortClass = Type::short($e);
 
-        return new Response(['payload' => "No Content ($shortClass)", 'status' => 500]);
+        $status = $e instanceof HttpStatusException ? $e->getStatus() : 500;
+        $message = "No Content ($shortClass)\n";
+
+        return $this->respond($input, $message, $status);
     }
 
     /**
@@ -174,6 +181,22 @@ class ErrorHandler implements Extendable
     {
         $this->logDeprecated = $force;
         return $this;
+    }
+
+    /**
+     * @param Input $input
+     * @param string $message
+     * @param int $status
+     * @return Response
+     */
+    protected function respond(Input $input, string $message, int $status=500) : Response
+    {
+        /** @var ResponseFactory $responseFactory */
+        $responseFactory = $this->app->get(ResponseFactory::class);
+        if ($responseFactory instanceof UtilizesInput) {
+            $responseFactory->setInput($input);
+        }
+        return $responseFactory->create($message)->withStatus($status);
     }
 
     /**

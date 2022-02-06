@@ -7,9 +7,14 @@ namespace Ems\Contracts\Routing\Exceptions;
 
 
 use Ems\Contracts\Core\Errors\NotFound;
-use RuntimeException;
+use Ems\Contracts\Http\Status;
+use Throwable;
 
-class RouteNotFoundException extends RuntimeException implements NotFound
+class RouteNotFoundException extends HttpStatusException implements NotFound
 {
-    //
+    public function __construct($message = "", $code = 0, Throwable $previous = null)
+    {
+        parent::__construct(Status::NOT_FOUND, $message, $code, $previous);
+    }
+
 }

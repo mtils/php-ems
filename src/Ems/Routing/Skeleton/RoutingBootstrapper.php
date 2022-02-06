@@ -6,6 +6,7 @@
 namespace Ems\Routing\Skeleton;
 
 
+use Ems\Console\AnsiRenderer;
 use Ems\Contracts\Routing\Dispatcher;
 use Ems\Contracts\Routing\Input;
 use Ems\Contracts\Routing\InputHandler as InputHandlerContract;
@@ -25,6 +26,8 @@ use Ems\Routing\Router;
 use Ems\Routing\SessionHandler\FileSessionHandler;
 use Ems\Routing\SessionMiddleware;
 use Ems\Skeleton\Bootstrapper;
+use Ems\Skeleton\Routing\RoutesConsoleView;
+use Ems\Skeleton\Routing\RoutesController;
 use Psr\Http\Message\RequestInterface;
 
 use function method_exists;
@@ -57,6 +60,10 @@ class RoutingBootstrapper extends Bootstrapper
             $this->addDefaultMiddleware($handler->middleware());
         });
 
+        $this->container->on(AnsiRenderer::class, function (AnsiRenderer $renderer) {
+            /** @noinspection PhpParamsInspection */
+            $renderer->extend('routes.index', $this->container->create(RoutesConsoleView::class));
+        });
         $this->addDefaultRoutes();
 
     }
@@ -182,11 +189,14 @@ class RoutingBootstrapper extends Bootstrapper
             )->argument('command_name', 'The name of the command you need help for.');
 
             $routes->command(
-                'routes:index',
+                'routes',
                 RoutesController::class.'->index',
                 'List all your routes (and commands)'
-            )->option('clientType=all', 'Routes of this client types', 'c')
-             ->option('scope=all', 'Routes of this scope', 's');
+            )->argument('?columns', 'What columns to show? v=Verb(Method), p=Pattern, n=Name, c=Clients, s=Scopes, m=Middleware')
+             ->option('pattern=*', 'Routes matches this pattern', 'p')
+             ->option('client=*', 'Routes of this client types', 'c')
+             ->option('name=*', 'Routes with this name', 'n')
+             ->option('scope=*', 'Routes of this scope', 's');
         });
     }
 }

@@ -13,14 +13,14 @@ trait RenderableTrait
     use StringableMethods;
 
     /**
-     * @var \Ems\Contracts\Core\Renderer
+     * @var Renderer
      **/
     protected $_renderer;
 
     /**
      * {@inheritdoc}
      *
-     * @return \Ems\Contracts\Core\Renderer
+     * @return Renderer
      **/
     public function getRenderer()
     {
@@ -30,7 +30,7 @@ trait RenderableTrait
     /**
      * {@inheritdoc}
      *
-     * @param \Ems\Contracts\Core\Renderer $renderer
+     * @param Renderer $renderer
      *
      * @return self
      **/

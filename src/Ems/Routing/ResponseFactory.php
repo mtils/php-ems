@@ -19,19 +19,9 @@ use Ems\View\View;
 class ResponseFactory implements ResponseFactoryContract, UtilizesInput
 {
     /**
-     * @var InputConnection
-     */
-    private $connection;
-
-    /**
      * @var Input
      */
     private $input;
-
-    public function __construct(InputConnection $connection)
-    {
-        $this->connection = $connection;
-    }
 
     /**
      * @param Stringable|string $content
@@ -39,14 +29,14 @@ class ResponseFactory implements ResponseFactoryContract, UtilizesInput
      */
     public function create($content): Response
     {
-        if ($this->input->getClientType() == Input::CLIENT_CONSOLE) {
-            return new Response($content);
-        }
-
         $attributes = ['payload' => $content];
 
         if ($content instanceof ViewContract && $content->mimeType()) {
             $attributes['contentType'] = $content->mimeType();
+        }
+
+        if ($this->input->getClientType() == Input::CLIENT_CONSOLE) {
+            return new Response($attributes);
         }
 
         return new HttpResponse($attributes);

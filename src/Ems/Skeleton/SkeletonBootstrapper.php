@@ -27,8 +27,6 @@ use function file_exists;
 use function getenv;
 use function spl_object_hash;
 
-use function var_dump;
-
 use const APPLICATION_START;
 
 

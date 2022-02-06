@@ -6,45 +6,33 @@
 namespace Ems\Skeleton\Connection;
 
 
-use Ems\Skeleton\Connection\StdOutputConnection;
+use Ems\Console\AnsiRenderer;
+use Ems\Contracts\Core\Stringable;
 use Ems\Core\Response;
 
-use function is_array;
 use function is_bool;
-use function str_replace;
-use function strip_tags;
+
 use const PHP_EOL;
 
 class ConsoleOutputConnection extends StdOutputConnection
 {
 
-    public const LINE_CONTENT_TYPE = 'text/x-console-lines';
-
     /**
-     * @var array
+     * @var AnsiRenderer
      */
-    private $tagStyles = [
-        'info'      => '0;32;40',
-        'mute'      => '1;30;40',
-        'comment'   => '0;33;40',
-        'warning'   => '1;33;40',
-        'error'     => '1;37;41'
-    ];
+    private $renderer;
 
     /**
      * @var bool
      */
     private $formattedOutput = true;
 
-    /**
-     * @var array
-     */
-    private $search;
+    public function __construct(...$args)
+    {
+        $this->renderer = new AnsiRenderer();
+        parent::__construct(...$args);
+    }
 
-    /**
-     * @var
-     */
-    private $replace;
 
     /**
      * Output a line. Replace any tags with console color styles.
@@ -53,57 +41,11 @@ class ConsoleOutputConnection extends StdOutputConnection
      * @param bool   $formatted (optional)
      * @param string $newLine (default: PHP_EOL)
      */
-    public function line($output, $formatted=null, $newLine=PHP_EOL)
+    public function line(string $output, bool $formatted=null, string $newLine=PHP_EOL)
     {
         $formatted = is_bool($formatted) ? $formatted : $this->shouldFormatOutput();
-        $output = $formatted ? $this->format($output) : $this->removeTags($output);
+        $output = $formatted ? $this->renderer->format($output) : $this->renderer->plain($output);
         $this->write($output . $newLine);
-    }
-
-    /**
-     * Replace the tags inside the string with console color styles.
-     *
-     * @param string $output
-     *
-     * @return string
-     */
-    public function format($output)
-    {
-        return str_replace($this->search(), $this->replace(), $output);
-    }
-
-    /**
-     * Get the console color style for a tag name.
-     *
-     * @param string $tag
-     *
-     * @return string
-     */
-    public function getTagStyle($tag)
-    {
-        return $this->tagStyles[$tag];
-    }
-
-    /**
-     * Set a style (console color code) for a tag name
-     *
-     * @param string|array $tag
-     * @param string       $style (optional)
-     *
-     * @return $this
-     */
-    public function setTagStyle($tag, $style=null)
-    {
-        if (!is_array($tag)) {
-            $this->tagStyles[$tag] = $style;
-            $this->search = null;
-            $this->replace = null;
-            return $this;
-        }
-        foreach ($tag as $name=>$style) {
-            $this->setTagStyle($name, $style);
-        }
-        return $this;
     }
 
     /**
@@ -111,7 +53,7 @@ class ConsoleOutputConnection extends StdOutputConnection
      *
      * @return bool
      */
-    public function shouldFormatOutput()
+    public function shouldFormatOutput() : bool
     {
         return $this->formattedOutput;
     }
@@ -126,56 +68,16 @@ class ConsoleOutputConnection extends StdOutputConnection
         if (!$output instanceof Response) {
             return parent::write($output, $lock);
         }
-        if ($output->contentType != self::LINE_CONTENT_TYPE) {
-            return parent::write($output, $lock);
+        $payload = $output->payload;
+        $stringPayload = $payload instanceof Stringable ? $payload->toString() : "$payload";
+        if ($output->contentType != AnsiRenderer::LINE_CONTENT_TYPE) {
+            return parent::write($stringPayload, $lock);
         }
-        $lines = explode(PHP_EOL, $output->payload);
+        $lines = explode(PHP_EOL, $stringPayload);
 
         foreach ($lines as $line) {
             $this->line($line);
         }
     }
 
-
-    /**
-     * @param string $string
-     *
-     * @return string
-     */
-    protected function removeTags($string)
-    {
-        return strip_tags($string);
-    }
-
-    /**
-     * @return array
-     */
-    protected function search()
-    {
-        if (is_array($this->search)) {
-            return $this->search;
-        }
-        $this->search = [];
-        foreach ($this->tagStyles as $tag=>$style) {
-            $this->search[] = "<$tag>";
-            $this->search[] = "</$tag>";
-        }
-        return $this->search;
-    }
-
-    /**
-     * @return array
-     */
-    protected function replace()
-    {
-        if (is_array($this->replace)) {
-            return $this->replace;
-        }
-        $this->replace = [];
-        foreach ($this->tagStyles as $tag=>$style) {
-            $this->replace[] = "\e[$style" . 'm';
-            $this->replace[] = "\e[0m";
-        }
-        return $this->replace;
-    }
 }

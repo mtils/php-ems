@@ -227,15 +227,15 @@ class Router implements RouterContract, SupportsCustomFactory
      */
     protected function addRoute(Route $route)
     {
+
+        if (!$route->clientTypes) {
+            $route->clientType('web');
+        }
+        if (!$route->scopes) {
+            $route->scope('default');
+        }
+
         $data = $route->toArray();
-
-        if (!$data['clientTypes']) {
-            $data['clientTypes'] = ['web'];
-        }
-
-        if (!$data['scopes']) {
-            $data['scopes'] = ['default'];
-        }
 
         $this->allRoutes[] = $route;
 
@@ -266,7 +266,7 @@ class Router implements RouterContract, SupportsCustomFactory
     /**
      * Assign the callable that will create the interpreters.
      *
-     * @param callable $factory (optional)
+     * @param callable|null $factory (optional)
      */
     protected function installInterpreterFactory(callable $factory=null)
     {
