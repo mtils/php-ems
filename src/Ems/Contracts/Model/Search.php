@@ -40,7 +40,7 @@ use Ems\Core\Collections\StringList;
  *
  * @package Ems\Contracts\Model
  */
-interface Search extends OrmCollection, CanSort, HasKeys
+interface Search extends Result, HasKeys
 {
 
     /**
@@ -107,7 +107,7 @@ interface Search extends OrmCollection, CanSort, HasKeys
     /**
      * Return all applied filter keys.
      *
-     * @return StringList
+     * @return StringList|string[]
      */
     public function filterKeys();
 }

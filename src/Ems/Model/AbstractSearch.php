@@ -5,11 +5,13 @@
 
 namespace Ems\Model;
 
+use Ems\Contracts\Model\CanSort;
+use Ems\Contracts\Model\OrmCollection;
 use Ems\Core\Support\TraitMethods;
 use Ems\Contracts\Model\Search as SearchContract;
 use Traversable;
 
-abstract class AbstractSearch implements SearchContract
+abstract class AbstractSearch implements SearchContract, OrmCollection, CanSort
 {
     use TraitMethods;
     use ResultTrait;
@@ -87,7 +89,7 @@ abstract class AbstractSearch implements SearchContract
     /**
      * Return an list keys (should be strings)
      *
-     * @return \Ems\Core\Collections\OrderedList
+     * @return string[]
      **/
     public function keys()
     {
