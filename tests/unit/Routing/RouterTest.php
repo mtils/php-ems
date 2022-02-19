@@ -10,8 +10,8 @@ use Ems\Contracts\Core\Url as UrlContract;
 use Ems\Contracts\Routing\Argument;
 use Ems\Contracts\Routing\Command;
 use Ems\Contracts\Routing\Exceptions\RouteNotFoundException;
-use Ems\Contracts\Routing\Option;
 use Ems\Contracts\Routing\Input;
+use Ems\Contracts\Routing\Option;
 use Ems\Contracts\Routing\Route;
 use Ems\Contracts\Routing\RouteCollector;
 use Ems\Contracts\Routing\Router as RouterContract;
@@ -20,8 +20,8 @@ use Ems\Core\Lambda;
 use Ems\Core\Url;
 use Ems\RoutingTrait;
 use Ems\TestCase;
-use ReflectionException;
 use LogicException;
+use ReflectionException;
 
 use function array_values;
 use function func_get_args;
@@ -593,7 +593,7 @@ class RouterTest extends TestCase
         }, [RouterContract::CLIENT => 'console']);
 
         foreach (['index', 'edit', 'update'] as $action) {
-            $this->assertEquals(['console'], $router->getByName("addresses.$action")->clientTypes);
+            $this->assertEquals(['console'], $router->getByName("addresses.$action", Input::CLIENT_CONSOLE)->clientTypes);
         }
     }
 
@@ -626,9 +626,10 @@ class RouterTest extends TestCase
         }, [RouterContract::CLIENT => ['console', 'ajax']]);
 
         foreach (['index', 'update'] as $action) {
-            $this->assertEquals(['console', 'ajax'], $router->getByName("addresses.$action")->clientTypes);
+            $this->assertEquals(['console', 'ajax'], $router->getByName("addresses.$action", Input::CLIENT_CONSOLE)->clientTypes);
+            $this->assertEquals(['console', 'ajax'], $router->getByName("addresses.$action", Input::CLIENT_AJAX)->clientTypes);
         }
-        $this->assertEquals(['api'], $router->getByName("addresses.edit")->clientTypes);
+        $this->assertEquals(['api'], $router->getByName("addresses.edit", Input::CLIENT_API)->clientTypes);
     }
 
     /**
@@ -658,8 +659,16 @@ class RouterTest extends TestCase
                 ->defaults(['type' => 'main']);
         }, [Router::SCOPE => ['default', 'admin']]);
 
-        foreach (['index', 'edit', 'update'] as $action) {
-            $this->assertEquals(['default', 'admin'], $router->getByName("addresses.$action")->scopes);
+        $mapping = [
+            'index' => ['web'],
+            'edit'  => ['api'],
+            'update' => ['web', 'api']
+        ];
+        foreach ($mapping as $action=>$clientTypes) {
+            foreach ($clientTypes as $clientType) {
+                $this->assertEquals(['default', 'admin'], $router->getByName("addresses.$action", $clientType)->scopes);
+            }
+
         }
 
     }
@@ -692,10 +701,23 @@ class RouterTest extends TestCase
                 ->defaults(['type' => 'main']);
         }, [Router::SCOPE => ['default', 'admin']]);
 
-        foreach (['index', 'edit'] as $action) {
-            $this->assertEquals(['default', 'admin'], $router->getByName("addresses.$action")->scopes);
+        $mapping = [
+            'index' => ['web'],
+            'edit'  => ['api'],
+            'update' => ['web', 'api']
+        ];
+        foreach ($mapping as $action=>$clientTypes) {
+            if ($action == 'update') {
+                continue;
+            }
+            foreach ($clientTypes as $clientType) {
+                $this->assertEquals(['default', 'admin'], $router->getByName("addresses.$action", $clientType)->scopes);
+            }
+
         }
-        $this->assertEquals(['master'], $router->getByName("addresses.update")->scopes);
+
+        $this->assertEquals(['master'], $router->getByName("addresses.update", 'web')->scopes);
+        $this->assertEquals(['master'], $router->getByName("addresses.update", 'api')->scopes);
 
     }
 
@@ -723,8 +745,16 @@ class RouterTest extends TestCase
                 ->defaults(['type' => 'main']);
         }, [Router::MIDDLEWARE => 'auth']);
 
-        foreach (['index', 'edit', 'update'] as $action) {
-            $this->assertEquals(['auth'], $router->getByName("addresses.$action")->middlewares);
+        $mapping = [
+            'index' => ['web'],
+            'edit'  => ['api'],
+            'update' => ['web', 'api']
+        ];
+        foreach ($mapping as $action=>$clientTypes) {
+            foreach ($clientTypes as $clientType) {
+                $this->assertEquals(['auth'], $router->getByName("addresses.$action", $clientType)->middlewares);
+            }
+
         }
 
     }
@@ -754,11 +784,21 @@ class RouterTest extends TestCase
                 ->defaults(['type' => 'main']);
         }, [Router::MIDDLEWARE => 'auth']);
 
-        foreach (['index', 'update'] as $action) {
-            $this->assertEquals(['auth'], $router->getByName("addresses.$action")->middlewares);
-        }
+        $mapping = [
+            'index' => ['web'],
+            'edit'  => ['api'],
+            'update' => ['web', 'api']
+        ];
+        foreach ($mapping as $action=>$clientTypes) {
+            if ($action == 'edit') {
+                continue;
+            }
+            foreach ($clientTypes as $clientType) {
+                $this->assertEquals(['auth'], $router->getByName("addresses.$action", $clientType)->middlewares);
+            }
 
-        $this->assertEquals(['auth', 'has-role:moderator'], $router->getByName("addresses.edit")->middlewares);
+        }
+        $this->assertEquals(['auth', 'has-role:moderator'], $router->getByName("addresses.edit", 'api')->middlewares);
 
     }
 
@@ -791,7 +831,7 @@ class RouterTest extends TestCase
             $this->assertEquals(['auth:admin', 'only:granny'], $router->getByName("addresses.$action")->middlewares);
         }
 
-        $this->assertEquals(['auth:moderator', 'only:granny'], $router->getByName("addresses.edit")->middlewares);
+        $this->assertEquals(['auth:moderator', 'only:granny'], $router->getByName("addresses.edit", 'api')->middlewares);
 
     }
 
@@ -837,10 +877,11 @@ class RouterTest extends TestCase
 
         foreach (['index', 'edit', 'update'] as $action) {
             $pattern = 'addresses'.$awaited[$action];
-            $this->assertEquals($pattern, $router->getByName("addresses.$action")->pattern);
+            $clientType = $action == 'edit' ? 'api' : 'web';
+            $this->assertEquals($pattern, $router->getByName("addresses.$action", $clientType)->pattern);
 
             $handler = 'AddressController' . RouteCollector::$methodSeparator . $action;
-            $this->assertEquals($handler, $router->getByName("addresses.$action")->handler);
+            $this->assertEquals($handler, $router->getByName("addresses.$action", $clientType)->handler);
         }
 
     }

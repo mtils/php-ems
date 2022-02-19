@@ -7,6 +7,7 @@ namespace Ems\Contracts\Routing;
 
 
 use Ems\Contracts\Core\Arrayable;
+use Ems\Contracts\Core\DataObject;
 use Ems\TestCase;
 
 class RouteTest extends TestCase
@@ -63,6 +64,25 @@ class RouteTest extends TestCase
     public function name_sets_name()
     {
         $this->assertEquals('addresses.index', $this->newRoute()->name('addresses.index')->name);
+    }
+
+    /**
+     * @test
+     */
+    public function entity_sets_entity_and_action()
+    {
+        $handler = [static::class, 'index'];
+        $route = $this->newRoute('GET', '/users', $handler);
+        $this->assertSame('', $route->entity);
+        $this->assertSame('', $route->action);
+
+        $route->entity(self::class);
+        $this->assertSame(self::class, $route->entity);
+        $this->assertSame('index', $route->action);
+
+        $route->entity(DataObject::class, 'destroy');
+        $this->assertSame(DataObject::class, $route->entity);
+        $this->assertSame('destroy', $route->action);
     }
 
     /**

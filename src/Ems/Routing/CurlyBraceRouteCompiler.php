@@ -20,25 +20,25 @@ class CurlyBraceRouteCompiler
      * Replace named and wildcard parameters. If you just use on of both methods
      * consider to not call compile.
      *
-     * @param $pattern
+     * @param string $pattern
      * @param array $parameters
      *
      * @return string
      */
-    public function compile($pattern, array &$parameters)
+    public function compile(string $pattern, array &$parameters) : string
     {
         $pattern = $this->replaceNamed($pattern, $parameters);
         return $this->replaceWildcards($pattern, $parameters);
     }
     /**
-     * Replace all of the wildcard parameters for $pattern.
+     * Replace all the wildcard parameters for $pattern.
      *
      * @param  string  $pattern
      * @param  array  $parameters
      *
      * @return string
      */
-    public function replaceWildcards($pattern, array &$parameters)
+    public function replaceWildcards(string $pattern, array &$parameters) : string
     {
         $pattern = preg_replace_callback('/\{.*?\}/', function ($match) use (&$parameters) {
             return (empty($parameters) && ! (substr($match[0], -strlen('?}')) === '?}'))
@@ -49,18 +49,18 @@ class CurlyBraceRouteCompiler
     }
 
     /**
-     * Replace all of the named parameters in $pattern.
+     * Replace all the named parameters in $pattern.
      *
      * @param  string  $pattern
      * @param  array
      *
      * @return string
      */
-    public function replaceNamed($pattern, &$parameters)
+    public function replaceNamed(string $pattern, &$parameters) : string
     {
         return preg_replace_callback('/\{(.*?)\??\}/', function ($m) use (&$parameters) {
             if (isset($parameters[$m[1]])) {
-                $value = isset($parameters[$m[1]]) ? $parameters[$m[1]] : null;
+                $value = $parameters[$m[1]] ?: null;
                 unset($parameters[$m[1]]);
                 return $value;
             }

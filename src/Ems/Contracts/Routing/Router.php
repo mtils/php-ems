@@ -78,28 +78,30 @@ interface Router extends IteratorAggregate
      * Get all routes that have $pattern. Optionally pass a (http) $method to
      * further narrow down the result.
      *
-     * @param string $pattern
-     * @param string $method (optional)
+     * @param string        $pattern
+     * @param string|null   $method
+     * @param string        $clientType
      *
      * @return Route[]
      */
-    public function getByPattern($pattern, $method=null);
+    public function getByPattern(string $pattern, string $method=null, string $clientType=Input::CLIENT_WEB) : array;
 
     /**
      * Get a route by its name.
      *
      * @param string $name
+     * @param string $clientType
      *
      * @return Route
      */
-    public function getByName($name);
+    public function getByName(string $name, string $clientType=Input::CLIENT_WEB) : Route;
 
     /**
      * Return all known unique client types (by route registrations)
      *
      * @return string[]
      */
-    public function clientTypes();
+    public function clientTypes() : array;
 
     /**
      * Return the dispatcher for $clientType. This is needed for the UrlGenerator
@@ -110,6 +112,6 @@ interface Router extends IteratorAggregate
      *
      * @return Dispatcher
      */
-    public function getDispatcher($clientType);
+    public function getDispatcher(string $clientType) : Dispatcher;
 
 }

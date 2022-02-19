@@ -125,29 +125,30 @@ class CompilableRouter implements RouterContract
     /**
      * {@inheritDoc}
      *
-     * @param string $pattern
-     * @param string $method (optional)
+     * @param string        $pattern
+     * @param string|null   $method
+     * @param string        $clientType
      *
      * @return Route[]
      */
-    public function getByPattern($pattern, $method = null)
+    public function getByPattern(string $pattern, string $method=null, string $clientType=Input::CLIENT_WEB) : array
     {
         if (!$this->isCompiled()) {
-            return $this->router->getByPattern($pattern, $method);
+            return $this->router->getByPattern($pattern, $method, $clientType);
         }
 
-        if (!isset($this->storage[self::KEY_BY_PATTERN][$pattern])) {
+        if (!isset($this->storage[self::KEY_BY_PATTERN][$clientType][$pattern])) {
             return [];
         }
 
         if (!$method) {
-            return $this->storage[self::KEY_BY_PATTERN][$pattern];
+            return $this->storage[self::KEY_BY_PATTERN][$clientType][$pattern];
         }
 
         $result = [];
 
         /** @var Route $route */
-        foreach ($this->storage[self::KEY_BY_PATTERN][$pattern] as $route) {
+        foreach ($this->storage[self::KEY_BY_PATTERN][$clientType][$pattern] as $route) {
             if (in_array($method, $route->methods)) {
                 $result[] = $route;
             }
@@ -160,20 +161,21 @@ class CompilableRouter implements RouterContract
      * Get a route by its name.
      *
      * @param string $name
+     * @param string $clientType
      *
      * @return Route
      */
-    public function getByName($name)
+    public function getByName(string $name, string $clientType=Input::CLIENT_WEB) : Route
     {
         if (!$this->isCompiled()) {
-            return $this->router->getByName($name);
+            return $this->router->getByName($name, $clientType);
         }
 
-        if (isset($this->storage[self::KEY_BY_NAME][$name])) {
-            return $this->storage[self::KEY_BY_NAME][$name];
+        if (isset($this->storage[self::KEY_BY_NAME][$clientType][$name])) {
+            return $this->storage[self::KEY_BY_NAME][$clientType][$name];
         }
 
-        throw new KeyNotFoundException("Route named '$name' not found.");
+        throw new KeyNotFoundException("Route named '$name' not found for clientType '$clientType'.");
     }
 
     /**
@@ -181,7 +183,7 @@ class CompilableRouter implements RouterContract
      *
      * @return string[]
      */
-    public function clientTypes()
+    public function clientTypes() : array
     {
         if (!$this->isCompiled()) {
             return $this->router->clientTypes();
@@ -197,7 +199,7 @@ class CompilableRouter implements RouterContract
      *
      * @return Dispatcher
      */
-    public function getDispatcher($clientType)
+    public function getDispatcher(string $clientType) : Dispatcher
     {
 
         if (isset($this->optimizedDispatchers[$clientType])) {
@@ -234,15 +236,28 @@ class CompilableRouter implements RouterContract
             $all[] = $route;
             $pattern = $route->pattern;
 
-            if (!isset($byPattern[$pattern])) {
-                $byPattern[$pattern] = [];
+            foreach ($route->clientTypes as $clientType) {
+
+                if (!isset($byPattern[$clientType])) {
+                    $byPattern[$clientType] = [];
+                }
+
+                if (!isset($byName[$clientType])) {
+                    $byName[$clientType] = [];
+                }
+
+                if (!isset($byPattern[$clientType][$pattern])) {
+                    $byPattern[$clientType][$pattern] = [];
+                }
+
+                $byPattern[$clientType][$pattern][] = $route;
+
+                if ($name = $route->name) {
+                    $byName[$clientType][$name] = $route;
+                }
             }
 
-            $byPattern[$pattern][] = $route;
 
-            if ($name = $route->name) {
-                $byName[$name] = $route;
-            }
         }
 
         $this->storage[self::KEY_ALL] = $all;
@@ -277,7 +292,7 @@ class CompilableRouter implements RouterContract
      *
      * @return bool
      */
-    public function isCompiled()
+    public function isCompiled() : bool
     {
         return isset($this->storage[self::KEY_VALID]);
     }
@@ -289,7 +304,7 @@ class CompilableRouter implements RouterContract
      *
      * @return $this
      */
-    public function setStorage(&$storage)
+    public function setStorage(&$storage) : CompilableRouter
     {
         $this->storage = $storage;
         return $this;

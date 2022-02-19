@@ -32,6 +32,8 @@ use function is_array;
  * @property-read string    $pattern     The route pattern
  * @property-read mixed     $handler     The assigned (whatever) handler
  * @property-read string    $name        The unique name of this route
+ * @property-read string    $entity      The entity class that is accessed by this route
+ * @property-read string    $action      The action that is performed on $this->entity on this route
  * @property-read array     $middlewares The middlewares of this route
  * @property-read string[]  $clientTypes The types of client which have access to this route
  * @property-read string[]  $scopes      The RouteScopes in which this route applies
@@ -50,6 +52,8 @@ class Route implements Arrayable
         'pattern'     => '',
         'handler'     => null,
         'name'        => '',
+        'entity'      => '',
+        'action'      => '',
         'middlewares' => [],
         'clientTypes' => [],
         'scopes'      => [],
@@ -84,9 +88,24 @@ class Route implements Arrayable
      *
      * @return $this
      */
-    public function name($name)
+    public function name(string $name) : Route
     {
         $this->_properties['name'] = $name;
+        return $this;
+    }
+
+    /**
+     * Mark this route as standing for perform $action on $entity
+     * @param string $class
+     * @param string $action
+     * @return $this
+     *
+     * @see UrlGenerator::entity
+     */
+    public function entity(string $class, string $action='index') : Route
+    {
+        $this->_properties['entity'] = $class;
+        $this->_properties['action'] = $action;
         return $this;
     }
 
@@ -102,7 +121,7 @@ class Route implements Arrayable
      *
      * @return $this
      */
-    public function middleware($middleware=null)
+    public function middleware($middleware=null) : Route
     {
         if ($middleware === null) {
             $this->_properties['middlewares'] = [];
@@ -125,7 +144,7 @@ class Route implements Arrayable
      *
      * @return $this
      */
-    public function clientType($type)
+    public function clientType($type) : Route
     {
         $this->_properties['clientTypes'] = is_array($type) ? $type : func_get_args();
         return $this;
@@ -138,7 +157,7 @@ class Route implements Arrayable
      *
      * @return $this
      */
-    public function scope($scope)
+    public function scope($scope) : Route
     {
         $this->_properties['scopes'] = is_array($scope) ? $scope : func_get_args();
         return $this;
@@ -152,7 +171,7 @@ class Route implements Arrayable
      *
      * @return $this
      */
-    public function defaults($key, $value=null)
+    public function defaults($key, $value=null) : Route
     {
         if (is_array($key)) {
             $this->_properties['defaults'] = $key;
@@ -172,7 +191,7 @@ class Route implements Arrayable
      *
      * @return Command
      */
-    public function command($command, $description='')
+    public function command($command, string $description='') : Command
     {
         if ($command instanceof Command) {
             $this->_properties['command'] = $command;
@@ -194,7 +213,7 @@ class Route implements Arrayable
      *
      * @return array
      **/
-    public function toArray()
+    public function toArray() : array
     {
         return $this->_properties;
     }

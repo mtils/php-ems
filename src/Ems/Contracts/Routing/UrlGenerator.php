@@ -3,11 +3,12 @@
 namespace Ems\Contracts\Routing;
 
 use Ems\Contracts\Core\Entity;
+use Ems\Contracts\Core\Url;
 
 /**
  * The Url Generator generates urls to parts of your application
  * It returns url objects so every extra parameter, path segment, fragment
- * etc can be set on the returned object instead of passing them to the
+ * etc. can be set on the returned object instead of passing them to the
  * method.
  **/
 interface  UrlGenerator
@@ -17,13 +18,12 @@ interface  UrlGenerator
      * results in self::resource($path, 'show')
      * Passing a string will be used as path.
      *
-     * @param string $path
-     * @param bool   $absolute (optional)
-     * @param bool   $secure   (optional)
+     * @param string|object $path
+     * @param string|RouteScope|null $scope
      *
-     * @return \Ems\Contracts\Core\Url
+     * @return Url
      **/
-    public function to($path, $absolute = null, $secure = null);
+    public function to($path, $scope=null) : Url;
 
     /**
      * This is similar to laravels UrlGenerator::route() method but also returns
@@ -31,33 +31,31 @@ interface  UrlGenerator
      *
      * @param string $name
      * @param array  $parameters (optional)
-     * @param bool   $absolute   (optional)
-     * @param bool   $secure     (optional)
+     * @param string|RouteScope|null $scope
      *
-     * @return \Ems\Contracts\Core\Url
+     * @return Url
      **/
-    public function route($name, $parameters = [], $absolute = null, $secure = null);
+    public function route(string $name, array $parameters = [], $scope=null) : Url;
 
     /**
-     * Return the url to an entity action. Default action is show.
+     * Return the url to an entity action. Default action is show. Pass an array
+     * for a path: resource([$user, 'addresses'])
      *
-     * @param \Ems\Contracts\Core\Entity $entity
-     * @param string                     $action   (optional)
-     * @param bool                       $absolute (optional)
-     * @param bool                       $secure   (optional)
+     * @param object|array  $entity
+     * @param string        $action   (optional)
+     * @param string|RouteScope|null $scope
      *
-     * @return \Ems\Contracts\Core\Url
+     * @return Url
      **/
-    public function resource(Entity $entity, $action = 'show', $absolute = null, $secure = null);
+    public function entity($entity, string $action = 'show', $scope=null) : Url;
 
     /**
      * Return the url to an asset.
      *
      * @param string $path
-     * @param bool   $absolute (optional)
-     * @param bool   $secure   (optional)
+     * @param string|RouteScope|null $scope
      *
-     * @return \Ems\Contracts\Core\Url
+     * @return Url
      **/
-    public function asset($path, $absolute = null, $secure = null);
+    public function asset(string $path, $scope=null) : Url;
 }

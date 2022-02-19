@@ -46,11 +46,6 @@ class Router implements RouterContract, SupportsCustomFactory
     /**
      * @var array
      */
-    protected $clientTypes = [];
-
-    /**
-     * @var array
-     */
     protected $dispatchers = [];
 
     /**
@@ -139,25 +134,26 @@ class Router implements RouterContract, SupportsCustomFactory
     /**
      * {@inheritDoc}
      *
-     * @param string $pattern
-     * @param string $method (optional)
+     * @param string        $pattern
+     * @param string|null   $method
+     * @param string        $clientType
      *
      * @return Route[]
      */
-    public function getByPattern($pattern, $method=null)
+    public function getByPattern(string $pattern, string $method=null, string $clientType=Input::CLIENT_WEB) : array
     {
-        if (!isset($this->byPattern[$pattern])) {
+        if (!isset($this->byPattern[$clientType][$pattern])) {
             return [];
         }
 
         if (!$method) {
-            return $this->byPattern[$pattern];
+            return $this->byPattern[$clientType][$pattern];
         }
 
         $result = [];
 
         /** @var Route $route */
-        foreach ($this->byPattern[$pattern] as $route) {
+        foreach ($this->byPattern[$clientType][$pattern] as $route) {
             if (in_array($method, $route->methods)) {
                 $result[] = $route;
             }
@@ -170,15 +166,16 @@ class Router implements RouterContract, SupportsCustomFactory
      * Get a route by its name.
      *
      * @param string $name
+     * @param string $clientType
      *
      * @return Route
      */
-    public function getByName($name)
+    public function getByName(string $name, string $clientType=Input::CLIENT_WEB) : Route
     {
-        if (isset($this->byName[$name])) {
-            return $this->byName[$name];
+        if (isset($this->byName[$clientType][$name])) {
+            return $this->byName[$clientType][$name];
         }
-        throw new KeyNotFoundException("Route named '$name' not found.");
+        throw new KeyNotFoundException("Route named '$name' not found for clientType '$clientType'.");
     }
 
     /**
@@ -186,9 +183,9 @@ class Router implements RouterContract, SupportsCustomFactory
      *
      * @return string[]
      */
-    public function clientTypes()
+    public function clientTypes() : array
     {
-        return array_keys($this->clientTypes);
+        return array_keys($this->byPattern);
     }
 
     /**
@@ -198,7 +195,7 @@ class Router implements RouterContract, SupportsCustomFactory
      *
      * @return Dispatcher
      */
-    public function getDispatcher($clientType)
+    public function getDispatcher(string $clientType) : Dispatcher
     {
         if (!isset($this->dispatchers[$clientType])) {
             $this->dispatchers[$clientType] = call_user_func($this->interpreterFactory, $clientType);
@@ -229,7 +226,7 @@ class Router implements RouterContract, SupportsCustomFactory
     {
 
         if (!$route->clientTypes) {
-            $route->clientType('web');
+            $route->clientType(Input::CLIENT_WEB);
         }
         if (!$route->scopes) {
             $route->scope('default');
@@ -240,7 +237,6 @@ class Router implements RouterContract, SupportsCustomFactory
         $this->allRoutes[] = $route;
 
         foreach ($data['clientTypes'] as $clientType) {
-            $this->clientTypes[$clientType] = true;
             $interpreter = $this->getDispatcher($clientType);
 
             foreach ($data['methods'] as $method) {
@@ -249,17 +245,30 @@ class Router implements RouterContract, SupportsCustomFactory
 
         }
 
-        if (!isset($this->byPattern[$data['pattern']])) {
-            $this->byPattern[$data['pattern']] = [];
-        }
+        foreach ($data['clientTypes'] as $clientType) {
 
-        $this->byPattern[$data['pattern']][] = $route;
+            if (!isset($this->byPattern[$clientType])) {
+                $this->byPattern[$clientType] = [];
+            }
+
+            if (!isset($this->byPattern[$clientType][$data['pattern']])) {
+                $this->byPattern[$clientType][$data['pattern']] = [];
+            }
+
+            $this->byPattern[$clientType][$data['pattern']][] = $route;
+
+        }
 
         if (!$data['name']) {
             return;
         }
 
-        $this->byName[$data['name']] = $route;
+        foreach ($data['clientTypes'] as $clientType) {
+            if (!isset($this->byName[$clientType])) {
+                $this->byName[$clientType] = [];
+            }
+            $this->byName[$clientType][$data['name']] = $route;
+        }
 
     }
 
