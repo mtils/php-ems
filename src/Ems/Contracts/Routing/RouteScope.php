@@ -19,6 +19,8 @@ use Ems\Contracts\Core\Stringable;
  */
 interface RouteScope extends Named, Stringable
 {
+    public const DEFAULT = 'default';
+
     /**
      * Return alternative names to match this scope.
      *

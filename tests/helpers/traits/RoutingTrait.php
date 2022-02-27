@@ -7,6 +7,8 @@ namespace Ems;
 
 use Ems\Contracts\Routing\RouteCollector;
 use Ems\Contracts\Routing\Router as RouterContract;
+use Ems\Routing\Router;
+
 use function is_string;
 use function str_replace;
 
@@ -15,6 +17,19 @@ trait RoutingTrait
 {
     use TestData;
     protected static $testRoutes;
+
+    /**
+     * @param bool $filled
+     * @return Router
+     */
+    protected function router(bool $filled=false) : Router
+    {
+        $router = new Router();
+        if ($filled) {
+            $this->fill($router);
+        }
+        return $router;
+    }
 
     /**
      * @beforeClass

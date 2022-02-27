@@ -192,7 +192,7 @@ class RouteCollector implements IteratorAggregate
      *
      * @return Route
      */
-    protected function newRoute($method, $pattern, $handler)
+    protected function newRoute($method, $pattern, $handler) : Route
     {
         return new Route($method, $pattern, $handler, $this);
     }

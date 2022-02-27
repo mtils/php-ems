@@ -14,8 +14,8 @@ use Ems\Contracts\Core\Url;
 interface  UrlGenerator
 {
     /**
-     * The to method accepts all kind of parameters. Passing an Entity
-     * results in self::resource($path, 'show')
+     * The to() method accepts all kind of parameters. Passing an Entity
+     * results in self::entity($path, 'show')
      * Passing a string will be used as path.
      *
      * @param string|object $path
@@ -41,8 +41,8 @@ interface  UrlGenerator
      * Return the url to an entity action. Default action is show. Pass an array
      * for a path: resource([$user, 'addresses'])
      *
-     * @param object|array  $entity
-     * @param string        $action   (optional)
+     * @param object|array          $entity
+     * @param string                $action   (optional)
      * @param string|RouteScope|null $scope
      *
      * @return Url
@@ -58,4 +58,20 @@ interface  UrlGenerator
      * @return Url
      **/
     public function asset(string $path, $scope=null) : Url;
+
+    /**
+     * Get the applied input.
+     *
+     * @return Input
+     */
+    public function getInput() : Input;
+
+    /**
+     * Return a new instance for $input. Typically, you have one generator per
+     * clientType or combination of clientType and scope.
+     *
+     * @param Input $input
+     * @return UrlGenerator
+     */
+    public function withInput(Input $input) : UrlGenerator;
 }

@@ -5,11 +5,13 @@
 
 namespace Ems\Routing;
 
+use Closure;
 use Ems\Contracts\Core\Url;
-use Ems\Core\Url as UrlObject;
+use Ems\Contracts\Routing\Input;
+use Ems\Contracts\Routing\Router as RouterContract;
 use Ems\Contracts\Routing\RouteScope;
 use Ems\Contracts\Routing\UrlGenerator as UrlGeneratorContract;
-use Ems\Contracts\Routing\Router as RouterContract;
+use Ems\Core\Url as UrlObject;
 
 use function call_user_func;
 use function is_object;
@@ -17,16 +19,6 @@ use function method_exists;
 
 class UrlGenerator implements UrlGeneratorContract
 {
-    /**
-     * @var callable
-     */
-    protected $baseUrlProvider;
-
-    /**
-     * @var Url
-     */
-    private $baseUrl;
-
     /**
      * @var RouterContract
      */
@@ -37,9 +29,33 @@ class UrlGenerator implements UrlGeneratorContract
      */
     protected $compiler;
 
-    public function __construct()
+    /**
+     * @var callable
+     */
+    protected $baseUrlProvider;
+
+    /**
+     * @var Input
+     */
+    protected $input;
+
+    /**
+     * @var array
+     */
+    protected $baseUrlCache = [];
+
+    /**
+     * @var Url
+     */
+    protected $assetUrl;
+
+    public function __construct(Router $router, CurlyBraceRouteCompiler $compiler, Input $input=null, &$baseUrlCache=[])
     {
-        $this->baseUrl = new UrlObject('localhost');
+        $this->router = $router;
+        $this->compiler = $compiler;
+        $this->baseUrlProvider = $this->defaultBaseUrlProvider();
+        $this->input = $input ?: GenericInput::clientType(Input::CLIENT_WEB, RouteScope::DEFAULT);
+        $this->baseUrlCache = $baseUrlCache;
     }
 
     /**
@@ -52,7 +68,8 @@ class UrlGenerator implements UrlGeneratorContract
         if ($this->looksLikeAnEntity($path)) {
             return $this->entity($path, 'show', $scope);
         }
-        return $this->getBaseUrl($scope)->append((string)$path);
+        $baseUrl = $this->getBaseUrl($scope);
+        return $path == '/' ? $baseUrl : $baseUrl->append((string)$path);
     }
 
     /**
@@ -63,7 +80,7 @@ class UrlGenerator implements UrlGeneratorContract
      */
     public function route(string $name, array $parameters = [], $scope = null): Url
     {
-        $route = $this->router->getByName($name);
+        $route = $this->router->getByName($name, $this->input->getClientType());
         return $this->to($this->compiler->compile($route->pattern, $parameters));
     }
 
@@ -72,6 +89,34 @@ class UrlGenerator implements UrlGeneratorContract
         // TODO: Implement entity() method.
     }
 
+    /**
+     * Return an asset url.
+     *
+     * @param string                 $path
+     * @param RouteScope|string|null $scope
+     * @return Url
+     */
+    public function asset(string $path, $scope = null): Url
+    {
+        if ($this->assetUrl) {
+            return $this->assetUrl->append($path);
+        }
+        return $this->to($path, $scope);
+    }
+
+    /**
+     * @return Input
+     */
+    public function getInput(): Input
+    {
+        return $this->input;
+    }
+
+    public function withInput(Input $input): UrlGeneratorContract
+    {
+        return (new static($this->router, $this->compiler, $input, $this->baseUrlCache))
+            ->setBaseUrlProvider($this->baseUrlProvider);
+    }
 
     /**
      * @param string|RouteScope|null $scope
@@ -79,15 +124,50 @@ class UrlGenerator implements UrlGeneratorContract
      */
     public function getBaseUrl($scope=null) : Url
     {
-        if (!$this->baseUrlProvider) {
-            return $this->baseUrl;
+        $cacheId = $this->cacheId($this->input, $scope);
+        if (!isset($this->baseUrlCache[$cacheId])) {
+            $this->baseUrlCache[$cacheId] = call_user_func($this->baseUrlProvider, $this->input, $scope);
         }
-        return call_user_func($this->baseUrlProvider, $this->baseUrl, $scope);
+        return $this->baseUrlCache[$cacheId];
     }
 
-    public function setBaseUrl(Url $url) : UrlGenerator
+    /**
+     * @return callable
+     */
+    public function getBaseUrlProvider(): callable
     {
-        $this->baseUrl = $url;
+        return $this->baseUrlProvider;
+    }
+
+    /**
+     * Set the base url provider. The base url provider creates an url for the
+     * assigned input.
+     * Create your own base url provider to return different urls per input
+     *
+     * @param callable $baseUrlProvider
+     * @return UrlGenerator
+     */
+    public function setBaseUrlProvider(callable $baseUrlProvider): UrlGenerator
+    {
+        $this->baseUrlProvider = $baseUrlProvider;
+        return $this;
+    }
+
+    /**
+     * @return Url|null
+     */
+    public function getAssetUrl(): ?Url
+    {
+        return $this->assetUrl;
+    }
+
+    /**
+     * @param Url $assetUrl
+     * @return UrlGenerator
+     */
+    public function setAssetUrl(Url $assetUrl): UrlGenerator
+    {
+        $this->assetUrl = $assetUrl;
         return $this;
     }
 
@@ -98,5 +178,27 @@ class UrlGenerator implements UrlGeneratorContract
     protected function looksLikeAnEntity($path) : bool
     {
         return is_object($path) && (isset($path->id) || method_exists($path, 'getId'));
+    }
+
+    /**
+     * @param Input                     $input
+     * @param RouteScope|string|null    $scope
+     *
+     * @return string
+     */
+    protected function cacheId(Input $input, $scope=null) : string
+    {
+        $scope = $scope ?: $input->getRouteScope();
+        return $input->getClientType() . '|' . ($scope ?: RouteScope::DEFAULT);
+    }
+
+    /**
+     * @return Closure
+     */
+    protected function defaultBaseUrlProvider() : Closure
+    {
+        return function (Input $input, $scope=null) {
+            return new UrlObject('http://localhost');
+        };
     }
 }

@@ -38,7 +38,7 @@ class RouterTest extends TestCase
      */
     public function it_implements_interface()
     {
-        $this->assertInstanceOf(RouterContract::class, $this->make());
+        $this->assertInstanceOf(RouterContract::class, $this->router());
     }
 
     /**
@@ -48,7 +48,7 @@ class RouterTest extends TestCase
     public function it_registers_routes()
     {
 
-        $router = $this->make();
+        $router = $this->router();
 
         $router->register(function (RouteCollector $collector) {
 
@@ -109,7 +109,7 @@ class RouterTest extends TestCase
     public function it_registers_routes_with_parameters()
     {
 
-        $router = $this->make();
+        $router = $this->router();
 
         $router->register(function (RouteCollector $collector) {
 
@@ -169,7 +169,7 @@ class RouterTest extends TestCase
     public function it_registers_routes_with_optional_parameters()
     {
 
-        $router = $this->make();
+        $router = $this->router();
 
         $router->register(function (RouteCollector $collector) {
 
@@ -229,7 +229,7 @@ class RouterTest extends TestCase
     public function it_registers_commands()
     {
 
-        $router = $this->make();
+        $router = $this->router();
 
         $router->register(function (RouteCollector $collector) {
 
@@ -347,7 +347,7 @@ class RouterTest extends TestCase
     public function it_routes_only_for_registered_clientType()
     {
 
-        $router = $this->make();
+        $router = $this->router();
 
         $router->register(function (RouteCollector $collector) {
 
@@ -413,7 +413,7 @@ class RouterTest extends TestCase
     public function it_routes_only_for_registered_scope()
     {
 
-        $router = $this->make();
+        $router = $this->router();
 
         $router->register(function (RouteCollector $collector) {
 
@@ -475,7 +475,7 @@ class RouterTest extends TestCase
     public function it_handles_routes()
     {
 
-        $router = $this->make();
+        $router = $this->router();
         $router->createObjectsBy(function ($class) {
             return new $class;
         });
@@ -539,7 +539,7 @@ class RouterTest extends TestCase
     public function getByClientType_returns_only_matching_routes()
     {
 
-        $router = $this->make();
+        $router = $this->router();
 
         $router->register(function (RouteCollector $collector) {
 
@@ -571,7 +571,7 @@ class RouterTest extends TestCase
     public function register_with_common_client_type()
     {
 
-        $router = $this->make();
+        $router = $this->router();
 
         $router->register(function (RouteCollector $collector) {
 
@@ -603,7 +603,7 @@ class RouterTest extends TestCase
     public function register_with_common_client_type_and_overwrites()
     {
 
-        $router = $this->make();
+        $router = $this->router();
 
         $router->register(function (RouteCollector $collector) {
 
@@ -638,7 +638,7 @@ class RouterTest extends TestCase
     public function register_with_common_scope()
     {
 
-        $router = $this->make();
+        $router = $this->router();
 
         $router->register(function (RouteCollector $collector) {
 
@@ -679,7 +679,7 @@ class RouterTest extends TestCase
     public function register_with_common_scope_and_overwrites()
     {
 
-        $router = $this->make();
+        $router = $this->router();
 
         $router->register(function (RouteCollector $collector) {
 
@@ -727,7 +727,7 @@ class RouterTest extends TestCase
     public function register_with_common_middleware()
     {
 
-        $router = $this->make();
+        $router = $this->router();
 
         $router->register(function (RouteCollector $collector) {
 
@@ -765,7 +765,7 @@ class RouterTest extends TestCase
     public function register_with_common_middleware_and_additional()
     {
 
-        $router = $this->make();
+        $router = $this->router();
 
         $router->register(function (RouteCollector $collector) {
 
@@ -808,7 +808,7 @@ class RouterTest extends TestCase
     public function register_with_common_middleware_and_same_middleware_with_different_parameters()
     {
 
-        $router = $this->make();
+        $router = $this->router();
 
         $router->register(function (RouteCollector $collector) {
 
@@ -841,7 +841,7 @@ class RouterTest extends TestCase
     public function register_with_common_path_and_controller_prefix()
     {
 
-        $router = $this->make();
+        $router = $this->router();
 
         $router->register(function (RouteCollector $collector) {
 
@@ -891,7 +891,7 @@ class RouterTest extends TestCase
      */
     public function getByPattern_returns_routes_by_pattern()
     {
-        $router = $this->make(true);
+        $router = $this->router(true);
 
         $result = $router->getByPattern('users');
         $this->assertContainsOnlyInstancesOf(Route::class, $result);
@@ -917,7 +917,7 @@ class RouterTest extends TestCase
      */
     public function getByName_returns_routes_by_name()
     {
-        $router = $this->make(true);
+        $router = $this->router(true);
 
         foreach (static::$testRoutes as $routeData) {
             $route = $router->getByName($routeData['name']);
@@ -932,7 +932,7 @@ class RouterTest extends TestCase
      */
     public function getByName_throws_exception_if_route_not_found()
     {
-        $this->make(true)->getByName('foo');
+        $this->router(true)->getByName('foo');
     }
 
     /**
@@ -942,7 +942,7 @@ class RouterTest extends TestCase
     public function clientTypes_returns_all_registered_clientTypes()
     {
 
-        $router = $this->make();
+        $router = $this->router();
         $router->createObjectsBy(function ($class) {
             return new $class;
         });
@@ -998,7 +998,7 @@ class RouterTest extends TestCase
     public function it_registers_command_and_route_in_one_call()
     {
 
-        $router = $this->make();
+        $router = $this->router();
 
         $router->register(function (RouteCollector $collector) {
 
@@ -1064,7 +1064,7 @@ class RouterTest extends TestCase
     public function it_registers_route_and_command_in_one_call()
     {
 
-        $router = $this->make();
+        $router = $this->router();
 
         $router->register(function (RouteCollector $collector) {
 
@@ -1121,15 +1121,6 @@ class RouterTest extends TestCase
         $this->assertEquals([Input::CLIENT_CONSOLE], $route->clientTypes);
         $this->assertTrue($routable->isRouted());
 
-    }
-
-    protected function make($filled=false)
-    {
-        $router = new Router();
-        if ($filled) {
-            $this->fill($router);
-        }
-        return $router;
     }
 
     /**

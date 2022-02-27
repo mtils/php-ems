@@ -79,5 +79,31 @@ class GenericInput extends Message implements Input
         return $this;
     }
 
+    /**
+     * Shortcut to create an input object with the passed client type.
+     *
+     * @param string                 $clientType
+     * @param string|RouteScope|null $scope
+     *
+     * @return Input|GenericInput
+     */
+    public static function clientType(string $clientType, $scope=null)
+    {
+        $input = (new static())->setClientType($clientType);
+        return $scope === null ? $input : $input->setRouteScope($scope);
+    }
 
+    /**
+     * Shortcut to create an input object just for the passed scope.
+     *
+     * @param string|RouteScope     $scope
+     * @param string|null           $clientType
+     *
+     * @return Input|GenericInput
+     */
+    public static function scope($scope, string $clientType=null)
+    {
+        $input = (new static())->setRouteScope($scope);
+        return $clientType === null ? $input : $input->setClientType($clientType);
+    }
 }
