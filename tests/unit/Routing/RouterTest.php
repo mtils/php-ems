@@ -21,6 +21,7 @@ use Ems\Core\Url;
 use Ems\RoutingTrait;
 use Ems\TestCase;
 use LogicException;
+use OutOfBoundsException;
 use ReflectionException;
 
 use function array_values;
@@ -1124,6 +1125,98 @@ class RouterTest extends TestCase
     }
 
     /**
+     * @test
+     */
+    public function it_finds_routes_by_entity_string()
+    {
+        $router = $this->router();
+
+        $router->register(function (RouteCollector $collector) {
+
+            $collector->get('addresses', 'UserController::index')
+                ->entity(RouterTest_Address::class);
+        });
+
+        $route = $router->getByEntityAction(RouterTest_Address::class);
+        $this->assertEquals('addresses', $route->pattern);
+    }
+
+    /**
+     * @test
+     */
+    public function it_finds_routes_by_direct_class()
+    {
+        $router = $this->router();
+
+        $router->register(function (RouteCollector $collector) {
+
+            $collector->get('addresses', 'UserController::index')
+                ->entity(RouterTest_Address::class);
+        });
+
+        $route = $router->getByEntityAction(new RouterTest_Address());
+        $this->assertEquals('addresses', $route->pattern);
+    }
+
+    /**
+     * @test
+     */
+    public function it_finds_routes_by_extended_class()
+    {
+        $router = $this->router();
+
+        $router->register(function (RouteCollector $collector) {
+
+            $collector->get('addresses', 'UserController::index')
+                ->entity(RouterTest_Address::class);
+        });
+
+        $route = $router->getByEntityAction(new RouterTest_CustomAddress());
+        $this->assertEquals('addresses', $route->pattern);
+
+        $route = $router->getByEntityAction(RouterTest_CustomAddress::class);
+        $this->assertEquals('addresses', $route->pattern);
+    }
+
+    /**
+     * @test
+     */
+    public function it_throws_an_exception_if_entity_not_found()
+    {
+        $router = $this->router();
+
+        $router->register(function (RouteCollector $collector) {
+
+            $collector->get('addresses', 'UserController::index')
+                ->entity(RouterTest_Address::class);
+        });
+
+        $this->expectException(OutOfBoundsException::class);
+        $router->getByEntityAction('foo');
+    }
+
+    /**
+     * @test
+     */
+    public function it_throws_an_exception_if_action_not_found()
+    {
+        $router = $this->router();
+
+        $router->register(function (RouteCollector $collector) {
+
+            $collector->get('addresses', 'UserController::index')
+                ->entity(RouterTest_Address::class);
+        });
+
+        $route = $router->getByEntityAction(new RouterTest_CustomAddress(), 'index');
+        $this->assertEquals('addresses', $route->pattern);
+
+        $this->expectException(OutOfBoundsException::class);
+        $router->getByEntityAction(new RouterTest_CustomAddress(), 'show');
+
+    }
+
+    /**
      * @param $url
      * @param string $method
      * @param string $clientType
@@ -1139,6 +1232,16 @@ class RouterTest extends TestCase
         }
         return $routable->setMethod($method)->setUrl($url)->setClientType($clientType)->setRouteScope($scope);
     }
+}
+
+class RouterTest_Address
+{
+
+}
+
+class RouterTest_CustomAddress extends RouterTest_Address
+{
+
 }
 
 class RouterTest_TestController

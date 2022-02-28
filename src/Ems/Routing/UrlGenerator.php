@@ -8,12 +8,16 @@ namespace Ems\Routing;
 use Closure;
 use Ems\Contracts\Core\Url;
 use Ems\Contracts\Routing\Input;
+use Ems\Contracts\Routing\Route;
 use Ems\Contracts\Routing\Router as RouterContract;
 use Ems\Contracts\Routing\RouteScope;
 use Ems\Contracts\Routing\UrlGenerator as UrlGeneratorContract;
 use Ems\Core\Url as UrlObject;
 
+use UnexpectedValueException;
+
 use function call_user_func;
+use function get_class;
 use function is_object;
 use function method_exists;
 
@@ -73,20 +77,31 @@ class UrlGenerator implements UrlGeneratorContract
     }
 
     /**
-     * @param string            $name
-     * @param array             $parameters
-     * @param string|RouteScope $scope
+     * @param string|Route              $route
+     * @param array                     $parameters
+     * @param string|RouteScope|null    $scope
+     *
      * @return Url
      */
-    public function route(string $name, array $parameters = [], $scope = null): Url
+    public function route($route, array $parameters = [], $scope = null): Url
     {
-        $route = $this->router->getByName($name, $this->input->getClientType());
-        return $this->to($this->compiler->compile($route->pattern, $parameters));
+        if (!$route instanceof Route) {
+            $route = $this->router->getByName($route, $this->input->getClientType());
+        }
+        return $this->to($this->compiler->compile($route->pattern, $parameters), $scope);
     }
 
+    /**
+     * @param object|array          $entity
+     * @param string                $action   (optional)
+     * @param string|RouteScope|null $scope
+     *
+     * @return Url
+     */
     public function entity($entity, string $action = 'show', $scope = null): Url
     {
-        // TODO: Implement entity() method.
+        $route = $this->router->getByEntityAction($entity, $action, $this->input->getClientType());
+        return $this->route($route, [$this->extractId($entity)], $scope);
     }
 
     /**
@@ -178,6 +193,22 @@ class UrlGenerator implements UrlGeneratorContract
     protected function looksLikeAnEntity($path) : bool
     {
         return is_object($path) && (isset($path->id) || method_exists($path, 'getId'));
+    }
+
+    /**
+     * @param object $entity
+     * @return mixed
+     */
+    protected function extractId($entity)
+    {
+        if (isset($entity->id)) {
+            return $entity->id;
+        }
+        if (method_exists($entity, 'getId')) {
+            return $entity->getId();
+        }
+        $class = get_class($entity);
+        throw new UnexpectedValueException("Impossible to guess identifier of object of class '$class'");
     }
 
     /**

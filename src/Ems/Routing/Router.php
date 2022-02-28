@@ -6,23 +6,28 @@
 namespace Ems\Routing;
 
 use ArrayIterator;
-use Ems\Contracts\Routing\Input;
-use Ems\Core\Response;
+use Ems\Contracts\Core\Containers\ByTypeContainer;
 use Ems\Contracts\Core\SupportsCustomFactory;
 use Ems\Contracts\Routing\Command;
 use Ems\Contracts\Routing\Dispatcher;
 use Ems\Contracts\Routing\Exceptions\RouteNotFoundException;
+use Ems\Contracts\Routing\Input;
 use Ems\Contracts\Routing\Route;
 use Ems\Contracts\Routing\RouteCollector;
 use Ems\Contracts\Routing\Router as RouterContract;
 use Ems\Core\Exceptions\KeyNotFoundException;
 use Ems\Core\Lambda;
+use Ems\Core\Response;
 use Ems\Core\Support\CustomFactorySupport;
 use Ems\Routing\FastRoute\FastRouteDispatcher;
+use OutOfBoundsException;
 use ReflectionException;
 use Traversable;
+
 use function call_user_func;
-use function var_dump;
+use function get_class;
+use function implode;
+use function is_object;
 
 class Router implements RouterContract, SupportsCustomFactory
 {
@@ -42,6 +47,16 @@ class Router implements RouterContract, SupportsCustomFactory
      * @var array
      */
     protected $byPattern = [];
+
+    /**
+     * @var array
+     */
+    protected $byEntity = [];
+
+    /**
+     * @var ByTypeContainer[]
+     */
+    protected $byTypeContainers = [];
 
     /**
      * @var array
@@ -179,6 +194,38 @@ class Router implements RouterContract, SupportsCustomFactory
     }
 
     /**
+     * {@inheritDoc}
+     *
+     * @param object|string $entity
+     * @param string $action
+     * @param string $clientType
+     *
+     * @return Route
+     */
+    public function getByEntityAction($entity, string $action = 'index', string $clientType = Input::CLIENT_WEB): Route
+    {
+        if (is_string($entity) && isset($this->byEntity[$clientType][$entity][$action])) {
+            return $this->byEntity[$clientType][$entity][$action];
+        }
+        if (!isset($this->byTypeContainers[$clientType])) {
+            $this->byTypeContainers[$clientType] = new ByTypeContainer($this->byEntity[$clientType]);
+        }
+        $class = is_object($entity) ? get_class($entity) : $entity;
+        if (!$result = $this->byTypeContainers[$clientType]->forInstanceOf($class)) {
+            throw new OutOfBoundsException("No route found that was associated with entity '$class'.");
+        }
+
+        if (isset($result[$action])) {
+            return $result[$action];
+        }
+
+        $actions = array_keys($result);
+        throw new OutOfBoundsException("Action $action not found for entity '$class'. The only known actions are: " . implode(',', $actions));
+
+    }
+
+
+    /**
      * Return all known unique client types (by route registrations)
      *
      * @return string[]
@@ -243,10 +290,6 @@ class Router implements RouterContract, SupportsCustomFactory
                 $interpreter->add($method, $data['pattern'], $data);
             }
 
-        }
-
-        foreach ($data['clientTypes'] as $clientType) {
-
             if (!isset($this->byPattern[$clientType])) {
                 $this->byPattern[$clientType] = [];
             }
@@ -256,6 +299,17 @@ class Router implements RouterContract, SupportsCustomFactory
             }
 
             $this->byPattern[$clientType][$data['pattern']][] = $route;
+
+            if (!isset($data['entity']) || !$data['entity']) {
+                continue;
+            }
+
+            if (!isset($this->byEntity[$clientType])) {
+                $this->byEntity[$clientType] = [
+                    $data['entity'] => []
+                ];
+            }
+            $this->byEntity[$clientType][$data['entity']][$data['action']] = $route;
 
         }
 

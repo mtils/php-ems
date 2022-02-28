@@ -97,6 +97,19 @@ interface Router extends IteratorAggregate
     public function getByName(string $name, string $clientType=Input::CLIENT_WEB) : Route;
 
     /**
+     * Get a route by an entity action. Pass a or interface class name for absolute
+     * equal comparison. Pass an object to get the route of classes or
+     * interfaces this objects implements or extends.
+     *
+     * @param object|string $entity
+     * @param string $action
+     * @param string $clientType
+     *
+     * @return Route
+     */
+    public function getByEntityAction($entity, string $action='index', string $clientType=Input::CLIENT_WEB) : Route;
+
+    /**
      * Return all known unique client types (by route registrations)
      *
      * @return string[]

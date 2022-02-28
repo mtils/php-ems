@@ -35,6 +35,11 @@ class ByTypeContainer implements ArrayAccess, IteratorAggregate, Countable
      */
     protected $forInstanceOfCache = [];
 
+    public function __construct(array $extensions=[])
+    {
+        $this->extensions = $extensions;
+    }
+
     /**
      * Find the handler/data for $class. Check by inheritance.
      *
@@ -135,4 +140,5 @@ class ByTypeContainer implements ArrayAccess, IteratorAggregate, Countable
     {
         return count($this->extensions);
     }
+
 }

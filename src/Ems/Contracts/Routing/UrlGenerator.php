@@ -29,13 +29,13 @@ interface  UrlGenerator
      * This is similar to laravels UrlGenerator::route() method but also returns
      * an object.
      *
-     * @param string $name
-     * @param array  $parameters (optional)
-     * @param string|RouteScope|null $scope
+     * @param string|Route              $route
+     * @param array                     $parameters (optional)
+     * @param string|RouteScope|null    $scope
      *
      * @return Url
      **/
-    public function route(string $name, array $parameters = [], $scope=null) : Url;
+    public function route($route, array $parameters = [], $scope=null) : Url;
 
     /**
      * Return the url to an entity action. Default action is show. Pass an array
