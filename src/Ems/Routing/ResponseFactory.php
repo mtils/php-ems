@@ -7,12 +7,12 @@ namespace Ems\Routing;
 
 use Ems\Contracts\Core\Stringable;
 use Ems\Contracts\Core\Url;
-use Ems\Contracts\Routing\UtilizesInput;
 use Ems\Contracts\Routing\Input;
 use Ems\Contracts\Routing\ResponseFactory as ResponseFactoryContract;
-use Ems\Contracts\Skeleton\InputConnection;
+use Ems\Contracts\Routing\UtilizesInput;
 use Ems\Contracts\View\View as ViewContract;
 use Ems\Core\Response;
+use Ems\Http\Client;
 use Ems\Http\HttpResponse;
 use Ems\View\View;
 
@@ -39,7 +39,14 @@ class ResponseFactory implements ResponseFactoryContract, UtilizesInput
             return new Response($attributes);
         }
 
-        return new HttpResponse($attributes);
+        $response = new HttpResponse($attributes);
+        $response->provideSerializerBy(function ($contentType) {
+            // Defer including of client because it is unlikely we need a
+            // deserializer in self created responses
+            $provider = Client::makeSerializerFactory();
+            return $provider($contentType);
+        });
+        return $response;
     }
 
     /**

@@ -24,6 +24,9 @@ class GenericInput extends Message implements Input
     public function __construct(...$args)
     {
         parent::__construct(...$args);
+        if (!$this->clientType) {
+            $this->clientType = Input::CLIENT_WEB;
+        }
     }
 
 

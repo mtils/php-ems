@@ -80,7 +80,13 @@ class StdOutputConnectionTest extends TestCase
         $string = ob_get_contents();
         ob_end_clean();
         $this->assertEquals('Hello', $string);
-        $this->assertEquals('foo: bar', $headers[1]);
+        $found = false;
+        foreach ($headers as $header) {
+            if ($header == 'foo: bar') {
+                $found = true;
+            }
+        }
+        $this->assertTrue($found, 'Added header was in response');
     }
 
     /**

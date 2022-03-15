@@ -17,10 +17,17 @@ use Ems\Http\HttpResponse;
 use Ems\Http\Serializer\CookieSerializer;
 use Psr\Http\Message\ResponseInterface;
 
+use function array_keys;
+use function array_map;
 use function call_user_func;
 use function fopen;
 use function headers_sent;
+use function in_array;
+use function ini_get;
 use function is_bool;
+use function is_object;
+use function method_exists;
+use function strtolower;
 
 class StdOutputConnection extends AbstractConnection implements OutputConnection
 {
@@ -130,6 +137,8 @@ class StdOutputConnection extends AbstractConnection implements OutputConnection
         if ($response->status > 299 && $response->status < 600) {
             $this->printHeader($this->buildStatusLine($response->status));
         }
+
+        $this->outputPropertiesAsHeaders($response, $response->envelope);
     }
 
     /**
@@ -143,7 +152,10 @@ class StdOutputConnection extends AbstractConnection implements OutputConnection
 
         $this->printHeader($this->getStatusLine($response));
 
-        foreach ($response->getHeaders() as $key=>$lines) {
+        $headers = $response->getHeaders();
+        $this->outputPropertiesAsHeaders($response, $headers);
+
+        foreach ($headers as $key=>$lines) {
             foreach ($lines as $header) {
                 $this->printHeader("$key: $header");
             }
@@ -223,5 +235,34 @@ class StdOutputConnection extends AbstractConnection implements OutputConnection
     protected function buildStatusLine(int $status=200, string $protocolVersion='1.1', string $reasonPhrase='') : string
     {
         return trim("HTTP/$protocolVersion $status $reasonPhrase");
+    }
+
+    /**
+     * @param Response $response
+     * @param array $envelope
+     * @return void
+     */
+    protected function outputPropertiesAsHeaders(Response $response, array $envelope)
+    {
+        $lowerKeys = array_map(function ($key) {
+            return strtolower($key);
+        }, array_keys($envelope));
+
+        if ($response->contentType && !in_array('content-type', $lowerKeys)) {
+            $this->printHeader("Content-Type: $response->contentType; charset=".$this->guessCharset($response));
+        }
+    }
+
+    /**
+     * @param Response $response
+     * @return string
+     */
+    protected function guessCharset(Response $response) : string
+    {
+        $payload = $response->payload;
+        if (is_object($payload) && method_exists($payload, 'getCharset')) {
+            return $payload->getCharset();
+        }
+        return  ini_get('default_charset') ?: 'UTF-8';
     }
 }

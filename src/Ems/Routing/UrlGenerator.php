@@ -13,7 +13,6 @@ use Ems\Contracts\Routing\Router as RouterContract;
 use Ems\Contracts\Routing\RouteScope;
 use Ems\Contracts\Routing\UrlGenerator as UrlGeneratorContract;
 use Ems\Core\Url as UrlObject;
-
 use UnexpectedValueException;
 
 use function call_user_func;
@@ -53,7 +52,7 @@ class UrlGenerator implements UrlGeneratorContract
      */
     protected $assetUrl;
 
-    public function __construct(Router $router, CurlyBraceRouteCompiler $compiler, Input $input=null, &$baseUrlCache=[])
+    public function __construct(RouterContract $router, CurlyBraceRouteCompiler $compiler, Input $input=null, &$baseUrlCache=[])
     {
         $this->router = $router;
         $this->compiler = $compiler;
@@ -129,8 +128,12 @@ class UrlGenerator implements UrlGeneratorContract
 
     public function withInput(Input $input): UrlGeneratorContract
     {
-        return (new static($this->router, $this->compiler, $input, $this->baseUrlCache))
+        $copy = (new static($this->router, $this->compiler, $input, $this->baseUrlCache))
             ->setBaseUrlProvider($this->baseUrlProvider);
+        if ($this->assetUrl) {
+            $copy->setAssetUrl($this->assetUrl);
+        }
+        return $copy;
     }
 
     /**

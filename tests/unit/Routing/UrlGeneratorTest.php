@@ -159,6 +159,67 @@ class UrlGeneratorTest extends TestCase
         $showProject = $urls->entity($project);
         $this->assertEquals("$domain/projects/12", "$showProject");
 
+        $this->assertEquals("$domain/projects/12", $urls->to($project));
+
+    }
+
+    /**
+     * @test
+     */
+    public function asset_returns_base_url()
+    {
+        $urls = $this->make();
+        $domain = 'https://web-utils.de';
+        $provider = $this->urlProvider($domain);
+        $urls->setBaseUrlProvider($provider);
+        $this->assertSame($provider, $urls->getBaseUrlProvider());
+
+        $this->assertEquals("$domain/blank.gif", $urls->asset('blank.gif'));
+    }
+
+    /**
+     * @test
+     */
+    public function asset_uses_custom_asset_url()
+    {
+        $urls = $this->make();
+        $domain = 'https://web-utils.de';
+        $assetUrl = new \Ems\Core\Url('https://static.web-utils.de');
+        $provider = $this->urlProvider($domain);
+        $urls->setBaseUrlProvider($provider);
+        $urls->setAssetUrl($assetUrl);
+
+        $this->assertEquals("$assetUrl/blank.gif", $urls->asset('blank.gif'));
+    }
+
+    /**
+     * @test
+     */
+    public function url_from_different_clientType()
+    {
+        $router = $this->router();
+        $router->register(function (RouteCollector $collector) {
+            $collector->get('projects/{project_id}', UserController::class)
+                ->name('projects.show')
+            ->clientType([Input::CLIENT_WEB, Input::CLIENT_API]);
+        });
+        $urls = $this->make($router);
+        $domain = 'https://web-utils.de';
+        $provider = function (Input $input, $scope = null) use ($domain) {
+            $url = new \Ems\Core\Url($domain);
+            if ($input->getClientType() == Input::CLIENT_WEB) {
+                return $url;
+            }
+            return $url->append($input->getClientType());
+        };
+
+        $otherClientInput = new GenericInput();
+        $otherClientInput->setClientType(Input::CLIENT_API);
+        $urls->setBaseUrlProvider($provider);
+
+        $this->assertEquals("$domain/projects/33",  (string)$urls->route('projects.show', [33]));
+        $this->assertEquals("$domain/api/projects/33",  (string)$urls->withInput($otherClientInput)->route('projects.show', [33]));
+
     }
 
     protected function make(Router $router=null, CurlyBraceRouteCompiler $compiler=null, Input $input=null, &$baseUrlCache=[]) : UrlGenerator
@@ -167,7 +228,6 @@ class UrlGeneratorTest extends TestCase
         $compiler = $compiler ?: new CurlyBraceRouteCompiler();
         return new UrlGenerator($router, $compiler, $input, $baseUrlCache);
     }
-
 
     protected function urlProvider($baseUrl = 'http://localhost') : Closure
     {

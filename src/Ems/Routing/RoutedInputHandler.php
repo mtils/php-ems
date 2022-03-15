@@ -11,6 +11,7 @@ use Ems\Contracts\Core\SupportsCustomFactory;
 use Ems\Contracts\Core\Type;
 use Ems\Contracts\Routing\Input as InputContract;
 use Ems\Contracts\Routing\InputHandler as InputHandlerContract;
+use Ems\Contracts\Routing\UrlGenerator as UrlGeneratorContract;
 use Ems\Contracts\Routing\UtilizesInput;
 use Ems\Core\Exceptions\UnConfiguredException;
 use Ems\Core\Input;
@@ -148,6 +149,11 @@ class RoutedInputHandler implements InputHandlerContract, SupportsCustomFactory,
         if ($this->_customFactory instanceof IOCContainer) {
             $this->_customFactory->on(UtilizesInput::class, function (UtilizesInput $inputUser) use ($input) {
                 $inputUser->setInput($input);
+            });
+            $this->_customFactory->bind(UrlGeneratorContract::class, function () use ($input) {
+                /** @var UrlGenerator $urls */
+                $urls = $this->_customFactory->create(UrlGenerator::class);
+                return $urls->withInput($input);
             });
         }
         // Manually bind the current input to explicitly use the input of this

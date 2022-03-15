@@ -285,7 +285,7 @@ class Client implements ClientContract
     protected function serializerFactory() : Closure
     {
         if (!$this->serializer) {
-            return $this->makeSerializerFactory();
+            return self::makeSerializerFactory();
         }
 
         if ($this->serializer instanceof Serializer) {
@@ -302,7 +302,11 @@ class Client implements ClientContract
         };
     }
 
-    protected function makeSerializerFactory() : Closure
+    /**
+     * TODO Centralize this. Perhaps use ResponseFactory everywhere
+     * @return Closure
+     */
+    public static function makeSerializerFactory() : Closure
     {
         return function ($contentType) {
             $contentType = strtolower($contentType);

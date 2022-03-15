@@ -29,6 +29,8 @@ use Ems\Skeleton\Bootstrapper;
 use Ems\Skeleton\Routing\RoutesConsoleView;
 use Ems\Skeleton\Routing\RoutesController;
 use Psr\Http\Message\RequestInterface;
+use Ems\Contracts\Routing\UrlGenerator as UrlGeneratorContract;
+use Ems\Routing\UrlGenerator;
 
 use function method_exists;
 use function php_sapi_name;
@@ -44,6 +46,7 @@ class RoutingBootstrapper extends Bootstrapper
     protected $bindings = [
         FastRouteDispatcher::class => Dispatcher::class,
         MiddlewareCollection::class => MiddlewareCollectionContract::class,
+        UrlGenerator::class         => UrlGeneratorContract::class
     ];
 
     protected $defaultSessionClients = [Input::CLIENT_WEB, Input::CLIENT_CMS, Input::CLIENT_AJAX, Input::CLIENT_MOBILE];
