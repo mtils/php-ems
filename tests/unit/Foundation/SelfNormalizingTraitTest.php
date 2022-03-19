@@ -93,7 +93,7 @@ class SelfNormalizingTraitTest extends \Ems\TestCase
         $this->assertEquals($args, $obj->calls[0][1]);
 
         $this->assertEquals('validateUncleBenz', $obj->calls[1][0]);
-        $this->assertEquals(['hihi', $awaited, null, null], $obj->calls[1][1]);
+        $this->assertEquals(['hihi', $awaited, null, []], $obj->calls[1][1]);
 
     }
 
@@ -147,7 +147,7 @@ class SelfNormalizingTraitTest extends \Ems\TestCase
         $this->assertEquals($adjustArgs, $obj->calls[0][1]);
 
         $this->assertEquals('validateUncleBenz', $obj->calls[1][0]);
-        $this->assertEquals(['hihi', $validatorInput, $resource, $locale], $obj->calls[1][1]);
+        $this->assertEquals(['hihi', $validatorInput, $resource, []], $obj->calls[1][1]);
 
         $this->assertEquals('castAddressStreet', $obj->calls[2][0]);
         $this->assertEquals(['Str.', $validatorInput, $resource, $locale], $obj->calls[2][1]);
@@ -167,8 +167,8 @@ class SelfNormalizingTraitTest extends \Ems\TestCase
     protected function newValidatorFactory()
     {
         $createValidator = function () {
-            return new GenericValidator(['a' => 'b'], function () {
-                return true;
+            return new GenericValidator(['a' => 'b'], function ($baseValidator, $input) {
+                return $input;
             });
         };
         return new GenericValidatorFactory($createValidator);

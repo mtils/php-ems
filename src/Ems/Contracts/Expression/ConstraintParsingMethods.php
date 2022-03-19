@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Ems\Expression;
+namespace Ems\Contracts\Expression;
 
 
 use function is_array;
@@ -15,7 +15,7 @@ trait ConstraintParsingMethods
      *
      * @return array
      **/
-    protected function parseConstraints(array $constraints)
+    protected function parseConstraints(array $constraints) : array
     {
         $parsedConstraints = [];
 
@@ -33,7 +33,7 @@ trait ConstraintParsingMethods
      *
      * @return array
      **/
-    protected function parseConstraint($rule)
+    protected function parseConstraint($rule) : array
     {
         $parsed = [];
 
@@ -59,7 +59,7 @@ trait ConstraintParsingMethods
      *
      * @return array
      **/
-    protected function explodeConstraints($keyConstraints)
+    protected function explodeConstraints($keyConstraints) : array
     {
         return is_string($keyConstraints) ? explode('|', $keyConstraints) : (array)$keyConstraints;
     }
@@ -71,7 +71,7 @@ trait ConstraintParsingMethods
      *
      * @return array
      **/
-    protected function nameAndParameters($constraint)
+    protected function nameAndParameters(string $constraint) : array
     {
         if (!strpos($constraint, ':')) {
             return [$this->normalizeConstraintName($constraint), []];
@@ -89,19 +89,19 @@ trait ConstraintParsingMethods
      *
      * @return string
      **/
-    protected function normalizeConstraintName($name)
+    protected function normalizeConstraintName(string $name) : string
     {
         return str_replace('-', '_', mb_strtolower($name));
     }
 
     /**
-     * Make every parameters to array if they are not already arrays.
+     * Make every parameter to array if they are not already arrays.
      *
      * @param array $rule
      *
      * @return array
      */
-    protected function normalizeNativeRule(array $rule)
+    protected function normalizeNativeRule(array $rule) : array
     {
         $normalized = [];
         foreach ($rule as $key=>$parameters) {

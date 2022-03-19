@@ -249,11 +249,11 @@ class PointInTime extends DateTime implements TemporalContract
     /**
      * Try to guess the datetime by the passed string.
      *
-     * @param string $date
+     * @param mixed $date
      *
      * @return static
      */
-    public static function guessFrom($date)
+    public static function guessFrom($date) : PointInTime
     {
         if ($date instanceof DateTime) {
             return (new static())->setTimestamp($date->getTimestamp())->setTimezone($date->getTimezone());
@@ -275,7 +275,7 @@ class PointInTime extends DateTime implements TemporalContract
         $date = (string) $date;
 
         if ($dateTime = date_create($date)) {
-            return $dateTime;
+            return static::guessFrom($dateTime);
         }
 
         throw new InvalidArgumentException("No idea how to cast $date to DateTime");

@@ -4,6 +4,7 @@
  **/
 
 namespace Ems\Contracts\Core;
+use Ems\Contracts\Core\Errors\ConstraintFailure;
 use Ems\Contracts\Expression\Constraint;
 use Ems\Contracts\Expression\ConstraintGroup;
 
@@ -21,24 +22,24 @@ interface Checker extends Extendable
      *
      * @param mixed                                   $value
      * @param ConstraintGroup|Constraint|array|string $rule
-     * @param AppliesToResource                       $resource (optional)
+     * @param object|null                             $ormObject (optional)
      *
      * @return bool
      */
-    public function check($value, $rule, AppliesToResource $resource=null);
+    public function check($value, $rule, $ormObject=null) : bool;
 
     /**
      * Same as self::check() but throws an exception on false.
      *
-     * @param mixed                        $value
-     * @param ConstraintGroup|array|string $rule
-     * @param AppliesToResource            $resource (optional)
+     * @param mixed                                     $value
+     * @param ConstraintGroup|Constraint|array|string   $rule
+     * @param object|null                               $ormObject (optional)
      *
      * @return bool (always true)
      *
-     * @throws \Ems\Contracts\Core\Errors\ConstraintFailure
+     * @throws ConstraintFailure
      */
-    public function force($value, $rule, AppliesToResource $resource=null);
+    public function force($value, $rule, $ormObject=null) : bool;
 
     /**
      * Return true if the constraint named $name is supported.
@@ -47,14 +48,14 @@ interface Checker extends Extendable
      *
      * @return bool
      */
-    public function supports($name);
+    public function supports(string $name) : bool;
 
     /**
      * Return the names of all constraints.
      *
-     * @return array
+     * @return string[]
      */
-    public function names();
+    public function names() : array;
 
     /**
      * Call a single constraint check. Will call an added extension.
@@ -64,6 +65,6 @@ interface Checker extends Extendable
      *
      * @return mixed
      */
-    public function __call($name, array $arguments=[]);
+    public function __call(string $name, array $arguments=[]);
 
 }

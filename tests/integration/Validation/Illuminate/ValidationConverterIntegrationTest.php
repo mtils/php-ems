@@ -6,7 +6,7 @@ namespace Ems\Validation\Illuminate;
 use Ems\Contracts\Validation\ValidationConverter as ValidationConverterContract;
 use Ems\Contracts\Validation\ValidatorFactory as ValidatorFactoryContract;
 use Ems\Contracts\Validation\Validation;
-use Ems\Expression\ConstraintParsingMethods;
+use Ems\Contracts\Expression\ConstraintParsingMethods;
 use Illuminate\Support\MessageBag;
 use Illuminate\Translation\ArrayLoader;
 use Illuminate\Translation\Translator;

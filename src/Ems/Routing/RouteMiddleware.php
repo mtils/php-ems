@@ -12,7 +12,7 @@ use Ems\Contracts\Routing\MiddlewareCollection as MiddlewareCollectionContract;
 use Ems\Core\Exceptions\UnConfiguredException;
 use Ems\Core\Response;
 use Ems\Core\Support\CustomFactorySupport;
-use Ems\Expression\ConstraintParsingMethods;
+use Ems\Contracts\Expression\ConstraintParsingMethods;
 use Ems\Skeleton\ProxyInputHandler;
 
 /**

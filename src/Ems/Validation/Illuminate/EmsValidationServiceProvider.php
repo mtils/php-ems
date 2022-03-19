@@ -32,10 +32,14 @@ class EmsValidationServiceProvider extends BootstrapperAsServiceProvider
         });
 
         $this->app->afterResolving(Validator::class, function (Validator $validator) {
-//             $this->app->call([$validator, 'setIlluminateFactory']);
+            $validator->detectRulesBy(function ($ormClass, $relations=1) {
+                /** @var XTypeProviderValidatorFactory $factory */
+                $factory = $this->app->get(XTypeProviderValidatorFactory::class);
+                return $factory->detectRules($ormClass, $relations);
+            });
         });
 
-        $this->app->singleton(ResourceRuleDetector::class, XTypeProviderValidatorFactory::class);
+        $this->app->singleton(XTypeProviderValidatorFactory::class);
 
         $this->app->singleton(ValidationConverterContract::class, function ($app) {
             $textProvider = $app->make(TextProvider::class)->forDomain('validation');

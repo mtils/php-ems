@@ -9,6 +9,7 @@ use Countable;
 use DateTimeInterface;
 use Ems\Contracts\Core\AppliesToResource;
 use Ems\Contracts\Core\Checker as CheckerContract;
+use Ems\Contracts\Core\Errors\ConstraintFailure;
 use Ems\Contracts\Core\PointInTime as PointInTimeContract;
 use Ems\Contracts\Core\Type;
 use Ems\Contracts\Expression\Constraint;
@@ -17,7 +18,7 @@ use Ems\Core\Exceptions\ConstraintViolationException;
 use Ems\Core\Exceptions\NotImplementedException;
 use Ems\Core\Patterns\ExtendableTrait;
 use Ems\Core\Patterns\SnakeCaseCallableMethods;
-use Ems\Expression\ConstraintParsingMethods;
+use Ems\Contracts\Expression\ConstraintParsingMethods;
 use function gettype;
 use InvalidArgumentException;
 use function is_bool;
@@ -60,13 +61,13 @@ class Checker implements CheckerContract
     /**
      * {@inheritdoc}
      *
-     * @param mixed                        $value
-     * @param ConstraintGroup|array|string $rule
-     * @param AppliesToResource            $resource (optional)
+     * @param mixed                                   $value
+     * @param ConstraintGroup|Constraint|array|string $rule
+     * @param object|null                             $ormObject (optional)
      *
      * @return bool
      */
-    public function check($value, $rule, AppliesToResource $resource=null)
+    public function check($value, $rule, $ormObject=null) : bool
     {
 
         $constraints = $this->ruleToArray($rule);
@@ -77,8 +78,8 @@ class Checker implements CheckerContract
 
             array_unshift($arguments, $value);
 
-            if ($resource) {
-                $arguments[] = $resource;
+            if ($ormObject) {
+                $arguments[] = $ormObject;
             }
 
             if (!$this->__call($name, $arguments)) {
@@ -93,16 +94,16 @@ class Checker implements CheckerContract
      * {@inheritdoc}
      *
      * @param mixed                        $value
-     * @param ConstraintGroup|array|string $rule
-     * @param AppliesToResource            $resource (optional)
+     * @param ConstraintGroup|Constraint|array|string $rule
+     * @param object|null                  $ormObject (optional)
      *
      * @return bool (always true)
      *
-     * @throws \Ems\Contracts\Core\Errors\ConstraintFailure
+     * @throws ConstraintViolationException
      */
-    public function force($value, $rule, AppliesToResource $resource=null)
+    public function force($value, $rule, $ormObject=null) : bool
     {
-        if (!$this->check($value, $rule, $resource)) {
+        if (!$this->check($value, $rule, $ormObject)) {
             throw new ConstraintViolationException('Value does not match constraint.');
         }
 
@@ -116,7 +117,7 @@ class Checker implements CheckerContract
      *
      * @return bool
      */
-    public function supports($name)
+    public function supports(string $name) : bool
     {
         if ($this->hasExtension($name)) {
             return true;
@@ -128,9 +129,9 @@ class Checker implements CheckerContract
     /**
      * {@inheritdoc}
      *
-     * @return array
+     * @return string[]
      */
-    public function names()
+    public function names() : array
     {
         $all = array_merge($this->extensions(), array_keys($this->getSnakeCaseMethods()));
         return array_unique($all);
@@ -144,7 +145,7 @@ class Checker implements CheckerContract
      *
      * @return mixed
      */
-    public function __call($name, array $arguments = [])
+    public function __call(string $name, array $arguments = [])
     {
         if (!$arguments) {
             throw new UnderflowException('You have to pass at least one parameter (value) to check something');
@@ -170,7 +171,7 @@ class Checker implements CheckerContract
      *
      * @return bool
      */
-    public function checkEquals($value, $other)
+    public function checkEquals($value, $other) : bool
     {
         return $value == $other;
     }
@@ -183,7 +184,7 @@ class Checker implements CheckerContract
      *
      * @return bool
      */
-    public function checkIs($value, $other)
+    public function checkIs($value, $other) : bool
     {
         return $this->checkCompare($value, 'is', $other);
     }
@@ -196,7 +197,7 @@ class Checker implements CheckerContract
      *
      * @return bool
      */
-    public function checkIsNot($value, $other)
+    public function checkIsNot($value, $other) : bool
     {
         return $this->checkCompare($value, 'is not', $other);
     }
@@ -209,7 +210,7 @@ class Checker implements CheckerContract
      *
      * @return bool
      */
-    public function checkNotEqual($value, $other)
+    public function checkNotEqual($value, $other) : bool
     {
         return !$this->checkEquals($value, $other);
     }
@@ -221,7 +222,7 @@ class Checker implements CheckerContract
      *
      * @return bool
      */
-    public function checkRequired($value)
+    public function checkRequired($value) : bool
     {
         if (is_null($value)) {
             return false;
@@ -246,7 +247,7 @@ class Checker implements CheckerContract
      *
      * @return bool
      */
-    public function checkMin($value, $limit)
+    public function checkMin($value, $limit) : bool
     {
         return $this->checkCompare($value, '>=', $limit);
     }
@@ -259,7 +260,7 @@ class Checker implements CheckerContract
      *
      * @return bool
      */
-    public function checkMax($value, $limit)
+    public function checkMax($value, $limit) : bool
     {
         return $this->checkCompare($value, '<=', $limit);
     }
@@ -272,7 +273,7 @@ class Checker implements CheckerContract
      *
      * @return bool
      */
-    public function checkGreater($value, $limit)
+    public function checkGreater($value, $limit) : bool
     {
         return $this->checkCompare($value, '>', $limit);
     }
@@ -285,7 +286,7 @@ class Checker implements CheckerContract
      *
      * @return bool
      */
-    public function checkLess($value, $limit)
+    public function checkLess($value, $limit) : bool
     {
         return $this->checkCompare($value, '<', $limit);
     }
@@ -299,7 +300,7 @@ class Checker implements CheckerContract
      *
      * @return bool
      */
-    public function checkBetween($value, $min, $max)
+    public function checkBetween($value, $min, $max) : bool
     {
         return $this->checkMin($value, $min) && $this->checkMax($value, $max);
     }
@@ -308,11 +309,11 @@ class Checker implements CheckerContract
      * Check if $value has exactly $size.
      *
      * @param mixed $value
-     * @param int $size
+     * @param $size
      *
      * @return bool
      */
-    public function checkSize($value, $size)
+    public function checkSize($value, $size) : bool
     {
         return $this->checkCompare($this->getSize($value), '=' , $size);
     }
@@ -325,7 +326,7 @@ class Checker implements CheckerContract
      *
      * @return bool
      */
-    public function checkAfter($date, $earliest)
+    public function checkAfter($date, $earliest) : bool
     {
         try {
             return $this->toTimestamp($date) > $this->toTimestamp($earliest);
@@ -342,7 +343,7 @@ class Checker implements CheckerContract
      *
      * @return bool
      */
-    public function checkBefore($date, $latest)
+    public function checkBefore($date, $latest) : bool
     {
         try {
             return $this->toTimestamp($date) < $this->toTimestamp($latest);
@@ -359,7 +360,7 @@ class Checker implements CheckerContract
      *
      * @return bool
      */
-    public function checkType($value, $type)
+    public function checkType($value, $type) : bool
     {
         return Type::is($value, $type);
     }
@@ -371,7 +372,7 @@ class Checker implements CheckerContract
      *
      * @return bool
      */
-    public function checkInt($value)
+    public function checkInt($value) : bool
     {
         return filter_var($value, FILTER_VALIDATE_INT) !== false;
     }
@@ -383,7 +384,7 @@ class Checker implements CheckerContract
      *
      * @return bool
      */
-    public function checkBool($value)
+    public function checkBool($value) : bool
     {
         return in_array($value, [true, false, 0, 1, '0', '1', 'true', 'false'], true);
     }
@@ -395,7 +396,7 @@ class Checker implements CheckerContract
      *
      * @return bool
      */
-    public function checkNumeric($value)
+    public function checkNumeric($value) : bool
     {
         return is_numeric($value);
     }
@@ -407,7 +408,7 @@ class Checker implements CheckerContract
      *
      * @return bool
      */
-    public function checkString($value)
+    public function checkString($value) : bool
     {
         return Type::isStringLike($value);
     }
@@ -422,11 +423,11 @@ class Checker implements CheckerContract
      *
      * @return bool
      */
-    public function checkCompare($left, $operator, $right, $strict=false)
+    public function checkCompare($left, string $operator, $right, bool $strict=false) : bool
     {
 
         if ($strict || in_array($operator, ['is', 'is not', '=', '!=', '<>'])) {
-            return $this->isComparable($left, $right) ? $this->compare($left, $operator, $right) : false;
+            return $this->isComparable($left, $right) && $this->compare($left, $operator, $right);
         }
 
         if (!$comparable = $this->makeComparable($left, $right)) {
@@ -445,7 +446,7 @@ class Checker implements CheckerContract
      *
      * @return bool
      */
-    public function checkTrue($value)
+    public function checkTrue($value) : bool
     {
         return Type::toBool($value) === true;
     }
@@ -457,7 +458,7 @@ class Checker implements CheckerContract
      *
      * @return bool
      */
-    public function checkFalse($value)
+    public function checkFalse($value) : bool
     {
         return Type::toBool($value) === false;
     }
@@ -470,7 +471,7 @@ class Checker implements CheckerContract
      *
      * @return bool
      */
-    public function checkIn($value, $list)
+    public function checkIn($value, $list) : bool
     {
         // List is passed as second parameter or with many single parameters
         $args = func_get_args();
@@ -489,7 +490,7 @@ class Checker implements CheckerContract
      *
      * @return bool
      */
-    public function checkNotIn($value, $list)
+    public function checkNotIn($value, $list) : bool
     {
         $args = func_get_args();
         return !$this->checkIn(...$args);
@@ -502,7 +503,7 @@ class Checker implements CheckerContract
      *
      * @return bool
      */
-    public function checkDate($value)
+    public function checkDate($value) : bool
     {
 
         if ($value instanceof PointInTimeContract) {
@@ -534,7 +535,7 @@ class Checker implements CheckerContract
      *
      * @return bool
      */
-    public function checkEmail($value)
+    public function checkEmail(string $value) : bool
     {
         return filter_var($value, FILTER_VALIDATE_EMAIL) !== false;
     }
@@ -546,7 +547,7 @@ class Checker implements CheckerContract
      *
      * @return bool
      */
-    public function checkUrl($value)
+    public function checkUrl($value) : bool
     {
         return filter_var($value, FILTER_VALIDATE_URL) !== false;
     }
@@ -558,7 +559,7 @@ class Checker implements CheckerContract
      *
      * @return bool
      */
-    public function checkIp($value)
+    public function checkIp($value) : bool
     {
         return filter_var($value, FILTER_VALIDATE_IP) !== false;
     }
@@ -570,7 +571,7 @@ class Checker implements CheckerContract
      *
      * @return bool
      */
-    public function checkIpv4($value)
+    public function checkIpv4($value) : bool
     {
         return filter_var($value, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) !== false;
     }
@@ -582,7 +583,7 @@ class Checker implements CheckerContract
      *
      * @return bool
      */
-    public function checkIpv6($value)
+    public function checkIpv6($value) : bool
     {
         return filter_var($value, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) !== false;
     }
@@ -590,12 +591,12 @@ class Checker implements CheckerContract
     /**
      * Check if a number of $count were passed.
      *
-     * @param string $value
+     * @param mixed $value
      * @param int    $count
      *
      * @return bool
      */
-    public function checkDigits($value, $count)
+    public function checkDigits($value, $count) : bool
     {
 
         if (is_numeric($value)) {
@@ -617,7 +618,7 @@ class Checker implements CheckerContract
      *
      * @return bool
      */
-    public function checkJson($value)
+    public function checkJson($value) : bool
     {
         if (!Type::isStringLike($value)) {
             return false;
@@ -635,7 +636,7 @@ class Checker implements CheckerContract
      *
      * @return bool
      */
-    public function checkXml($value)
+    public function checkXml($value) : bool
     {
         if (!Type::isStringLike($value)) {
             return false;
@@ -651,7 +652,7 @@ class Checker implements CheckerContract
      *
      * @return bool
      */
-    public function checkHtml($value)
+    public function checkHtml($value) : bool
     {
         if (!Type::isStringLike($value)) {
             return false;
@@ -669,7 +670,7 @@ class Checker implements CheckerContract
      *
      * @return bool
      */
-    public function checkPlain($value)
+    public function checkPlain($value) : bool
     {
         if (!Type::isStringable($value)) {
             return false;
@@ -690,7 +691,7 @@ class Checker implements CheckerContract
      *
      * @return bool
      */
-    public function checkTags($value, $htmlTags)
+    public function checkTags($value, $htmlTags) : bool
     {
         if (!Type::isStringable($value)) {
             return false;
@@ -724,7 +725,7 @@ class Checker implements CheckerContract
      *
      * @return bool
      */
-    public function checkChars($value, $count)
+    public function checkChars($value, $count) : bool
     {
         if (!Type::isStringable($value)) {
             return false;
@@ -741,7 +742,7 @@ class Checker implements CheckerContract
      *
      * @return bool
      */
-    public function checkWords($value, $count)
+    public function checkWords($value, $count) : bool
     {
         if (!Type::isStringLike($value)) {
             return $count == 0;
@@ -758,7 +759,7 @@ class Checker implements CheckerContract
      *
      * @return bool
      */
-    public function checkStartsWith($value, $start)
+    public function checkStartsWith($value, $start) : bool
     {
         if (!Type::isStringable($value)) {
             return false;
@@ -775,7 +776,7 @@ class Checker implements CheckerContract
      *
      * @return bool
      */
-    public function checkEndsWith($value, $end)
+    public function checkEndsWith($value, $end) : bool
     {
         if (!Type::isStringable($value)) {
             return false;
@@ -792,7 +793,7 @@ class Checker implements CheckerContract
      *
      * @return bool
      */
-    public function checkContains($value, $needle)
+    public function checkContains($value, $needle) : bool
     {
         return Helper::contains($value, $needle);
     }
@@ -806,7 +807,7 @@ class Checker implements CheckerContract
      *
      * @return bool
      */
-    public function checkLike($value, $pattern, $escape='\\')
+    public function checkLike($value, $pattern, $escape='\\') : bool
     {
 
         if (!Type::isStringable($value) || !Type::isStringable($pattern)) {
@@ -869,7 +870,7 @@ class Checker implements CheckerContract
      *
      * @return bool
      */
-    public function checkRegex($value, $pattern)
+    public function checkRegex($value, $pattern) : bool
     {
 
         if (!Type::isStringable($value)) {
@@ -886,7 +887,7 @@ class Checker implements CheckerContract
      *
      * @return bool
      */
-    public function checkAlpha($value)
+    public function checkAlpha($value) : bool
     {
         return $this->checkRegex($value, '/^[\pL\pM]+$/u');
     }
@@ -898,7 +899,7 @@ class Checker implements CheckerContract
      *
      * @return bool
      */
-    public function checkAlphaDash($value)
+    public function checkAlphaDash($value) : bool
     {
         return $this->checkRegex($value, '/^[\pL\pM\pN_-]+$/u');
     }
@@ -910,7 +911,7 @@ class Checker implements CheckerContract
      *
      * @return bool
      */
-    public function checkAlphaNum($value)
+    public function checkAlphaNum($value) : bool
     {
         return $this->checkRegex($value, '/^[\pL\pM\pN]+$/u');
     }
@@ -948,7 +949,7 @@ class Checker implements CheckerContract
      *
      * @return array
      */
-    protected function makeComparable($value, $parameter)
+    protected function makeComparable($value, $parameter) : array
     {
 
         if (!$value instanceof DateTimeInterface && !$parameter instanceof DateTimeInterface) {
@@ -975,7 +976,7 @@ class Checker implements CheckerContract
      *
      * @return bool
      */
-    protected function isComparable($left, $right)
+    protected function isComparable($left, $right) : bool
     {
 
         if (gettype($left) == gettype($right)) {
@@ -998,7 +999,7 @@ class Checker implements CheckerContract
      *
      * @return int
      */
-    protected function toTimestamp($date)
+    protected function toTimestamp($date) : int
     {
         return PointInTime::guessFrom($date)->getTimestamp();
     }
@@ -1011,7 +1012,7 @@ class Checker implements CheckerContract
      *
      * @return int
      */
-    protected function getSize($value, bool $checkNumeric=true)
+    protected function getSize($value, bool $checkNumeric=true) : int
     {
         if ($checkNumeric && is_numeric($value)) {
             return $value;
@@ -1029,7 +1030,7 @@ class Checker implements CheckerContract
      *
      * @return array
      */
-    protected function ruleToArray($rule)
+    protected function ruleToArray($rule) : array
     {
         if ($rule instanceof ConstraintGroup || $rule instanceof Constraint) {
             return $this->constraintToArray($rule);
@@ -1043,7 +1044,7 @@ class Checker implements CheckerContract
      *
      * @return array
      */
-    protected function constraintToArray($rule)
+    protected function constraintToArray($rule) : array
     {
         if ($rule instanceof ConstraintGroup) {
             return $this->constraintGroupToArray($rule);
@@ -1074,7 +1075,7 @@ class Checker implements CheckerContract
      *
      * @return array
      */
-    protected function constraintGroupToArray(ConstraintGroup $group)
+    protected function constraintGroupToArray(ConstraintGroup $group) : array
     {
         $array = [];
 
@@ -1096,7 +1097,7 @@ class Checker implements CheckerContract
      *
      * @return bool
      */
-    protected function compare($left, $operator, $right)
+    protected function compare($left, string $operator, $right) : bool
     {
         switch ($operator) {
             case '<':

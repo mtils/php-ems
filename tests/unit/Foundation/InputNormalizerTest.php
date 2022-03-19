@@ -52,7 +52,7 @@ class InputNormalizerTest extends \Ems\TestCase
         $validator->shouldReceive('validate')
                   ->with($adjusted, $resource, null)
                   ->once()
-                  ->andReturn(true);
+                  ->andReturn($input);
 
         $caster->shouldReceive('process')
                ->with($adjusted, $resource, null)
@@ -94,7 +94,7 @@ class InputNormalizerTest extends \Ems\TestCase
         $validator->shouldReceive('validate')
                   ->with($adjusted, $resource, null)
                   ->once()
-                  ->andReturn(true);
+                  ->andReturn($input);
 
         $caster->shouldReceive('process')
                ->with($adjusted, $resource, null)
@@ -132,7 +132,7 @@ class InputNormalizerTest extends \Ems\TestCase
         $validator->shouldReceive('validate')
                   ->with($input, $resource, null)
                   ->once()
-                  ->andReturn(true);
+                  ->andReturn($input);
 
         $caster->shouldReceive('process')
                ->with($input, $resource, null)
@@ -180,7 +180,7 @@ class InputNormalizerTest extends \Ems\TestCase
         $validator->shouldReceive('validate')
                   ->with($adjusted, $resource, null)
                   ->once()
-                  ->andReturn(true);
+                  ->andReturn($input);
 
         $caster->shouldReceive('process')
                ->with($adjusted, $resource, null)
@@ -226,7 +226,7 @@ class InputNormalizerTest extends \Ems\TestCase
         $validator->shouldReceive('validate')
                   ->with($adjusted, $resource, null)
                   ->once()
-                  ->andReturn(true);
+                  ->andReturn($input);
 
         $caster->shouldReceive('process')
                ->with($adjusted, $resource, null)
@@ -269,7 +269,7 @@ class InputNormalizerTest extends \Ems\TestCase
         $validator->shouldReceive('validate')
                   ->with($adjusted, $resource, null)
                   ->once()
-                  ->andReturn(true);
+                  ->andReturn($input);
 
         $caster->shouldReceive('process')
                ->with($adjusted, $resource, null)
@@ -353,7 +353,7 @@ class InputNormalizerTest extends \Ems\TestCase
         $customValidator->shouldReceive('validate')
                   ->with($adjusted, $resource, null)
                   ->once()
-                  ->andReturn(true);
+                  ->andReturn($input);
 
         $caster->shouldReceive('process')
                ->with($adjusted, $resource, null)
@@ -461,7 +461,7 @@ class InputNormalizerTest extends \Ems\TestCase
         $validator->shouldReceive('validate')
                   ->with($adjusted, $resource, null)
                   ->once()
-                  ->andReturn(true);
+                  ->andReturn($input);
 
         $caster->shouldReceive('process')
                ->never();
@@ -506,7 +506,7 @@ class InputNormalizerTest extends \Ems\TestCase
         $validator->shouldReceive('validate')
                   ->with($adjusted, $resource, null)
                   ->once()
-                  ->andReturn(true);
+                  ->andReturn($input);
 
         $customCaster->shouldReceive('process')
                ->with($adjusted, $resource, null)
@@ -558,7 +558,7 @@ class InputNormalizerTest extends \Ems\TestCase
         $validator->shouldReceive('validate')
                   ->with($adjusted, $resource, null)
                   ->once()
-                  ->andReturn(true);
+                  ->andReturn($input);
 
         $awaited = $normalizer->adjust()
                               ->validate($rules)
@@ -595,7 +595,7 @@ class InputNormalizerTest extends \Ems\TestCase
         $validator->shouldReceive('validate')
                   ->with($adjusted, $resource, null)
                   ->once()
-                  ->andReturn(true);
+                  ->andReturn($input);
 
         $caster->shouldReceive('process')
                ->with($adjusted, $resource, null)

@@ -9,8 +9,12 @@ use Ems\Core\FakeEntity as GenericEntity;
 use Ems\Contracts\Validation\Validation;
 use Ems\Contracts\Validation\GenericValidator as GenericValidatorContract;
 use Ems\Contracts\Validation\AlterableValidator as AlterableValidatorContract;
-use Ems\Contracts\Validation\ResourceRuleDetector;
 use Ems\Testing\LoggingCallable;
+
+use stdClass;
+
+use function print_r;
+use function var_dump;
 
 /**
  * @group validation
@@ -27,23 +31,23 @@ class GenericValidatorTest extends \Ems\TestCase
     {
 
         $handler = new LoggingCallable(function (Validation $validation, array $input, array $rules, AppliesToResource $resource, $locale) {
-            return 'not true';
+            return $input;
         });
 
         $rules = ['password' => 'required'];
         $parsed = ['password' => ['required' => []]];
         $input = ['password' => 'blabla'];
         $resource = new NamedObject(15, 'king', 'category');
-        $locale = 'cz';
+        $formats = [\Ems\Contracts\Validation\Validator::LOCALE, 'cz'];
 
         $validator = $this->newValidator($rules, $handler);
 
-        $this->assertTrue($validator->validate($input, $resource, $locale));
+        $this->assertEquals($input, $validator->validate($input, $resource, $formats));
         $this->assertInstanceOf(Validation::class, $handler->arg(0));
         $this->assertEquals($input, $handler->arg(1));
         $this->assertEquals($parsed, $handler->arg(2));
         $this->assertSame($resource, $handler->arg(3));
-        $this->assertEquals($locale, $handler->arg(4));
+        $this->assertEquals($formats, $handler->arg(4));
     }
 
     public function test_validate_throws_validation_exception_validation_has_count()
@@ -51,7 +55,7 @@ class GenericValidatorTest extends \Ems\TestCase
 
         $handler = new LoggingCallable(function (Validation $validation, array $input, array $rules, AppliesToResource $resource, $locale) {
             $validation->addFailure('password', 'between', [1,24]);
-            return 'not true';
+            return $input;
         });
 
         $rules = ['password' => 'required'];
@@ -71,7 +75,7 @@ class GenericValidatorTest extends \Ems\TestCase
 
         try {
 
-            $validator->validate($input, $resource, $locale);
+            $validator->validate($input, $resource, [\Ems\Contracts\Validation\Validator::LOCALE => $locale]);
             $this->fail("Validator had to throw an validation exception");
 
         } catch (Validation $validation) {
@@ -82,7 +86,7 @@ class GenericValidatorTest extends \Ems\TestCase
         $this->assertEquals($input, $handler->arg(1));
         $this->assertEquals($parsed, $handler->arg(2));
         $this->assertSame($resource, $handler->arg(3));
-        $this->assertEquals($locale, $handler->arg(4));
+        $this->assertEquals([\Ems\Contracts\Validation\Validator::LOCALE => $locale], $handler->arg(4));
     }
 
     /**
@@ -148,11 +152,11 @@ class GenericValidatorTest extends \Ems\TestCase
 
     }
 
-    public function test_detectRules_if_no_rules_setted()
+    public function test_detectRules_if_no_rules_set()
     {
-        $validator = $this->newValidator([], function () { return true; } );
-        $detector = $this->mock(ResourceRuleDetector::class);
-
+        $ormClass = NamedObject::class;
+        $validator = $this->newValidator([], function ($validator, $input) { return $input; } );
+        $validator->setOrmClass($ormClass);
         $resource = new NamedObject;
 
         $rules = [
@@ -189,15 +193,21 @@ class GenericValidatorTest extends \Ems\TestCase
             'type_id'   => 2
         ];
 
-        $detector->shouldReceive('detectRules')
-                 ->with($resource, [])
-                 ->once()
-                 ->andReturn($rules);
+        $called = false;
 
-        $validator->injectRuleDetector($detector);
+        $detector = function ($passedClass, $relations) use ($rules, $ormClass, &$called) {
+            $called = true;
+            if ($passedClass != $ormClass) {
+                $this->fail("The orm class was not passed by the validator");
+            }
+            return $rules;
+        };
 
-        $this->assertTrue($validator->validate($input, $resource));
+        $validator->detectRulesBy($detector);
+
+        $this->assertEquals($input, $validator->validate($input, $resource));
         $this->assertEquals($parsed, $validator->rules());
+        $this->assertTrue($called, "The rule detector was not called by the validator");
 
     }
 
@@ -207,7 +217,7 @@ class GenericValidatorTest extends \Ems\TestCase
     public function test_detectRules_throws_exception_if_no_detector_assigned()
     {
         $validator = $this->newValidator([], function () { return true; });
-        $validator->setResource(new NamedObject());
+        $validator->setOrmClass(NamedObject::class);
         $validator->validate([]);
 
     }
@@ -215,17 +225,17 @@ class GenericValidatorTest extends \Ems\TestCase
     public function test_merge_merges_rules()
     {
 
-        $handler = new LoggingCallable(function (Validation $validation, array $input, array $rules, AppliesToResource $resource, $locale) {
-            return 'not true';
+        $handler = new LoggingCallable(function (Validation $validation, array $input, array $rules, $resource, $parameters) {
+            return $input;
         });
 
         $rules = ['password' => 'required'];
 
         $input = ['password' => 'blabla'];
 
-        $resource = new NamedObject(15, 'king', 'category');
+        $resource = new NamedObject();
 
-        $locale = 'cz';
+        $parameters = [\Ems\Contracts\Validation\Validator::LOCALE => 'cz'];
 
         $parsed = [
             'password' => [
@@ -237,14 +247,15 @@ class GenericValidatorTest extends \Ems\TestCase
         ];
 
         $validator = $this->newValidator($rules, $handler);
+        $validator->setOrmClass(NamedObject::class);
         $validator->mergeRules(['password' => 'min:3', 'login' => 'max:64']);
 
-        $this->assertTrue($validator->validate($input, $resource, $locale));
+        $this->assertEquals($input, $validator->validate($input, $resource, $parameters));
         $this->assertInstanceOf(Validation::class, $handler->arg(0));
         $this->assertEquals($input, $handler->arg(1));
         $this->assertEquals($parsed, $handler->arg(2));
         $this->assertSame($resource, $handler->arg(3));
-        $this->assertEquals($locale, $handler->arg(4));
+        $this->assertEquals($parameters, $handler->arg(4));
     }
 
     public function test_get_and_set_resourceName()
@@ -510,21 +521,21 @@ class GenericValidatorTest extends \Ems\TestCase
     public function test_validateForbidden()
     {
 
-        $handler = new LoggingCallable(function (Validation $validation, array $input, array $rules, AppliesToResource $resource, $locale) {
-            return true;
+        $handler = new LoggingCallable(function (Validation $validation, array $input, array $rules, $ormObject=null, $formats=[]) {
+            return $input;
         });
 
         $rules = ['created_at' => 'forbidden'];
         $input = ['password' => 'blabla'];
         $resource = new NamedObject(15, 'king', 'category');
-        $locale = 'cz';
+        $formats = [\Ems\Contracts\Validation\Validator::LOCALE=>'cz'];
 
         $validator = $this->newValidator($rules, $handler);
 
-        $this->assertTrue($validator->validate($input, $resource, $locale));
+        $this->assertEquals($input, $validator->validate($input, $resource, $formats));
 
         try {
-            $validator->validate(['created_at'=>new \DateTime], $resource, $locale);
+            $validator->validate(['created_at'=>new \DateTime], $resource, $formats);
             $this->fail('Validation should fail with forbidden attributes');
         } catch (Validation $e) {
 

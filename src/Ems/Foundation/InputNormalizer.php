@@ -186,7 +186,7 @@ class InputNormalizer implements InputNormalizerContract
             $input = $this->processListeners('adjust', 'after', $input, $resource, $locale);
         }
 
-        $this->validateIfDesired($input, $resource, $locale);
+        $this->validateIfDesired($input, $resource);
 
         if ($this->shouldCast) {
             $input = $this->processListeners('cast', 'before', $input, $resource, $locale);
@@ -204,22 +204,22 @@ class InputNormalizer implements InputNormalizerContract
      *
      * @return bool
      **/
-    protected function validateIfDesired(array $input, AppliesToResource $resource=null, $locale=null)
+    protected function validateIfDesired(array $input, $ormObject=null, array $formats=[])
     {
 
         if (!$this->shouldValidate) {
             return true;
         }
 
-        $validator = $this->validator ? $this->validator : $this->validatorFactory->make($this->validationRules, $resource);
+        $validator = $this->validator ? $this->validator : $this->validatorFactory->make($this->validationRules, $ormObject);
 
         if (!$validator) {
             throw new MisConfiguredException("Cannot validate without a validator or rules");
         }
 
-        $this->callBeforeListeners('validate', [$input, $resource, $locale]);
-        $validator->validate($input, $resource, $locale);
-        $this->callAfterListeners('validate', [$input, $resource, $locale]);
+        $this->callBeforeListeners('validate', [$input, $ormObject, $formats]);
+        $validator->validate($input, $ormObject, $formats);
+        $this->callAfterListeners('validate', [$input, $ormObject, $formats]);
 
         return true;
 

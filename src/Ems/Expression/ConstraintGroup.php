@@ -7,6 +7,7 @@ use Ems\Contracts\Core\Expression as ExpressionContract;
 use Ems\Contracts\Core\Type;
 use Ems\Contracts\Expression\Constraint as ConstraintContract;
 use Ems\Contracts\Expression\ConstraintGroup as ConstraintGroupContract;
+use Ems\Contracts\Expression\ConstraintParsingMethods;
 use Ems\Core\Exceptions\KeyNotFoundException;
 use Ems\Core\Support\StringableTrait;
 use InvalidArgumentException;

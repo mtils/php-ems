@@ -6,6 +6,8 @@ use Ems\Contracts\Core\AppliesToResource;
 use Ems\Contracts\Core\HasMethodHooks;
 
 /**
+ * DEPRECATED: This concept was cancelled
+ *
  * The InputNormalizer is a input processing queue. You have three steps:
  * adjust, validate, cast.
  *
@@ -30,7 +32,8 @@ use Ems\Contracts\Core\HasMethodHooks;
  * So usually if you have an api and a normal web app you could use the same
  * controller with different InputNormalizer instances.
  *
- * 
+ * @deprecated
+ *
  **/
 interface InputNormalizer extends HasMethodHooks
 {

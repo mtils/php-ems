@@ -272,8 +272,8 @@ class InputNormalizerFactoryTest extends \Ems\TestCase
     protected function newValidatorFactory()
     {
         $createValidator = function () {
-            return new GenericValidator(['a' => 'b'], function () {
-                return true;
+            return new GenericValidator(['a' => 'b'], function ($baseValidator, $input) {
+                return $input;
             });
         };
         return new GenericValidatorFactory($createValidator);

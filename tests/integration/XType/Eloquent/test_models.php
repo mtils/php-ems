@@ -65,7 +65,7 @@ abstract class BaseModel extends EloquentModel implements Entity
     public function getBootCount()
     {
         $class = get_class($this);
-        return isset(static::$bootCounters[$class]) ? static::$bootCounters[$class] : 0;
+        return static::$bootCounters[$class] ?? 0;
     }
 }
 

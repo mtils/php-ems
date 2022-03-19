@@ -29,20 +29,22 @@ abstract class Validator extends AbstractValidator implements AppliesToResource,
     /**
      * Perform all validation by the the base validator
      *
-     * @param Validation        $validation
-     * @param array             $input
-     * @param array             $baseRules
-     * @param AppliesToResource $resource (optional)
-     * @param string            $locale (optional)
+     * @param Validation    $validation
+     * @param array         $input
+     * @param array         $baseRules
+     * @param object|null   $ormObject (optional)
+     * @param array         $formats (optional)
+     *
+     * @return array
      **/
-    protected function validateByBaseValidator(Validation $validation, array $input, array $baseRules, AppliesToResource $resource=null, $locale=null)
+    protected function validateByBaseValidator(Validation $validation, array $input, array $baseRules, $ormObject = null, array $formats=[]) : array
     {
         $laravelRules = $this->toLaravelRules($baseRules);
 
         $illuminateValidator = $this->buildValidator($input, $laravelRules);
 
         if (!$illuminateValidator->fails()) {
-            return;
+            return $input;
         }
 
         foreach ($illuminateValidator->failed() as $key=>$fails) {
@@ -50,23 +52,24 @@ abstract class Validator extends AbstractValidator implements AppliesToResource,
                 $validation->addFailure($key, Type::snake_case($ruleName), $parameters);
             }
         }
+        return $input;
     }
 
     /**
      * {@inheritdoc}
      *
-     * @param array             $rules
-     * @param array             $input
-     * @param AppliesToResource $resource (optional)
-     * @param string            $locale (optional)
+     * @param array         $rules
+     * @param array         $input
+     * @param object|null   $ormObject (optional)
+     * @param array         $formats (optional)
      *
      * @return array
      **/
-    protected function prepareRulesForValidation(array $rules, array $input, AppliesToResource $resource=null, $locale=null)
+    protected function prepareRulesForValidation(array $rules, array $input, $ormObject=null, array $formats=[]) : array
     {
 
         $preparedRules = [];
-        $rules = parent::prepareRulesForValidation($rules, $input, $resource, $locale);
+        $rules = parent::prepareRulesForValidation($rules, $input, $ormObject, $formats);
 
 //        $dateConstraints = ['after', 'before', 'date'];
 
@@ -86,7 +89,7 @@ abstract class Validator extends AbstractValidator implements AppliesToResource,
 //                 }
 
                 if ($constraint == 'unique') {
-                    $preparedRules[$key][$constraint] = $this->parametersOfUniqueConstraint($key, $parameters, $resource);
+                    $preparedRules[$key][$constraint] = $this->parametersOfUniqueConstraint($key, $parameters, $ormObject);
                     continue;
                 }
 
@@ -94,7 +97,7 @@ abstract class Validator extends AbstractValidator implements AppliesToResource,
                 // If the key isset, it should not contain any empty values
                 // if not, the request is valid.
                 // So just remove it if it shouldn't be updated
-                if ($resource instanceof Entity && !$resource->isNew() && $constraint == 'required') {
+                if ($ormObject instanceof Entity && !$ormObject->isNew() && $constraint == 'required') {
                     if (!array_key_exists($key, $input)) {
                         continue;
                     }
@@ -114,19 +117,19 @@ abstract class Validator extends AbstractValidator implements AppliesToResource,
     /**
      * Calculate the unique parameters for the uniqueParameters.
      *
-     * @param string            $key
-     * @param array             $originalParameters
-     * @param AppliesToResource $resource (optional)
+     * @param string        $key
+     * @param array         $originalParameters
+     * @param object|null   $ormObject (optional)
      *
      * @return array
      **/
-    protected function parametersOfUniqueConstraint($key, array $originalParameters, AppliesToResource $resource=null)
+    protected function parametersOfUniqueConstraint(string $key, array $originalParameters, $ormObject=null) : array
     {
-        if (!$resource instanceof Entity) {
+        if (!$ormObject instanceof Entity) {
             return $originalParameters;
         }
 
-        if (!$resource instanceof EloquentModel) {
+        if (!$ormObject instanceof EloquentModel) {
             return $originalParameters;
         }
 
@@ -135,15 +138,15 @@ abstract class Validator extends AbstractValidator implements AppliesToResource,
             return $originalParameters;
         }
 
-        $table = $resource->getTable();
+        $table = $ormObject->getTable();
         $uniqueKey = $key;
 
-        if ($resource->isNew()) {
+        if ($ormObject->isNew()) {
             return [$table, $uniqueKey];
         }
 
-        $id = $resource->getId();
-        $primaryKey = $resource->getKeyName();
+        $id = $ormObject->getId();
+        $primaryKey = $ormObject->getKeyName();
 
         return [$table, $uniqueKey, $id, $primaryKey];
     }

@@ -4,15 +4,17 @@
 namespace Ems\Validation;
 
 use Ems\Contracts\Core\AppliesToResource;
+use Ems\Contracts\Core\ChangeTracking;
 use Ems\Contracts\Core\Checker as CheckerContract;
+use Ems\Contracts\Core\DataObject;
 use Ems\Contracts\Core\Entity;
 use Ems\Contracts\Core\HasInjectMethods;
 use Ems\Contracts\Core\HasMethodHooks;
 use Ems\Contracts\Expression\Constraint;
 use Ems\Contracts\Expression\ConstraintGroup;
-use Ems\Contracts\Validation\GenericValidator as GenericValidatorContract;
-use Ems\Contracts\Validation\ResourceRuleDetector;
+use Ems\Contracts\Expression\ConstraintParsingMethods;
 use Ems\Contracts\Validation\Validation;
+use Ems\Contracts\Validation\ValidationException;
 use Ems\Contracts\Validation\Validator as ValidatorContract;
 use Ems\Contracts\XType\TypeProvider;
 use Ems\Contracts\XType\XType;
@@ -23,10 +25,15 @@ use Ems\Core\Helper;
 use Ems\Core\Lambda;
 use Ems\Core\Patterns\HookableTrait;
 use Ems\Core\Patterns\SnakeCaseCallableMethods;
-use Ems\Expression\ConstraintParsingMethods;
 use Ems\XType\SequenceType;
 use RuntimeException;
 use stdClass;
+
+use function array_key_exists;
+use function array_merge;
+use function is_object;
+use function method_exists;
+use function print_r;
 
 
 class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
@@ -36,6 +43,11 @@ class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
     use SnakeCaseCallableMethods {
         SnakeCaseCallableMethods::isSnakeCaseCallableMethod as parentIsSnakeCaseCallableMethod;
     }
+
+    /**
+     * @var string
+     */
+    protected $ormClass = '';
 
     /**
      * @var array
@@ -63,7 +75,7 @@ class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
     protected $ownValidationMethods;
 
     /**
-     * @var ResourceRuleDetector
+     * @var callable
      **/
     protected $ruleDetector;
 
@@ -105,22 +117,30 @@ class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
     }
 
     /**
+     * {@inheritDoc}
+     *
+     * @return string
+     */
+    public function ormClass(): string
+    {
+        return $this->ormClass;
+    }
+
+    /**
      * {@inheritdoc}
      *
      * @return array
      **/
-    public function rules()
+    public function rules() : array
     {
         if ($this->parsedRules !== null) {
             return $this->parsedRules;
         }
 
         $rules = $this->buildRules();
-
         $this->callBeforeListeners('parseRules', [&$rules]);
         $rules = $this->parseRules($rules);
         $this->callAfterListeners('parseRules', [&$rules]);
-
         $this->parsedRules = $rules;
 
         return $this->parsedRules;
@@ -129,33 +149,32 @@ class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
     /**
      * Validates to true or fails by an exception (with unparsed messages)
      *
-     * @param array                  $input
-     * @param AppliesToResource|null $resource (optional)
-     * @param string                 $locale (optional)
+     * @param array         $input      The input from a request or another input source like import files
+     * @param object|null   $ormObject  An orm object that this data will belong to
+     * @param array         $formats Pass information how to read the input see self::DATE_FORMAT etc.
      *
-     * @return bool (always true)
+     * @return array Return a clean version of the input data that can be processed by a repository
+     *
+     * @throws ValidationException
      **/
-    public function validate(array $input, AppliesToResource $resource=null, $locale=null)
+    public function validate(array $input, $ormObject=null, array $formats=[]) : array
     {
+        $rules = $this->prepareRulesForValidation($this->rules(), $input, $ormObject, $formats);
 
-        // If a generic validator didnt have a resource until here, assign it
-        if (!$this->rules && $this instanceof GenericValidatorContract && !$this->resource()) {
-            $this->setResource($resource);
-        }
+        $this->callBeforeListeners('validate', [$input, $rules, $ormObject, $formats]);
 
-        $rules = $this->prepareRulesForValidation($this->rules(), $input, $resource, $locale);
+        $validation = new ValidationException();
+        $validation->setRules($rules);
 
-        $this->callBeforeListeners('validate', [$input, $rules, $resource, $locale]);
+        $validated = $this->performValidation($input, $validation, $ormObject, $formats);
 
-        $validation = $this->performValidation($input, $rules, $resource, $locale);
-
-        $this->callAfterListeners('validate', [$input, $rules, $resource, $validation, $locale]);
+        $this->callAfterListeners('validate', [$input, $rules, $ormObject, $validation, $formats]);
 
         if (count($validation)) {
             throw $validation;
         }
 
-        return true;
+        return $validated;
     }
 
     /**
@@ -180,14 +199,16 @@ class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
     }
 
     /**
-     * Set a rule detector to easily detect the rules. Right now only
-     * XTypeProviderValidatorFactory is supported.
+     * Set a rule detector to detect the rules for deferred loading of rules.
+     * The detector will be called with the orm class and a depth or relation.
      *
-     * @param ResourceRuleDetector $detector
+     * $detector = function (string $ormClass, $relations=1) { return ['name' => 'required'] };
+     *
+     * @param callable $detector
      *
      * @return self
      **/
-    public function injectRuleDetector(ResourceRuleDetector $detector)
+    public function detectRulesBy(callable $detector) : Validator
     {
         $this->ruleDetector = $detector;
         return $this;
@@ -210,14 +231,19 @@ class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
      * Perform validation by the base validator. Reimplement this method
      * to use it with your favourite base validator.
      *
-     * @param Validation             $validation
-     * @param array                  $input
-     * @param array                  $baseRules
-     * @param AppliesToResource|null $resource (optional)
-     * @param string                 $locale (optional)
+     * @param Validation    $validation
+     * @param array         $input
+     * @param array         $baseRules
+     * @param object|null   $ormObject (optional)
+     * @param array         $formats (optional)
+     *
+     * @return array
      **/
-    protected function validateByBaseValidator(Validation $validation, array $input, array $baseRules, AppliesToResource $resource=null, $locale=null)
+    protected function validateByBaseValidator(Validation $validation, array $input, array $baseRules, $ormObject=null, array $formats=[]) : array
     {
+
+        $validated = [];
+
         foreach ($baseRules as $key=>$rule) {
 
             if (!$this->checkRequiredRules($rule, $input, $key, $validation)) {
@@ -230,11 +256,16 @@ class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
                 if (in_array($name, $this->required_rules)) {
                     continue;
                 }
-                if (!$this->check($value, [$name=>$args], $resource)) {
+                if (!$this->check($value, [$name=>$args], $ormObject, $formats)) {
                     $validation->addFailure($key, $name, $args);
                 }
             }
+            if (array_key_exists($key, $input)) {
+                $validated[$key] = $this->cast($value, $rule, $ormObject, $formats);
+            }
         }
+
+        return $validated;
     }
 
     /**
@@ -245,7 +276,7 @@ class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
      *
      * @return bool
      **/
-    protected function validateForbidden($input, $key)
+    protected function validateForbidden($input, $key) : bool
     {
         $flat = NestedArray::flat($input);
         return !array_key_exists($key, $flat);
@@ -267,33 +298,28 @@ class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
     /**
      * Try to detect rules for the resource of this validator.
      *
-     * @param object $resource
+     * @param string $ormClass
      *
      * @return array
      **/
-    protected function detectRules($resource)
+    protected function detectRules(string $ormClass) : array
     {
-
         if (!$this->ruleDetector) {
             throw new UnConfiguredException("You have to assign a rule detector to detect rules");
         }
-
-        if (!$resource instanceof AppliesToResource) {
-            return [];
-        }
-        return $this->ruleDetector->detectRules($resource, $this->relations);
+        return call_user_func($this->ruleDetector, $ormClass, $this->relations);
     }
 
     /**
      * Apply some filtering on the detected rules. If they are provided by
      * a TypeProvider they contain really all keys, also readonly
      *
-     * @param array $rules
-     * @param object|null $resource
+     * @param array       $rules
+     * @param string|null $ormClass
      *
      * @return array
      **/
-    protected function filterDetectedRules(array $rules, $resource=null)
+    protected function filterDetectedRules(array $rules, string $ormClass=null) : array
     {
 
         if (!$this->typeProvider) {
@@ -350,14 +376,14 @@ class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
      *
      * @return array
      **/
-    protected function buildRules()
+    protected function buildRules() : array
     {
         if ($this->rules) {
             return $this->rules;
         }
 
-        if ($resource = $this->resource()) {
-            $this->rules = $this->filterDetectedRules($this->detectRules($resource), $resource);
+        if ($ormClass = $this->ormClass()) {
+            $this->rules = $this->filterDetectedRules($this->detectRules($ormClass), $ormClass);
         }
 
         return $this->rules;
@@ -370,14 +396,14 @@ class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
      * It allows you to have simple rule expressions like date and then add
      * the localized date format later.
      *
-     * @param array             $rules
-     * @param array             $input
-     * @param AppliesToResource $resource (optional)
-     * @param string            $locale (optional)
+     * @param array         $rules
+     * @param array         $input
+     * @param object|null   $ormObject (optional)
+     * @param array         $formats (optional)
      *
      * @return array
      **/
-    protected function prepareRulesForValidation(array $rules, array $input, AppliesToResource $resource=null, $locale=null)
+    protected function prepareRulesForValidation(array $rules, array $input, $ormObject=null, array $formats=[]) : array
     {
 
         $prepared = [];
@@ -387,8 +413,7 @@ class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
 
         $passedRelations = $this->collectRelations($flatInput);
 
-        $entityExists = ($resource instanceof Entity) && !$resource->isNew();
-
+        $entityExists = $this->isFromStorage($ormObject);
 
         foreach ($rules as $key=>$constraints) {
 
@@ -399,7 +424,7 @@ class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
                 // The parent segment of the nested key
                 $relation = $this->getRelationName($key);
 
-                $relationNotInInput = (bool)$relation && !in_array($relation, $passedRelations);
+                $relationNotInInput = $relation && !in_array($relation, $passedRelations);
 
                 // If this is an optional relation, and no key was passed, skip it
                 if ($relationNotInInput && $this->isOptionalRelation($relation)) {
@@ -500,50 +525,52 @@ class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
     }
 
     /**
-     * @param array             $input
-     * @param array             $parsedRules
-     * @param AppliesToResource $resource (optional)
-     * @param string            $locale (optional)
+     * @param array         $input
+     * @param Validation    $validation
+     * @param object|null   $ormObject (optional)
+     * @param array         $formats (optional)
      *
-     * @return Validation
+     * @return array
      **/
-    protected function performValidation(array $input, array $parsedRules, AppliesToResource $resource=null, $locale=null)
+    protected function performValidation(array $input, Validation $validation, $ormObject=null, array $formats=[]) : array
     {
 
         // First split rules into base rules and the custom rules of this class
-        list($baseRules, $ownRules) = $this->toBaseAndOwnRules($parsedRules);
+        list($baseRules, $ownRules) = $this->toBaseAndOwnRules($validation->rules());
 
-        $validation = new ValidationException();
-        $validation->setRules($parsedRules);
+        $validated = $input;
 
         if ($baseRules) {
-            $this->validateByBaseValidator($validation, $input, $baseRules, $resource, $locale);
+            $validated = $this->validateByBaseValidator($validation, $input, $baseRules, $ormObject, $formats);
         }
 
-        if ($ownRules) {
-            $this->validateByOwnMethods($validation, $input, $ownRules, $resource, $locale);
+        if (!$ownRules) {
+            return $validated;
         }
-        return $validation;
+
+        $this->validateByOwnMethods($validation, $input, $ownRules, $ormObject, $formats);
+
+        return $validated;
     }
 
     /**
      * Perform all validation by the custom methods of this class
      *
-     * @param Validation        $validation
-     * @param array             $input
-     * @param array             $ownRules
-     * @param AppliesToResource $resource (optional)
-     * @param string            $locale (optional)
+     * @param Validation    $validation
+     * @param array         $input
+     * @param array         $ownRules
+     * @param object|null   $ormObject (optional)
+     * @param array         $formats (optional)
      **/
-    protected function validateByOwnMethods(Validation $validation, array $input, array $ownRules, AppliesToResource $resource=null, $locale=null)
+    protected function validateByOwnMethods(Validation $validation, array $input, array $ownRules, $ormObject=null, array $formats=[])
     {
         foreach ($ownRules as $key=>$keyRules) {
             $vars = [
-                'input'    => $input,
-                'key'      => $key,
-                'value'    => Helper::value($input, $key),
-                'resource' => $resource,
-                'locale'   => $locale
+                'input'     => $input,
+                'key'       => $key,
+                'value'     => Helper::value($input, $key),
+                'ormObject' => $ormObject,
+                'formats'   => $formats
             ];
 
             foreach ($keyRules as $ruleName=>$parameters) {
@@ -561,17 +588,32 @@ class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
      *
      * @param mixed                                   $value
      * @param ConstraintGroup|Constraint|array|string $rule
-     * @param object|null                             $resource (optional)
+     * @param object|null                             $ormObject (optional)
+     * @param array                                   $formats (optional)
      *
      * @return bool
      */
-    protected function check($value, $rule, $resource=null) : bool
+    protected function check($value, $rule, $ormObject = null, array $formats=[]) : bool
     {
         if (!$this->checker) {
             $this->checker = new Checker();
         }
-        $resource = $resource instanceof AppliesToResource ? $resource : null;
-        return $this->checker->check($value, $rule, $resource);
+        return $this->checker->check($value, $rule, $ormObject);
+    }
+
+    /**
+     * Cast the value into something a repository can process.
+     *
+     * @param mixed                                   $value
+     * @param ConstraintGroup|Constraint|array|string $rule
+     * @param object|null                             $ormObject (optional)
+     * @param array                                   $formats (optional)
+     *
+     * @return mixed
+     */
+    protected function cast($value, $rule, $ormObject=null, array $formats=[])
+    {
+        return $value;
     }
 
     /**
@@ -678,14 +720,14 @@ class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
      * Perform the validation by an own validator method.
      *
      * @param string $ruleName
-     * @param array $vars The validation variables (input, value, key, resource, locale)
+     * @param array $vars The validation variables (input, value, key, ormObject, locale)
      * @param array $parameters The rule parameters (in rules array)
      *
      * @return bool
      *
      * @throws \ReflectionException
      */
-    protected function validateByOwnMethod($ruleName, array $vars, array $parameters)
+    protected function validateByOwnMethod(string $ruleName, array $vars, array $parameters) : bool
     {
         $method = $this->getMethodBySnakeCaseName($ruleName);
 
@@ -744,7 +786,7 @@ class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
      *
      * @param string $path (optional)
      *
-     * @return \Emx\Contracts\XType\XType
+     * @return \Ems\Contracts\XType\XType
      **/
     protected function xType($path=null)
     {
@@ -757,5 +799,33 @@ class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
         }
 
         return $this->typeProvider->xType($resource, $path);
+    }
+
+    /**
+     * @param object|null $ormObject
+     * @return bool
+     */
+    protected function isFromStorage($ormObject) : bool
+    {
+        // Everything that is not an object is new ;-)
+        // This works here because we will not be able to determine previous
+        // data to skip required values
+        if (!is_object($ormObject)) {
+            return false;
+        }
+        if ($ormObject instanceof Entity || $ormObject instanceof DataObject || $ormObject instanceof ChangeTracking) {
+            return !$ormObject->isNew();
+        }
+        if (method_exists($ormObject, 'getId')) {
+            return (bool)$ormObject->getId();
+        }
+        if (isset($ormObject->id)) {
+            return (bool)$ormObject->id;
+        }
+        // Eloquent
+        if (isset($ormObject->exists)) {
+            return (bool)$ormObject->exists;
+        }
+        return false;
     }
 }

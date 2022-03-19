@@ -2,6 +2,8 @@
 
 namespace Ems\Validation;
 
+use function print_r;
+
 /**
  * Use this trait to support merging of rules. Use this trait
  * with \Ems\Validation\Validator
@@ -33,9 +35,9 @@ trait RuleMergingSupport
      *
      * @return array
      **/
-    protected function buildRules()
+    protected function buildRules() : array
     {
-        $rules = array_merge(parent::buildRules(), $this->extendedRules);
-        return $rules;
+        $parentRules = parent::buildRules();
+        return array_merge($parentRules, $this->extendedRules);
     }
 }

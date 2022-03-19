@@ -38,11 +38,13 @@ class ValidatorTest extends \Ems\TestCase
     public function test_buildValidator_throws_exception_if_no_factory_assigned()
     {
         $validator = $this->newCustomValidator();
+
         $detector = $this->mock(XTypeProviderValidatorFactory::class);
+        $validator->setOrmClass(NamedObject::class);
 
         $resource = new NamedObject;
 
-        $this->assertTrue($validator->validate([], $resource));
+        $this->assertSame([], $validator->validate([], $resource));
 
     }
 
@@ -246,7 +248,7 @@ class ValidatorTest extends \Ems\TestCase
                 'exactly' => ['/home/michael/.profile']
             ],
             'address.street' => [
-                'min' => [2],            
+                'min' => [2],
                 'max' => [5]
             ]
         ];
@@ -599,28 +601,28 @@ class CustomValidator extends GenericValidator
     }
 
     /**
-     * @param array             $input
-     * @param string            $key
-     * @param AppliesToResource $resource (optional)
+     * @param array                     $input
+     * @param string                    $key
+     * @param AppliesToResource|null    $ormObject (optional)
      *
      * @return bool
      **/
-    protected function validateUser(array $input, $key, AppliesToResource $resource=null)
+    protected function validateUser(array $input, $key, AppliesToResource $ormObject=null) : bool
     {
-        if (!$value = Helper::value($input, $key)) {
+        if (!Helper::value($input, $key)) {
             return true;
         }
 
-        if (!$resource) {
+        if (!$ormObject) {
             return true;
         }
 
-        return $resource->resourceName() == 'user';
+        return $ormObject->resourceName() == 'user';
     }
 
-    protected function validateHasId(AppliesToResource $resource, $id)
+    protected function validateHasId(AppliesToResource $ormObject, $id)
     {
-        return $resource->getId() == $id;
+        return $ormObject->getId() == $id;
     }
 
     protected function validateIsIn(array $input, $key)

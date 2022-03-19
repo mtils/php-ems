@@ -5,18 +5,19 @@ namespace Ems\Validation\Illuminate;
 
 use Ems\Contracts\Core\AppliesToResource;
 use Ems\Contracts\Core\SupportsCustomFactory;
-use Ems\Contracts\Validation\ResourceRuleDetector;
 use Ems\Contracts\Validation\ValidatorFactory as ValidatorFactoryContract;
 use Ems\Contracts\XType\TypeProvider;
 use Ems\Core\Support\CustomFactorySupport;
 use Ems\XType\Illuminate\XTypeToRuleConverter;
+
+use function var_dump;
 
 /**
  * This class retrievs the xtype of a parameter, converts
  * it into laravel validation rules and creates a
  * validator out of it.
  **/
-class XTypeProviderValidatorFactory implements SupportsCustomFactory, ValidatorFactoryContract, ResourceRuleDetector
+class XTypeProviderValidatorFactory implements SupportsCustomFactory, ValidatorFactoryContract
 {
     use CustomFactorySupport;
 
@@ -55,7 +56,7 @@ class XTypeProviderValidatorFactory implements SupportsCustomFactory, ValidatorF
             return null;
         }
 
-        $rules = array_merge($this->detectRules($resource), $rules);
+        $rules = array_merge($this->detectRules(get_class($resource)), $rules);
 
         return $this->createObject(GenericValidator::class)->setRules($rules);
 
@@ -64,14 +65,14 @@ class XTypeProviderValidatorFactory implements SupportsCustomFactory, ValidatorF
     /**
      * Convert a resource into a laravel rule array.
      *
-     * @param AppliesToResource $resource
-     * @param int|array         $relationDepth (default:1)
+     * @param string    $ormClass
+     * @param int|array $relationDepth (default:1)
      *
      * @return array
      **/
-    public function detectRules(AppliesToResource $resource, $relationDepth=1)
+    public function detectRules(string $ormClass, $relationDepth=1)
     {
-        $type = $this->typeProvider->xType($resource);
+        $type = $this->typeProvider->xType($ormClass);
         return $this->ruleConverter->toRule($type, $relationDepth);
     }
 }

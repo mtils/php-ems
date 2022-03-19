@@ -208,18 +208,15 @@ class DoesNotSupportRuleSetting extends Validator
         return new NamedObject(1,'foo','foo');
     }
 
-    /**
-     * Perform validation by the the base validator. Reimplement this method
-     * to use it with your favourite base validator.
-     *
-     * @param Validation        $validation
-     * @param array             $input
-     * @param array             $baseRules
-     * @param AppliesToResource $resource (optional)
-     * @param string            $locale (optional)
-     **/
-    protected function validateByBaseValidator(Validation $validation, array $input, array $baseRules, AppliesToResource $resource=null, $locale=null)
-    {
+    protected function validateByBaseValidator(
+        Validation $validation,
+        array $input,
+        array $baseRules,
+        $ormObject = null,
+        array $formats = []
+    ): array {
+        return $input;
     }
+
 
 }

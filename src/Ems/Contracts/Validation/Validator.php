@@ -3,20 +3,41 @@
 namespace Ems\Contracts\Validation;
 
 
-use Ems\Contracts\Core\AppliesToResource;
-
 /**
  * The ems validation system works like the laravel validation with rules.
  * The main reason for that is the great readability of a rules array and
  * that you can change its behaviour easily by changing its rules.
- * But in opposite to laravel its meant to write one validator class for
- * each resource.
+ * But in opposite to create validators on the fly (which you could do here also)
+ * you should write validator classes for each of your resources.
  *
- * HasMethodHooks has to provide onBefore('validate'), onAfter('validate')
- * onBefore('parseRules') and onAfter('parseRules') to manipulate the array
  **/
 interface Validator
 {
+    /**
+     * Locale parameter for validate method
+     */
+    const LOCALE = 'locale';
+
+    /**
+     * Datetime format parameter for validate method
+     */
+    const DATETIME_FORMAT = 'datetime_format';
+
+    /**
+     * Date format parameter for validate method
+     */
+    const DATE_FORMAT = 'date_format';
+
+    /**
+     * Time format for validate method
+     */
+    const TIME_FORMAT = 'time_format';
+
+    /**
+     * Decimal separator for validation method
+     */
+    const DECIMAL_SEPARATOR = 'decimal_separator';
+
     /**
      * An array of string names rules. Like in laravels validation. The rules
      * are used to map the validator to other validators like a javascript
@@ -24,23 +45,29 @@ interface Validator
      *
      * @return array
      **/
-    public function rules();
+    public function rules() : array;
 
     /**
-     * Validates to true or fails by an exception (with unparsed messages)
+     * Validate and return a sanitized version of $input. Cast dates to
+     * datetime, turn foreign keys into objects so that the result can be passed
+     * to a repository.
+     * Throw anything that is a validation
      *
-     * @param array             $input
-     * @param AppliesToResource $resource (optional)
-     * @param string            $locale (optional)
+     * @param array         $input      The input from a request or another input source like import files
+     * @param object|null   $ormObject  An orm object that this data will belong to
+     * @param array         $formats Pass information how to read the input see self::DATE_FORMAT etc.
      *
-     * @return bool (always true)
+     * @return array Return a clean version of the input data that can be processed by a repository
+     *
+     * @throws ValidationException
      **/
-    public function validate(array $input, AppliesToResource $resource=null, $locale=null);
+    public function validate(array $input, $ormObject=null, array $formats=[]) : array;
 
     /**
-     * Return the resource / model this validator belongs to
+     * Return the orm class this validator belongs to. Return an empty string if
+     * it does not belong to a special class.
      *
-     * @return object|null
+     * @return string
      **/
-    public function resource();
+    public function ormClass() : string;
 }

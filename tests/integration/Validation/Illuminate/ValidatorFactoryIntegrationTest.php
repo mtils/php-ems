@@ -112,7 +112,7 @@ class ValidatorFactoryIntegrationTest extends \Ems\LaravelIntegrationTest
         $category = new Category;
 
         $validator = $factory->make($rules, $category);
-
+        $validator->setOrmClass(Category::class);
         $this->assertInstanceOf(AlterableCategoryValidator::class, $validator);
         $rules = $validator->rules();
 
@@ -150,6 +150,7 @@ class ValidatorFactoryIntegrationTest extends \Ems\LaravelIntegrationTest
         $category = new Category;
 
         $validator = $factory->make([], $category);
+        $validator->setOrmClass(Category::class);
 
         $this->assertInstanceOf(CategoryValidator::class, $validator);
         $rules = $validator->rules();
@@ -163,7 +164,7 @@ class ValidatorFactoryIntegrationTest extends \Ems\LaravelIntegrationTest
 
 class CategoryValidator extends GenericValidator
 {
-    
+
 }
 
 class AlterableCategoryValidator extends AlterableValidator
