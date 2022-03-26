@@ -2,13 +2,9 @@
 
 namespace Ems\Validation\Illuminate;
 
-use Ems\Contracts\Validation\GenericValidator as GenericValidatorContract;
-use Ems\Validation\RuleSettingSupport;
 
-
-class GenericValidator extends Validator implements GenericValidatorContract
+class GenericValidator extends Validator
 {
-    use RuleSettingSupport;
 
     /**
      * @param string $class

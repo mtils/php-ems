@@ -3,12 +3,10 @@
 
 namespace Ems\Validation\Illuminate;
 
-use Ems\Contracts\Validation\ValidatorFactory as ValidatorFactoryContract;
 use Ems\Contracts\Core\AppliesToResource;
 use Ems\Contracts\Core\SupportsCustomFactory;
-use Ems\Contracts\XType\TypeProvider;
+use Ems\Contracts\Validation\ValidatorFactory as ValidatorFactoryContract;
 use Ems\Core\Support\CustomFactorySupport;
-use Ems\XType\Illuminate\XTypeToRuleConverter;
 use Ems\Validation\ConfiguresValidator;
 
 /**
@@ -30,11 +28,14 @@ class ValidatorFactory implements ValidatorFactoryContract, SupportsCustomFactor
     public function make(array $rules, AppliesToResource $resource=null)
     {
 
-        if (!$rules) {
+        if (!$rules || $resource) {
             return null;
         }
 
-        $validator = $this->createObject(GenericValidator::class)->setRules($rules);
+        /** @var GenericValidator $validator */
+        $validator = $this->createObject(GenericValidator::class, [
+            'rules' => $rules
+        ]);
         return $this->configureAndReturn($validator, $rules, $resource);
     }
 

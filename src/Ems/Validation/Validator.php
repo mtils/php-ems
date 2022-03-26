@@ -3,7 +3,6 @@
 
 namespace Ems\Validation;
 
-use Ems\Contracts\Core\AppliesToResource;
 use Ems\Contracts\Core\ChangeTracking;
 use Ems\Contracts\Core\Checker as CheckerContract;
 use Ems\Contracts\Core\DataObject;
@@ -16,8 +15,6 @@ use Ems\Contracts\Expression\ConstraintParsingMethods;
 use Ems\Contracts\Validation\Validation;
 use Ems\Contracts\Validation\ValidationException;
 use Ems\Contracts\Validation\Validator as ValidatorContract;
-use Ems\Contracts\XType\TypeProvider;
-use Ems\Contracts\XType\XType;
 use Ems\Core\Checker;
 use Ems\Core\Collections\NestedArray;
 use Ems\Core\Exceptions\UnConfiguredException;
@@ -25,7 +22,6 @@ use Ems\Core\Helper;
 use Ems\Core\Lambda;
 use Ems\Core\Patterns\HookableTrait;
 use Ems\Core\Patterns\SnakeCaseCallableMethods;
-use Ems\XType\SequenceType;
 use RuntimeException;
 use stdClass;
 
@@ -33,7 +29,6 @@ use function array_key_exists;
 use function array_merge;
 use function is_object;
 use function method_exists;
-use function print_r;
 
 
 class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
@@ -72,17 +67,17 @@ class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
     /**
      * @var array
      **/
+    protected $extendedRules = [];
+
+    /**
+     * @var array
+     **/
     protected $ownValidationMethods;
 
     /**
      * @var callable
      **/
     protected $ruleDetector;
-
-    /**
-     * @var TypeProvider
-     **/
-    protected $typeProvider;
 
     /**
      * This is the prefix for the "own validation methods" of this class.
@@ -178,6 +173,27 @@ class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
     }
 
     /**
+     * @param array $rules
+     *
+     * @return self
+     **/
+    public function mergeRules(array $rules) : ValidatorContract
+    {
+        $this->extendedRules = array_merge($this->extendedRules, $rules);
+        $this->parsedRules = null;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function canMergeRules(): bool
+    {
+        return true;
+    }
+
+
+    /**
      * {@inheritdoc}
      *
      * @return array
@@ -211,19 +227,6 @@ class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
     public function detectRulesBy(callable $detector) : Validator
     {
         $this->ruleDetector = $detector;
-        return $this;
-    }
-
-    /**
-     * Set a type provider for better automatic rule detection an filtering.
-     *
-     * @param TypeProvider $provider
-     *
-     * @return self
-     **/
-    public function injectTypeProvider(TypeProvider $provider)
-    {
-        $this->typeProvider = $provider;
         return $this;
     }
 
@@ -311,67 +314,6 @@ class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
     }
 
     /**
-     * Apply some filtering on the detected rules. If they are provided by
-     * a TypeProvider they contain really all keys, also readonly
-     *
-     * @param array       $rules
-     * @param string|null $ormClass
-     *
-     * @return array
-     **/
-    protected function filterDetectedRules(array $rules, string $ormClass=null) : array
-    {
-
-        if (!$this->typeProvider) {
-            return $rules;
-        }
-
-        $filteredRules = [];
-
-        foreach ($rules as $key=>$rule) {
-
-            if (!$type = $this->xType($key)) {
-                continue;
-            }
-
-            if ($this->shouldRemoveRules($key, $type)) {
-                continue;
-            }
-
-            if ($type->readonly) {
-                $filteredRules[$key] = 'forbidden';
-                continue;
-            }
-
-            $filteredRules[$key] = $rule;
-        }
-
-        return $filteredRules;
-    }
-
-    /**
-     * Return true if rules for a key should be removed from the detected rules
-     *
-     * @param string $key
-     * @param XType  $type
-     *
-     * @return bool
-     **/
-    protected function shouldRemoveRules($key, XType $type)
-    {
-
-        if ($type instanceof SequenceType) {
-            return true;
-        }
-
-        if ($type->isComplex()) {
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
      * This method is called just to have a hook to build initial rules.
      *
      * @return array
@@ -379,12 +321,14 @@ class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
     protected function buildRules() : array
     {
         if ($this->rules) {
-            return $this->rules;
+            return array_merge($this->rules, $this->extendedRules);
         }
 
         if ($ormClass = $this->ormClass()) {
-            $this->rules = $this->filterDetectedRules($this->detectRules($ormClass), $ormClass);
+            $this->rules = $this->detectRules($ormClass);
         }
+
+        $this->rules = array_merge($this->rules, $this->extendedRules);
 
         return $this->rules;
     }
@@ -739,11 +683,11 @@ class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
     /**
      * Collects all relation keys
      *
-     * @param array $rules
+     * @param array $flat
      *
      * @return array
      **/
-    protected function collectRelations(array $flat)
+    protected function collectRelations(array $flat) : array
     {
 
         $relations = [];
@@ -767,7 +711,7 @@ class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
      *
      * @return string
      **/
-    protected function getRelationName($key)
+    protected function getRelationName(string $key) : string
     {
         if (strpos($key, '.') === false) {
             return '';
@@ -778,27 +722,6 @@ class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
         array_pop($path);
 
         return implode('.', $path);
-    }
-
-    /**
-     * A little helper method if you work with xtype. Just quickly retrieve the
-     * type of the resource (or a path on it)
-     *
-     * @param string $path (optional)
-     *
-     * @return \Ems\Contracts\XType\XType
-     **/
-    protected function xType($path=null)
-    {
-        if (!$this->typeProvider) {
-            throw new UnConfiguredException("No typeprovider setted");
-        }
-
-        if (!$resource = $this->resource()) {
-            throw new UnConfiguredException("Without returning something in resource() I cant find a type");
-        }
-
-        return $this->typeProvider->xType($resource, $path);
     }
 
     /**

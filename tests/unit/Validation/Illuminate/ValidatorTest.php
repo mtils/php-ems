@@ -6,6 +6,7 @@ namespace Ems\Validation\Illuminate;
 use Ems\Contracts\Core\Entity;
 use Ems\Contracts\Validation\Validation;
 use Ems\Contracts\Validation\Validator as ValidatorContract;
+use Ems\XType\Illuminate\XTypeProviderValidatorFactory;
 use Illuminate\Validation\Factory as IlluminateFactory;
 use Illuminate\Contracts\Translation\Translator as TranslatorContract;
 use Illuminate\Translation\ArrayLoader;
@@ -67,8 +68,7 @@ class ValidatorTest extends \Ems\TestCase
 
         try {
 
-            $validator = $this->newValidator();
-            $validator->setRules($rules);
+            $validator = $this->newValidator($rules);
             $validator->validate($input);
 
         } catch (Validation $v) {
@@ -136,8 +136,7 @@ class ValidatorTest extends \Ems\TestCase
 
         try {
 
-            $validator = $this->newValidator();
-            $validator->setRules($rules);
+            $validator = $this->newValidator($rules);
             $validator->validate($input);
             $this->fail('validate() throws does not throw an exception even if data is invalid');
 
@@ -195,8 +194,7 @@ class ValidatorTest extends \Ems\TestCase
 
         try {
 
-            $validator = $this->newCustomValidator();
-            $validator->setRules($rules);
+            $validator = $this->newCustomValidator($rules);
             $validator->validate($input, $resource);
 
         } catch (Validation $v) {
@@ -276,8 +274,7 @@ class ValidatorTest extends \Ems\TestCase
 
         try {
 
-            $validator = $this->newCustomValidator();
-            $validator->setRules($rules);
+            $validator = $this->newCustomValidator($rules);
             $validator->validate($input, $resource);
             $this->fail('validate() does not throw an exception even if data is invalid');
 
@@ -321,8 +318,7 @@ class ValidatorTest extends \Ems\TestCase
 
         try {
 
-            $validator = $this->newValidator();
-            $validator->setRules($rules);
+            $validator = $this->newValidator($rules);
 
             $validator->onBefore('validate', $breaker);
 
@@ -370,8 +366,7 @@ class ValidatorTest extends \Ems\TestCase
 
         try {
 
-            $validator = $this->newValidator();
-            $validator->setRules($rules);
+            $validator = $this->newValidator($rules);
 
             $validator->onBefore('validate', $breaker);
 
@@ -417,8 +412,7 @@ class ValidatorTest extends \Ems\TestCase
 
         try {
 
-            $validator = $this->newValidator();
-            $validator->setRules($rules);
+            $validator = $this->newValidator($rules);
 
             $validator->onBefore('validate', $breaker);
 
@@ -464,8 +458,7 @@ class ValidatorTest extends \Ems\TestCase
 
         try {
 
-            $validator = $this->newValidator();
-            $validator->setRules($rules);
+            $validator = $this->newValidator($rules);
 
             $validator->onBefore('validate', $breaker);
 
@@ -511,8 +504,7 @@ class ValidatorTest extends \Ems\TestCase
 
         try {
 
-            $validator = $this->newValidator();
-            $validator->setRules($rules);
+            $validator = $this->newValidator($rules);
 
             $validator->onBefore('validate', $breaker);
 
@@ -525,14 +517,14 @@ class ValidatorTest extends \Ems\TestCase
         }
     }
 
-    protected function newValidator(IlluminateFactory $factory=null)
+    protected function newValidator(array $rules=[])
     {
-        return (new GenericValidator())->injectIlluminateFactory($factory ?: $this->newFactory());
+        return (new GenericValidator($rules))->injectIlluminateFactory($this->newFactory());
     }
 
-    protected function newCustomValidator(IlluminateFactory $factory=null)
+    protected function newCustomValidator(array $rules=[], IlluminateFactory $factory=null)
     {
-        return (new CustomValidator())->injectIlluminateFactory($factory ?: $this->newFactory());
+        return (new CustomValidator($rules))->injectIlluminateFactory($factory ?: $this->newFactory());
     }
 
     protected function newFactory(TranslatorContract $lang=null)

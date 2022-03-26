@@ -73,7 +73,9 @@ class ValidatorFactoryIntegrationTest extends \Ems\LaravelIntegrationTest
 
         $category = new Category;
 
+        /** @var GenericValidator $validator */
         $validator = $factory->make($rules, $category);
+        $validator->setOrmClass(Category::class);
 
         $this->assertInstanceOf(GenericValidator::class, $validator);
         $rules = $validator->rules();

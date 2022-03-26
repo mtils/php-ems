@@ -5,9 +5,9 @@ namespace Ems\Validation;
 
 use Ems\Contracts\Core\AppliesToResource;
 use Ems\Contracts\Validation\Validator as ValidatorContract;
-use Ems\Contracts\Validation\GenericValidator as GenericContract;
-use Ems\Contracts\Validation\AlterableValidator as AlterableContract;
 use Ems\Core\Exceptions\UnsupportedParameterException;
+
+use function get_class;
 
 
 trait ConfiguresValidator
@@ -20,40 +20,30 @@ trait ConfiguresValidator
      * @param array                    $rules
      * @param string|AppliesToResource $resource (optional)
      *
-     * @return Validator
+     * @return ValidatorContract
      *
      * @throws UnsupportedParameterException (If validator does not allow to set rules)
      **/
     protected function configureAndReturn(ValidatorContract $validator, array $rules, $resource=null)
     {
 
-        if (!$rules && !$resource) {
+        if ((!$rules && !$resource)) {
             return $validator;
         }
 
-        if ($validator instanceof AlterableContract) {
-
-            $validator = $rules ? $validator->mergeRules($rules) : $validator;
-
-            // Special case of implement both interfaces
-            if ($validator instanceof GenericValidator && $resource) {
-                $validator->setResource($resource);
-            }
-
-            return $validator;
-
-        }
-
-        if (!$validator instanceof GenericContract) {
+        if (!$validator->canMergeRules()) {
             $name = get_class($validator);
-            throw new UnsupportedParameterException("The validator '$name' does not support setting, merging rules or setting a resource.");
+            throw new UnsupportedParameterException("The validator '$name' does not support merging rules.");
         }
 
-        if ($resource) {
-            $validator->setResource($resource);
+        $validator = $rules ? $validator->mergeRules($rules) : $validator;
+
+        // Special case of implement both interfaces
+        if ($validator instanceof GenericValidator && $resource) {
+            $validator->setOrmClass(get_class($resource));
         }
 
-        return $validator->setRules($rules);
+        return $validator;
 
     }
 }

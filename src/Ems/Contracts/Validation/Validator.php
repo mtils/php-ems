@@ -70,4 +70,22 @@ interface Validator
      * @return string
      **/
     public function ormClass() : string;
+
+    /**
+     * Merge the passed ruled with default rules of this validator. Throw a
+     * MergingFailedException if you do not support merging or you do not accept
+     * the passed rules for merging.
+     *
+     * @param array $rules
+     * @return Validator
+     * @throws MergingFailedException
+     */
+    public function mergeRules(array $rules) : Validator;
+
+    /**
+     * Return true if your validator supports merging of rules.
+     *
+     * @return bool
+     */
+    public function canMergeRules() : bool;
 }

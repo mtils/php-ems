@@ -3,13 +3,10 @@
 
 namespace Ems\Validation;
 
+use Ems\Contracts\Core\AppliesToResource;
 use Ems\Contracts\Core\HasMethodHooks;
 use Ems\Contracts\Validation\Validation as ValidationContract;
-use Ems\Contracts\Validation\GenericValidator as GenericValidatorContract;
-use Ems\Contracts\Validation\AlterableValidator as AlterableValidatorContract;
-use Ems\Contracts\Core\AppliesToResource;
 use Ems\Core\Exceptions\UnConfiguredException;
-use Ems\Core\Patterns\HookableTrait;
 
 
 /**
@@ -17,11 +14,8 @@ use Ems\Core\Patterns\HookableTrait;
  * It is normally not allowed to have a generic and alterable validator at
  * once.
  **/
-class GenericValidator extends Validator implements GenericValidatorContract, AlterableValidatorContract, AppliesToResource, HasMethodHooks
+class GenericValidator extends Validator implements AppliesToResource, HasMethodHooks
 {
-    use RuleSettingSupport;
-    use RuleMergingSupport;
-
     /**
      * @var callable
      **/
@@ -34,7 +28,7 @@ class GenericValidator extends Validator implements GenericValidatorContract, Al
     public function __construct(array $rules=[], callable $baseValidator=null)
     {
         parent::__construct();
-        $this->setRules($rules);
+        $this->applyRules($rules);
         $this->baseValidator = $baseValidator;
     }
 
@@ -70,4 +64,13 @@ class GenericValidator extends Validator implements GenericValidatorContract, Al
         return call_user_func($this->baseValidator, $validation, $input, $baseRules, $ormObject, $formats);
     }
 
+    /**
+     * Little method for less code duplication when extending GenericValidator
+     * @param array $rules
+     * @return void
+     */
+    protected function applyRules(array $rules)
+    {
+        $this->rules = $rules;
+    }
 }

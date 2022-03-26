@@ -5,6 +5,7 @@ namespace Ems\Validation;
 
 use ArrayIterator;
 use Ems\Contracts\Validation\Rule as RuleContract;
+use Ems\Contracts\Expression\Constraint as ConstraintContract;
 use Ems\Expression\Constraint;
 use Ems\Expression\ConstraintGroup;
 use InvalidArgumentException;

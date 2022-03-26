@@ -208,6 +208,12 @@ class DoesNotSupportRuleSetting extends Validator
         return new NamedObject(1,'foo','foo');
     }
 
+    public function canMergeRules(): bool
+    {
+        return false;
+    }
+
+
     protected function validateByBaseValidator(
         Validation $validation,
         array $input,

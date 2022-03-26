@@ -4,17 +4,11 @@
 namespace Ems\Validation;
 
 use Ems\Contracts\Core\AppliesToResource;
-use Ems\Core\NamedObject;
-use Ems\Core\FakeEntity as GenericEntity;
 use Ems\Contracts\Validation\Validation;
-use Ems\Contracts\Validation\GenericValidator as GenericValidatorContract;
-use Ems\Contracts\Validation\AlterableValidator as AlterableValidatorContract;
+use Ems\Contracts\Validation\Validator as ValidatorContract;
+use Ems\Core\FakeEntity as GenericEntity;
+use Ems\Core\NamedObject;
 use Ems\Testing\LoggingCallable;
-
-use stdClass;
-
-use function print_r;
-use function var_dump;
 
 /**
  * @group validation
@@ -23,8 +17,7 @@ class GenericValidatorTest extends \Ems\TestCase
 {
     public function test_implements_interface()
     {
-        $this->assertInstanceOf(GenericValidatorContract::class, $this->newValidator());
-        $this->assertInstanceOf(AlterableValidatorContract::class, $this->newValidator());
+        $this->assertInstanceOf(ValidatorContract::class, $this->newValidator());
     }
 
     public function test_validate_forwards_to_passed_callable()
@@ -101,18 +94,6 @@ class GenericValidatorTest extends \Ems\TestCase
 
     }
 
-    /**
-     * @expectedException Ems\Core\Exceptions\UnConfiguredException
-     **/
-    public function test_buildValidator_throws_exception_if_no_resource_assigned_and_resourceName_is_called()
-    {
-        $validator = $this->newValidator();
-        $detector = $this->mock(XTypeProviderValidatorFactory::class);
-
-        $validator->resourceName();
-
-    }
-
     public function test_rules_returns_parsedRules()
     {
 
@@ -145,10 +126,7 @@ class GenericValidatorTest extends \Ems\TestCase
             ]
         ];
 
-        $this->assertSame($validator, $validator->setRules($rules));
-
         $this->assertEquals($parsed, $validator->rules());
-
 
     }
 
@@ -248,6 +226,7 @@ class GenericValidatorTest extends \Ems\TestCase
 
         $validator = $this->newValidator($rules, $handler);
         $validator->setOrmClass(NamedObject::class);
+        echo "\nFrom here";
         $validator->mergeRules(['password' => 'min:3', 'login' => 'max:64']);
 
         $this->assertEquals($input, $validator->validate($input, $resource, $parameters));
@@ -258,14 +237,13 @@ class GenericValidatorTest extends \Ems\TestCase
         $this->assertEquals($parameters, $handler->arg(4));
     }
 
-    public function test_get_and_set_resourceName()
+    public function test_get_and_set_ormClass()
     {
 
-        $resource = new NamedObject(14, 'king', 'users');
         $validator = $this->newValidator(['password' => 'min:3']);
-        $this->assertSame($validator, $validator->setResource($resource));
-        $this->assertEquals('users', $validator->resourceName());
-        $this->assertSame($resource, $validator->resource());
+        $this->assertEmpty($validator->ormClass());
+        $this->assertSame($validator, $validator->setOrmClass(self::class));
+        $this->assertEquals(self::class, $validator->ormClass());
 
     }
 
@@ -307,7 +285,7 @@ class GenericValidatorTest extends \Ems\TestCase
             ]
         ];
 
-        $validator->setRules($rules);
+        $validator->mergeRules($rules);
 
         $this->assertEquals($parsed, $validator->rules());
 
@@ -358,8 +336,7 @@ class GenericValidatorTest extends \Ems\TestCase
 
         try {
 
-            $validator = $this->newValidator();
-            $validator->setRules($rules);
+            $validator = $this->newValidator($rules);
 
             $validator->onBefore('validate', $breaker);
 
@@ -421,8 +398,7 @@ class GenericValidatorTest extends \Ems\TestCase
 
         try {
 
-            $validator = $this->newValidator();
-            $validator->setRules($rules);
+            $validator = $this->newValidator($rules);
 
             $validator->onBefore('validate', $breaker);
 
@@ -503,8 +479,7 @@ class GenericValidatorTest extends \Ems\TestCase
 
         try {
 
-            $validator = new ValidatorWithOptionalRelations;
-            $validator->setRules($rules);
+            $validator = new ValidatorWithOptionalRelations($rules);
 
             $validator->onBefore('validate', $breaker);
 
