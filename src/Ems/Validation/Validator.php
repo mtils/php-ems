@@ -96,11 +96,12 @@ class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
      */
     protected $required_rules = ['required', 'required_if', 'required_unless'];
 
-    public function __construct(array $rules=[])
+    public function __construct(array $rules=[], string $ormClass='')
     {
         if ($rules) {
             $this->rules = $rules;
         }
+        $this->ormClass = $ormClass;
     }
 
     /**

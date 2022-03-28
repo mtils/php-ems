@@ -3,200 +3,227 @@
 
 namespace Ems\Validation;
 
-use Ems\Contracts\Validation\ValidatorFactory as ValidatorFactoryContract;
-use Ems\Contracts\Core\Extendable;
-use Ems\Contracts\Core\AppliesToResource;
+use Ems\Contracts\Core\Exceptions\TypeException;
+use Ems\Contracts\Core\Subscribable;
 use Ems\Contracts\Core\SupportsCustomFactory;
-use Ems\Contracts\Validation\ValidationConverter as ConverterContract;
 use Ems\Contracts\Validation\Validation;
-use Ems\Validation\ValidationException;
-
+use Ems\Contracts\Validation\ValidatorFactory as ValidatorFactoryContract;
+use Ems\Core\Exceptions\UnsupportedParameterException;
 use Ems\Core\NamedObject;
+use Ems\Testing\LoggingCallable;
+use OutOfBoundsException;
+use stdClass;
+
+use function get_class;
 
 /**
  * @group validation
  **/
 class ValidatorFactoryTest extends \Ems\TestCase
 {
-    public function test_implements_interface()
+    /**
+     * @test
+     */
+    public function implements_interface()
     {
         $this->assertInstanceOf(ValidatorFactoryContract::class, $this->newFactory());
         $this->assertInstanceOf(SupportsCustomFactory::class, $this->newFactory());
-    }
-
-    public function test_make_forwards_to_first_factory()
-    {
-        $factory = $this->newFactory();
-        $factory->add(new GenericValidatorFactory);
-
-        $rules = [
-            'login' => 'required|min:3'
-        ];
-
-        $this->assertInstanceOf(GenericValidator::class, $factory->make($rules));
-    }
-
-    public function test_make_forwards_to_first_factory_if_no_direct_resource_validator_setted()
-    {
-        $factory = $this->newFactory();
-        $factory->add(new GenericValidatorFactory);
-
-        $resource = new NamedObject(12, 'name', 'users');
-
-        $rules = [
-            'login' => 'required|min:3'
-        ];
-
-        $this->assertInstanceOf(GenericValidator::class, $factory->make($rules, $resource));
+        $this->assertInstanceOf(Subscribable::class, $this->newFactory());
     }
 
     /**
-     * @expectedException Ems\Contracts\Core\Errors\Unsupported
-     **/
-    public function test_make_throws_exception_if_passing_rules_to_validator_which_not_supports_setting_of_rules()
+     * @test
+     */
+    public function create_makes_validator()
     {
-        $factory = $this->newFactory();
-        $factory->add(new GenericValidatorFactory(function () {
-            return new DoesNotSupportRuleSetting();
-        }));
-
-        $resource = new NamedObject(12, 'name', 'users');
-
         $rules = [
             'login' => 'required|min:3'
         ];
+        $parsed = [
+            'login' => [
+                'required'  => [],
+                'min'       => [3]
+            ]
+        ];
+        $validator = $this->newFactory()->create($rules, self::class);
+        $this->assertInstanceOf(Validator::class, $validator);
+        $this->assertEquals($parsed, $validator->rules());
+        $this->assertEquals(self::class, $validator->ormClass());
+    }
 
-        $factory->make($rules, $resource);
+    /**
+     * @test
+     */
+    public function create_validator_calls_listener()
+    {
+        $rules = [
+            'login' => 'required|min:3'
+        ];
+        $listener = new LoggingCallable();
+        $factory = $this->newFactory();
+        $factory->on(self::class, $listener);
+        $validator = $factory->create($rules, self::class);
+        $this->assertInstanceOf(Validator::class, $validator);
+
+        $this->assertEquals(1, count($listener));
+        $this->assertSame($validator, $listener->arg(0));
 
     }
 
-    public function test_make_forwards_to_resource_validator_if_setted()
+    /**
+     * @test
+     */
+    public function create_validator_without_ormClass_does_not_call_listener()
     {
-        $factory = $this->newFactory();
-        $factory->add(new GenericValidatorFactory);
-
-        $resource = new NamedObject(12, 'name', 'users');
-
         $rules = [
             'login' => 'required|min:3'
         ];
+        $listener = new LoggingCallable();
+        $factory = $this->newFactory();
+        $factory->on('', $listener);
+        $validator = $factory->create($rules);
+        $this->assertInstanceOf(Validator::class, $validator);
+        $this->assertEquals(0, count($listener));
+    }
 
-        $validator = new GenericValidator;
+    /**
+     * @test
+     */
+    public function create_validator_with_custom_factory()
+    {
+        $factory = $this->newFactory();
+        $custom = function (array $rules, string $ormClass='') {
+            return new DoesNotSupportRuleSetting($rules, $ormClass);
+        };
+        $factory->setCreateFactory($custom);
 
-        $creator = function () use ($validator) {
+        $validator = $factory->create([]);
+        $this->assertInstanceOf(DoesNotSupportRuleSetting::class, $validator);
+
+    }
+
+    /**
+     * @test
+     */
+    public function get_registered_validator()
+    {
+        $factory = $this->newFactory();
+        $factory->register(ValidatorFactoryTest_Address::class, function () {
+            return new ValidatorFactoryTest_AddressValidator();
+        });
+
+        $validator = $factory->get(ValidatorFactoryTest_Address::class);
+        $this->assertInstanceOf(ValidatorFactoryTest_AddressValidator::class, $validator);
+    }
+
+    /**
+     * @test
+     */
+    public function get_registered_validator_by_class()
+    {
+        $factory = $this->newFactory();
+        $check = null;
+        $validator = new ValidatorFactoryTest_AddressValidator();
+
+        $factory->register(ValidatorFactoryTest_Address::class, ValidatorFactoryTest_AddressValidator::class);
+        $handler = function (string $ormClass) use ($validator, &$check) {
+            $check = get_class($validator) == $ormClass;
             return $validator;
         };
-
-        $factory->setForResource($resource, $creator);
-
-        $this->assertSame($validator, $factory->make($rules, $resource));
-    }
-
-    public function test_hasForResource_returns_correct_state()
-    {
-
-        $factory = $this->newFactory();
-        $resource = 'users';
-        $this->assertFalse($factory->hasForResource($resource));
-        $factory->setForResource($resource, GenericValidator::class);
-        $this->assertTrue($factory->hasForResource($resource));
-    }
-
-    public function test_getForResource_returns_added_validator_as_callable()
-    {
-
-        $factory = $this->newFactory();
-        $resource = 'users';
-        $factory->setForResource($resource, GenericValidator::class);
-        $creator = $factory->getForResource($resource);
-        $this->assertInstanceOf(GenericValidator::class, $creator());
-    }
-
-    public function test_setForResource_with_callable_creator()
-    {
-
-        $factory = $this->newFactory();
-        $resource = 'users';
-
-        $creator = function () {
-            return new GenericValidator;
-        };
-
-        $factory->setForResource($resource, $creator);
-
-        $this->assertSame($creator, $factory->getForResource($resource));
-    }
-
-    public function test_setForResource_with_validator_instance()
-    {
-
-        $factory = $this->newFactory();
-        $resource = 'users';
-
-        $validator = new GenericValidator;
-
-        $factory->setForResource($resource, $validator);
-
-        $creator = $factory->getForResource($resource);
-
-        $this->assertTrue(is_callable($creator));
-
-        $createdValidator = $creator();
-
-        $this->assertInstanceOf(GenericValidator::class, $createdValidator);
-        $this->assertNotSame($validator, $createdValidator);
+        $factory->createObjectsBy($handler);
+        $this->assertSame($validator, $factory->get(ValidatorFactoryTest_Address::class));
+        $this->assertTrue($check);
     }
 
     /**
-     * @expectedException InvalidArgumentException
-     **/
-    public function test_setForResource_throws_exception_on_invalid_type()
+     * @test
+     */
+    public function get_without_handler_throws_OutOfBoundsException()
     {
-        $this->newFactory()->setForResource('users', 3.5);
-    }
-
-    public function test_unsetForResource_removes_setted_factory()
-    {
-
         $factory = $this->newFactory();
-        $resource = 'users';
-        $this->assertFalse($factory->hasForResource($resource));
-        $factory->setForResource($resource, GenericValidator::class);
-        $this->assertTrue($factory->hasForResource($resource));
-        $factory->unsetForResource($resource);
-        $this->assertFalse($factory->hasForResource($resource));
+        $this->expectException(OutOfBoundsException::class);
+        $factory->get(ValidatorFactoryTest_Address::class);
     }
 
     /**
-     * @expectedException Ems\Core\Exceptions\HandlerNotFoundException
-     **/
-    public function test_unsetForResource_throws_exception_if_not_setted()
+     * @test
+     */
+    public function creating_wrong_validator_throws_exception()
     {
-
         $factory = $this->newFactory();
-        $resource = 'users';
-        $factory->unsetForResource($resource);
+
+        $factory->register(ValidatorFactoryTest_Address::class, function () {
+            return new stdClass();
+        });
+
+        $this->expectException(TypeException::class);
+        $factory->get(ValidatorFactoryTest_Address::class);
     }
 
-    protected function newFactory()
-    {
-        return new ValidatorFactory();
-    }
-}
-
-class ValidatorFactoryTestFactory implements ValidatorFactoryContract
-{
     /**
-     * {@inheritdoc}
-     *
-     * @param array             $rules
-     * @param AppliesToResource $resource (optional
-     *
-     * @return Validator
-     **/
-    public function make(array $rules, AppliesToResource $resource=null)
+     * @test
+     */
+    public function registered_class_not_implementing_validator_throws_exception()
     {
-        return new GenericValidator($rules);
+        $factory = $this->newFactory();
+
+        $factory->register(ValidatorFactoryTest_Address::class, stdClass::class);
+
+        $this->expectException(TypeException::class);
+        $factory->get(ValidatorFactoryTest_Address::class);
+    }
+
+    /**
+     * @test
+     */
+    public function register_validator_directly_throws_exception()
+    {
+        $factory = $this->newFactory(function () {});
+        $this->expectException(UnsupportedParameterException::class);
+        $factory->register(stdClass::class, new ValidatorFactoryTest_AddressValidator());
+    }
+
+    /**
+     * @test
+     */
+    public function register_wrong_type_as_validator_throws_exception()
+    {
+        $factory = $this->newFactory(function () {});
+        $this->expectException(UnsupportedParameterException::class);
+        $factory->register(stdClass::class, 33);
+    }
+
+    /**
+     * @test
+     */
+    public function validate_validates_by_validator()
+    {
+        $object = new ValidatorFactoryTest_Address();
+        $factory = $this->newFactory();
+        try {
+            $factory->validate(['login' => 'required'], [], $object);
+            $this->fail('Validate did not throw an exception');
+        } catch (\Ems\Contracts\Validation\ValidationException $e) {
+            $this->assertSame([], $e->failures()['login']['required']);
+        }
+    }
+
+    /**
+     * @test
+     */
+    public function forwardValidatorEvent_forwards_event()
+    {
+        $factory = $this->newFactory();
+        $logger = new LoggingCallable(function () {});
+        $factory->on(stdClass::class, $logger);
+        $validator = new Validator([], stdClass::class);
+        $factory->forwardValidatorEvent($validator);
+        $this->assertSame($validator, $logger->arg(0));
+    }
+
+    protected function newFactory(callable $fallbackFactory=null) : ValidatorFactory
+    {
+        return new ValidatorFactory($fallbackFactory);
     }
 }
 
@@ -222,6 +249,27 @@ class DoesNotSupportRuleSetting extends Validator
         array $formats = []
     ): array {
         return $input;
+    }
+
+
+}
+
+class ValidatorFactoryTest_Address
+{
+    //
+}
+
+class ValidatorFactoryTest_AddressValidator extends Validator
+{
+    protected $rules = [
+        'street'        => 'required|min:5|max:58',
+        'city'          => 'required|min:2|max:64',
+        'house_number'  => 'string|min:2|max:16',
+    ];
+
+    public function ormClass(): string
+    {
+        return ValidatorFactoryTest_Address::class;
     }
 
 
