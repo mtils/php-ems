@@ -18,31 +18,24 @@ trait SnakeCaseCallableMethods
     protected $snakeCaseMethods;
 
     /**
-     * Add some methods here to be ignored by this trait.
-     *
-     * @var array
-     */
-    protected $nonSnakeCaseMethods = [];
-
-    /**
      * Get the real name of the method which is callable by (snake cased) $name.
      *
      * @param string $name
      *
      * @return string
      */
-    protected function getMethodBySnakeCaseName($name)
+    protected function getMethodBySnakeCaseName(string $name) : string
     {
         $methods = $this->getSnakeCaseMethods();
-        return isset($methods[$name]) ? $methods[$name] : '';
+        return $methods[$name] ?? '';
     }
 
     /**
      * Get all snake case methods, indexed by its snake case name.
      *
-     * @return array
+     * @return string[]
      */
-    protected function getSnakeCaseMethods()
+    protected function getSnakeCaseMethods() : array
     {
         if ($this->snakeCaseMethods !== null) {
             return $this->snakeCaseMethods;
@@ -74,9 +67,23 @@ trait SnakeCaseCallableMethods
      *
      * @return bool
      */
-    protected function isSnakeCaseCallableMethod($method, $prefix)
+    protected function isSnakeCaseCallableMethod(string $method, string $prefix) : bool
     {
+        if ($this->isIgnoredSnakeCaseCallableMethod($method)) {
+            return false;
+        }
         return $method != $prefix && strpos($method, $prefix) === 0;
+    }
+
+    /**
+     * Overwrite this method to filter out some your methods.
+     *
+     * @param string $method
+     * @return bool
+     */
+    protected function isIgnoredSnakeCaseCallableMethod(string $method) : bool
+    {
+        return false;
     }
 
     /**
@@ -87,7 +94,7 @@ trait SnakeCaseCallableMethods
      *
      * @return string
      **/
-    protected function methodToSnakeCase($methodName, $prefix)
+    protected function methodToSnakeCase(string $methodName, string $prefix) : string
     {
         return Type::snake_case(substr($methodName, strlen($prefix)));
     }

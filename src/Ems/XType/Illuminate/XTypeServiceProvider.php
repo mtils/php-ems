@@ -2,9 +2,9 @@
 
 namespace Ems\XType\Illuminate;
 
+use Ems\Contracts\XType\SelfExplanatory;
 use Ems\Core\Laravel\BootstrapperAsServiceProvider;
-use Ems\Validation\Illuminate\Validator;
-use Ems\Validation\ValidatorFactory as ValidatorFactoryChain;
+use Ems\Validation\ValidatorFactory as ValidatorFactoryRegistry;
 use Ems\XType\Skeleton\XTypeBootstrapper;
 
 class XTypeServiceProvider extends BootstrapperAsServiceProvider
@@ -20,18 +20,15 @@ class XTypeServiceProvider extends BootstrapperAsServiceProvider
     public function register()
     {
         parent::register();
-        $this->app->afterResolving(Validator::class, function (Validator $validator) {
-            $validator->detectRulesBy(function ($ormClass, $relations=1) {
-                /** @var XTypeProviderValidatorFactory $factory */
-                $factory = $this->app->get(XTypeProviderValidatorFactory::class);
-                return $factory->detectRules($ormClass, $relations);
-            });
-        });
 
         $this->app->singleton(XTypeProviderValidatorFactory::class);
 
-        $this->app->afterResolving(ValidatorFactoryChain::class, function (ValidatorFactoryChain $factory) {
-            $factory->addIfNoneOfClass($this->app->make(XTypeProviderValidatorFactory::class));
+        $this->app->afterResolving(ValidatorFactoryRegistry::class, function (ValidatorFactoryRegistry $factory) {
+            $factory->register(SelfExplanatory::class, function (string $ormClass) {
+                /** @var XTypeProviderValidatorFactory $xtypeFactory */
+                $xtypeFactory = $this->app->make(XTypeProviderValidatorFactory::class);
+                return $xtypeFactory->validator($ormClass);
+            });
         });
     }
 

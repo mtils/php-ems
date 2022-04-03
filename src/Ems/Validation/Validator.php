@@ -17,16 +17,15 @@ use Ems\Contracts\Validation\ValidationException;
 use Ems\Contracts\Validation\Validator as ValidatorContract;
 use Ems\Core\Checker;
 use Ems\Core\Collections\NestedArray;
-use Ems\Core\Exceptions\UnConfiguredException;
 use Ems\Core\Helper;
 use Ems\Core\Lambda;
 use Ems\Core\Patterns\HookableTrait;
 use Ems\Core\Patterns\SnakeCaseCallableMethods;
-use RuntimeException;
-use stdClass;
 
 use function array_key_exists;
 use function array_merge;
+use function call_user_func;
+use function in_array;
 use function is_object;
 use function method_exists;
 
@@ -35,9 +34,7 @@ class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
 {
     use HookableTrait;
     use ConstraintParsingMethods;
-    use SnakeCaseCallableMethods {
-        SnakeCaseCallableMethods::isSnakeCaseCallableMethod as parentIsSnakeCaseCallableMethod;
-    }
+    use SnakeCaseCallableMethods;
 
     /**
      * @var string
@@ -70,16 +67,6 @@ class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
     protected $extendedRules = [];
 
     /**
-     * @var array
-     **/
-    protected $ownValidationMethods;
-
-    /**
-     * @var callable
-     **/
-    protected $ruleDetector;
-
-    /**
      * This is the prefix for the "own validation methods" of this class.
      *
      * @var string
@@ -92,24 +79,22 @@ class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
     protected $checker;
 
     /**
+     * @var callable
+     */
+    protected $baseValidator;
+
+    /**
      * @var string[]
      */
     protected $required_rules = ['required', 'required_if', 'required_unless'];
 
-    public function __construct(array $rules=[], string $ormClass='')
+    public function __construct(array $rules=[], string $ormClass='', callable $baseValidator=null)
     {
         if ($rules) {
             $this->rules = $rules;
         }
         $this->ormClass = $ormClass;
-    }
-
-    /**
-     * @return stdClass
-     */
-    public function resource()
-    {
-        return new stdClass();
+        $this->baseValidator = $baseValidator;
     }
 
     /**
@@ -180,7 +165,7 @@ class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
      **/
     public function mergeRules(array $rules) : ValidatorContract
     {
-        $this->extendedRules = array_merge($this->extendedRules, $rules);
+        $this->rules = array_merge($this->rules, $rules);
         $this->parsedRules = null;
         return $this;
     }
@@ -193,7 +178,6 @@ class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
         return true;
     }
 
-
     /**
      * {@inheritdoc}
      *
@@ -202,33 +186,6 @@ class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
     public function methodHooks()
     {
         return ['parseRules', 'validate'];
-    }
-
-    /**
-     * @return string
-     **/
-    public function resourceName()
-    {
-        if ($resource = $this->resource()) {
-            return $resource->resourceName();
-        }
-        throw new UnConfiguredException("No Resource provided to get the resource name");
-    }
-
-    /**
-     * Set a rule detector to detect the rules for deferred loading of rules.
-     * The detector will be called with the orm class and a depth or relation.
-     *
-     * $detector = function (string $ormClass, $relations=1) { return ['name' => 'required'] };
-     *
-     * @param callable $detector
-     *
-     * @return self
-     **/
-    public function detectRulesBy(callable $detector) : Validator
-    {
-        $this->ruleDetector = $detector;
-        return $this;
     }
 
     /**
@@ -245,31 +202,7 @@ class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
      **/
     protected function validateByBaseValidator(Validation $validation, array $input, array $baseRules, $ormObject=null, array $formats=[]) : array
     {
-
-        $validated = [];
-
-        foreach ($baseRules as $key=>$rule) {
-
-            if (!$this->checkRequiredRules($rule, $input, $key, $validation)) {
-                continue;
-            }
-
-            $value = $input[$key] ?? null;
-
-            foreach ($rule as $name=>$args) {
-                if (in_array($name, $this->required_rules)) {
-                    continue;
-                }
-                if (!$this->check($value, [$name=>$args], $ormObject, $formats)) {
-                    $validation->addFailure($key, $name, $args);
-                }
-            }
-            if (array_key_exists($key, $input)) {
-                $validated[$key] = $this->cast($value, $rule, $ormObject, $formats);
-            }
-        }
-
-        return $validated;
+        return call_user_func($this->getBaseValidator(), $validation, $input, $baseRules, $ormObject, $formats);
     }
 
     /**
@@ -294,24 +227,9 @@ class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
      *
      * @return array
      **/
-    protected function parseRules(array $rules)
+    protected function parseRules(array $rules) : array
     {
         return $this->parseConstraints($rules);
-    }
-
-    /**
-     * Try to detect rules for the resource of this validator.
-     *
-     * @param string $ormClass
-     *
-     * @return array
-     **/
-    protected function detectRules(string $ormClass) : array
-    {
-        if (!$this->ruleDetector) {
-            throw new UnConfiguredException("You have to assign a rule detector to detect rules");
-        }
-        return call_user_func($this->ruleDetector, $ormClass, $this->relations);
     }
 
     /**
@@ -321,22 +239,12 @@ class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
      **/
     protected function buildRules() : array
     {
-        if ($this->rules) {
-            return array_merge($this->rules, $this->extendedRules);
-        }
-
-        if ($ormClass = $this->ormClass()) {
-            $this->rules = $this->detectRules($ormClass);
-        }
-
-        $this->rules = array_merge($this->rules, $this->extendedRules);
-
         return $this->rules;
     }
 
     /**
      * Here is the point where you should change validations caused by the
-     * state of the resource (unique keys, exists,...) and depending on the
+     * state of the ormObject (unique keys, exists,...) and depending on the
      * current locale.
      * It allows you to have simple rule expressions like date and then add
      * the localized date format later.
@@ -457,16 +365,12 @@ class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
      * Overwritten to skip the two validateBy... methods.
      *
      * @param string $method
-     * @param string $prefix
      *
      * @return bool
      **/
-    protected function isSnakeCaseCallableMethod($method, $prefix)
+    protected function isIgnoredSnakeCaseCallableMethod(string $method) : bool
     {
-        if (in_array($method, ['validateByBaseValidator', 'validateByOwnMethods'])) {
-            return false;
-        }
-        return $this->parentIsSnakeCaseCallableMethod($method, $prefix);
+        return in_array($method, ['validateByBaseValidator', 'validateByOwnMethods']);
     }
 
     /**
@@ -529,21 +433,16 @@ class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
     }
 
     /**
-     * Check if $value matches $rule.
-     *
-     * @param mixed                                   $value
-     * @param ConstraintGroup|Constraint|array|string $rule
-     * @param object|null                             $ormObject (optional)
-     * @param array                                   $formats (optional)
-     *
-     * @return bool
+     * Get or create the base validator
+     * @return callable
      */
-    protected function check($value, $rule, $ormObject = null, array $formats=[]) : bool
+    protected function getBaseValidator() : callable
     {
-        if (!$this->checker) {
-            $this->checker = new Checker();
+        if (!$this->baseValidator) {
+            $this->baseValidator = new CheckerBaseValidator(new Checker());
         }
-        return $this->checker->check($value, $rule, $ormObject);
+
+        return $this->baseValidator;
     }
 
     /**
@@ -559,106 +458,6 @@ class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
     protected function cast($value, $rule, $ormObject=null, array $formats=[])
     {
         return $value;
-    }
-
-    /**
-     * Check all required rules and return true if other rules should be checked
-     * after.
-     *
-     * @param array $rule
-     * @param array $input
-     * @param string $key
-     * @param Validation $validation
-     * @return bool
-     */
-    protected function checkRequiredRules(array $rule, array $input, string $key, Validation $validation) : bool
-    {
-        $value = $input[$key] ?? null;
-        // Check required before others to skip rest if missing
-        if (isset($rule['required']) && !$this->checkRequired($input, $key)) {
-            $validation->addFailure($key, 'required', []);
-            return false;
-        }
-
-        if (isset($rule['required_if']) && !$this->checkRequiredIf($input, $key, $rule['required_if'])) {
-            $validation->addFailure($key, 'required_if', $rule['required_if']);
-            return false;
-        }
-
-        if (isset($rule['required_unless']) && !$this->checkRequiredUnless($input, $key, $rule['required_unless'])) {
-            $validation->addFailure($key, 'required_unless', $rule['required_unless']);
-            return false;
-        }
-
-        // Check if not required other rules are ignored
-        if (!isset($rule['required']) && !$this->checkRequired($input, $key)) {
-            return false;
-        }
-
-
-
-        return true;
-    }
-
-    /**
-     * @param array $input
-     * @param string $key
-     * @return bool
-     */
-    protected function checkRequired(array $input, string $key) : bool
-    {
-        if (!isset($input[$key])) {
-            return false;
-        }
-        return $this->check($input[$key], ['required' => []]);
-    }
-
-    /**
-     * Check if value is present but only if another is also.
-     *
-     * @param array $input
-     * @param string $key
-     * @param array $args
-     * @return bool
-     */
-    protected function checkRequiredIf(array $input, string $key, array $args=[]) : bool
-    {
-        if (!isset($args[0])) {
-            throw new RuntimeException("Validation rules required_if and required_unless need another field name arg as minimum");
-        }
-        $other = $args[0];
-        $otherValue = $input[$other] ?? null;
-
-        $otherMatches = isset($args[1]) ? $args[1] == $otherValue : $this->checkRequired($input, $other);
-
-        if (!$otherMatches) {
-            return true;
-        }
-        return $this->checkRequired($input, $key);
-    }
-
-    /**
-     * Check if value is present but only if other is not.
-     *
-     * @param array $input
-     * @param string $key
-     * @param array $args
-     * @return bool
-     */
-    protected function checkRequiredUnless(array $input, string $key, array $args=[]) : bool
-    {
-        if (!isset($args[0])) {
-            throw new RuntimeException("Validation rules required_if and required_unless need another field name arg as minimum");
-        }
-        $other = $args[0];
-        $otherValue = $input[$other] ?? null;
-
-        $otherMatches = isset($args[1]) ? $args[1] == $otherValue : $this->checkRequired($input, $other);
-
-        if ($otherMatches) {
-            return true;
-        }
-        return $this->checkRequired($input, $key);
     }
 
     /**
@@ -752,4 +551,5 @@ class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
         }
         return false;
     }
+
 }

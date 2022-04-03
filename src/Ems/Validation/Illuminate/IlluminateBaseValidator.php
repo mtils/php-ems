@@ -1,4 +1,7 @@
 <?php
+/**
+ *  * Created by mtils on 03.04.2022 at 12:27.
+ **/
 
 namespace Ems\Validation\Illuminate;
 
@@ -6,40 +9,50 @@ use Ems\Contracts\Core\Entity;
 use Ems\Contracts\Core\Type;
 use Ems\Contracts\Validation\Validation;
 use Ems\Core\Collections\NestedArray;
-use Ems\Core\Exceptions\UnConfiguredException;
-use Ems\Validation\Validator as BaseValidator;
 use Illuminate\Contracts\Validation\Factory as IlluminateFactory;
+use Illuminate\Contracts\Validation\Validator as IlluminateValidator;
+
 use Illuminate\Database\Eloquent\Model as EloquentModel;
 
+use function array_key_exists;
+use function implode;
+use function print_r;
+use function strpos;
 
-class Validator extends BaseValidator
+class IlluminateBaseValidator
 {
     /**
      * @var IlluminateFactory
-     **/
-    protected $validatorFactory;
+     */
+    protected $factory;
 
     /**
-     * @var \Illuminate\Contracts\Validation\Validator
-     **/
-    protected $illuminateValidator;
+     * @param IlluminateFactory $factory
+     */
+    public function __construct(IlluminateFactory $factory)
+    {
+        $this->factory = $factory;
+    }
 
     /**
      * Perform all validation by the the base validator
      *
      * @param Validation    $validation
      * @param array         $input
-     * @param array         $baseRules
+     * @param array         $rules
      * @param object|null   $ormObject (optional)
      * @param array         $formats (optional)
      *
      * @return array
      **/
-    protected function validateByBaseValidator(Validation $validation, array $input, array $baseRules, $ormObject = null, array $formats=[]) : array
+    protected function validate(Validation $validation, array $input, array $rules, $ormObject = null, array $formats=[]) : array
     {
-        $laravelRules = $this->toLaravelRules($baseRules);
 
-        $illuminateValidator = $this->buildValidator($input, $laravelRules);
+        $rules = $this->prepareRules($rules, $input, $ormObject, $formats);
+
+        $laravelRules = $this->toLaravelRules($rules);
+
+        $illuminateValidator = $this->makeValidator($input, $laravelRules);
 
         if (!$illuminateValidator->fails()) {
             return $input;
@@ -54,6 +67,27 @@ class Validator extends BaseValidator
     }
 
     /**
+     * Alias for self::validate() for simple assignment in Validator.
+     *
+     * @param Validation    $validation
+     * @param array         $input
+     * @param array         $rules
+     * @param object|null   $ormObject (optional)
+     * @param array         $formats (optional)
+     *
+     * @return array
+     **/
+    public function __invoke(Validation $validation, array $input, array $rules, $ormObject = null, array $formats=[]) : array
+    {
+        return $this->validate($validation, $input, $rules, $ormObject, $formats);
+    }
+
+    protected function makeValidator(array $input, array $rules) : IlluminateValidator
+    {
+        return $this->factory->make($input, $rules);
+    }
+
+    /**
      * {@inheritdoc}
      *
      * @param array         $rules
@@ -63,13 +97,10 @@ class Validator extends BaseValidator
      *
      * @return array
      **/
-    protected function prepareRulesForValidation(array $rules, array $input, $ormObject=null, array $formats=[]) : array
+    protected function prepareRules(array $rules, array $input, $ormObject=null, array $formats=[]) : array
     {
 
         $preparedRules = [];
-        $rules = parent::prepareRulesForValidation($rules, $input, $ormObject, $formats);
-
-//        $dateConstraints = ['after', 'before', 'date'];
 
         // Flatify to allow nested checks
         $input = NestedArray::flat($input);
@@ -79,12 +110,6 @@ class Validator extends BaseValidator
             $preparedRules[$key] = [];
 
             foreach ($constraints as $constraint=>$parameters) {
-
-//                 if (in_array($constraint, $dateConstraints)) {
-                    // Handle that later, we need complete localized formats
-                    // to make this work (next EMS version)
-
-//                 }
 
                 if ($constraint == 'unique') {
                     $preparedRules[$key][$constraint] = $this->parametersOfUniqueConstraint($key, $parameters, $ormObject);
@@ -103,13 +128,35 @@ class Validator extends BaseValidator
 
                 $preparedRules[$key][$constraint] = $parameters;
 
-
             }
 
         }
 
         return $preparedRules;
 
+    }
+
+    /**
+     * Convert the ems rules into the laravel format
+     *
+     * @param array $parsedRules
+     *
+     * @return array
+     **/
+    protected function toLaravelRules(array $parsedRules) : array
+    {
+        $laravelRules = [];
+
+        foreach ($parsedRules as $key=>$keyRules) {
+            $laravelRules[$key] = [];
+
+            foreach ($keyRules as $ruleName=>$parameters) {
+                $separator = $parameters ? ':' : '';
+                $laravelRules[$key][] = $ruleName.$separator.implode(',', $parameters);
+            }
+        }
+
+        return $laravelRules;
     }
 
     /**
@@ -148,56 +195,4 @@ class Validator extends BaseValidator
 
         return [$table, $uniqueKey, $id, $primaryKey];
     }
-
-    /**
-     * Assign the laravel factory. This has been removed from the
-     * constructor to allow your own constructor.
-     *
-     * @param IlluminateFactory $validatorFactory
-     *
-     * @return self
-     **/
-    public function injectIlluminateFactory(IlluminateFactory $validatorFactory)
-    {
-        $this->validatorFactory = $validatorFactory;
-        return $this;
-    }
-
-    /**
-     * @param array $input
-     * @param array $rules
-     *
-     * @return \Illuminate\Contracts\Validation\Validator
-     **/
-    protected function buildValidator(array $input, array $rules)
-    {
-        if (!$this->validatorFactory) {
-            throw new UnConfiguredException("You have to assign the Illuminate Validation\Factory or this validator does not work.");
-        }
-        return $this->validatorFactory->make($input, $rules);
-    }
-
-    /**
-     * Convert the ems rules into the laravel format
-     *
-     * @param array $parsedRules
-     *
-     * @return array
-     **/
-    protected function toLaravelRules(array $parsedRules)
-    {
-        $laravelRules = [];
-
-        foreach ($parsedRules as $key=>$keyRules) {
-            $laravelRules[$key] = [];
-
-            foreach ($keyRules as $ruleName=>$parameters) {
-                $separator = $parameters ? ':' : '';
-                $laravelRules[$key][] = $ruleName.$separator.implode(',', $parameters);
-            }
-        }
-
-        return $laravelRules;
-    }
-
 }

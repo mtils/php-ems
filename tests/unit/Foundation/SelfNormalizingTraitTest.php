@@ -3,10 +3,9 @@
 
 namespace Ems\Foundation;
 
-use Ems\Validation\ValidatorFactory;
-use Ems\Validation\GenericValidatorFactory;
-use Ems\Validation\GenericValidator;
 use Ems\Core\NamedObject;
+use Ems\Validation\Validator;
+use Ems\Validation\ValidatorFactory;
 
 class SelfNormalizingTraitTest extends \Ems\TestCase
 {
@@ -167,11 +166,11 @@ class SelfNormalizingTraitTest extends \Ems\TestCase
     protected function newValidatorFactory()
     {
         $createValidator = function () {
-            return new GenericValidator(['a' => 'b'], function ($baseValidator, $input) {
+            return new Validator(['a' => 'b'], '', function ($baseValidator, $input) {
                 return $input;
             });
         };
-        return new GenericValidatorFactory($createValidator);
+        return new ValidatorFactory($createValidator);
     }
 }
 

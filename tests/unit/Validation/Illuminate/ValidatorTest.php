@@ -17,6 +17,7 @@ use Ems\Core\Helper;
 use Ems\Core\NamedObject;
 use Ems\Contracts\Core\AppliesToResource;
 use Ems\XType\Eloquent\UniqueCountry;
+use Ems\Validation\Validator;
 
 require_once realpath(__DIR__ . '/../../../integration/XType/Eloquent/test_models.php');
 
@@ -31,22 +32,6 @@ class ValidatorTest extends \Ems\TestCase
             ValidatorContract::class,
             $this->newValidator()
         );
-    }
-
-    /**
-     * @expectedException Ems\Core\Exceptions\UnConfiguredException
-     **/
-    public function test_buildValidator_throws_exception_if_no_factory_assigned()
-    {
-        $validator = $this->newCustomValidator();
-
-        $detector = $this->mock(XTypeProviderValidatorFactory::class);
-        $validator->setOrmClass(NamedObject::class);
-
-        $resource = new NamedObject;
-
-        $this->assertSame([], $validator->validate([], $resource));
-
     }
 
     public function test_validate_validates_base_rules_with_valid_data()
@@ -298,36 +283,43 @@ class ValidatorTest extends \Ems\TestCase
             'iso_code'  => 'fr'
         ];
 
-        $country = new UniqueCountry;
-
-        $breaker = new LoggingCallable(function () {
-            throw new TestFinishedException;
-        });
-
         $awaitedRules = [
             'name' => [
-                'min' => [2],
-                'max' => [255]
+                'min:2',
+                'max:255'
             ],
             'iso_code' => [
-                'min' => [2],
-                'max' => [2],
-                'unique' => ['countries', 'iso_code']
+                'min:2',
+                'max:2',
+                'unique:countries,iso_code'
             ]
         ];
 
+        $country = new UniqueCountry();
+
+        $usedRules = [];
+
+        $factory = $this->mock(IlluminateFactory::class);
+        $factory->shouldReceive('make')
+            ->once()
+            ->with($input, $awaitedRules)
+            ->andReturnUsing(function ($input, $rules) use (&$usedRules) {
+                $usedRules = $rules;
+                throw new TestFinishedException();
+            });
+
+        $baseValidator = new IlluminateBaseValidator($factory);
+
         try {
 
-            $validator = $this->newValidator($rules);
-
-            $validator->onBefore('validate', $breaker);
+            $validator = $this->newValidator($rules, UniqueCountry::class, $baseValidator);
 
             $validator->validate($input, $country);
 
             $this->fail('The injected exception throw was not performed');
 
         } catch (TestFinishedException $e) {
-            $this->assertEquals($awaitedRules, $breaker->arg(1));
+            $this->assertEquals($awaitedRules, $usedRules);
         }
     }
 
@@ -348,34 +340,41 @@ class ValidatorTest extends \Ems\TestCase
         $country->id = 45;
         $country->exists = true;
 
-        $breaker = new LoggingCallable(function () {
-            throw new TestFinishedException;
-        });
-
         $awaitedRules = [
             'name' => [
-                'min' => [2],
-                'max' => [255]
+                'min:2',
+                'max:255'
             ],
             'iso_code' => [
-                'min' => [2],
-                'max' => [2],
-                'unique' => ['countries', 'iso_code', 45, 'id']
+                'min:2',
+                'max:2',
+                'unique:countries,iso_code,45,id'
             ]
         ];
 
+        $usedRules = [];
+
+        $factory = $this->mock(IlluminateFactory::class);
+        $factory->shouldReceive('make')
+            ->once()
+            ->with($input, $awaitedRules)
+            ->andReturnUsing(function ($input, $rules) use (&$usedRules) {
+                $usedRules = $rules;
+                throw new TestFinishedException();
+            });
+
+        $baseValidator = new IlluminateBaseValidator($factory);
+
         try {
 
-            $validator = $this->newValidator($rules);
-
-            $validator->onBefore('validate', $breaker);
+            $validator = $this->newValidator($rules, UniqueCountry::class, $baseValidator);
 
             $validator->validate($input, $country);
 
             $this->fail('The injected exception throw was not performed');
 
         } catch (TestFinishedException $e) {
-            $this->assertEquals($awaitedRules, $breaker->arg(1));
+            $this->assertEquals($awaitedRules, $usedRules);
         }
     }
 
@@ -394,34 +393,41 @@ class ValidatorTest extends \Ems\TestCase
 
         $country = new NamedObject;
 
-        $breaker = new LoggingCallable(function () {
-            throw new TestFinishedException;
-        });
-
         $awaitedRules = [
             'name' => [
-                'min' => [2],
-                'max' => [255]
+                'min:2',
+                'max:255'
             ],
             'iso_code' => [
-                'min' => [2],
-                'max' => [2],
-                'unique' => []
+                'min:2',
+                'max:2',
+                'unique'
             ]
         ];
 
+        $usedRules = [];
+
+        $factory = $this->mock(IlluminateFactory::class);
+        $factory->shouldReceive('make')
+            ->once()
+            ->with($input, $awaitedRules)
+            ->andReturnUsing(function ($input, $rules) use (&$usedRules) {
+                $usedRules = $rules;
+                throw new TestFinishedException();
+            });
+
+        $baseValidator = new IlluminateBaseValidator($factory);
+
         try {
 
-            $validator = $this->newValidator($rules);
-
-            $validator->onBefore('validate', $breaker);
+            $validator = $this->newValidator($rules, NamedObject::class, $baseValidator);
 
             $validator->validate($input, $country);
 
             $this->fail('The injected exception throw was not performed');
 
         } catch (TestFinishedException $e) {
-            $this->assertEquals($awaitedRules, $breaker->arg(1));
+            $this->assertEquals($awaitedRules, $usedRules);
         }
     }
 
@@ -517,14 +523,15 @@ class ValidatorTest extends \Ems\TestCase
         }
     }
 
-    protected function newValidator(array $rules=[])
+    protected function newValidator(array $rules=[], string $ormClass='', callable $baseValidator=null)
     {
-        return (new GenericValidator($rules))->injectIlluminateFactory($this->newFactory());
+        $baseValidator = $baseValidator ?: new IlluminateBaseValidator($this->newFactory());
+        return new Validator($rules, $ormClass, $baseValidator);
     }
 
     protected function newCustomValidator(array $rules=[], IlluminateFactory $factory=null)
     {
-        return (new CustomValidator($rules))->injectIlluminateFactory($factory ?: $this->newFactory());
+        return new CustomValidator($rules, '', new IlluminateBaseValidator($factory ?: $this->newFactory()));
     }
 
     protected function newFactory(TranslatorContract $lang=null)
@@ -543,7 +550,7 @@ class ValidatorTest extends \Ems\TestCase
     }
 }
 
-class CustomValidator extends GenericValidator
+class CustomValidator extends Validator
 {
 
     /**

@@ -12,7 +12,7 @@ use Illuminate\Translation\ArrayLoader;
 use Illuminate\Translation\Translator;
 use Ems\Skeleton\Application;
 use Ems\Core\Helper;
-use Ems\Validation\ValidationException;
+use Ems\Contracts\Validation\ValidationException;
 
 /**
  * @group validation
@@ -442,7 +442,7 @@ class ValidationConverterIntegrationTest extends \Ems\LaravelIntegrationTest
 
     protected function newValidator(array $rules)
     {
-        return $this->app(ValidatorFactoryContract::class)->make($rules);
+        return $this->app(ValidatorFactoryContract::class)->create($rules);
     }
 
     protected function bootApplication(Application $app)

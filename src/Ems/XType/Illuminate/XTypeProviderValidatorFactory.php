@@ -3,22 +3,21 @@
 
 namespace Ems\XType\Illuminate;
 
-use Ems\Contracts\Core\AppliesToResource;
 use Ems\Contracts\Core\SupportsCustomFactory;
-use Ems\Contracts\Validation\Validator;
-use Ems\Contracts\Validation\ValidatorFactory as ValidatorFactoryContract;
+use Ems\Contracts\Validation\Validator as ValidatorContract;
 use Ems\Contracts\XType\TypeProvider;
 use Ems\Contracts\XType\XType;
 use Ems\Core\Support\CustomFactorySupport;
-use Ems\Validation\Illuminate\GenericValidator;
+use Ems\Validation\Illuminate\IlluminateBaseValidator;
 use Ems\XType\SequenceType;
+use Ems\Validation\Validator;
 
 /**
  * This class retrieves the xtype of a parameter, converts
  * it into laravel validation rules and creates a
  * validator out of it.
  **/
-class XTypeProviderValidatorFactory implements SupportsCustomFactory, ValidatorFactoryContract
+class XTypeProviderValidatorFactory implements SupportsCustomFactory
 {
     use CustomFactorySupport;
 
@@ -45,20 +44,21 @@ class XTypeProviderValidatorFactory implements SupportsCustomFactory, ValidatorF
     /**
      * Create a validator for $rules and $resource
      *
-     * @param array             $rules
-     * @param AppliesToResource $resource (optional)
+     * @param string $ormClass
      *
-     * @return Validator|null
-     **/
-    public function make(array $rules, AppliesToResource $resource=null)
+     * @return ValidatorContract|null
+     *
+     * @throws \ReflectionException
+     */
+    public function validator(string $ormClass) : ValidatorContract
     {
 
-        if (!$resource) {
-            return null;
-        }
-
-        $rules = array_merge($this->detectRules(get_class($resource)), $rules);
-        return $this->createObject(GenericValidator::class, ['rules' => $rules]);
+        $rules = $this->detectRules($ormClass);
+        return $this->createObject(Validator::class, [
+            'rules'         => $rules,
+            'ormClass'      => $ormClass,
+            'baseValidator' => $this->createObject(IlluminateBaseValidator::class)
+        ]);
 
     }
 

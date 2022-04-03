@@ -25,7 +25,11 @@ class EmsValidationServiceProvider extends BootstrapperAsServiceProvider
         parent::register();
 
         $this->app->afterResolving(ValidatorFactoryChain::class, function (ValidatorFactoryChain $factory) {
-            $factory->addIfNoneOfClass($this->app->make(ValidatorFactory::class));
+            $factory->setCreateFactory(function (array $rules, string $ormClass='') {
+                /** @var ValidatorFactory $illuminateFactory */
+                $illuminateFactory = $this->app->make(ValidatorFactory::class);
+                return $illuminateFactory->validator($rules, $ormClass);
+            });
         });
 
         $this->app->singleton(ValidationConverterContract::class, function ($app) {

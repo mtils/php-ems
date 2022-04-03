@@ -3,11 +3,17 @@
 namespace Ems\Validation\Illuminate;
 
 use Ems\Contracts\Validation\ValidatorFactory as ValidationFactoryContract;
-use Illuminate\Contracts\Validation\Factory as IlluminateFactory;
+use Ems\Skeleton\Application;
 use Ems\Testing\Eloquent\InMemoryConnection;
-use Ems\XType\Eloquent\User;
+use Ems\Validation\Validator;
+use Ems\Validation\ValidatorFactory as EmsValidatorFactory;
+use Ems\XType\Eloquent\BaseModel;
 use Ems\XType\Eloquent\Category;
-use Ems\XType\Eloquent\ModelTypeFactoryTest;
+use Ems\XType\Eloquent\User;
+use Ems\XType\Illuminate\XTypeProviderValidatorFactory;
+use Illuminate\Contracts\Translation\Translator as TranslatorContract;
+use Illuminate\Translation\ArrayLoader;
+use Illuminate\Translation\Translator;
 
 require_once realpath(__DIR__ . '/../../XType/Eloquent/test_models.php');
 
@@ -25,7 +31,7 @@ class ValidatorFactoryIntegrationTest extends \Ems\LaravelIntegrationTest
 
     public function test_create_validator_by_rules()
     {
-        $factory = $this->laravel(ValidationFactoryContract::class);
+        $factory = $this->make();
 
         $rules = [
             'login' => 'required|min:3|max:128'
@@ -39,45 +45,38 @@ class ValidatorFactoryIntegrationTest extends \Ems\LaravelIntegrationTest
             ]
         ];
 
-        $validator = $factory->make($rules);
+        $validator = $factory->create($rules);
 
-        $this->assertInstanceOf(GenericValidator::class, $validator);
+        $this->assertInstanceOf(Validator::class, $validator);
         $this->assertEquals($parsed, $validator->rules());
     }
 
-    public function test_create_validator_by_xtype_of_model()
+    public function test_get_validator_by_xtype_of_model()
     {
-        $factory = $this->laravel(ValidationFactoryContract::class);
+        $factory = $this->make();
 
-        $rules = [
-            'login' => 'required|min:3|max:128'
-        ];
+        $validator = $factory->get(User::class);
 
-        $user = new User;
-
-        $validator = $factory->make([], $user);
-
-        $this->assertInstanceOf(GenericValidator::class, $validator);
+        $this->assertInstanceOf(Validator::class, $validator);
 
         $this->assertTrue(count($validator->rules()) > 4);
     }
 
-    public function test_create_validator_by_xtype_of_model_and_merges_rules()
+    public function test_get_validator_by_xtype_of_model_and_merges_rules()
     {
-        $factory = $this->laravel(ValidationFactoryContract::class);
+        $factory = $this->make();
 
         $rules = [
             'external_id' => 'required|min:3|max:64',
             'some_other'  => 'numeric|between:1,6'
         ];
 
-        $category = new Category;
+        /** @var Validator $validator */
+        $validator = $factory->get(Category::class);
+        $this->assertEquals(Category::class, $validator->ormClass());
 
-        /** @var GenericValidator $validator */
-        $validator = $factory->make($rules, $category);
-        $validator->setOrmClass(Category::class);
+        $validator->mergeRules($rules);
 
-        $this->assertInstanceOf(GenericValidator::class, $validator);
         $rules = $validator->rules();
 
         $this->assertTrue(count($rules) > 4);
@@ -99,26 +98,28 @@ class ValidatorFactoryIntegrationTest extends \Ems\LaravelIntegrationTest
         }
     }
 
-    public function test_create_validator_by_custom_assigned_validator()
+    public function test_get_validator_by_custom_assigned_validator()
     {
 
-        $factory = $this->laravel(ValidationFactoryContract::class);
+        $factory = $this->make();
 
-        $factory->setForResource('categories', AlterableCategoryValidator::class);
+        if (!$factory instanceof \Ems\Validation\ValidatorFactory) {
+            $this->fail("This test only works with ValidatorFactory");
+        }
+        $factory->register(Category::class, AlterableCategoryValidator::class);
 
         $rules = [
             'external_id' => 'required|min:3|max:64',
             'some_other'  => 'numeric|between:1,6'
         ];
 
-        $category = new Category;
-
-        $validator = $factory->make($rules, $category);
-        $validator->setOrmClass(Category::class);
+        $validator = $factory->get( Category::class);
         $this->assertInstanceOf(AlterableCategoryValidator::class, $validator);
+        $validator->mergeRules($rules);
+
         $rules = $validator->rules();
 
-        $this->assertTrue(count($rules) > 4);
+        $this->assertTrue(count($rules) > 2);
 
         $awaited = [
             'external_id' => [
@@ -137,44 +138,78 @@ class ValidatorFactoryIntegrationTest extends \Ems\LaravelIntegrationTest
         }
     }
 
-    public function test_create_validator_by_custom_assigned_generic_validator()
+    public function test_get_validator_by_custom_assigned_generic_validator()
     {
 
-        $factory = $this->laravel(ValidationFactoryContract::class);
+        $factory = $this->make();
 
-        $factory->setForResource('categories', CategoryValidator::class);
+        if (!$factory instanceof \Ems\Validation\ValidatorFactory) {
+            $this->fail("This test only works with ValidatorFactory");
+        }
+
+        $factory->register(Category::class, function (string $ormClass) {
+            return new CategoryValidator([
+                                     'external_id' => 'string|min:5|max:255',
+                                     'name'        => 'string|min:10|max:255'
+                                 ], $ormClass);
+        });
 
         $rules = [
             'external_id' => 'required|min:3|max:64',
             'some_other'  => 'numeric|between:1,6'
         ];
 
-        $category = new Category;
-
-        $validator = $factory->make([], $category);
-        $validator->setOrmClass(Category::class);
-
+        $validator = $factory->get(Category::class);
         $this->assertInstanceOf(CategoryValidator::class, $validator);
+
+        $validator->mergeRules($rules);
+
         $rules = $validator->rules();
 
-        $this->assertTrue(count($rules) > 4);
+        $this->assertTrue(count($rules) > 2);
 
     }
 
-
-}
-
-class CategoryValidator extends GenericValidator
-{
-
-}
-
-class AlterableCategoryValidator extends AlterableValidator
-{
-
-    public function resource()
+    /**
+     * Create the factory
+     * @return ValidationFactoryContract
+     */
+    protected function make() : ValidationFactoryContract
     {
-        return new Category;
+        return $this->laravel(ValidationFactoryContract::class);
     }
 
+    protected function bootApplication(Application $app)
+    {
+        parent::bootApplication($app);
+        $app->onAfter(EmsValidatorFactory::class, function (EmsValidatorFactory $factory) {
+            $factory->register(BaseModel::class, function (string $ormClass) {
+                /** @var XTypeProviderValidatorFactory $xtypeFactory */
+                $xtypeFactory = $this->laravel(XTypeProviderValidatorFactory::class);
+                return $xtypeFactory->validator($ormClass);
+            });
+        });
+        $app->bind(TranslatorContract::class, function () {
+            $loader = new ArrayLoader();
+            return new Translator($loader, 'en');
+        });
+    }
+
+
+}
+
+class CategoryValidator extends Validator
+{
+    public function ormClass() : string
+    {
+        return Category::class;
+    }
+}
+
+class AlterableCategoryValidator extends CategoryValidator
+{
+    protected $rules = [
+        'external_id' => 'string|min:5|max:255',
+        'name'        => 'string|min:10|max:255'
+    ];
 }

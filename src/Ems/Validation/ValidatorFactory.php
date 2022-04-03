@@ -3,7 +3,6 @@
 namespace Ems\Validation;
 
 use Closure;
-use Ems\Contracts\Core\AppliesToResource;
 use Ems\Contracts\Core\Containers\ByTypeContainer;
 use Ems\Contracts\Core\Exceptions\TypeException;
 use Ems\Contracts\Core\Subscribable;
@@ -25,7 +24,6 @@ use function is_string;
 class ValidatorFactory implements ValidatorFactoryContract, SupportsCustomFactory, Subscribable
 {
     use CustomFactorySupport;
-    use ConfiguresValidator;
     use SubscribableTrait {
         on as traitOn;
     }
@@ -236,34 +234,6 @@ class ValidatorFactory implements ValidatorFactoryContract, SupportsCustomFactor
     protected function checkEvent($event)
     {
         // Accept everything
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @param array             $rules
-     * @param AppliesToResource $resource (optional
-     *
-     * @return Validator
-     **/
-    public function make(array $rules, AppliesToResource $resource=null)
-    {
-
-        if (!$resource) {
-            $validator = $this->firstNotNullResultOrFail('make', $rules, $resource);
-            return $this->configureAndReturn($validator, $rules, $resource);
-        }
-
-        $resourceName = $resource->resourceName();
-
-        if (!isset($this->resourceFactories[$resourceName])) {
-            return $this->firstNotNullResultOrFail('make', $rules, $resource);
-        }
-
-        $validator = call_user_func($this->resourceFactories[$resourceName]);
-
-        return $this->configureAndReturn($validator, $rules, $resource);
-
     }
 
 }

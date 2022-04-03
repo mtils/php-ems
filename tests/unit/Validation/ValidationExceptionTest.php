@@ -5,6 +5,7 @@ namespace Ems\Validation;
 
 use Ems\Contracts\Validation\Validation;
 use Ems\Contracts\Validation\Validator as ValidatorContract;
+use Ems\Contracts\Validation\ValidationException;
 
 /**
  * @group validation

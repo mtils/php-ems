@@ -8,16 +8,6 @@ use Ems\Contracts\Core\Extendable;
 interface ValidatorFactory
 {
     /**
-     * Return a validator for $rules. Instantiate it or deliver some predefined
-     *
-     * @param array             $rules
-     * @param AppliesToResource $resource (optional
-     *
-     * @return Validator
-     **/
-    public function make(array $rules, AppliesToResource $resource=null);
-
-    /**
      * Create a validator. Optionally pass the ormClass you want to validate by
      * this validator. This allows manipulating rules when extending the app.
      *

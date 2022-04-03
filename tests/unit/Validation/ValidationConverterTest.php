@@ -5,7 +5,7 @@ namespace Ems\Validation;
 
 use Ems\Contracts\Core\Extendable;
 use Ems\Contracts\Validation\ValidationConverter as ConverterContract;
-use Ems\Validation\ValidationException;
+use Ems\Contracts\Validation\ValidationException;
 
 /**
  * @group validation

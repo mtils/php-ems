@@ -3,18 +3,12 @@
 
 namespace Ems\Foundation;
 
-use Ems\Contracts\Foundation\InputProcessor as InputProcessorContract;
 use Ems\Contracts\Foundation\InputNormalizer as InputNormalizerContract;
-use Ems\Core\Patterns\HookableTrait;
-use Ems\Contracts\Core\AppliesToResource;
-use Ems\Contracts\Core\NamedCallableChain as ChainContract;
-use Ems\Contracts\Validation\ValidatorFactory;
+use Ems\Contracts\Foundation\InputProcessor as InputProcessorContract;
 use Ems\Contracts\Validation\Validator;
+use Ems\Contracts\Validation\ValidatorFactory;
 use Ems\Core\NamedObject;
 use Ems\Testing\LoggingCallable;
-use Ems\Core\Patterns\ExtendableTrait;
-use Ems\Validation\GenericValidator;
-use Ems\Validation\GenericValidatorFactory;
 
 
 class InputNormalizerTest extends \Ems\TestCase
@@ -45,8 +39,8 @@ class InputNormalizerTest extends \Ems\TestCase
                  ->once()
                  ->andReturn($adjusted);
 
-        $validatorFactory->shouldReceive('make')
-                         ->with($rules, $resource)
+        $validatorFactory->shouldReceive('create')
+                         ->with($rules, NamedObject::class)
                          ->andReturn($validator);
 
         $validator->shouldReceive('validate')
@@ -87,8 +81,8 @@ class InputNormalizerTest extends \Ems\TestCase
                  ->once()
                  ->andReturn($adjusted);
 
-        $validatorFactory->shouldReceive('make')
-                         ->with([], $resource)
+        $validatorFactory->shouldReceive('create')
+                         ->with([], NamedObject::class)
                          ->andReturn($validator);
 
         $validator->shouldReceive('validate')
@@ -125,8 +119,8 @@ class InputNormalizerTest extends \Ems\TestCase
         $adjuster->shouldReceive('process')
                  ->never();
 
-        $validatorFactory->shouldReceive('make')
-                         ->with($rules, $resource)
+        $validatorFactory->shouldReceive('create')
+                         ->with($rules, NamedObject::class)
                          ->andReturn($validator);
 
         $validator->shouldReceive('validate')
@@ -173,8 +167,8 @@ class InputNormalizerTest extends \Ems\TestCase
                        ->once()
                        ->andReturn($adjusted);
 
-        $validatorFactory->shouldReceive('make')
-                         ->with($rules, $resource)
+        $validatorFactory->shouldReceive('create')
+                         ->with($rules, NamedObject::class)
                          ->andReturn($validator);
 
         $validator->shouldReceive('validate')
@@ -219,9 +213,9 @@ class InputNormalizerTest extends \Ems\TestCase
             return $adjusted;
         });
 
-        $validatorFactory->shouldReceive('make')
-                         ->with($rules, $resource)
-                         ->andReturn($validator);
+        $validatorFactory->shouldReceive('create')
+            ->with($rules, NamedObject::class)
+            ->andReturn($validator);
 
         $validator->shouldReceive('validate')
                   ->with($adjusted, $resource, null)
@@ -262,9 +256,9 @@ class InputNormalizerTest extends \Ems\TestCase
                  ->once()
                  ->andReturn($adjusted);
 
-        $validatorFactory->shouldReceive('make')
-                         ->with([], $resource)
-                         ->andReturn($validator);
+        $validatorFactory->shouldReceive('create')
+            ->with($rules, NamedObject::class)
+            ->andReturn($validator);
 
         $validator->shouldReceive('validate')
                   ->with($adjusted, $resource, null)
@@ -277,7 +271,7 @@ class InputNormalizerTest extends \Ems\TestCase
                ->andReturn($casted);
 
         $awaited = $normalizer->adjust()
-                              ->validate(true)
+                              ->validate($rules)
                               ->cast()
                               ->normalize($input, $resource);
 
@@ -397,42 +391,6 @@ class InputNormalizerTest extends \Ems\TestCase
         $this->assertEquals($awaited, $casted);
     }
 
-    /**
-     * @expectedException Ems\Contracts\Core\Errors\ConfigurationError
-     **/
-    public function test_normalize_with_validate_and_no_validator_throws_exception()
-    {
-        $adjuster = $this->mock(InputProcessorContract::class);
-        $validator = $this->mock(Validator::class);
-        $validatorFactory = $this->mock(ValidatorFactory::class);
-        $caster = $this->mock(InputProcessorContract::class);
-
-        $normalizer = $this->newNormalizer($validatorFactory, $adjuster, $caster);
-
-        $input = ['a' => 1, 'b' => 2];
-        $adjusted = ['a' => 1, 'b' => 2, 'c' => 3];
-        $casted = ['a' => 1];
-        $rules = ['a' => 'min:2'];
-
-        $resource = new NamedObject;
-
-        $adjuster->shouldReceive('process')
-                 ->with($input, $resource, null)
-                 ->once()
-                 ->andReturn($adjusted);
-
-        $validatorFactory->shouldReceive('make')
-                         ->with([], $resource)
-                         ->andReturn(null);
-
-        $awaited = $normalizer->adjust()
-                              ->validate(true)
-                              ->cast()
-                              ->normalize($input, $resource);
-
-        $this->assertEquals($awaited, $casted);
-    }
-
     public function test_normalize_without_cast_if_explicit_disabled()
     {
         $adjuster = $this->mock(InputProcessorContract::class);
@@ -454,8 +412,8 @@ class InputNormalizerTest extends \Ems\TestCase
                  ->once()
                  ->andReturn($adjusted);
 
-        $validatorFactory->shouldReceive('make')
-                         ->with($rules, $resource)
+        $validatorFactory->shouldReceive('create')
+                         ->with($rules, NamedObject::class)
                          ->andReturn($validator);
 
         $validator->shouldReceive('validate')
@@ -499,8 +457,8 @@ class InputNormalizerTest extends \Ems\TestCase
                  ->andReturn($adjusted);
 
 
-        $validatorFactory->shouldReceive('make')
-                         ->with($rules, $resource)
+        $validatorFactory->shouldReceive('create')
+                         ->with($rules, NamedObject::class)
                          ->andReturn($validator);
 
         $validator->shouldReceive('validate')
@@ -551,8 +509,8 @@ class InputNormalizerTest extends \Ems\TestCase
                  ->once()
                  ->andReturn($adjusted);
 
-        $validatorFactory->shouldReceive('make')
-                         ->with($rules, $resource)
+        $validatorFactory->shouldReceive('create')
+                         ->with($rules, NamedObject::class)
                          ->andReturn($validator);
 
         $validator->shouldReceive('validate')
@@ -588,8 +546,8 @@ class InputNormalizerTest extends \Ems\TestCase
                  ->once()
                  ->andReturn($adjusted);
 
-        $validatorFactory->shouldReceive('make')
-                         ->with([], $resource)
+        $validatorFactory->shouldReceive('create')
+                         ->with([], NamedObject::class)
                          ->andReturn($validator);
 
         $validator->shouldReceive('validate')
@@ -662,7 +620,7 @@ class InputNormalizerTest extends \Ems\TestCase
 
     protected function newNormalizer(ValidatorFactory $factory=null, InputProcessorContract $adjuster=null, InputProcessorContract $caster=null, $validator=null)
     {
-        $factory = $factory ?: new GenericValidatorFactory();
+        $factory = $factory ?: new \Ems\Validation\ValidatorFactory();
         $adjuster = $adjuster ?: new InputProcessor;
         $caster = $caster?: new InputProcessor;
         return new InputNormalizer($factory, $adjuster, $caster);

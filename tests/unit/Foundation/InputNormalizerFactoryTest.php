@@ -3,18 +3,15 @@
 
 namespace Ems\Foundation;
 
-use Ems\Contracts\Foundation\InputProcessor as InputProcessorContract;
 use Ems\Contracts\Foundation\InputNormalizer as InputNormalizerContract;
 use Ems\Contracts\Foundation\InputNormalizerFactory as InputNormalizerFactoryContract;
-use Ems\Contracts\Core\AppliesToResource;
-use Ems\Contracts\Core\NamedCallableChain as ChainContract;
-use Ems\Validation\GenericValidator;
-use Ems\Contracts\Validation\ValidatorFactory;
+use Ems\Contracts\Foundation\InputProcessor as InputProcessorContract;
+use Ems\Contracts\Validation\ValidatorFactory as ValidatorFactoryContract;
 use Ems\Core\NamedObject;
-use Ems\Testing\LoggingCallable;
-use Ems\Contracts\Core\Errors\NotFound;
 use Ems\Testing\Cheat;
-use Ems\Validation\GenericValidatorFactory;
+use Ems\Testing\LoggingCallable;
+use Ems\Validation\Validator;
+use Ems\Validation\ValidatorFactory;
 
 require_once __DIR__ . '/InputNormalizerTest.php';
 
@@ -44,7 +41,7 @@ class InputNormalizerFactoryTest extends \Ems\TestCase
 
     public function test_validatorFactory()
     {
-        $factory = $this->mock(ValidatorFactory::class);
+        $factory = $this->mock(ValidatorFactoryContract::class);
         $normalizer = $this->newFactory($factory);
 
         $this->assertSame($factory, $normalizer->validatorFactory());
@@ -261,7 +258,7 @@ class InputNormalizerFactoryTest extends \Ems\TestCase
         $this->assertEquals($input, $listeners['cast.after']->arg(0));
     }
 
-    protected function newFactory(ValidatorFactory $validator=null, InputProcessorContract $adjuster=null, InputProcessorContract $caster=null)
+    protected function newFactory(ValidatorFactoryContract $validator=null, InputProcessorContract $adjuster=null, InputProcessorContract $caster=null)
     {
         $validator = $validator ?: $this->newValidatorFactory();
         $adjuster = $adjuster ?: new InputProcessor;
@@ -272,10 +269,10 @@ class InputNormalizerFactoryTest extends \Ems\TestCase
     protected function newValidatorFactory()
     {
         $createValidator = function () {
-            return new GenericValidator(['a' => 'b'], function ($baseValidator, $input) {
+            return new Validator(['a' => 'b'], '', function ($baseValidator, $input) {
                 return $input;
             });
         };
-        return new GenericValidatorFactory($createValidator);
+        return new ValidatorFactory($createValidator);
     }
 }

@@ -13,6 +13,9 @@ use Ems\Core\Exceptions\UnsupportedParameterException;
 use Ems\Contracts\Core\Type;
 use UnexpectedValueException;
 
+use function get_class;
+use function is_object;
+
 class InputNormalizer implements InputNormalizerContract
 {
     use HookableTrait;
@@ -211,7 +214,9 @@ class InputNormalizer implements InputNormalizerContract
             return true;
         }
 
-        $validator = $this->validator ? $this->validator : $this->validatorFactory->make($this->validationRules, $ormObject);
+        $ormClass = is_object($ormObject) ? get_class($ormObject) : '';
+
+        $validator = $this->validator ?: $this->validatorFactory->create($this->validationRules, $ormClass);
 
         if (!$validator) {
             throw new MisConfiguredException("Cannot validate without a validator or rules");
