@@ -13,8 +13,17 @@ use Ems\Contracts\Core\Url as UrlContract;
 use Ems\Core\Filesystem\FileStream;
 use Ems\Core\Support\LoggerMethods;
 use Psr\Log\LoggerInterface;
+
+use Throwable;
+
+use function get_class;
+use function is_object;
+use function json_encode;
+use function spl_object_id;
 use function strtoupper;
 use function var_export;
+
+use const JSON_PRETTY_PRINT;
 
 /**
  * Class StreamLogger
@@ -168,10 +177,41 @@ class StreamLogger implements LoggerInterface, OutputConnection
 
         $contextString = '';
         if ($context) {
-            $contextString = var_export($context, true);
+            $contextString = $this->formatContext($context);
         }
         $type = strtoupper($level);
         return "## $date $type ## $message $contextString";
+    }
+
+    /**
+     * Format the context of a log message.
+     *
+     * @param array $context
+     * @return string
+     */
+    protected function formatContext(array $context) : string
+    {
+        $formatted = [];
+        foreach ($context as $key=>$value) {
+            if (is_array($value)) {
+                $formatted[] = "$key => " . json_encode($value, JSON_PRETTY_PRINT, 4);
+                continue;
+            }
+            if (!is_object($value)) {
+                $formatted[] = "$key => " . var_export($value, true);
+                continue;
+            }
+            if (!$value instanceof Throwable) {
+                $formatted[] = "$key => Object #" . spl_object_id($value) . ' of class ' . get_class($value);
+                continue;
+            }
+
+            $formatted[] = "$key => Exception " . get_class($value) . ' with message "' . $value->getMessage() . '"';
+            $formatted[] = 'Trace: ' . $value->getTraceAsString();
+
+        }
+
+        return implode("\n", $formatted);
     }
 
 }
