@@ -6,6 +6,7 @@ namespace Ems\Core;
 use ArrayIterator;
 use DateTime;
 use Ems\Contracts\Core\Checker as CheckerContract;
+use Ems\Contracts\Core\Containers\ByTypeContainer;
 use Ems\Contracts\Core\None;
 use Ems\Core\Exceptions\ConstraintViolationException;
 use Ems\Expression\Constraint;
@@ -585,6 +586,17 @@ class CheckerTest extends TestCase
         $this->assertPasses('1245','length:2-5');
         $this->assertFails('3','length:2-5');
         $this->assertFails('1234567','length:2-5');
+    }
+
+    /**
+     * @test
+     */
+    public function array_if_passed()
+    {
+        $this->assertPasses([], 'array');
+        $this->assertFails('Hello', 'array');
+        $this->assertPasses(new ByTypeContainer(), 'array');
+        $this->assertFails(new stdClass(), 'array');
     }
 
     protected function newChecker()

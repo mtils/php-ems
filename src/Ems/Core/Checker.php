@@ -5,36 +5,33 @@
 
 namespace Ems\Core;
 
+use ArrayAccess;
 use Countable;
 use DateTimeInterface;
-use Ems\Contracts\Core\AppliesToResource;
 use Ems\Contracts\Core\Checker as CheckerContract;
-use Ems\Contracts\Core\Errors\ConstraintFailure;
 use Ems\Contracts\Core\PointInTime as PointInTimeContract;
 use Ems\Contracts\Core\Type;
 use Ems\Contracts\Expression\Constraint;
 use Ems\Contracts\Expression\ConstraintGroup;
+use Ems\Contracts\Expression\ConstraintParsingMethods;
 use Ems\Core\Exceptions\ConstraintViolationException;
 use Ems\Core\Exceptions\NotImplementedException;
 use Ems\Core\Patterns\ExtendableTrait;
 use Ems\Core\Patterns\SnakeCaseCallableMethods;
-use Ems\Contracts\Expression\ConstraintParsingMethods;
-use function gettype;
 use InvalidArgumentException;
-use function is_bool;
+use Traversable;
 use UnderflowException;
-use const FILTER_FLAG_IPV4;
-use const FILTER_VALIDATE_URL;
-use const JSON_ERROR_NONE;
-use const PREG_SPLIT_NO_EMPTY;
+
 use function array_shift;
 use function array_unique;
 use function array_unshift;
 use function date_parse;
 use function filter_var;
 use function func_get_args;
+use function gettype;
 use function in_array;
 use function is_array;
+use function is_bool;
 use function is_numeric;
 use function is_object;
 use function json_decode;
@@ -44,6 +41,11 @@ use function method_exists;
 use function simplexml_load_string;
 use function strip_tags;
 use function strtotime;
+
+use const FILTER_FLAG_IPV4;
+use const FILTER_VALIDATE_URL;
+use const JSON_ERROR_NONE;
+use const PREG_SPLIT_NO_EMPTY;
 
 class Checker implements CheckerContract
 {
@@ -939,6 +941,20 @@ class Checker implements CheckerContract
             throw new InvalidArgumentException("checkLength either accepts a numeric value for equal comparison or two numbers divided by a minus.");
         }
         return $size >= $parts[0] && $size <= $parts[1];
+    }
+
+    /**
+     * Check if something is an array (or behaves like an array)
+     *
+     * @param mixed $value
+     * @return bool
+     */
+    public function checkArray($value) : bool
+    {
+        if (is_array($value)) {
+            return true;
+        }
+        return $value instanceof ArrayAccess && $value instanceof Traversable && $value instanceof Countable;
     }
 
     /**
