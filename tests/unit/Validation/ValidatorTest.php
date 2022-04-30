@@ -929,6 +929,44 @@ class ValidatorTest extends TestCase
         $this->assertFailsWith($input, $rules, 'max');
     }
 
+    /**
+     * @test
+     */
+    public function test_nested_jsonpath_rule()
+    {
+        $rules = [
+            'projects[*].name' => 'numeric'
+        ];
+        $input = [
+            'name' => 'Michael',
+            'projects' => [
+                [
+                    'id' => 14,
+                    'name'  => 'Refactor complicated Validators'
+                ],
+                [
+                    'id' => 22,
+                    'name'  => 'Publish version one'
+                ]
+            ]
+        ];
+        $failures = $this->assertFailsWith($input, $rules, 'numeric');
+        $this->assertEquals([
+            'projects[0].name' => ['numeric'=>[]],
+            'projects[1].name' => ['numeric'=>[]],
+                            ], $failures);
+
+        $rules = [
+            'projects[*].name' => 'min:20'
+        ];
+
+        $failures = $this->assertFailsWith($input, $rules, 'min');
+
+        $this->assertEquals([
+                                'projects[1].name' => ['min'=>['20']],
+                            ], $failures);
+    }
+
     protected function make(array $rules=[], string $ormClass='', callable $baseValidator=null)
     {
         return new Validator($rules, $ormClass, $baseValidator);
@@ -977,7 +1015,7 @@ class ValidatorTest extends TestCase
         if ($success) {
             return $failures;
         }
-        $this->fail("Validating for rule $rule did not fail on $rule but on " . implode($failedRules));
+        $this->fail("Validating for rule $rule did not fail on $rule but on " . implode(',',$failedRules));
     }
 }
 
