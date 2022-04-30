@@ -4,7 +4,6 @@
 namespace Ems\Validation;
 
 use Ems\Contracts\Core\ChangeTracking;
-use Ems\Contracts\Core\Checker as CheckerContract;
 use Ems\Contracts\Core\DataObject;
 use Ems\Contracts\Core\Entity;
 use Ems\Contracts\Core\HasInjectMethods;
@@ -21,6 +20,8 @@ use Ems\Core\Helper;
 use Ems\Core\Lambda;
 use Ems\Core\Patterns\HookableTrait;
 use Ems\Core\Patterns\SnakeCaseCallableMethods;
+
+use ReflectionException;
 
 use function array_key_exists;
 use function array_merge;
@@ -62,11 +63,6 @@ class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
     protected $parsedRules;
 
     /**
-     * @var array
-     **/
-    protected $extendedRules = [];
-
-    /**
      * This is the prefix for the "own validation methods" of this class.
      *
      * @var string
@@ -74,19 +70,9 @@ class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
     protected $snakeCasePrefix = 'validate';
 
     /**
-     * @var CheckerContract
-     */
-    protected $checker;
-
-    /**
      * @var callable
      */
     protected $baseValidator;
-
-    /**
-     * @var string[]
-     */
-    protected $required_rules = ['required', 'required_if', 'required_unless'];
 
     public function __construct(array $rules=[], string $ormClass='', callable $baseValidator=null)
     {
@@ -144,8 +130,7 @@ class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
 
         $this->callBeforeListeners('validate', [$input, $rules, $ormObject, $formats]);
 
-        $validation = new ValidationException();
-        $validation->setRules($rules);
+        $validation = (new ValidationException())->setRules($rules);
 
         $validated = $this->performValidation($input, $validation, $ormObject, $formats);
 
@@ -181,9 +166,9 @@ class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
     /**
      * {@inheritdoc}
      *
-     * @return array
+     * @return string[]
      **/
-    public function methodHooks()
+    public function methodHooks() : array
     {
         return ['parseRules', 'validate'];
     }
@@ -328,7 +313,7 @@ class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
      *
      * @return bool
      **/
-    protected function isOptionalRelation($relation)
+    protected function isOptionalRelation(string $relation) : bool
     {
         return false;
     }
@@ -340,7 +325,7 @@ class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
      *
      * @return array
      **/
-    protected function toBaseAndOwnRules(array $parsedRules)
+    protected function toBaseAndOwnRules(array $parsedRules) : array
     {
         $ownRules = [];
         $baseRules = [];
@@ -441,7 +426,6 @@ class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
         if (!$this->baseValidator) {
             $this->baseValidator = new CheckerBaseValidator(new Checker());
         }
-
         return $this->baseValidator;
     }
 
@@ -469,7 +453,7 @@ class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
      *
      * @return bool
      *
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     protected function validateByOwnMethod(string $ruleName, array $vars, array $parameters) : bool
     {

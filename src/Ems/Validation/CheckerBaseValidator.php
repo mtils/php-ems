@@ -9,11 +9,13 @@ use Ems\Contracts\Core\Checker;
 use Ems\Contracts\Expression\Constraint;
 use Ems\Contracts\Expression\ConstraintGroup;
 use Ems\Contracts\Validation\Validation;
-
+use Ems\Core\Iterators\JsonPathIterator;
 use RuntimeException;
 
 use function array_key_exists;
 use function in_array;
+use function iterator_to_array;
+use function strpos;
 
 class CheckerBaseValidator
 {
@@ -50,23 +52,26 @@ class CheckerBaseValidator
 
         foreach ($baseRules as $key=>$rule) {
 
-            if (!$this->checkRequiredRules($rule, $input, $key, $validation)) {
+            $values = $this->extractValue($input, $key);
+
+            if (!$this->checkRequiredRules($rule, $input, $key, $validation, $values)) {
                 continue;
             }
 
-            $value = $input[$key] ?? null;
+            foreach ($values as $path=>$value) {
+                foreach ($rule as $name=>$args) {
+                    if (in_array($name, $this->required_rules)) {
+                        continue;
+                    }
+                    if (!$this->check($value, [$name=>$args], $ormObject, $formats)) {
+                        $validation->addFailure($path, $name, $args);
+                    }
+                }
+                if (array_key_exists($key, $input)) {
+                    $validated[$key] = $this->cast($value, $rule, $ormObject, $formats);
+                }
+            }
 
-            foreach ($rule as $name=>$args) {
-                if (in_array($name, $this->required_rules)) {
-                    continue;
-                }
-                if (!$this->check($value, [$name=>$args], $ormObject, $formats)) {
-                    $validation->addFailure($key, $name, $args);
-                }
-            }
-            if (array_key_exists($key, $input)) {
-                $validated[$key] = $this->cast($value, $rule, $ormObject, $formats);
-            }
         }
 
         return $validated;
@@ -122,6 +127,26 @@ class CheckerBaseValidator
     }
 
     /**
+     * Select the value by key. If key contains wildcards select the passed
+     * values.
+     * Set the "path" to each value as a key in the array.
+     * This allows keys like [12].address.street for keys like [*].address.*
+     *
+     * @param array $input
+     * @param string $key
+     *
+     * @return array
+     */
+    protected function extractValue(array $input, string $key) : array
+    {
+        if (!$this->isSelector($key)) {
+            return isset($input[$key]) ? [$key=>$input[$key]]: [$key=>null];
+        }
+        $iterator = (new JsonPathIterator($input, $key))->setKeyPrefix('');
+        return iterator_to_array($iterator);
+    }
+
+    /**
      * Check all required rules and return true if other rules should be checked
      * after.
      *
@@ -129,9 +154,10 @@ class CheckerBaseValidator
      * @param array $input
      * @param string $key
      * @param Validation $validation
+     * @param array $extracted
      * @return bool
      */
-    protected function checkRequiredRules(array $rule, array $input, string $key, Validation $validation) : bool
+    protected function checkRequiredRules(array $rule, array $input, string $key, Validation $validation, array $extracted=[]) : bool
     {
         // Check required before others to skip rest if missing
         if (isset($rule['required']) && !$this->checkRequired($input, $key)) {
@@ -149,8 +175,10 @@ class CheckerBaseValidator
             return false;
         }
 
+        $hasValue = $extracted && $extracted !== [$key=>null];
+
         // Check if not required other rules are ignored
-        if (!isset($rule['required']) && !$this->checkRequired($input, $key)) {
+        if (!isset($rule['required']) && !$this->checkRequired($input, $key) && !$hasValue) {
             return false;
         }
 
@@ -216,5 +244,14 @@ class CheckerBaseValidator
             return true;
         }
         return $this->checkRequired($input, $key);
+    }
+
+    /**
+     * @param string $key
+     * @return bool
+     */
+    protected function isSelector(string $key) : bool
+    {
+        return  (bool)strpos($key,'*');
     }
 }

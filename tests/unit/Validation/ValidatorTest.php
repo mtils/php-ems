@@ -7,11 +7,14 @@ namespace Ems\Validation;
 
 use Ems\Contracts\Core\AppliesToResource;
 use Ems\Contracts\Validation\Validation;
+use Ems\Contracts\Validation\ValidationException;
 use Ems\Contracts\Validation\Validator as ValidatorContract;
 use Ems\Core\FakeEntity as GenericEntity;
 use Ems\Core\NamedObject;
 use Ems\TestCase;
 use Ems\Testing\LoggingCallable;
+
+use function implode;
 
 class ValidatorTest extends TestCase
 {
@@ -832,9 +835,149 @@ class ValidatorTest extends TestCase
         }
     }
 
+    /**
+     * @test
+     */
+    public function required_without_not_required_array_throws_no_exception()
+    {
+        $rules = [
+            'name' => 'string',
+            'tags' => 'array'
+        ];
+        $input = ['name' => 'Michael'];
+        $this->assertEquals($input, $this->make($rules)->validate($input));
+    }
+
+    /**
+     * @test
+     */
+    public function required_without_required_array_throws_exception()
+    {
+        $rules = [
+            'name' => 'string',
+            'tags' => 'required|array'
+        ];
+        $input = ['name' => 'Michael'];
+        $this->expectException(ValidationException::class);
+        $this->assertEquals($input, $this->make($rules)->validate($input));
+    }
+
+    /**
+     * @test
+     */
+    public function required_with_array_throws_no_exception()
+    {
+        $rules = [
+            'name' => 'string',
+            'tags' => 'required|array'
+        ];
+        $input = ['name' => 'Michael', 'tags' => ['old','green']];
+        $this->assertEquals($input, $this->make($rules)->validate($input));
+    }
+
+    /**
+     * @test
+     */
+    public function required_with_no_array_throws_exception()
+    {
+        $rules = [
+            'name' => 'string',
+            'tags' => 'required|array'
+        ];
+        $input = ['name' => 'Michael', 'tags' => 'Thomas'];
+        $this->expectException(ValidationException::class);
+        $this->assertEquals($input, $this->make($rules)->validate($input));
+    }
+
+    /**
+     * @test
+     */
+    public function required_with_min_array_size()
+    {
+        $rules = [
+            'name' => 'string',
+            'tags' => 'required|array|min:3'
+        ];
+        $input = ['name' => 'Michael', 'tags' => ['old','green']];
+        $this->assertFailsWith($input, $rules, 'min');
+    }
+
+    /**
+     * @test
+     */
+    public function required_with_max_array_size()
+    {
+        $rules = [
+            'name' => 'string',
+            'tags' => 'required|array|max:2'
+        ];
+        $input = ['name' => 'Michael', 'tags' => ['old','green','whoop']];
+        $this->assertFailsWith($input, $rules, 'max');
+    }
+
+    /**
+     * @test
+     */
+    public function test_array_items_rule()
+    {
+        $rules = [
+            'name' => 'string',
+            'tags' => 'required|array|min:2',
+            'tags.*' => 'max:4'
+        ];
+        $input = ['name' => 'Michael', 'tags' => ['old','green','whoop']];
+        $this->assertFailsWith($input, $rules, 'max');
+    }
+
     protected function make(array $rules=[], string $ormClass='', callable $baseValidator=null)
     {
         return new Validator($rules, $ormClass, $baseValidator);
+    }
+
+    /**
+     * Assert the validation of $input with $rules produces a validation error
+     * with $rule.
+     *
+     * @param array $input
+     * @param array $rules
+     * @param string $rule
+     * @param string $key (optional)
+     * @return array The failed validation
+     */
+    protected function assertFailsWith(array $input, array $rules, string $rule, string $key='') : array
+    {
+        try {
+            $this->make($rules)->validate($input);
+            $this->fail("Validating for $rule should fail");
+        } catch (ValidationException $e) {
+            //
+        }
+
+        $failures = $e->failures();
+
+        if ($key) {
+            if (!isset($failures[$key])) {
+                $this->fail("Validating for $rule did not fail on key '$key'");
+            }
+            $failures = [$failures[$key]];
+        }
+
+        $failedRules = [];
+        $success = false;
+
+        foreach ($failures as $key=>$rules) {
+            foreach ($rules as $rulesRule=>$params) {
+                $failedRules[] = $rulesRule;
+                if ($rulesRule == $rule) {
+                    $success = true;
+                    break;
+                }
+            }
+        }
+        if ($success) {
+            return $failures;
+        }
+        $this->fail("Validating for rule $rule did not fail on $rule but on " . implode($failedRules));
     }
 }
 
@@ -844,7 +987,7 @@ class BreakException extends \Exception
 
 class ValidatorWithOptionalRelations extends Validator
 {
-    protected function isOptionalRelation($relation) : bool
+    protected function isOptionalRelation(string $relation) : bool
     {
         return $relation == 'category';
     }
