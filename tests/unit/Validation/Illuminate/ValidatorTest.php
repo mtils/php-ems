@@ -215,7 +215,7 @@ class ValidatorTest extends \Ems\TestCase
 
         $parsed = [
             'login' => [
-                'required' => [],
+                // 'required' => [], Login will be removed
                 'manners'  => []
             ],
             'age' => [

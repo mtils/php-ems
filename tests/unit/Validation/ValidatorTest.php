@@ -15,6 +15,7 @@ use Ems\TestCase;
 use Ems\Testing\LoggingCallable;
 
 use function implode;
+use function var_export;
 
 class ValidatorTest extends TestCase
 {
@@ -436,7 +437,7 @@ class ValidatorTest extends TestCase
         $rules = ['password' => 'required'];
         $parsed = ['password' => ['required' => []]];
         $input = ['password' => 'blabla'];
-        $resource = new NamedObject(15, 'king', 'category');
+        $resource = new NamedObject(null, 'king', 'category');
         $formats = [\Ems\Contracts\Validation\Validator::LOCALE, 'cz'];
 
         $validator = $this->make($rules, NamedObject::class, $handler);
@@ -467,7 +468,7 @@ class ValidatorTest extends TestCase
             ]
         ];
 
-        $resource = new NamedObject(15, 'king', 'category');
+        $resource = new NamedObject(null, 'king', 'category');
         $locale = 'cz';
 
         $validator = $this->make($rules, NamedObject::class, $handler);
@@ -668,7 +669,7 @@ class ValidatorTest extends TestCase
         }
     }
 
-    public function test_prepareRulesForValidation_removes_nested_array_rules_if_not_present_in_input()
+    public function test_missing_values_are_not_producing_validation_when_parent_not_required()
     {
 
         $rules = [
@@ -690,53 +691,47 @@ class ValidatorTest extends TestCase
             ]
         ];
 
-        $country = (new GenericEntity)->makeNew(false);
+        $country = (new GenericEntity())->makeNew(false);
 
-        $breaker = new LoggingCallable(function () {
-            throw new BreakException;
-        });
+        try {
+            $validator = $this->make($rules);
+            $validator->validate($input, $country);
 
-        $awaitedRules = [
-            'name' => [
-                'min' => [2],
-                'max' => [255]
-            ],
-            'iso_code' => [
-                'min' => [2],
-                'max' => [2]
-            ],
-//             'category.id' => [
-//                 'min' => [2],
-//                 'max' => [255]
-//             ],
-            'profile.nickname' => [
-                'min' => [2],
-                'max' => [255]
-            ]
+        } catch (ValidationException $e) {
+            $this->fail('The validation failed: ' . var_export($e->failures(), true));
+        }
+
+        $rules = [
+            'name'              => 'min:2|max:255',
+            'iso_code'          => 'min:2|max:2',
+            'password'          => 'required',
+            'address'           => 'required',
+            'address.country'   => 'min:2|max:255',
+            'address.street'    => 'min:2|max:255',
+            'address.location.name' => 'min:2|max:255',
+            'category.id'       => 'min:2|max:255',
+            'profile.nickname'  => 'min:2|max:255'
         ];
 
         try {
 
             $validator = $this->make($rules);
 
-            $validator->onBefore('validate', $breaker);
+            $validator->validate($input);
+            $this->fail('The validation should be failing because parent required was not found');
 
-            $validator->validate($input, $country);
-
-            $this->fail('The injected exception throw was not performed');
-
-        } catch (BreakException $e) {
-            $this->assertEquals($awaitedRules, $breaker->arg(1));
+        } catch (ValidationException $e) {
+            //print_r($e->failures());
         }
     }
 
-    public function test_prepareRulesForValidation_removes_nested_array_rules_if_not_present_in_input_when_optional()
+    public function test_missing_values_are_producing_validation_when_parent_required()
     {
 
         $rules = [
             'name'              => 'min:2|max:255',
             'iso_code'          => 'min:2|max:2',
-            'password'          => 'required',
+            'address'           => 'required',
             'address.country'   => 'min:2|max:255',
             'address.street'    => 'min:2|max:255',
             'address.location.name' => 'min:2|max:255',
@@ -747,63 +742,50 @@ class ValidatorTest extends TestCase
         $input = [
             'name'      => 'France',
             'iso_code'  => 'fr',
-            'address' => [
-                'street' => 'Elm Str.'
-            ],
             'profile'   => [
                 'nickname' => 'bla'
             ]
         ];
 
-        $country = (new GenericEntity)->makeNew(true);
+        try {
+            $validator = $this->make($rules);
+            $validator->validate($input);
 
-        $breaker = new LoggingCallable(function () {
-            throw new BreakException;
-        });
+        } catch (ValidationException $e) {
+            $this->assertArrayHasKey('address', $e->failures(), 'The required address validation did not fail');
+        }
 
-        $awaitedRules = [
-            'name' => [
-                'min' => [2],
-                'max' => [255]
-            ],
-            'iso_code' => [
-                'min' => [2],
-                'max' => [2]
-            ],
-            'password' => [
-                'required' => []
-            ],
-            'address.country' => [
-                'min' => [2],
-                'max' => [255]
-            ],
-            'address.street' => [
-                'min' => [2],
-                'max' => [255]
-            ],
-            'address.location.name' => [
-                'min' => [2],
-                'max' => [255]
-            ],
-            'profile.nickname' => [
-                'min' => [2],
-                'max' => [255]
+     }
+
+    public function test_missing_required_values_are_not_producing_validation_when_parent_not_required()
+    {
+
+        $rules = [
+            'name'                  => 'min:2|max:255',
+            'iso_code'              => 'min:2|max:2',
+            'address.country'       => 'required_if:address|min:2|max:255',
+            'address.street'        => 'min:2|max:255',
+            'address.location.name' => 'min:2|max:255',
+            'category.id'           => 'min:2|max:255',
+            'profile.nickname'      => 'min:2|max:255'
+        ];
+
+        $input = [
+            'name'      => 'France',
+            'iso_code'  => 'fr',
+            'profile'   => [
+                'nickname' => 'bla'
             ]
         ];
 
         try {
+            $validator = $this->make($rules);
+            $validator->validate($input);
 
-            $validator = new ValidatorWithOptionalRelations($rules, GenericEntity::class);
-
-            $validator->onBefore('validate', $breaker);
-
-            $validator->validate($input, $country);
-
-            $this->fail('The injected exception throw was not performed');
-
-        } catch (BreakException $e) {
-            $this->assertEquals($awaitedRules, $breaker->arg(1));
+        } catch (ValidationException $e) {
+            $this->fail('Validation should not fail on required attribute if parent is not required:' . var_export($e->failures(), true));
         }
+
     }
 
     public function test_validateForbidden()
@@ -1021,12 +1003,4 @@ class ValidatorTest extends TestCase
 
 class BreakException extends \Exception
 {
-}
-
-class ValidatorWithOptionalRelations extends Validator
-{
-    protected function isOptionalRelation(string $relation) : bool
-    {
-        return $relation == 'category';
-    }
 }
