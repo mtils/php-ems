@@ -7,6 +7,7 @@ namespace Ems\Core;
 
 use ArrayAccess;
 use Countable;
+use DateTime;
 use DateTimeInterface;
 use Ems\Contracts\Core\Checker as CheckerContract;
 use Ems\Contracts\Core\PointInTime as PointInTimeContract;
@@ -19,12 +20,14 @@ use Ems\Core\Exceptions\NotImplementedException;
 use Ems\Core\Patterns\ExtendableTrait;
 use Ems\Core\Patterns\SnakeCaseCallableMethods;
 use InvalidArgumentException;
+use Throwable;
 use Traversable;
 use UnderflowException;
 
 use function array_shift;
 use function array_unique;
 use function array_unshift;
+use function checkdate;
 use function date_parse;
 use function filter_var;
 use function func_get_args;
@@ -40,7 +43,12 @@ use function mb_strlen;
 use function method_exists;
 use function simplexml_load_string;
 use function strip_tags;
+use function strpos;
 use function strtotime;
+
+use function var_dump;
+
+use function var_export;
 
 use const FILTER_FLAG_IPV4;
 use const FILTER_VALIDATE_URL;
@@ -321,34 +329,40 @@ class Checker implements CheckerContract
     }
 
     /**
-     * Check if $date is after $earliest.
+     * Check if $date is after $earliest. It is assumed the $date comes from "outside"
+     * like http, an import,...so the earliest is not parsed
+     * using the format by default. But it will make a second try using it.
      *
      * @param $date
      * @param $earliest
+     * @param string $format
      *
      * @return bool
      */
-    public function checkAfter($date, $earliest) : bool
+    public function checkAfter($date, $earliest, string $format='') : bool
     {
         try {
-            return $this->toTimestamp($date) > $this->toTimestamp($earliest);
+            return $this->toTimestamp($date, $format) > $this->tryWithoutAndWithFormat($earliest, $format);
         } catch (InvalidArgumentException $e) {
             return false;
         }
     }
 
     /**
-     * Check if $date is before $earliest.
+     * Check if $date is before $earliest. It is assumed the $date comes from "outside"
+     * like http, an import,...so the earliest is not parsed
+     * using the format by default. But it will make a second try using it
      *
      * @param $date
      * @param $latest
+     * @param string $format
      *
      * @return bool
      */
-    public function checkBefore($date, $latest) : bool
+    public function checkBefore($date, $latest, string $format='') : bool
     {
         try {
-            return $this->toTimestamp($date) < $this->toTimestamp($latest);
+            return $this->toTimestamp($date, $format) < $this->tryWithoutAndWithFormat($latest, $format);
         } catch (InvalidArgumentException $e) {
             return false;
         }
@@ -499,13 +513,15 @@ class Checker implements CheckerContract
     }
 
     /**
-     * Check if the passed $value is a valid date.
+     * Check if the passed $value is a valid date. Date can be only day or date
+     * and time
      *
      * @param $value
+     * @param string $format
      *
      * @return bool
      */
-    public function checkDate($value) : bool
+    public function checkDate($value, string $format='') : bool
     {
 
         if ($value instanceof PointInTimeContract) {
@@ -521,13 +537,92 @@ class Checker implements CheckerContract
             return $this->checkInt($value->getTimestamp());
         }
 
-        if ((!Type::isStringLike($value) && !is_numeric($value)) || strtotime($value) === false) {
+        if (((!Type::isStringLike($value) && !is_numeric($value)) || strtotime($value) === false) && !$format) {
             return false;
         }
 
-        $date = date_parse($value);
+        if (!$format) {
+            $date = date_parse($value);
 
-        return checkdate($date['month'], $date['day'], $date['year']);
+            return checkdate($date['month'], $date['day'], $date['year']);
+        }
+
+        try {
+            $dateTime = DateTime::createFromFormat($format, $value);
+            return $dateTime instanceof DateTime;
+        } catch (Throwable $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Check if value is a valid date and time. If a string contains no hour
+     * or the point in time has no time it returns false.
+     *
+     * @param $value
+     * @param string $format
+     * @return bool
+     */
+    public function checkDateTime($value, string $format='') : bool
+    {
+        if ($value instanceof PointInTimeContract) {
+            return $value->isValid() && in_array($value->precision(), [PointInTimeContract::HOUR, PointInTimeContract::MINUTE, PointInTimeContract::SECOND]);
+        }
+        if ($value instanceof DateTimeInterface) {
+            return true;
+        }
+        if (!Type::isStringLike($value)) {
+            return $this->checkDate($value, $format);
+        }
+        $dateString = (string)$value;
+        // No time passed
+        if (!$format && !strpos($dateString, ':')) {
+            return false;
+        }
+        // all time format chars
+        foreach (['a','A','B','g','G','h','H','i','s','u','v','c','r','U'] as $char) {
+            if (strpos($format, $char)) {
+                return true;
+            }
+        }
+        return $this->checkDate($value, $format);
+    }
+
+    /**
+     * Check if the passed value is a valid time (clock)
+     * @param $value
+     * @param string $format
+     * @return bool
+     */
+    public function checkTime($value, string $format='') : bool
+    {
+        if ($value instanceof PointInTimeContract) {
+            return $value->isValid() && in_array($value->precision(), [PointInTimeContract::HOUR, PointInTimeContract::MINUTE, PointInTimeContract::SECOND]);
+        }
+        if ($value instanceof DateTimeInterface) {
+            return true;
+        }
+        if (!Type::isStringLike($value)) {
+            return $this->checkDate($value, $format);
+        }
+        if ($format) {
+            return @DateTime::createFromFormat($format, $value) !== false;
+        }
+        if (!strpos($value, ':')) {
+            return false;
+        }
+        $parts = explode(':', $value);
+        $partCount = count($parts);
+        if ($partCount < 2 || $partCount > 3) {
+            return false;
+        }
+        $hour = (int)$parts[0];
+        $minutes = (int)$parts[1];
+        $seconds = 0;
+        if ($partCount > 2) {
+            $seconds = $parts[2];
+        }
+        return $hour > -1 && $hour < 24 && $minutes > -1 && $minutes < 60 && $seconds > -1 && $seconds < 59;
     }
 
     /**
@@ -1012,12 +1107,33 @@ class Checker implements CheckerContract
      * Try to convert a arbitrary date parameter into a timestamp.
      *
      * @param mixed $date
-     *
+     * @param string $format
      * @return int
      */
-    protected function toTimestamp($date) : int
+    protected function toTimestamp($date, string $format='') : int
     {
-        return PointInTime::guessFrom($date)->getTimestamp();
+        $obj = $format ? PointInTime::createFromFormat($format, $date) : PointInTime::guessFrom($date);
+        if (!$obj) {
+            throw new InvalidArgumentException("Unable to parse date '$date'");
+        }
+        return $obj->getTimestamp();
+    }
+
+    /**
+     * @param $date
+     * @param string $format
+     * @return int
+     */
+    protected function tryWithoutAndWithFormat($date, string $format) : int
+    {
+        if (!$format) {
+            return $this->toTimestamp($date);
+        }
+        try {
+            return $this->toTimestamp($date);
+        } catch (InvalidArgumentException $e) {
+            return $this->toTimestamp($date, $format);
+        }
     }
 
     /**

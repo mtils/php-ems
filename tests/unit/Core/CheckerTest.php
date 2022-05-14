@@ -293,6 +293,11 @@ class CheckerTest extends TestCase
         $this->assertPasses('2017-07-01', 'after:2017-06-30');
         $this->assertFails('2017-07-01', 'after:2017-07-01');
         $this->assertFails('foo', 'after:2017-07-01');
+
+        $this->assertPasses('05/2017/31', 'after:2017-04-01,m/Y/d');
+        $this->assertPasses('05/2017/31', 'after:04/2017/01,m/Y/d');
+
+        $this->assertFails('05/2017/31', 'after:2017-08-01,m/Y/d');
     }
 
     public function test_before()
@@ -300,6 +305,11 @@ class CheckerTest extends TestCase
         $this->assertPasses('2017-07-01', 'before:2017-07-02');
         $this->assertFails('2017-07-01', 'before:2017-07-01');
         $this->assertFails('foo', 'before:2017-07-01');
+
+        $this->assertPasses('05/2017/31', 'before:2017-09-01,m/Y/d');
+        $this->assertPasses('05/2017/31', 'before:09/2017/01,m/Y/d');
+
+        $this->assertFails('05/2017/31', 'before:2017-04-01,m/Y/d');
     }
 
     public function test_type()
@@ -402,6 +412,47 @@ class CheckerTest extends TestCase
         $this->assertFalse($checker->checkDate('2017-12-12 23:85:43'));
         $this->assertFalse($checker->checkDate('2017-12-12 23:15:92'));
 
+    }
+
+    public function test_checkDatetime()
+    {
+        $checker = $this->newChecker();
+
+        $this->assertTrue($checker->checkDateTime(new PointInTime()));
+        $this->assertFalse($checker->checkDateTime(new PointInTime(new None())));
+        $time = new PointInTime();
+        $time->precision = \Ems\Contracts\Core\PointInTime::DAY;
+        $this->assertFalse($checker->checkDateTime($time));
+        $time->precision = \Ems\Contracts\Core\PointInTime::HOUR;
+        $this->assertTrue($checker->checkDateTime($time));
+
+        $this->assertFalse($checker->checkDateTime('2021-01-31'));
+        $this->assertTrue($checker->checkDateTime('2021-01-31 08:00'));
+
+        $this->assertFalse($checker->checkDateTime('2021-01-31 09 21'));
+        $this->assertTrue($checker->checkDateTime('2021-01-31 09 21', 'Y-m-d H i'));
+        $this->assertFalse($checker->checkDateTime('2021-01-31 09 21', 'Y-m-d'));
+    }
+
+    public function test_checkTime()
+    {
+        $checker = $this->newChecker();
+        $this->assertTrue($checker->checkDateTime(new PointInTime()));
+        $this->assertFalse($checker->checkDateTime(new PointInTime(new None())));
+        $time = new PointInTime();
+        $time->precision = \Ems\Contracts\Core\PointInTime::DAY;
+        $this->assertFalse($checker->checkDateTime($time));
+        $time->precision = \Ems\Contracts\Core\PointInTime::HOUR;
+        $this->assertTrue($checker->checkDateTime($time));
+
+        $this->assertTrue($checker->checkTime(new DateTime()));
+
+        $this->assertTrue($checker->checkTime('00:24'));
+        $this->assertTrue($checker->checkTime('00:24:32'));
+        $this->assertFalse($checker->checkTime('26:24:32'));
+        $this->assertFalse($checker->checkTime('4'));
+        $this->assertFalse($checker->checkTime('04:76'));
+        $this->assertFalse($checker->checkTime('04:23:84'));
     }
 
     public function test_email()
