@@ -5,6 +5,7 @@
 
 namespace Ems\Validation;
 
+use DateTime;
 use Ems\Contracts\Core\AppliesToResource;
 use Ems\Contracts\Validation\Validation;
 use Ems\Contracts\Validation\ValidationException;
@@ -46,14 +47,145 @@ class ValidatorTest extends TestCase
             'type_id'   => 2
         ];
 
-        try {
+        $this->assertPasses($input, $rules);
+    }
 
-            $validator = $this->make($rules);
-            $validator->validate($input);
-            $this->assertTrue(true);
-        } catch (Validation $v) {
-            $this->fail('validate() throws an exception even if data is valid');
-        }
+    /**
+     * @test
+     */
+    public function it_validates_dates_without_format()
+    {
+        $rules = [
+            'birthday'  => 'date'
+        ];
+
+        $input = [
+            'birthday'     => '1976-05-31'
+        ];
+
+        $this->assertPasses($input, $rules);
+
+        $input = [
+            'birthday'     => '05/31/1976'
+        ];
+
+        $this->assertPasses($input, $rules);
+
+        $input = [
+            'birthday'     => 'now'
+        ];
+
+        $this->assertFailsWith($input, $rules, 'date');
+
+    }
+
+    /**
+     * @test
+     */
+    public function it_validates_dates_with_format()
+    {
+        $rules = [
+            'birthday'  => 'date'
+        ];
+
+        $input = [
+            'birthday'     => '31 1976 05'
+        ];
+
+        $this->assertFailsWith($input, $rules, 'date');
+
+        $this->assertPasses($input, $rules, null, [ValidatorContract::DATE_FORMAT=>'d Y m']);
+
+        $rules = [
+            'birthday'  => 'date:d Y m'
+        ];
+
+        $this->assertPasses($input, $rules);
+
+    }
+
+    /**
+     * @test
+     */
+    public function it_validates_datetime_without_format()
+    {
+        $rules = [
+            'created'  => 'datetime'
+        ];
+
+        $input = [
+            'created'     => '1976-05-31 12:53'
+        ];
+
+        $this->assertPasses($input, $rules);
+
+        $input = [
+            'created'     => '1976-05-31'
+        ];
+
+        $this->assertFailsWith($input, $rules, 'datetime');
+
+        $input = [
+            'created'     => 'now'
+        ];
+
+        $this->assertFailsWith($input, $rules, 'datetime');
+
+    }
+
+    /**
+     * @test
+     */
+    public function it_validates_datetime_with_format()
+    {
+        $rules = [
+            'created'  => 'datetime:m Y d H;i'
+        ];
+
+        $input = [
+            'created'     => '05 1976 31 12;53'
+        ];
+
+        $this->assertPasses($input, $rules);
+
+        $input = [
+            'created'     => '05 1976/31 12,53'
+        ];
+
+        $this->assertFailsWith($input, $rules, 'datetime');
+
+    }
+
+    /**
+     * @test
+     */
+    public function it_validates_after()
+    {
+        $rules = [
+            'created'  => 'after:2020-05-22'
+        ];
+
+        $input = [
+            'created'     => '2021-05-23'
+        ];
+
+        $this->assertPasses($input, $rules);
+
+        $input = [
+            'created'     => '2020-05-21'
+        ];
+
+        $this->assertFailsWith($input, $rules, 'after');
+
+        $rules = [
+            'created'  => 'after:2020-05-22,m/d/Y'
+        ];
+
+        $input = [
+            'created'     => '05/23/2020'
+        ];
+
+        $this->assertPasses($input, $rules);
     }
 
     /**
@@ -949,9 +1081,110 @@ class ValidatorTest extends TestCase
                             ], $failures);
     }
 
+    public function test_cast_scalar_rules()
+    {
+        $rules = [
+            'id'        => 'int',
+            'weight'    => 'numeric',
+            'name'      => 'string',
+            'married'   => 'bool'
+        ];
+        $validator = $this->make($rules);
+        $input = [
+            'id'    => '554',
+            'weight'    => '90.75',
+            'name'      => 'Uncle Tommy',
+            'married'   => "1"
+        ];
+        $awaited = [
+            'id'        => 554,
+            'weight'    => 90.75,
+            'name'      => 'Uncle Tommy',
+            'married'   => true
+        ];
+        $this->assertSame($awaited, $validator->validate($input));
+    }
+
+    public function test_cast_date_values()
+    {
+        $rules = [
+            'created'   => 'datetime',
+            'birthday'  => 'date',
+            'lunch'     => 'time',
+            'meet_at'   => 'after:2022-05-31',
+            'registered'    => 'before:now'
+        ];
+        $input = [
+            'created'   => '2022-05-14 08:55:23',
+            'birthday'  => '1976-05-31',
+            'lunch'     => '12:05',
+            'meet_at'   => '2022-06-08 07:00',
+            'registered'    => '2010-08-03 22:15:11'
+        ];
+        $validator = $this->make($rules);
+        $casted = $validator->validate($input);
+        $this->assertInstanceOf(DateTime::class, $casted['created']);
+        $this->assertEquals($input['created'], $casted['created']->format('Y-m-d H:i:s'));
+        $this->assertInstanceOf(DateTime::class, $casted['birthday']);
+        $this->assertEquals($input['birthday'], $casted['birthday']->format('Y-m-d'));
+        $this->assertEquals('12:05', $casted['lunch']);
+        $this->assertInstanceOf(DateTime::class, $casted['meet_at']);
+        $this->assertEquals($input['meet_at'], $casted['meet_at']->format('Y-m-d H:i'));
+        $this->assertInstanceOf(DateTime::class, $casted['registered']);
+        $this->assertEquals($input['registered'], $casted['registered']->format('Y-m-d H:i:s'));
+    }
+
+    public function test_cast_date_values_with_format()
+    {
+        $rules = [
+            'created'   => 'datetime:YmdHis',
+            'birthday'  => 'date:d Y m',
+            'lunch'     => 'time:H.i.s',
+            'meet_at'   => 'after:2022-05-31,Y/m/d',
+            'registered'    => 'before:2022-05-31,m-d-Y'
+        ];
+        $input = [
+            'created'   => '20220514085523',
+            'birthday'  => '31 1976 05',
+            'lunch'     => '12.05.01',
+            'meet_at'   => '2022/06/08',
+            'registered'    => '08-03-2010'
+        ];
+        $validator = $this->make($rules);
+        try {
+            $casted = $validator->validate($input);
+        } catch (ValidationException $e) {
+            print_r($e->failures());
+        }
+
+        $this->assertInstanceOf(DateTime::class, $casted['created']);
+        $this->assertEquals($input['created'], $casted['created']->format('YmdHis'));
+        $this->assertInstanceOf(DateTime::class, $casted['birthday']);
+        $this->assertEquals($input['birthday'], $casted['birthday']->format('d Y m'));
+        $this->assertEquals('12.05.01', $casted['lunch']);
+        $this->assertInstanceOf(DateTime::class, $casted['meet_at']);
+        $this->assertEquals($input['meet_at'], $casted['meet_at']->format('Y/m/d'));
+        $this->assertInstanceOf(DateTime::class, $casted['registered']);
+        $this->assertEquals($input['registered'], $casted['registered']->format('m-d-Y'));
+    }
+
     protected function make(array $rules=[], string $ormClass='', callable $baseValidator=null)
     {
         return new Validator($rules, $ormClass, $baseValidator);
+    }
+
+    /**
+     * @param array $input
+     * @param array $rules
+     * @return void
+     */
+    protected function assertPasses(array $input, array $rules, $ormObject=null, array $formats=[])
+    {
+        try {
+            $this->assertTrue(is_array($this->make($rules)->validate($input, $ormObject, $formats)));
+        } catch (ValidationException $e) {
+            $this->fail('Validation should pass but fails with ' . var_export($e->failures(), true));
+        }
     }
 
     /**
@@ -962,12 +1195,14 @@ class ValidatorTest extends TestCase
      * @param array $rules
      * @param string $rule
      * @param string $key (optional)
+     * @param null $ormObject
+     * @param array $formats
      * @return array The failed validation
      */
-    protected function assertFailsWith(array $input, array $rules, string $rule, string $key='') : array
+    protected function assertFailsWith(array $input, array $rules, string $rule, string $key='', $ormObject=null, array $formats=[]) : array
     {
         try {
-            $this->make($rules)->validate($input);
+            $this->make($rules)->validate($input, $ormObject, $formats);
             $this->fail("Validating for $rule should fail");
         } catch (ValidationException $e) {
             //

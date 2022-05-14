@@ -121,7 +121,7 @@ class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
      *
      * @return array Return a clean version of the input data that can be processed by a repository
      *
-     * @throws ValidationException|ReflectionException
+     * @throws ValidationException
      **/
     public function validate(array $input, $ormObject=null, array $formats=[]) : array
     {
@@ -328,8 +328,6 @@ class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
      * @param array $formats (optional)
      *
      * @return array
-     *
-     * @throws ReflectionException
      */
     protected function performValidation(array $input, Validation $validation, $ormObject=null, array $formats=[]) : array
     {
@@ -361,7 +359,6 @@ class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
      * @param object|null $ormObject (optional)
      * @param array $formats (optional)
      *
-     * @throws ReflectionException
      */
     protected function validateByOwnMethods(Validation $validation, array $input, array $ownRules, $ormObject=null, array $formats=[])
     {
@@ -375,11 +372,14 @@ class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
             ];
 
             foreach ($keyRules as $ruleName=>$parameters) {
-                if ($this->validateByOwnMethod($ruleName, $vars, $parameters)) {
-                    continue;
+                try {
+                    if ($this->validateByOwnMethod($ruleName, $vars, $parameters)) {
+                        continue;
+                    }
+                    $validation->addFailure($key, $ruleName, $parameters);
+                } catch (ReflectionException $e) {
+                    $validation->addFailure($key, 'internal', ["Custom validation of rule $ruleName failed with an exception"]);
                 }
-
-                $validation->addFailure($key, $ruleName, $parameters);
             }
         }
     }

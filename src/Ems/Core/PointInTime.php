@@ -240,7 +240,9 @@ class PointInTime extends DateTime implements TemporalContract
     public static function createFromFormat($format, $string, $timezone = null)
     {
         $timezone = $timezone ?: new DateTimeZone(date_default_timezone_get());
-        $other = DateTime::createFromFormat($format, $string, $timezone);
+        if (!$other = DateTime::createFromFormat($format, $string, $timezone)) {
+            throw new InvalidArgumentException("Unable to parse date '$string' with format '$format'");
+        }
 
         return (new static())->setTimestamp($other->getTimestamp())
                            ->setTimezone($other->getTimezone());

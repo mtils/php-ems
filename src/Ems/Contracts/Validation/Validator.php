@@ -39,6 +39,11 @@ interface Validator
     const DECIMAL_SEPARATOR = 'decimal_separator';
 
     /**
+     * Decimal separator for validation method
+     */
+    const THOUSANDS_SEPARATOR = 'decimal_separator';
+
+    /**
      * An array of string names rules. Like in laravels validation. The rules
      * are used to map the validator to other validators like a javascript
      * validator.

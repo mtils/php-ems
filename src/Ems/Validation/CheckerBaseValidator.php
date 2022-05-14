@@ -9,10 +9,12 @@ use Ems\Contracts\Core\Checker;
 use Ems\Contracts\Expression\Constraint;
 use Ems\Contracts\Expression\ConstraintGroup;
 use Ems\Contracts\Validation\Validation;
+use Ems\Contracts\Validation\Validator as ValidatorContract;
 use Ems\Core\Iterators\JsonPathIterator;
 use RuntimeException;
 
 use function array_key_exists;
+use function call_user_func;
 use function in_array;
 use function iterator_to_array;
 use function strpos;
@@ -29,9 +31,15 @@ class CheckerBaseValidator
      */
     protected $required_rules = ['required', 'required_if', 'required_unless'];
 
-    public function __construct(Checker $checker)
+    /**
+     * @var callable
+     */
+    private $caster;
+
+    public function __construct(Checker $checker, callable $caster=null)
     {
         $this->checker = $checker;
+        $this->caster = $caster ?: new Caster();
     }
 
     /**
@@ -59,16 +67,18 @@ class CheckerBaseValidator
             }
 
             foreach ($values as $path=>$value) {
+                $isValid = true;
                 foreach ($rule as $name=>$args) {
                     if (in_array($name, $this->required_rules)) {
                         continue;
                     }
                     if (!$this->check($value, [$name=>$args], $ormObject, $formats)) {
+                        $isValid = false;
                         $validation->addFailure($path, $name, $args);
                     }
                 }
                 if (array_key_exists($key, $input)) {
-                    $validated[$key] = $this->cast($value, $rule, $ormObject, $formats);
+                    $validated[$key] = $isValid ? $this->cast($value, $rule, $ormObject, $formats) : $value;
                 }
             }
 
@@ -105,7 +115,7 @@ class CheckerBaseValidator
      */
     public function cast($value, $rule, $ormObject=null, array $formats=[])
     {
-        return $value;
+        return call_user_func($this->caster, $value, $rule, $ormObject, $formats);
     }
 
     /**
@@ -122,6 +132,9 @@ class CheckerBaseValidator
     {
         if (!$this->checker) {
             $this->checker = new \Ems\Core\Checker();
+        }
+        if (isset($rule['date']) && isset($formats[ValidatorContract::DATE_FORMAT])) {
+            $rule['date'] = [$formats[ValidatorContract::DATE_FORMAT]];
         }
         return $this->checker->check($value, $rule, $ormObject);
     }
