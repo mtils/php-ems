@@ -563,7 +563,7 @@ class Checker implements CheckerContract
      * @param string $format
      * @return bool
      */
-    public function checkDateTime($value, string $format='') : bool
+    public function checkDatetime($value, string $format='') : bool
     {
         if ($value instanceof PointInTimeContract) {
             return $value->isValid() && in_array($value->precision(), [PointInTimeContract::HOUR, PointInTimeContract::MINUTE, PointInTimeContract::SECOND]);
@@ -576,14 +576,19 @@ class Checker implements CheckerContract
         }
         $dateString = (string)$value;
         // No time passed
-        if (!$format && !strpos($dateString, ':')) {
-            return false;
+        if (!$format) {
+            return strpos($dateString, ':') && $this->checkDate($dateString);
         }
+
+        $timeFormatCharFound = false;
         // all time format chars
         foreach (['a','A','B','g','G','h','H','i','s','u','v','c','r','U'] as $char) {
             if (strpos($format, $char)) {
-                return true;
+                $timeFormatCharFound = true;
             }
+        }
+        if (!$timeFormatCharFound) {
+            return false;
         }
         return $this->checkDate($value, $format);
     }

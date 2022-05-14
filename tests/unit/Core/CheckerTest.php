@@ -418,32 +418,32 @@ class CheckerTest extends TestCase
     {
         $checker = $this->newChecker();
 
-        $this->assertTrue($checker->checkDateTime(new PointInTime()));
-        $this->assertFalse($checker->checkDateTime(new PointInTime(new None())));
+        $this->assertTrue($checker->checkDatetime(new PointInTime()));
+        $this->assertFalse($checker->checkDatetime(new PointInTime(new None())));
         $time = new PointInTime();
         $time->precision = \Ems\Contracts\Core\PointInTime::DAY;
-        $this->assertFalse($checker->checkDateTime($time));
+        $this->assertFalse($checker->checkDatetime($time));
         $time->precision = \Ems\Contracts\Core\PointInTime::HOUR;
-        $this->assertTrue($checker->checkDateTime($time));
+        $this->assertTrue($checker->checkDatetime($time));
 
-        $this->assertFalse($checker->checkDateTime('2021-01-31'));
-        $this->assertTrue($checker->checkDateTime('2021-01-31 08:00'));
+        $this->assertFalse($checker->checkDatetime('2021-01-31'));
+        $this->assertTrue($checker->checkDatetime('2021-01-31 08:00'));
 
-        $this->assertFalse($checker->checkDateTime('2021-01-31 09 21'));
-        $this->assertTrue($checker->checkDateTime('2021-01-31 09 21', 'Y-m-d H i'));
-        $this->assertFalse($checker->checkDateTime('2021-01-31 09 21', 'Y-m-d'));
+        $this->assertFalse($checker->checkDatetime('2021-01-31 09 21'));
+        $this->assertTrue($checker->checkDatetime('2021-01-31 09 21', 'Y-m-d H i'));
+        $this->assertFalse($checker->checkDatetime('2021-01-31 09 21', 'Y-m-d'));
     }
 
     public function test_checkTime()
     {
         $checker = $this->newChecker();
-        $this->assertTrue($checker->checkDateTime(new PointInTime()));
-        $this->assertFalse($checker->checkDateTime(new PointInTime(new None())));
+        $this->assertTrue($checker->checkDatetime(new PointInTime()));
+        $this->assertFalse($checker->checkDatetime(new PointInTime(new None())));
         $time = new PointInTime();
         $time->precision = \Ems\Contracts\Core\PointInTime::DAY;
-        $this->assertFalse($checker->checkDateTime($time));
+        $this->assertFalse($checker->checkDatetime($time));
         $time->precision = \Ems\Contracts\Core\PointInTime::HOUR;
-        $this->assertTrue($checker->checkDateTime($time));
+        $this->assertTrue($checker->checkDatetime($time));
 
         $this->assertTrue($checker->checkTime(new DateTime()));
 
