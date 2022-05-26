@@ -441,6 +441,9 @@ class Helper
         ob_start();
         var_dump($variable);
         $output = ob_get_clean();
+        if (strpos($output, __FILE__) === false) {
+            return $output;
+        }
         $withoutFile = mb_substr($output, mb_strlen(__FILE__)+1);
         return trim(mb_substr($withoutFile, mb_strpos($withoutFile, ':')+1));
     }
