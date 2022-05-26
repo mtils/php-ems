@@ -442,7 +442,7 @@ class Helper
         var_dump($variable);
         $output = ob_get_clean();
         if (strpos($output, __FILE__) === false) {
-            return $output;
+            return trim($output);
         }
         $withoutFile = mb_substr($output, mb_strlen(__FILE__)+1);
         return trim(mb_substr($withoutFile, mb_strpos($withoutFile, ':')+1));
@@ -489,14 +489,21 @@ class Helper
         return $array;
     }
 
+    /**
+     * @param array           $array
+     * @param string|string[] $key
+     * @param mixed           $value
+     * @return void
+     */
     public static function offsetSet(array &$array, $key, $value)
     {
 
         if (is_null($key)) {
-            return $array = $value;
+            $array = $value;
+            return;
         }
 
-        $segments = explode('.', $key);
+        $segments = is_array($key) ? $key : explode('.', $key);
 
         while (count($segments) > 1) {
             $key = array_shift($segments);
@@ -510,7 +517,6 @@ class Helper
 
         $array[array_shift($segments)] = $value;
 
-        return $array;
     }
 
     public static function offsetUnset(array &$array, $key)
