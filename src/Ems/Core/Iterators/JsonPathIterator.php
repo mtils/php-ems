@@ -119,9 +119,7 @@ class JsonPathIterator implements Iterator
             return true;
         }
 
-        $path = $this->key();
-
-        if (!call_user_func($this->matcher, $path, $this->splitPath($path), $this->current())) {
+        if (!call_user_func($this->matcher, $this->key(), $this)) {
             $this->next();
             return $this->valid();
         }
@@ -353,7 +351,7 @@ class JsonPathIterator implements Iterator
         }
 
         if (!$this->isComplexExpression($expression)) {
-            return function (string $path, array $pathStack, $value) use ($expression) {
+            return function (string $path) use ($expression) {
                 return $path == $expression;
             };
         }
@@ -362,11 +360,13 @@ class JsonPathIterator implements Iterator
 
         $parsedExpression = $this->splitPath($expression);
 
-        return function (string $path, array $pathStack, $value) use ($expression, $parsedExpression) {
+        return function (string $path) use ($expression, $parsedExpression) {
 
             if ($expression == $path) {
                 return true;
             }
+
+            $pathStack = $this->splitPath($path);
 
             if (count($parsedExpression) != count($pathStack)) {
                 return false;
@@ -408,7 +408,6 @@ class JsonPathIterator implements Iterator
                     return false;
                 }
 
-                echo "\n$criterion matches " . $pathStack[$i];
             }
 
             return true;
