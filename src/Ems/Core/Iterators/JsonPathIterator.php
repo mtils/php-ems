@@ -276,7 +276,7 @@ class JsonPathIterator implements Iterator
      * Split a json path into its segments
      *
      * @param string $expression
-     * @return array
+     * @return string[]
      */
     public function splitPath(string $expression) : array
     {

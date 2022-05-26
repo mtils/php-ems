@@ -1151,11 +1151,7 @@ class ValidatorTest extends TestCase
             'registered'    => '08-03-2010'
         ];
         $validator = $this->make($rules);
-        try {
-            $casted = $validator->validate($input);
-        } catch (ValidationException $e) {
-            print_r($e->failures());
-        }
+        $casted = $validator->validate($input);
 
         $this->assertInstanceOf(DateTime::class, $casted['created']);
         $this->assertEquals($input['created'], $casted['created']->format('YmdHis'));
@@ -1168,7 +1164,115 @@ class ValidatorTest extends TestCase
         $this->assertEquals($input['registered'], $casted['registered']->format('m-d-Y'));
     }
 
-    protected function make(array $rules=[], string $ormClass='', callable $baseValidator=null)
+    public function test_cast_nested_arrays()
+    {
+        $rules = [
+            'login'             => 'required|alpha-dash',
+            'email'             => 'required|email',
+            'password'          => 'required|min:6|max:12',
+            'age'               => 'int',
+            'subscribe'         => 'required|bool',
+            'birthday'          => 'date',
+            'address'           => 'required|array',
+            'address.zip'       => 'required|int|min:4',
+            'address.street'    => 'required|min:6',
+            'address.house_no'  => 'max:4',
+            'address.city'      => 'string',
+            'address.moved_into'=> 'before:2022-05-15'
+        ];
+
+        $input = [
+            'login'             => 'michael',
+            'email'             => 'michael@ems.org',
+            'password'          => 'secretly1654',
+            'age'               => '45',
+            'subscribe'         => '1',
+            'birthday'          => '1976-05-31',
+            'address'           => [
+                'zip'       => '12345',
+                'street'    => 'Elm Street',
+                'house_no'  => '77A',
+                'city'      => 'California',
+                'moved_into'    => '2022-01-14 10:23:16'
+            ]
+        ];
+
+        $validator = $this->make($rules);
+
+
+        $casted = $validator->validate($input);
+        $this->assertSame((int)$input['age'], $casted['age']);
+        $this->assertSame((bool)$input['subscribe'], $casted['subscribe']);
+        $this->assertInstanceOf(DateTime::class, $casted['birthday']);
+        $this->assertEquals($input['birthday'], $casted['birthday']->format('Y-m-d'));
+
+        $this->assertSame((int)$input['address']['zip'], $casted['address']['zip']);
+        $this->assertInstanceOf(DateTime::class, $casted['address']['moved_into']);
+        $this->assertEquals($input['address']['moved_into'], $casted['address']['moved_into']->format('Y-m-d H:i:s'));
+
+    }
+
+    public function test_cast_indexed_arrays()
+    {
+        $rules = [
+            'login'             => 'required|alpha-dash',
+            'email'             => 'required|email',
+            'password'          => 'required|min:6|max:12',
+            'age'               => 'int',
+            'subscribe'         => 'required|bool',
+            'birthday'          => 'date',
+            'addresses'         => 'required|array',
+            'addresses[*].zip'       => 'required|int|min:4',
+            'addresses[*].street'    => 'required|min:6',
+            'addresses[*].house_no'  => 'max:4',
+            'addresses[*].city'      => 'string',
+            'addresses[*].moved_into'=> 'before:2022-05-15'
+        ];
+
+        $input = [
+            'login'             => 'michael',
+            'email'             => 'michael@ems.org',
+            'password'          => 'secretly1654',
+            'age'               => '45',
+            'subscribe'         => '1',
+            'birthday'          => '1976-05-31',
+            'addresses'         => [
+                [
+                    'zip'       => '12345',
+                    'street'    => 'Elm Street',
+                    'house_no'  => '77A',
+                    'city'      => 'California',
+                    'moved_into'    => '2022-01-14 10:23:16'
+                ],
+                [
+                    'zip'       => '6789',
+                    'street'    => 'Wall Street',
+                    'house_no'  => '66B',
+                    'city'      => 'Ettlingen',
+                    'moved_into'    => '2007-02-08 09:18:22'
+                ]
+            ]
+        ];
+
+        $validator = $this->make($rules);
+
+
+        $casted = $validator->validate($input);
+
+        $this->assertSame((int)$input['age'], $casted['age']);
+        $this->assertSame((bool)$input['subscribe'], $casted['subscribe']);
+        $this->assertInstanceOf(DateTime::class, $casted['birthday']);
+        $this->assertEquals($input['birthday'], $casted['birthday']->format('Y-m-d'));
+
+        $this->assertSame((int)$input['addresses'][0]['zip'], $casted['addresses'][0]['zip']);
+        $this->assertSame((int)$input['addresses'][1]['zip'], $casted['addresses'][1]['zip']);
+
+        $this->assertEquals($input['addresses'][0]['moved_into'], $casted['addresses'][0]['moved_into']->format('Y-m-d H:i:s'));
+        $this->assertEquals($input['addresses'][1]['moved_into'], $casted['addresses'][1]['moved_into']->format('Y-m-d H:i:s'));
+
+    }
+
+    protected function make(array $rules=[], string $ormClass='', callable $baseValidator=null) : Validator
     {
         return new Validator($rules, $ormClass, $baseValidator);
     }
@@ -1176,6 +1280,8 @@ class ValidatorTest extends TestCase
     /**
      * @param array $input
      * @param array $rules
+     * @param null $ormObject
+     * @param array $formats
      * @return void
      */
     protected function assertPasses(array $input, array $rules, $ormObject=null, array $formats=[])

@@ -10,14 +10,15 @@ use Ems\Contracts\Expression\Constraint;
 use Ems\Contracts\Expression\ConstraintGroup;
 use Ems\Contracts\Validation\Validation;
 use Ems\Contracts\Validation\Validator as ValidatorContract;
+use Ems\Core\Helper;
 use Ems\Core\Iterators\JsonPathIterator;
 use RuntimeException;
 
-use function array_key_exists;
 use function call_user_func;
 use function in_array;
 use function iterator_to_array;
 use function strpos;
+use function substr;
 
 class CheckerBaseValidator
 {
@@ -36,10 +37,16 @@ class CheckerBaseValidator
      */
     private $caster;
 
+    /**
+     * @var JsonPathIterator
+     */
+    private $jsonPathSplitter;
+
     public function __construct(Checker $checker, callable $caster=null)
     {
         $this->checker = $checker;
         $this->caster = $caster ?: new Caster();
+        $this->jsonPathSplitter = new JsonPathIterator();
     }
 
     /**
@@ -77,9 +84,10 @@ class CheckerBaseValidator
                         $validation->addFailure($path, $name, $args);
                     }
                 }
-                if (array_key_exists($key, $input)) {
-                    $validated[$key] = $isValid ? $this->cast($value, $rule, $ormObject, $formats) : $value;
-                }
+
+                $casted = $isValid ? $this->cast($value, $rule, $ormObject, $formats) : $value;
+
+                Helper::offsetSet($validated, $this->splitPath($path), $casted);
             }
 
         }
@@ -172,6 +180,10 @@ class CheckerBaseValidator
      */
     protected function checkRequiredRules(array $rule, array $input, string $key, Validation $validation, array $extracted=[]) : bool
     {
+        if ($extracted && $extracted !== [$key=>null]) {
+            return true;
+        }
+
         // Check required before others to skip rest if missing
         if (isset($rule['required']) && !$this->checkRequired($input, $key)) {
             $validation->addFailure($key, 'required', []);
@@ -188,10 +200,8 @@ class CheckerBaseValidator
             return false;
         }
 
-        $hasValue = $extracted && $extracted !== [$key=>null];
-
         // Check if not required other rules are ignored
-        if (!isset($rule['required']) && !$this->checkRequired($input, $key) && !$hasValue) {
+        if (!isset($rule['required']) && !$this->checkRequired($input, $key)) {
             return false;
         }
 
@@ -265,6 +275,45 @@ class CheckerBaseValidator
      */
     protected function isSelector(string $key) : bool
     {
-        return  (bool)strpos($key,'*');
+        return strpos($key,'*') || strpos($key,'.');
+    }
+
+    /**
+     * Check if this is a json path selector for indexed arrays. ([0] or [*] or so)
+     *
+     * @param string $path
+     * @return bool
+     */
+    protected function isIndexedPath(string $path) : bool
+    {
+        return strpos($path, '[') !== false;
+    }
+
+    /**
+     * @param string $path
+     *
+     * @return string[]
+     */
+    protected function splitPath(string $path) : array
+    {
+        if (!$this->isIndexedPath($path)) {
+            return explode('.', $path);
+        }
+        if (!$this->jsonPathSplitter) {
+            $this->jsonPathSplitter = new JsonPathIterator();
+        }
+
+        $segments = [];
+
+        foreach($this->jsonPathSplitter->splitPath($path) as $segment) {
+            if (strpos($segment, '[') !== 0) {
+                $segments[] = $segment;
+                continue;
+            }
+            $segments[] = (int)substr($segment, 1, -1);
+        }
+
+        return $segments;
+
     }
 }

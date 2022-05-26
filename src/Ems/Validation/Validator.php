@@ -136,7 +136,7 @@ class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
         $this->callAfterListeners('validate', [$input, $rules, $ormObject, $validation, $formats]);
 
         if (count($validation)) {
-            throw $validation;
+            throw ($validation->wasManipulated() ? $validation->copy() : $validation);
         }
 
         return $validated;

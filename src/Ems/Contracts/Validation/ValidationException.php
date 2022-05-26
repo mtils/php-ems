@@ -12,6 +12,8 @@ use JsonSerializable;
 use RuntimeException;
 use Throwable;
 
+use function implode;
+
 class ValidationException extends RuntimeException implements Validation, JsonSerializable
 {
     /**
@@ -29,13 +31,30 @@ class ValidationException extends RuntimeException implements Validation, JsonSe
      **/
     protected $validatorClass = '';
 
+    /**
+     * @var bool
+     */
+    protected $failuresInConstruct = false;
+
+    /**
+     * @var bool
+     */
+    protected $wasManipulated = false;
+
+    /**
+     * @var string
+     */
+    protected $originalMessage = '';
+
     public function __construct(array $failures = [], array $rules = [], string $validatorClass = null,
-                                string $message='Validation errors occurred', int $code=4220, Throwable $previous=null)
+                                string $message='', int $code=4220, Throwable $previous=null)
     {
-        parent::__construct($message, $code, $previous);
+        parent::__construct($this->generateMessage($message, $failures), $code, $previous);
+        $this->originalMessage = $message;
         $this->failures = $failures;
+        $this->failuresInConstruct = (bool)$failures;
         $this->rules = $rules;
-        $this->validatorClass = $validatorClass;
+        $this->validatorClass = $validatorClass ?: '';
     }
 
     /**
@@ -54,7 +73,7 @@ class ValidationException extends RuntimeException implements Validation, JsonSe
         }
 
         $this->failures[$key][$ruleName] = $parameters;
-
+        $this->wasManipulated = true;
         return $this;
     }
 
@@ -107,7 +126,7 @@ class ValidationException extends RuntimeException implements Validation, JsonSe
     public function setRules(array $rules) : ValidationException
     {
         $this->rules = $rules;
-
+        $this->wasManipulated = true;
         return $this;
     }
 
@@ -129,7 +148,7 @@ class ValidationException extends RuntimeException implements Validation, JsonSe
     public function setValidatorClass(string $validatorClass) : ValidationException
     {
         $this->validatorClass = $validatorClass;
-
+        $this->wasManipulated = true;
         return $this;
     }
 
@@ -163,7 +182,7 @@ class ValidationException extends RuntimeException implements Validation, JsonSe
         if (isset($data['validator_class'])) {
             $this->setValidatorClass($data['validator_class']);
         }
-
+        $this->wasManipulated = true;
         return $this;
     }
 
@@ -205,6 +224,7 @@ class ValidationException extends RuntimeException implements Validation, JsonSe
      **/
     public function offsetUnset($key)
     {
+        $this->wasManipulated = true;
         unset($this->failures[$key]);
     }
 
@@ -217,7 +237,7 @@ class ValidationException extends RuntimeException implements Validation, JsonSe
     }
 
     /**
-     * Count returns the amount of failures, not keys. So dont use
+     * Count returns the amount of failures, not keys. So don't use
      * it in loops using indexes/numbers with count.
      *
      * @return int
@@ -233,5 +253,63 @@ class ValidationException extends RuntimeException implements Validation, JsonSe
         }
 
         return $count;
+    }
+
+    /**
+     * @return Validation
+     */
+    public function copy() : Validation
+    {
+        return new static(
+            $this->failures(),
+            $this->rules(),
+            $this->validatorClass(),
+            $this->originalMessage,
+            $this->getCode(),
+            $this->getPrevious()
+        );
+    }
+
+    /**
+     * Return true if the exception was manipulated after instantiation (add
+     * failures, rules etc).
+     * This is needed due to some limitation in php exception in all final
+     * base methods.
+     *
+     * @return bool
+     */
+    public function wasManipulated() : bool
+    {
+        return $this->wasManipulated;
+    }
+
+    /**
+     * Parse a readable message by the
+     * @param string $message
+     * @param array $failures
+     * @return string
+     */
+    protected function generateMessage(string $message, array $failures=[]) : string
+    {
+        if (!$failures) {
+            return $message ?: 'Validation errors occurred.';
+        }
+        $message = $message ?: 'Validation errors: ';
+        $formatted = [];
+        foreach ($failures as $key=>$rules) {
+
+            $ruleLine = [];
+            foreach ($rules as $constraint=>$params) {
+                $rLine = $constraint;
+                $paramString = '';
+                if ($params) {
+                    $paramString = ':' . implode(',', $params);
+                }
+                $ruleLine[] = "$rLine$paramString";
+            }
+            $line = "$key=>" . implode('|', $ruleLine);
+            $formatted[] = $line;
+        }
+        return $message . ' ' . implode(" ", $formatted);
     }
 }
