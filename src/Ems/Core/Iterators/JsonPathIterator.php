@@ -12,12 +12,14 @@ use RecursiveArrayIterator;
 
 use function array_pop;
 use function call_user_func;
+use function dd;
 use function explode;
 use function implode;
 use function in_array;
 use function is_int;
 use function str_split;
 use function strpos;
+use function var_export;
 
 /*
  *
@@ -94,7 +96,7 @@ class JsonPathIterator implements Iterator
     {
         if ($this->stackPosition != $this->maxPosition) {
             $this->stackPosition += 1;
-            $this->addToSelector($this->stack[$this->stackPosition]['key']);
+            $this->selectorStack[] = $this->formatSegment($this->stack[$this->stackPosition]['key'], $this->stackPosition);
         }
 
         if (!$iterator = $this->sourceIterator()) {
@@ -117,13 +119,9 @@ class JsonPathIterator implements Iterator
             return true;
         }
 
-        $current = $this->current();
         $path = $this->key();
-        $pathSplit = $this->splitPath($path);
 
-
-
-        if (!call_user_func($this->matcher, $path, $pathSplit, $current)) {
+        if (!call_user_func($this->matcher, $path, $this->splitPath($path), $this->current())) {
             $this->next();
             return $this->valid();
         }
@@ -155,7 +153,7 @@ class JsonPathIterator implements Iterator
 
         $stack = $this->selectorStack;
 
-        $stack[] = $this->formatSegment($iterator->key());
+        $stack[] = $this->formatSegment($iterator->key(), $this->stackPosition+1);
 
         $selector = implode($stack);
         if (!$this->keyPrefix) {
@@ -328,26 +326,18 @@ class JsonPathIterator implements Iterator
     }
 
     /**
-     * @param int|string $key
-     * @return void
-     */
-    protected function addToSelector($key)
-    {
-        $this->selectorStack[] = $this->formatSegment($key);
-    }
-
-    /**
      * Add a dot or brackets around a key to make it a segment.
      *
      * @param int|string $key
+     * @param int        $stackPosition
      * @return string
      */
-    protected function formatSegment($key) : string
+    protected function formatSegment($key, int $stackPosition) : string
     {
         if (is_int($key)) {
             return "[$key]";
         }
-        if (!$this->rootIsList && $this->stackPosition < 2) {
+        if (!$this->rootIsList && $stackPosition < 2) {
             return $key;
         }
         return ".$key";

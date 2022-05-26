@@ -56,6 +56,31 @@ class JsonPathIteratorTest extends TestCase
     /**
      * @test
      */
+    public function it_iterates_simple_nested_array()
+    {
+        $input = [
+            'login'             => 'michael',
+            'email'             => 'michael@ems.org',
+            'password'          => 'secretly1654',
+            'age'               => '45',
+            'subscribe'         => '1',
+            'birthday'          => '1976-05-31',
+            'address'           => [
+                'zip'       => '12345',
+                'street'    => 'Elm Street',
+                'house_no'  => '77A',
+                'city'      => 'California',
+                'moved_into'    => '2022-01-14 10:23:16'
+            ]
+        ];
+
+        $this->assertResultIs(['login'=>$input['login']], $input, 'login','');
+        $this->assertResultIs(['address.street'=>$input['address']['street']], $input, 'address.street','');
+    }
+
+    /**
+     * @test
+     */
     public function it_iterates_deeper_array()
     {
         $source = [
@@ -521,6 +546,11 @@ class JsonPathIteratorTest extends TestCase
         $iterator = $this->make([], $expression);
         $pathSplit = $iterator->splitPath($path);
         return $iterator->getMatcher()($path, $pathSplit, $value);
+    }
+
+    protected function toArray(array $source, string $selector) : array
+    {
+        return iterator_to_array($this->make($source, $selector));
     }
 
     protected function make(array $source=[], string $selector='') : JsonPathIterator
