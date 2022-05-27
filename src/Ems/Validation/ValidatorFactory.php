@@ -9,6 +9,7 @@ use Ems\Contracts\Core\Subscribable;
 use Ems\Contracts\Core\SupportsCustomFactory;
 use Ems\Contracts\Validation\Validator;
 use Ems\Contracts\Validation\ValidatorFactory as ValidatorFactoryContract;
+use Ems\Core\Checker;
 use Ems\Core\Exceptions\UnsupportedParameterException;
 use Ems\Core\Patterns\SubscribableTrait;
 use Ems\Core\Support\CustomFactorySupport;
@@ -20,10 +21,13 @@ use function get_class;
 use function is_callable;
 use function is_object;
 use function is_string;
+use function spl_object_hash;
 
 class ValidatorFactory implements ValidatorFactoryContract, SupportsCustomFactory, Subscribable
 {
-    use CustomFactorySupport;
+    use CustomFactorySupport {
+        createWithoutFactory as traitCreateWithoutFactory;
+    }
     use SubscribableTrait {
         on as traitOn;
     }
@@ -37,6 +41,11 @@ class ValidatorFactory implements ValidatorFactoryContract, SupportsCustomFactor
      * @var callable
      */
     protected $createFactory;
+
+    /**
+     * @var Validator|null
+     */
+    protected $lastPublishedValidator;
 
     public function __construct(callable $factory = null)
     {
@@ -60,7 +69,7 @@ class ValidatorFactory implements ValidatorFactoryContract, SupportsCustomFactor
             return $factory($rules, $ormClass);
         }
         $validator = $factory($rules, $ormClass);
-        $this->callOnListeners($ormClass, [$validator]);
+        $this->publish($ormClass, $validator);
         return $validator;
     }
 
@@ -74,7 +83,7 @@ class ValidatorFactory implements ValidatorFactoryContract, SupportsCustomFactor
     public function get(string $ormClass): Validator
     {
         $validator = $this->validator($ormClass);
-        $this->callOnListeners($ormClass, [$validator]);
+        $this->publish($ormClass, $validator);
         return $validator;
     }
 
@@ -156,8 +165,19 @@ class ValidatorFactory implements ValidatorFactoryContract, SupportsCustomFactor
      */
     public function forwardValidatorEvent(Validator $validator)
     {
-        if ($ormClass = $validator->ormClass()) {
-            $this->callOnListeners($ormClass, [$validator]);
+
+        if (!$ormClass = $validator->ormClass()) {
+            return;
+        }
+        $this->publish($ormClass, $validator);
+        return;
+        if (!$this->lastPublishedValidator) {
+            $this->publish($ormClass, $validator);
+            return;
+        }
+
+        if (spl_object_hash($validator) != spl_object_hash($this->lastPublishedValidator)) {
+            $this->publish($ormClass, $validator);
         }
     }
 
@@ -171,7 +191,8 @@ class ValidatorFactory implements ValidatorFactoryContract, SupportsCustomFactor
         return function (array $rules, string $ormClass='') {
             return $this->createObject(ValidatorObject::class, [
                 'rules'     => $rules,
-                'ormClass'  => $ormClass
+                'ormClass'  => $ormClass,
+                $this->createObject(CheckerBaseValidator::class)
             ]);
         };
     }
@@ -236,4 +257,50 @@ class ValidatorFactory implements ValidatorFactoryContract, SupportsCustomFactor
         // Accept everything
     }
 
+    /**
+     * Overwritten in case of missing factory.
+     *
+     * @param string $abstract
+     * @param array $parameters
+     * @return CheckerBaseValidator|object
+     * @throws ReflectionException
+     */
+    protected function createWithoutFactory($abstract, array $parameters = [])
+    {
+        if ($abstract === CheckerBaseValidator::class) {
+            return new CheckerBaseValidator($this->createObject(Checker::class));
+        }
+        return $this->traitCreateWithoutFactory($abstract, $parameters);
+    }
+
+    /**
+     * Publish the validator by subscribable trait.
+     *
+     * @param string $ormClass
+     * @param Validator $validator
+     * @return void
+     */
+    protected function publish(string $ormClass, Validator $validator)
+    {
+        if ($this->isLastPublishedValidator($validator)) {
+            return;
+        }
+        $this->lastPublishedValidator = $validator;
+        $this->callOnListeners($ormClass, [$validator]);
+    }
+
+    /**
+     * Check if the passed validator is the last published. This is needed to
+     * avoid double events for validators.
+     *
+     * @param Validator $validator
+     * @return bool
+     */
+    protected function isLastPublishedValidator(Validator $validator) : bool
+    {
+        if (!$this->lastPublishedValidator) {
+            return false;
+        }
+        return spl_object_hash($validator) == spl_object_hash($this->lastPublishedValidator);
+    }
 }

@@ -79,7 +79,7 @@ class Validator implements ValidatorContract, HasInjectMethods, HasMethodHooks
             $this->rules = $rules;
         }
         $this->ormClass = $ormClass;
-        $this->baseValidator = $baseValidator;
+        $this->baseValidator = $baseValidator ?: new CheckerBaseValidator(new Checker());
     }
 
     /**
