@@ -153,12 +153,15 @@ class IOCContainer implements ContainerContract
             return $concrete;
         }
 
+        $namedParamsFound = false;
+
         foreach ($constructorParams as $i=>$param) {
 
             $name = $param->getName();
 
             if (isset($parameters[$name])) {
                 $callParams[] = $parameters[$name];
+                $namedParamsFound = true;
                 continue;
             }
 
@@ -178,9 +181,12 @@ class IOCContainer implements ContainerContract
             }
         }
 
-        foreach ($parameters as $key => $value) {
-            $callParams[] = $value;
+        if(!$namedParamsFound) {
+            foreach ($parameters as $key => $value) {
+                $callParams[] = $value;
+            }
         }
+
 
         $object = self::$reflectionClasses[$implementation]->newInstanceArgs($callParams);
 
