@@ -28,6 +28,7 @@ interface ValidatorFactory
      * @param string $ormClass
      *
      * @return Validator
+     * @throws ValidatorFabricationException
      */
     public function get(string $ormClass) : Validator;
 

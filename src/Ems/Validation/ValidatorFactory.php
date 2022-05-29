@@ -4,17 +4,16 @@ namespace Ems\Validation;
 
 use Closure;
 use Ems\Contracts\Core\Containers\ByTypeContainer;
-use Ems\Contracts\Core\Exceptions\TypeException;
 use Ems\Contracts\Core\Subscribable;
 use Ems\Contracts\Core\SupportsCustomFactory;
 use Ems\Contracts\Validation\Validator;
+use Ems\Contracts\Validation\ValidatorFabricationException;
 use Ems\Contracts\Validation\ValidatorFactory as ValidatorFactoryContract;
 use Ems\Core\Checker;
 use Ems\Core\Exceptions\UnsupportedParameterException;
 use Ems\Core\Patterns\SubscribableTrait;
 use Ems\Core\Support\CustomFactorySupport;
 use Ems\Validation\Validator as ValidatorObject;
-use OutOfBoundsException;
 use ReflectionException;
 
 use function get_class;
@@ -78,7 +77,7 @@ class ValidatorFactory implements ValidatorFactoryContract, SupportsCustomFactor
      *
      * @param string $ormClass
      * @return Validator
-     * @throws ReflectionException
+     * @throws ValidatorFabricationException
      */
     public function get(string $ormClass): Validator
     {
@@ -170,15 +169,6 @@ class ValidatorFactory implements ValidatorFactoryContract, SupportsCustomFactor
             return;
         }
         $this->publish($ormClass, $validator);
-        return;
-        if (!$this->lastPublishedValidator) {
-            $this->publish($ormClass, $validator);
-            return;
-        }
-
-        if (spl_object_hash($validator) != spl_object_hash($this->lastPublishedValidator)) {
-            $this->publish($ormClass, $validator);
-        }
     }
 
     /**
@@ -200,27 +190,41 @@ class ValidatorFactory implements ValidatorFactoryContract, SupportsCustomFactor
     /**
      * @param string $ormClass
      * @return Validator
-     * @throws ReflectionException
      */
     protected function validator(string $ormClass) : Validator
     {
         if (!$factoryOrClass = $this->factories->forInstanceOf($ormClass)) {
-            throw new OutOfBoundsException("No handler registered for class '$ormClass'");
+            throw new ValidatorFabricationException("No handler registered for class '$ormClass'", ValidatorFabricationException::NO_FACTORY_FOR_ORM_CLASS);
         }
 
-        $validator = is_callable($factoryOrClass) ? $factoryOrClass($ormClass) : $this->createObject($factoryOrClass);
+        try {
+            $validator = is_callable($factoryOrClass) ? $factoryOrClass($ormClass) : $this->createObject($factoryOrClass);
+        } catch (ReflectionException $e) {
+            throw new ValidatorFabricationException(
+                "ReflectionException while trying to create validator for '$ormClass'",
+                ValidatorFabricationException::UNRESOLVABLE_BY_FACTORY,
+                $e
+            );
+        }
+
 
         if ($validator instanceof Validator) {
             return $validator;
         }
 
         if (is_string($factoryOrClass)) {
-            throw new TypeException("The registered class or binding $factoryOrClass must implement " . Validator::class);
+            throw new ValidatorFabricationException(
+                "The registered class or binding $factoryOrClass must implement " . Validator::class,
+                ValidatorFabricationException::WRONG_TYPE_REGISTERED
+            );
         }
 
         $type = is_object($factoryOrClass) ? get_class($factoryOrClass) : 'callable';
 
-        throw new TypeException("The registered factory of type '$type' did not return a " . Validator::class);
+        throw new ValidatorFabricationException(
+            "The registered factory of type '$type' did not return a " . Validator::class,
+            ValidatorFabricationException::FACTORY_RETURNED_WRONG_TYPE
+        );
 
     }
 
@@ -268,6 +272,7 @@ class ValidatorFactory implements ValidatorFactoryContract, SupportsCustomFactor
     protected function createWithoutFactory($abstract, array $parameters = [])
     {
         if ($abstract === CheckerBaseValidator::class) {
+            /** @noinspection PhpParamsInspection */
             return new CheckerBaseValidator($this->createObject(Checker::class));
         }
         return $this->traitCreateWithoutFactory($abstract, $parameters);

@@ -3,15 +3,14 @@
 
 namespace Ems\Validation;
 
-use Ems\Contracts\Core\Exceptions\TypeException;
 use Ems\Contracts\Core\Subscribable;
 use Ems\Contracts\Core\SupportsCustomFactory;
 use Ems\Contracts\Validation\Validation;
+use Ems\Contracts\Validation\ValidatorFabricationException;
 use Ems\Contracts\Validation\ValidatorFactory as ValidatorFactoryContract;
 use Ems\Core\Exceptions\UnsupportedParameterException;
 use Ems\Core\NamedObject;
 use Ems\Testing\LoggingCallable;
-use OutOfBoundsException;
 use stdClass;
 
 use function get_class;
@@ -138,10 +137,10 @@ class ValidatorFactoryTest extends \Ems\TestCase
     /**
      * @test
      */
-    public function get_without_handler_throws_OutOfBoundsException()
+    public function get_without_handler_throws_Exception()
     {
         $factory = $this->newFactory();
-        $this->expectException(OutOfBoundsException::class);
+        $this->expectException(ValidatorFabricationException::class);
         $factory->get(ValidatorFactoryTest_Address::class);
     }
 
@@ -156,7 +155,7 @@ class ValidatorFactoryTest extends \Ems\TestCase
             return new stdClass();
         });
 
-        $this->expectException(TypeException::class);
+        $this->expectException(ValidatorFabricationException::class);
         $factory->get(ValidatorFactoryTest_Address::class);
     }
 
@@ -169,7 +168,7 @@ class ValidatorFactoryTest extends \Ems\TestCase
 
         $factory->register(ValidatorFactoryTest_Address::class, stdClass::class);
 
-        $this->expectException(TypeException::class);
+        $this->expectException(ValidatorFabricationException::class);
         $factory->get(ValidatorFactoryTest_Address::class);
     }
 
