@@ -2,18 +2,25 @@
 
 namespace Ems\Validation\Illuminate;
 
+use Ems\Contracts\Core\Subscribable;
+use Ems\Contracts\Validation\Validator as ValidatorContract;
 use Ems\Contracts\Validation\ValidatorFactory as ValidationFactoryContract;
 use Ems\Skeleton\Application;
 use Ems\Testing\Eloquent\InMemoryConnection;
+use Ems\Testing\LoggingCallable;
 use Ems\Validation\Validator;
+use Ems\Validation\ValidatorFactory;
 use Ems\Validation\ValidatorFactory as EmsValidatorFactory;
 use Ems\XType\Eloquent\BaseModel;
 use Ems\XType\Eloquent\Category;
 use Ems\XType\Eloquent\User;
 use Ems\XType\Illuminate\XTypeProviderValidatorFactory;
+use Illuminate\Contracts\Container\Container;
 use Illuminate\Contracts\Translation\Translator as TranslatorContract;
 use Illuminate\Translation\ArrayLoader;
 use Illuminate\Translation\Translator;
+
+use function get_class;
 
 require_once realpath(__DIR__ . '/../../XType/Eloquent/test_models.php');
 
@@ -170,6 +177,137 @@ class ValidatorFactoryIntegrationTest extends \Ems\LaravelIntegrationTest
 
     }
 
+    public function test_create_validator_calls_listener()
+    {
+        $factory = $this->make();
+        $rules = ['login' => 'required|min:3|max:128'];
+        $ormClass = self::class;
+
+        if (!$factory instanceof Subscribable) {
+            $this->markTestSkipped("The tested class " . get_class($factory) . ' does implement ' . Subscribable::class);
+        }
+
+        $validatorListener = new LoggingCallable();
+        $factory->on($ormClass, $validatorListener);
+
+        $appListener = new LoggingCallable();
+        $this->laravel()->afterResolving(ValidatorContract::class, function (...$args) use ($appListener) {
+            $appListener(...$args);
+        });
+
+        $validator = $factory->create($rules, $ormClass);
+        $this->assertInstanceOf(ValidatorContract::class, $validator);
+
+        $this->assertCount(1, $validatorListener);
+        $this->assertSame($validator, $validatorListener->arg(0));
+
+        $this->assertCount(1, $appListener);
+        $this->assertSame($validator, $appListener->arg(0));
+
+    }
+
+    public function test_get_validator_calls_listener()
+    {
+        $ormClass = Category::class;
+
+        $factory = $this->make();
+        if (!$factory instanceof ValidatorFactory) {
+            $this->markTestSkipped("The tested class " . get_class($factory) . ' does implement ' . Validator::class);
+        }
+
+        $factory->register($ormClass, CategoryValidator::class);
+
+        $validatorListener = new LoggingCallable();
+        $factory->on($ormClass, $validatorListener);
+
+        $appListener = new LoggingCallable();
+        $this->laravel()->afterResolving(CategoryValidator::class, function (...$args) use ($appListener) {
+            $appListener(...$args);
+        });
+
+        $validator = $factory->get($ormClass);
+        $this->assertInstanceOf(CategoryValidator::class, $validator);
+
+        $this->assertCount(1, $validatorListener);
+        $this->assertSame($validator, $validatorListener->arg(0));
+
+        $this->assertCount(1, $appListener);
+        $this->assertSame($validator, $appListener->arg(0));
+    }
+
+    public function test_even_make_validator_by_container_calls_listener()
+    {
+        $rules = ['login' => 'required|min:3|max:128'];
+        $ormClass = self::class;
+
+        $parsed = [
+            'login' => [
+                'required'  => [],
+                'min'       => [3],
+                'max'       => [128]
+            ]
+        ];
+
+        $factory = $this->make();
+        if (!$factory instanceof Subscribable) {
+            $this->markTestSkipped("The tested class " . get_class($factory) . ' does implement ' . Subscribable::class);
+        }
+
+        $validatorListener = new LoggingCallable();
+        $factory->on($ormClass, $validatorListener);
+
+        $appListener = new LoggingCallable();
+        /** @var Container $laravel */
+        $laravel = $this->laravel();
+
+        $laravel->afterResolving(ValidatorContract::class, function (...$args) use ($appListener) {
+            $appListener(...$args);
+        });
+
+        $validator = $laravel->make(ValidatorContract::class, [
+            'rules'     => $rules,
+            'ormClass'  => $ormClass
+        ]);
+        $this->assertInstanceOf(ValidatorContract::class, $validator);
+
+        $this->assertCount(1, $validatorListener);
+        $this->assertSame($validator, $validatorListener->arg(0));
+
+        $this->assertGreaterThan(0, count($appListener));
+        $this->assertSame($validator, $appListener->arg(0));
+
+        $this->assertEquals($parsed, $validator->rules());
+
+    }
+
+    public function test_even_make_custom_validator_by_container_calls_listener()
+    {
+        $ormClass = Category::class;
+
+        $factory = $this->make();
+        if (!$factory instanceof Subscribable) {
+            $this->markTestSkipped("The tested class " . get_class($factory) . ' does implement ' . Subscribable::class);
+        }
+
+        $validatorListener = new LoggingCallable();
+        $factory->on($ormClass, $validatorListener);
+
+        $appListener = new LoggingCallable();
+        $laravel = $this->laravel();
+
+        $laravel->afterResolving(CategoryValidator::class, function (...$args) use ($appListener) {
+            $appListener(...$args);
+        });
+
+        $validator = $laravel->make(CategoryValidator::class);
+        $this->assertInstanceOf(CategoryValidator::class, $validator);
+
+        $this->assertCount(1, $validatorListener);
+        $this->assertSame($validator, $validatorListener->arg(0));
+
+        $this->assertGreaterThan(0, count($appListener));
+        $this->assertSame($validator, $appListener->arg(0));
+    }
     /**
      * Create the factory
      * @return ValidationFactoryContract
