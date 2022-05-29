@@ -7,6 +7,7 @@ use Ems\Contracts\Validation\ValidationConverter as ValidationConverterContract;
 use Ems\Contracts\Validation\ValidatorFactory as ValidatorFactoryContract;
 use Ems\Contracts\Validation\Validation;
 use Ems\Contracts\Expression\ConstraintParsingMethods;
+use Ems\Validation\Validator;
 use Illuminate\Support\MessageBag;
 use Illuminate\Translation\ArrayLoader;
 use Illuminate\Translation\Translator;
@@ -399,6 +400,31 @@ class ValidationConverterIntegrationTest extends \Ems\LaravelIntegrationTest
             $this->assertEquals($awaited, $messageBag->messages());
 
         }
+    }
+
+    public function test_convert_required_with_passed_custom_message_for_rule_in_validation()
+    {
+
+        $rules = [
+            'login'    => 'required',
+            'password' => 'required'
+        ];
+
+        $customMessage = 'It is so broken!';
+
+
+        $validation = new ValidationException([], $rules, Validator::class);
+        $validation->addFailure('login', 'required');
+        $validation->addFailure('password', 'required', [], $customMessage);
+
+
+        /** @var MessageBag $messageBag */
+        $messageBag = $this->convert($validation, []);
+        $messages = $messageBag->messages();
+
+        $this->assertEquals($customMessage, $messages['password'][0]);
+
+
     }
 
     public function test_convert_required_with_passed_custom_message_in_translation()

@@ -105,6 +105,10 @@ class ValidationConverter implements ConverterContract
 
         foreach ($validation as $key=>$rules) {
             foreach ($rules as $ruleName=>$parameters) {
+                if ($customMessage = $validation->customMessage($key, $ruleName)) {
+                    $messages->add($key, $customMessage);
+                    continue;
+                }
                 $message = $this->getMessage($key, $ruleName, $rules, $keyTitles, $customMessages);
                 $messages->add($key, $message);
             }

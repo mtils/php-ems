@@ -22,13 +22,13 @@ interface Validation extends ArrayAccess, IteratorAggregate, Countable
      * [ 'login' => 'min:3']
      * It would be: $validation->addFailure('login', 'min', [3]).
      *
-     * @param string $key
-     * @param string $ruleName
-     * @param array  $parameters (optional)
-     *
+     * @param string        $key
+     * @param string        $ruleName
+     * @param array         $parameters (optional)
+     * @param string|null   $customMessage
      * @return self
      **/
-    public function addFailure($key, $ruleName, array $parameters = []);
+    public function addFailure(string $key, string $ruleName, array $parameters = [], string $customMessage=null);
 
     /**
      * Return the complete object data as an array:.
@@ -41,7 +41,7 @@ interface Validation extends ArrayAccess, IteratorAggregate, Countable
      *
      * @return array
      **/
-    public function failures();
+    public function failures() : array;
 
     /**
      * Quick access to parameters.
@@ -51,7 +51,16 @@ interface Validation extends ArrayAccess, IteratorAggregate, Countable
      *
      * @return array
      **/
-    public function parameters($key, $ruleName);
+    public function parameters(string $key, string $ruleName) : array;
+
+    /**
+     * Return a custom message if one was set for $key and $rule.
+     *
+     * @param string $key
+     * @param string $ruleName
+     * @return string|null
+     */
+    public function customMessage(string $key, string $ruleName): ?string;
 
     /**
      * Return the validation rules the validator used
@@ -59,12 +68,12 @@ interface Validation extends ArrayAccess, IteratorAggregate, Countable
      *
      * @return array
      **/
-    public function rules();
+    public function rules() : array;
 
     /**
      * Return the validator class that created this validation.
      *
      * @return string
      **/
-    public function validatorClass();
+    public function validatorClass() : string;
 }

@@ -46,6 +46,11 @@ class ValidationException extends RuntimeException implements Validation, JsonSe
      */
     protected $originalMessage = '';
 
+    /**
+     * @var array
+     */
+    protected $customMessages = [];
+
     public function __construct(array $failures = [], array $rules = [], string $validatorClass = null,
                                 string $message='', int $code=4220, Throwable $previous=null)
     {
@@ -63,10 +68,11 @@ class ValidationException extends RuntimeException implements Validation, JsonSe
      * @param string $key
      * @param string $rule
      * @param array  $parameters (optional)
+     * @param string|null   $customMessage
      *
      * @return ValidationException
      **/
-    public function addFailure($key, $ruleName, array $parameters = []) : ValidationException
+    public function addFailure(string $key, string $ruleName, array $parameters = [], string $customMessage=null) : ValidationException
     {
         if (!isset($this->failures[$key])) {
             $this->failures[$key] = [];
@@ -74,6 +80,13 @@ class ValidationException extends RuntimeException implements Validation, JsonSe
 
         $this->failures[$key][$ruleName] = $parameters;
         $this->wasManipulated = true;
+        if ($customMessage === null) {
+            return $this;
+        }
+        if (!isset($this->customMessages[$key])) {
+            $this->customMessages[$key] = [];
+        }
+        $this->customMessages[$key][$ruleName] = $customMessage;
         return $this;
     }
 
@@ -95,7 +108,7 @@ class ValidationException extends RuntimeException implements Validation, JsonSe
      *
      * @return array
      **/
-    public function parameters($key, $ruleName) : array
+    public function parameters(string $key, string $ruleName) : array
     {
         if (!isset($this->failures[$key])) {
             throw new KeyNotFoundException("Key '$key' has no failures");
@@ -106,6 +119,18 @@ class ValidationException extends RuntimeException implements Validation, JsonSe
         }
 
         return $this->failures[$key][$ruleName];
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param string $key
+     * @param string $ruleName
+     * @return string|null
+     */
+    public function customMessage(string $key, string $ruleName): ?string
+    {
+        return $this->customMessages[$key][$ruleName] ?? null;
     }
 
     /**
