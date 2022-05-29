@@ -180,6 +180,43 @@ class ValidationFactoryIntegrationTest extends IntegrationTest
 
     }
 
+    /**
+     * @test
+     */
+    public function rules_can_be_altered()
+    {
+        $ormClass = self::class;
+
+        $factory = $this->factory();
+
+        if (!$factory instanceof Subscribable) {
+            $this->markTestSkipped("The tested class " . get_class($factory) . ' does implement ' . Subscribable::class);
+        }
+
+        $factory->on($ormClass, function (ValidatorContract $validator) {
+            $validator->mergeRules(['password' => 'required|complex|min:12|max:64']);
+        });
+
+        $validator = $factory->create(['login' => 'required|min:3|max:128'], $ormClass);
+
+        $parsed = [
+            'login' => [
+                'required'  => [],
+                'min'       => [3],
+                'max'       => [128]
+            ],
+            'password'  => [
+                'required'  =>  [],
+                'complex'   =>  [],
+                'min'       =>  [12],
+                'max'       =>  [64]
+            ]
+        ];
+
+        $this->assertInstanceOf(ValidatorContract::class, $validator);
+        $this->assertEquals($parsed, $validator->rules());
+    }
+
     protected function create(array $rules, string $ormClass='') : ValidatorContract
     {
         return $this->factory()->create($rules, $ormClass);
