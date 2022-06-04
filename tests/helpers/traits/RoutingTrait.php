@@ -5,8 +5,12 @@
 
 namespace Ems;
 
+use Ems\Contracts\Core\Url as UrlContract;
+use Ems\Contracts\Routing\Input;
 use Ems\Contracts\Routing\RouteCollector;
 use Ems\Contracts\Routing\Router as RouterContract;
+use Ems\Core\Url;
+use Ems\Routing\GenericInput;
 use Ems\Routing\Router;
 
 use function is_string;
@@ -77,5 +81,22 @@ trait RoutingTrait
             $handler = str_replace($search, $replace, $handler);
         }
         return $handler;
+    }
+
+    /**
+     * @param UrlContract|string $url
+     * @param string $method
+     * @param string $clientType
+     * @param string $scope
+     *
+     * @return Input
+     */
+    protected function routable($url, string $method=Input::GET, string $clientType=Input::CLIENT_WEB, string $scope='default') : Input
+    {
+        $routable = new GenericInput();
+        if (!$url instanceof UrlContract) {
+            $url = new Url($url);
+        }
+        return $routable->setMethod($method)->setUrl($url)->setClientType($clientType)->setRouteScope($scope);
     }
 }

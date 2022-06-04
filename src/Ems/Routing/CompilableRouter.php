@@ -13,8 +13,12 @@ use Ems\Contracts\Routing\Route;
 use Ems\Contracts\Routing\Router as RouterContract;
 use Ems\Core\Exceptions\KeyNotFoundException;
 use Exception;
+use OutOfBoundsException;
 use Traversable;
+
+use function get_class;
 use function in_array;
+use function is_object;
 
 /**
  * Class CompilableRouter
@@ -30,15 +34,17 @@ use function in_array;
 class CompilableRouter implements RouterContract
 {
 
-    const KEY_VALID = 'routes-cached';
+    protected const KEY_VALID = 'routes-cached';
 
-    const KEY_ALL = 'routes-all';
+    protected const KEY_ALL = 'routes-all';
 
-    const KEY_BY_PATTERN = 'routes-by-pattern';
+    protected const KEY_BY_PATTERN = 'routes-by-pattern';
 
-    const KEY_BY_NAME = 'routes-by-name';
+    protected const KEY_BY_NAME = 'routes-by-name';
 
-    const KEY_DISPATCHER_DATA = 'routes-compiled';
+    protected const KEY_BY_ENTITY_ACTION = 'routes-by-entity-action';
+
+    protected const KEY_DISPATCHER_DATA = 'routes-compiled';
 
     /**
      * @var RouterContract
@@ -55,10 +61,14 @@ class CompilableRouter implements RouterContract
      */
     protected $optimizedDispatchers = [];
 
-    public function __construct(RouterContract $router, $storage=[])
+    /**
+     * @param RouterContract $router
+     * @param array|ArrayAccess $storage
+     */
+    public function __construct(RouterContract $router, &$storage=[])
     {
         $this->router = $router;
-        $this->storage = $storage;
+        $this->setStorage($storage);
     }
 
     /**
@@ -179,6 +189,27 @@ class CompilableRouter implements RouterContract
     }
 
     /**
+     * @param $entity
+     * @param string $action
+     * @param string $clientType
+     * @return Route
+     */
+    public function getByEntityAction($entity, string $action = 'index', string $clientType = Input::CLIENT_WEB): Route
+    {
+        if (!$this->isCompiled()) {
+            return $this->router->getByEntityAction($entity, $action, $clientType);
+        }
+
+        $key = is_object($entity) ? get_class($entity) : "$entity";
+        if (isset($this->storage[self::KEY_BY_ENTITY_ACTION][$clientType][$key][$action])) {
+            return $this->storage[self::KEY_BY_ENTITY_ACTION][$clientType][$key][$action];
+        }
+
+        throw new OutOfBoundsException("Action '$action' not found for entity '$key'");
+    }
+
+
+    /**
      * Return all known unique client types (by route registrations)
      *
      * @return string[]
@@ -257,7 +288,6 @@ class CompilableRouter implements RouterContract
                 }
             }
 
-
         }
 
         $this->storage[self::KEY_ALL] = $all;
@@ -306,7 +336,7 @@ class CompilableRouter implements RouterContract
      */
     public function setStorage(&$storage) : CompilableRouter
     {
-        $this->storage = $storage;
+        $this->storage = &$storage;
         return $this;
     }
 

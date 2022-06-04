@@ -1215,23 +1215,6 @@ class RouterTest extends TestCase
         $router->getByEntityAction(new RouterTest_CustomAddress(), 'show');
 
     }
-
-    /**
-     * @param $url
-     * @param string $method
-     * @param string $clientType
-     * @param string $scope
-     *
-     * @return Input
-     */
-    protected function routable($url, $method=Input::GET, $clientType=Input::CLIENT_WEB, $scope='default')
-    {
-        $routable = new GenericInput();
-        if (!$url instanceof UrlContract) {
-            $url = new Url($url);
-        }
-        return $routable->setMethod($method)->setUrl($url)->setClientType($clientType)->setRouteScope($scope);
-    }
 }
 
 class RouterTest_Address
