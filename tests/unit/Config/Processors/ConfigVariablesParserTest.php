@@ -118,7 +118,8 @@ class ConfigVariablesParserTest extends TestCase
         $env = [
             'PATH'      => '/usr/bin',
             'TIMEZONE'  => 'Europe/Berlin',
-            'ENV'       => 'staging'
+            'ENV'       => 'staging',
+            'COMPILE'   => true
         ];
         $config = [
             'database' => [
@@ -134,12 +135,16 @@ class ConfigVariablesParserTest extends TestCase
             ],
             'app' => [
                 'url' => 'https://ems-application.com'
+            ],
+            'routes' => [
+                'compile' => false
             ]
         ];
         $instance->assign('env', $env);
         $instance->assign('config', $config);
 
         $this->assertEquals('https://google.de', $instance->parse('{config.app.uri|https://google.de}'));
+        $this->assertEquals($config['app']['url'], $instance->parse('{config.app.url|https://google.de}'));
         $this->assertEquals($config['database']['connections'], $instance->parse('{config.database.connections}'));
 
     }
@@ -195,6 +200,179 @@ class ConfigVariablesParserTest extends TestCase
         $instance->assign('env', $env);
 
         $this->assertEquals($awaited, $instance($config, $config));
+
+    }
+
+    /**
+     * @test
+     */
+    public function invoke_replaces_default_variables_if_other_not_assigned()
+    {
+        $instance = $this->make();
+        $configPath = 'local/storage/cache/routes.json';
+
+        $env = [
+        ];
+
+        $config = [
+            'routing' => [
+                'compile_path' => "{env.ROUTES_COMPILE_PATH|$configPath}"
+            ]
+        ];
+
+        $awaited = [
+            'routing' => [
+                'compile_path' => $configPath
+            ]
+        ];
+
+        $instance->assign('env', $env);
+
+        $this->assertEquals($awaited, $instance($config, $config));
+
+    }
+
+    /**
+     * @test
+     */
+    public function invoke_replaces_default_variables_if_other_set()
+    {
+        $instance = $this->make();
+        $configPath = 'local/storage/cache/routes.json';
+        $envPath = 'local/storage/cache/routes.raw';
+
+        $env = [
+            'ROUTES_COMPILE_PATH' => $envPath
+        ];
+
+        $config = [
+            'routing' => [
+                'compile_path' => "{env.ROUTES_COMPILE_PATH|$configPath}"
+            ]
+        ];
+
+        $awaited = [
+            'routing' => [
+                'compile_path' => $envPath
+            ]
+        ];
+
+        $instance->assign('env', $env);
+
+        $this->assertEquals($awaited, $instance($config, $config));
+
+    }
+
+    /**
+     * @test
+     */
+    public function invoke_replaces_default_variables_if_other_empty()
+    {
+        $instance = $this->make();
+        $configPath = 'local/storage/cache/routes.json';
+        $envPath = '';
+
+        $env = [
+            'ROUTES_COMPILE_PATH' => $envPath
+        ];
+
+        $config = [
+            'routing' => [
+                'compile_path' => "{env.ROUTES_COMPILE_PATH|$configPath}"
+            ]
+        ];
+
+        $awaited = [
+            'routing' => [
+                'compile_path' => $envPath
+            ]
+        ];
+
+        $instance->assign('env', $env);
+
+        $this->assertEquals($awaited, $instance($config, $config));
+
+    }
+
+    /**
+     * @test
+     */
+    public function invoke_replaces_false_bool_variables()
+    {
+        $instance = $this->make();
+        $envValue = false;
+
+        $env = [
+            'ROUTES_COMPILE' => $envValue
+        ];
+        $config = [
+            'routing' => [
+                'compile' => '{env.ROUTES_COMPILE}'
+            ]
+        ];
+        $awaited = [
+            'routing' => [
+                'compile' => $envValue
+            ]
+        ];
+
+        $instance->assign('env', $env);
+
+        $this->assertSame($awaited, $instance($config, $config));
+
+    }
+
+    /**
+     * @test
+     */
+    public function invoke_replaces_true_variables()
+    {
+        $instance = $this->make();
+        $envValue = true;
+
+        $env = [
+            'ROUTES_COMPILE' => $envValue
+        ];
+        $config = [
+            'routing' => [
+                'compile' => '{env.ROUTES_COMPILE}'
+            ]
+        ];
+        $awaited = [
+            'routing' => [
+                'compile' => $envValue
+            ]
+        ];
+
+        $instance->assign('env', $env);
+
+        $this->assertSame($awaited, $instance($config, $config));
+
+    }
+
+    /**
+     * @test
+     */
+    public function invoke_replaces_boolean_default_variables()
+    {
+        $instance = $this->make();
+
+        $env = [
+        ];
+        $config = [
+            'routing' => [
+                'compile' => '{env.ROUTES_COMPILE|false}'
+            ]
+        ];
+        $awaited = [
+            'routing' => [
+                'compile' => false
+            ]
+        ];
+
+        $instance->assign('env', $env);
+
+        $this->assertSame($awaited, $instance($config, $config));
 
     }
 

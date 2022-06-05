@@ -99,12 +99,15 @@ class ConfigVariablesParser
                 $variable
             );
 
-            if (!$value && $default) {
+            $isDefault = false;
+
+            if ($value === null && $default) {
                 $value = $default;
+                $isDefault = true;
             }
 
             if ($matchCount === 1 && $string == $match) {
-                return $value;
+                return $isDefault ? $this->toBooleanIfLooksLike($default) :  $value;
             }
             $search[] = $match;
             $replace[] = $value;
@@ -197,5 +200,20 @@ class ConfigVariablesParser
         }
         $result = null;
         return $result;
+    }
+
+    /**
+     * @param string $value
+     * @return bool|string
+     */
+    protected function toBooleanIfLooksLike(string $value)
+    {
+        if ($value === 'true') {
+            return true;
+        }
+        if ($value === 'false') {
+            return false;
+        }
+        return $value;
     }
 }
