@@ -119,7 +119,7 @@ class RoutedInputHandler implements InputHandlerContract, SupportsCustomFactory,
         }
 
         if (in_array($input->getClientType(), [InputContract::CLIENT_CONSOLE, InputContract::CLIENT_TASK])) {
-            return new Response($result);
+            return is_int($result) ? new Response(null, [], $result) : new Response($result);
         }
 
         return new HttpResponse($result);

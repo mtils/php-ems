@@ -7,17 +7,20 @@ namespace Ems\Routing;
 
 use ArrayAccess;
 use ArrayIterator;
+use Ems\Contracts\Routing\Command;
 use Ems\Contracts\Routing\Dispatcher;
 use Ems\Contracts\Routing\Input;
 use Ems\Contracts\Routing\Route;
 use Ems\Contracts\Routing\Router as RouterContract;
 use Ems\Core\Exceptions\KeyNotFoundException;
+use Ems\Core\Response;
 use Exception;
 use OutOfBoundsException;
 use Traversable;
 
 use function get_class;
 use function in_array;
+use function is_array;
 use function is_object;
 
 /**
@@ -34,7 +37,7 @@ use function is_object;
 class CompilableRouter implements RouterContract
 {
 
-    protected const KEY_VALID = 'routes-cached';
+    public const KEY_VALID = 'routes-cached';
 
     protected const KEY_ALL = 'routes-all';
 
@@ -54,7 +57,7 @@ class CompilableRouter implements RouterContract
     /**
      * @var ArrayAccess|array
      */
-    protected $storage = [];
+    protected $compiledData = [];
 
     /**
      * @var Dispatcher[]
@@ -62,30 +65,47 @@ class CompilableRouter implements RouterContract
     protected $optimizedDispatchers = [];
 
     /**
-     * @param RouterContract $router
-     * @param array|ArrayAccess $storage
+     * @var callable[]
      */
-    public function __construct(RouterContract $router, &$storage=[])
+    protected $loadListeners = [];
+
+    /**
+     * @var bool
+     */
+    protected $listenersCalled = false;
+
+    /**
+     * @param RouterContract $router
+     */
+    public function __construct(RouterContract $router)
     {
         $this->router = $router;
-        $this->setStorage($storage);
     }
 
     /**
      * {@inheritDoc}
      *
-     * Reimplemented to skip every call in compiled mode
+     * Reimplemented to skip every call when compiled data is present
      *
      * @param callable $registrar
      * @param array $attributes
      */
     public function register(callable $registrar, array $attributes = [])
     {
-        // Skip every register call in "compiled" mode
-        if ($this->isCompiled()) {
-            return;
-        }
-        $this->router->register($registrar, $attributes);
+        // Bravely trusting the hopefully assigned compiled data
+    }
+
+    /**
+     * Use the router as a normal middleware.
+     *
+     * @param Input $input
+     * @param callable $next
+     *
+     * @return Response
+     */
+    public function __invoke(Input $input, callable $next)
+    {
+        return $next($this->route($input));
     }
 
     /**
@@ -97,23 +117,11 @@ class CompilableRouter implements RouterContract
      */
     public function route(Input $routable) : Input
     {
-
-        $clientType = $routable->getClientType();
-
-        // If we now this dispatcher it was already optimized
-        if (isset($this->optimizedDispatchers[$clientType]) || !$this->isCompiled()) {
-            return $this->router->route($routable);
-        }
-
-        $dispatcher = $this->router->getDispatcher($clientType);
-
-        $dispatcher->fill($this->storage[self::KEY_DISPATCHER_DATA][$clientType]);
-
-        $this->optimizedDispatchers[$clientType] = $dispatcher;
-
+        $this->callListenersOnce();
+        // Trigger loading of data
+        $this->getDispatcher($routable->getClientType());
         return $this->router->route($routable);
     }
-
 
     /**
      * Retrieve an external iterator
@@ -126,10 +134,12 @@ class CompilableRouter implements RouterContract
      */
     public function getIterator()
     {
-        if (isset($this->storage[self::KEY_ALL])) {
-            return new ArrayIterator($this->storage[self::KEY_ALL]);
+        $this->callListenersOnce();
+        $routes = [];
+        foreach ($this->compiledData[self::KEY_ALL] as $routeData) {
+            $routes[] = $this->toRoute($routeData);
         }
-        return $this->router->getIterator();
+        return new ArrayIterator($routes);
     }
 
     /**
@@ -143,24 +153,17 @@ class CompilableRouter implements RouterContract
      */
     public function getByPattern(string $pattern, string $method=null, string $clientType=Input::CLIENT_WEB) : array
     {
-        if (!$this->isCompiled()) {
-            return $this->router->getByPattern($pattern, $method, $clientType);
-        }
-
-        if (!isset($this->storage[self::KEY_BY_PATTERN][$clientType][$pattern])) {
+        $this->callListenersOnce();
+        if (!isset($this->compiledData[self::KEY_BY_PATTERN][$clientType][$pattern])) {
             return [];
-        }
-
-        if (!$method) {
-            return $this->storage[self::KEY_BY_PATTERN][$clientType][$pattern];
         }
 
         $result = [];
 
         /** @var Route $route */
-        foreach ($this->storage[self::KEY_BY_PATTERN][$clientType][$pattern] as $route) {
-            if (in_array($method, $route->methods)) {
-                $result[] = $route;
+        foreach ($this->compiledData[self::KEY_BY_PATTERN][$clientType][$pattern] as $routeData) {
+            if (!$method || in_array($method, $routeData['methods'])) {
+                $result[] = $this->toRoute($routeData);
             }
         }
 
@@ -177,14 +180,10 @@ class CompilableRouter implements RouterContract
      */
     public function getByName(string $name, string $clientType=Input::CLIENT_WEB) : Route
     {
-        if (!$this->isCompiled()) {
-            return $this->router->getByName($name, $clientType);
+        $this->callListenersOnce();
+        if (isset($this->compiledData[self::KEY_BY_NAME][$clientType][$name])) {
+            return $this->toRoute($this->compiledData[self::KEY_BY_NAME][$clientType][$name]);
         }
-
-        if (isset($this->storage[self::KEY_BY_NAME][$clientType][$name])) {
-            return $this->storage[self::KEY_BY_NAME][$clientType][$name];
-        }
-
         throw new KeyNotFoundException("Route named '$name' not found for clientType '$clientType'.");
     }
 
@@ -196,15 +195,11 @@ class CompilableRouter implements RouterContract
      */
     public function getByEntityAction($entity, string $action = 'index', string $clientType = Input::CLIENT_WEB): Route
     {
-        if (!$this->isCompiled()) {
-            return $this->router->getByEntityAction($entity, $action, $clientType);
-        }
-
+        $this->callListenersOnce();
         $key = is_object($entity) ? get_class($entity) : "$entity";
-        if (isset($this->storage[self::KEY_BY_ENTITY_ACTION][$clientType][$key][$action])) {
-            return $this->storage[self::KEY_BY_ENTITY_ACTION][$clientType][$key][$action];
+        if (isset($this->compiledData[self::KEY_BY_ENTITY_ACTION][$clientType][$key][$action])) {
+            return $this->toRoute($this->compiledData[self::KEY_BY_ENTITY_ACTION][$clientType][$key][$action]);
         }
-
         throw new OutOfBoundsException("Action '$action' not found for entity '$key'");
     }
 
@@ -216,10 +211,7 @@ class CompilableRouter implements RouterContract
      */
     public function clientTypes() : array
     {
-        if (!$this->isCompiled()) {
-            return $this->router->clientTypes();
-        }
-        return array_keys($this->storage[self::KEY_DISPATCHER_DATA]);
+        return array_keys($this->compiledData[self::KEY_DISPATCHER_DATA]);
     }
 
     /**
@@ -239,11 +231,11 @@ class CompilableRouter implements RouterContract
 
         $dispatcher = $this->router->getDispatcher($clientType);
 
-        if (!isset($this->storage[self::KEY_DISPATCHER_DATA][$clientType])) {
+        if (!isset($this->compiledData[self::KEY_DISPATCHER_DATA][$clientType])) {
             return $dispatcher;
         }
 
-        $dispatcher->fill($this->storage[self::KEY_DISPATCHER_DATA][$clientType]);
+        $dispatcher->fill($this->compiledData[self::KEY_DISPATCHER_DATA][$clientType]);
 
         $this->optimizedDispatchers[$clientType] = $dispatcher;
 
@@ -252,20 +244,48 @@ class CompilableRouter implements RouterContract
     }
 
     /**
-     * Create the compiled routes in cache.
+     * @return array|ArrayAccess
      */
-    public function compile()
+    public function getCompiledData()
+    {
+        return $this->compiledData;
+    }
+
+    /**
+     * Set the storage. Use anything with array access (Ems\Core\Storage, Ems\Cache\Cache, ...);
+     *
+     * @param array|ArrayAccess $compiledData
+     *
+     * @return $this
+     */
+    public function setCompiledData(&$compiledData) : CompilableRouter
+    {
+        $this->compiledData = &$compiledData;
+        $this->optimizedDispatchers = [];
+        return $this;
+    }
+
+    /**
+     * Create the compiled data and return it.
+     */
+    public function compile() : array
     {
 
         $all = [];
         $byName = [];
         $byPattern = [];
+        $byEntityAction = [];
+
+        $compiled = [];
 
         /** @var Route $route */
         foreach ($this->router as $route) {
 
-            $all[] = $route;
+            $routeData = $route->toArray();
+
+            $all[] = $routeData;
             $pattern = $route->pattern;
+
 
             foreach ($route->clientTypes as $clientType) {
 
@@ -281,63 +301,61 @@ class CompilableRouter implements RouterContract
                     $byPattern[$clientType][$pattern] = [];
                 }
 
-                $byPattern[$clientType][$pattern][] = $route;
+                $byPattern[$clientType][$pattern][] = $routeData;
 
                 if ($name = $route->name) {
-                    $byName[$clientType][$name] = $route;
+                    $byName[$clientType][$name] = $routeData;
                 }
+
+                if (!$entity = $route->entity) {
+                    continue;
+                }
+                if (!isset($byEntityAction[$clientType])) {
+                    $byEntityAction[$clientType] = [];
+                }
+                if (!isset($byEntityAction[$clientType][$entity])) {
+                    $byEntityAction[$clientType][$entity] = [];
+                }
+                $byEntityAction[$clientType][$entity][$route->action] = $routeData;
             }
 
         }
 
-        $this->storage[self::KEY_ALL] = $all;
-        $this->storage[self::KEY_BY_PATTERN] = $byPattern;
-        $this->storage[self::KEY_BY_NAME] = $byName;
-
-        $dispatcherData = [];
+        $compiled[self::KEY_ALL] = $all;
+        $compiled[self::KEY_BY_PATTERN] = $byPattern;
+        $compiled[self::KEY_BY_NAME] = $byName;
+        $compiled[self::KEY_BY_ENTITY_ACTION] = $byEntityAction;
+        $compiled[self::KEY_DISPATCHER_DATA] = [];
 
         foreach ($this->router->clientTypes() as $clientType) {
-            $dispatcherData[$clientType] = $this->router->getDispatcher($clientType)->toArray();
+            $compiled[self::KEY_DISPATCHER_DATA][$clientType] = $this->router->getDispatcher($clientType)->toArray();
         }
 
-        $this->storage[self::KEY_DISPATCHER_DATA] = $dispatcherData;
+        $compiled[self::KEY_VALID] = true;
 
-        $this->storage[self::KEY_VALID] = true;
+        return $compiled;
     }
 
     /**
-     * Clean all compiled data (like make clean in qmake/Qt)
+     * @param array $properties
+     * @return Route
      */
-    public function clean()
+    protected function toRoute(array $properties) : Route
     {
-        foreach ([self::KEY_ALL, self::KEY_BY_PATTERN, self::KEY_BY_NAME,
-                  self::KEY_DISPATCHER_DATA, self::KEY_VALID] as $key) {
-            unset($this->storage[$key]);
+        if (isset($properties['command']) && is_array($properties['command'])) {
+            $properties['command'] = Command::fromArray($properties['command']);
         }
-        $this->optimizedDispatchers = [];
+        return Route::fromArray($properties);
     }
 
-    /**
-     * Check if the router works with compiled data.
-     *
-     * @return bool
-     */
-    public function isCompiled() : bool
+    protected function callListenersOnce()
     {
-        return isset($this->storage[self::KEY_VALID]);
+        if ($this->listenersCalled) {
+            return;
+        }
+        $this->listenersCalled = true;
+        foreach ($this->loadListeners as $listener) {
+            $listener($this);
+        }
     }
-
-    /**
-     * Set the storage. Use anything with array access (Ems\Core\Storage, Ems\Cache\Cache, ...);
-     *
-     * @param array|ArrayAccess $storage
-     *
-     * @return $this
-     */
-    public function setStorage(&$storage) : CompilableRouter
-    {
-        $this->storage = &$storage;
-        return $this;
-    }
-
 }

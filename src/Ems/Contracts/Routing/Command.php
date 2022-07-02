@@ -10,6 +10,7 @@ use Ems\Contracts\Core\Arrayable;
 use Ems\Contracts\Core\Map;
 use Ems\Core\Helper;
 use Ems\Core\Support\ObjectReadAccess;
+use JsonSerializable;
 use LogicException;
 
 use function explode;
@@ -36,7 +37,7 @@ use function trim;
  *
  * @package Ems\Contracts\Routing
  */
-class Command implements Arrayable
+class Command implements Arrayable, JsonSerializable
 {
     use ObjectReadAccess;
 
@@ -180,7 +181,7 @@ class Command implements Arrayable
 
     /**
      * This is a performance related method. In this method
-     * you should implement the fastest was to get every
+     * you should implement the fastest way to get every
      * key and value as an array.
      * Only the root has to be an array, it should not build
      * the array by recursion.
@@ -191,6 +192,15 @@ class Command implements Arrayable
     {
         return $this->_properties;
     }
+
+    /**
+     * @return array
+     */
+    public function jsonSerialize() : array
+    {
+        return $this->toArray();
+    }
+
 
     /**
      * Register a _new_ GET route to the collector using the same handler.
@@ -287,6 +297,34 @@ class Command implements Arrayable
     }
 
     /**
+     * @param array $properties
+     * @return Command
+     */
+    public static function fromArray(array $properties) : Command
+    {
+        $command = new static($properties['pattern']);
+        foreach ($command->_properties as $key=>$value) {
+
+            if (!isset($properties[$key])) {
+                continue;
+            }
+
+            if ($key == 'arguments') {
+                $command->_properties['arguments'] = self::toArguments($properties[$key]);
+                continue;
+            }
+
+            if ($key == 'options') {
+                $command->_properties['options'] = self::toOptions($properties[$key]);
+                continue;
+            }
+
+            $command->_properties[$key] = $properties[$key];
+        }
+        return $command;
+    }
+
+    /**
      * @param string $signature
      *
      * @return Argument
@@ -360,5 +398,31 @@ class Command implements Arrayable
             'type'      => $type ?: 'string',
             'default'   => $default
         ]);
+    }
+
+    /**
+     * @param array $arguments
+     * @return Argument[]
+     */
+    protected static function toArguments(array $arguments) : array
+    {
+        $casted = [];
+        foreach ($arguments as $data) {
+            $casted[] = $data instanceof Argument ? $data : new Argument($data);
+        }
+        return $casted;
+    }
+
+    /**
+     * @param array $arguments
+     * @return Option[]
+     */
+    protected static function toOptions(array $arguments) : array
+    {
+        $casted = [];
+        foreach ($arguments as $data) {
+            $casted[] = $data instanceof Option ? $data : new Option($data);
+        }
+        return $casted;
     }
 }

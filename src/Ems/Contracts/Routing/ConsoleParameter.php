@@ -7,6 +7,7 @@ namespace Ems\Contracts\Routing;
 
 
 use Ems\Contracts\Core\Arrayable;
+use JsonSerializable;
 use ReflectionClass;
 use ReflectionProperty as RP;
 
@@ -17,7 +18,7 @@ use ReflectionProperty as RP;
  *
  * @package Ems\Contracts\Routing
  */
-abstract class ConsoleParameter implements Arrayable
+abstract class ConsoleParameter implements Arrayable, JsonSerializable
 {
     /**
      * The name. Just used internally to access the argument
@@ -61,6 +62,13 @@ abstract class ConsoleParameter implements Arrayable
      */
     protected static $propertyNames;
 
+    public function __construct(array $properties=[])
+    {
+        if ($properties) {
+            $this->fill($properties);
+        }
+    }
+
     /**
      * @param array $data
      *
@@ -90,6 +98,14 @@ abstract class ConsoleParameter implements Arrayable
             $array[$key] = $this->$key;
         }
         return $array;
+    }
+
+    /**
+     * @return array
+     */
+    public function jsonSerialize() : array
+    {
+        return $this->toArray();
     }
 
     /**

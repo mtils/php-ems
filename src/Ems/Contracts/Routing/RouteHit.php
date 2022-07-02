@@ -13,7 +13,7 @@ use Ems\Core\Support\ObjectReadAccess;
 /**
  * Class RouteHit
  *
- * A RouteHit is a result of matching a route by a RouteMatcher. ArrayAccess
+ * A RouteHit is a result of matching a route by a Dispatcher. ArrayAccess
  * is o access the route parameters
  *
  * @package Ems\Contracts\Routing

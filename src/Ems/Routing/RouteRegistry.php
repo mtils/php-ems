@@ -1,46 +1,59 @@
 <?php
 /**
- *  * Created by mtils on 30.06.19 at 11:07.
+ *  * Created by mtils on 15.06.2022 at 14:11.
  **/
 
 namespace Ems\Routing;
 
 use ArrayIterator;
 use Ems\Contracts\Core\Containers\ByTypeContainer;
-use Ems\Contracts\Core\SupportsCustomFactory;
-use Ems\Contracts\Routing\Command;
 use Ems\Contracts\Routing\Dispatcher;
-use Ems\Contracts\Routing\Exceptions\RouteNotFoundException;
 use Ems\Contracts\Routing\Input;
 use Ems\Contracts\Routing\Route;
 use Ems\Contracts\Routing\RouteCollector;
-use Ems\Contracts\Routing\Router as RouterContract;
+use Ems\Contracts\Routing\RouteRegistry as RouteRegistryContract;
+
 use Ems\Core\Exceptions\KeyNotFoundException;
-use Ems\Core\Lambda;
-use Ems\Core\Response;
-use Ems\Core\Support\CustomFactorySupport;
-use Ems\Routing\FastRoute\FastRouteDispatcher;
-use Exception;
 use OutOfBoundsException;
-use ReflectionException;
 use Traversable;
 
-use function call_user_func;
+use function array_keys;
+use function func_num_args;
 use function get_class;
 use function implode;
+use function in_array;
+use function is_iterable;
+
 use function is_object;
-use function trigger_error;
+use function is_string;
+
+use function iterator_to_array;
 
 use const E_USER_WARNING;
 
-class Router implements RouterContract, SupportsCustomFactory
+class RouteRegistry implements RouteRegistryContract
 {
-    use CustomFactorySupport;
+    public const KEY_VALID = 'routes-cached';
+
+    protected const KEY_ALL = 'routes-all';
+
+    protected const KEY_BY_PATTERN = 'routes-by-pattern';
+
+    protected const KEY_BY_NAME = 'routes-by-name';
+
+    protected const KEY_BY_ENTITY_ACTION = 'routes-by-entity-action';
+
+    protected const KEY_DISPATCHER_DATA = 'routes-compiled';
 
     /**
-     * @var array
+     * @var Route[]
      */
     protected $allRoutes = [];
+
+    /**
+     * @var array[]
+     */
+    protected $byClientType = [];
 
     /**
      * @var array
@@ -83,21 +96,12 @@ class Router implements RouterContract, SupportsCustomFactory
     protected $registrarsCalled = false;
 
     /**
-     * The divider between middleware name and parameters
-     * @var string
+     * @var array
      */
-    public function __construct()
-    {
-        $this->installDispatcherFactory();
-    }
+    protected $compiledData = [];
 
-    /**
-     * @param callable $registrar
-     * @param array    $attributes (optional)
-     */
-    public function register(callable $registrar, array $attributes=[])
+    public function register(callable $registrar, array $attributes = [])
     {
-
         if (!$this->registrarsCalled) {
             $this->registrars[] = [
                 'registrar'     => $registrar,
@@ -107,48 +111,27 @@ class Router implements RouterContract, SupportsCustomFactory
         }
         @\trigger_error('Routes were already registered. Try to register all routes before the first access.', E_USER_WARNING);
         $this->callRegistrars([['registrar' => $registrar, 'attributes'=>$attributes]]);
-
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * @param Input $routable
-     *
-     * @return Input
-     *
-     * @throws ReflectionException
+     * @param Dispatcher $dispatcher
+     * @param string $clientType
+     * @return void
      */
-    public function route(Input $routable) : Input
+    public function fillDispatcher(Dispatcher $dispatcher, string $clientType)
     {
         $this->callRegistrarsOnce();
-        $clientType = $routable->getClientType() ?: Input::CLIENT_WEB;
-        $dispatcher = $this->getDispatcher($clientType);
-        $hit = $dispatcher->match($routable->getMethod(), (string)$routable->getUrl()->path);
-        $routeData = $hit->handler;
-
-        $scope = $routable->getRouteScope();
-
-        if ($routeData['scopes'] != ['*'] && !in_array((string)$scope, $routeData['scopes'])) {
-            throw new RouteNotFoundException("Route {$hit->pattern} is not allowed in scope $scope");
+        if (isset($this->compiledData[self::KEY_DISPATCHER_DATA][$clientType])) {
+            $dispatcher->fill($this->compiledData[self::KEY_DISPATCHER_DATA][$clientType]);
+            return;
         }
-
-        $parameters = $this->buildParameters($routeData['defaults'], $hit->parameters);
-
-        $route = new Route($routeData['methods'], $routeData['pattern'], $routeData['handler']);
-        $route->scope($routeData['scopes'])
-              ->clientType($routeData['clientTypes'])
-              ->middleware($routeData['middlewares'])
-              ->defaults($routeData['defaults'])
-              ->name($routeData['name']);
-
-        if (isset($routeData['command']) && $routeData['command'] instanceof Command) {
-            $route->command($routeData['command']);
+        foreach ($this->byClientType as $data) {
+            foreach ($data['methods'] as $method) {
+                $dispatcher->add($method, $data['pattern'], $data);
+            }
         }
-
-        return $routable->makeRouted($route, $this->makeHandler($routable, $route), $parameters);
-
     }
+
 
     /**
      * Retrieve an external iterator
@@ -175,6 +158,12 @@ class Router implements RouterContract, SupportsCustomFactory
     public function getByPattern(string $pattern, string $method=null, string $clientType=Input::CLIENT_WEB) : array
     {
         $this->callRegistrarsOnce();
+
+        // Small simplification when passing console method
+        if ($method === Input::CONSOLE && func_num_args() === 2) {
+            $clientType = Input::CLIENT_CONSOLE;
+        }
+
         if (!isset($this->byPattern[$clientType][$pattern])) {
             return [];
         }
@@ -256,32 +245,11 @@ class Router implements RouterContract, SupportsCustomFactory
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * @param string $clientType
-     *
-     * @return Dispatcher
+     * @return int
      */
-    public function getDispatcher(string $clientType) : Dispatcher
+    public function count() : int
     {
-        if (!isset($this->dispatchers[$clientType])) {
-            $this->dispatchers[$clientType] = call_user_func($this->dispatcherFactory, $clientType);
-        }
-        return $this->dispatchers[$clientType];
-    }
-
-    /**
-     * Use the router as normal middleware.
-     *
-     * @param Input $input
-     * @param callable $next
-     *
-     * @return Response
-     * @throws ReflectionException
-     */
-    public function __invoke(Input $input, callable $next)
-    {
-        return $next($this->route($input));
+        return count(iterator_to_array($this->getIterator()));
     }
 
     /**
@@ -291,7 +259,7 @@ class Router implements RouterContract, SupportsCustomFactory
      */
     protected function addRoute(Route $route)
     {
-//throw new \Exception('Why?');
+
         if (!$route->clientTypes) {
             $route->clientType(Input::CLIENT_WEB);
         }
@@ -304,11 +272,16 @@ class Router implements RouterContract, SupportsCustomFactory
         $this->allRoutes[] = $route;
 
         foreach ($data['clientTypes'] as $clientType) {
-            $dispatcher = $this->getDispatcher($clientType);
 
-            foreach ($data['methods'] as $method) {
-                $dispatcher->add($method, $data['pattern'], $data);
+            if (!isset($this->byClientType[$clientType])) {
+                $this->byClientType[$clientType] = [];
             }
+            $this->byClientType[$clientType][] = $data;
+            //$dispatcher = $this->getDispatcher($clientType);
+
+            //foreach ($data['methods'] as $method) {
+                //$dispatcher->add($method, $data['pattern'], $data);
+            //}
 
             if (!isset($this->byPattern[$clientType])) {
                 $this->byPattern[$clientType] = [];
@@ -347,21 +320,6 @@ class Router implements RouterContract, SupportsCustomFactory
     }
 
     /**
-     * Assign the callable that will create the dispatchers
-     *
-     * @param callable|null $factory (optional)
-     */
-    protected function installDispatcherFactory(callable $factory=null)
-    {
-        $this->dispatcherFactory = $factory ?: function ($clientType) {
-            if (in_array($clientType, [Input::CLIENT_CONSOLE, Input::CLIENT_TASK])) {
-                return $this->createObject(ConsoleDispatcher::class);
-            }
-            return $this->createObject(FastRouteDispatcher::class);
-        };
-    }
-
-    /**
      * Create the collector, which is usually the object registering your routes
      *
      * @param array $attributes (optional)
@@ -371,43 +329,6 @@ class Router implements RouterContract, SupportsCustomFactory
     protected function newCollector($attributes=[])
     {
         return new RouteCollector($attributes);
-    }
-
-    /**
-     * Merge default and calculated parameters,
-     *
-     * @param array $defaults
-     * @param array $routeParameters
-     *
-     * @return array
-     */
-    protected function buildParameters(array $defaults, array $routeParameters)
-    {
-        foreach ($defaults as $key=>$value) {
-            if (!isset($routeParameters[$key])) {
-                $routeParameters[$key] = $value;
-            }
-        }
-        return $routeParameters;
-    }
-
-    /**
-     * @param Input  $input
-     * @param Route  $route
-     *
-     * @return Lambda
-     *
-     * @throws ReflectionException
-     */
-    protected function makeHandler(Input $input, Route $route) : Lambda
-    {
-        $lambda = new Lambda($route->handler, $this->_customFactory);
-
-        if ($this->_customFactory) {
-            $lambda->autoInject(true, false);
-        }
-
-        return $lambda;
     }
 
     protected function callRegistrarsOnce()
@@ -426,8 +347,15 @@ class Router implements RouterContract, SupportsCustomFactory
     {
         foreach ($registrars as $info) {
             $collector = $this->newCollector($info['attributes']);
-            $info['registrar']($collector);
-            $this->addRoutes($collector);
+            $routes = $info['registrar']($collector);
+            if (!$collector->isEmpty()) {
+                $this->addRoutes($collector);
+                return;
+            }
+            if (is_iterable($routes)) {
+                $this->addRoutes($routes);
+                return;
+            }
         }
     }
 

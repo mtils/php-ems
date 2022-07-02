@@ -25,6 +25,7 @@ use function array_values;
 use function class_exists;
 use function explode;
 use function func_get_args;
+use function get_class;
 use function implode;
 use function is_numeric;
 use function strpos;
@@ -53,7 +54,6 @@ class InputHandlerIntegrationTest extends \Ems\IntegrationTest
     public function standard_routing_stack_routes_to_custom_controller()
     {
         $handler = $this->makeHandler();
-
         $router = $this->makeRouter();
 
         foreach (static::$testRoutes as $routeData) {

@@ -39,6 +39,11 @@ class ListenerContainer
     private $listeners = [];
 
     /**
+     * @var bool
+     */
+    private $muted = false;
+
+    /**
      * Add a $listener to $event on $position.
      *
      * @param string $event
@@ -151,6 +156,9 @@ class ListenerContainer
      */
     public function callByInheritance(string $abstract, $concrete, array $args=[], $positions=self::ON)
     {
+        if ($this->muted) {
+            return false;
+        }
         $called = false;
         $excludes = [];
         $positions = (array)$positions;
@@ -181,4 +189,17 @@ class ListenerContainer
 
     }
 
+    /**
+     * Call $run without running the normal hooks assigned to this listener container.
+     *
+     * @param callable $run
+     * @return mixed
+     */
+    public function secretly(callable $run)
+    {
+        $this->muted = true;
+        $result = $run();
+        $this->muted = false;
+        return $result;
+    }
 }

@@ -22,9 +22,15 @@ use function call_user_func;
 use function error_get_last;
 use function error_reporting;
 use function get_class;
+use function in_array;
 use function register_shutdown_function;
 use function set_error_handler;
 use function set_exception_handler;
+
+use const E_DEPRECATED;
+use const E_USER_DEPRECATED;
+use const E_USER_WARNING;
+use const E_WARNING;
 
 class ErrorHandler implements Extendable
 {
@@ -44,6 +50,11 @@ class ErrorHandler implements Extendable
      * @var null|bool
      */
     protected $logDeprecated;
+
+    /**
+     * @var bool
+     */
+    protected $logWarnings = true;
 
     /**
      * ErrorHandler constructor.
@@ -118,6 +129,10 @@ class ErrorHandler implements Extendable
         if (!(error_reporting() && $level)) {
             return;
         }
+        if (in_array($level,[E_WARNING, E_USER_WARNING])) {
+            $this->handleWarning($message, $file, $line, $context);
+            return;
+        }
         if (in_array($level,[E_DEPRECATED, E_USER_DEPRECATED])) {
             $this->handleDeprecatedError($message, $file, $line, $context);
             return;
@@ -174,6 +189,14 @@ class ErrorHandler implements Extendable
     }
 
     /**
+     * @return bool
+     */
+    public function shouldLogWarnings() : bool
+    {
+        return $this->logWarnings;
+    }
+
+    /**
      * @param bool $force
      * @return $this
      */
@@ -197,6 +220,20 @@ class ErrorHandler implements Extendable
             $responseFactory->setInput($input);
         }
         return $responseFactory->create($message)->withStatus($status);
+    }
+
+    /**
+     * @param string $message
+     * @param string $file
+     * @param int $line
+     * @param array $context
+     * @return void
+     */
+    protected function handleWarning(string $message, string $file = '', int $line = 0, array $context=[])
+    {
+        if ($this->shouldLogWarnings()) {
+            $this->app->log('warning',"Warning: " . $message . " in $file($line)");
+        }
     }
 
     /**

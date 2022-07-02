@@ -219,6 +219,21 @@ class Route implements Arrayable
     }
 
     /**
+     * @param array $properties
+     * @return Route
+     */
+    public static function fromArray(array $properties) : Route
+    {
+        $route = new static($properties['methods'], $properties['pattern'], $properties['handler']);
+        foreach ($route->_properties as $key=>$value) {
+            if (isset($properties[$key])) {
+                $route->_properties[$key] = $properties[$key];
+            }
+        }
+        return $route;
+    }
+
+    /**
      * Assign the http method(s) which should handled by this route
      *
      * @param array|string $method

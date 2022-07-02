@@ -7,6 +7,7 @@ namespace Ems\Routing\Skeleton;
 
 
 use Ems\Console\AnsiRenderer;
+use Ems\Contracts\Core\Filesystem;
 use Ems\Contracts\Routing\Dispatcher;
 use Ems\Contracts\Routing\Input;
 use Ems\Contracts\Routing\InputHandler as InputHandlerContract;
@@ -14,6 +15,13 @@ use Ems\Contracts\Routing\MiddlewareCollection as MiddlewareCollectionContract;
 use Ems\Contracts\Routing\ResponseFactory as ResponseFactoryContract;
 use Ems\Contracts\Routing\RouteCollector;
 use Ems\Contracts\Routing\Router as RouterContract;
+use Ems\Contracts\Routing\UrlGenerator as UrlGeneratorContract;
+use Ems\Core\Exceptions\UnsupportedParameterException;
+use Ems\Core\Serializer;
+use Ems\Core\Serializer\JsonSerializer;
+use Ems\Core\Storages\SingleFileStorage;
+use Ems\Core\Url;
+use Ems\Routing\CompilableRouter;
 use Ems\Routing\ConsoleDispatcher;
 use Ems\Routing\FastRoute\FastRouteDispatcher;
 use Ems\Routing\HttpInput;
@@ -25,12 +33,11 @@ use Ems\Routing\RouteMiddleware;
 use Ems\Routing\Router;
 use Ems\Routing\SessionHandler\FileSessionHandler;
 use Ems\Routing\SessionMiddleware;
+use Ems\Routing\UrlGenerator;
 use Ems\Skeleton\Bootstrapper;
 use Ems\Skeleton\Routing\RoutesConsoleView;
 use Ems\Skeleton\Routing\RoutesController;
 use Psr\Http\Message\RequestInterface;
-use Ems\Contracts\Routing\UrlGenerator as UrlGeneratorContract;
-use Ems\Routing\UrlGenerator;
 
 use function method_exists;
 use function php_sapi_name;
@@ -39,7 +46,6 @@ class RoutingBootstrapper extends Bootstrapper
 {
     protected $singletons = [
         InputHandler::class         => InputHandlerContract::class,
-        Router::class               => RouterContract::class,
         ResponseFactory::class      => ResponseFactoryContract::class
     ];
 
@@ -51,9 +57,27 @@ class RoutingBootstrapper extends Bootstrapper
 
     protected $defaultSessionClients = [Input::CLIENT_WEB, Input::CLIENT_CMS, Input::CLIENT_AJAX, Input::CLIENT_MOBILE];
 
+    protected $defaultConfig = [
+        'compile'       => false,
+        'cache_driver'  => 'file',
+        'cache_file'    => 'local/cache/routes.json'
+    ];
+
     public function bind()
     {
         parent::bind();
+
+        $this->container->share(RouterContract::class, function () {
+            return $this->createRouter();
+        });
+
+        $this->container->share(Router::class, function () {
+            return $this->container->get(RouterContract::class);
+        });
+
+        $this->container->bind(CompilableRouter::class, function () {
+            return $this->createCompilableRouter();
+        });
 
         $this->container->onAfter(ConsoleDispatcher::class, function (ConsoleDispatcher $dispatcher) {
             $dispatcher->setFallbackCommand('commands');
@@ -67,8 +91,55 @@ class RoutingBootstrapper extends Bootstrapper
             /** @noinspection PhpParamsInspection */
             $renderer->extend('routes.index', $this->container->create(RoutesConsoleView::class));
         });
+
+        $this->container->on(RouteCompileController::class, function (RouteCompileController $controller) {
+            $controller->setStorage($this->createCacheStorage($this->getRoutingConfig()));
+        });
+
         $this->addDefaultRoutes();
 
+    }
+
+    /**
+     * Create normal router if compilation is not wanted or cache file does not
+     * exist.
+     *
+     * @return Router
+     * @noinspection PhpIncompatibleReturnTypeInspection
+     */
+    protected function createRouter() : RouterContract
+    {
+        $config = $this->getRoutingConfig();
+
+        if (!$config['compile']) {
+            return $this->container->create(Router::class);
+        }
+
+        /** @var Filesystem $fileSystem */
+        $fileSystem = $this->container->get(Filesystem::class);
+
+        if (!$fileSystem->exists($config['cache_file'])) {
+            return $this->container->create(Router::class);
+        }
+
+        $storage = $this->createCacheStorage($this->getRoutingConfig());
+        $compiledData = $storage->toArray();
+
+        if (!isset($compiledData[CompilableRouter::KEY_VALID])) {
+            return $this->container->create(Router::class);
+        }
+
+        $router = $this->container->create(Router::class);
+        $compiled = $this->createCompilableRouter($router);
+        return $compiled->setCompiledData($compiledData);
+    }
+
+    /** @noinspection PhpIncompatibleReturnTypeInspection */
+    protected function createCompilableRouter(RouterContract $base=null) : CompilableRouter
+    {
+        return $this->container->create(CompilableRouter::class, [
+            'router'    => $base ?: $this->container->get(RouterContract::class)
+        ]);
     }
 
     protected function addDefaultMiddleware(MiddlewareCollectionContract $collection)
@@ -200,6 +271,72 @@ class RoutingBootstrapper extends Bootstrapper
              ->option('client=*', 'Routes of this client types', 'c')
              ->option('name=*', 'Routes with this name', 'n')
              ->option('scope=*', 'Routes of this scope', 's');
+
+            $routes->command(
+                'routes:compile',
+                [RouteCompileController::class, 'compile'],
+                'Optimize routes (compile them into a cache file)'
+            );
+
+            $routes->command(
+                'routes:compile-status',
+                [RouteCompileController::class, 'status'],
+                'Check if the rules were compiled'
+            );
+            $routes->command(
+                'routes:clear-compiled',
+                [RouteCompileController::class, 'clear'],
+                'Clear the compile route cache.'
+            );
         });
+    }
+
+    /**
+     * @return array
+     */
+    protected function getRoutingConfig() : array
+    {
+        if (!$appConfig = $this->app->config('routing')) {
+            return $this->defaultConfig;
+        }
+        $config = [];
+        foreach ($this->defaultConfig as $key=>$value) {
+            $config[$key] = $appConfig[$key] ?? $value;
+        }
+        if (isset($config['cache_file']) && $config['cache_file'][0] != '/') {
+            $config['cache_file'] = (string)$this->app->path($config['cache_file']);
+        }
+        return $config;
+    }
+
+    protected function createCacheStorage(array $config)
+    {
+        if (isset($config['cache_driver']) && $config['cache_driver'] != 'file') {
+            throw new UnsupportedParameterException('I only support cache files for route cache currently not ' . $config['cache_driver']);
+        }
+
+        /** @var Filesystem $fileSystem */
+        $fileSystem = $this->container->get(Filesystem::class);
+        $serializer = $this->createSerializer($fileSystem->extension($config['cache_file']));
+
+        /** @var SingleFileStorage $storage */
+        $storage = $this->container->create(SingleFileStorage::class, [
+            'filesystem'    => $fileSystem,
+            'serializer'    => $serializer
+        ]);
+        $storage->setUrl(new Url($config['cache_file']));
+        return $storage;
+    }
+
+    protected function createSerializer(string $extension)
+    {
+        if ($extension == 'json') {
+            return (new JsonSerializer())->asArrayByDefault(true);
+        }
+        if ($extension == 'phpdata') {
+            return new Serializer();
+        }
+
+        throw new UnsupportedParameterException("Unknown serialize extension '$extension'");
     }
 }

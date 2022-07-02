@@ -17,7 +17,7 @@ class RouteCollector implements IteratorAggregate
     /**
      * @var Route[]
      */
-    protected $routes;
+    protected $routes = [];
 
     /**
      * @var Command[]
@@ -183,6 +183,15 @@ class RouteCollector implements IteratorAggregate
                 $this->routes
             )
         );
+    }
+
+    /**
+     * Check if routes were added to this collector
+     * @return bool
+     */
+    public function isEmpty() : bool
+    {
+        return $this->routes === [];
     }
 
     /**

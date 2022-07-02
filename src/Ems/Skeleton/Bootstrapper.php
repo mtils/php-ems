@@ -59,6 +59,11 @@ class Bootstrapper
     protected $configuredRouters = [];
 
     /**
+     * @var callable[]
+     */
+    protected $routeLoaders = [];
+
+    /**
      * @param IOCContainer $container
      */
     public function __construct(IOCContainer $container)
@@ -79,6 +84,7 @@ class Bootstrapper
      */
     protected function addRoutesBy(callable $adder)
     {
+        $this->routeLoaders[] = $adder;
         $this->container->onAfter(Router::class, function (Router $router) use ($adder) {
             $routerId = spl_object_hash($router);
             if (isset($this->configuredRouters[$routerId])) {

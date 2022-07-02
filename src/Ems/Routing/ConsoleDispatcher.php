@@ -6,9 +6,12 @@
 namespace Ems\Routing;
 
 
+use Ems\Contracts\Routing\Command;
 use Ems\Contracts\Routing\Dispatcher;
 use Ems\Contracts\Routing\Exceptions\RouteNotFoundException;
 use Ems\Contracts\Routing\RouteHit;
+
+use function is_array;
 
 class ConsoleDispatcher implements Dispatcher
 {
@@ -71,7 +74,15 @@ class ConsoleDispatcher implements Dispatcher
      */
     public function fill(array $data)
     {
-        $this->routesByPattern = $data;
+        $casted = [];
+        foreach ($data as $pattern=>$info) {
+            if (isset($info['command']) && is_array($info['command'])) {
+                $info['command']['pattern'] = $pattern;
+                $info['command'] = Command::fromArray($info['command']);
+            }
+            $casted[$pattern] = $info;
+        }
+        $this->routesByPattern = $casted;
         return true;
     }
 
@@ -95,7 +106,7 @@ class ConsoleDispatcher implements Dispatcher
      **/
     public function toArray()
     {
-        RETURN $this->routesByPattern;
+        return $this->routesByPattern;
     }
 
     /**

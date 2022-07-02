@@ -9,6 +9,7 @@ use Ems\Contracts\Core\Url as UrlContract;
 use Ems\Contracts\Routing\Input;
 use Ems\Contracts\Routing\RouteCollector;
 use Ems\Contracts\Routing\Router as RouterContract;
+use Ems\Routing\RouteRegistry;
 use Ems\Core\Url;
 use Ems\Routing\GenericInput;
 use Ems\Routing\Router;
@@ -35,6 +36,15 @@ trait RoutingTrait
         return $router;
     }
 
+    protected function registry(bool $filled=false) : RouteRegistry
+    {
+        $registry = new RouteRegistry();
+        if ($filled) {
+            $this->fill($registry);
+        }
+        return $registry;
+    }
+
     /**
      * @beforeClass
      */
@@ -43,16 +53,16 @@ trait RoutingTrait
         static::$testRoutes = static::includeDataFile('routing/basic-routes.php');
     }
 
-    protected function fillIfNotFilled(RouterContract $router, array $controllerReplace=[])
+    protected function fillIfNotFilled($registry, array $controllerReplace=[])
     {
-        if (!$router->getByPattern('users')) {
-            $this->fill($router, $controllerReplace);
+        if (!$registry->getByPattern('users')) {
+            $this->fill($registry, $controllerReplace);
         }
     }
 
-    protected function fill(RouterContract $router, $controllerReplace=[])
+    protected function fill($registry, $controllerReplace=[])
     {
-        $router->register(function (RouteCollector $collector) use ($controllerReplace) {
+        $registry->register(function (RouteCollector $collector) use ($controllerReplace) {
             $this->fillCollector($collector, $controllerReplace);
         });
     }
