@@ -234,6 +234,105 @@ class Route implements Arrayable
     }
 
     /**
+     * Create a new GET route.
+     *
+     * @param string       $pattern
+     * @param mixed        $handler
+     *
+     * @return Route
+     */
+    public static function get(string $pattern, $handler) : Route
+    {
+        return new static(Input::GET, $pattern, $handler);
+    }
+
+    /**
+     * Create a new POST route.
+     *
+     * @param string       $pattern
+     * @param mixed        $handler
+     *
+     * @return Route
+     */
+    public static function post(string $pattern, $handler) : Route
+    {
+        return new static(Input::POST, $pattern, $handler);
+    }
+
+    /**
+     * Create a new PUT route.
+     *
+     * @param string       $pattern
+     * @param mixed        $handler
+     *
+     * @return Route
+     */
+    public static function put(string $pattern, $handler) : Route
+    {
+        return new static(Input::PUT, $pattern, $handler);
+    }
+
+    /**
+     * Create a new DELETE route.
+     *
+     * @param string       $pattern
+     * @param mixed        $handler
+     *
+     * @return Route
+     */
+    public static function delete(string $pattern, $handler) : Route
+    {
+        return new static(Input::DELETE, $pattern, $handler);
+    }
+
+    /**
+     * Create a new PATCH route.
+     *
+     * @param string       $pattern
+     * @param mixed        $handler
+     *
+     * @return Route
+     */
+    public static function patch(string $pattern, $handler) : Route
+    {
+        return new static(Input::PATCH, $pattern, $handler);
+    }
+
+    /**
+     * Create a new OPTIONS route.
+     *
+     * @param string       $pattern
+     * @param mixed        $handler
+     *
+     * @return Route
+     */
+    public static function options(string $pattern, $handler) : Route
+    {
+        return new static(Input::OPTIONS, $pattern, $handler);
+    }
+
+    /**
+     * Create a new console route (and command)
+     *
+     * @param string $pattern
+     * @param mixed  $handler
+     * @param string $description (optional)
+     *
+     * @return Route
+     */
+    public static function console(string $pattern, $handler, string $description='') : Route
+    {
+        $command = new Command($pattern, $description);
+        $command->argument('command', 'The command name that should be executed');
+
+        $route = new static(Input::CONSOLE, $pattern, $handler);
+        $route->clientType(Input::CLIENT_CONSOLE)
+            ->name($pattern)
+            ->command($command);
+        return $route;
+    }
+
+    /**
      * Assign the http method(s) which should handled by this route
      *
      * @param array|string $method

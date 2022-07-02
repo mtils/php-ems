@@ -30,7 +30,7 @@ use function implode;
 use function is_callable;
 use function iterator_to_array;
 
-class RouterTest extends TestCase
+class RouterWithRegistryTest extends TestCase
 {
     use RoutingTrait;
 

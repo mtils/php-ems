@@ -277,11 +277,6 @@ class RouteRegistry implements RouteRegistryContract
                 $this->byClientType[$clientType] = [];
             }
             $this->byClientType[$clientType][] = $data;
-            //$dispatcher = $this->getDispatcher($clientType);
-
-            //foreach ($data['methods'] as $method) {
-                //$dispatcher->add($method, $data['pattern'], $data);
-            //}
 
             if (!isset($this->byPattern[$clientType])) {
                 $this->byPattern[$clientType] = [];
@@ -326,7 +321,7 @@ class RouteRegistry implements RouteRegistryContract
      *
      * @return RouteCollector
      */
-    protected function newCollector($attributes=[])
+    protected function newCollector($attributes=[]) : RouteCollector
     {
         return new RouteCollector($attributes);
     }
@@ -336,7 +331,7 @@ class RouteRegistry implements RouteRegistryContract
         if ($this->registrarsCalled) {
             return;
         }
-        //throw new Exception('Why call registrars?');
+
         $this->registrarsCalled = true;
 
         $this->callRegistrars($this->registrars);

@@ -78,13 +78,49 @@ class RouteRegistryTest extends TestCase
     /**
      * @test
      */
+    public function register_without_collector()
+    {
+
+        $registry = $this->registry();
+
+        $registry->register(function () {
+            return [
+                Route::get('addresses', 'AddressController::index')
+                    ->name('addresses.index')
+                    ->scope('default', 'admin')
+                    ->middleware('auth'),
+                Route::get(
+                    'addresses/{address}/edit',
+                    'AddressController::edit'
+                )
+                    ->name('addresses.edit')
+                    ->scope('default', 'admin')
+                    ->middleware('auth'),
+                Route::put(
+                    'addresses[/{type}]',
+                    'AddressController::updateDelivery'
+                )
+                    ->name('addresses.update')
+                    ->scope('default', 'admin')
+                    ->middleware('auth')
+                    ->defaults(['type' => 'main'])
+            ];
+        });
+
+        foreach (['index', 'edit', 'update'] as $action) {
+            $this->assertEquals(['web'], $registry->getByName("addresses.$action")->clientTypes);
+        }
+    }
+
+    /**
+     * @test
+     */
     public function register_with_common_client_type()
     {
 
         $registry = $this->registry();
 
         $registry->register(function (RouteCollector $collector) {
-
             $collector->get('addresses', 'AddressController::index')
                 ->name('addresses.index')
                 ->scope('default', 'admin')
@@ -514,9 +550,7 @@ class RouteRegistryTest extends TestCase
                 ->middleware('auth');
         });
 
-        $routes = iterator_to_array($registry);
-
-        $this->assertCount(2, $routes);
+        $this->assertCount(2, $registry);
 
         $commandRoute = $registry->getByPattern('addresses:index', Input::CONSOLE)[0];
         $webRoute = $registry->getByName('addresses.index');
@@ -557,9 +591,7 @@ class RouteRegistryTest extends TestCase
                 ->command('addresses:index');
         });
 
-        $routes = iterator_to_array($registry);
-
-        $this->assertCount(2, $routes);
+        $this->assertCount(2, $registry);
 
         $consoleRoute = $registry->getByPattern('addresses:index', Input::CONSOLE)[0];
         $webRoute = $registry->getByName('addresses.index');
