@@ -160,4 +160,16 @@ trait RoutingTrait
             return $this->httpDispatcher($routes, $clientType);
         };
     }
+
+    /**
+     * @param Route[] $knownRoutes
+     * @param Route[] $routes
+     * @return void
+     */
+    protected function assertRoutesEquals(array $knownRoutes, array $routes)
+    {
+        foreach ($knownRoutes as $i=>$route) {
+            $this->assertEquals($route->toArray(), $routes[$i]->toArray());
+        }
+    }
 }

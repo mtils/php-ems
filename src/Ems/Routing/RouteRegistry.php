@@ -11,6 +11,7 @@ use Ems\Contracts\Routing\Dispatcher;
 use Ems\Contracts\Routing\Input;
 use Ems\Contracts\Routing\Route;
 use Ems\Contracts\Routing\RouteCollector;
+use Ems\Contracts\Routing\Router as RouterContract;
 use Ems\Contracts\Routing\RouteRegistry as RouteRegistryContract;
 use Ems\Core\Exceptions\KeyNotFoundException;
 use OutOfBoundsException;
@@ -121,7 +122,6 @@ class RouteRegistry implements RouteRegistryContract
             }
         }
     }
-
 
     /**
      * Retrieve an external iterator
@@ -243,6 +243,61 @@ class RouteRegistry implements RouteRegistryContract
     }
 
     /**
+     * Compile all route data into array.
+     *
+     * @param RouterContract $router
+     * @return array
+     */
+    public function compile(RouterContract $router) : array
+    {
+        $this->callRegistrarsOnce();
+
+        $compiled = [];
+
+        $compiled[self::KEY_ALL] = $this->allRoutes;
+        $compiled[self::KEY_BY_PATTERN] = $this->byPattern;
+        $compiled[self::KEY_BY_NAME] = $this->byName;
+        $compiled[self::KEY_BY_ENTITY_ACTION] = $this->byEntity;
+        $compiled[self::KEY_DISPATCHER_DATA] = [];
+
+        foreach ($this->clientTypes() as $clientType) {
+            $dispatcher = $router->getDispatcher($clientType);
+            $this->fillDispatcher($dispatcher, $clientType);
+            $compiled[self::KEY_DISPATCHER_DATA][$clientType] = $dispatcher->toArray();
+        }
+
+        $compiled[self::KEY_VALID] = true;
+
+        return $compiled;
+    }
+
+    /**
+     * Get the previously assigned compiled data.
+     *
+     * @return array
+     */
+    public function getCompiledData() : array
+    {
+        return $this->compiledData;
+    }
+
+    /**
+     * Set the previously by compile() generated array.
+     *
+     * @param $compiledData
+     * @return $this
+     */
+    public function setCompiledData(&$compiledData) : RouteRegistry
+    {
+        $this->compiledData = &$compiledData;
+        $this->allRoutes = $compiledData[self::KEY_ALL];
+        $this->byPattern = $compiledData[self::KEY_BY_PATTERN];
+        $this->byName = $compiledData[self::KEY_BY_NAME];
+        $this->byEntity = $compiledData[self::KEY_BY_ENTITY_ACTION];
+        return $this;
+    }
+
+    /**
      * Add a route to all places were it is needed.
      *
      * @param Route   $route
@@ -318,7 +373,7 @@ class RouteRegistry implements RouteRegistryContract
 
     protected function callRegistrarsOnce()
     {
-        if ($this->registrarsCalled) {
+        if ($this->registrarsCalled || isset($this->compiledData[self::KEY_VALID])) {
             return;
         }
 

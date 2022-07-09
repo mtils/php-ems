@@ -705,6 +705,125 @@ class RouteRegistryTest extends TestCase
 
     }
 
+    /**
+     * @test
+     */
+    public function compiled_registry_loads_routes_by_name()
+    {
+        $base = $this->registry(true);
+        $router = $this->router();
+
+
+        $compiledData = $base->compile($router);
+
+        $this->assertTrue($compiledData[RouteRegistry::KEY_VALID]);
+
+        $optimized = new RouteRegistryTest_Registry();
+        $optimized->setCompiledData($compiledData);
+
+        $route = $optimized->getByName('users.index');
+        $this->assertInstanceOf(Route::class, $route);
+        $this->assertEquals('users.index', $route->name);
+        $this->assertFalse($optimized->wasRegistrarsCalled(), 'The registry should not call registrars when filled by compiled data');
+
+    }
+
+    /**
+     * @test
+     */
+    public function compiled_registry_loads_all_routes()
+    {
+        $base = $this->registry(true);
+        $router = $this->router();
+
+
+        $compiledData = $base->compile($router);
+
+        $this->assertTrue($compiledData[RouteRegistry::KEY_VALID]);
+
+        $optimized = new RouteRegistryTest_Registry();
+        $optimized->setCompiledData($compiledData);
+
+        $baseArray = iterator_to_array($base);
+        $optimizedArray = iterator_to_array($optimized);
+
+        foreach ($baseArray as $i=>$route) {
+            $this->assertEquals($route->toArray(), $optimizedArray[$i]->toArray());
+        }
+
+        $this->assertFalse($optimized->wasRegistrarsCalled(), 'The registry should not call registrars when filled by compiled data');
+
+    }
+
+    /**
+     * @test
+     */
+    public function compiled_registry_loads_all_clientTypes()
+    {
+        $base = $this->registry(true);
+        $router = $this->router();
+
+        $compiledData = $base->compile($router);
+
+        $this->assertTrue($compiledData[RouteRegistry::KEY_VALID]);
+
+        $optimized = new RouteRegistryTest_Registry();
+        $optimized->setCompiledData($compiledData);
+
+        $this->assertEquals($base->clientTypes(), $optimized->clientTypes());
+
+        $this->assertFalse($optimized->wasRegistrarsCalled(), 'The registry should not call registrars when filled by compiled data');
+
+    }
+
+    /**
+     * @test
+     */
+    public function compiled_registry_gets_route_by_pattern()
+    {
+        $base = $this->registry(true);
+        $router = $this->router();
+
+        $compiled = $base->compile($router);
+        $optimized = (new RouteRegistryTest_Registry())->setCompiledData($compiled);
+
+        $this->assertRoutesEquals($base->getByPattern('users/create'), $optimized->getByPattern('users/create'));
+
+        $this->assertRoutesEquals($base->getByPattern('users'), $optimized->getByPattern('users'));
+
+        $this->assertRoutesEquals($base->getByPattern('users', 'GET'), $optimized->getByPattern('users', 'GET'));
+
+        $this->assertRoutesEquals($base->getByPattern('foo'), $optimized->getByPattern('foo'));
+
+        $this->assertFalse($optimized->wasRegistrarsCalled(), 'The registry should not call registrars when filled by compiled data');
+    }
+
+    /**
+     * @test
+     */
+    public function compiled_registry_returns_by_entity_action()
+    {
+        $base = $this->registry(true);
+
+        $base->register(function (RouteCollector $collector) {
+            $collector->get('registrations/create', 'UserController@register')
+                ->entity('User', 'register');
+        });
+
+        $compiled = $base->compile($this->router());
+
+        $optimized = (new RouteRegistryTest_Registry())->setCompiledData($compiled);
+
+        $this->assertEquals($base->getByEntityAction('User', 'register')->toArray(), $optimized->getByEntityAction('User', 'register')->toArray());
+
+        $this->assertEquals($compiled, $optimized->getCompiledData());
+
+        $this->expectException(OutOfBoundsException::class);
+        $optimized->getByEntityAction('Duck');
+
+        $this->assertFalse($optimized->wasRegistrarsCalled(), 'The registry should not call registrars when filled by compiled data');
+
+    }
 }
 
 class RegistryTest_Address
@@ -732,5 +851,13 @@ class RouteRegistryTest_TestController
     public function store()
     {
         return 'update was called: ' . implode(',', func_get_args());
+    }
+}
+
+class RouteRegistryTest_Registry extends RouteRegistry
+{
+    public function wasRegistrarsCalled() : bool
+    {
+        return $this->registrarsCalled;
     }
 }

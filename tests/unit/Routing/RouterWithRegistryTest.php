@@ -697,6 +697,78 @@ class RouterWithRegistryTest extends TestCase
 
     }
 
+    /**
+     * @test
+     * @throws ReflectionException
+     */
+    public function it_does_not_call_registrars_when_compiled_and_handles_routes()
+    {
+
+        $router = $this->router();
+        $router->createObjectsBy(function ($class) {
+            return new $class;
+        });
+
+        $registry = $this->registry();
+
+        $registry->register(function (RouteCollector $collector) {
+
+            $collector->get('addresses', RouterWithRegistryTest_TestController::class.'->index')
+                ->name('addresses.index')
+                ->scope('default', 'admin')
+                ->clientType('web', 'api')
+                ->middleware('auth');
+
+            $collector->get('addresses/{address}/edit', RouterWithRegistryTest_TestController::class.'->edit')
+                ->name('addresses.edit')
+                ->scope('default', 'admin')
+                ->clientType('web', 'api')
+                ->middleware('auth');
+
+            $collector->put('addresses/{address}/edit', RouterWithRegistryTest_TestController::class.'->update')
+                ->name('addresses.update')
+                ->scope('default', 'admin')
+                ->clientType('web', 'api')
+                ->middleware('auth');
+        });
+
+
+        $compiledData = $registry->compile($this->router());
+
+        $optimized = (new RouteWithRegistryTest_Registry())->setCompiledData($compiledData);
+
+        $router->fillDispatchersBy([$optimized, 'fillDispatcher']);
+
+        $routable = $this->routable('addresses/112/edit');
+        $router->route($routable);
+
+        $this->assertEquals(Input::CLIENT_WEB, $routable->getClientType());
+        $this->assertEquals('GET', $routable->getMethod());
+        $this->assertEquals('default', (string)$routable->getRouteScope());
+        $this->assertInstanceOf(RouteScope::class, $routable->getRouteScope());
+        $this->assertInstanceOf(UrlContract::class, $routable->getUrl());
+        $this->assertEquals('addresses/112/edit', (string)$routable->getUrl());
+        $this->assertEquals(['address' => 112], $routable->getRouteParameters());
+
+        $route = $routable->getMatchedRoute();
+
+        $this->assertEquals(RouterWithRegistryTest_TestController::class . '->edit', $route->handler);
+        $this->assertEquals('addresses.edit', $route->name);
+        $this->assertEquals([], $route->defaults);
+        $this->assertEquals(['GET'], $route->methods);
+        $this->assertEquals(['web', 'api'], $route->clientTypes);
+        $this->assertEquals(['auth'], $route->middlewares);
+        $this->assertEquals(['default', 'admin'], $route->scopes);
+        $this->assertEquals('addresses/{address}/edit', $route->pattern);
+        $this->assertTrue($routable->isRouted());
+        $handler = $routable->getHandler();
+        $this->assertInstanceOf(Lambda::class, $handler);
+        $this->assertEquals('edit was called: 112' , $handler(...array_values($routable->getRouteParameters())));
+
+        $this->assertFalse($optimized->wasRegistrarsCalled(), 'The registry should not call registrars when filled by compiled data');
+
+    }
+
 }
 
 class RouterWithRegistryTest_TestController
@@ -714,5 +786,13 @@ class RouterWithRegistryTest_TestController
     public function store()
     {
         return 'update was called: ' . implode(',', func_get_args());
+    }
+}
+
+class RouteWithRegistryTest_Registry extends RouteRegistry
+{
+    public function wasRegistrarsCalled() : bool
+    {
+        return $this->registrarsCalled;
     }
 }
