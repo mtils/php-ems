@@ -8,7 +8,7 @@ namespace Ems\Routing;
 use ArrayIterator;
 use Ems\Contracts\Model\Search;
 use Ems\Contracts\Routing\Route;
-use Ems\Contracts\Routing\Router as RouterContract;
+use Ems\Contracts\Routing\RouteRegistry as RouteRegistryContract;
 use UnexpectedValueException;
 
 use function array_key_exists;
@@ -62,18 +62,18 @@ class RouteSearch implements Search
     protected $keys = [];
 
     /**
-     * @var RouterContract
+     * @var RouteRegistryContract
      */
-    protected $router;
+    protected $registry;
 
     /**
      * @var object|null
      */
     protected $creator;
 
-    public function __construct(RouterContract $router)
+    public function __construct(RouteRegistryContract $registry)
     {
-        $this->router = $router;
+        $this->registry = $registry;
     }
 
     /**
@@ -202,7 +202,7 @@ class RouteSearch implements Search
         $this->parseInput();
         $rows = [];
         /** @var Route $route */
-        foreach ($this->router as $route) {
+        foreach ($this->registry as $route) {
             if ($this->matches($route, $this->filters)) {
                 $rows[] = $route;
             }

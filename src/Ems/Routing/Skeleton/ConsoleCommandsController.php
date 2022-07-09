@@ -13,6 +13,7 @@ use Ems\Contracts\Routing\Exceptions\RouteNotFoundException;
 use Ems\Contracts\Routing\Input;
 use Ems\Contracts\Routing\Route;
 use Ems\Contracts\Routing\Router;
+use Ems\Contracts\Routing\RouteRegistry;
 use Ems\Core\Helper;
 use Ems\Routing\ArgvInput;
 use Ems\Skeleton\Connection\ConsoleOutputConnection;
@@ -32,15 +33,15 @@ class ConsoleCommandsController
      * Show all console commands.
      *
      * @param Input $input
-     * @param Router $router
+     * @param RouteRegistry $registry
      * @param ConsoleOutputConnection $out
      */
     public function index(
         Input $input,
-        Router $router,
+        RouteRegistry $registry,
         ConsoleOutputConnection $out
     ) {
-        $commands = $this->getConsoleCommands($router);
+        $commands = $this->getConsoleCommands($registry);
         $maxLength = $this->longestCommandLength($commands);
         $padLength = $maxLength + 8;
         $pattern = trim($input->get('pattern', ''));
@@ -62,17 +63,17 @@ class ConsoleCommandsController
      * Show help for a single command.
      *
      * @param ArgvInput $input
-     * @param Router $router
+     * @param RouteRegistry $registry
      * @param ConsoleOutputConnection $out
      */
     public function show(
         ArgvInput $input,
-        Router $router,
+        RouteRegistry $registry,
         ConsoleOutputConnection $out,
         AnsiRenderer $renderer
     ) {
         $command = $input->argument('command_name');
-        $commands = $this->getConsoleCommands($router);
+        $commands = $this->getConsoleCommands($registry);
 
         $indentSize = 2;
         $indent = str_repeat(' ', $indentSize);
@@ -113,16 +114,16 @@ class ConsoleCommandsController
     }
 
     /**
-     * @param Router $router
+     * @param RouteRegistry $registry
      *
      * @return Command[]
      */
-    protected function getConsoleCommands(Router $router): array
+    protected function getConsoleCommands(RouteRegistry $registry): array
     {
         $consoleCommands = [];
 
         /** @var Route $route */
-        foreach ($router as $route) {
+        foreach ($registry as $route) {
             if (in_array(
                     Input::CLIENT_CONSOLE,
                     $route->clientTypes
