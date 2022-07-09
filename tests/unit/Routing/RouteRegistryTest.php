@@ -6,25 +6,22 @@
 namespace Ems\Routing;
 
 use Ems\Contracts\Core\Errors\NotFound;
-use Ems\Contracts\Core\Url as UrlContract;
 use Ems\Contracts\Routing\Command;
 use Ems\Contracts\Routing\Input;
 use Ems\Contracts\Routing\Route;
 use Ems\Contracts\Routing\RouteCollector;
 use Ems\Contracts\Routing\Router as RouterContract;
-use Ems\Contracts\Routing\RouteScope;
-use Ems\Core\Exceptions\KeyNotFoundException;
-use Ems\Routing\RouteRegistry;
 use Ems\Contracts\Routing\RouteRegistry as RegistryContract;
+use Ems\Core\Exceptions\KeyNotFoundException;
 use Ems\RoutingTrait;
 use Ems\TestCase;
 use LogicException;
 use OutOfBoundsException;
 use ReflectionException;
 
-use function is_callable;
+use function func_get_args;
+use function implode;
 use function iterator_to_array;
-use function var_dump;
 
 class RouteRegistryTest extends TestCase
 {
@@ -492,21 +489,21 @@ class RouteRegistryTest extends TestCase
         $registry->register(function (RouteCollector $collector) {
 
             $collector->get('addresses',
-                            RouterTest_TestController::class . '->index')
+                            RouteRegistryTest_TestController::class . '->index')
                 ->name('addresses.index')
                 ->scope('default', 'admin')
                 ->clientType('web', 'api')
                 ->middleware('auth');
 
             $collector->get('addresses/{address}/edit',
-                            RouterTest_TestController::class . '->edit')
+                            RouteRegistryTest_TestController::class . '->edit')
                 ->name('addresses.edit')
                 ->scope('default', 'admin')
                 ->clientType('web', 'api')
                 ->middleware('auth');
 
             $collector->put('addresses/{address}/edit',
-                            RouterTest_TestController::class . '->update')
+                            RouteRegistryTest_TestController::class . '->update')
                 ->name('addresses.update')
                 ->scope('default', 'admin')
                 ->clientType('web', 'api')
@@ -718,4 +715,22 @@ class RegistryTest_Address
 class RegistryTest_CustomAddress extends RegistryTest_Address
 {
 
+}
+
+class RouteRegistryTest_TestController
+{
+    public function index()
+    {
+        return 'index was called: ' . implode(',', func_get_args());
+    }
+
+    public function edit()
+    {
+        return 'edit was called: ' . implode(',', func_get_args());
+    }
+
+    public function store()
+    {
+        return 'update was called: ' . implode(',', func_get_args());
+    }
 }

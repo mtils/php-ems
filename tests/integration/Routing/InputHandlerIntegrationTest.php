@@ -8,6 +8,7 @@ namespace Ems\Routing;
 use ArgumentCountError;
 use Ems\Cache\Exception\CacheMissException;
 use Ems\Contracts\Core\Filesystem;
+use Ems\Contracts\Routing\RouteRegistry as RouteRegistryContract;
 use Ems\Core\Response;
 use Ems\Contracts\Core\StringConverter;
 use Ems\Contracts\Core\TextFormatter;
@@ -95,20 +96,19 @@ class InputHandlerIntegrationTest extends \Ems\IntegrationTest
 
     /**
      * @test
-     * @expectedException  \Ems\Cache\Exception\CacheMissException
      */
     public function exceptions_are_thrown_without_an_assigned_handler()
     {
         $handler = $this->makeHandler();
 
-        $router = $this->makeRouter(false);
-
-        $router->register(function (RouteCollector $routes) {
+        $registry = $this->app(RouteRegistryContract::class);
+        $registry->register(function (RouteCollector $routes) {
             $routes->get('foo', function () {
                 throw new CacheMissException();
             });
         });
 
+        $this->expectException(CacheMissException::class);
         $handler($this->input('foo'));
 
     }
@@ -124,9 +124,9 @@ class InputHandlerIntegrationTest extends \Ems\IntegrationTest
         }
         $handler = $this->makeHandler();
 
-        $router = $this->makeRouter(false);
+        $registry = $this->app(RouteRegistryContract::class);
 
-        $router->register(function (RouteCollector $routes) {
+        $registry->register(function (RouteCollector $routes) {
             $routes->get('foo', function () {
                 throw new ArgumentCountError();
             });
@@ -156,9 +156,11 @@ class InputHandlerIntegrationTest extends \Ems\IntegrationTest
         $this->assertSame($errorHandler, $handler->getExceptionHandler());
 
         $exception = new CacheMissException();
-        $router = $this->makeRouter(false);
 
-        $router->register(function (RouteCollector $routes) use ($exception) {
+        /** @var RouteRegistryContract $registry */
+        $registry = $this->app(RouteRegistryContract::class);
+
+        $registry->register(function (RouteCollector $routes) use ($exception) {
             $routes->get('foo', function () use ($exception) {
                 throw $exception;
             });
@@ -190,9 +192,11 @@ class InputHandlerIntegrationTest extends \Ems\IntegrationTest
         $this->assertSame($errorHandler, $handler->getExceptionHandler());
 
         $exception = new ArgumentCountError();
-        $router = $this->makeRouter(false);
 
-        $router->register(function (RouteCollector $routes) use ($exception) {
+        /** @var RouteRegistryContract $registry */
+        $registry = $this->app(RouteRegistryContract::class);
+
+        $registry->register(function (RouteCollector $routes) use ($exception) {
             $routes->get('foo', function () use ($exception) {
                 throw $exception;
             });
@@ -210,7 +214,6 @@ class InputHandlerIntegrationTest extends \Ems\IntegrationTest
     public function route_middleware_runs_assigned_middleware()
     {
         $handler = $this->makeHandler();
-        $router = $this->makeRouter(false);
         $app = $this->app();
 
         $app->bind('require-auth', function () {
@@ -220,7 +223,10 @@ class InputHandlerIntegrationTest extends \Ems\IntegrationTest
             };
         });
 
-        $router->register(function (RouteCollector $routes) {
+        /** @var RouteRegistryContract $registry */
+        $registry = $this->app(RouteRegistryContract::class);
+
+        $registry->register(function (RouteCollector $routes) {
             $routes->get('my-account', function (Input $input) {
                 return 'my-account was called and ' . $input['i_was_here'];
             })->middleware('require-auth');
@@ -238,7 +244,6 @@ class InputHandlerIntegrationTest extends \Ems\IntegrationTest
     public function route_middleware_runs_assigned_middleware_with_parameters()
     {
         $handler = $this->makeHandler();
-        $router = $this->makeRouter(false);
         $app = $this->app();
 
         $app->bind('require-auth', function () {
@@ -248,7 +253,10 @@ class InputHandlerIntegrationTest extends \Ems\IntegrationTest
             };
         });
 
-        $router->register(function (RouteCollector $routes) {
+        /** @var RouteRegistryContract $registry */
+        $registry = $this->app(RouteRegistryContract::class);
+
+        $registry->register(function (RouteCollector $routes) {
             $routes->get('my-account', function (Input $input) {
                 return 'my-account was called and ' . $input['i_was_here'];
             })->middleware('require-auth:a,b');
@@ -266,7 +274,6 @@ class InputHandlerIntegrationTest extends \Ems\IntegrationTest
     public function route_middleware_runs_multiple_assigned_middleware_with_parameters()
     {
         $handler = $this->makeHandler();
-        $router = $this->makeRouter(false);
         $app = $this->app();
 
         $app->bind('require-auth', function () {
@@ -283,7 +290,10 @@ class InputHandlerIntegrationTest extends \Ems\IntegrationTest
             };
         });
 
-        $router->register(function (RouteCollector $routes) {
+        /** @var RouteRegistryContract $registry */
+        $registry = $this->app(RouteRegistryContract::class);
+
+        $registry->register(function (RouteCollector $routes) {
             $routes->get('my-account', function (Input $input) {
                 return 'my-account was called and ' . $input['i_was_here'] . '--' . $input['i_was_here2'];
             })->middleware('require-auth:a,b', 'require-role:moderator');
@@ -301,7 +311,8 @@ class InputHandlerIntegrationTest extends \Ems\IntegrationTest
     public function route_middleware_skips_routed_if_response_returned()
     {
         $handler = $this->makeHandler();
-        $router = $this->makeRouter(false);
+        /** @var RouteRegistryContract $registry */
+        $registry = $this->app(RouteRegistryContract::class);
         $app = $this->app();
 
         $app->bind('require-token', function () {
@@ -310,7 +321,7 @@ class InputHandlerIntegrationTest extends \Ems\IntegrationTest
             };
         });
 
-        $router->register(function (RouteCollector $routes) {
+        $registry->register(function (RouteCollector $routes) {
             $routes->get('my-account', function (Input $input) {
                 return 'my-account was called';
             })->middleware('require-token');
@@ -346,9 +357,11 @@ class InputHandlerIntegrationTest extends \Ems\IntegrationTest
     {
         /** @var RouterContract $router */
         $router = $this->app(RouterContract::class);
+        $registry = $this->registry();
         if ($filled) {
-            $this->fillIfNotFilled($router, $controllerReplace ?: $this->controllerReplace);
+            $this->fillIfNotFilled($registry, $controllerReplace ?: $this->controllerReplace);
         }
+        $router->fillDispatchersBy([$registry, 'fillDispatcher']);
         return $router;
     }
 

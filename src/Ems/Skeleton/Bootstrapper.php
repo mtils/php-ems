@@ -3,7 +3,7 @@
 namespace Ems\Skeleton;
 
 use Ems\Contracts\Core\IOCContainer;
-use Ems\Contracts\Routing\Router;
+use Ems\Contracts\Routing\RouteRegistry;
 
 use function defined;
 use function function_exists;
@@ -56,7 +56,7 @@ class Bootstrapper
      *
      * @var array
      */
-    protected $configuredRouters = [];
+    protected $configuredRegistries = [];
 
     /**
      * @var callable[]
@@ -85,13 +85,13 @@ class Bootstrapper
     protected function addRoutesBy(callable $adder)
     {
         $this->routeLoaders[] = $adder;
-        $this->container->onAfter(Router::class, function (Router $router) use ($adder) {
-            $routerId = spl_object_hash($router);
-            if (isset($this->configuredRouters[$routerId])) {
+        $this->container->onAfter(RouteRegistry::class, function (RouteRegistry $registry) use ($adder) {
+            $routerId = spl_object_hash($registry);
+            if (isset($this->configuredRegistries[$routerId])) {
                 return;
             }
-            $this->configuredRouters[$routerId] = true;
-            $router->register($adder);
+            $this->configuredRegistries[$routerId] = true;
+            $registry->register($adder);
         });
     }
 

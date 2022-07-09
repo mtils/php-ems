@@ -5,10 +5,7 @@
 
 namespace Ems\Contracts\Routing;
 
-
-use IteratorAggregate;
-
-interface Router extends IteratorAggregate
+interface Router
 {
     /**
      * The key for passing common middleware attributes in register().
@@ -43,30 +40,6 @@ interface Router extends IteratorAggregate
     const CONTROLLER = 'controller';
 
     /**
-     * Pass a callable that will register routes. The callable will be called
-     * with a RouteCollector instance that allows to add your routes.
-     *
-     * @example $router->register(function (RouteCollector $routes) {
-     *     $routes->get('foo', 'BarController->fooAction');
-     * });
-     *
-     * Why not directly assign routes? This is a performance decision. If you
-     * cache your routes the Router can skip every call inside your callable.
-     * So be aware to only register inside this callable. The whole code will be
-     * skipped on cached requests.
-     * There is also no guaranty that the passed callable will be called directly.
-     * The router should call all registrars when the routes are needed, not
-     * before.
-     *
-     * The second parameter is for passing common attributes for all routes
-     * you register in your callable.
-     *
-     * @param callable $registrar
-     * @param array    $attributes (optional)
-     */
-    public function register(callable $registrar, array $attributes=[]);
-
-    /**
      * Make the routable routed. At the end find a route and a handler, assign it
      * to the passed routable. It returns the result of Input::makeRouted() so
      * depending on the input you will get a new instance. (immutable input)
@@ -76,48 +49,6 @@ interface Router extends IteratorAggregate
      * @return Input
      */
     public function route(Input $routable) : Input;
-
-    /**
-     * Get all routes that have $pattern. Optionally pass a (http) $method to
-     * further narrow down the result.
-     *
-     * @param string        $pattern
-     * @param string|null   $method
-     * @param string        $clientType
-     *
-     * @return Route[]
-     */
-    public function getByPattern(string $pattern, string $method=null, string $clientType=Input::CLIENT_WEB) : array;
-
-    /**
-     * Get a route by its name.
-     *
-     * @param string $name
-     * @param string $clientType
-     *
-     * @return Route
-     */
-    public function getByName(string $name, string $clientType=Input::CLIENT_WEB) : Route;
-
-    /**
-     * Get a route by an entity action. Pass a or interface class name for absolute
-     * equal comparison. Pass an object to get the route of classes or
-     * interfaces this objects implements or extends.
-     *
-     * @param object|string $entity
-     * @param string $action
-     * @param string $clientType
-     *
-     * @return Route
-     */
-    public function getByEntityAction($entity, string $action='index', string $clientType=Input::CLIENT_WEB) : Route;
-
-    /**
-     * Return all known unique client types (by route registrations)
-     *
-     * @return string[]
-     */
-    public function clientTypes() : array;
 
     /**
      * Return the dispatcher for $clientType. This is needed for the UrlGenerator

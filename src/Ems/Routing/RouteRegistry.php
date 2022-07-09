@@ -12,7 +12,6 @@ use Ems\Contracts\Routing\Input;
 use Ems\Contracts\Routing\Route;
 use Ems\Contracts\Routing\RouteCollector;
 use Ems\Contracts\Routing\RouteRegistry as RouteRegistryContract;
-
 use Ems\Core\Exceptions\KeyNotFoundException;
 use OutOfBoundsException;
 use Traversable;
@@ -23,10 +22,8 @@ use function get_class;
 use function implode;
 use function in_array;
 use function is_iterable;
-
 use function is_object;
 use function is_string;
-
 use function iterator_to_array;
 
 use const E_USER_WARNING;
@@ -78,16 +75,6 @@ class RouteRegistry implements RouteRegistryContract
     /**
      * @var array
      */
-    protected $dispatchers = [];
-
-    /**
-     * @var callable
-     */
-    protected $dispatcherFactory;
-
-    /**
-     * @var array
-     */
     protected $registrars = [];
 
     /**
@@ -125,9 +112,12 @@ class RouteRegistry implements RouteRegistryContract
             $dispatcher->fill($this->compiledData[self::KEY_DISPATCHER_DATA][$clientType]);
             return;
         }
-        foreach ($this->byClientType as $data) {
-            foreach ($data['methods'] as $method) {
-                $dispatcher->add($method, $data['pattern'], $data);
+        if (!isset($this->byClientType[$clientType])) {
+            return;
+        }
+        foreach ($this->byClientType[$clientType] as $routeArray) {
+            foreach ($routeArray['methods'] as $method) {
+                $dispatcher->add($method, $routeArray['pattern'], $routeArray);
             }
         }
     }
@@ -343,13 +333,13 @@ class RouteRegistry implements RouteRegistryContract
         foreach ($registrars as $info) {
             $collector = $this->newCollector($info['attributes']);
             $routes = $info['registrar']($collector);
+
             if (!$collector->isEmpty()) {
                 $this->addRoutes($collector);
-                return;
+                continue;
             }
             if (is_iterable($routes)) {
                 $this->addRoutes($routes);
-                return;
             }
         }
     }

@@ -312,23 +312,30 @@ class Route implements Arrayable
     }
 
     /**
-     * Create a new console route (and command)
+     * Create a new console route (and command). If you want to configure the
+     * command pass a callable as third parameter that will be called with the
+     * command instance.
      *
-     * @param string $pattern
-     * @param mixed  $handler
-     * @param string $description (optional)
+     * @param string        $pattern
+     * @param mixed         $handler
+     * @param callable|null $commandConfigurator (optional)
      *
      * @return Route
      */
-    public static function console(string $pattern, $handler, string $description='') : Route
+    public static function console(string $pattern, $handler, callable $commandConfigurator=null) : Route
     {
-        $command = new Command($pattern, $description);
+        $command = new Command($pattern);
         $command->argument('command', 'The command name that should be executed');
 
         $route = new static(Input::CONSOLE, $pattern, $handler);
         $route->clientType(Input::CLIENT_CONSOLE)
             ->name($pattern)
             ->command($command);
+
+        if ($commandConfigurator) {
+            $commandConfigurator($command);
+        }
+
         return $route;
     }
 

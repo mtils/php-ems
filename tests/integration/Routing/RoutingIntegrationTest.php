@@ -10,6 +10,7 @@ use Ems\Contracts\Routing\Input;
 use Ems\Contracts\Routing\InputHandler as InputHandlerContract;
 use Ems\Contracts\Routing\RouteCollector;
 use Ems\Contracts\Routing\Router as RouterContract;
+use Ems\Contracts\Routing\RouteRegistry;
 use Ems\Core\Response;
 use Ems\Core\Url;
 use Ems\Http\HttpResponse;
@@ -72,8 +73,6 @@ class RoutingIntegrationTest extends HttpMockTest
 
         $this->assertEquals(self::$sessionConfig['driver'], $middleware->getDriver());
         $this->assertEquals(self::$sessionConfig['serverside_lifetime'], $middleware->getLifeTime());
-
-
 
     }
 
@@ -180,12 +179,12 @@ class RoutingIntegrationTest extends HttpMockTest
 
     protected function boot(Application $app)
     {
-        $app->onAfter(RouterContract::class, function (RouterContract $router) {
-            $routerId = spl_object_hash($router);
+        $app->onAfter(RouteRegistry::class, function (RouteRegistry $registry) {
+            $routerId = spl_object_id($registry);
             if (isset(static::$configuredRouters[$routerId])) {
                 return;
             }
-            $router->register(function (RouteCollector $routes) {
+            $registry->register(function (RouteCollector $routes)  use ($routerId) {
                 $routes->get('/foo', RoutingIntegrationTest_Controller::class.'->foo');
                 $routes->get('/session-write', RoutingIntegrationTest_Controller::class.'->accessSession');
                 $routes->get('/session-read', RoutingIntegrationTest_Controller::class.'->read');

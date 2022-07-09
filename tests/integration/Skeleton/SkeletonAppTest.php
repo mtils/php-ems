@@ -12,7 +12,7 @@ use Ems\Contracts\Model\SchemaInspector;
 use Ems\Contracts\Routing\Input;
 use Ems\Contracts\Routing\ResponseFactory;
 use Ems\Contracts\Routing\RouteCollector;
-use Ems\Contracts\Routing\Router;
+use Ems\Contracts\Routing\RouteRegistry;
 use Ems\Contracts\Routing\UrlGenerator;
 use Ems\DatabaseIntegrationTest;
 use Ems\Model\Orm;
@@ -119,9 +119,9 @@ class SkeletonAppTest extends DatabaseIntegrationTest
 
     protected function boot(Application $app)
     {
-        /** @var Router $router */
-        $router = $app->get(Router::class);
-        $router->register(function (RouteCollector $collector) {
+        /** @var RouteRegistry $registry */
+        $registry = $app->get(RouteRegistry::class);
+        $registry->register(function (RouteCollector $collector) {
 
             $collector->post('/project-types', SkeletonAppTest_ProjectController::class.'@storeType')
                 ->entity(ProjectType::class, 'store')

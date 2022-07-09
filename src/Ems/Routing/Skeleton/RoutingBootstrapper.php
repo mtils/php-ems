@@ -13,6 +13,8 @@ use Ems\Contracts\Routing\Input;
 use Ems\Contracts\Routing\InputHandler as InputHandlerContract;
 use Ems\Contracts\Routing\MiddlewareCollection as MiddlewareCollectionContract;
 use Ems\Contracts\Routing\ResponseFactory as ResponseFactoryContract;
+use Ems\Contracts\Routing\RouteRegistry as RouteRegistryContract;
+use Ems\Routing\RouteRegistry;
 use Ems\Contracts\Routing\RouteCollector;
 use Ems\Contracts\Routing\Router as RouterContract;
 use Ems\Contracts\Routing\UrlGenerator as UrlGeneratorContract;
@@ -67,8 +69,18 @@ class RoutingBootstrapper extends Bootstrapper
     {
         parent::bind();
 
+        $this->container->share(RouteRegistryContract::class, function () {
+            return $this->createRegistry();
+        });
+
         $this->container->share(RouterContract::class, function () {
-            return $this->createRouter();
+            /** @var Router $router */
+            $router = $this->container->create(Router::class);
+            $router->createObjectsBy($this->container);
+            /** @var RouteRegistry $registry */
+            $registry = $this->container->make(RouteRegistryContract::class);
+            $router->fillDispatchersBy([$registry, 'fillDispatcher']);
+            return $router;
         });
 
         $this->container->share(Router::class, function () {
@@ -107,29 +119,31 @@ class RoutingBootstrapper extends Bootstrapper
      * @return Router
      * @noinspection PhpIncompatibleReturnTypeInspection
      */
-    protected function createRouter() : RouterContract
+    protected function createRegistry() : RouteRegistry
     {
         $config = $this->getRoutingConfig();
 
         if (!$config['compile']) {
-            return $this->container->create(Router::class);
+            return $this->container->create(RouteRegistry::class);
         }
 
         /** @var Filesystem $fileSystem */
         $fileSystem = $this->container->get(Filesystem::class);
 
         if (!$fileSystem->exists($config['cache_file'])) {
-            return $this->container->create(Router::class);
+            return $this->container->create(RouteRegistry::class);
         }
 
         $storage = $this->createCacheStorage($this->getRoutingConfig());
         $compiledData = $storage->toArray();
 
         if (!isset($compiledData[CompilableRouter::KEY_VALID])) {
-            return $this->container->create(Router::class);
+            return $this->container->create(RouteRegistry::class);
         }
 
-        $router = $this->container->create(Router::class);
+        /** @var RouteRegistry $registry */
+        $registry = $this->container->create(RouteRegistry::class);
+        $registry->setCompiledData($bla);
         $compiled = $this->createCompilableRouter($router);
         return $compiled->setCompiledData($compiledData);
     }

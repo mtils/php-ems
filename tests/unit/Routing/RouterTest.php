@@ -1,10 +1,9 @@
 <?php
 /**
- *  * Created by mtils on 30.06.19 at 11:12.
+ *  * Created by mtils on 03.07.2022 at 07:28.
  **/
 
-namespace Ems\Routing;
-
+namespace unit\Routing;
 
 use Ems\Contracts\Core\Url as UrlContract;
 use Ems\Contracts\Routing\Argument;
@@ -13,24 +12,19 @@ use Ems\Contracts\Routing\Exceptions\RouteNotFoundException;
 use Ems\Contracts\Routing\Input;
 use Ems\Contracts\Routing\Option;
 use Ems\Contracts\Routing\Route;
-use Ems\Contracts\Routing\RouteCollector;
 use Ems\Contracts\Routing\Router as RouterContract;
 use Ems\Contracts\Routing\RouteScope;
 use Ems\Core\Lambda;
-use Ems\Core\Url;
 use Ems\RoutingTrait;
 use Ems\TestCase;
-use LogicException;
-use OutOfBoundsException;
 use ReflectionException;
 
 use function array_values;
 use function func_get_args;
 use function implode;
 use function is_callable;
-use function iterator_to_array;
 
-class RouterWithRegistryTest extends TestCase
+class RouterTest extends TestCase
 {
     use RoutingTrait;
 
@@ -44,39 +38,31 @@ class RouterWithRegistryTest extends TestCase
 
     /**
      * @test
-     * @throws ReflectionException
      */
-    public function it_registers_routes()
+    public function it_routes_simple_routes()
     {
 
-        $router = $this->router();
-        $registry = $this->registry();
+        $routes = [
+            Route::get('addresses', 'AddressController::index')
+                ->name('addresses.index')
+                ->scope('default', 'admin')
+                ->clientType('web', 'api')
+                ->middleware('auth'),
 
-        $registry->register(function (RouteCollector $collector) {
-
-            $collector->get('addresses', 'AddressController::index')
-                      ->name('addresses.index')
-                      ->scope('default', 'admin')
-                      ->clientType('web', 'api')
-                      ->middleware('auth');
-
-            $collector->get('addresses/{address}/edit', 'AddressController::edit')
+            Route::get('addresses/{address}/edit', 'AddressController::edit')
                 ->name('addresses.edit')
                 ->scope('default', 'admin')
                 ->clientType('web', 'api')
-                ->middleware('auth');
+                ->middleware('auth'),
 
-            $collector->put('addresses/{address}/edit', 'AddressController::update')
+            Route::put('addresses/{address}/edit', 'AddressController::update')
                 ->name('addresses.update')
                 ->scope('default', 'admin')
                 ->clientType('web', 'api')
-                ->middleware('auth');
-        });
+                ->middleware('auth')
+        ];
 
-        $router->fillDispatchersBy([$registry, 'fillDispatcher']);
-        $routes = iterator_to_array($registry);
-
-        $this->assertCount(3, $routes);
+        $router = $this->router($this->dispatcherFactory($routes));
 
         $routable = $this->routable('addresses');
         $this->assertFalse($routable->isRouted());
@@ -109,37 +95,30 @@ class RouterWithRegistryTest extends TestCase
      * @test
      * @throws ReflectionException
      */
-    public function it_registers_routes_with_parameters()
+    public function it_routes_with_parameters()
     {
 
-        $registry = $this->registry();
-        $router = $this->router();
-
-        $registry->register(function (RouteCollector $collector) {
-
-            $collector->get('addresses', 'AddressController::index')
+        $routes = [
+            Route::get('addresses', 'AddressController::index')
                 ->name('addresses.index')
                 ->scope('default', 'admin')
                 ->clientType('web', 'api')
-                ->middleware('auth');
+                ->middleware('auth'),
 
-            $collector->get('addresses/{address}/edit', 'AddressController::edit')
+            Route::get('addresses/{address}/edit', 'AddressController::edit')
                 ->name('addresses.edit')
                 ->scope('default', 'admin')
                 ->clientType('web', 'api')
-                ->middleware('auth');
+                ->middleware('auth'),
 
-            $collector->post('addresses/{address}/edit', 'AddressController::update')
+            Route::put('addresses/{address}/edit', 'AddressController::update')
                 ->name('addresses.update')
                 ->scope('default', 'admin')
                 ->clientType('web', 'api')
-                ->middleware('auth');
-        });
+                ->middleware('auth')
+        ];
 
-        $router->fillDispatchersBy([$registry, 'fillDispatcher']);
-        $routes = iterator_to_array($registry);
-
-        $this->assertCount(3, $routes);
+        $router = $this->router($this->dispatcherFactory($routes));
 
         $routable = $this->routable('addresses/112/edit');
         $router->route($routable);
@@ -171,37 +150,31 @@ class RouterWithRegistryTest extends TestCase
      * @test
      * @throws ReflectionException
      */
-    public function it_registers_routes_with_optional_parameters()
+    public function it_routes_with_optional_parameters()
     {
 
-        $registry = $this->registry();
-        $router = $this->router();
+        $routes = [
 
-        $registry->register(function (RouteCollector $collector) {
-
-            $collector->get('addresses', 'AddressController::index')
+            Route::get('addresses', 'AddressController::index')
                 ->scope('default', 'admin')
                 ->clientType('web', 'api')
-                ->middleware('auth');
+                ->middleware('auth'),
 
-            $collector->get('addresses/{address}/edit', 'AddressController::edit')
+            Route::get('addresses/{address}/edit', 'AddressController::edit')
                 ->name('addresses.edit')
                 ->scope('default', 'admin')
                 ->clientType('web', 'api')
-                ->middleware('auth');
+                ->middleware('auth'),
 
-            $collector->patch('delivery-addresses[/{type}]', 'AddressController::updateDelivery')
+            Route::patch('delivery-addresses[/{type}]', 'AddressController::updateDelivery')
                 ->name('delivery-addresses.update')
                 ->scope('default', 'admin')
                 ->clientType('web', 'api')
                 ->middleware('auth')
-                ->defaults(['type' => 'main']);
-        });
+                ->defaults(['type' => 'main'])
+        ];
 
-        $router->fillDispatchersBy([$registry, 'fillDispatcher']);
-        $routes = iterator_to_array($registry);
-
-        $this->assertCount(3, $routes);
+        $router = $this->router($this->dispatcherFactory($routes));
 
         $routable = $this->routable('delivery-addresses', 'PATCH');
         $router->route($routable);
@@ -233,39 +206,31 @@ class RouterWithRegistryTest extends TestCase
      * @test
      * @throws ReflectionException
      */
-    public function it_registers_commands()
+    public function it_routes_commands()
     {
 
-        $registry = $this->registry();
-        $router = $this->router();
-
-        $registry->register(function (RouteCollector $collector) {
-
-            $collector->get('addresses', 'AddressController::index')
+        $routes = [
+            Route::get('addresses', 'AddressController::index')
                 ->name('addresses.index')
                 ->scope('default', 'admin')
                 ->clientType('web', 'api')
-                ->middleware('auth');
+                ->middleware('auth'),
 
-            $collector->get('addresses/{address}/edit', 'AddressController::edit')
+            Route::get('addresses/{address}/edit', 'AddressController::edit')
                 ->name('addresses.edit')
                 ->scope('default', 'admin')
                 ->clientType('web', 'api')
-                ->middleware('auth');
+                ->middleware('auth'),
 
-            $collector->command('import:run', 'ImportController::run')
-                ->argument('file', 'Import this file (url)')
-                ->argument('email?', 'Send result to this email')
-                ->option('dryrun', 'Do not write changes', 'd')
-                ->option('timeout=5000', 'Kill if too long');
+            Route::console('import:run', 'ImportController::run', function (Command $command) {
+                $command->argument('file', 'Import this file (url)')
+                        ->argument('email?', 'Send result to this email')
+                        ->option('dryrun', 'Do not write changes', 'd')
+                        ->option('timeout=5000', 'Kill if too long');
+            })
+        ];
 
-
-        });
-
-        $router->fillDispatchersBy([$registry, 'fillDispatcher']);
-        $routes = iterator_to_array($registry);
-
-        $this->assertCount(3, $routes);
+        $router = $this->router($this->dispatcherFactory($routes));
 
         $routable = $this->routable('addresses');
         $this->assertFalse($routable->isRouted());
@@ -356,32 +321,28 @@ class RouterWithRegistryTest extends TestCase
     public function it_routes_only_for_registered_clientType()
     {
 
-        $registry = $this->registry();
-        $router = $this->router();
-
-        $registry->register(function (RouteCollector $collector) {
-
-            $collector->get('addresses', 'AddressController::index')
+        $routes = [
+            Route::get('addresses', 'AddressController::index')
                 ->name('addresses.index')
                 ->scope('default', 'admin')
                 ->clientType('web')
-                ->middleware('auth');
+                ->middleware('auth'),
 
-            $collector->get('addresses/{address}/edit', 'AddressController::edit')
+            Route::get('addresses/{address}/edit', 'AddressController::edit')
                 ->name('addresses.edit')
                 ->scope('default', 'admin')
                 ->clientType('api')
-                ->middleware('auth');
+                ->middleware('auth'),
 
-            $collector->put('delivery-addresses[/{type}]', 'AddressController::updateDelivery')
+            Route::put('delivery-addresses[/{type}]', 'AddressController::updateDelivery')
                 ->name('delivery-addresses.update')
                 ->scope('default', 'admin')
                 ->clientType('web', 'api')
                 ->middleware('auth')
-                ->defaults(['type' => 'main']);
-        });
+                ->defaults(['type' => 'main'])
+        ];
 
-        $router->fillDispatchersBy([$registry, 'fillDispatcher']);
+        $router = $this->router($this->dispatcherFactory($routes));
 
         $routable = $this->routable('addresses');
         $router->route($routable);
@@ -414,7 +375,6 @@ class RouterWithRegistryTest extends TestCase
         $router->route($routable);
         $this->assertTrue($routable->isRouted());
 
-
     }
 
     /**
@@ -424,29 +384,26 @@ class RouterWithRegistryTest extends TestCase
     public function it_routes_only_for_registered_scope()
     {
 
-        $registry = $this->registry();
-        $router = $this->router();
-
-        $registry->register(function (RouteCollector $collector) {
-
-            $collector->get('addresses', 'AddressController::index')
+        $routes = [
+            Route::get('addresses', 'AddressController::index')
                 ->name('addresses.index')
                 ->scope('default')
-                ->middleware('auth');
+                ->middleware('auth'),
 
-            $collector->get('addresses/{address}/edit', 'AddressController::edit')
+            Route::get('addresses/{address}/edit', 'AddressController::edit')
                 ->name('addresses.edit')
                 ->scope('admin')
-                ->middleware('auth');
+                ->middleware('auth'),
 
-            $collector->put('delivery-addresses[/{type}]', 'AddressController::updateDelivery')
+            Route::put('delivery-addresses[/{type}]', 'AddressController::updateDelivery')
                 ->name('delivery-addresses.update')
                 ->scope('default', 'admin')
                 ->middleware('auth')
-                ->defaults(['type' => 'main']);
-        });
+                ->defaults(['type' => 'main'])
+        ];
 
-        $router->fillDispatchersBy([$registry, 'fillDispatcher']);
+        $router = $this->router($this->dispatcherFactory($routes));
+
         $routable = $this->routable('addresses', 'GET', 'web', 'default');
         $router->route($routable);
         $this->assertTrue($routable->isRouted());
@@ -488,39 +445,32 @@ class RouterWithRegistryTest extends TestCase
     public function it_handles_routes()
     {
 
-        $router = $this->router();
-        $router->createObjectsBy(function ($class) {
-            return new $class;
-        });
+        $routes = [
 
-        $registry = $this->registry();
-
-        $registry->register(function (RouteCollector $collector) {
-
-            $collector->get('addresses', RouterWithRegistryTest_TestController::class.'->index')
+            Route::get('addresses', RouterTest_TestController::class.'->index')
                 ->name('addresses.index')
                 ->scope('default', 'admin')
                 ->clientType('web', 'api')
-                ->middleware('auth');
+                ->middleware('auth'),
 
-            $collector->get('addresses/{address}/edit', RouterWithRegistryTest_TestController::class.'->edit')
+            Route::get('addresses/{address}/edit', RouterTest_TestController::class.'->edit')
                 ->name('addresses.edit')
                 ->scope('default', 'admin')
                 ->clientType('web', 'api')
-                ->middleware('auth');
+                ->middleware('auth'),
 
-            $collector->put('addresses/{address}/edit', RouterWithRegistryTest_TestController::class.'->update')
+            Route::put('addresses/{address}/edit', RouterTest_TestController::class.'->update')
                 ->name('addresses.update')
                 ->scope('default', 'admin')
                 ->clientType('web', 'api')
-                ->middleware('auth');
+                ->middleware('auth')
+        ];
+
+        $router = $this->router($this->dispatcherFactory($routes));
+
+        $router->createObjectsBy(function ($class) {
+            return new $class;
         });
-
-        $routes = iterator_to_array($registry);
-
-        $router->fillDispatchersBy([$registry, 'fillDispatcher']);
-
-        $this->assertCount(3, $routes);
 
         $routable = $this->routable('addresses/112/edit');
         $router->route($routable);
@@ -535,7 +485,7 @@ class RouterWithRegistryTest extends TestCase
 
         $route = $routable->getMatchedRoute();
 
-        $this->assertEquals(RouterWithRegistryTest_TestController::class . '->edit', $route->handler);
+        $this->assertEquals(RouterTest_TestController::class . '->edit', $route->handler);
         $this->assertEquals('addresses.edit', $route->name);
         $this->assertEquals([], $route->defaults);
         $this->assertEquals(['GET'], $route->methods);
@@ -549,157 +499,19 @@ class RouterWithRegistryTest extends TestCase
         $this->assertEquals('edit was called: 112' , $handler(...array_values($routable->getRouteParameters())));
 
     }
+}
 
-    /**
-     * @test
-     * @throws ReflectionException
-     */
-    public function it_fails_when_registers_command_and_route_in_one_call_without_collector()
-    {
-        $command = new Command('addresses:index', 'AddressController::index');
-        $this->expectException(LogicException::class);
-        $command->get('addresses');
-    }
-
-    /**
-     * @test
-     * @throws ReflectionException
-     */
-    public function it_registers_command_and_route_in_one_call()
-    {
-
-        $registry = $this->registry();
-        $router = $this->router();
-
-        $registry->register(function (RouteCollector $collector) {
-
-            $collector->command('addresses:index', 'AddressController::index', 'List addresses')
-                ->get('addresses')
-                ->name('addresses.index')
-                ->scope('default', 'admin')
-                ->clientType('web', 'api')
-                ->middleware('auth');
-        });
-
-        $routes = iterator_to_array($registry);
-        $router->fillDispatchersBy([$registry,'fillDispatcher']);
-
-        $this->assertCount(2, $routes);
-
-        $routable = $this->routable('addresses');
-        $this->assertFalse($routable->isRouted());
-        $router->route($routable);
-
-        $this->assertEquals(Input::CLIENT_WEB, $routable->getClientType());
-        $this->assertEquals('GET', $routable->getMethod());
-        $this->assertEquals('default', (string)$routable->getRouteScope());
-        $this->assertInstanceOf(RouteScope::class, $routable->getRouteScope());
-        $this->assertInstanceOf(UrlContract::class, $routable->getUrl());
-        $this->assertEquals('addresses', (string)$routable->getUrl());
-        $this->assertEquals([], $routable->getRouteParameters());
-
-        $route = $routable->getMatchedRoute();
-
-        $this->assertEquals('AddressController::index', $route->handler);
-        $this->assertEquals('addresses.index', $route->name);
-        $this->assertEquals([], $route->defaults);
-        $this->assertEquals(['GET'], $route->methods);
-        $this->assertEquals(['web', 'api'], $route->clientTypes);
-        $this->assertEquals(['auth'], $route->middlewares);
-        $this->assertEquals(['default', 'admin'], $route->scopes);
-        $this->assertEquals('addresses', $route->pattern);
-        $this->assertTrue($routable->isRouted());
-        $this->assertTrue(is_callable($routable->getHandler()));
-
-
-        $routable = $this->routable('console:addresses:index', Input::CONSOLE, Input::CLIENT_CONSOLE);
-
-        $this->assertFalse($routable->isRouted());
-        $router->route($routable);
-
-        $route = $routable->getMatchedRoute();
-
-        $this->assertEquals('AddressController::index', $route->handler);
-        $this->assertEquals('addresses:index', $route->pattern);
-        $this->assertEquals('addresses:index', $route->name);
-        $this->assertEquals([], $route->defaults);
-        $this->assertEquals([Input::CONSOLE], $route->methods);
-        $this->assertEquals([Input::CLIENT_CONSOLE], $route->clientTypes);
-        $this->assertTrue($routable->isRouted());
-
-    }
-
-    /**
-     * @test
-     * @throws ReflectionException
-     */
-    public function it_registers_route_and_command_in_one_call()
-    {
-        $registry = $this->registry();
-        $router = $this->router();
-
-        $registry->register(function (RouteCollector $collector) {
-
-            $collector->get('addresses', 'AddressController::index')
-                ->name('addresses.index')
-                ->scope('default', 'admin')
-                ->clientType('web', 'api')
-                ->middleware('auth')
-                ->command('addresses:index');
-        });
-
-        $routes = iterator_to_array($registry);
-
-        $router->fillDispatchersBy([$registry, 'fillDispatcher']);
-
-        $this->assertCount(2, $routes);
-
-        $routable = $this->routable('addresses');
-        $this->assertFalse($routable->isRouted());
-        $router->route($routable);
-
-        $this->assertEquals(Input::CLIENT_WEB, $routable->getClientType());
-        $this->assertEquals('GET', $routable->getMethod());
-        $this->assertEquals('default', (string)$routable->getRouteScope());
-        $this->assertInstanceOf(RouteScope::class, $routable->getRouteScope());
-        $this->assertInstanceOf(UrlContract::class, $routable->getUrl());
-        $this->assertEquals('addresses', (string)$routable->getUrl());
-        $this->assertEquals([], $routable->getRouteParameters());
-
-        $route = $routable->getMatchedRoute();
-
-        $this->assertEquals('AddressController::index', $route->handler);
-        $this->assertEquals('addresses.index', $route->name);
-        $this->assertEquals([], $route->defaults);
-        $this->assertEquals(['GET'], $route->methods);
-        $this->assertEquals(['web', 'api'], $route->clientTypes);
-        $this->assertEquals(['auth'], $route->middlewares);
-        $this->assertEquals(['default', 'admin'], $route->scopes);
-        $this->assertEquals('addresses', $route->pattern);
-        $this->assertTrue($routable->isRouted());
-        $this->assertTrue(is_callable($routable->getHandler()));
-
-
-        $routable = $this->routable('console:addresses:index', Input::CONSOLE, Input::CLIENT_CONSOLE);
-
-        $this->assertFalse($routable->isRouted());
-        $router->route($routable);
-
-        $route = $routable->getMatchedRoute();
-
-        $this->assertEquals('AddressController::index', $route->handler);
-        $this->assertEquals('addresses:index', $route->pattern);
-        $this->assertEquals('addresses:index', $route->name);
-        $this->assertEquals([], $route->defaults);
-        $this->assertEquals([Input::CONSOLE], $route->methods);
-        $this->assertEquals([Input::CLIENT_CONSOLE], $route->clientTypes);
-        $this->assertTrue($routable->isRouted());
-
-    }
+class RouterTest_Address
+{
 
 }
 
-class RouterWithRegistryTest_TestController
+class RouterTest_CustomAddress extends RouterTest_Address
+{
+
+}
+
+class RouterTest_TestController
 {
     public function index()
     {

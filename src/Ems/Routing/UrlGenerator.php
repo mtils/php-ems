@@ -9,7 +9,7 @@ use Closure;
 use Ems\Contracts\Core\Url;
 use Ems\Contracts\Routing\Input;
 use Ems\Contracts\Routing\Route;
-use Ems\Contracts\Routing\Router as RouterContract;
+use Ems\Contracts\Routing\RouteRegistry;
 use Ems\Contracts\Routing\RouteScope;
 use Ems\Contracts\Routing\UrlGenerator as UrlGeneratorContract;
 use Ems\Core\Url as UrlObject;
@@ -23,9 +23,9 @@ use function method_exists;
 class UrlGenerator implements UrlGeneratorContract
 {
     /**
-     * @var RouterContract
+     * @var RouteRegistry
      */
-    protected $router;
+    protected $registry;
 
     /**
      * @var CurlyBraceRouteCompiler
@@ -52,9 +52,9 @@ class UrlGenerator implements UrlGeneratorContract
      */
     protected $assetUrl;
 
-    public function __construct(RouterContract $router, CurlyBraceRouteCompiler $compiler, Input $input=null, &$baseUrlCache=[])
+    public function __construct(RouteRegistry $registry, CurlyBraceRouteCompiler $compiler, Input $input=null, &$baseUrlCache=[])
     {
-        $this->router = $router;
+        $this->registry = $registry;
         $this->compiler = $compiler;
         $this->baseUrlProvider = $this->defaultBaseUrlProvider();
         $this->input = $input ?: GenericInput::clientType(Input::CLIENT_WEB, RouteScope::DEFAULT);
@@ -85,7 +85,7 @@ class UrlGenerator implements UrlGeneratorContract
     public function route($route, array $parameters = [], $scope = null): Url
     {
         if (!$route instanceof Route) {
-            $route = $this->router->getByName($route, $this->input->getClientType());
+            $route = $this->registry->getByName($route, $this->input->getClientType());
         }
         return $this->to($this->compiler->compile($route->pattern, $parameters), $scope);
     }
@@ -99,7 +99,7 @@ class UrlGenerator implements UrlGeneratorContract
      */
     public function entity($entity, string $action = 'show', $scope = null): Url
     {
-        $route = $this->router->getByEntityAction($entity, $action, $this->input->getClientType());
+        $route = $this->registry->getByEntityAction($entity, $action, $this->input->getClientType());
         return $this->route($route, [$this->extractId($entity)], $scope);
     }
 
@@ -128,7 +128,7 @@ class UrlGenerator implements UrlGeneratorContract
 
     public function withInput(Input $input): UrlGeneratorContract
     {
-        $copy = (new static($this->router, $this->compiler, $input, $this->baseUrlCache))
+        $copy = (new static($this->registry, $this->compiler, $input, $this->baseUrlCache))
             ->setBaseUrlProvider($this->baseUrlProvider);
         if ($this->assetUrl) {
             $copy->setAssetUrl($this->assetUrl);

@@ -5,15 +5,21 @@
 
 namespace Ems;
 
+use Closure;
 use Ems\Contracts\Core\Url as UrlContract;
 use Ems\Contracts\Routing\Input;
+use Ems\Contracts\Routing\Route;
 use Ems\Contracts\Routing\RouteCollector;
-use Ems\Contracts\Routing\Router as RouterContract;
-use Ems\Routing\RouteRegistry;
 use Ems\Core\Url;
+use Ems\Routing\ConsoleDispatcher;
+use Ems\Routing\FastRoute\FastRouteDispatcher;
 use Ems\Routing\GenericInput;
 use Ems\Routing\Router;
+use Ems\Routing\RouteRegistry;
 
+use function in_array;
+use function is_bool;
+use function is_callable;
 use function is_string;
 use function str_replace;
 
@@ -24,14 +30,16 @@ trait RoutingTrait
     protected static $testRoutes;
 
     /**
-     * @param bool $filled
+     * @param bool|callable $filled
      * @return Router
      */
-    protected function router(bool $filled=false) : Router
+    protected function router($filled=false) : Router
     {
-        $router = new Router();
-        if ($filled) {
-            $this->fill($router);
+        $router = new Router(is_callable($filled) ? $filled : null);
+        if ($filled and is_bool($filled)) {
+            $registry = $this->registry(true);
+            $router->fillDispatchersBy([$registry, 'fillDispatcher']);
+            $this->fill($registry);
         }
         return $router;
     }
@@ -108,5 +116,48 @@ trait RoutingTrait
             $url = new Url($url);
         }
         return $routable->setMethod($method)->setUrl($url)->setClientType($clientType)->setRouteScope($scope);
+    }
+
+    /**
+     * @param Route[] $routes
+     * @param string $clientType (optional)
+     * @return FastRouteDispatcher
+     */
+    protected function httpDispatcher(array $routes=[], string $clientType='') : FastRouteDispatcher
+    {
+        $dispatcher = new FastRouteDispatcher();
+        foreach ($routes as $route) {
+            if ($clientType && $route->clientTypes && !in_array($clientType, $route->clientTypes)) {
+                continue;
+            }
+            $dispatcher->add($route->methods, $route->pattern, $route->toArray());
+        }
+        return $dispatcher;
+    }
+
+    /**
+     * @param Route[] $routes
+     * @return ConsoleDispatcher
+     */
+    protected function consoleDispatcher(array $routes=[]) : ConsoleDispatcher
+    {
+        $dispatcher = new ConsoleDispatcher();
+        foreach ($routes as $route) {
+            if (in_array(Input::CONSOLE, $route->methods)) {
+                $dispatcher->add(Input::CONSOLE, $route->pattern, $route->toArray());
+            }
+
+        }
+        return $dispatcher;
+    }
+
+    protected function dispatcherFactory(array $routes=[]) : Closure
+    {
+        return function (string $clientType) use ($routes) {
+            if (in_array($clientType, [Input::CLIENT_CONSOLE, Input::CLIENT_TASK])) {
+                return $this->consoleDispatcher($routes);
+            }
+            return $this->httpDispatcher($routes, $clientType);
+        };
     }
 }

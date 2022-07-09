@@ -10,6 +10,7 @@ use Closure;
 use Ems\Contracts\Core\Url;
 use Ems\Contracts\Routing\Input;
 use Ems\Contracts\Routing\RouteCollector;
+use Ems\Contracts\Routing\RouteRegistry as RouteRegistryContract;
 use Ems\Contracts\Routing\UrlGenerator as UrlGeneratorContract;
 use Ems\RoutingTrait;
 use Ems\TestCase;
@@ -124,12 +125,12 @@ class UrlGeneratorTest extends TestCase
      */
     public function route_works_with_multiple_parameters()
     {
-        $router = $this->router();
-        $router->register(function (RouteCollector $collector) {
+        $registry = $this->registry();
+        $registry->register(function (RouteCollector $collector) {
             $collector->get('users/{user_id}/projects/{project_id}/categories/{category_id}', UserController::class)
                 ->name('users.projects.categories.show');
         });
-        $urls = $this->make($router);
+        $urls = $this->make($registry);
         $domain = 'https://web-utils.de';
         $provider = $this->urlProvider($domain);
         $urls->setBaseUrlProvider($provider);
@@ -145,12 +146,12 @@ class UrlGeneratorTest extends TestCase
      */
     public function entity_returns_route_to_entity()
     {
-        $router = $this->router();
-        $router->register(function (RouteCollector $collector) {
+        $registry = $this->registry();
+        $registry->register(function (RouteCollector $collector) {
             $collector->get('projects/{project_id}',UrlGeneratorTest_ProjectController::class.'->show')
                 ->entity(UrlGeneratorTest_Project::class, 'show');
         });
-        $urls = $this->make($router);
+        $urls = $this->make($registry);
         $domain = 'https://web-utils.de';
         $provider = $this->urlProvider($domain);
         $urls->setBaseUrlProvider($provider);
@@ -197,13 +198,13 @@ class UrlGeneratorTest extends TestCase
      */
     public function url_from_different_clientType()
     {
-        $router = $this->router();
-        $router->register(function (RouteCollector $collector) {
+        $registry = $this->registry();
+        $registry->register(function (RouteCollector $collector) {
             $collector->get('projects/{project_id}', UserController::class)
                 ->name('projects.show')
             ->clientType([Input::CLIENT_WEB, Input::CLIENT_API]);
         });
-        $urls = $this->make($router);
+        $urls = $this->make($registry);
         $domain = 'https://web-utils.de';
         $provider = function (Input $input, $scope = null) use ($domain) {
             $url = new \Ems\Core\Url($domain);
@@ -222,11 +223,11 @@ class UrlGeneratorTest extends TestCase
 
     }
 
-    protected function make(Router $router=null, CurlyBraceRouteCompiler $compiler=null, Input $input=null, &$baseUrlCache=[]) : UrlGenerator
+    protected function make(RouteRegistryContract $registry=null, CurlyBraceRouteCompiler $compiler=null, Input $input=null, &$baseUrlCache=[]) : UrlGenerator
     {
-        $router = $router ?: $this->router(true);
+        $registry = $registry ?: $this->registry(true);
         $compiler = $compiler ?: new CurlyBraceRouteCompiler();
-        return new UrlGenerator($router, $compiler, $input, $baseUrlCache);
+        return new UrlGenerator($registry, $compiler, $input, $baseUrlCache);
     }
 
     protected function urlProvider($baseUrl = 'http://localhost') : Closure
