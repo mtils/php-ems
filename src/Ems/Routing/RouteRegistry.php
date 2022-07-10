@@ -13,6 +13,7 @@ use Ems\Contracts\Routing\Route;
 use Ems\Contracts\Routing\RouteCollector;
 use Ems\Contracts\Routing\Router as RouterContract;
 use Ems\Contracts\Routing\RouteRegistry as RouteRegistryContract;
+use Ems\Core\Exceptions\DataIntegrityException;
 use Ems\Core\Exceptions\KeyNotFoundException;
 use OutOfBoundsException;
 use Traversable;
@@ -47,6 +48,11 @@ class RouteRegistry implements RouteRegistryContract
      * @var Route[]
      */
     protected $allRoutes = [];
+
+    /**
+     * @var array[]
+     */
+    protected $allRouteData = [];
 
     /**
      * @var array[]
@@ -133,7 +139,10 @@ class RouteRegistry implements RouteRegistryContract
     public function getIterator()
     {
         $this->callRegistrarsOnce();
-        return new ArrayIterator($this->allRoutes);
+        if (!$this->compiledData) {
+            return new ArrayIterator(array_values($this->allRoutes));
+        }
+        return new ArrayIterator($this->routesByIds(array_keys($this->allRouteData)));
     }
 
     /**
@@ -159,13 +168,13 @@ class RouteRegistry implements RouteRegistryContract
         }
 
         if (!$method) {
-            return $this->byPattern[$clientType][$pattern];
+            return $this->routesByIds($this->byPattern[$clientType][$pattern]);
         }
 
         $result = [];
 
-        /** @var Route $route */
-        foreach ($this->byPattern[$clientType][$pattern] as $route) {
+        foreach ($this->byPattern[$clientType][$pattern] as $routeId) {
+            $route = $this->routeById($routeId);
             if (in_array($method, $route->methods)) {
                 $result[] = $route;
             }
@@ -186,7 +195,7 @@ class RouteRegistry implements RouteRegistryContract
     {
         $this->callRegistrarsOnce();
         if (isset($this->byName[$clientType][$name])) {
-            return $this->byName[$clientType][$name];
+            return $this->routeById($this->byName[$clientType][$name]);
         }
         throw new KeyNotFoundException("Route named '$name' not found for clientType '$clientType'.");
     }
@@ -204,7 +213,7 @@ class RouteRegistry implements RouteRegistryContract
     {
         $this->callRegistrarsOnce();
         if (is_string($entity) && isset($this->byEntity[$clientType][$entity][$action])) {
-            return $this->byEntity[$clientType][$entity][$action];
+            return $this->routeById($this->byEntity[$clientType][$entity][$action]);
         }
         if (!isset($this->byTypeContainers[$clientType])) {
             $this->byTypeContainers[$clientType] = new ByTypeContainer($this->byEntity[$clientType]);
@@ -215,7 +224,7 @@ class RouteRegistry implements RouteRegistryContract
         }
 
         if (isset($result[$action])) {
-            return $result[$action];
+            return $this->routeById($result[$action]);
         }
 
         $actions = array_keys($result);
@@ -254,7 +263,7 @@ class RouteRegistry implements RouteRegistryContract
 
         $compiled = [];
 
-        $compiled[self::KEY_ALL] = $this->allRoutes;
+        $compiled[self::KEY_ALL] = $this->allRouteData;
         $compiled[self::KEY_BY_PATTERN] = $this->byPattern;
         $compiled[self::KEY_BY_NAME] = $this->byName;
         $compiled[self::KEY_BY_ENTITY_ACTION] = $this->byEntity;
@@ -290,7 +299,7 @@ class RouteRegistry implements RouteRegistryContract
     public function setCompiledData(&$compiledData) : RouteRegistry
     {
         $this->compiledData = &$compiledData;
-        $this->allRoutes = $compiledData[self::KEY_ALL];
+        $this->allRouteData = $compiledData[self::KEY_ALL];
         $this->byPattern = $compiledData[self::KEY_BY_PATTERN];
         $this->byName = $compiledData[self::KEY_BY_NAME];
         $this->byEntity = $compiledData[self::KEY_BY_ENTITY_ACTION];
@@ -312,9 +321,11 @@ class RouteRegistry implements RouteRegistryContract
             $route->scope('default');
         }
 
+        $id = $this->identify($route);
         $data = $route->toArray();
 
-        $this->allRoutes[] = $route;
+        $this->allRoutes[$id] = $route;
+        $this->allRouteData[$id] = $data;
 
         foreach ($data['clientTypes'] as $clientType) {
 
@@ -331,7 +342,7 @@ class RouteRegistry implements RouteRegistryContract
                 $this->byPattern[$clientType][$data['pattern']] = [];
             }
 
-            $this->byPattern[$clientType][$data['pattern']][] = $route;
+            $this->byPattern[$clientType][$data['pattern']][] = $id;
 
             if (!isset($data['entity']) || !$data['entity']) {
                 continue;
@@ -342,7 +353,7 @@ class RouteRegistry implements RouteRegistryContract
                     $data['entity'] => []
                 ];
             }
-            $this->byEntity[$clientType][$data['entity']][$data['action']] = $route;
+            $this->byEntity[$clientType][$data['entity']][$data['action']] = $id;
 
         }
 
@@ -354,7 +365,7 @@ class RouteRegistry implements RouteRegistryContract
             if (!isset($this->byName[$clientType])) {
                 $this->byName[$clientType] = [];
             }
-            $this->byName[$clientType][$data['name']] = $route;
+            $this->byName[$clientType][$data['name']] = $id;
         }
 
     }
@@ -408,5 +419,48 @@ class RouteRegistry implements RouteRegistryContract
         foreach($routes as $route) {
             $this->addRoute($route);
         }
+    }
+
+    protected function identify(Route $route) : string
+    {
+        return $route->clientTypes[0] . '-' . $route->methods[0] . '-' . $route->pattern;
+    }
+
+    /**
+     * @param string $id
+     * @return Route
+     */
+    protected function routeById(string $id) : Route
+    {
+        if (isset($this->allRoutes[$id])) {
+            return $this->allRoutes[$id];
+        }
+        if (isset($this->allRouteData[$id])) {
+            $this->allRoutes[$id] = $this->toRoute($this->allRouteData[$id]);
+            return $this->allRoutes[$id];
+        }
+        throw new DataIntegrityException("Route not found by id '$id'");
+    }
+
+    /**
+     * @param array $ids
+     * @return Route[]
+     */
+    protected function routesByIds(array $ids) : array
+    {
+        $routes = [];
+        foreach ($ids as $id) {
+            $routes[] = $this->routeById($id);
+        }
+        return $routes;
+    }
+
+    /**
+     * @param array $properties
+     * @return Route
+     */
+    protected function toRoute(array $properties) : Route
+    {
+        return Route::fromArray($properties);
     }
 }

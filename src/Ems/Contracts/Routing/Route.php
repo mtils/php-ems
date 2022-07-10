@@ -6,10 +6,11 @@
 namespace Ems\Contracts\Routing;
 
 
-use LogicException;
-use function array_values;
 use Ems\Contracts\Core\Arrayable;
 use Ems\Core\Support\ObjectReadAccess;
+use LogicException;
+
+use function array_values;
 use function func_get_args;
 use function is_array;
 
@@ -224,7 +225,12 @@ class Route implements Arrayable
      */
     public static function fromArray(array $properties) : Route
     {
+        if (isset($properties['command']) && is_array($properties['command'])) {
+            $properties['command'] = Command::fromArray($properties['command']);
+        }
+
         $route = new static($properties['methods'], $properties['pattern'], $properties['handler']);
+
         foreach ($route->_properties as $key=>$value) {
             if (isset($properties[$key])) {
                 $route->_properties[$key] = $properties[$key];

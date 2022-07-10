@@ -78,7 +78,7 @@ class RoutingBootstrapper extends Bootstrapper
             $router = $this->container->create(Router::class);
             $router->createObjectsBy($this->container);
             /** @var RouteRegistry $registry */
-            $registry = $this->container->make(RouteRegistryContract::class);
+            $registry = $this->container->get(RouteRegistryContract::class);
             $router->fillDispatchersBy([$registry, 'fillDispatcher']);
             return $router;
         });
@@ -137,15 +137,13 @@ class RoutingBootstrapper extends Bootstrapper
         $storage = $this->createCacheStorage($this->getRoutingConfig());
         $compiledData = $storage->toArray();
 
-        if (!isset($compiledData[CompilableRouter::KEY_VALID])) {
+        if (!isset($compiledData[RouteRegistry::KEY_VALID])) {
             return $this->container->create(RouteRegistry::class);
         }
 
         /** @var RouteRegistry $registry */
         $registry = $this->container->create(RouteRegistry::class);
-        $registry->setCompiledData($bla);
-        $compiled = $this->createCompilableRouter($router);
-        return $compiled->setCompiledData($compiledData);
+        return $registry->setCompiledData($compiledData);
     }
 
     /** @noinspection PhpIncompatibleReturnTypeInspection */

@@ -7,6 +7,8 @@ namespace Ems\Routing\Skeleton;
 
 use Ems\Contracts\Core\Storage;
 use Ems\Contracts\Core\Type;
+use Ems\Contracts\Routing\Router;
+use Ems\Contracts\Routing\RouteRegistry;
 use Ems\Routing\CompilableRouter;
 use Ems\Skeleton\Connection\ConsoleOutputConnection;
 
@@ -19,7 +21,7 @@ class RouteCompileController
      */
     private $storage;
 
-    public function compile(CompilableRouter $router, ConsoleOutputConnection $out) : int
+    public function compile(RouteRegistry $registry, Router $router, ConsoleOutputConnection $out) : int
     {
         $storageClass = Type::short($this->storage);
         $message = "Compiling routes into cache stored by <comment>$storageClass</comment>";
@@ -28,7 +30,7 @@ class RouteCompileController
         }
         $out->line($message);
 
-        $compiledData = $router->compile();
+        $compiledData = $registry->compile($router);
         $this->storage->clear();
 
         foreach ($compiledData as $key=>$value) {
