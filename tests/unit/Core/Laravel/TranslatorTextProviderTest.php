@@ -2,14 +2,15 @@
 
 namespace Ems\Core\Laravel;
 
-use Ems\Contracts\Core\TextProvider;
 use Ems\Contracts\Core\Multilingual;
-use Illuminate\Translation\Translator;
-use Illuminate\Translation\LoaderInterface;
-use Illuminate\Translation\ArrayLoader;
+use Ems\Contracts\Core\TextProvider;
 use Illuminate\Contracts\Translation\Loader;
+use Illuminate\Translation\ArrayLoader;
+use Illuminate\Translation\LoaderInterface;
+use Illuminate\Translation\Translator;
 
-use function class_exists;
+use function interface_exists;
+use function is_array;
 
 class TranslatorTextProviderTest extends \Ems\TestCase
 {
@@ -61,7 +62,6 @@ class TranslatorTextProviderTest extends \Ems\TestCase
 
         $loader = $this->newLoader(['foo' => 'bar']);
         $loader->addMessages('de', 'root', ['foo'=>'bär']);
-
         $provider = $this->newProvider($loader);
         $this->assertEquals('bar', $provider->get('root.foo'));
         $this->assertEquals('en', $provider->getLocale());
@@ -114,14 +114,20 @@ class TranslatorTextProviderTest extends \Ems\TestCase
 
     protected function newTranslator($messages=null)
     {
-        $interface = class_exists(LoaderInterface::class) ? LoaderInterface::class : Loader::class;
-        $loader = $messages instanceof $interface ? $messages : $this->newLoader($messages);
+        $isLoader = false;
+        if (interface_exists(LoaderInterface::class) && $messages instanceof LoaderInterface) {
+            $isLoader = true;
+        }
+        if (!$isLoader && interface_exists(Loader::class) && $messages instanceof Loader) {
+            $isLoader = true;
+        }
+        $loader = $isLoader ? $messages : $this->newLoader(is_array($messages) ? $messages : null);
         return new Translator($loader, 'en');
     }
 
-    protected function newLoader(array $messages = null)
+    protected function newLoader($messages = null)
     {
-        $loader = new ArrayLoader;
+        $loader = new ArrayLoader();
         $loader->addMessages('en', 'root', $messages ?: $this->sampleMessages());
         return $loader;
     }

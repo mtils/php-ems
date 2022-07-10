@@ -21,6 +21,7 @@ use Illuminate\Translation\ArrayLoader;
 use Illuminate\Translation\Translator;
 
 use function get_class;
+use function method_exists;
 
 require_once realpath(__DIR__ . '/../../XType/Eloquent/test_models.php');
 
@@ -264,7 +265,8 @@ class ValidatorFactoryIntegrationTest extends \Ems\LaravelIntegrationTest
             $appListener(...$args);
         });
 
-        $validator = $laravel->make(ValidatorContract::class, [
+        $method = method_exists($laravel, 'makeWith') ? 'makeWith' : 'make';
+        $validator = $laravel->$method(ValidatorContract::class, [
             'rules'     => $rules,
             'ormClass'  => $ormClass
         ]);

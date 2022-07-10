@@ -8,7 +8,6 @@ namespace Ems\Core;
 use ArrayAccess;
 use Ems\Contracts\Core\Url;
 use Ems\Contracts\Routing\GenericRouteScope;
-use Ems\Core\ImmutableMessage;
 use Ems\Contracts\Routing\Route;
 use Ems\Contracts\Routing\RouteScope;
 
