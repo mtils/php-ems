@@ -5,6 +5,10 @@
 
 namespace Ems\Contracts\Core;
 
+use function preg_match;
+use function preg_quote;
+use function str_replace;
+
 /**
  * This is a string object. In the future it will work in oo string syntax. For
  * now it acts as a generic renderable.
@@ -103,6 +107,37 @@ class Str implements Renderable
             return $this->renderer->render($this);
         }
         return $this->raw;
+    }
+
+    /**
+     * @param string $pattern
+     * @param string $any
+     * @param string $single
+     * @return bool
+     */
+    public function isLike(string $pattern, string $any='%', string $single='_') : bool
+    {
+        return self::match($this->raw, $pattern, $any, $single);
+    }
+
+    /**
+     * Match a string using wildcard (*) and single char (?) pattern.
+     *
+     * @param string $haystack
+     * @param string $pattern
+     * @param string $any
+     * @param string $single
+     * @return bool
+     */
+    public static function match(string $haystack, string $pattern, string $any='*', string $single='?') : bool
+    {
+        $anyEscape = '§§§§';
+        $singleEscape = '§§§§§';
+
+        // Save the special characters
+        $pattern = str_replace([$single, $any], [$singleEscape, $anyEscape], $pattern);
+        $regex = str_replace([$singleEscape, $anyEscape], ['.', '.*'], preg_quote($pattern));
+        return preg_match("/^$regex$/i", $haystack);
     }
 
 }
