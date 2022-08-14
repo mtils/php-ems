@@ -3,7 +3,7 @@
     "description": "A framework agnostic php library which provides the basics for cmsable and other frameworks",
     "type": "library",
     "require": {
-        "php": ">=7.1.0",
+        "php": ">=7.2.0",
         "psr/http-message": "1.*",
         "psr/http-server-middleware": "1.*",
         "psr/log": "~1.0",

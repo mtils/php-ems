@@ -28,6 +28,8 @@ trait RoutingTrait
 {
     use TestData;
     protected static $testRoutes;
+    protected $addRoutes = [];
+    protected $addMiddlewares = [];
 
     /**
      * @param bool|callable $filled

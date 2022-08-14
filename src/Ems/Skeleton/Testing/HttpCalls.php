@@ -45,7 +45,7 @@ trait HttpCalls
      * @param string                $method
      * @return GenericInput
      */
-    protected function request($url, $payload='', string $method='') : GenericInput
+    protected function request($url, $payload='', string $method='') : Input
     {
         $input = new GenericInput($payload);
         if ($method) {

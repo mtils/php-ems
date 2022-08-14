@@ -218,4 +218,11 @@ interface Input extends ArrayAccess, IteratorAggregate, Countable
      * @return string
      */
     public function getApiVersion() : string;
+
+    /**
+     * Return the "current" user.
+     *
+     * @return object
+     */
+    public function getUser() : object;
 }

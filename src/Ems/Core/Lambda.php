@@ -27,6 +27,7 @@ use function is_callable;
 use function is_object;
 use function is_string;
 use function method_exists;
+use function spl_object_hash;
 use function strpos;
 
 /**
@@ -845,6 +846,35 @@ class Lambda implements Stringable
         $r = new ReflectionFunction($callable);
         return 'Closure:' . $r->getFileName() . ':' . $r->getStartLine() . ':' . $r->getEndLine();
 
+    }
+
+    /**
+     * This is a small helper to ensure a listener is called only once. So as an
+     * example in $app->onAfter() instead of this:
+     *
+     * $app->onAfter(Repository::class, function (Repository $repository) {
+     *   $repository->configure();
+     * });
+     *
+     * You can write:
+     * $app->onAfter(Repository::class, Lambda::once(function (Repository $repository) {
+     *   $repository->configure();
+     * }));
+     *
+     * @param callable $call
+     * @return Closure
+     */
+    public static function once(callable $call) : Closure
+    {
+        $received = [];
+        return function (...$args) use ($call, &$received) {
+            $hash = spl_object_hash($args[0]);
+            if (isset($received[$hash])) {
+                return;
+            }
+            $received[$hash] = true;
+            $call(...$args);
+        };
     }
 
     /**

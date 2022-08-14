@@ -41,6 +41,7 @@ use function print_r;
  * @property-read string                          locale
  * @property-read string                          determinedContentType
  * @property-read string                          apiVersion
+ * @property-read object                          user
  * @property      SessionContract                 session
  */
 class HttpInput extends HttpRequest implements Input, ServerRequestInterface
@@ -140,6 +141,8 @@ class HttpInput extends HttpRequest implements Input, ServerRequestInterface
                 return $this->custom;
             case 'session':
                 return $this->session;
+            case 'user':
+                return $this->getUser();
         }
         $value = $this->getInputTraitProperty($key);
         if (!$value instanceof None) {

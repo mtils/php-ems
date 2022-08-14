@@ -102,6 +102,9 @@ class HttpResponse extends Response implements ResponseInterface
         if ($dataIsArray && !isset($data['status'])) {
             $this->status = $status;
         }
+        if ($this->status == 0) {
+            $this->status = 200;
+        }
     }
 
     /**

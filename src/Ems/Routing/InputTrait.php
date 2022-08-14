@@ -13,6 +13,7 @@ use Ems\Contracts\Routing\GenericRouteScope;
 use Ems\Contracts\Routing\Input;
 use Ems\Contracts\Routing\Route;
 use Ems\Contracts\Routing\RouteScope;
+use stdClass;
 
 trait InputTrait
 {
@@ -60,6 +61,11 @@ trait InputTrait
      * @var string
      */
     protected $apiVersion = '';
+
+    /**
+     * @var object
+     */
+    protected $user;
 
     /**
      * @return Url
@@ -174,6 +180,19 @@ trait InputTrait
     }
 
     /**
+     * {@inheritDoc}
+     *
+     * @return object
+     */
+    public function getUser() : object
+    {
+        if (!$this->user) {
+            return new stdClass();
+        }
+        return $this->user;
+    }
+
+    /**
      * @param RouteScope|string|Stringable $scope
      * @return Input
      */
@@ -189,6 +208,19 @@ trait InputTrait
     public function withLocale(string $locale) : Input
     {
         return $this->replicate(['locale' => $locale]);
+    }
+
+    /**
+     * Assign a "current" user for this input.
+     *
+     * @param object $user
+     * @return Input
+     */
+    public function withUser(object $user) : Input
+    {
+        $copy = clone $this;
+        $copy->user = $user;
+        return $copy;
     }
 
     /**
@@ -232,6 +264,9 @@ trait InputTrait
         if (isset($attributes['apiVersion'])) {
             $this->apiVersion = $attributes['apiVersion'];
         }
+        if (isset($attributes['user'])) {
+            $this->user = $attributes['user'];
+        }
     }
 
     protected function copyInputTraitStateInto(array &$attributes)
@@ -265,6 +300,9 @@ trait InputTrait
         }
         if (!isset($attributes['apiVersion'])) {
             $attributes['apiVersion'] = $this->apiVersion;
+        }
+        if (!isset($attributes['user'])) {
+            $attributes['user'] = $this->user;
         }
     }
 
