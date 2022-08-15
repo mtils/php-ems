@@ -18,7 +18,7 @@ class SessionAuthMiddleware
      */
     protected $auth;
 
-    protected $sessionKey = 'ems-auth-id';
+    protected $sessionKey = 'ems-auth-credentials';
 
     public function __construct(Auth $auth)
     {

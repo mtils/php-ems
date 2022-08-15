@@ -26,7 +26,7 @@ interface Auth
 
     /**
      * @param array $credentials
-     * @return object
+     * @return object|null
      */
     public function userByCredentials(array $credentials) : ?object;
 
