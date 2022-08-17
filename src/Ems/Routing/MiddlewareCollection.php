@@ -49,9 +49,14 @@ class MiddlewareCollection implements MiddlewareCollectionContract
     protected $after = [];
 
     /**
+     * @var array
+     */
+    protected static $aliases = [];
+
+    /**
      * MiddlewareCollection constructor.
      *
-     * @param callable $instanceResolver (optional)
+     * @param callable|null $instanceResolver (optional)
      */
     public function __construct(callable $instanceResolver=null)
     {
@@ -305,6 +310,65 @@ class MiddlewareCollection implements MiddlewareCollectionContract
     }
 
     /**
+     * Map a middleware name to a class. So you can just do:
+     *
+     * Middleware::alias('auth', IsAuthenticatedMiddleware::class)
+     * and then do:
+     * $routes->get('profile/edit')->middleware('auth')
+     *
+     * $container->alias('auth', IsAuthenticatedMiddleware::class) would have
+     * the same effect but it looks strange to make a global binding to name
+     * middlewares.
+     *
+     * @param string $name
+     * @param string $class
+     * @return void
+     */
+    public static function alias(string $name, string $class)
+    {
+        self::$aliases[$name] = $class;
+    }
+
+    /**
+     * Get the class of alias (or an empty string if there is none)
+     *
+     * @param string $alias
+     * @return string
+     */
+    public static function getClassOfAlias(string $alias) : string
+    {
+        return self::$aliases[$alias] ?? '';
+    }
+
+    /**
+     * Find the alias of $class or return an empty string.
+     *
+     * @param string $class
+     * @return string
+     */
+    public static function getAliasOfClass(string $class) :  string
+    {
+        foreach (self::$aliases as $alias=>$mappedClass) {
+            if ($mappedClass === $class) {
+                return $alias;
+            }
+        }
+        return '';
+    }
+
+    /**
+     * Remove a previously added alias
+     * @param string $alias
+     * @return void
+     */
+    public static function removeAlias(string $alias)
+    {
+        if (isset(self::$aliases[$alias])) {
+            unset(self::$aliases[$alias]);
+        }
+    }
+
+    /**
      * Create the object that walks over the middlewares.
      *
      * @param array $keys
@@ -460,6 +524,9 @@ class MiddlewareCollection implements MiddlewareCollectionContract
      */
     protected function getOrCreateMiddleware($middleware)
     {
-        return is_string($middleware) ? $this->createObject($middleware) : $middleware;
+        if (!is_string($middleware)) {
+            return $middleware;
+        }
+        return $this->createObject(self::$aliases[$middleware] ?? $middleware);
     }
 }

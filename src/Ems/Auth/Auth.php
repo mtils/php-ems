@@ -78,7 +78,6 @@ class Auth implements AuthInterface
         return true;
     }
 
-
     /**
      * {@inheritDoc}
      *

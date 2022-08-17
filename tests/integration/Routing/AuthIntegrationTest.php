@@ -5,12 +5,15 @@
 
 namespace integration\Routing;
 
+use Closure;
 use Ems\Auth\Auth;
+use Ems\Auth\Routing\IsAllowedMiddleware;
 use Ems\Auth\Routing\IsAuthenticatedMiddleware;
 use Ems\Auth\Routing\SessionAuthMiddleware;
 use Ems\Auth\User;
 use Ems\Contracts\Auth\Auth as AuthInterface;
-use Ems\Contracts\Auth\LoggedOutException;
+use Ems\Contracts\Auth\Exceptions\LoggedOutException;
+use Ems\Contracts\Auth\Exceptions\NotAllowedException;
 use Ems\Contracts\Core\IOCContainer;
 use Ems\Contracts\Core\Url as UrlContract;
 use Ems\Contracts\Routing\Input;
@@ -23,6 +26,7 @@ use Ems\IntegrationTest;
 use Ems\Routing\GenericInput;
 use Ems\Routing\HttpInput;
 use Ems\Routing\InputHandler;
+use Ems\Routing\MiddlewareCollection;
 use Ems\Routing\SessionHandler\ArraySessionHandler;
 use Ems\Routing\SessionMiddleware;
 use Ems\RoutingTrait;
@@ -141,6 +145,51 @@ class AuthIntegrationTest extends IntegrationTest
 
     }
 
+    /**
+     * @test
+     */
+    public function check_allowed_middleware()
+    {
+        $response = $this->get('/orders/1422/edit');
+        $this->assertInstanceOf(HttpResponse::class, $response);
+        $this->assertEquals(403, $response->status);
+
+        // Got back from password manager
+        $response = $this->post('/session/create', [
+            'email' => 'kathleen@somewhere.com',
+            'password' => AuthIntegrationTest_Controller::PASSWORD
+        ]);
+
+        $this->assertEquals('User logged in', $response->payload);
+        $this->assertEquals(201, $response->status);
+
+        $response = $this->get('/orders/1422/edit');
+        $this->assertInstanceOf(HttpResponse::class, $response);
+
+        // Still no luck
+        $response = $this->get('/orders/1422/edit');
+        $this->assertInstanceOf(HttpResponse::class, $response);
+        $this->assertEquals(403, $response->status);
+
+        // Log kathleen out
+        $response = $this->dispatch($this->request('/session', '', 'DELETE'));
+        $this->assertEquals(204, $response->status);
+
+        // Log mary in
+        $response = $this->post('/session/create', [
+            'email' => 'mary@somewhere.com',
+            'password' => AuthIntegrationTest_Controller::PASSWORD
+        ]);
+
+        $this->assertEquals('User logged in', $response->payload);
+        $this->assertEquals(201, $response->status);
+
+        $response = $this->get('/orders/1422/edit');
+        $this->assertInstanceOf(HttpResponse::class, $response);
+
+        $this->assertEquals('User mary@somewhere.com wants to edit order #1422', $response->payload);
+    }
+
     protected function clearSession()
     {
         self::$sessionData = [];
@@ -148,7 +197,8 @@ class AuthIntegrationTest extends IntegrationTest
 
     protected function boot(Application $app)
     {
-        $app->bind('auth', IsAuthenticatedMiddleware::class);
+        MiddlewareCollection::alias('auth', IsAuthenticatedMiddleware::class);
+        MiddlewareCollection::alias('allowed', IsAllowedMiddleware::class);
         $app->onAfter(InputHandler::class, function (InputHandler $handler) {
             $handler->middleware()->add('session-auth', SessionAuthMiddleware::class)->after('session');
         });
@@ -162,6 +212,8 @@ class AuthIntegrationTest extends IntegrationTest
                 $routes->get('/user-check', [AuthIntegrationTest_Controller::class,'checkUser']);
                 $routes->post('/session/create', [AuthIntegrationTest_Controller::class,'login']);
                 $routes->delete('/session', [AuthIntegrationTest_Controller::class,'logout']);
+                $routes->get('/orders/{orderId}/edit', [AuthIntegrationTest_Controller::class,'editOrder'])
+                ->middleware('allowed:orders,edit');
             });
         }));
 
@@ -184,9 +236,10 @@ class AuthIntegrationTest extends IntegrationTest
                 $results = $users->filter($credentials)->toArray();
                 return isset($results[0]) ? $results[0] : null;
             };
-            $auth =  $app->create(Auth::class, ['userProvider' => $provider]);
+            $auth = $app->create(Auth::class, ['userProvider' => $provider]);
             $auth->setCredentialsForSpecialUser(AuthInterface::GUEST, ['email' => 'nobody@somewhere.com']);
             $auth->setCredentialsForSpecialUser(AuthInterface::SYSTEM, ['email' => 'system@somewhere.com']);
+            $auth->addChecker($this->userChecker());
             return $auth;
         });
 
@@ -198,8 +251,10 @@ class AuthIntegrationTest extends IntegrationTest
             $handler->extend(LoggedOutException::class, function (LoggedOutException $e, Input $input) {
                 return new HttpResponse($e->getMessage(), [], 401);
             });
+            $handler->extend(NotAllowedException::class, function (NotAllowedException $e, Input $input) {
+                return new HttpResponse($e->getMessage(), [], 403);
+            });
         });
-
 
     }
 
@@ -213,6 +268,17 @@ class AuthIntegrationTest extends IntegrationTest
              new User(['id' => 5, 'email' => 'kathleen@somewhere.com'])
          ]);
     }
+
+    protected function userChecker() : Closure
+    {
+        return function (User $user, $resource, $operation=AuthInterface::ACCESS) {
+            if ($operation == AuthInterface::ACCESS) {
+                return $user->id % 2 === 0;
+            }
+            return $user->id == 3; // Only kathleen is admin
+        };
+    }
+
     /**
      * Create an http request.
      *
@@ -282,5 +348,10 @@ class AuthIntegrationTest_Controller
     {
         $middleware->removeFromSession($input->session);
         return new HttpResponse('', [], 204);
+    }
+
+    public function editOrder(HttpInput $input, $orderId) : string
+    {
+        return 'User ' . $input->getUser()->email . " wants to edit order #$orderId";
     }
 }

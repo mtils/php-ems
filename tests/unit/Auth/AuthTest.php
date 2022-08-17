@@ -66,6 +66,7 @@ class AuthTest extends TestCase
 
         $this->assertTrue($auth->is($nobody, AuthInterface::GUEST));
         $this->assertFalse($auth->is($nobody, AuthInterface::SYSTEM));
+        $this->assertFalse($auth->is($nobody, AuthInterface::USER));
         $this->assertFalse($auth->is($system, AuthInterface::GUEST));
         $this->assertTrue($auth->is($system, AuthInterface::SYSTEM));
         $this->assertFalse($auth->is($user, AuthInterface::GUEST));
