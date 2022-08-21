@@ -232,6 +232,9 @@ class UrlGenerator implements UrlGeneratorContract
     protected function defaultBaseUrlProvider() : Closure
     {
         return function (Input $input, $scope=null) {
+            if ($url = $input->getUrl()) {
+                return new UrlObject($url->scheme . '://' . $url->host);
+            }
             return new UrlObject('http://localhost');
         };
     }
