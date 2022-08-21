@@ -10,6 +10,7 @@ use Ems\Contracts\Routing\Input;
 use Ems\Contracts\Routing\Session;
 use Ems\Routing\ArgvInput;
 use Ems\Routing\HttpInput;
+use Throwable;
 
 class SessionAuthMiddleware
 {
@@ -28,8 +29,12 @@ class SessionAuthMiddleware
     public function __invoke(Input $input, callable $next)
     {
         if ($input instanceof ArgvInput) {
-            $user = $this->auth->specialUser(Auth::SYSTEM);
-            return $next($input->withUser($user));
+            try {
+                $user = $this->auth->specialUser(Auth::SYSTEM);
+                return $next($input->withUser($user));
+            } catch (Throwable $e) {
+                return $next($input);
+            }
         }
         if (!$input instanceof HttpInput || !isset($input->session[$this->sessionKey])) {
              return $next($input->withUser($this->auth->specialUser(Auth::GUEST)));
