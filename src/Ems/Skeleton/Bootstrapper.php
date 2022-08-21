@@ -218,7 +218,7 @@ class Bootstrapper
     protected function getConfig(string $name) : array
     {
         if (!$appConfig = $this->app->config($name)) {
-            return $appConfig;
+            return $this->defaultConfig;
         }
         $config = [];
         foreach ($this->defaultConfig as $key=>$value) {
