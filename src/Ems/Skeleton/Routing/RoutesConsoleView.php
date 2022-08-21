@@ -70,7 +70,7 @@ class RoutesConsoleView
             case RouteSearch::MIDDLEWARE:
                 $middlewares = [];
                 foreach ($this->parseMiddleware($route) as $middleware=>$parameters) {
-                    $middlewares[] = $middleware . ':' . $parameters;
+                    $middlewares[] = $parameters ? ($middleware . ':' . $parameters) : $middleware;
                 }
                 return implode(',', $middlewares);
         }
