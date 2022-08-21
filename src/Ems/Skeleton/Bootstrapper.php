@@ -88,16 +88,17 @@ class Bootstrapper
 
     /**
      * @param callable $adder
+     * @param array $attributes
      */
-    protected function addRoutesBy(callable $adder)
+    protected function addRoutesBy(callable $adder, array $attributes=[])
     {
-        $this->container->onAfter(RouteRegistry::class, function (RouteRegistry $registry) use ($adder) {
+        $this->container->onAfter(RouteRegistry::class, function (RouteRegistry $registry) use ($adder, $attributes) {
             $routerId = spl_object_hash($registry);
             if (isset($this->configuredRegistries[$routerId])) {
                 return;
             }
             $this->configuredRegistries[$routerId] = true;
-            $registry->register($adder);
+            $registry->register($adder, $attributes);
         });
     }
 
