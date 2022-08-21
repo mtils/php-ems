@@ -15,6 +15,9 @@ use Ems\Core\Response;
 use Ems\Http\Client;
 use Ems\Http\HttpResponse;
 use Ems\View\View;
+use Ems\Contracts\Routing\UrlGenerator as UrlGeneratorContract;
+
+use function strpos;
 
 class ResponseFactory implements ResponseFactoryContract, UtilizesInput
 {
@@ -22,6 +25,16 @@ class ResponseFactory implements ResponseFactoryContract, UtilizesInput
      * @var Input
      */
     private $input;
+
+    /**
+     * @var UrlGeneratorContract
+     */
+    private $urls;
+
+    public function __construct(UrlGeneratorContract $urls)
+    {
+        $this->urls = $urls;
+    }
 
     /**
      * @param Stringable|string $content
@@ -68,12 +81,27 @@ class ResponseFactory implements ResponseFactoryContract, UtilizesInput
      */
     public function redirect($to, array $routeParams = []): Response
     {
+        $to = $this->isRouteName($to) ? $this->urls->route($to) : $to;
         return new HttpResponse([],['Location' => "$to"], 302);
     }
 
     public function setInput(Input $input)
     {
         $this->input = $input;
+        $this->urls = $this->urls->withInput($input);
     }
 
+    /**
+     * Check if the passed $to is a route name.
+     *
+     * @param string|Url $to
+     * @return bool
+     */
+    protected function isRouteName($to) : bool
+    {
+        if ($to instanceof Url) {
+            return false;
+        }
+        return strpos($to, '/') === false;
+    }
 }
