@@ -68,6 +68,11 @@ class Route implements Arrayable
     protected $collector;
 
     /**
+     * @var bool
+     */
+    protected $middlewareWasRemoved = false;
+
+    /**
      * RouteConfiguration constructor.
      *
      * @param string|array $method
@@ -126,8 +131,11 @@ class Route implements Arrayable
     {
         if ($middleware === null) {
             $this->_properties['middlewares'] = [];
+            $this->middlewareWasRemoved = true;
             return $this;
         }
+
+        $this->middlewareWasRemoved = false;
 
         $middlewares = is_array($middleware) ? array_values($middleware) : func_get_args();
 
@@ -217,6 +225,17 @@ class Route implements Arrayable
     public function toArray() : array
     {
         return $this->_properties;
+    }
+
+    /**
+     * Check if middleware() was called without a parameter. This is needed to
+     * determine if common registered middleware should be skipped.
+     *
+     * @return bool
+     */
+    public function wasMiddlewareRemoved() : bool
+    {
+        return $this->middlewareWasRemoved;
     }
 
     /**

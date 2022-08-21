@@ -231,6 +231,10 @@ class RouteCollector implements IteratorAggregate
             return $route;
         }
 
+        if ($route->wasMiddlewareRemoved()) {
+            return $route;
+        }
+
         $routeMiddlewares = $route->middlewares;
 
         $route->middleware(); // clear middleware
