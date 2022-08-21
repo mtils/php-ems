@@ -6,6 +6,7 @@
 namespace Ems\Auth;
 
 use Ems\Contracts\Auth\Auth as AuthInterface;
+use Ems\Core\Exceptions\UnConfiguredException;
 use LogicException;
 
 use function call_user_func;
@@ -31,9 +32,11 @@ class Auth implements AuthInterface
     /**
      * @param callable|null $userProvider
      */
-    public function __construct(callable $userProvider)
+    public function __construct(callable $userProvider=null)
     {
-        $this->userProvider = $userProvider;
+        $this->userProvider = $userProvider ?: function () {
+            throw new UnConfiguredException('No user provider was assigned to the auth. Assign it with $auth->provideUsersBy(callable $yourProvider)');
+        };
     }
 
     /**
@@ -111,7 +114,6 @@ class Auth implements AuthInterface
         return false;
     }
 
-
     /**
      * Add a "allowed" checker. Assign a callable that will be called with all
      * arguments of allowed.
@@ -148,6 +150,18 @@ class Auth implements AuthInterface
     public function setCredentialsForSpecialUser(string $when, array $credentials)
     {
         $this->userData[$when] = $credentials;
+    }
+
+    /**
+     * Assign a callable that provides a user by passed credentials.
+     *
+     * @param callable $userProvider
+     * @return $this
+     */
+    public function provideUsersBy(callable $userProvider) : Auth
+    {
+        $this->userProvider = $userProvider;
+        return $this;
     }
 
     /**

@@ -308,13 +308,7 @@ class RoutingBootstrapper extends Bootstrapper
      */
     protected function getRoutingConfig() : array
     {
-        if (!$appConfig = $this->app->config('routing')) {
-            return $this->defaultConfig;
-        }
-        $config = [];
-        foreach ($this->defaultConfig as $key=>$value) {
-            $config[$key] = $appConfig[$key] ?? $value;
-        }
+        $config = $this->getConfig('routing');
         if (isset($config['cache_file']) && $config['cache_file'][0] != '/') {
             $config['cache_file'] = (string)$this->app->path($config['cache_file']);
         }

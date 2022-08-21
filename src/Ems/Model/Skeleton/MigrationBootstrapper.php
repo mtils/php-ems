@@ -45,17 +45,17 @@ class MigrationBootstrapper extends Bootstrapper
         }
 
         $this->container->share(MigrationStepRepository::class, function () {
-            return $this->makeRepository($this->getConfig());
+            return $this->makeRepository($this->getConfig('migrations'));
         });
 
         $this->container->bind(MigrationRunner::class, function () {
-            return $this->makeRunner($this->getConfig());
+            return $this->makeRunner($this->getConfig('migrations'));
         });
 
         $this->container->share(MigratorContract::class, function () {
             $migrator = $this->container->create(Migrator::class);
             if ($migrator instanceof Configurable) {
-                $this->configure($migrator, $this->getConfig());
+                $this->configure($migrator, $this->getConfig('migrations'));
             }
             return $migrator;
         });
@@ -162,9 +162,4 @@ class MigrationBootstrapper extends Bootstrapper
         });
     }
 
-    protected function getConfig($key=null)
-    {
-        $config = $this->app->config('migrations', $this->defaultConfig);
-        return $key ? $config[$key] : $config;
-    }
 }

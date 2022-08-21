@@ -3,7 +3,9 @@
 namespace Ems\Skeleton;
 
 use Ems\Contracts\Core\IOCContainer;
+use Ems\Contracts\Routing\MiddlewareCollection;
 use Ems\Contracts\Routing\RouteRegistry;
+use Ems\Routing\InputHandler;
 
 use function defined;
 use function function_exists;
@@ -56,12 +58,14 @@ class Bootstrapper
      *
      * @var array
      */
-    protected $configuredRegistries = [];
+    private $configuredRegistries = [];
 
     /**
-     * @var callable[]
+     * Put a default configuration into this array.
+     *
+     * @var array
      */
-    protected $routeLoaders = [];
+    protected $defaultConfig = [];
 
     /**
      * @param IOCContainer $container
@@ -77,6 +81,9 @@ class Bootstrapper
         $this->registerAliases();
         $this->bindBindings();
         $this->bindSingletons();
+        $this->container->onAfter(InputHandler::class, function (InputHandler $handler) {
+            $this->addMiddleware($handler->middleware());
+        });
     }
 
     /**
@@ -84,7 +91,6 @@ class Bootstrapper
      */
     protected function addRoutesBy(callable $adder)
     {
-        $this->routeLoaders[] = $adder;
         $this->container->onAfter(RouteRegistry::class, function (RouteRegistry $registry) use ($adder) {
             $routerId = spl_object_hash($registry);
             if (isset($this->configuredRegistries[$routerId])) {
@@ -93,6 +99,16 @@ class Bootstrapper
             $this->configuredRegistries[$routerId] = true;
             $registry->register($adder);
         });
+    }
+
+    /**
+     * Overwrite this method to add your middleware
+     *
+     * @param MiddlewareCollection $middlewares
+     */
+    protected function addMiddleware(MiddlewareCollection $middlewares)
+    {
+        //
     }
 
     /**
@@ -191,5 +207,23 @@ class Bootstrapper
         }
         // Try to guess relative from vendor
         return realpath(__DIR__.'/../../../../..');
+    }
+
+    /**
+     * Get a config for this bootstrapper or fallback to $this->defaultConfig.
+     *
+     * @param string $name
+     * @return array
+     */
+    protected function getConfig(string $name) : array
+    {
+        if (!$appConfig = $this->app->config($name)) {
+            return $appConfig;
+        }
+        $config = [];
+        foreach ($this->defaultConfig as $key=>$value) {
+            $config[$key] = $appConfig[$key] ?? $value;
+        }
+        return $config;
     }
 }
