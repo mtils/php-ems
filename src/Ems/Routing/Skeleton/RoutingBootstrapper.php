@@ -108,8 +108,6 @@ class RoutingBootstrapper extends Bootstrapper
             $controller->setStorage($this->createCacheStorage($this->getRoutingConfig()));
         });
 
-        $this->addDefaultRoutes();
-
     }
 
     /**
@@ -258,9 +256,9 @@ class RoutingBootstrapper extends Bootstrapper
         }
     }
 
-    protected function addDefaultRoutes()
+    protected function addRoutes(RouteRegistryContract $registry)
     {
-        $this->addRoutesBy(function (RouteCollector $routes) {
+        $registry->register(function (RouteCollector $routes) {
 
             $routes->command(
                 'commands',
@@ -279,10 +277,10 @@ class RoutingBootstrapper extends Bootstrapper
                 RoutesController::class.'->index',
                 'List all your routes (and commands)'
             )->argument('?columns', 'What columns to show? v=Verb(Method), p=Pattern, n=Name, c=Clients, s=Scopes, m=Middleware')
-             ->option('pattern=*', 'Routes matches this pattern', 'p')
-             ->option('client=*', 'Routes of this client types', 'c')
-             ->option('name=*', 'Routes with this name', 'n')
-             ->option('scope=*', 'Routes of this scope', 's');
+                ->option('pattern=*', 'Routes matches this pattern', 'p')
+                ->option('client=*', 'Routes of this client types', 'c')
+                ->option('name=*', 'Routes with this name', 'n')
+                ->option('scope=*', 'Routes of this scope', 's');
 
             $routes->command(
                 'routes:compile',

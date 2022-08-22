@@ -52,7 +52,7 @@ class AssetsBootstrapper extends Bootstrapper
         });
 
         $this->container->onAfter('Illuminate\Contracts\Routing\Registrar', function ($router, $app) {
-            $this->addRoutes($router);
+            $this->addIlluminateRoutes($router);
         });
 
         $this->container->on('Ems\Assets\Compiler', function ($compiler) {
@@ -102,7 +102,7 @@ class AssetsBootstrapper extends Bootstrapper
         $chain->add($this->container->get('Ems\Assets\Renderer\JavascriptRenderer'));
     }
 
-    protected function addRoutes(Registrar $router)
+    protected function addIlluminateRoutes(Registrar $router)
     {
         $router->get('_ems/asset', [
             'uses' => '\Ems\Assets\Laravel\AssetController@show',
@@ -128,7 +128,9 @@ class AssetsBootstrapper extends Bootstrapper
 
     /**
      * TODO: Implement URL Dispatcher.
-     **/
+     *
+     * @noinspection PhpUndefinedFunctionInspection
+     */
     protected function publicPath($subPath = '')
     {
         if (function_exists('public_path')) {
@@ -140,6 +142,7 @@ class AssetsBootstrapper extends Bootstrapper
         return $subPath ? "$basePath/$subPath" : $basePath;
     }
 
+    /** @noinspection PhpUndefinedFunctionInspection */
     protected function url($path = '')
     {
         if (function_exists('url')) {

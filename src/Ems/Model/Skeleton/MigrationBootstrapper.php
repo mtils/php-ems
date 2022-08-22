@@ -11,14 +11,14 @@ use Ems\Contracts\Model\Schema\MigrationRunner;
 use Ems\Contracts\Model\Schema\MigrationStepRepository;
 use Ems\Contracts\Model\Schema\Migrator as MigratorContract;
 use Ems\Contracts\Routing\RouteCollector;
-use Ems\Skeleton\Application;
+use Ems\Contracts\Routing\RouteRegistry;
 use Ems\Core\Exceptions\NotImplementedException;
-use Ems\Skeleton\Bootstrapper;
 use Ems\Core\Url;
 use Ems\Model\Eloquent\EmsConnectionFactory;
 use Ems\Model\Schema\Illuminate\IlluminateMigrationRunner;
 use Ems\Model\Schema\Illuminate\IlluminateMigrationStepRepository;
 use Ems\Model\Schema\Migrator;
+use Ems\Skeleton\Bootstrapper;
 use Illuminate\Database\ConnectionResolverInterface;
 use Illuminate\Database\Migrations\DatabaseMigrationRepository;
 use Illuminate\Database\Migrations\MigrationRepositoryInterface;
@@ -37,8 +37,6 @@ class MigrationBootstrapper extends Bootstrapper
     public function bind()
     {
         parent::bind();
-
-        $this->addRoutes();
 
         if (!$this->container->has(ConnectionResolverInterface::class)) {
             $this->registerConnectionResolver();
@@ -60,12 +58,11 @@ class MigrationBootstrapper extends Bootstrapper
             return $migrator;
         });
 
-        $this->addRoutes();
     }
 
-    protected function addRoutes()
+    protected function addRoutes(RouteRegistry $registry)
     {
-        $this->addRoutesBy(function (RouteCollector $collector) {
+        $registry->register(function (RouteCollector $collector) {
 
             $collector->command('migrate', MigrationCommand::class.'->migrate', 'Run all pending migrations')
                 ->option('simulate', 'Just show the queries but do not change the database.', 't');

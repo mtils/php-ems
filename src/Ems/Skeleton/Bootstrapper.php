@@ -84,26 +84,30 @@ class Bootstrapper
         $this->container->onAfter(InputHandler::class, function (InputHandler $handler) {
             $this->addMiddleware($handler->middleware());
         });
-    }
 
-    /**
-     * @param callable $adder
-     * @param array $attributes
-     */
-    protected function addRoutesBy(callable $adder, array $attributes=[])
-    {
-        $this->container->onAfter(RouteRegistry::class, function (RouteRegistry $registry) use ($adder, $attributes) {
+        $this->container->onAfter(RouteRegistry::class, function (RouteRegistry $registry) {
             $routerId = spl_object_hash($registry);
             if (isset($this->configuredRegistries[$routerId])) {
                 return;
             }
             $this->configuredRegistries[$routerId] = true;
-            $registry->register($adder, $attributes);
+            $this->addRoutes($registry);
         });
     }
 
     /**
-     * Overwrite this method to add your middleware
+     * Overwrite this method to add your routes.
+     *
+     * @param RouteRegistry $registry
+     * @return void
+     */
+    protected function addRoutes(RouteRegistry $registry)
+    {
+        //
+    }
+
+    /**
+     * Overwrite this method to add your middleware(s).
      *
      * @param MiddlewareCollection $middlewares
      */
@@ -194,7 +198,9 @@ class Bootstrapper
      * Return the applications base path (the vcs root directory)
      *
      * @return string
-     **/
+     *
+     * @noinspection PhpUndefinedFunctionInspection
+     */
     protected function appPath() : string
     {
         if (defined('APP_ROOT')) {
