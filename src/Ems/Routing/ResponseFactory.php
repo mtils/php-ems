@@ -48,7 +48,7 @@ class ResponseFactory implements ResponseFactoryContract, UtilizesInput
             $attributes['contentType'] = $content->mimeType();
         }
 
-        if ($this->input->getClientType() == Input::CLIENT_CONSOLE) {
+        if ($this->input && $this->input->getClientType() == Input::CLIENT_CONSOLE) {
             return new Response($attributes);
         }
 
@@ -70,7 +70,9 @@ class ResponseFactory implements ResponseFactoryContract, UtilizesInput
     public function view(string $name, array $data = []): Response
     {
         $view = (new View($name))->assign($data);
-        $view->setMimeType($this->input->getDeterminedContentType());
+        if ($this->input) {
+            $view->setMimeType($this->input->getDeterminedContentType());
+        }
         return $this->create($view);
     }
 

@@ -9,6 +9,7 @@ use Ems\Contracts\Core\SupportsCustomFactory;
 use Ems\Contracts\Routing\Input;
 use Ems\Contracts\Routing\InputHandler as InputHandlerContract;
 use Ems\Contracts\Routing\MiddlewareCollection as MiddlewareCollectionContract;
+use Ems\Core\ImmutableMessage;
 use Ems\Core\Response;
 use Ems\Core\Support\CustomFactorySupport;
 use Exception;
@@ -61,7 +62,7 @@ class InputHandler implements InputHandlerContract, SupportsCustomFactory
     /**
      * @return MiddlewareCollectionContract
      */
-    public function middleware()
+    public function middleware() : MiddlewareCollectionContract
     {
         return $this->middleware;
     }
@@ -87,5 +88,18 @@ class InputHandler implements InputHandlerContract, SupportsCustomFactory
         return $this;
     }
 
+    /**
+     * Find the last created input by a middleware
+     *
+     * @param Input $input
+     * @return Input
+     */
+    protected function findLastCreatedInput(Input $input) : Input
+    {
+        if ($input instanceof ImmutableMessage && $input->next instanceof Input) {
+            return $this->findLastCreatedInput($input->next);
+        }
+        return $input;
+    }
 
 }

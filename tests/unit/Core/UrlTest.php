@@ -13,7 +13,10 @@ use function str_replace;
 
 class UrlTest extends TestCase
 {
-    public function test_implements_interface()
+    /**
+     * @test
+     */
+    public function implements_interface()
     {
         $this->assertInstanceOf(
             UrlContract::class,
@@ -21,7 +24,10 @@ class UrlTest extends TestCase
         );
     }
 
-    public function test_path_leads_to_plain_path()
+    /**
+     * @test
+     */
+    public function path_leads_to_plain_path()
     {
         $path = '/home/marcus/test.txt';
         $url = $this->newUrl($path);
@@ -29,7 +35,10 @@ class UrlTest extends TestCase
         $this->assertEquals($path, "$url");
     }
 
-    public function test_path_with_scheme_leads_to_path()
+    /**
+     * @test
+     */
+    public function path_with_scheme_leads_to_path()
     {
         $path = '/home/marcus/test.txt';
         $url = $this->newUrl($path);
@@ -39,7 +48,10 @@ class UrlTest extends TestCase
         $this->assertEquals('file', $newUrl->scheme);
     }
 
-    public function test_path_with_file_scheme_leads_to_path()
+    /**
+     * @test
+     */
+    public function path_with_file_scheme_leads_to_path()
     {
         $path = 'file:///home/marcus/test.txt';
         $url = $this->newUrl($path);
@@ -49,7 +61,10 @@ class UrlTest extends TestCase
         $this->assertEquals('file', $url->scheme);
     }
 
-    public function test_psr_scheme_methods()
+    /**
+     * @test
+     */
+    public function psr_scheme_methods()
     {
         $string = 'ftps://ftp.tils.org/public';
         $url = $this->newUrl($string);
@@ -58,7 +73,10 @@ class UrlTest extends TestCase
         $this->assertEquals('https', $url->withScheme('https')->getScheme());
     }
 
-    public function test_psr_host_methods()
+    /**
+     * @test
+     */
+    public function psr_host_methods()
     {
         $string = 'ftps://ftp.tils.org/public';
         $url = $this->newUrl($string);
@@ -67,7 +85,10 @@ class UrlTest extends TestCase
         $this->assertEquals('web-utils.de', $url->withHost('web-utils.de')->getHost());
     }
 
-    public function test_psr_post_methods()
+    /**
+     * @test
+     */
+    public function psr_post_methods()
     {
         $string = 'ftps://ftp.tils.org:55/public';
         $url = $this->newUrl($string);
@@ -76,7 +97,10 @@ class UrlTest extends TestCase
         $this->assertEquals('66', $url->withPort(66)->getPort());
     }
 
-    public function test_psr_query_methods()
+    /**
+     * @test
+     */
+    public function psr_query_methods()
     {
         $string = 'https://ftp.tils.org:55/public?foo=bar&boing=whoops';
         $url = $this->newUrl($string);
@@ -86,7 +110,10 @@ class UrlTest extends TestCase
         $this->assertSame('', $this->newUrl('https://ftp.tils.org:55/public')->getQuery());
     }
 
-    public function test_psr_fragment()
+    /**
+     * @test
+     */
+    public function psr_fragment()
     {
         $string = 'https://ftp.tils.org:55/public#top';
         $url = $this->newUrl($string);
@@ -95,7 +122,10 @@ class UrlTest extends TestCase
         $this->assertEquals('contact', $url->withFragment('contact')->getFragment());
     }
 
-    public function test_psr_path_methods()
+    /**
+     * @test
+     */
+    public function psr_path_methods()
     {
         $string = 'ftps://ftp.tils.org/public/index.html';
         $url = $this->newUrl($string);
@@ -105,10 +135,11 @@ class UrlTest extends TestCase
     }
 
     /**
-     * @expectedException InvalidArgumentException
-     **/
-    public function test_path_with_file_looking_scheme_throws_exception()
+     * @test
+     */
+    public function path_with_file_looking_scheme_throws_exception()
     {
+        $this->expectException(InvalidArgumentException::class);
         $path = "some-very-long-scheme-that-shouldnt-exist:///home/michael/file.txt";
         $url = $this->newUrl($path);
 
@@ -117,7 +148,10 @@ class UrlTest extends TestCase
         $this->assertEquals('file', $url->scheme);
     }
 
-    public function test_path_with_non_file_scheme_leads_to_path()
+    /**
+     * @test
+     */
+    public function path_with_non_file_scheme_leads_to_path()
     {
         $path = 'sqlite:///home/marcus/test.db';
         $url = $this->newUrl($path);
@@ -127,7 +161,10 @@ class UrlTest extends TestCase
         $this->assertEquals('sqlite', $url->scheme);
     }
 
-    public function test_user_adds_correct_syntax()
+    /**
+     * @test
+     */
+    public function user_adds_correct_syntax()
     {
         $path = 'admin/session/create';
         $host = 'foo.de';
@@ -144,7 +181,10 @@ class UrlTest extends TestCase
         $this->assertEquals("$scheme://$user@$host/$path", "$newUrl");
     }
 
-    public function test_user_adds_correct_syntax_psr()
+    /**
+     * @test
+     */
+    public function user_adds_correct_syntax_psr()
     {
         $path = 'admin/session/create';
         $host = 'foo.de';
@@ -161,7 +201,10 @@ class UrlTest extends TestCase
         $this->assertEquals("$scheme://$user@$host/$path", "$newUrl");
     }
 
-    public function test_user_and_password_adds_correct_syntax()
+    /**
+     * @test
+     */
+    public function user_and_password_adds_correct_syntax()
     {
         $path = 'admin/session/create';
         $host = 'foo.de';
@@ -180,7 +223,10 @@ class UrlTest extends TestCase
         $this->assertEquals("$scheme://$user:xxxxxx@$host/$path", "$newUrl");
     }
 
-    public function test_user_and_password_adds_correct_syntax_psr()
+    /**
+     * @test
+     */
+    public function user_and_password_adds_correct_syntax_psr()
     {
         $path = 'admin/session/create';
         $host = 'foo.de';
@@ -199,7 +245,10 @@ class UrlTest extends TestCase
         $this->assertEquals("$scheme://$user:xxxxxx@$host/$path", "$newUrl");
     }
 
-    public function test_user_adds_correct_syntax_on_flat_url()
+    /**
+     * @test
+     */
+    public function user_adds_correct_syntax_on_flat_url()
     {
         $host = 'foo.de';
         $scheme = 'mailto';
@@ -216,7 +265,10 @@ class UrlTest extends TestCase
         $this->assertEquals("$scheme:$user@$host", "$url");
     }
 
-    public function test_user_and_password_and_port_adds_correct_syntax()
+    /**
+     * @test
+     */
+    public function user_and_password_and_port_adds_correct_syntax()
     {
         $path = 'admin/session/create';
         $host = 'foo.de';
@@ -236,7 +288,10 @@ class UrlTest extends TestCase
         $this->assertEquals("$scheme://$user:xxxxxx@$host:$port/$path", "$newUrl");
     }
 
-    public function test_user_and_password_and_port_and_fragment_adds_correct_syntax()
+    /**
+     * @test
+     */
+    public function user_and_password_and_port_and_fragment_adds_correct_syntax()
     {
         $path = 'admin/session/create';
         $host = 'foo.de';
@@ -262,7 +317,10 @@ class UrlTest extends TestCase
         $this->assertEquals("$scheme://$user:xxxxxx@$host:$port/$path#$fragment", "$newUrl");
     }
 
-    public function test_user_and_password_are_encoded()
+    /**
+     * @test
+     */
+    public function user_and_password_are_encoded()
     {
         $path = 'admin/session/create';
         $host = 'foo.de';
@@ -289,7 +347,10 @@ class UrlTest extends TestCase
         $this->assertEquals("$scheme://$encodedUser:xxxxxx@$host:$port/$path#$fragment", "$newUrl");
     }
 
-    public function test_user_and_password_are_decoded()
+    /**
+     * @test
+     */
+    public function user_and_password_are_decoded()
     {
         $user = 'hannah@gmail.com';
         $password = 'password 123';
@@ -304,7 +365,10 @@ class UrlTest extends TestCase
 
     }
 
-    public function test_parses_and_renders_all_properties()
+    /**
+     * @test
+     */
+    public function parses_and_renders_all_properties()
     {
         $path = 'admin/session/create';
         $host = 'foo.de';
@@ -339,8 +403,10 @@ class UrlTest extends TestCase
         $this->assertEquals(str_replace(':123',':xxxxxx', $string), "$url");
     }
 
-
-    public function test_path_sets_new_path()
+    /**
+     * @test
+     */
+    public function path_sets_new_path()
     {
         $path = 'admin/session/create';
         $host = 'foo.de';
@@ -356,7 +422,10 @@ class UrlTest extends TestCase
         $this->assertEquals("$scheme://$host/$newPath", "$newUrl");
     }
 
-    public function test_append_appends_path_segment()
+    /**
+     * @test
+     */
+    public function append_appends_path_segment()
     {
         $path = 'admin/session/create';
         $host = 'foo.de';
@@ -372,7 +441,10 @@ class UrlTest extends TestCase
         $this->assertEquals("$scheme://$host/$path/$segment", "$newUrl");
     }
 
-    public function test_prepend_prepends_path_segment()
+    /**
+     * @test
+     */
+    public function prepend_prepends_path_segment()
     {
         $path = 'admin/session/create';
         $host = 'foo.de';
@@ -388,7 +460,10 @@ class UrlTest extends TestCase
         $this->assertEquals("$scheme://$host/$segment/$path", "$newUrl");
     }
 
-    public function test_pop_removes_lasts_path_segment()
+    /**
+     * @test
+     */
+    public function pop_removes_lasts_path_segment()
     {
         $path = 'admin/session/create';
         $host = 'foo.de';
@@ -403,7 +478,10 @@ class UrlTest extends TestCase
         $this->assertEquals("$scheme://$host/admin/session", "$newUrl");
     }
 
-    public function test_shift_removes_first_path_segment()
+    /**
+     * @test
+     */
+    public function shift_removes_first_path_segment()
     {
         $path = 'admin/session/create';
         $host = 'foo.de';
@@ -418,7 +496,10 @@ class UrlTest extends TestCase
         $this->assertEquals("$scheme://$host/session/create", "$newUrl");
     }
 
-    public function test_shift_removes_first_path_segments()
+    /**
+     * @test
+     */
+    public function shift_removes_first_path_segments()
     {
         $path = 'admin/users/144/addresses/104';
         $host = 'foo.de';
@@ -433,7 +514,10 @@ class UrlTest extends TestCase
         $this->assertEquals("$scheme://$host/addresses/104", "$newUrl");
     }
 
-    public function test_query_adds_query_param()
+    /**
+     * @test
+     */
+    public function query_adds_query_param()
     {
         $path = 'admin/session/create';
         $host = 'foo.de';
@@ -460,7 +544,10 @@ class UrlTest extends TestCase
         $this->assertEquals("$scheme://$host/$path?$queryPart", "$newUrl");
     }
 
-    public function test_query_adds_query_params()
+    /**
+     * @test
+     */
+    public function query_adds_query_params()
     {
         $path = 'admin/session/create';
         $host = 'foo.de';
@@ -482,7 +569,10 @@ class UrlTest extends TestCase
         $this->assertEquals("$scheme://$host/$path?$queryPart", "$newUrl");
     }
 
-    public function test_query_adds_query_params_by_querystring()
+    /**
+     * @test
+     */
+    public function query_adds_query_params_by_querystring()
     {
         $path = 'admin/session/create';
         $host = 'foo.de';
@@ -504,7 +594,10 @@ class UrlTest extends TestCase
         $this->assertEquals("$scheme://$host/$path?$queryPart", "$newUrl");
     }
 
-    public function test_query_replaces_query_params_by_querystring()
+    /**
+     * @test
+     */
+    public function query_replaces_query_params_by_querystring()
     {
         $path = 'admin/session/create';
         $host = 'foo.de';
@@ -530,18 +623,27 @@ class UrlTest extends TestCase
         $this->assertEquals("$scheme://$host/$path?$queryPart", "$newUrl");
     }
 
-    public function test_isEmpty_returns_true_if_query_empty()
+    /**
+     * @test
+     */
+    public function isEmpty_returns_true_if_query_empty()
     {
         $this->assertTrue($this->newUrl()->isEmpty());
     }
 
-    public function test_isEmpty_returns_false_if_query_empty()
+    /**
+     * @test
+     */
+    public function isEmpty_returns_false_if_query_empty()
     {
         $this->assertFalse($this->newUrl('http://google.de')->isEmpty());
         $this->assertFalse($this->newUrl('/home/michael')->isEmpty());
     }
 
-    public function test_without_removes_one_query_keys()
+    /**
+     * @test
+     */
+    public function without_removes_one_query_keys()
     {
         $path = 'admin/session/create';
         $host = 'foo.de';
@@ -587,14 +689,18 @@ class UrlTest extends TestCase
     }
 
     /**
-     * @expectedException InvalidArgumentException
-     **/
-    public function test_get_throws_exception_if_property_unknown()
+     * @test
+     */
+    public function get_throws_exception_if_property_unknown()
     {
+        $this->expectException(InvalidArgumentException::class);
         $this->newUrl()->foo;
     }
 
-    public function test_offsetExists_returns_if_query_key_exists()
+    /**
+     * @test
+     */
+    public function offsetExists_returns_if_query_key_exists()
     {
         $path = 'admin/session/create';
         $host = 'foo.de';
@@ -609,7 +715,10 @@ class UrlTest extends TestCase
         $this->assertFalse(isset($url['foo']));
     }
 
-    public function test_offsetGet_returns_query_value()
+    /**
+     * @test
+     */
+    public function offsetGet_returns_query_value()
     {
         $path = 'admin/session/create';
         $host = 'foo.de';
@@ -624,23 +733,28 @@ class UrlTest extends TestCase
     }
 
     /**
-     * @expectedException RuntimeException
-     **/
+     * @test
+     */
     public function test_offsetSet_throws_exception()
     {
+        $this->expectException(RuntimeException::class);
         $this->newUrl()['foo'] = 'bar';
     }
 
     /**
-     * @expectedException RuntimeException
-     **/
+     * @test
+     */
     public function test_offsetUnset_throws_exception()
     {
         $url = $this->newUrl();
+        $this->expectException(RuntimeException::class);
         unset($url['foo']);
     }
 
-    public function test_getIterator_iterates_over_query_items()
+    /**
+     * @test
+     */
+    public function getIterator_iterates_over_query_items()
     {
         $path = 'admin/session/create';
         $host = 'foo.de';
@@ -665,7 +779,10 @@ class UrlTest extends TestCase
         $this->assertEquals($query, $queryItems);
     }
 
-    public function test_passing_other_url_copies_it()
+    /**
+     * @test
+     */
+    public function passing_other_url_copies_it()
     {
         $path = 'admin/session/create';
         $host = 'foo.de';
@@ -695,14 +812,18 @@ class UrlTest extends TestCase
     }
 
     /**
-     * @expectedException InvalidArgumentException
-     **/
-    public function test_passing_unknown_object_throws_exception()
+     * @test
+     */
+    public function passing_unknown_object_throws_exception()
     {
+        $this->expectException(InvalidArgumentException::class);
         $this->newUrl(new stdClass());
     }
 
-    public function test_clear_path()
+    /**
+     * @test
+     */
+    public function clear_path()
     {
         $path = '/home/marcus/test.txt';
         $url = $this->newUrl($path)->path('');
@@ -711,7 +832,10 @@ class UrlTest extends TestCase
         $this->assertCount(0, $url->path);
     }
 
-    public function test_relative_path()
+    /**
+     * @test
+     */
+    public function relative_path()
     {
         $path = 'marcus/test.txt';
         $url = $this->newUrl($path);
@@ -720,7 +844,10 @@ class UrlTest extends TestCase
         $this->assertEquals($path, (string)$url);
     }
 
-    public function test_clear_query()
+    /**
+     * @test
+     */
+    public function clear_query()
     {
         $path = 'admin/session/create';
         $host = 'foo.de';
@@ -738,9 +865,9 @@ class UrlTest extends TestCase
     }
 
     /**
-     * @expectedException \InvalidArgumentException
-     **/
-    public function test_query_throws_exception_if_type_unsupported()
+     * @test
+     */
+    public function query_throws_exception_if_type_unsupported()
     {
         $path = 'admin/session/create';
         $host = 'foo.de';
@@ -748,18 +875,23 @@ class UrlTest extends TestCase
 
         $url = $this->newUrl("$scheme://$host/$path");
 
+        $this->expectException(InvalidArgumentException::class);
         $url->query(new stdClass());
     }
 
     /**
-     * @expectedException \InvalidArgumentException
-     **/
+     * @test
+     */
     public function test_query_throws_exception_if_query_unparseable()
     {
+        $this->expectException(InvalidArgumentException::class);
         $this->newUrl('http://');
     }
 
-    public function test_appended_slash_behaviour()
+    /**
+     * @test
+     */
+    public function appended_slash_behaviour()
     {
         $tests = [
             'http://google.de'      => '',
@@ -784,7 +916,10 @@ class UrlTest extends TestCase
 
     }
 
-    public function test_appended_slash_in_domain_does_not_lead_to_appended_slashes_in_path()
+    /**
+     * @test
+     */
+    public function appended_slash_in_domain_does_not_lead_to_appended_slashes_in_path()
     {
 
         $url = $this->newUrl('https://google.com/');
@@ -794,7 +929,10 @@ class UrlTest extends TestCase
         $this->assertEquals('https://google.com/analytics/graphs/line', "$url");
     }
 
-    public function test_appended_slash_in_domain_with_path_does_lead_to_appended_slashes_in_path()
+    /**
+     * @test
+     */
+    public function appended_slash_in_domain_with_path_does_lead_to_appended_slashes_in_path()
     {
 
         $url = $this->newUrl('https://google.com/analytics/');
@@ -803,7 +941,10 @@ class UrlTest extends TestCase
         $this->assertEquals('https://google.com/analytics/graphs/line/', "$url");
     }
 
-    public function test_equals()
+    /**
+     * @test
+     */
+    public function equals_compares()
     {
         $this->assertTrue($this->equals('/home/michi', '/home/michi'));
         $this->assertTrue($this->equals('http://www.ip.de', 'http://www.ip.de'));
@@ -816,7 +957,7 @@ class UrlTest extends TestCase
 
     }
 
-    public function newUrl($data=null)
+    public function newUrl($data=null) : Url
     {
         return new Url($data);
     }

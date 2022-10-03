@@ -4,6 +4,7 @@ namespace Ems\Core;
 
 use Closure;
 use Ems\Testing\LoggingCallable;
+use Ems\Core\Exceptions\KeyNotFoundException;
 use stdClass;
 use function func_get_args;
 
@@ -310,15 +311,16 @@ class LambdaTest extends \Ems\TestCase
     }
 
     /**
-     * @expectedException \Ems\Core\Exceptions\KeyNotFoundException
+     * @test
      **/
-    public function test_toArguments_throws_exception_if_optional_parameter_is_not_passed()
+    public function toArguments_throws_exception_if_optional_parameter_is_not_passed()
     {
 
         $f = function ($a, $b, $c=null) {};
 
         $params = ['a' => 'foo', 'c' => 'bar'];
 
+        $this->expectException(KeyNotFoundException::class);
         Lambda::toArguments($f, $params, ['joe']);
 
     }

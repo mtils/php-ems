@@ -207,4 +207,21 @@ class Input extends ImmutableMessage
         $this->determinedContentType = $contentType;
         return $this;
     }
+
+    protected function replicate(array $attributes = []): ImmutableMessage
+    {
+        $copy = parent::replicate($attributes);
+        $keys = [
+            'custom', 'routeScope', 'url', 'clientType', 'matchedRoute',
+            'routeParameters', 'handler', 'determinedContentType'
+        ];
+        foreach ($keys as $key) {
+            if (!isset($attributes[$key])) {
+                $copy->$key = $this->$key;
+            }
+        }
+        return $copy;
+    }
+
+
 }
