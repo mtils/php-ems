@@ -2,8 +2,11 @@
 
 namespace Ems\Expression;
 
+use BadMethodCallException;
+use Ems\Contracts\Core\Errors\UnSupported;
 use Ems\Contracts\Expression\Condition as ConditionContract;
 use Ems\Core\Expression;
+use InvalidArgumentException;
 
 class ConditionTest extends \Ems\TestCase
 {
@@ -23,11 +26,9 @@ class ConditionTest extends \Ems\TestCase
         $this->assertEquals('first_name', $c->operand());
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     **/
     public function test_setOperand_throws_exception_if_unsupported_type()
     {
+        $this->expectException(InvalidArgumentException::class);
         $c = $this->condition();
         $c->setOperand(new \stdClass);
     }
@@ -40,11 +41,9 @@ class ConditionTest extends \Ems\TestCase
         $this->assertSame($constraint, $c->constraint());
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     **/
     public function test_setConstraint_throws_exception_if_unsupported_type()
     {
+        $this->expectException(InvalidArgumentException::class);
         $c = $this->condition();
         $c->setConstraint(new \stdClass);
     }
@@ -79,19 +78,15 @@ class ConditionTest extends \Ems\TestCase
         $this->assertEquals('5 >= 3', "$c");
     }
 
-    /**
-     * @expectedException BadMethodCallException
-     **/
     public function test_allowOperators_twice_throws_exception()
     {
+        $this->expectException(BadMethodCallException::class);
         $this->condition()->allowOperators('=')->allowOperators('!=');
     }
 
-    /**
-     * @expectedException Ems\Contracts\Core\Errors\UnSupported
-     **/
     public function test_expressions_with_unsupported_operator_throws_exception()
     {
+        $this->expectException(UnSupported::class);
         $c = $this->condition()->allowOperators('=');
         $this->assertEquals(['='], $c->allowedOperators());
         $constraint = new Constraint('required');
@@ -106,15 +101,13 @@ class ConditionTest extends \Ems\TestCase
         $c->setConstraint($constraint);
     }
 
-    /**
-     * @expectedException Ems\Contracts\Core\Errors\UnSupported
-     **/
     public function test_expressions_with_unsupported_operator_throws_exception_if_constraint_already_added()
     {
+        $this->expectException(UnSupported::class);
         $c = $this->condition('login', new Constraint('required'));
         $c->allowOperators('=');
     }
-    
+
     public function test_expressions_with_supported_operator_throws_no_exception_if_constraint_already_added()
     {
         $c = $this->condition('login', new Constraint('equals', [], '='));

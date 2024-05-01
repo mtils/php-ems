@@ -11,6 +11,8 @@ use Ems\Model\ChunkIterator;
 use Ems\TestCase;
 use Iterator;
 
+use PHPUnit\Framework\Attributes\Test;
+
 use function array_slice;
 use function func_get_args;
 use function iterator_to_array;
@@ -19,19 +21,13 @@ use function range;
 
 class ChunkIteratorTest extends TestCase
 {
-    /**
-     * @test
-     */
-    public function it_implements_iterator()
+    #[Test] public function it_implements_iterator()
     {
         $paginatable = function () {};
         $this->assertInstanceOf(Iterator::class, $this->newIterator($paginatable));
     }
 
-    /**
-     * @test
-     */
-    public function it_produces_chunks()
+    #[Test] public function it_produces_chunks()
     {
         $alphabet = range('A', 'Z');
         $calls = [];
@@ -54,10 +50,7 @@ class ChunkIteratorTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function it_produces_chunks_with_result_with_exact_multiplier()
+    #[Test] public function it_produces_chunks_with_result_with_exact_multiplier()
     {
         $alphabet = range('A', 'T');
         $calls = [];
@@ -81,10 +74,7 @@ class ChunkIteratorTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function it_produces_chunks_with_result_with_one_chunk()
+    #[Test] public function it_produces_chunks_with_result_with_one_chunk()
     {
         $alphabet = range('A', 'J');
         $calls = [];
@@ -106,10 +96,7 @@ class ChunkIteratorTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function it_produces_chunks_with_result_less_than_one_chunk()
+    #[Test] public function it_produces_chunks_with_result_less_than_one_chunk()
     {
         $alphabet = range('A', 'I');
         $calls = [];
@@ -130,10 +117,7 @@ class ChunkIteratorTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function it_produces_chunks_with_result_less_empty_list()
+    #[Test] public function it_produces_chunks_with_result_less_empty_list()
     {
         $alphabet = [];
         $calls = [];

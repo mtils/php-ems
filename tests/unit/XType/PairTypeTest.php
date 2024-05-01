@@ -4,6 +4,7 @@ namespace Ems\XType;
 
 
 use Ems\XType\AbstractTypeTest;
+use InvalidArgumentException;
 
 require_once __DIR__.'/AbstractTypeTest.php';
 
@@ -18,20 +19,16 @@ class PairTypeTest extends AbstractTypeTest
 //         $this->assertEquals(2, $type->constraints->min);
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     **/
     public function test_setting_min_throws_exception_if_value_not_2()
     {
+        $this->expectException(InvalidArgumentException::class);
         $type = $this->newType();
         $type->min = 13;
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     **/
     public function test_setting_max_throws_exception_if_value_not_2()
     {
+        $this->expectException(InvalidArgumentException::class);
         $type = $this->newType();
         $type->min = 1;
     }
@@ -46,10 +43,11 @@ class PairTypeTest extends AbstractTypeTest
     /**
      * Overwritten to check the min/max access
      *
-     * @expectedException InvalidArgumentException
+     *
      **/
     public function test_unset_removes_constraint()
     {
+        $this->expectException(InvalidArgumentException::class);
         $type = $this->newType();
         $type->min = 15;
     }
@@ -57,10 +55,11 @@ class PairTypeTest extends AbstractTypeTest
     /**
      * Overwritten to check the min/max access
      *
-     * @expectedException InvalidArgumentException
+     *
      **/
     public function test_throws_exception_when_setting_max()
     {
+        $this->expectException(InvalidArgumentException::class);
         $type = $this->newType();
         $type->max = 15;
     }

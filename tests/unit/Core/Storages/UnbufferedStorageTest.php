@@ -15,11 +15,9 @@ class UnbufferedStorageTest extends \Ems\TestCase
         $this->assertInstanceOf(StorageContract::class, $this->newProxy());
     }
 
-    /**
-     * @expectedException \LogicException
-     */
     public function test_instantiating_fails_with_already_unbuffered_storage()
     {
+        $this->expectException(\LogicException::class);
         $unbufferedStorage = $this->mock(StorageContract::class);
         $unbufferedStorage->shouldReceive('isBuffered')->andReturn(false);
         $this->newProxy($unbufferedStorage);

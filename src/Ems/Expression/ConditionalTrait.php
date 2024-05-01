@@ -299,7 +299,7 @@ trait ConditionalTrait
      *
      * @return ConstraintContract
      **/
-    protected function newConstraint($name, $parameters=[], $operator)
+    protected function newConstraint($name, $parameters=[], $operator='')
     {
         return new Constraint($name, (array)$parameters, $operator);
     }
@@ -318,6 +318,6 @@ trait ConditionalTrait
         }
         return strtolower($operator);
     }
-    
+
 
 }

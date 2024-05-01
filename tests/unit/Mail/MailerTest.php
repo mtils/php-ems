@@ -11,6 +11,7 @@ use Ems\Contracts\Mail\MessageComposer;
 use Ems\Testing\LoggingCallable;
 use Ems\Testing\Cheat;
 use Ems\Mail\Swift\Message as SwiftMessage;
+use UnderflowException;
 
 class MailerTest extends TestCase
 {
@@ -161,11 +162,9 @@ class MailerTest extends TestCase
         $mailer->sendMessage($message);
     }
 
-    /**
-     * @expectedException UnderflowException
-     **/
     public function test_send_throws_exception_if_no_recipients_found()
     {
+        $this->expectException(UnderflowException::class);
         $configProvider = $this->mockConfigProvider();
         $configProvider->shouldReceive('configFor');
         $mailer = $this->newMailer(null, $configProvider, null);

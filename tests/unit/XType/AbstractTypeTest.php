@@ -2,6 +2,8 @@
 
 namespace Ems\XType;
 
+use BadMethodCallException;
+use Ems\Contracts\Core\Errors\NotFound;
 use Ems\Contracts\XType\XType;
 use Ems\Validation\Rule;
 
@@ -151,11 +153,9 @@ class AbstractTypeTest extends \Ems\TestCase
         $this->assertEquals($awaited, $type->toArray());
     }
 
-    /**
-     * @expectedException Ems\Contracts\Core\Errors\NotFound
-     **/
     public function test_get_throws_exception_if_key_not_found()
     {
+        $this->expectException(NotFound::class);
         $this->newType()->foo;
     }
 
@@ -183,18 +183,13 @@ class AbstractTypeTest extends \Ems\TestCase
         $this->assertTrue(isset($type->constraints->min));
     }
 
-    /**
-     * @expectedException BadMethodCallException
-     **/
     public function test_unset_throws_exception_if_trying_to_delete_a_getter_managed_property()
     {
+        $this->expectException(BadMethodCallException::class);
         $type = $this->newType();
         unset($type->name);
     }
 
-    /**
-     * @_expectedException BadMethodCallException
-     **/
     public function test_unset_removes_constraint()
     {
         $type = $this->newType();
@@ -223,11 +218,11 @@ class AbstractTypeTestType extends AbstractType
 
     public static function getMeNotAsAGetter()
     {
-        
+
     }
-    
+
     public static function setMeNotAsASetter($value)
     {
-        
+
     }
 }

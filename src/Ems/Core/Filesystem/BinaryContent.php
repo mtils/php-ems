@@ -129,6 +129,7 @@ class BinaryContent implements Content
      *
      * @return Iterator
      **/
+    #[\ReturnTypeWillChange]
     public function getIterator()
     {
         if ($this->iteratorCreator) {

@@ -183,7 +183,7 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
      * The amount of values. You can pass a hidden value to count
      * the occurrences of this value in this list.
      *
-     * @param mixed $value (optional) 
+     * @param mixed $value (optional)
      *
      * @return int
      **/
@@ -337,6 +337,7 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
      *
      * @return \ArrayIterator
      **/
+    #[\ReturnTypeWillChange]
     public function getIterator()
     {
         return new ArrayIterator($this->source);
@@ -449,7 +450,7 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
 
     /**
      * Copies the list or its extended class.
-     * 
+     *
      * @return $this
      */
     public function copy()

@@ -12,12 +12,12 @@ class SizeTest extends TestCase
 {
     public function test_new_instance()
     {
-        $this->assertInstanceOf(Size::class,  $this->size());
+        $this->assertInstanceOf(Size::class,  $this->newSize());
     }
 
     public function test_width_and_height()
     {
-        $size = $this->size(800,600);
+        $size = $this->newSize(800,600);
         $this->assertEquals(800, $size->width());
         $this->assertEquals(600, $size->height());
         $this->assertSame($size, $size->setWidth(1024));
@@ -31,52 +31,52 @@ class SizeTest extends TestCase
 
     public function test_aspectRatio()
     {
-        $this->assertEquals(4, $this->size(1000, 250)->aspectRatio());
+        $this->assertEquals(4, $this->newSize(1000, 250)->aspectRatio());
     }
 
     public function test_isLandscape()
     {
-        $this->assertTrue($this->size(800, 600)->isLandscape());
-        $this->assertFalse($this->size(800, 800)->isLandscape());
-        $this->assertFalse($this->size(800, 801)->isLandscape());
-        $this->assertFalse($this->size(600, 800)->isLandscape());
-        $this->assertFalse($this->size(0, 800)->isLandscape());
-        $this->assertFalse($this->size(800, 0)->isLandscape());
-        $this->assertFalse($this->size(0, 0)->isLandscape());
+        $this->assertTrue($this->newSize(800, 600)->isLandscape());
+        $this->assertFalse($this->newSize(800, 800)->isLandscape());
+        $this->assertFalse($this->newSize(800, 801)->isLandscape());
+        $this->assertFalse($this->newSize(600, 800)->isLandscape());
+        $this->assertFalse($this->newSize(0, 800)->isLandscape());
+        $this->assertFalse($this->newSize(800, 0)->isLandscape());
+        $this->assertFalse($this->newSize(0, 0)->isLandscape());
     }
 
     public function test_isPortrait()
     {
-        $this->assertFalse($this->size(800, 600)->isPortrait());
-        $this->assertFalse($this->size(800, 800)->isPortrait());
-        $this->assertTrue($this->size(800, 801)->isPortrait());
-        $this->assertTrue($this->size(600, 800)->isPortrait());
-        $this->assertFalse($this->size(0, 800)->isPortrait());
-        $this->assertFalse($this->size(800, 0)->isPortrait());
-        $this->assertFalse($this->size(0, 0)->isPortrait());
+        $this->assertFalse($this->newSize(800, 600)->isPortrait());
+        $this->assertFalse($this->newSize(800, 800)->isPortrait());
+        $this->assertTrue($this->newSize(800, 801)->isPortrait());
+        $this->assertTrue($this->newSize(600, 800)->isPortrait());
+        $this->assertFalse($this->newSize(0, 800)->isPortrait());
+        $this->assertFalse($this->newSize(800, 0)->isPortrait());
+        $this->assertFalse($this->newSize(0, 0)->isPortrait());
     }
 
     public function test_isSquare()
     {
-        $this->assertFalse($this->size(800, 600)->isSquare());
-        $this->assertTrue($this->size(800, 800)->isSquare());
-        $this->assertFalse($this->size(800, 801)->isSquare());
-        $this->assertFalse($this->size(600, 800)->isSquare());
-        $this->assertFalse($this->size(0, 800)->isSquare());
-        $this->assertFalse($this->size(800, 0)->isSquare());
-        $this->assertFalse($this->size(0, 0)->isSquare());
+        $this->assertFalse($this->newSize(800, 600)->isSquare());
+        $this->assertTrue($this->newSize(800, 800)->isSquare());
+        $this->assertFalse($this->newSize(800, 801)->isSquare());
+        $this->assertFalse($this->newSize(600, 800)->isSquare());
+        $this->assertFalse($this->newSize(0, 800)->isSquare());
+        $this->assertFalse($this->newSize(800, 0)->isSquare());
+        $this->assertFalse($this->newSize(0, 0)->isSquare());
     }
 
     public function test_total_returns_area()
     {
-        $size = $this->size(800,600);
+        $size = $this->newSize(800,600);
         $this->assertEquals(480000, $size->area());
         $this->assertEquals(480000, $size->total());
     }
 
     public function test_scale_scales_by_factor()
     {
-        $size = $this->size(800,600);
+        $size = $this->newSize(800,600);
         $scaled = $size->scale(2);
         $this->assertNotSame($size, $scaled);
         $this->assertEquals(1600, $scaled->width());
@@ -86,11 +86,11 @@ class SizeTest extends TestCase
 
     }
 
-    public function test_scale_scales_by_size()
+    public function test_scale_scales_by_newSize()
     {
-        $size = $this->size(800,600);
+        $size = $this->newSize(800,600);
 
-        $toSize = $this->size(1076, 768);
+        $toSize = $this->newSize(1076, 768);
 
         $scaled = $size->scale($toSize);
 
@@ -104,24 +104,22 @@ class SizeTest extends TestCase
 
     }
 
-    /**
-     * @expectedException \UnderflowException
-     */
     public function test_scaleTo_throws_exception_if_no_width_and_hight_passed()
     {
-        $this->size(800,600)->scaleTo();
+        $this->expectException(\UnderflowException::class);
+        $this->newSize(800,600)->scaleTo();
     }
 
     public function test_scaleTo_scales_exactly_if_width_and_height_are_passed()
     {
-        $size = $this->size(800,600);
+        $size = $this->newSize(800,600);
         $scaled = $size->scaleTo(1200, 800);
 
         $this->assertNotSame($size, $scaled);
         $this->assertEquals(1200, $scaled->width());
         $this->assertEquals(800, $scaled->height());
 
-        $scaled = $size->scaleTo($this->size(1200, 800));
+        $scaled = $size->scaleTo($this->newSize(1200, 800));
 
         $this->assertNotSame($size, $scaled);
         $this->assertEquals(1200, $scaled->width());
@@ -131,7 +129,7 @@ class SizeTest extends TestCase
 
     public function test_scaleTo_scales_width_by_keeping_aspect_ratio()
     {
-        $size = $this->size(800,600);
+        $size = $this->newSize(800,600);
         $scaled = $size->scaleTo(1200);
 
         $this->assertNotSame($size, $scaled);
@@ -141,7 +139,7 @@ class SizeTest extends TestCase
 
     public function test_scaleTo_scales_height_by_keeping_aspect_ratio()
     {
-        $size = $this->size(800,600);
+        $size = $this->newSize(800,600);
         $scaled = $size->scaleTo(null, 640);
 
         $this->assertNotSame($size, $scaled);
@@ -151,7 +149,7 @@ class SizeTest extends TestCase
 
     public function test_fitInto_scales_not_bigger_than_target()
     {
-        $size = $this->size(800,600);
+        $size = $this->newSize(800,600);
         $scaled = $size->fitInto(640, 480);
 
         $this->assertNotSame($size, $scaled);
@@ -161,14 +159,14 @@ class SizeTest extends TestCase
         $scaled = $size->fitInto(1024, 0);
         $this->assertFalse($scaled->isValid());
 
-        $target = $this->size(1920, 1080);
+        $target = $this->newSize(1920, 1080);
 
         $scaled = $size->fitInto($target);
         $this->assertEquals($size->aspectRatio(), $scaled->aspectRatio());
         $this->assertNotBigger($target, $scaled);
         $this->assertOneEdgeMatches($target, $scaled);
 
-        $target = $this->size(1080, 1920);
+        $target = $this->newSize(1080, 1920);
 
         $scaled = $size->fitInto($target);
         $this->assertEquals($size->aspectRatio(), $scaled->aspectRatio());
@@ -178,7 +176,7 @@ class SizeTest extends TestCase
 
     public function test_expandInto_scales_not_bigger_than_target()
     {
-        $size = $this->size(800,600);
+        $size = $this->newSize(800,600);
         $scaled = $size->expandTo(640, 480);
 
         $this->assertNotSame($size, $scaled);
@@ -188,14 +186,14 @@ class SizeTest extends TestCase
         $scaled = $size->expandTo(1024, 0);
         $this->assertFalse($scaled->isValid());
 
-        $target = $this->size(1920, 1080);
+        $target = $this->newSize(1920, 1080);
 
         $scaled = $size->expandTo($target);
         $this->assertEquals($size->aspectRatio(), $scaled->aspectRatio());
         $this->assertOneEdgeLonger($target, $scaled);
         $this->assertOneEdgeMatches($target, $scaled);
 
-        $target = $this->size(1080, 1920);
+        $target = $this->newSize(1080, 1920);
 
         $scaled = $size->expandTo($target);
         $this->assertEquals($size->aspectRatio(), $scaled->aspectRatio());
@@ -205,8 +203,8 @@ class SizeTest extends TestCase
 
     public function test_multiply()
     {
-        $size1 = $this->size(800,600);
-        $size2 = $this->size(3,4);
+        $size1 = $this->newSize(800,600);
+        $size2 = $this->newSize(3,4);
         $result = $size1->multiply($size2);
 
         $this->assertEquals(2400, $result->width());
@@ -215,8 +213,8 @@ class SizeTest extends TestCase
 
     public function test_add()
     {
-        $size1 = $this->size(800,600);
-        $size2 = $this->size(300,400);
+        $size1 = $this->newSize(800,600);
+        $size2 = $this->newSize(300,400);
         $result = $size1->add($size2);
 
         $this->assertEquals(1100, $result->width());
@@ -225,8 +223,8 @@ class SizeTest extends TestCase
 
     public function test_subtract()
     {
-        $size1 = $this->size(800,600);
-        $size2 = $this->size(300,400);
+        $size1 = $this->newSize(800,600);
+        $size2 = $this->newSize(300,400);
         $result = $size1->subtract($size2);
 
         $this->assertEquals(500, $result->width());
@@ -235,8 +233,8 @@ class SizeTest extends TestCase
 
     public function test_divide()
     {
-        $size1 = $this->size(800,600);
-        $size2 = $this->size(2,3);
+        $size1 = $this->newSize(800,600);
+        $size2 = $this->newSize(2,3);
         $result = $size1->divide($size2);
 
         $this->assertEquals(400, $result->width());
@@ -246,36 +244,34 @@ class SizeTest extends TestCase
     public function test_findBest()
     {
         $sizes = [
-            $this->size(800,600),
-            $this->size(640,480),
-            $this->size(3840,2160),
-            $this->size(1024,768),
-            $this->size(1920,1080),
-            $this->size(1600,1200),
+            $this->newSize(800,600),
+            $this->newSize(640,480),
+            $this->newSize(3840,2160),
+            $this->newSize(1024,768),
+            $this->newSize(1920,1080),
+            $this->newSize(1600,1200),
         ];
 
-        $this->assertEquals(800, $this->size(700, 525)->findBest($sizes)->width());
+        $this->assertEquals(800, $this->newSize(700, 525)->findBest($sizes)->width());
 
         // Equals
-        $this->assertEquals(1024, $this->size(1024, 768)->findBest($sizes)->width());
+        $this->assertEquals(1024, $this->newSize(1024, 768)->findBest($sizes)->width());
 
-        $this->assertEquals(1600, $this->size(1200, 900)->findBest($sizes)->width());
+        $this->assertEquals(1600, $this->newSize(1200, 900)->findBest($sizes)->width());
 
-        $this->assertEquals(3840, $this->size(7680, 4320)->findBest($sizes)->width());
+        $this->assertEquals(3840, $this->newSize(7680, 4320)->findBest($sizes)->width());
 
-        $one = [$this->size(640, 480)];
-        $this->assertEquals(640, $this->size(7680, 4320)->findBest($one)->width());
+        $one = [$this->newSize(640, 480)];
+        $this->assertEquals(640, $this->newSize(7680, 4320)->findBest($one)->width());
     }
 
-    /**
-     * @expectedException \UnderflowException
-     */
     public function test_findBest_throws_exception_if_sizes_empty()
     {
-        $this->size()->findBest([]);
+        $this->expectException(\UnderflowException::class);
+        $this->newSize()->findBest([]);
     }
 
-    protected function size($width=null, $height=null)
+    protected function newSize($width=null, $height=null)
     {
         return new Size($width, $height);
     }

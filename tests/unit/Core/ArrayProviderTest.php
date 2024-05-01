@@ -99,11 +99,11 @@ class ArrayProviderTest extends TestCase
 
     }
 
-    /**
-     * @expectedException \Ems\Core\Exceptions\KeyNotFoundException
-     */
     public function test_getOrFail_throws_exception_if_key_not_found()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\KeyNotFoundException::class
+        );
         $data = [
             'a' => 'b',
             'c' => 'd',
@@ -665,19 +665,15 @@ class ArrayProviderTest extends TestCase
         $this->assertNull($provider->get('j'));
     }
 
-    /**
-     * @expectedException \Ems\Contracts\Core\Errors\UnSupported
-     */
     public function test_offsetUnset_throws_exception()
     {
+        $this->expectException(\Ems\Contracts\Core\Errors\UnSupported::class);
         $this->newProvider()->offsetUnset('foo');
     }
 
-    /**
-     * @expectedException \OutOfBoundsException
-     */
     public function test_get_from_unknown_namespace_throws_exception()
     {
+        $this->expectException(\OutOfBoundsException::class);
         $this->newProvider()->get('my-namespace::my-key');
     }
 
@@ -717,7 +713,8 @@ class ArrayProviderTest_Array implements \ArrayAccess
         $this->_booted = true;
     }
 
-    public function offsetExists($offset)
+    #[\ReturnTypeWillChange]
+    public function offsetExists($offset) : bool
     {
         if ($this->throwOnAccess) {
             throw new \Exception("Tried to test offset $offset when throwOnGet is true");
@@ -727,6 +724,7 @@ class ArrayProviderTest_Array implements \ArrayAccess
         return $this->parentOffsetExists($offset);
     }
 
+    #[\ReturnTypeWillChange]
     public function offsetGet($offset)
     {
         if ($this->throwOnAccess) {

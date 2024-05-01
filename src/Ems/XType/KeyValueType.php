@@ -139,6 +139,7 @@ abstract class KeyValueType extends AbstractType implements ArrayAccess, Countab
     /**
      * @return \ArrayIterator
      **/
+    #[\ReturnTypeWillChange]
     public function getIterator()
     {
         $this->loadKeysIfNotLoaded();

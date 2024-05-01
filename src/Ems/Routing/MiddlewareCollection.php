@@ -290,6 +290,7 @@ class MiddlewareCollection implements MiddlewareCollectionContract
      * <b>Traversable</b>
      * @since 5.0.0
      */
+    #[\ReturnTypeWillChange]
     public function getIterator()
     {
         return new ArrayIterator($this->toArray());
@@ -304,6 +305,7 @@ class MiddlewareCollection implements MiddlewareCollectionContract
      * The return value is cast to an integer.
      * @since 5.1.0
      */
+    #[\ReturnTypeWillChange]
     public function count()
     {
         return count($this->middlewares);

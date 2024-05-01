@@ -22,6 +22,7 @@ use Ems\RoutingTrait;
 use Ems\TestCase;
 use LogicException;
 use OutOfBoundsException;
+use PHPUnit\Framework\Attributes\Test;
 use ReflectionException;
 
 use function array_values;
@@ -34,19 +35,15 @@ class RouterWithRegistryTest extends TestCase
 {
     use RoutingTrait;
 
-    /**
-     * @test
-     */
-    public function it_implements_interface()
+    #[Test] public function it_implements_interface()
     {
         $this->assertInstanceOf(RouterContract::class, $this->router());
     }
 
     /**
-     * @test
      * @throws ReflectionException
      */
-    public function it_registers_routes()
+    #[Test] public function it_registers_routes()
     {
 
         $router = $this->router();
@@ -106,10 +103,9 @@ class RouterWithRegistryTest extends TestCase
     }
 
     /**
-     * @test
      * @throws ReflectionException
      */
-    public function it_registers_routes_with_parameters()
+    #[Test] public function it_registers_routes_with_parameters()
     {
 
         $registry = $this->registry();
@@ -168,10 +164,9 @@ class RouterWithRegistryTest extends TestCase
     }
 
     /**
-     * @test
      * @throws ReflectionException
      */
-    public function it_registers_routes_with_optional_parameters()
+    #[Test] public function it_registers_routes_with_optional_parameters()
     {
 
         $registry = $this->registry();
@@ -230,10 +225,9 @@ class RouterWithRegistryTest extends TestCase
     }
 
     /**
-     * @test
      * @throws ReflectionException
      */
-    public function it_registers_commands()
+    #[Test] public function it_registers_commands()
     {
 
         $registry = $this->registry();
@@ -350,10 +344,9 @@ class RouterWithRegistryTest extends TestCase
     }
 
     /**
-     * @test
      * @throws ReflectionException
      */
-    public function it_routes_only_for_registered_clientType()
+    #[Test] public function it_routes_only_for_registered_clientType()
     {
 
         $registry = $this->registry();
@@ -418,10 +411,9 @@ class RouterWithRegistryTest extends TestCase
     }
 
     /**
-     * @test
      * @throws ReflectionException
      */
-    public function it_routes_only_for_registered_scope()
+    #[Test] public function it_routes_only_for_registered_scope()
     {
 
         $registry = $this->registry();
@@ -482,10 +474,9 @@ class RouterWithRegistryTest extends TestCase
     }
 
     /**
-     * @test
      * @throws ReflectionException
      */
-    public function it_handles_routes()
+    #[Test] public function it_handles_routes()
     {
 
         $router = $this->router();
@@ -551,10 +542,9 @@ class RouterWithRegistryTest extends TestCase
     }
 
     /**
-     * @test
      * @throws ReflectionException
      */
-    public function it_fails_when_registers_command_and_route_in_one_call_without_collector()
+    #[Test] public function it_fails_when_registers_command_and_route_in_one_call_without_collector()
     {
         $command = new Command('addresses:index', 'AddressController::index');
         $this->expectException(LogicException::class);
@@ -562,10 +552,9 @@ class RouterWithRegistryTest extends TestCase
     }
 
     /**
-     * @test
      * @throws ReflectionException
      */
-    public function it_registers_command_and_route_in_one_call()
+    #[Test] public function it_registers_command_and_route_in_one_call()
     {
 
         $registry = $this->registry();
@@ -630,10 +619,9 @@ class RouterWithRegistryTest extends TestCase
     }
 
     /**
-     * @test
      * @throws ReflectionException
      */
-    public function it_registers_route_and_command_in_one_call()
+    #[Test] public function it_registers_route_and_command_in_one_call()
     {
         $registry = $this->registry();
         $router = $this->router();
@@ -698,10 +686,9 @@ class RouterWithRegistryTest extends TestCase
     }
 
     /**
-     * @test
      * @throws ReflectionException
      */
-    public function it_does_not_call_registrars_when_compiled_and_handles_routes()
+    #[Test] public function it_does_not_call_registrars_when_compiled_and_handles_routes()
     {
 
         $router = $this->router();

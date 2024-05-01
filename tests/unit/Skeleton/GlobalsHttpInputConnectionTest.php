@@ -10,29 +10,21 @@ use Ems\Contracts\Routing\Input;
 use Ems\Contracts\Skeleton\InputConnection;
 use Ems\Skeleton\GlobalsHttpInputConnection;
 use Ems\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 class GlobalsHttpInputConnectionTest extends TestCase
 {
-    /**
-     * @test
-     */
-    public function it_implements_interface()
+    #[Test] public function it_implements_interface()
     {
         $this->assertInstanceOf(InputConnection::class, $this->make());
     }
 
-    /**
-     * @test
-     */
-    public function isInteractive_returns_false()
+    #[Test] public function isInteractive_returns_false()
     {
         $this->assertFalse($this->make()->isInteractive());
     }
 
-    /**
-     * @test
-     */
-    public function read_reads_input()
+    #[Test] public function read_reads_input()
     {
         $request = ['foo' => 'bar'];
         $con = $this->make($request, [
@@ -46,10 +38,7 @@ class GlobalsHttpInputConnectionTest extends TestCase
         $this->assertEquals($input->toArray(), $request);
     }
 
-    /**
-     * @test
-     */
-    public function read_reads_input_into_handler()
+    #[Test] public function read_reads_input_into_handler()
     {
         $request = ['foo' => 'bar'];
         $con = $this->make($request, [
@@ -69,10 +58,7 @@ class GlobalsHttpInputConnectionTest extends TestCase
         $this->assertEquals($inputs[0]->toArray(), $request);
     }
 
-    /**
-     * @test
-     */
-    public function open_and_close()
+    #[Test] public function open_and_close()
     {
         $con = $this->make();
         $this->assertFalse($con->isOpen());

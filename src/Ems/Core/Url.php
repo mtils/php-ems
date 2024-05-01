@@ -457,6 +457,7 @@ class Url implements UrlContract, UriInterface
      *
      * @return ArrayIterator
      **/
+    #[\ReturnTypeWillChange]
     public function getIterator()
     {
         return new ArrayIterator($this->query);

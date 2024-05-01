@@ -50,11 +50,9 @@ class BootManagerTest extends \Ems\IntegrationTest
         $this->assertEquals(1, $object->bootCalled);
     }
 
-    /**
-     * @expectedException \RuntimeException
-     */
     public function test_throws_exception_if_app_already_booted()
     {
+        $this->expectException(\RuntimeException::class);
         $manager = $this->newBootManager();
         $manager->setApplication($this->app());
     }

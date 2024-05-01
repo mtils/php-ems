@@ -13,22 +13,18 @@ use Ems\Contracts\Routing\Route;
 use Ems\Contracts\Routing\RouteScope;
 use Ems\TestCase;
 
+use PHPUnit\Framework\Attributes\Test;
+
 use function get_class;
 
 class ArgvInputTest extends TestCase
 {
-    /**
-     * @test
-     */
-    public function it_implements_interface()
+    #[Test] public function it_implements_interface()
     {
         $this->assertInstanceOf(ArgvInput::class, $this->make());
     }
 
-    /**
-     * @test
-     */
-    public function it_assigns_arguments_as_query_parameters_on_get()
+    #[Test] public function it_assigns_arguments_as_query_parameters_on_get()
     {
         $tenant = '101';
         $input = $this->make(['console', $tenant]);
@@ -42,10 +38,7 @@ class ArgvInputTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function it_assigns_arguments_as_query_parameters_on_getOfFail()
+    #[Test] public function it_assigns_arguments_as_query_parameters_on_getOfFail()
     {
         $tenant = '101';
         $input = $this->make(['console', $tenant]);
@@ -59,10 +52,7 @@ class ArgvInputTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function it_assigns_arguments_as_query_parameters_on_offsetExists()
+    #[Test] public function it_assigns_arguments_as_query_parameters_on_offsetExists()
     {
         $tenant = '101';
         $input = $this->make(['console', $tenant]);
@@ -77,10 +67,7 @@ class ArgvInputTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function it_assigns_arguments_as_query_parameters_on_offsetGet()
+    #[Test] public function it_assigns_arguments_as_query_parameters_on_offsetGet()
     {
         $tenant = '101';
         $input = $this->make(['console', $tenant]);
@@ -94,10 +81,7 @@ class ArgvInputTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function it_assigns_arguments_as_query_parameters_on_toArray()
+    #[Test] public function it_assigns_arguments_as_query_parameters_on_toArray()
     {
         $tenant = '101';
         $input = $this->make(['console', $tenant]);
@@ -111,10 +95,7 @@ class ArgvInputTest extends TestCase
         $this->assertEquals($tenant, $inputData['tenant']);
     }
 
-    /**
-     * @test
-     */
-    public function it_assigns_options_as_query_parameters_on_get()
+    #[Test] public function it_assigns_options_as_query_parameters_on_get()
     {
         $tenant = '101';
         $force = '';
@@ -131,10 +112,7 @@ class ArgvInputTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function it_is_routable()
+    #[Test] public function it_is_routable()
     {
         $argv = ['console', 'users:show', '--parameters=3', '--long'];
         $input = $this->make($argv);
@@ -156,10 +134,7 @@ class ArgvInputTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function property_access()
+    #[Test] public function property_access()
     {
         // [X] argv
         // [x] arguments

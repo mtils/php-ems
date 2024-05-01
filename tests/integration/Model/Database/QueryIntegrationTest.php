@@ -21,6 +21,8 @@ use Ems\Model\Database\Dialects\SQLiteDialect;
 use Ems\Pagination\Paginator;
 use Ems\TestData;
 
+use PHPUnit\Framework\Attributes\Test;
+
 use function crc32;
 use function file_get_contents;
 use function iterator_to_array;
@@ -59,26 +61,17 @@ class QueryIntegrationTest extends DatabaseIntegrationTest
      */
     protected static $userKeys = ['email', 'password', 'web', 'created_at', 'updated_at'];
 
-    /**
-     * @test
-     */
-    public function it_can_be_instantiated()
+    #[Test] public function it_can_be_instantiated()
     {
         $this->assertInstanceOf(Query::class, static::$con->query());
     }
 
-    /**
-     * @test
-     */
-    public function mimeType_is_sql()
+    #[Test] public function mimeType_is_sql()
     {
         $this->assertEquals('application/sql', static::$con->query()->mimeType());
     }
 
-    /**
-     * @test
-     */
-    public function select_all_entries()
+    #[Test] public function select_all_entries()
     {
 
         $count = 0;
@@ -95,10 +88,7 @@ class QueryIntegrationTest extends DatabaseIntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function select_paginated()
+    #[Test] public function select_paginated()
     {
 
         $perPage = 10;
@@ -134,10 +124,7 @@ class QueryIntegrationTest extends DatabaseIntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function select_paginated_with_custom_count_query()
+    #[Test] public function select_paginated_with_custom_count_query()
     {
 
         $perPage = 10;
@@ -161,10 +148,7 @@ class QueryIntegrationTest extends DatabaseIntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function select_paginated_without_paginator()
+    #[Test] public function select_paginated_without_paginator()
     {
 
         $perPage = 10;
@@ -201,10 +185,7 @@ class QueryIntegrationTest extends DatabaseIntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function select_paginated_with_custom_paginator()
+    #[Test] public function select_paginated_with_custom_paginator()
     {
 
         $perPage = 10;
@@ -253,10 +234,7 @@ class QueryIntegrationTest extends DatabaseIntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function replace_inserts_or_updates()
+    #[Test] public function replace_inserts_or_updates()
     {
         $query = static::$con->query('contacts');
 
@@ -316,10 +294,7 @@ class QueryIntegrationTest extends DatabaseIntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function update_changes_record()
+    #[Test] public function update_changes_record()
     {
         $user = static::$con->query('contacts')
             ->where('last_name', 'Ear')
@@ -352,10 +327,7 @@ class QueryIntegrationTest extends DatabaseIntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function delete_removes_record()
+    #[Test] public function delete_removes_record()
     {
         $lastName = 'Weisinger2';
         $firstName = 'Reed2';
@@ -381,10 +353,7 @@ class QueryIntegrationTest extends DatabaseIntegrationTest
             ->first());
     }
 
-    /**
-     * @test
-     */
-    public function insert_creates_record()
+    #[Test] public function insert_creates_record()
     {
         $query = static::$con->query('contacts');
 
@@ -420,10 +389,7 @@ class QueryIntegrationTest extends DatabaseIntegrationTest
         $this->assertEquals($lastName, $found[0]['last_name']);
     }
 
-    /**
-     * @test
-     */
-    public function select_with_unprepared_query()
+    #[Test] public function select_with_unprepared_query()
     {
         $query = static::$con->query('contacts');
         $renderer = $query->getRenderer();
@@ -448,10 +414,7 @@ class QueryIntegrationTest extends DatabaseIntegrationTest
         $this->assertGreaterThan(1, $count);
     }
 
-    /**
-     * @test
-     */
-    public function insert_with_unprepared_query()
+    #[Test] public function insert_with_unprepared_query()
     {
         $query = static::$con->query('contacts');
 

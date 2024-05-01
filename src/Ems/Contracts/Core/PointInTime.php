@@ -2,6 +2,9 @@
 
 namespace Ems\Contracts\Core;
 
+use DateTime;
+use DateTimeInterface;
+
 interface PointInTime
 {
     const YEAR = 'Y';
@@ -50,14 +53,14 @@ interface PointInTime
      *
      * @return string
      **/
-    public function format($format);
+    public function format(string $format): string;
 
     /**
      * Modify the date.
      *
      * @param string
      **/
-    public function modify($string);
+    public function modify(string $string) : DateTime|false;
 
     /**
      * Set year, month and day.
@@ -68,7 +71,7 @@ interface PointInTime
      *
      * @return self
      **/
-    public function setDate($year, $month, $day);
+    public function setDate(int $year, int $month, int $day) : DateTime;
 
     /**
      * Set hour, minute and second.
@@ -76,10 +79,11 @@ interface PointInTime
      * @param int $hour
      * @param int $minute
      * @param int $second (optional)
+     * @param int $microsecond
      *
-     * @return self
-     **/
-    public function setTime($hour, $minute, $second = 0);
+     * @return DateTime
+     */
+    public function setTime(int $hour, int $minute, int $second = 0, int $microsecond = 0) : DateTime;
 
     /**
      * You can invalidate a PointInTime Object. Normally there is no

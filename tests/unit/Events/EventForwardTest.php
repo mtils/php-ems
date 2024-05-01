@@ -7,9 +7,11 @@ use Ems\Contracts\Core\Subscribable;
 use Ems\Contracts\Core\Hookable;
 use Ems\Contracts\Core\HasMethodHooks;
 use Ems\Contracts\Events\EventForward;
+use Ems\Core\Exceptions\UnsupportedUsageException;
 use Ems\Testing\LoggingCallable;
 use Ems\Core\Patterns\SubscribableTrait;
 use Ems\Core\Patterns\HookableTrait;
+use LogicException;
 
 class EventForwardTest extends \Ems\TestCase
 {
@@ -37,31 +39,25 @@ class EventForwardTest extends \Ems\TestCase
         $this->assertSame($target, $forward->getTarget());
     }
 
-    /**
-     * @expectedException LogicException
-     **/
     public function test_invoke_throws_exception_if_no_source_added()
     {
+        $this->expectException(LogicException::class);
         $bus = $this->newBus();
         $forward = $this->newForward();
         $forward();
     }
 
-    /**
-     * @expectedException LogicException
-     **/
     public function test_invoke_throws_exception_if_no_source_events_added()
     {
+        $this->expectException(LogicException::class);
         $bus = $this->newBus();
         $forward = $this->newForward($bus);
         $forward();
     }
 
-    /**
-     * @expectedException LogicException
-     **/
     public function test_invoke_throws_exception_if_patterns_assigned()
     {
+        $this->expectException(LogicException::class);
         $bus = $this->newBus();
         $forward = $this->newForward($bus, 'bla.*');
         $forward();
@@ -136,11 +132,9 @@ class EventForwardTest extends \Ems\TestCase
 
     }
 
-    /**
-     * @expectedException LogicException
-     **/
     public function test_to_with_unknown_event_throws_exception()
     {
+        $this->expectException(LogicException::class);
         $bus = $this->newBus();
         $forward = $this->newForward();
 
@@ -148,11 +142,9 @@ class EventForwardTest extends \Ems\TestCase
 
     }
 
-    /**
-     * @expectedException LogicException
-     **/
     public function test_to_without_target_throws_exception()
     {
+        $this->expectException(LogicException::class);
         $bus = $this->newBus();
         $forward = $this->newForward();
 
@@ -160,11 +152,9 @@ class EventForwardTest extends \Ems\TestCase
 
     }
 
-    /**
-     * @expectedException LogicException
-     **/
     public function test_to_without_source_throws_exception()
     {
+        $this->expectException(LogicException::class);
         $bus = $this->newBus();
         $forward = $this->newForward();
 
@@ -172,11 +162,9 @@ class EventForwardTest extends \Ems\TestCase
 
     }
 
-    /**
-     * @expectedException LogicException
-     **/
     public function test_patterns_with_non_bus_throws_exception()
     {
+        $this->expectException(LogicException::class);
 
         $bus = $this->newBus();
         $subscribable = new EventForwardTest_Subscribable;
@@ -216,11 +204,9 @@ class EventForwardTest extends \Ems\TestCase
 
     }
 
-    /**
-     * @expectedException Ems\Core\Exceptions\UnsupportedUsageException
-     **/
     public function test_forward_a_second_time_throws_exception()
     {
+        $this->expectException(UnsupportedUsageException::class);
         $bus = $this->newBus();
         $bus2 = $this->newBus();
 
@@ -543,7 +529,7 @@ class EventForwardTest extends \Ems\TestCase
 class EventForwardTest_Subscribable implements Subscribable
 {
     use SubscribableTrait;
-    
+
     public function trigger($hook, $args)
     {
         $this->callOnListeners($hook, $args);
@@ -553,12 +539,12 @@ class EventForwardTest_Subscribable implements Subscribable
 class EventForwardTest_Hookable implements HasMethodHooks
 {
     use HookableTrait;
-    
+
     public function trigger($hook, $args)
     {
         $this->callAfterListeners($hook, $args);
     }
-    
+
     public function methodHooks()
     {
         return ['info', 'warning', 'error'];

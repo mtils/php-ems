@@ -108,7 +108,7 @@ abstract class AbstractStringConverterTest extends \Ems\TestCase
      */
     abstract protected function newConverter();
 
-    protected function setUp()
+    protected function setUp(): void
     {
         if (!$this->extension) {
             return;

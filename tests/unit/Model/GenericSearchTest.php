@@ -547,11 +547,9 @@ class GenericSearchTest extends TestCase
 
     }
 
-    /**
-     * @expectedException \Ems\Contracts\Core\Errors\Unsupported
-     */
     public function _test_paginate_with_unpaginatable_result_throws_exception()
     {
+        $this->expectException(\Ems\Contracts\Core\Errors\Unsupported::class);
         $engine = $this->mockEngine();
         $ormObject = new GenericSearchTest_OrmObject();
 

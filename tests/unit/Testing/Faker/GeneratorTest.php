@@ -9,13 +9,11 @@ namespace unit\Testing\Faker {
     use Ems\Testing\Faker\Factory;
     use GeneratorTestFactoryNS\Factories\GeneratorTest_EntityFactory;
     use GeneratorTestNS\App\Orm\GeneratorTest_Entity;
+    use PHPUnit\Framework\Attributes\Test;
 
     class GeneratorTest extends TestCase
     {
-        /**
-         * @test
-         */
-        public function add_a_factory()
+        #[Test] public function add_a_factory()
         {
             $generator = $this->generator();
             $factory = $generator->getInstanceFactory(
@@ -24,10 +22,7 @@ namespace unit\Testing\Faker {
             $this->assertInstanceOf(GeneratorTest_EntityFactory::class, $factory);
         }
 
-        /**
-         * @test
-         */
-        public function use_a_factory_for_attributes()
+        #[Test] public function use_a_factory_for_attributes()
         {
             $generator = $this->generator();
 
@@ -38,10 +33,7 @@ namespace unit\Testing\Faker {
             $this->assertNotEmpty($data['name']);
         }
 
-        /**
-         * @test
-         */
-        public function use_a_factory_with_one_instance()
+        #[Test] public function use_a_factory_with_one_instance()
         {
             $generator = $this->generator();
 
@@ -53,10 +45,7 @@ namespace unit\Testing\Faker {
             $this->assertNotEmpty($instance->name);
         }
 
-        /**
-         * @test
-         */
-        public function use_a_factory_with_multiple_instance()
+        #[Test] public function use_a_factory_with_multiple_instance()
         {
 
             $generator = $this->generator();

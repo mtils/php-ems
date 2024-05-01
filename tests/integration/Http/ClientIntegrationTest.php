@@ -7,6 +7,7 @@ use Ems\Http\FilesystemConnection;
 use Ems\HttpMockTest;
 use Ems\IntegrationTest;
 use InterNations\Component\HttpMock\PHPUnit\HttpMockTrait;
+use PHPUnit\Framework\Attributes\Test;
 
 /**
  *  * Created by mtils on 12.08.19 at 15:32.
@@ -14,10 +15,7 @@ use InterNations\Component\HttpMock\PHPUnit\HttpMockTrait;
 
 class ClientIntegrationTest extends HttpMockTest
 {
-    /**
-     * @test
-     */
-    public function submit_form_data()
+    #[Test] public function submit_form_data()
     {
 
         $path = '/foo';

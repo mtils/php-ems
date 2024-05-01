@@ -32,6 +32,7 @@ class PDOResult implements Result
      *
      * @return \Iterator
      **/
+    #[\ReturnTypeWillChange]
     public function getIterator()
     {
         $this->statement->execute();

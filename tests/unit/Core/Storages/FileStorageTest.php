@@ -3,12 +3,16 @@
 namespace Ems\Core\Storages;
 
 
+use Ems\Contracts\Core\Errors\ConfigurationError;
+use Ems\Contracts\Core\Errors\DataCorruption;
+use Ems\Contracts\Core\Errors\UnSupported;
 use Ems\Contracts\Core\Filesystem;
 use Ems\Contracts\Core\Serializer as SerializerContract;
 use Ems\Contracts\Core\Storage as StorageContract;
 use Ems\Core\Serializer;
 use Ems\Core\Url;
 use Ems\Testing\FilesystemMethods;
+use RuntimeException;
 
 class FileStorageTest extends \Ems\TestCase
 {
@@ -57,22 +61,20 @@ class FileStorageTest extends \Ems\TestCase
         $this->assertEquals('b', $storage2['a']);
     }
 
-    /**
-     * @expectedException Ems\Contracts\Core\Errors\UnSupported
-     **/
     public function test_persist_with_unsupported_key_throws_exception()
     {
+        $this->expectException(UnSupported::class);
         $storage = $this->newStorage();
         $url = new Url($this->tempFileName());
         $storage->setUrl($url);
         $storage['foo$%%%/%§'] = 'bar';
     }
 
-    /**
-     * @expectedException Ems\Contracts\Core\Errors\ConfigurationError
-     **/
     public function test_persist_without_url_throws_exception()
     {
+        $this->expectException(
+            ConfigurationError::class
+        );
         $storage = $this->newStorage();
         $url = new Url($this->tempFileName());
 
@@ -80,18 +82,16 @@ class FileStorageTest extends \Ems\TestCase
 
     }
 
-    /**
-     * @expectedException RuntimeException
-     **/
     public function test_unwritable_directory_throws_exception()
     {
+        $this->expectException(RuntimeException::class);
         $url = new Url('/proc/test');
         $storage = $this->newStorage()->setUrl($url);
 
         $storage['foo'] = 'bar';
 
     }
-    
+
     public function test_persist_without_checksum_and_return_value()
     {
         $storage = $this->newStorage()->setOption('checksum_method', '');
@@ -179,11 +179,9 @@ class FileStorageTest extends \Ems\TestCase
         $this->assertEquals('b', $storage2['a']);
     }
 
-    /**
-     * @expectedException Ems\Contracts\Core\Errors\DataCorruption
-     **/
     public function test_persist_throws_exception_if_checksum_failed()
     {
+        $this->expectException(DataCorruption::class);
         $storage = $this->newStorage(null, null, false);
 
         $storage->createChecksumBy(function ($method, $data) {

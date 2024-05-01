@@ -12,6 +12,7 @@ use Ems\Config\Processors\ConfigVariablesParser;
 use Ems\TestCase;
 use Ems\Testing\LoggingCallable;
 use OverflowException;
+use PHPUnit\Framework\Attributes\Test;
 use stdClass;
 use Traversable;
 
@@ -23,10 +24,7 @@ use function iterator_to_array;
 
 class ConfigTest extends TestCase
 {
-    /**
-     * @test
-     */
-    public function it_instantiates()
+    #[Test] public function it_instantiates()
     {
         $config = $this->make();
         $this->assertInstanceOf(Config::class, $config);
@@ -34,10 +32,7 @@ class ConfigTest extends TestCase
         $this->assertInstanceOf(Traversable::class, $config);
     }
 
-    /**
-     * @test
-     */
-    public function append_and_get_source()
+    #[Test] public function append_and_get_source()
     {
         $config = $this->make();
         $source = $this->source();
@@ -50,10 +45,7 @@ class ConfigTest extends TestCase
         $this->assertEquals($source['app']['key'], $config['app']['key']);
     }
 
-    /**
-     * @test
-     */
-    public function offsetSet_changes_keys()
+    #[Test] public function offsetSet_changes_keys()
     {
         $config = $this->make();
         $source = $this->source();
@@ -65,10 +57,7 @@ class ConfigTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function offsetUnset_removes_keys()
+    #[Test] public function offsetUnset_removes_keys()
     {
         $config = $this->make();
         $source = $this->source();
@@ -82,10 +71,7 @@ class ConfigTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function iterate_over_config_works()
+    #[Test] public function iterate_over_config_works()
     {
         $config = $this->make();
         $source = $this->source();
@@ -98,10 +84,7 @@ class ConfigTest extends TestCase
         $this->assertEquals($source, $copy);
     }
 
-    /**
-     * @test
-     */
-    public function append_multiple_sources()
+    #[Test] public function append_multiple_sources()
     {
         $config = $this->make();
         $source = $this->source();
@@ -114,10 +97,7 @@ class ConfigTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function prepend_multiple_sources()
+    #[Test] public function prepend_multiple_sources()
     {
         $config = $this->make();
         $source = $this->source();
@@ -130,10 +110,7 @@ class ConfigTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function appendPostProcessor_hooks_processor()
+    #[Test] public function appendPostProcessor_hooks_processor()
     {
         $config = $this->make();
         $source = $this->source();
@@ -147,10 +124,7 @@ class ConfigTest extends TestCase
         $this->assertEquals('test', $config['foo']);
     }
 
-    /**
-     * @test
-     */
-    public function appendPostProcessor_hooks_multiple_processor()
+    #[Test] public function appendPostProcessor_hooks_multiple_processor()
     {
         $config = $this->make();
         $source = $this->source();
@@ -171,10 +145,7 @@ class ConfigTest extends TestCase
         $this->assertEquals('test2', $config['foo']);
     }
 
-    /**
-     * @test
-     */
-    public function prependPostProcessor_hooks_multiple_processor()
+    #[Test] public function prependPostProcessor_hooks_multiple_processor()
     {
         $config = $this->make();
         $source = $this->source();
@@ -196,10 +167,7 @@ class ConfigTest extends TestCase
         $this->assertEquals('test', $config['foo']);
     }
 
-    /**
-     * @test
-     */
-    public function append_real_parser()
+    #[Test] public function append_real_parser()
     {
         $config = $this->make();
         $source = $this->source();
@@ -210,30 +178,21 @@ class ConfigTest extends TestCase
         $this->assertEquals('cache://'.$source['cache']['driver'], $config['app']['cache_hint']);
     }
 
-    /**
-     * @test
-     */
-    public function empty_sources_throw_exception()
+    #[Test] public function empty_sources_throw_exception()
     {
         $config = $this->make();
         $this->expectException(UnderflowException::class);
         $config['foo'];
     }
 
-    /**
-     * @test
-     */
-    public function append_unsupported_source_throws_exception()
+    #[Test] public function append_unsupported_source_throws_exception()
     {
         $config = $this->make();
         $this->expectException(UnexpectedValueException::class);
         $config->appendSource(new stdClass());
     }
 
-    /**
-     * @test
-     */
-    public function gives_up_after_too_many_sources_were_appended()
+    #[Test] public function gives_up_after_too_many_sources_were_appended()
     {
         $config = $this->make();
         $this->expectException(OverflowException::class);

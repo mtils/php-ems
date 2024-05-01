@@ -18,6 +18,10 @@ use Ems\Model\Database\PDOConnection;
 use Ems\Model\Database\QueryRenderer;
 use Ems\Model\Database\SQL;
 
+use PHPUnit\Framework\Attributes\AfterClass;
+
+use PHPUnit\Framework\Attributes\BeforeClass;
+
 use function array_keys;
 use function crc32;
 use function explode;
@@ -57,10 +61,7 @@ class DatabaseIntegrationTest extends IntegrationTest
      */
     protected static $updated_at;
 
-    /**
-     * @beforeClass
-     */
-    public static function createDatabase()
+    #[BeforeClass] public static function createDatabase(): void
     {
         $dialect = new SQLiteDialect();
         static::$con = new PDOConnection(new Url('sqlite://memory'));
@@ -72,10 +73,7 @@ class DatabaseIntegrationTest extends IntegrationTest
         static::fillDatabase(static::$con, static::$data);
     }
 
-    /**
-     * @afterClass
-     */
-    public static function destroyDatabase()
+    #[AfterClass] public static function destroyDatabase()
     {
         static::$con->close();
     }

@@ -98,11 +98,11 @@ class PaginatorTest extends TestCase
         $this->assertEquals(20, $paginator->getOffset());
     }
 
-    /**
-     * @expectedException \Ems\Core\Exceptions\UnsupportedUsageException
-     */
     public function test_offsetSet_throws_exception()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\UnsupportedUsageException::class
+        );
         $paginator = $this->paginate();
 
         $result = [
@@ -117,11 +117,11 @@ class PaginatorTest extends TestCase
         $pages[1] = 'foo';
     }
 
-    /**
-     * @expectedException \Ems\Core\Exceptions\UnsupportedUsageException
-     */
     public function test_offsetUnset_throws_exception()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\UnsupportedUsageException::class
+        );
         $paginator = $this->paginate();
 
         $result = [
@@ -562,11 +562,11 @@ class PaginatorTest extends TestCase
         $this->assertEquals(range('a', 'j'), iterator_to_array($paginator));
     }
 
-    /**
-     * @expectedException \Ems\Core\Exceptions\UnConfiguredException
-     */
     public function test_asking_for_urls_when_none_assigned_throws_exception()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\UnConfiguredException::class
+        );
 
         $result = range('a', 'z');
         $paginator = $this->paginate(1, 40);

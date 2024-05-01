@@ -5,6 +5,7 @@ namespace Ems\Core\Support;
 
 
 use Ems\Contracts\Core\SupportsCustomFactory;
+use Ems\Core\Exceptions\UnConfiguredException;
 use Ems\Testing\LoggingCallable;
 
 
@@ -36,11 +37,11 @@ class CustomFactorySupportTest extends \Ems\TestCase
         $this->assertInstanceOf(CreateMe::class, $object);
     }
 
-    /**
-     * @expectedException Ems\Core\Exceptions\UnConfiguredException
-     **/
     public function test_it_createObject_without_class_and_property_throws_exception()
     {
+        $this->expectException(
+            UnConfiguredException::class
+        );
         $object = $this->newObject()->make();
     }
 
@@ -91,7 +92,7 @@ class CreateMeWithParameters
 {
     public function __construct(array $some, \stdClass $other)
     {
-        
+
     }
 }
 

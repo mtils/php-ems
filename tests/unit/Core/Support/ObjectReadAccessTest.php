@@ -4,14 +4,12 @@
 namespace Ems\Core\Support;
 
 use Ems\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 class ObjectReadAccessTest extends TestCase
 {
 
-    /**
-     * @test
-     */
-    public function isset_returns_right_value()
+    #[Test] public function isset_returns_right_value()
     {
         $object = $this->newObject();
         $this->assertTrue(isset($object->number));
@@ -20,19 +18,13 @@ class ObjectReadAccessTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function isset_returns_true_on_null()
+    #[Test] public function isset_returns_true_on_null()
     {
         $object = $this->newObject();
         $this->assertTrue(isset($object->nothing));
     }
 
-    /**
-     * @test
-     */
-    public function get_returns_setted_value()
+    #[Test] public function get_returns_setted_value()
     {
         $object = $this->newObject();
         $this->assertEquals(15, $object->number);
@@ -40,29 +32,24 @@ class ObjectReadAccessTest extends TestCase
         $this->assertNull($object->nothing);
     }
 
-    /**
-     * @test
-     * @expectedException \Ems\Core\Exceptions\KeyNotFoundException
-     */
-    public function get_throws_exception_if_key_not_found()
+    #[Test] public function get_throws_exception_if_key_not_found()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\KeyNotFoundException::class
+        );
         $this->newObject()->bar;
     }
 
-    /**
-     * @test
-     * @expectedException \Ems\Core\Exceptions\NotImplementedException
-     */
-    public function get_throws_exception_if_properties_not_implemented()
+    #[Test] public function get_throws_exception_if_properties_not_implemented()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\NotImplementedException::class
+        );
         $object = new ObjectReadAccessTest_Object_without_Properties();
         $object->bar;
     }
 
-    /**
-     * @test
-     */
-    public function get_throws_no_exception_if_it_should_not_fail_on_missing_properties()
+    #[Test] public function get_throws_no_exception_if_it_should_not_fail_on_missing_properties()
     {
         $object = new ObjectReadAccessTest_Object_that_allows_missing_properties();
         $object->bar;

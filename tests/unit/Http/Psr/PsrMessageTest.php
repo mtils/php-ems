@@ -17,6 +17,7 @@ use Ems\Core\Url;
 use Ems\Http\Psr\PsrMessageTrait;
 use Ems\TestCase;
 use IteratorAggregate;
+use PHPUnit\Framework\Attributes\Test;
 use Psr\Http\Message\MessageInterface;
 use Psr\Http\Message\StreamInterface;
 
@@ -26,10 +27,7 @@ use function json_encode;
 
 class PsrMessageTest extends TestCase
 {
-    /**
-     * @test
-     */
-    public function it_implements_interface()
+    #[Test] public function it_implements_interface()
     {
         $message = $this->message();
         $this->assertInstanceOf(MessageInterface::class, $message);
@@ -38,10 +36,7 @@ class PsrMessageTest extends TestCase
         $this->assertInstanceOf(Countable::class, $message);
     }
 
-    /**
-     * @test
-     */
-    public function behaves_like_array()
+    #[Test] public function behaves_like_array()
     {
         $attributes = [
             'foo' => 'bar',
@@ -64,10 +59,7 @@ class PsrMessageTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function getProtocolVersion_and_withProtocolVersion()
+    #[Test] public function getProtocolVersion_and_withProtocolVersion()
     {
         $message = $this->message(['protocolVersion' => '1.1']);
         $fork = $message->withProtocolVersion('2.0');
@@ -77,10 +69,7 @@ class PsrMessageTest extends TestCase
         $this->assertEquals('2.0', $fork->getProtocolVersion());
     }
 
-    /**
-     * @test
-     */
-    public function getHeaders_returns_headers()
+    #[Test] public function getHeaders_returns_headers()
     {
         $header = [
             'Date' => 'Fri, 10 Nov 2017 20:30:00 GMT',
@@ -103,10 +92,7 @@ class PsrMessageTest extends TestCase
         $this->assertFalse($message->hasHeader('Foo'));
     }
 
-    /**
-     * @test
-     */
-    public function hasHeader_checks_if_has()
+    #[Test] public function hasHeader_checks_if_has()
     {
         $header = [
             'Date' => 'Fri, 10 Nov 2017 20:30:00 GMT',
@@ -128,10 +114,7 @@ class PsrMessageTest extends TestCase
         $this->assertFalse($message->hasHeader('Foo'));
     }
 
-    /**
-     * @test
-     */
-    public function getHeader_returns_headers()
+    #[Test] public function getHeader_returns_headers()
     {
         $header = [
             'Date' => 'Fri, 10 Nov 2017 20:30:00 GMT',
@@ -152,10 +135,7 @@ class PsrMessageTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function getHeaderLine_returns_header_as_string()
+    #[Test] public function getHeaderLine_returns_header_as_string()
     {
         $header = [
             'Date' => 'Fri, 10 Nov 2017 20:30:00 GMT',
@@ -176,10 +156,7 @@ class PsrMessageTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function withHeader_returns_new_instance_with_changed_header()
+    #[Test] public function withHeader_returns_new_instance_with_changed_header()
     {
         $header = [
             'Date' => 'Fri, 10 Nov 2017 20:30:00 GMT',
@@ -200,10 +177,7 @@ class PsrMessageTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function withAddedHeader_returns_new_instance_with_changed_header()
+    #[Test] public function withAddedHeader_returns_new_instance_with_changed_header()
     {
         $header = [
             'Date' => 'Fri, 10 Nov 2017 20:30:00 GMT',
@@ -224,10 +198,7 @@ class PsrMessageTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function withoutHeader_returns_new_instance_without_header()
+    #[Test] public function withoutHeader_returns_new_instance_without_header()
     {
         $header = [
             'Date' => 'Fri, 10 Nov 2017 20:30:00 GMT',
@@ -248,10 +219,7 @@ class PsrMessageTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function getBody_returns_stream_with_payload()
+    #[Test] public function getBody_returns_stream_with_payload()
     {
         $message = $this->message(['payload' => 'Blabla']);
 
@@ -273,10 +241,7 @@ class PsrMessageTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function withBody_returns_new_instance()
+    #[Test] public function withBody_returns_new_instance()
     {
         $string1 = 'Blabla';
         $string2 = 'Blibli';

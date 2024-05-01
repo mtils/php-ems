@@ -124,6 +124,7 @@ class NamedObject implements NamedQuantity, AppliesToResource
      *
      * @see \Ems\Contracts\Core\NamedQuantity
      **/
+    #[\ReturnTypeWillChange]
     public function count()
     {
         return $this->count;

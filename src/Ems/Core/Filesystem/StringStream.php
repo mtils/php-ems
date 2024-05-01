@@ -8,6 +8,7 @@ namespace Ems\Core\Filesystem;
 
 use Countable;
 use Ems\Contracts\Core\Stringable;
+use Ems\Contracts\Core\Type;
 use Ems\Contracts\Core\Url as UrlContract;
 use Ems\Core\Url;
 use function base64_encode;
@@ -102,8 +103,9 @@ class StringStream extends AbstractStream implements Countable
      */
     public function write($data)
     {
-        if (!parent::write($data)) {
-            return false;
+        if (Type::isStringLike($data)) {
+            $this->string .= "$data";
+            return "$data" !== '';
         }
 
         // This is little bit overhead but I didn't find any other simple

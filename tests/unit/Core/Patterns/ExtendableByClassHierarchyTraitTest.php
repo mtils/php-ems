@@ -4,6 +4,7 @@ namespace Ems\Core\Patterns;
 
 use Ems\Contracts\Core\Extendable;
 use Ems\Testing\LoggingCallable;
+use OutOfBoundsException;
 
 class ExtendableByClassHierarchyTraitTest extends \Ems\TestCase
 {
@@ -93,11 +94,9 @@ class ExtendableByClassHierarchyTraitTest extends \Ems\TestCase
 
     }
 
-    /**
-     * @expectedException OutOfBoundsException
-     **/
     public function test_getExtension_throws_OutOfBoundsException_if_extension_not_found()
     {
+        $this->expectException(OutOfBoundsException::class);
 
         $object = $this->newExtendable();
 
@@ -111,11 +110,9 @@ class ExtendableByClassHierarchyTraitTest extends \Ems\TestCase
 
     }
 
-    /**
-     * @expectedException OutOfBoundsException
-     **/
     public function test_getExtension_throws_OutOfBoundsException_if_no_extensions_assigned()
     {
+        $this->expectException(OutOfBoundsException::class);
 
         $object = $this->newExtendable();
 
@@ -123,11 +120,9 @@ class ExtendableByClassHierarchyTraitTest extends \Ems\TestCase
 
     }
 
-    /**
-     * @expectedException OutOfBoundsException
-     **/
     public function test_getExtension_throws_OutOfBoundsException_if_no_matching_extension()
     {
+        $this->expectException(OutOfBoundsException::class);
 
         $object = $this->newExtendable();
 

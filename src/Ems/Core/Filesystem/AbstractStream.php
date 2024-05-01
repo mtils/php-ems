@@ -324,6 +324,7 @@ abstract class AbstractStream implements Stream, StreamInterface
     /**
      * Reset the internal pointer to the beginning.
      **/
+    #[\ReturnTypeWillChange]
     public function rewind()
     {
         // Lets assume rewind is only called when reading
@@ -339,6 +340,7 @@ abstract class AbstractStream implements Stream, StreamInterface
     /**
      * @return string
      **/
+    #[\ReturnTypeWillChange]
     public function current()
     {
         if ($this->position === 0 && $this->currentValue instanceof None) {
@@ -350,11 +352,13 @@ abstract class AbstractStream implements Stream, StreamInterface
     /**
      * @return int
      **/
+    #[\ReturnTypeWillChange]
     public function key()
     {
         return $this->position;
     }
 
+    #[\ReturnTypeWillChange]
     public function next()
     {
         $this->currentValue = $this->readNext($this->resource, $this->chunkSize);
@@ -369,6 +373,7 @@ abstract class AbstractStream implements Stream, StreamInterface
      *
      * @return bool
      **/
+    #[\ReturnTypeWillChange]
     public function valid()
     {
         return is_resource($this->resource) && $this->position !== -1;

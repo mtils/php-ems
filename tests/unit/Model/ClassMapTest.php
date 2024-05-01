@@ -9,21 +9,16 @@ namespace Ems\Model;
 use Ems\Contracts\Core\Url;
 use Ems\Contracts\Model\Relationship;
 use Ems\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 class ClassMapTest extends TestCase
 {
-    /**
-     * @test
-     */
-    public function it_instantiates()
+    #[Test] public function it_instantiates()
     {
         $this->assertInstanceOf(ClassMap::class, $this->newMap());
     }
 
-    /**
-     * @test
-     */
-    public function get_and_set_StorageUrl()
+    #[Test] public function get_and_set_StorageUrl()
     {
         $address = 'database://default';
         $map = $this->newMap();
@@ -34,10 +29,7 @@ class ClassMapTest extends TestCase
         $this->assertEquals($address, "$url");
     }
 
-    /**
-     * @test
-     */
-    public function get_and_set_ormClass()
+    #[Test] public function get_and_set_ormClass()
     {
         $class = Url::class;
         $map = $this->newMap();
@@ -46,10 +38,7 @@ class ClassMapTest extends TestCase
         $this->assertSame($class, $map->getOrmClass());
     }
 
-    /**
-     * @test
-     */
-    public function get_and_set_storageName()
+    #[Test] public function get_and_set_storageName()
     {
         $name = 'users';
         $map = $this->newMap();
@@ -58,10 +47,7 @@ class ClassMapTest extends TestCase
         $this->assertSame($name, $map->getStorageName());
     }
 
-    /**
-     * @test
-     */
-    public function get_and_set_primary_key()
+    #[Test] public function get_and_set_primary_key()
     {
         $keys = ['id', 'email', 'password'];
 
@@ -74,10 +60,7 @@ class ClassMapTest extends TestCase
         $this->assertSame($keys, $map->getPrimaryKey());
     }
 
-    /**
-     * @test
-     */
-    public function get_and_set_keys()
+    #[Test] public function get_and_set_keys()
     {
         $keys = ['id', 'email', 'password'];
 
@@ -87,10 +70,7 @@ class ClassMapTest extends TestCase
         $this->assertSame($keys, $map->getKeys());
     }
 
-    /**
-     * @test
-     */
-    public function get_and_set_relation()
+    #[Test] public function get_and_set_relation()
     {
         $relation = new Relationship();
         $map = $this->newMap();
@@ -100,10 +80,7 @@ class ClassMapTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function get_and_set_defaults()
+    #[Test] public function get_and_set_defaults()
     {
         $defaults = [
             'foo' => 'bar',
@@ -117,10 +94,7 @@ class ClassMapTest extends TestCase
         ], $map->getDefaults());
     }
 
-    /**
-     * @test
-     */
-    public function get_and_set_autoUpdates()
+    #[Test] public function get_and_set_autoUpdates()
     {
         $defaults = [
             'foo' => 'bar',
@@ -134,10 +108,7 @@ class ClassMapTest extends TestCase
                             ], $map->getAutoUpdates());
     }
 
-    /**
-     * @test
-     */
-    public function get_and_set_types()
+    #[Test] public function get_and_set_types()
     {
         $types = [
             'foo' => 'string',

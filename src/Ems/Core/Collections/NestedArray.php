@@ -61,7 +61,7 @@ use ArrayIterator;
  *
  * If you query the array with a single dot you will get only the unnested
  * properties $nestedArray['.']:
- * 
+ *
  * [
  *     'id'            => 13,
  *     'name'          => 'Michael',
@@ -206,6 +206,7 @@ class NestedArray implements ArrayAccess, Countable, IteratorAggregate
      *
      * @return \Collection\Iterator\ArrayIterator
      **/
+    #[\ReturnTypeWillChange]
     public function getIterator()
     {
         return new ArrayIterator($this->nested());

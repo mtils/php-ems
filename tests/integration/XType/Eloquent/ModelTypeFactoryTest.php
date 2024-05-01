@@ -273,11 +273,11 @@ class ModelTypeFactoryTest extends \Ems\IntegrationTest
 
     }
 
-    /**
-     * @expectedException \Ems\Contracts\Core\Errors\ConfigurationError
-     **/
     public function test_myXtype_throws_exception_ConfigurationError_if_itemType_not_configured()
     {
+        $this->expectException(
+            \Ems\Contracts\Core\Errors\ConfigurationError::class
+        );
         $numbersType = $this->xType(new AdditionalPhoneNumbers)['phone_numbers'];
 
         $itemType = $emailsType->itemType;
@@ -306,19 +306,15 @@ class ModelTypeFactoryTest extends \Ems\IntegrationTest
 
     }
 
-    /**
-     * @expectedException \Ems\Contracts\Core\Errors\Unsupported
-     **/
     public function test_toType_throws_Unsupported_if_class_not_an_eloquent_model()
     {
+        $this->expectException(\Ems\Contracts\Core\Errors\Unsupported::class);
         $this->xType(new \stdClass);
     }
 
-    /**
-     * @expectedException \Ems\Contracts\Core\Errors\Unsupported
-     **/
     public function test_toType_throws_Unsupported_if_relation_is_no_eloquent_relation()
     {
+        $this->expectException(\Ems\Contracts\Core\Errors\Unsupported::class);
         $this->xType(new WrongRelationType);
     }
 

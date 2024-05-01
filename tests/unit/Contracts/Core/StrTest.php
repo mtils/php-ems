@@ -3,6 +3,7 @@
 namespace Ems\Contracts\Core;
 
 use Ems\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 /**
  *  * Created by mtils on 30.07.2022 at 08:17.
@@ -10,18 +11,12 @@ use Ems\TestCase;
 
 class StrTest extends TestCase
 {
-    /**
-     * @test
-     */
-    public function it_implements_interface()
+    #[Test] public function it_implements_interface()
     {
         $this->assertInstanceOf(Stringable::class, $this->str());
     }
 
-    /**
-     * @test
-     */
-    public function like_matches_strings()
+    #[Test] public function like_matches_strings()
     {
         $this->assertTrue($this->str('Hello')->isLike('Hello'));
         $this->assertTrue($this->str('Hello')->isLike('hello'));

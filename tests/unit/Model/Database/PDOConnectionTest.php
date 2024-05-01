@@ -12,6 +12,7 @@ use Ems\Contracts\Model\Result;
 use Ems\Core\Url;
 use Ems\Testing\Cheat;
 use Exception;
+use InvalidArgumentException;
 use PDOException;
 
 use function call_user_func;
@@ -68,11 +69,9 @@ class PDOConnectionTest extends PDOBaseTest
         $this->assertEquals('mysql', $con->dialect());
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     **/
     public function test_setDialect_throws_exception_on_unsupported_value()
     {
+        $this->expectException(InvalidArgumentException::class);
         $con = $this->newConnection()->setDialect(131);
     }
 
@@ -314,11 +313,9 @@ class PDOConnectionTest extends PDOBaseTest
 
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     **/
     public function test_transaction_with_invalid_attempts_throws_exception()
     {
+        $this->expectException(InvalidArgumentException::class);
 
         $con = $this->newConnection();
 

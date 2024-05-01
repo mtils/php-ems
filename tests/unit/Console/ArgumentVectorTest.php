@@ -7,6 +7,8 @@ namespace Ems\Console;
 
 
 use Ems\TestCase;
+use PHPUnit\Framework\Attributes\Test;
+
 use function array_keys;
 use function array_merge;
 use function func_get_args;
@@ -14,36 +16,24 @@ use function is_array;
 
 class ArgumentVectorTest extends TestCase
 {
-    /**
-     * @test
-     */
-    public function it_instantiates()
+    #[Test] public function it_instantiates()
     {
         $this->assertInstanceOf(ArgumentVector::class, $this->make());
     }
 
-    /**
-     * @test
-     */
-    public function argv_returns_input()
+    #[Test] public function argv_returns_input()
     {
         $input = ['a', 'b', 'c'];
         $this->assertEquals($input, $this->make($input)->argv());
     }
 
-    /**
-     * @test
-     */
-    public function command_returns_parsed_command()
+    #[Test] public function command_returns_parsed_command()
     {
         $input = ['console', 'a', 'b', 'c'];
         $this->assertEquals($input[0], $this->make($input)->command());
     }
 
-    /**
-     * @test
-     */
-    public function arguments_returns_segments_without_prefix()
+    #[Test] public function arguments_returns_segments_without_prefix()
     {
         $input = ['a', 'b', 'c'];
         $argv = $this->c($input);
@@ -51,10 +41,7 @@ class ArgumentVectorTest extends TestCase
     }
 
 
-    /**
-     * @test
-     */
-    public function options_returns_short_options()
+    #[Test] public function options_returns_short_options()
     {
         $input = ['a', 'b', 'c', '-fbar', '-e', '80', '-v'];
 
@@ -73,10 +60,7 @@ class ArgumentVectorTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function options_with_multiple_short_options()
+    #[Test] public function options_with_multiple_short_options()
     {
         $input = ['a', 'b', '-fbar', '-e', '80', '-v', 'c'];
 
@@ -98,10 +82,7 @@ class ArgumentVectorTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function options_returns_long_options()
+    #[Test] public function options_returns_long_options()
     {
         $input = ['a', 'b', 'c', '--foo=bar', '--elm=', '--baz'];
 
@@ -118,10 +99,7 @@ class ArgumentVectorTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function double_dash_makes_very_following_an_argument()
+    #[Test] public function double_dash_makes_very_following_an_argument()
     {
         $input = ['a', 'b', 'c', '--foo=bar', '--',  '--elm=',  '--baz', 'd', '-s'];
 
@@ -140,10 +118,7 @@ class ArgumentVectorTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function multiple_same_options_creates_array_value()
+    #[Test] public function multiple_same_options_creates_array_value()
     {
         $input = ['a', 'b', 'c', '--foo=bar', '--foo=baz', '--baz', '--foo=zof'];
 
@@ -159,10 +134,7 @@ class ArgumentVectorTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function multiple_same_short_options_creates_array_value()
+    #[Test] public function multiple_same_short_options_creates_array_value()
     {
         $input = ['a', 'b', 'c', '-fbar', '-f', 'baz', '--baz', '-f', 'zof'];
 
@@ -179,12 +151,9 @@ class ArgumentVectorTest extends TestCase
 
     }
 
-    /**
-     * @test
-     * @expectedException \Ems\Contracts\Core\Errors\Unsupported
-     */
-    public function definsShortOption_throw_exception_if_option_has_more_than_one_char()
+    #[Test] public function definsShortOption_throw_exception_if_option_has_more_than_one_char()
     {
+        $this->expectException(\Ems\Contracts\Core\Errors\Unsupported::class);
         $input = ['a', 'b', 'c', '-fbar', '-f', 'baz', '--baz', '-f', 'zof'];
 
         $argv = $this->c($input);
@@ -193,10 +162,7 @@ class ArgumentVectorTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function toString_returns_command_line()
+    #[Test] public function toString_returns_command_line()
     {
         $input = ['a', 'b', 'c', '-fbar', '-f', 'baz', '--baz', '-f', 'zof'];
 
@@ -206,10 +172,7 @@ class ArgumentVectorTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function definedShortOptions_returns_defined_short_options()
+    #[Test] public function definedShortOptions_returns_defined_short_options()
     {
         $input = ['a', 'b', 'c', '--foo=bar', '--foo=baz', '--baz', '--foo=zof'];
 
@@ -227,10 +190,7 @@ class ArgumentVectorTest extends TestCase
         $this->assertEquals(array_keys($options), $subject->definedShortOptions());
     }
 
-    /**
-     * @test
-     */
-    public function isShortOptionDefined_returns_true_on_defined_options()
+    #[Test] public function isShortOptionDefined_returns_true_on_defined_options()
     {
         $input = ['a', 'b', 'c', '--foo=bar', '--foo=baz', '--baz', '--foo=zof'];
 

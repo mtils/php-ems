@@ -21,22 +21,17 @@ use Ems\Core\Storages\PushableProxyStorage;
 use Ems\Foundation\InputProcessor;
 use Ems\Model\OrmObject;
 use Ems\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 
 class StorageRepositoryTest extends TestCase
 {
-    /**
-     * @test
-     */
-    public function implements_interface()
+    #[Test] public function implements_interface()
     {
         $this->assertInstanceOf(Repository::class, $this->newRepository());
     }
 
-    /**
-     * @test
-     */
-    public function makeCreatesObject()
+    #[Test] public function makeCreatesObject()
     {
         $repo = $this->newRepository();
 
@@ -58,10 +53,7 @@ class StorageRepositoryTest extends TestCase
         }
     }
 
-    /**
-     * @test
-     */
-    public function fill_fills_entity()
+    #[Test] public function fill_fills_entity()
     {
 
         $repo = $this->newRepository();
@@ -80,12 +72,11 @@ class StorageRepositoryTest extends TestCase
         $this->assertFalse($repo->fill($hans, ['name' => 'monika']));
     }
 
-    /**
-     * @test
-     * @expectedException \Ems\Contracts\Core\Errors\ConstraintFailure
-     */
-    public function fill_throws_exception_when_model_not_GenericEntity()
+    #[Test] public function fill_throws_exception_when_model_not_GenericEntity()
     {
+        $this->expectException(
+            \Ems\Contracts\Core\Errors\ConstraintFailure::class
+        );
 
         $repo = $this->newRepository();
 
@@ -94,10 +85,7 @@ class StorageRepositoryTest extends TestCase
         $repo->fill($hans, ['name' => 'monika']);
     }
 
-    /**
-     * @test
-     */
-    public function store_stores_object()
+    #[Test] public function store_stores_object()
     {
         $repo = $this->newRepository();
 
@@ -137,12 +125,11 @@ class StorageRepositoryTest extends TestCase
 
     }
 
-    /**
-     * @test
-     * @expectedException \Ems\Contracts\Core\Errors\DataCorruption
-     */
-    public function store_throws_DataIntegrityException_if_store_did_fail()
+    #[Test] public function store_throws_DataIntegrityException_if_store_did_fail()
     {
+        $this->expectException(
+            \Ems\Contracts\Core\Errors\DataCorruption::class
+        );
         $storage = $this->mock(PushableStorage::class);
         $storage->shouldReceive('isBuffered')->andReturn(true);
         $storage->shouldReceive('offsetPush')->andReturn(1);
@@ -159,10 +146,7 @@ class StorageRepositoryTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function get_returns_stored_objects()
+    #[Test] public function get_returns_stored_objects()
     {
         $repo = $this->newRepository();
 
@@ -187,10 +171,7 @@ class StorageRepositoryTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function update_saves_changes_in_object()
+    #[Test] public function update_saves_changes_in_object()
     {
         $repo = $this->newRepository();
 
@@ -215,10 +196,7 @@ class StorageRepositoryTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function update_does_not_save_if_object_didnt_change()
+    #[Test] public function update_does_not_save_if_object_didnt_change()
     {
         $repo = $this->newRepository();
 
@@ -237,10 +215,7 @@ class StorageRepositoryTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function save_does_not_persist_if_object_didnt_change()
+    #[Test] public function save_does_not_persist_if_object_didnt_change()
     {
         $repo = $this->newRepository();
 
@@ -263,10 +238,7 @@ class StorageRepositoryTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function delete_deletes_stored_object()
+    #[Test] public function delete_deletes_stored_object()
     {
         $repo = $this->newRepository();
 

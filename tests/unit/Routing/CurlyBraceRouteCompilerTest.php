@@ -7,21 +7,16 @@ namespace Ems\Routing;
 
 
 use Ems\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 class CurlyBraceRouteCompilerTest extends TestCase
 {
-    /**
-     * @test
-     */
-    public function it_instantiates()
+    #[Test] public function it_instantiates()
     {
         $this->assertInstanceOf(CurlyBraceRouteCompiler::class, $this->make());
     }
 
-    /**
-     * @test
-     */
-    public function replaceWildcards_replaces_wildcards()
+    #[Test] public function replaceWildcards_replaces_wildcards()
     {
         $c = $this->make();
 
@@ -44,10 +39,7 @@ class CurlyBraceRouteCompilerTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function replaceNamed_replaces_parameters()
+    #[Test] public function replaceNamed_replaces_parameters()
     {
         $c = $this->make();
 
@@ -70,10 +62,7 @@ class CurlyBraceRouteCompilerTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function compile_replaces_parameters()
+    #[Test] public function compile_replaces_parameters()
     {
         $c = $this->make();
 

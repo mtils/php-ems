@@ -229,6 +229,7 @@ trait TraitOfResponsibility
      *
      * @return int
      **/
+    #[\ReturnTypeWillChange]
     public function count()
     {
         return count($this->candidates);

@@ -17,6 +17,7 @@ use Ems\Model\Database\Dialects\SQLiteDialect;
 use Ems\Model\Database\PDOConnection;
 use Ems\Model\Database\SQLBlobStorage;
 use Ems\Model\OrmObject;
+use PHPUnit\Framework\Attributes\Test;
 
 class OrmStorageRepositoryIntegrationTest extends IntegrationTest
 {
@@ -26,18 +27,12 @@ class OrmStorageRepositoryIntegrationTest extends IntegrationTest
         `data`       TEXT
     );';
 
-    /**
-     * @test
-     */
-    public function implements_interface()
+    #[Test] public function implements_interface()
     {
         $this->assertInstanceOf(Repository::class, $this->newRepository());
     }
 
-    /**
-     * @test
-     */
-    public function makeCreatesObject()
+    #[Test] public function makeCreatesObject()
     {
         $repo = $this->newRepository();
 
@@ -54,10 +49,7 @@ class OrmStorageRepositoryIntegrationTest extends IntegrationTest
         $this->assertTrue($hans->isNew());
     }
 
-    /**
-     * @test
-     */
-    public function fill_fills_OrmObject()
+    #[Test] public function fill_fills_OrmObject()
     {
 
         $repo = $this->newRepository();
@@ -76,12 +68,11 @@ class OrmStorageRepositoryIntegrationTest extends IntegrationTest
         $this->assertFalse($repo->fill($hans, ['name' => 'monika']));
     }
 
-    /**
-     * @test
-     * @expectedException \Ems\Contracts\Core\Errors\ConstraintFailure
-     */
-    public function fill_throws_exception_when_model_not_OrmObject()
+    #[Test] public function fill_throws_exception_when_model_not_OrmObject()
     {
+        $this->expectException(
+            \Ems\Contracts\Core\Errors\ConstraintFailure::class
+        );
 
         $repo = $this->newRepository();
 
@@ -90,10 +81,7 @@ class OrmStorageRepositoryIntegrationTest extends IntegrationTest
         $repo->fill($hans, ['name' => 'monika']);
     }
 
-    /**
-     * @test
-     */
-    public function store_stores_object()
+    #[Test] public function store_stores_object()
     {
         $repo = $this->newRepository();
 
@@ -127,12 +115,11 @@ class OrmStorageRepositoryIntegrationTest extends IntegrationTest
 
     }
 
-    /**
-     * @test
-     * @expectedException \Ems\Contracts\Core\Errors\DataCorruption
-     */
-    public function store_throws_DataIntegrityException_if_store_did_fail()
+    #[Test] public function store_throws_DataIntegrityException_if_store_did_fail()
     {
+        $this->expectException(
+            \Ems\Contracts\Core\Errors\DataCorruption::class
+        );
         $storage = $this->mock(PushableStorage::class);
         $storage->shouldReceive('isBuffered')->andReturn(true);
         $storage->shouldReceive('offsetPush')->andReturn(1);
@@ -149,10 +136,7 @@ class OrmStorageRepositoryIntegrationTest extends IntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function get_returns_stored_objects()
+    #[Test] public function get_returns_stored_objects()
     {
         $repo = $this->newRepository();
 
@@ -177,10 +161,7 @@ class OrmStorageRepositoryIntegrationTest extends IntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function update_saves_changes_in_object()
+    #[Test] public function update_saves_changes_in_object()
     {
         $repo = $this->newRepository();
 
@@ -203,10 +184,7 @@ class OrmStorageRepositoryIntegrationTest extends IntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function update_does_not_save_if_object_didnt_change()
+    #[Test] public function update_does_not_save_if_object_didnt_change()
     {
         $repo = $this->newRepository();
 
@@ -224,10 +202,7 @@ class OrmStorageRepositoryIntegrationTest extends IntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function save_does_not_persist_if_object_didnt_change()
+    #[Test] public function save_does_not_persist_if_object_didnt_change()
     {
         $repo = $this->newRepository();
 
@@ -242,10 +217,7 @@ class OrmStorageRepositoryIntegrationTest extends IntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function delete_deletes_stored_object()
+    #[Test] public function delete_deletes_stored_object()
     {
         $repo = $this->newRepository();
 
@@ -283,18 +255,12 @@ class OrmStorageRepositoryIntegrationTest extends IntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function itemClass_get_and_set_works()
+    #[Test] public function itemClass_get_and_set_works()
     {
         $this->assertEquals('foo', $this->newRepository()->setItemClass('foo')->getItemClass());
     }
 
-    /**
-     * @test
-     */
-    public function lazyLoader_is_passed_to_objects()
+    #[Test] public function lazyLoader_is_passed_to_objects()
     {
         $return = 'a dududu a dadada is what I want to say to you';
 

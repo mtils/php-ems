@@ -7,6 +7,7 @@ namespace Ems\View;
 
 use Ems\TestCase;
 use Ems\TestData;
+use PHPUnit\Framework\Attributes\Test;
 
 /**
  *
@@ -15,18 +16,12 @@ class ViewFileFinderTest extends TestCase
 {
     use TestData;
 
-    /**
-     * @test
-     */
-    public function it_instantiates()
+    #[Test] public function it_instantiates()
     {
         $this->assertInstanceOf(ViewFileFinder::class, $this->make());
     }
 
-    /**
-     * @test
-     */
-    public function it_finds_view()
+    #[Test] public function it_finds_view()
     {
         $finder = $this->make();
         $testDir = $this->dirOfTests('views');

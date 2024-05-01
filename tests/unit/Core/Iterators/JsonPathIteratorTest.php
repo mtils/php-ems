@@ -10,22 +10,18 @@ use Ems\Core\Iterators\JsonPathIterator;
 use Ems\TestCase;
 use Iterator;
 
+use PHPUnit\Framework\Attributes\Test;
+
 use function iterator_to_array;
 
 class JsonPathIteratorTest extends TestCase
 {
-    /**
-     * @test
-     */
-    public function it_acts_as_an_array()
+    #[Test] public function it_acts_as_an_array()
     {
         $this->assertInstanceOf(Iterator::class, $this->make());
     }
 
-    /**
-     * @test
-     */
-    public function it_iterates_simple_array()
+    #[Test] public function it_iterates_simple_array()
     {
         $source = [
             'name' => 'Michael',
@@ -53,10 +49,7 @@ class JsonPathIteratorTest extends TestCase
         }
     }
 
-    /**
-     * @test
-     */
-    public function it_iterates_simple_nested_array()
+    #[Test] public function it_iterates_simple_nested_array()
     {
         $input = [
             'login'             => 'michael',
@@ -78,10 +71,7 @@ class JsonPathIteratorTest extends TestCase
         $this->assertResultIs(['address.street'=>$input['address']['street']], $input, 'address.street','');
     }
 
-    /**
-     * @test
-     */
-    public function it_iterates_deeper_array()
+    #[Test] public function it_iterates_deeper_array()
     {
         $source = [
             'name' => 'Michael',
@@ -141,10 +131,7 @@ class JsonPathIteratorTest extends TestCase
         }
     }
 
-    /**
-     * @test
-     */
-    public function it_iterates_deeper_array_without_keyPrefix()
+    #[Test] public function it_iterates_deeper_array_without_keyPrefix()
     {
         $source = [
             'name' => 'Michael',
@@ -205,10 +192,7 @@ class JsonPathIteratorTest extends TestCase
         }
     }
 
-    /**
-     * @test
-     */
-    public function it_iterates_root_list()
+    #[Test] public function it_iterates_root_list()
     {
         $source = [
             [
@@ -276,10 +260,7 @@ class JsonPathIteratorTest extends TestCase
         }
     }
 
-    /**
-     * @test
-     */
-    public function it_iterates_root_list_without_keyPrefix()
+    #[Test] public function it_iterates_root_list_without_keyPrefix()
     {
         $source = [
             [
@@ -347,19 +328,13 @@ class JsonPathIteratorTest extends TestCase
         }
     }
 
-    /**
-     * @test
-     */
-    public function matcher_matches_simple_expressions()
+    #[Test] public function matcher_matches_simple_expressions()
     {
         $this->assertMatches('$.name', '$.name');
         $this->assertDoesNotMatch('$.foo', '$.name');
     }
 
-    /**
-     * @test
-     */
-    public function split_expression()
+    #[Test] public function split_expression()
     {
         $matcher = $this->make();
         $this->assertSame(['name'], $matcher->splitPath('$.name'));
@@ -371,10 +346,7 @@ class JsonPathIteratorTest extends TestCase
         $this->assertSame(['[2]', 'projects', '[3]', 'tags', '[3]', 'creator', 'name'], $matcher->splitPath('[2].projects[3].tags[3].creator.name'));
     }
 
-    /**
-     * @test
-     */
-    public function matcher_matches_wildcard_keys()
+    #[Test] public function matcher_matches_wildcard_keys()
     {
         $this->assertMatches('.*', '.name');
         $this->assertMatches('*', 'name');
@@ -388,19 +360,13 @@ class JsonPathIteratorTest extends TestCase
         $this->assertDoesNotMatch('user.projects[*].tags[*].name', 'user.projects[12].tags[144].id');
     }
 
-    /**
-     * @test
-     */
-    public function matcher_matches_numeric_indexes()
+    #[Test] public function matcher_matches_numeric_indexes()
     {
         $this->assertMatches('projects[12]', 'projects[12]');
         $this->assertDoesNotMatch('projects[12]', 'projects[11]');
     }
 
-    /**
-     * @test
-     */
-    public function matcher_matches_multiple_indexes()
+    #[Test] public function matcher_matches_multiple_indexes()
     {
         $this->assertMatches('projects[1,2]', 'projects[1]');
         $this->assertMatches('projects[1,2]', 'projects[2]');
@@ -414,10 +380,7 @@ class JsonPathIteratorTest extends TestCase
         $this->assertDoesNotMatch('[*]', '[13].user');
     }
 
-    /**
-     * @test
-     */
-    public function it_selects_explicit_expressions()
+    #[Test] public function it_selects_explicit_expressions()
     {
         $source = [
             [
@@ -462,10 +425,7 @@ class JsonPathIteratorTest extends TestCase
         $this->assertResultIs([$selector => $source[0]['address']['street']], $source[0]['address'], $selector, '');
     }
 
-    /**
-     * @test
-     */
-    public function it_selects_wildcard_expressions()
+    #[Test] public function it_selects_wildcard_expressions()
     {
         $source = [
             [

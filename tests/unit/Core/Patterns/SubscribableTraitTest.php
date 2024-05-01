@@ -26,11 +26,9 @@ class SubscribableTraitTest extends \Ems\TestCase
         $this->assertSame($listener, $hookable->getListeners('get')[0]);
     }
 
-    /**
-     * @expectedException \Ems\Contracts\Core\Errors\UnSupported
-     **/
     public function test_getListeners_with_unknown_position_throws_exception()
     {
+        $this->expectException(\Ems\Contracts\Core\Errors\UnSupported::class);
         $hookable = $this->newSubscribable();
 
         $listener = function () {};
@@ -77,11 +75,9 @@ class SubscribableTraitTest extends \Ems\TestCase
         $this->assertEquals(['a', 'b', 'c', 'd', 'e'], $listener->args(5));
     }
 
-    /**
-     * @expectedException \Ems\Contracts\Core\Errors\UnSupported
-     **/
     public function test_listen_on_object_event_throws_exception()
     {
+        $this->expectException(\Ems\Contracts\Core\Errors\UnSupported::class);
         $hookable = $this->newSubscribable();
 
         $listener = new LoggingCallable();
@@ -89,11 +85,9 @@ class SubscribableTraitTest extends \Ems\TestCase
         $hookable->on(new \stdClass(), $listener);
     }
 
-    /**
-     * @expectedException \Ems\Contracts\Core\Errors\UnSupported
-     **/
     public function test_listen_on_class_like_event_throws_exception()
     {
+        $this->expectException(\Ems\Contracts\Core\Errors\UnSupported::class);
         $hookable = $this->newHookableWithoutMethodHooks();
 
         $listener = new LoggingCallable();

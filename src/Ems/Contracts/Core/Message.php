@@ -264,6 +264,7 @@ abstract class Message implements ArrayAccess, IteratorAggregate, Countable
      * @param string|int $offset
      * @return mixed
      */
+    #[\ReturnTypeWillChange]
     public function offsetGet($offset)
     {
         return $this->custom[$offset];
@@ -274,6 +275,7 @@ abstract class Message implements ArrayAccess, IteratorAggregate, Countable
      * @param mixed $value
      * @return void
      */
+    #[\ReturnTypeWillChange]
     public function offsetSet($offset, $value)
     {
         throw new UnsupportedUsageException('Setting values is not supported by AbstractMessage');
@@ -283,6 +285,7 @@ abstract class Message implements ArrayAccess, IteratorAggregate, Countable
      * @param string|int $offset
      * @return void
      */
+    #[\ReturnTypeWillChange]
     public function offsetUnset($offset)
     {
         throw new UnsupportedUsageException('Unsetting values is not supported by AbstractMessage');
@@ -299,6 +302,7 @@ abstract class Message implements ArrayAccess, IteratorAggregate, Countable
     /**
      * @return ArrayIterator
      */
+    #[\ReturnTypeWillChange]
     public function getIterator() : Iterator
     {
         return new ArrayIterator($this->toArray());
@@ -307,6 +311,7 @@ abstract class Message implements ArrayAccess, IteratorAggregate, Countable
     /**
      * @return int
      */
+    #[\ReturnTypeWillChange]
     public function count()
     {
         return count($this->toArray());

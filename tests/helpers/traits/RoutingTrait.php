@@ -17,6 +17,8 @@ use Ems\Routing\GenericInput;
 use Ems\Routing\Router;
 use Ems\Routing\RouteRegistry;
 
+use PHPUnit\Framework\Attributes\BeforeClass;
+
 use function in_array;
 use function is_bool;
 use function is_callable;
@@ -55,10 +57,7 @@ trait RoutingTrait
         return $registry;
     }
 
-    /**
-     * @beforeClass
-     */
-    public static function loadTestRoutes()
+    #[BeforeClass] public static function loadTestRoutes()
     {
         static::$testRoutes = static::includeDataFile('routing/basic-routes.php');
     }

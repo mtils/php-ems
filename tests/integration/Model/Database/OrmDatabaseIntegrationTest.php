@@ -21,6 +21,8 @@ use Models\Ems\TokenMap;
 use Models\Ems\UserMap;
 use Models\User;
 
+use PHPUnit\Framework\Attributes\Test;
+
 use function array_key_exists;
 use function crc32;
 use function explode;
@@ -36,10 +38,7 @@ class OrmDatabaseIntegrationTest extends DatabaseIntegrationTest
 {
     use TestOrm;
 
-    /**
-     * @test
-     */
-    public function select_contacts()
+    #[Test] public function select_contacts()
     {
         $query = new OrmQuery(Contact::class);
         $query->where(ContactMap::FIRST_NAME, 'like', 'Br%');
@@ -53,10 +52,7 @@ class OrmDatabaseIntegrationTest extends DatabaseIntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function select_contacts_unchunked()
+    #[Test] public function select_contacts_unchunked()
     {
         $query = new OrmQuery(Contact::class);
         $query->where(ContactMap::FIRST_NAME, 'like', 'Br%');
@@ -70,10 +66,7 @@ class OrmDatabaseIntegrationTest extends DatabaseIntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function select_user_with_contact()
+    #[Test] public function select_user_with_contact()
     {
         $query = (new OrmQuery(User::class))->with('contact');
         $query->where(UserMap::EMAIL, 'like', 'br%');
@@ -85,10 +78,7 @@ class OrmDatabaseIntegrationTest extends DatabaseIntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function select_user_with_parent_and_contact()
+    #[Test] public function select_user_with_parent_and_contact()
     {
         $query = (new OrmQuery(User::class))->with('contact', 'parent');
         $query->where(UserMap::EMAIL, 'like', 's%');
@@ -118,10 +108,7 @@ class OrmDatabaseIntegrationTest extends DatabaseIntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function select_user_with_parent_and_contact_of_parent()
+    #[Test] public function select_user_with_parent_and_contact_of_parent()
     {
         $query = (new OrmQuery(User::class))->with('contact', 'parent.contact');
         $query->where(UserMap::EMAIL, 'like', 's%');
@@ -154,10 +141,7 @@ class OrmDatabaseIntegrationTest extends DatabaseIntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function select_user_with_to_many_tokens()
+    #[Test] public function select_user_with_to_many_tokens()
     {
         $query = (new OrmQuery(User::class))->with('tokens', 'contact');
         $query->where(UserMap::EMAIL, 'like', 's%');
@@ -178,10 +162,7 @@ class OrmDatabaseIntegrationTest extends DatabaseIntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function select_user_with_m_to_n_groups()
+    #[Test] public function select_user_with_m_to_n_groups()
     {
         $query = (new OrmQuery(User::class))->with('groups', 'contact');
         $query->where('contact.last_name', 'like', 's%');
@@ -203,10 +184,7 @@ class OrmDatabaseIntegrationTest extends DatabaseIntegrationTest
         }
     }
 
-    /**
-     * @test
-     */
-    public function select_user_with_groups_and_token()
+    #[Test] public function select_user_with_groups_and_token()
     {
         $query = (new OrmQuery(User::class))->with('groups', 'contact', 'tokens');
         $query->where(UserMap::EMAIL, 'like', 's%');
@@ -236,10 +214,7 @@ class OrmDatabaseIntegrationTest extends DatabaseIntegrationTest
         }
     }
 
-    /**
-     * @test
-     */
-    public function select_user_with_m_to_n_to_one_projects_type()
+    #[Test] public function select_user_with_m_to_n_to_one_projects_type()
     {
         $query = (new OrmQuery(User::class))->with('projects.type', 'contact');
         $query->where(UserMap::EMAIL, 'like', 's%');
@@ -268,10 +243,7 @@ class OrmDatabaseIntegrationTest extends DatabaseIntegrationTest
         }
     }
 
-    /**
-     * @test
-     */
-    public function select_user_with_m_to_n_to_many_projects_files()
+    #[Test] public function select_user_with_m_to_n_to_many_projects_files()
     {
         $query = (new OrmQuery(User::class))->with('projects.files', 'contact');
         $query->where(UserMap::EMAIL, 'like', 's%');
@@ -301,10 +273,7 @@ class OrmDatabaseIntegrationTest extends DatabaseIntegrationTest
         }
     }
 
-    /**
-     * @test
-     */
-    public function select_user_with_many_different_relations()
+    #[Test] public function select_user_with_many_different_relations()
     {
         $query = (new OrmQuery(User::class))->with('projects.files', 'projects.type', 'tokens', 'groups', 'contact');
         $query->where(UserMap::EMAIL, 'like', 's%');
@@ -355,10 +324,7 @@ class OrmDatabaseIntegrationTest extends DatabaseIntegrationTest
         }
     }
 
-    /**
-     * @test
-     */
-    public function select_to_one_that_has_to_many_contact_user()
+    #[Test] public function select_to_one_that_has_to_many_contact_user()
     {
         $query = (new OrmQuery(Contact::class))->with('user.tokens');
         $query->where('user.email', 'like', 's%');
@@ -378,10 +344,7 @@ class OrmDatabaseIntegrationTest extends DatabaseIntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function select_to_one_that_has_to_many_that_has_to_many_and_to_one_contact_user_project()
+    #[Test] public function select_to_one_that_has_to_many_that_has_to_many_and_to_one_contact_user_project()
     {
         $query = (new OrmQuery(Contact::class))->with('user.tokens', 'user.projects.files', 'user.projects.type');
         $query->where('user.email', 'like', 's%');
@@ -425,10 +388,7 @@ class OrmDatabaseIntegrationTest extends DatabaseIntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function select_user_with_many_different_relations_or_none()
+    #[Test] public function select_user_with_many_different_relations_or_none()
     {
         $query = (new OrmQuery(User::class))->with('projects.files', 'projects.type', 'tokens', 'groups', 'contact');
         $query('or')->where(UserMap::EMAIL, 'like', 'st%')
@@ -486,10 +446,7 @@ class OrmDatabaseIntegrationTest extends DatabaseIntegrationTest
         }
     }
 
-    /**
-     * @test
-     */
-    public function create_user()
+    #[Test] public function create_user()
     {
         $data = [
             UserMap::EMAIL      => 'test@test.de',
@@ -514,10 +471,7 @@ class OrmDatabaseIntegrationTest extends DatabaseIntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function update_user()
+    #[Test] public function update_user()
     {
         $data = [
             UserMap::EMAIL      => 'test2@test.de',
@@ -544,10 +498,7 @@ class OrmDatabaseIntegrationTest extends DatabaseIntegrationTest
         }
     }
 
-    /**
-     * @test
-     */
-    public function delete_user()
+    #[Test] public function delete_user()
     {
         $data = [
             UserMap::EMAIL      => 'test3@test.de',
@@ -575,10 +526,7 @@ class OrmDatabaseIntegrationTest extends DatabaseIntegrationTest
         $this->assertNull($queryBuilder->retrieve(static::$con, $query)->first());
     }
 
-    /**
-     * @test
-     */
-    public function paginate_users_with_m_to_n_groups()
+    #[Test] public function paginate_users_with_m_to_n_groups()
     {
         $query = (new OrmQuery(User::class))->with('groups', 'contact');
         $query->where('contact.last_name', 'like', 's%');

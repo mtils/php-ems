@@ -5,6 +5,7 @@ namespace Ems\Model\Database;
 use Ems\Contracts\Core\Renderable;
 use Ems\Contracts\Model\PaginatableResult;
 use Ems\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 use function str_replace;
 use Ems\Contracts\Model\Database\Query as BaseQuery;
 
@@ -14,20 +15,14 @@ use Ems\Contracts\Model\Database\Query as BaseQuery;
 
 class QueryTest extends TestCase
 {
-    /**
-     * @test
-     */
-    public function it_implements_interfaces()
+    #[Test] public function it_implements_interfaces()
     {
         $this->assertInstanceOf(BaseQuery::class, $this->newQuery());
         $this->assertInstanceOf(Renderable::class, $this->newQuery());
         $this->assertInstanceOf(PaginatableResult::class, $this->newQuery());
     }
 
-    /**
-     * @test
-     */
-    public function mimeType_is_sql()
+    #[Test] public function mimeType_is_sql()
     {
         $this->assertEquals('application/sql', $this->newQuery()->mimeType());
     }

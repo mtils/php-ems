@@ -5,6 +5,7 @@ namespace Ems\Model\Database;
 
 use Ems\Contracts\Core\Storage;
 use Ems\Contracts\Model\Database\Connection;
+use Ems\Contracts\Model\Database\SQLException;
 use Ems\Contracts\Model\QueryableStorage;
 use Ems\Contracts\Model\StorageQuery as StorageQueryContract;
 use Ems\Core\Url;
@@ -59,11 +60,11 @@ class SQLStorageTest extends \Ems\TestCase
         $this->assertEquals('foo', $this->newStorage(null, null, 'foo')->getIdKey());
     }
 
-    /**
-     * @expectedException Ems\Model\Database\SQLNameNotFoundException
-     **/
     public function test_access_without_table_creator_throws_exception()
     {
+        $this->expectException(
+            SQLNameNotFoundException::class
+        );
         $this->newStorage()['foo'];
     }
 
@@ -277,11 +278,11 @@ class SQLStorageTest extends \Ems\TestCase
 
     }
 
-    /**
-     * @expectedException Ems\Contracts\Model\Database\SQLException
-     **/
     public function test_missing_column_does_not_trigger_table_ceation()
     {
+        $this->expectException(
+            SQLException::class
+        );
 
         $con = $this->mock(Connection::class);
 

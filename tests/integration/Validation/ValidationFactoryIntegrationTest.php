@@ -14,6 +14,8 @@ use Ems\TestData;
 use Ems\Testing\LoggingCallable;
 use Ems\Validation\Skeleton\ValidationBootstrapper;
 
+use PHPUnit\Framework\Attributes\Test;
+
 use function get_class;
 
 class ValidationFactoryIntegrationTest extends IntegrationTest
@@ -23,10 +25,7 @@ class ValidationFactoryIntegrationTest extends IntegrationTest
 
     protected $extraBootstrappers = [ValidationBootstrapper::class];
 
-    /**
-     * @test
-     */
-    public function it_creates_validator_by_rules()
+    #[Test] public function it_creates_validator_by_rules()
     {
         $validator = $this->create(['login' => 'required|min:3|max:128'], self::class);
 
@@ -43,10 +42,7 @@ class ValidationFactoryIntegrationTest extends IntegrationTest
         $this->assertEquals(self::class, $validator->ormClass());
     }
 
-    /**
-     * @test
-     */
-    public function create_validator_calls_listener()
+    #[Test] public function create_validator_calls_listener()
     {
 
         $rules = ['login' => 'required|min:3|max:128'];
@@ -74,10 +70,7 @@ class ValidationFactoryIntegrationTest extends IntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function get_validator_calls_listener()
+    #[Test] public function get_validator_calls_listener()
     {
 
         $ormClass = self::class;
@@ -106,10 +99,7 @@ class ValidationFactoryIntegrationTest extends IntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function even_create_validator_by_container_calls_listener()
+    #[Test] public function even_create_validator_by_container_calls_listener()
     {
 
         $rules = ['login' => 'required|min:3|max:128'];
@@ -150,10 +140,7 @@ class ValidationFactoryIntegrationTest extends IntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function even_get_validator_by_container_calls_listener()
+    #[Test] public function even_get_validator_by_container_calls_listener()
     {
 
         $ormClass = self::class;
@@ -180,10 +167,7 @@ class ValidationFactoryIntegrationTest extends IntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function rules_can_be_altered()
+    #[Test] public function rules_can_be_altered()
     {
         $ormClass = self::class;
 

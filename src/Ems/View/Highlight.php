@@ -175,6 +175,7 @@ class Highlight extends View implements HighlightContract
      *
      * @return \ArrayIterator
      **/
+    #[\ReturnTypeWillChange]
     public function getIterator()
     {
         return new ArrayIterator($this->getResultOnce());

@@ -107,6 +107,7 @@ class DbOrmQueryResult implements Result, Paginatable, HasMethodHooks
      * <b>Traversable</b>
      * @throws Exception on failure.
      */
+    #[\ReturnTypeWillChange]
     public function getIterator()
     {
         if (!$this->chunkSize || $this->dbQuery->limit) {

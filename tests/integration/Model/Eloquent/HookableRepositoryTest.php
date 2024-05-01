@@ -7,6 +7,8 @@ use Ems\Contracts\Model\HookableRepository as HookableRepositoryContract;
 use Ems\Testing\Eloquent\MigratedDatabase;
 use Ems\Core\NamedObject;
 
+use InvalidArgumentException;
+
 use function get_class;
 
 class HookableRepositoryTest extends \Ems\TestCase
@@ -18,11 +20,9 @@ class HookableRepositoryTest extends \Ems\TestCase
         $this->assertInstanceOf(HookableRepositoryContract::class, $this->newRepo());
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     **/
     public function test_instantiating_with_unidentifiable_throws_InvalidArgumentException()
     {
+        $this->expectException(InvalidArgumentException::class);
         $this->newRepo(new UnIdentifiable);
     }
 
@@ -32,11 +32,9 @@ class HookableRepositoryTest extends \Ems\TestCase
         $this->assertEquals('foo', $repo->get(12, 'foo'));
     }
 
-    /**
-     * @expectedException Ems\Contracts\Core\Errors\NotFound
-     **/
     public function test_getOrFail_throws_NotFound_if_model_not_found()
     {
+        $this->expectException(Ems\Contracts\Core\Errors\NotFound::class);
         $repo = $this->newRepo();
         $this->assertEquals('foo', $repo->getOrFail(12));
     }
@@ -96,11 +94,9 @@ class HookableRepositoryTest extends \Ems\TestCase
 
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     **/
     public function test_update_fails_with_non_eloquent_model()
     {
+        $this->expectException(InvalidArgumentException::class);
         $repo = $this->newRepo();
 
         $model = new NamedObject;

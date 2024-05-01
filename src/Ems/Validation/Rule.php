@@ -30,6 +30,7 @@ class Rule extends ConstraintGroup implements RuleContract
     /**
      * @return ArrayIterator
      **/
+    #[\ReturnTypeWillChange]
     public function getIterator()
     {
         return new ArrayIterator($this->namesToParameters());

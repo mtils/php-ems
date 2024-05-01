@@ -5,16 +5,15 @@ namespace Ems\Core\Filesystem;
 use Ems\Contracts\Core\Stream;
 use Ems\Contracts\Core\Stringable;
 use Ems\Testing\FilesystemMethods;
+use PHPUnit\Framework\Attributes\Test;
+
 use function file_get_contents;
 
 class StringStreamTest extends \Ems\IntegrationTest
 {
     use FilesystemMethods;
 
-    /**
-     * @test
-     */
-    public function implements_interfaces()
+    #[Test] public function implements_interfaces()
     {
         $stream = $this->newStream();
         $this->assertInstanceOf(
@@ -27,10 +26,7 @@ class StringStreamTest extends \Ems\IntegrationTest
         );
     }
 
-    /**
-     * @test
-     */
-    public function type_returns_right_type()
+    #[Test] public function type_returns_right_type()
     {
         $this->assertEquals('stream', $this->newStream()->type());
 
@@ -40,10 +36,7 @@ class StringStreamTest extends \Ems\IntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function type_returns_right_type_even_without_resource()
+    #[Test] public function type_returns_right_type_even_without_resource()
     {
         $this->assertEquals('stream', $this->newStream()->type());
 
@@ -52,20 +45,14 @@ class StringStreamTest extends \Ems\IntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function getting_url()
+    #[Test] public function getting_url()
     {
         $stream = $this->newStream();
         $this->assertInstanceOf(\Ems\Contracts\Core\Url::class, $stream->url());
         $this->assertEquals('php://memory', (string)$stream->url());
     }
 
-    /**
-     * @test
-     */
-    public function reads_string_in_chunks()
+    #[Test] public function reads_string_in_chunks()
     {
         $file = static::dataFile('ascii-data-eol-l.txt');
 
@@ -103,10 +90,7 @@ class StringStreamTest extends \Ems\IntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function read_chunk()
+    #[Test] public function read_chunk()
     {
         $fileContent = file_get_contents(static::dataFile('ascii-data-eol-l.txt'));
 
@@ -117,10 +101,7 @@ class StringStreamTest extends \Ems\IntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function reads_in_toString()
+    #[Test] public function reads_in_toString()
     {
         $fileContent = file_get_contents(static::dataFile('ascii-data-eol-l.txt'));
 
@@ -130,10 +111,7 @@ class StringStreamTest extends \Ems\IntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function reads_empty_string()
+    #[Test] public function reads_empty_string()
     {
         $stream = $this->newStream('')->setChunkSize(1024);
 
@@ -147,10 +125,7 @@ class StringStreamTest extends \Ems\IntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function count_returns_strlen()
+    #[Test] public function count_returns_strlen()
     {
         $fileContent = static::dataFileContent('ascii-data-eol-l.txt');
 
@@ -160,18 +135,12 @@ class StringStreamTest extends \Ems\IntegrationTest
     }
 
 
-    /**
-     * @test
-     */
-    public function isLocal_returns_correct_value()
+    #[Test] public function isLocal_returns_correct_value()
     {
         $this->assertTrue($this->newStream()->isLocal());
     }
 
-    /**
-     * @test
-     */
-    public function write_file_in_one_row()
+    #[Test] public function write_file_in_one_row()
     {
         $content = static::dataFileContent('ascii-data-eol-l.txt');
 
@@ -185,32 +154,26 @@ class StringStreamTest extends \Ems\IntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function write_file_in_chunks()
+    #[Test] public function write_file_in_chunks()
     {
         $content = static::dataFileContent('ascii-data-eol-l.txt');
 
-        $readStream = $this->newStream($content)->setChunkSize(256);
-
         $chunkSize = 256;
 
-        $stream = $this->newStream($content, 'a+')->setChunkSize($chunkSize);
+        $readStream = $this->newStream($content)->setChunkSize($chunkSize);
+
+        $stream = $this->newStream('', 'a+')->setChunkSize($chunkSize);
 
         foreach ($readStream as $chunk) {
-//            $this->assertTrue($stream->write($chunk)); Didnt work under PHP 7|7.1
-            $stream->write($chunk);
+            $this->assertTrue($stream->write($chunk)); //Didnt work under PHP 7|7.1
+            //$stream->write($chunk);
         }
 
         $stream->close();
         $this->assertEquals($content, "$stream");
     }
 
-    /**
-     * @test
-     */
-    public function write_empty_string()
+    #[Test] public function write_empty_string()
     {
         $stream = $this->newStream('', 'r+');
 

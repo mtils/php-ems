@@ -32,11 +32,11 @@ class LocalFilesystemTest extends \Ems\IntegrationTest
         $this->assertFalse($this->newTestFilesystem()->exists('foo'));
     }
 
-    /**
-     * @expectedException \Ems\Core\Exceptions\ResourceNotFoundException
-     **/
     public function test_read_throws_NotFoundException_if_file_not_found()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\ResourceNotFoundException::class
+        );
         $fs = $this->newTestFilesystem();
         $fs->read('some-not-existing-file.txt');
     }
@@ -48,11 +48,11 @@ class LocalFilesystemTest extends \Ems\IntegrationTest
         $this->assertEquals($contentsOfThisFile, $fs->read(__FILE__, 0, true));
     }
 
-    /**
-     * @expectedException \Ems\Contracts\Core\Errors\ConcurrentAccess
-     **/
     public function test_read_throws_exception_when_trying_to_read_a_locked_file()
     {
+        $this->expectException(
+            \Ems\Contracts\Core\Errors\ConcurrentAccess::class
+        );
         $fs = $this->newTestFilesystem();
         $fileName = $this->tempFileName();
         $testString = 'Foo is a buddy of bar';
@@ -148,11 +148,11 @@ class LocalFilesystemTest extends \Ems\IntegrationTest
         $this->assertFalse($fs->exists($fileName));
     }
 
-    /**
-     * @expectedException \Ems\Contracts\Core\Exceptions\TypeException
-     */
     public function test_write_throws_exception_on_unsupported_content()
     {
+        $this->expectException(
+            \Ems\Contracts\Core\Exceptions\TypeException::class
+        );
         $fs = $this->newTestFilesystem();
 
         $fs->write(stream_context_get_default(), []);

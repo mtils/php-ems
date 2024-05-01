@@ -30,23 +30,11 @@ class EventDispatcher implements Dispatcher
      *
      * @param  string|array  $events
      * @param  mixed  $listener
-     * @param  int  $priority
      * @return void
      */
-    public function listen($events, $listener, $priority = 0)
+    public function listen($events, $listener=null): void
     {
-        if ($priority === 0) {
-            $this->events->on($events, $listener);
-            return;
-        }
-
-        if ($priority > 5) {
-            $this->events->onBefore($events, $listener);
-            return;
-        }
-
-        $this->events->onAfter($events, $listener);
-
+        $this->events->on($events, $listener);
     }
 
     /**

@@ -13,6 +13,7 @@ use Ems\TestData;
 use Ems\Testing\Cheat;
 use FastRoute\DataGenerator;
 use FastRoute\Dispatcher as FastRouteDispatcherContract;
+use PHPUnit\Framework\Attributes\Test;
 
 class FastRouteDispatcherTest extends TestCase
 {
@@ -23,24 +24,18 @@ class FastRouteDispatcherTest extends TestCase
     /**
      * This method is called before the first test of this test class is run.
      */
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
         static::$testRoutes = static::includeDataFile('routing/basic-routes.php');
     }
 
 
-    /**
-     * @test
-     */
-    public function it_implements_interface()
+    #[Test] public function it_implements_interface()
     {
         $this->assertInstanceOf(FastRouteDispatcher::class, $this->make());
     }
 
-    /**
-     * @test
-     */
-    public function add_adds_route()
+    #[Test] public function add_adds_route()
     {
         $dispatcher = $this->make();
         $method = 'GET';
@@ -57,34 +52,31 @@ class FastRouteDispatcherTest extends TestCase
 
     }
 
-    /**
-     * @test
-     * @expectedException \Ems\Contracts\Routing\Exceptions\RouteNotFoundException
-     */
-    public function match_throws_exception_if_route_did_not_match()
+    #[Test] public function match_throws_exception_if_route_did_not_match()
     {
+        $this->expectException(
+            \Ems\Contracts\Routing\Exceptions\RouteNotFoundException::class
+        );
         $dispatcher = $this->make();
         $dispatcher->match('GET', 'cars');
     }
 
-    /**
-     * @test
-     * @expectedException \Ems\Contracts\Routing\Exceptions\MethodNotAllowedException
-     */
-    public function match_throws_exception_if_method_did_not_match()
+    #[Test] public function match_throws_exception_if_method_did_not_match()
     {
+        $this->expectException(
+            \Ems\Contracts\Routing\Exceptions\MethodNotAllowedException::class
+        );
         $dispatcher = $this->make();
         $dispatcher->add('GET', 'cars', 'CarController@index');
         $dispatcher->add('POST', 'cars', 'CarController@store');
         $dispatcher->match('PUT', 'cars');
     }
 
-    /**
-     * @test
-     * @expectedException \Ems\Core\Exceptions\DataIntegrityException
-     */
-    public function match_throws_exception_if_handler_not_wellformed()
+    #[Test] public function match_throws_exception_if_handler_not_wellformed()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\DataIntegrityException::class
+        );
         $dispatcher = $this->make();
         $fDispatcher = $this->mock(FastRouteDispatcherContract::class);
 
@@ -102,10 +94,7 @@ class FastRouteDispatcherTest extends TestCase
         $dispatcher->match($method, $uri);
     }
 
-    /**
-     * @test
-     */
-    public function match_various_routes()
+    #[Test] public function match_various_routes()
     {
         $dispatcher = $this->make();
 
@@ -124,10 +113,7 @@ class FastRouteDispatcherTest extends TestCase
         }
     }
 
-    /**
-     * @test
-     */
-    public function store_and_restore_state_by_toArray_and_fill()
+    #[Test] public function store_and_restore_state_by_toArray_and_fill()
     {
         $dispatcherForRegister = $this->make();
 
@@ -151,10 +137,7 @@ class FastRouteDispatcherTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function CharCountBasedDispatcher()
+    #[Test] public function CharCountBasedDispatcher()
     {
 
         $dispatcher = $this->make(new DataGenerator\CharCountBased());
@@ -172,10 +155,7 @@ class FastRouteDispatcherTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function GroupPosBasedDispatcher()
+    #[Test] public function GroupPosBasedDispatcher()
     {
 
         $dispatcher = $this->make(new DataGenerator\GroupPosBased());
@@ -193,10 +173,7 @@ class FastRouteDispatcherTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function MarkBasedDispatcher()
+    #[Test] public function MarkBasedDispatcher()
     {
 
         $dispatcher = $this->make(new DataGenerator\MarkBased());
@@ -214,12 +191,11 @@ class FastRouteDispatcherTest extends TestCase
 
     }
 
-    /**
-     * @test
-     * @expectedException \Ems\Core\Exceptions\UnsupportedUsageException
-     */
-    public function unknown_DataGenerator_throws_exception()
+    #[Test] public function unknown_DataGenerator_throws_exception()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\UnsupportedUsageException::class
+        );
 
         /** @var DataGenerator $dataGenerator */
         $dataGenerator = $this->mock(DataGenerator::class);

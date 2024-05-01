@@ -15,15 +15,13 @@ use Ems\Core\KeyExpression;
 use Ems\Core\Response as CoreResponse;
 use Ems\Core\Serializer\JsonSerializer;
 use Ems\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 
 class HttpResponseTest extends TestCase
 {
-    /**
-     * @test
-     */
-    public function it_implements_interface()
+    #[Test] public function it_implements_interface()
     {
         $response = $this->response();
         $this->assertInstanceOf(ResponseInterface::class, $response);
@@ -31,10 +29,7 @@ class HttpResponseTest extends TestCase
     }
 
 
-    /**
-     * @test
-     */
-    public function it_applies_all_attributes()
+    #[Test] public function it_applies_all_attributes()
     {
         $attributes = [
             'type'      => Message::TYPE_OUTPUT,
@@ -52,10 +47,7 @@ class HttpResponseTest extends TestCase
         }
     }
 
-    /**
-     * @test
-     */
-    public function it_applies_separate_constructor_attributes()
+    #[Test] public function it_applies_separate_constructor_attributes()
     {
         $data = ['foo' => 'bar'];
         $headers = ['Content-Type' =>  'application/json'];
@@ -67,10 +59,7 @@ class HttpResponseTest extends TestCase
         $this->assertEquals($status, $response->status);
     }
 
-    /**
-     * @test
-     */
-    public function it_changes_status()
+    #[Test] public function it_changes_status()
     {
         $response = $this->response();
         $this->assertEquals(200, $response->status);
@@ -89,10 +78,7 @@ class HttpResponseTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function it_creates_body()
+    #[Test] public function it_creates_body()
     {
         $response = $this->response('blob');
 
@@ -103,10 +89,7 @@ class HttpResponseTest extends TestCase
         $this->assertEquals('blob', "$body");
     }
 
-    /**
-     * @test
-     */
-    public function status_from_header_if_none_set()
+    #[Test] public function status_from_header_if_none_set()
     {
         $headers = [
             'HTTP/1.1 207 OK',
@@ -122,10 +105,7 @@ class HttpResponseTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function contentType_from_header_if_none_set()
+    #[Test] public function contentType_from_header_if_none_set()
     {
         $headers = [
             'HTTP/1.1 207 OK',
@@ -141,10 +121,7 @@ class HttpResponseTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function protocolVersion_from_header_if_none_set()
+    #[Test] public function protocolVersion_from_header_if_none_set()
     {
         $headers = [
             'HTTP/1.2 207 OK',
@@ -160,10 +137,7 @@ class HttpResponseTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function contentType_from_header_if_not_readable()
+    #[Test] public function contentType_from_header_if_not_readable()
     {
         $headers = [
             'HTTP/1.1 207 OK',
@@ -180,10 +154,7 @@ class HttpResponseTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function body_gets_rendered_from_scalar_payload()
+    #[Test] public function body_gets_rendered_from_scalar_payload()
     {
         $response = $this->response();
         $fork = $response->withPayload(null);
@@ -195,20 +166,14 @@ class HttpResponseTest extends TestCase
         $this->assertEquals('15.4', (string)$response->body);
     }
 
-    /**
-     * @test
-     */
-    public function body_gets_rendered_from_stringable()
+    #[Test] public function body_gets_rendered_from_stringable()
     {
         $body = new Expression('foo');
         $response = $this->response($body);
         $this->assertEquals('foo', (string)$response->body);
     }
 
-    /**
-     * @test
-     */
-    public function body_gets_rendered_from_toString()
+    #[Test] public function body_gets_rendered_from_toString()
     {
         $payload = new HttpResponseTest_String();
         $response = $this->response($payload);
@@ -217,10 +182,7 @@ class HttpResponseTest extends TestCase
         $this->assertEquals('hi', "$response");
     }
 
-    /**
-     * @test
-     */
-    public function body_gets_rendered_threw_serializer()
+    #[Test] public function body_gets_rendered_threw_serializer()
     {
         $response = $this->response();
         $serializer = $this->serializer();
@@ -237,20 +199,14 @@ class HttpResponseTest extends TestCase
         $this->assertEquals($serialized, (string)$fork);
     }
 
-    /**
-     * @test
-     */
-    public function body_throws_exception_if_needs_serializer_and_none_assigned()
+    #[Test] public function body_throws_exception_if_needs_serializer_and_none_assigned()
     {
         $response = $this->response(['foo' => 'bar']);
         $this->expectException(UnConfiguredException::class);
         $response->getBody();
     }
 
-    /**
-     * @test
-     */
-    public function test_raw_data()
+    #[Test] public function test_raw_data()
     {
         $response = $this->response(['raw' => 'blob']);
         $fork = $response->with('foo', 'bar');
@@ -259,19 +215,13 @@ class HttpResponseTest extends TestCase
         $this->assertEquals('blob', $fork->raw);
     }
 
-    /**
-     * @test
-     */
-    public function payload_getter_and_setter()
+    #[Test] public function payload_getter_and_setter()
     {
         $response = $this->response(['haha']);
         $this->assertEquals(['haha'], $response->payload);
     }
 
-    /**
-     * @test
-     */
-    public function test_setPayload_with_stringable()
+    #[Test] public function test_setPayload_with_stringable()
     {
         $expression = new KeyExpression('haha');
         $response = $this->response($expression);
@@ -280,29 +230,20 @@ class HttpResponseTest extends TestCase
         $this->assertEquals('haha', (string)$response);
     }
 
-    /**
-     * @test
-     */
-    public function test_payload_returns_null_if_no_body_found()
+    #[Test] public function test_payload_returns_null_if_no_body_found()
     {
         $response = $this->response();
         $this->assertNull($response->payload);
     }
 
-    /**
-     * @test
-     */
-    public function toArray_throws_exception_if_no_serializer_assigned()
+    #[Test] public function toArray_throws_exception_if_no_serializer_assigned()
     {
         $response = $this->response(123456);
         $this->expectException(UnConfiguredException::class);
         $response->toArray();
     }
 
-    /**
-     * @test
-     */
-    public function custom_deserializes_body()
+    #[Test] public function custom_deserializes_body()
     {
 
         $serializer = $this->serializer();
@@ -322,10 +263,7 @@ class HttpResponseTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function toArray_deserializes()
+    #[Test] public function toArray_deserializes()
     {
 
         $serializer = $this->serializer();
@@ -345,10 +283,7 @@ class HttpResponseTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function iterate()
+    #[Test] public function iterate()
     {
 
         $serializer = $this->serializer();
@@ -374,10 +309,7 @@ class HttpResponseTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function count_triggers_deserialize()
+    #[Test] public function count_triggers_deserialize()
     {
         $serializer = $this->serializer();
 
@@ -397,10 +329,7 @@ class HttpResponseTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function arrayAccess_triggers_deserialization()
+    #[Test] public function arrayAccess_triggers_deserialization()
     {
         $serializer = $this->serializer();
 
@@ -420,10 +349,7 @@ class HttpResponseTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function withCookie_with_separate_parameters()
+    #[Test] public function withCookie_with_separate_parameters()
     {
         $response = $this->response();
         $this->assertSame([], $response->cookies);
@@ -452,10 +378,7 @@ class HttpResponseTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function withSecureCookies()
+    #[Test] public function withSecureCookies()
     {
         $response = $this->response();
         $this->assertSame([], $response->cookies);
@@ -469,10 +392,7 @@ class HttpResponseTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function withCookie_with_Cookie_object()
+    #[Test] public function withCookie_with_Cookie_object()
     {
         $expire = new DateTime('2022-01-15 08:36:00');
         $cookie = new Cookie('a', 'b', $expire, '/users', 'localhost', false, false, Cookie::STRICT);
@@ -482,10 +402,7 @@ class HttpResponseTest extends TestCase
         $this->assertSame($cookie, $cookieResponse->cookies['a']);
     }
 
-    /**
-     * @test
-     */
-    public function withoutCookie_deletes_cookie()
+    #[Test] public function withoutCookie_deletes_cookie()
     {
         $response = $this->response();
         $this->assertSame([], $response->cookies);

@@ -5,6 +5,7 @@ namespace Ems\Core\Filesystem;
 use Countable;
 use Ems\Contracts\Core\Filesystem as FSContract;
 use Ems\Contracts\Core\StringConverter;
+use Ems\Core\Exceptions\InvalidCharsetException;
 use Iterator;
 use Ems\IntegrationTest;
 
@@ -273,11 +274,11 @@ class CsvReadIteratorTest extends IntegrationTest
 
     }
 
-    /**
-     * @expectedException Ems\Core\Exceptions\InvalidCharsetException
-     **/
     public function test_read_with_wrong_encoding_throws_InvalidCharsetException()
     {
+        $this->expectException(
+            InvalidCharsetException::class
+        );
 
         $reader = $this->newReader(static::dataFile('simple-semicolon-placeholder-iso.csv'));
         $reader->setDetector((new CsvDetector)->setOption(CsvDetector::FORCE_HEADER_LINE, true));
@@ -314,11 +315,11 @@ class CsvReadIteratorTest extends IntegrationTest
 
     }
 
-    /**
-     * @expectedException \Ems\Core\Exceptions\DetectionFailedException
-     **/
     public function test_read_undetectable_header_throws_DetectionFailedException()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\DetectionFailedException::class
+        );
 
         $reader = $this->newReader(static::dataFile('simple-pipe-placeholder-no-header.csv'));
         $reader->setDetector((new CsvDetector)->setOption(CsvDetector::FORCE_HEADER_LINE, true));

@@ -17,6 +17,8 @@ use Ems\Core\Expression;
 use Ems\Core\Url;
 use Ems\Http\Serializer\UrlEncodeSerializer;
 
+use PHPUnit\Framework\Attributes\Test;
+
 use function json_encode;
 
 class ClientTest extends \Ems\TestCase
@@ -49,11 +51,9 @@ class ClientTest extends \Ems\TestCase
         $this->assertSame($response, $client->head($url));
     }
 
-    /**
-     * @expectedException \UnexpectedValueException
-     */
     public function test_any_call_to_con_throws_exception_if_no_http_connection_returned()
     {
+        $this->expectException(\UnexpectedValueException::class);
         $pool = $this->pool();
         $client = $this->newClient($pool);
 
@@ -149,10 +149,7 @@ class ClientTest extends \Ems\TestCase
         $this->assertSame($response, $client->post($url, $data, 'application/json'));
     }
 
-    /**
-     * @test
-     */
-    public function post_throws_exception_if_data_not_serializable()
+    #[Test] public function post_throws_exception_if_data_not_serializable()
     {
         $con = $this->con();
         $client = $this->newClient($this->pool($con));

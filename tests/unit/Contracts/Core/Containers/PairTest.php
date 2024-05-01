@@ -193,11 +193,9 @@ class PairTest extends TestCase
 
     }
 
-    /**
-     * @expectedException \OutOfBoundsException
-     */
     public function test_offsetGet_throws_exception_on_wrong_index()
     {
+        $this->expectException(\OutOfBoundsException::class);
         $this->pair(15,44)[0];
     }
 

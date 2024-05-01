@@ -21,6 +21,8 @@ use Ems\Core\Url;
 use Ems\RoutingTrait;
 use Illuminate\Contracts\Container\Container;
 
+use PHPUnit\Framework\Attributes\Test;
+
 use function array_filter;
 use function array_values;
 use function class_exists;
@@ -41,18 +43,12 @@ class InputHandlerIntegrationTest extends \Ems\IntegrationTest
         'UserAddressController' => InputHandlerIntegrationTest_UserAddressController::class
     ];
 
-    /**
-     * @test
-     */
-    public function it_implements_interface()
+    #[Test] public function it_implements_interface()
     {
         $this->assertInstanceOf(HandlerContract::class, $this->makeHandler());
     }
 
-    /**
-     * @test
-     */
-    public function standard_routing_stack_routes_to_custom_controller()
+    #[Test] public function standard_routing_stack_routes_to_custom_controller()
     {
         $handler = $this->makeHandler();
         $router = $this->makeRouter();
@@ -67,10 +63,7 @@ class InputHandlerIntegrationTest extends \Ems\IntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function standard_routing_stack_routes_to_custom_controller_with_method_dependencies()
+    #[Test] public function standard_routing_stack_routes_to_custom_controller_with_method_dependencies()
     {
         $handler = $this->makeHandler();
 
@@ -94,10 +87,7 @@ class InputHandlerIntegrationTest extends \Ems\IntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function exceptions_are_thrown_without_an_assigned_handler()
+    #[Test] public function exceptions_are_thrown_without_an_assigned_handler()
     {
         $handler = $this->makeHandler();
 
@@ -113,10 +103,7 @@ class InputHandlerIntegrationTest extends \Ems\IntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function throwables_are_thrown_without_an_assigned_handler()
+    #[Test] public function throwables_are_thrown_without_an_assigned_handler()
     {
         // PHP7.0 has no ArgumentCountError
         if (!class_exists(ArgumentCountError::class)) {
@@ -142,10 +129,7 @@ class InputHandlerIntegrationTest extends \Ems\IntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function thrown_exceptions_are_passed_to_the_handler()
+    #[Test] public function thrown_exceptions_are_passed_to_the_handler()
     {
         $handler = $this->makeHandler();
         $errorHandler = function ($e) {
@@ -172,10 +156,7 @@ class InputHandlerIntegrationTest extends \Ems\IntegrationTest
         $this->assertSame($exception, $response->payload);
     }
 
-    /**
-     * @test
-     */
-    public function thrown_throwables_are_passed_to_the_handler()
+    #[Test] public function thrown_throwables_are_passed_to_the_handler()
     {
         // PHP7.0 has no ArgumentCountError
         if (!class_exists(ArgumentCountError::class)) {
@@ -208,10 +189,7 @@ class InputHandlerIntegrationTest extends \Ems\IntegrationTest
         $this->assertSame($exception, $response->payload);
     }
 
-    /**
-     * @test
-     */
-    public function route_middleware_runs_assigned_middleware()
+    #[Test] public function route_middleware_runs_assigned_middleware()
     {
         $handler = $this->makeHandler();
         $app = $this->app();
@@ -238,10 +216,7 @@ class InputHandlerIntegrationTest extends \Ems\IntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function route_middleware_runs_assigned_middleware_with_parameters()
+    #[Test] public function route_middleware_runs_assigned_middleware_with_parameters()
     {
         $handler = $this->makeHandler();
         $app = $this->app();
@@ -268,10 +243,7 @@ class InputHandlerIntegrationTest extends \Ems\IntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function route_middleware_runs_multiple_assigned_middleware_with_parameters()
+    #[Test] public function route_middleware_runs_multiple_assigned_middleware_with_parameters()
     {
         $handler = $this->makeHandler();
         $app = $this->app();
@@ -305,10 +277,7 @@ class InputHandlerIntegrationTest extends \Ems\IntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function route_middleware_skips_routed_if_response_returned()
+    #[Test] public function route_middleware_skips_routed_if_response_returned()
     {
         $handler = $this->makeHandler();
         /** @var RouteRegistryContract $registry */

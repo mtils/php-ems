@@ -2,6 +2,10 @@
 
 namespace Ems\Events;
 
+use Ems\Contracts\Core\Errors\ConfigurationError;
+use Ems\Contracts\Core\Errors\UnSupported;
+use InvalidArgumentException;
+
 class MatchingListenerTest extends \Ems\TestCase
 {
     public function test_it_instantiates()
@@ -189,20 +193,16 @@ class MatchingListenerTest extends \Ems\TestCase
         ]));
     }
 
-    /**
-     * @expectedException Ems\Contracts\Core\Errors\ConfigurationError
-     **/
     public function test_invoke_throws_exception_if_no_callable_assigned()
     {
+        $this->expectException(ConfigurationError::class);
         $listener = $this->newListener(null);
         $listener();
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     **/
     public function test_toArray_throws_exception_if_exclamation_mark_in_associative_marks()
     {
+        $this->expectException(InvalidArgumentException::class);
         $listener = $this->newListener(null);
         $listener->markToArray(['!no-broadcast' => true]);
     }
@@ -216,20 +216,16 @@ class MatchingListenerTest extends \Ems\TestCase
         ],$listener->markToArray('!remote'));
     }
 
-    /**
-     * @expectedException Ems\Contracts\Core\Errors\UnSupported
-     **/
     public function test_toArray_throws_exception_if_value_no_string_or_boolean()
     {
+        $this->expectException(UnSupported::class);
         $listener = $this->newListener(null);
         $listener->markToArray(['no-broadcast' => 12]);
     }
 
-    /**
-     * @expectedException Ems\Contracts\Core\Errors\UnSupported
-     **/
     public function test_toArray_throws_exception_if_mark_not_in_known_marks()
     {
+        $this->expectException(UnSupported::class);
         $listener = $this->newListener(null);
         $listener->markToArray('no-broadcast', null, ['remote'=>true]);
     }

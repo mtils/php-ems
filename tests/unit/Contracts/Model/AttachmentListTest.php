@@ -78,11 +78,11 @@ class AttachmentListTest extends TestCase
         $this->assertCount(1, $list->where('type', 'application/pdf'));
     }
 
-    /**
-     * @expectedException \Ems\Core\Exceptions\UnsupportedParameterException
-     */
     public function test_where_throws_exception_if_filter_not_supported()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\UnsupportedParameterException::class
+        );
         $this->newList()->where('foo', 'bar');
     }
     protected function newList($attachments=[])

@@ -13,6 +13,7 @@ use Ems\Core\Collections\OrderedList;
 use Ems\Core\Exceptions\HandlerNotFoundException;
 use Ems\Core\ObjectArrayConverter;
 use Ems\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 use stdClass;
 use Traversable;
 
@@ -22,18 +23,12 @@ use function property_exists;
 
 class ObjectArrayConverterTest extends TestCase
 {
-    /**
-     * @test
-     */
-    public function it_implements_interface()
+    #[Test] public function it_implements_interface()
     {
         $this->assertInstanceOf(ObjectArrayConverterContract::class, $this->make());
     }
 
-    /**
-     * @test
-     */
-    public function create_simple_object()
+    #[Test] public function create_simple_object()
     {
         $data = [
             'id'    =>  123456,
@@ -45,10 +40,7 @@ class ObjectArrayConverterTest extends TestCase
         $this->assertEquals((object)$data, $object);
     }
 
-    /**
-     * @test
-     */
-    public function create_simple_nested_object()
+    #[Test] public function create_simple_nested_object()
     {
         $data = [
             'id'    =>  123456,
@@ -64,10 +56,7 @@ class ObjectArrayConverterTest extends TestCase
         $this->assertEquals((object)$data['address'], $object->address);
     }
 
-    /**
-     * @test
-     */
-    public function create_simple_custom_object()
+    #[Test] public function create_simple_custom_object()
     {
         $data = [
             'id'    =>  123456,
@@ -84,10 +73,7 @@ class ObjectArrayConverterTest extends TestCase
         $this->assertEquals($data['id'], $object->id);
     }
 
-    /**
-     * @test
-     */
-    public function create_simple_custom_nested_object()
+    #[Test] public function create_simple_custom_nested_object()
     {
         $data = [
             'id'    =>  123456,
@@ -110,10 +96,7 @@ class ObjectArrayConverterTest extends TestCase
 //        $this->assertEquals($data['id'], $object->id);
     }
 
-    /**
-     * @test
-     */
-    public function create_simple_to_many_nested_object()
+    #[Test] public function create_simple_to_many_nested_object()
     {
         $data = [
             'id'    =>  123456,
@@ -153,10 +136,7 @@ class ObjectArrayConverterTest extends TestCase
         $this->assertEquals($data['projects'][1], get_object_vars($object->projects[1]));
     }
 
-    /**
-     * @test
-     */
-    public function create_nested_object()
+    #[Test] public function create_nested_object()
     {
         $data = [
             'id'    =>  123456,
@@ -187,10 +167,7 @@ class ObjectArrayConverterTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function create_to_many_nested_object()
+    #[Test] public function create_to_many_nested_object()
     {
         $data = [
             'id' => 123456,
@@ -290,10 +267,7 @@ class ObjectArrayConverterTest extends TestCase
         $this->assertEquals($data['projects'][1]['members'][2], get_object_vars($object->projects[1]->members[2]));
     }
 
-    /**
-     * @test
-     */
-    public function create_simple_nested_object_by_custom_converter()
+    #[Test] public function create_simple_nested_object_by_custom_converter()
     {
         $data = [
             'id'    =>  123456,
@@ -319,10 +293,7 @@ class ObjectArrayConverterTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function create_nested_object_by_custom_converter()
+    #[Test] public function create_nested_object_by_custom_converter()
     {
         $data = [
             'id'    =>  123456,
@@ -348,10 +319,7 @@ class ObjectArrayConverterTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function create_to_many_nested_object_by_custom_converter()
+    #[Test] public function create_to_many_nested_object_by_custom_converter()
     {
         $data = [
             'id' => 123456,
@@ -465,10 +433,7 @@ class ObjectArrayConverterTest extends TestCase
         $this->assertEquals(ObjectArrayConverterTest_SimpleConverter::class, $object->projects[1]->members[2]->converter);
     }
 
-    /**
-     * @test
-     */
-    public function create_to_many_nested_object_by_custom_list_converter()
+    #[Test] public function create_to_many_nested_object_by_custom_list_converter()
     {
         $data = [
             'id' => 123456,
@@ -584,19 +549,13 @@ class ObjectArrayConverterTest extends TestCase
         $this->assertEquals(ObjectArrayConverterTest_SimpleConverter::class, $object->projects[1]->members[2]->converter);
     }
 
-    /**
-     * @test
-     */
-    public function it_fails_if_interface_is_passed_and_no_converter_found()
+    #[Test] public function it_fails_if_interface_is_passed_and_no_converter_found()
     {
         $this->expectException(HandlerNotFoundException::class);
         $this->make()->fromArray(Traversable::class, ['id' => 22]);
     }
 
-    /**
-     * @test
-     */
-    public function remove_custom_converter()
+    #[Test] public function remove_custom_converter()
     {
         $data = [
             'id'    =>  123456,
@@ -634,10 +593,7 @@ class ObjectArrayConverterTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function newList_manages_array()
+    #[Test] public function newList_manages_array()
     {
         $converter = $this->make();
         $list = $converter->newList(stdClass::class, 'foo');
@@ -654,10 +610,7 @@ class ObjectArrayConverterTest extends TestCase
         $this->assertSame([$item], $list);
     }
 
-    /**
-     * @test
-     */
-    public function newList_manages_by_adapter()
+    #[Test] public function newList_manages_by_adapter()
     {
         $class = ObjectArrayConverterTest_User::class;
         $converter = $this->make();
@@ -678,10 +631,7 @@ class ObjectArrayConverterTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function it_throws_exception_if_adding_to_non_array_without_extension()
+    #[Test] public function it_throws_exception_if_adding_to_non_array_without_extension()
     {
         $converter = $this->make();
         $list = new OrderedList();
@@ -690,10 +640,7 @@ class ObjectArrayConverterTest extends TestCase
         $converter->addToList(stdClass::class, 'foo', $list, $item);
     }
 
-    /**
-     * @test
-     */
-    public function it_throws_exception_if_removing_from_non_array_without_extension()
+    #[Test] public function it_throws_exception_if_removing_from_non_array_without_extension()
     {
         $converter = $this->make();
         $list = new OrderedList();
@@ -702,10 +649,7 @@ class ObjectArrayConverterTest extends TestCase
         $converter->removeFromList(stdClass::class, 'foo', $list, $item);
     }
 
-    /**
-     * @test
-     */
-    public function it_gets_and_sets_TypeProvider()
+    #[Test] public function it_gets_and_sets_TypeProvider()
     {
         $converter = $this->make();
         $typeProvider = $this->makeTypeProvider();
@@ -713,10 +657,7 @@ class ObjectArrayConverterTest extends TestCase
         $this->assertSame($typeProvider, $converter->getTypeProvider());
     }
 
-    /**
-     * @test
-     */
-    public function toArray_creates_array()
+    #[Test] public function toArray_creates_array()
     {
         $data = [
             'id'    =>  123456,
@@ -728,10 +669,7 @@ class ObjectArrayConverterTest extends TestCase
         $this->assertEquals($data, $object);
     }
 
-    /**
-     * @test
-     */
-    public function toArray_of_simple_nested_object()
+    #[Test] public function toArray_of_simple_nested_object()
     {
         $data = [
             'id'    =>  123456,
@@ -754,10 +692,7 @@ class ObjectArrayConverterTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function toArray_with_nested_array()
+    #[Test] public function toArray_with_nested_array()
     {
         $data = [
             'id' => 123456,
@@ -831,10 +766,7 @@ class ObjectArrayConverterTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function toArray_of_simple_nested_object_with_custom_converter()
+    #[Test] public function toArray_of_simple_nested_object_with_custom_converter()
     {
         $data = [
             'id'    =>  123456,

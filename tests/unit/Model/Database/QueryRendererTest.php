@@ -22,6 +22,7 @@ use Ems\Model\Database\Dialects\SQLiteDialect;
 use Ems\TestCase;
 
 use Ems\Testing\Cheat;
+use PHPUnit\Framework\Attributes\Test;
 use stdClass;
 
 use function array_values;
@@ -29,18 +30,12 @@ use function str_replace;
 
 class QueryRendererTest extends TestCase
 {
-    /**
-     * @test
-     */
-    public function it_implements_interface()
+    #[Test] public function it_implements_interface()
     {
         $this->assertInstanceOf(Renderer::class, $this->newRenderer());
     }
 
-    /**
-     * @test
-     */
-    public function canRender_is_only_true_on_queries()
+    #[Test] public function canRender_is_only_true_on_queries()
     {
         $renderer = $this->newRenderer();
         $query = $this->newQuery();
@@ -53,21 +48,17 @@ class QueryRendererTest extends TestCase
 
     }
 
-    /**
-     * @test
-     * @expectedException \Ems\Core\Exceptions\UnsupportedParameterException
-     */
-    public function render_throws_exception_if_no_query()
+    #[Test] public function render_throws_exception_if_no_query()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\UnsupportedParameterException::class
+        );
         $renderer = $this->newRenderer();
         $renderable = $this->mock(Renderable::class);
         $renderer->render($renderable);
     }
 
-    /**
-     * @test
-     */
-    public function render_simple_select()
+    #[Test] public function render_simple_select()
     {
         $renderer = $this->newRenderer();
         $query = $this->newQuery()->from('users');
@@ -75,21 +66,17 @@ class QueryRendererTest extends TestCase
         $this->assertInstanceOf(SQLExpression::class, $renderer->render($query));
     }
 
-    /**
-     * @test
-     * @expectedException \Ems\Core\Exceptions\UnsupportedParameterException
-     */
-    public function test_render_throws_exception_if_operation_unknown()
+    #[Test] public function test_render_throws_exception_if_operation_unknown()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\UnsupportedParameterException::class
+        );
         $query = $this->newQuery();
         $query->operation = 'FOO';
         $this->newRenderer()->render($query);
     }
 
-    /**
-     * @test
-     */
-    public function render_simple_distinct_select()
+    #[Test] public function render_simple_distinct_select()
     {
         $renderer = $this->newRenderer();
         $query = $this->newQuery()->from('users')->distinct();
@@ -97,10 +84,7 @@ class QueryRendererTest extends TestCase
         $this->assertInstanceOf(SQLExpression::class, $renderer->render($query));
     }
 
-    /**
-     * @test
-     */
-    public function renderColumns_renders_strings()
+    #[Test] public function renderColumns_renders_strings()
     {
         $renderer = $this->newRenderer();
         $columns = [
@@ -115,10 +99,7 @@ class QueryRendererTest extends TestCase
         $this->assertEquals('"id", "login", "password"', $renderer->renderColumns($columns));
     }
 
-    /**
-     * @test
-     */
-    public function renderColumns_renders_expressions()
+    #[Test] public function renderColumns_renders_expressions()
     {
         $renderer = $this->newRenderer();
 
@@ -139,10 +120,7 @@ class QueryRendererTest extends TestCase
         $this->assertEquals($subSelect->getBindings(), $bindings);
     }
 
-    /**
-     * @test
-     */
-    public function renderColumns_renders_aliases()
+    #[Test] public function renderColumns_renders_aliases()
     {
         $renderer = $this->newRenderer();
         $columns = [
@@ -157,10 +135,7 @@ class QueryRendererTest extends TestCase
         $this->assertEquals('"id", "login", "password" AS \'pass\'', $renderer->renderColumns($columns));
     }
 
-    /**
-     * @test
-     */
-    public function renderColumns_renders_expression_without_dialect()
+    #[Test] public function renderColumns_renders_expression_without_dialect()
     {
         $renderer = $this->newRenderer(false);
 
@@ -181,10 +156,7 @@ class QueryRendererTest extends TestCase
         $this->assertEquals($subSelect->getBindings(), $bindings);
     }
 
-    /**
-     * @test
-     */
-    public function get_and_set_Dialect()
+    #[Test] public function get_and_set_Dialect()
     {
         /* @var Dialect $dialect */
         $dialect = $this->mock(Dialect::class);
@@ -195,10 +167,7 @@ class QueryRendererTest extends TestCase
         $this->assertSame($dialect, $renderer->getDialect());
     }
 
-    /**
-     * @test
-     */
-    public function renderColumns_renders_strings_without_dialect()
+    #[Test] public function renderColumns_renders_strings_without_dialect()
     {
         $renderer = $this->newRenderer(false);
         $columns = [
@@ -208,10 +177,7 @@ class QueryRendererTest extends TestCase
         $this->assertEquals('id, login, password', $renderer->renderColumns($columns));
     }
 
-    /**
-     * @test
-     */
-    public function renderColumns_renders_raw_string()
+    #[Test] public function renderColumns_renders_raw_string()
     {
         $renderer = $this->newRenderer(false);
         $columns = ['id, login, password'];
@@ -220,10 +186,7 @@ class QueryRendererTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function renderJoins_renders_join()
+    #[Test] public function renderJoins_renders_join()
     {
         $renderer = $this->newRenderer();
 
@@ -235,10 +198,7 @@ class QueryRendererTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function renderJoins_renders_joins()
+    #[Test] public function renderJoins_renders_joins()
     {
         $renderer = $this->newRenderer();
 
@@ -257,10 +217,7 @@ class QueryRendererTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function renderJoins_renders_join_with_additional_condition()
+    #[Test] public function renderJoins_renders_join_with_additional_condition()
     {
         $renderer = $this->newRenderer();
 
@@ -283,10 +240,7 @@ class QueryRendererTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function renderJoins_renders_join_with_multiple_conditions_without_on()
+    #[Test] public function renderJoins_renders_join_with_multiple_conditions_without_on()
     {
         $renderer = $this->newRenderer();
 
@@ -305,10 +259,7 @@ class QueryRendererTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function renderJoins_renders_join_without_conditions()
+    #[Test] public function renderJoins_renders_join_without_conditions()
     {
         $renderer = $this->newRenderer();
 
@@ -321,10 +272,7 @@ class QueryRendererTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function renderGroupBy_renders_simple_column()
+    #[Test] public function renderGroupBy_renders_simple_column()
     {
         $groupBys = ['addresses.id'];
         $renderer = $this->newRenderer();
@@ -334,10 +282,7 @@ class QueryRendererTest extends TestCase
         $this->assertSql('"addresses"."id"', "$expression");
     }
 
-    /**
-     * @test
-     */
-    public function renderGroupBy_renders_multiple_columns()
+    #[Test] public function renderGroupBy_renders_multiple_columns()
     {
         $groupBys = ['group.id', 'addresses.id', 'postcode'];
         $renderer = $this->newRenderer();
@@ -347,10 +292,7 @@ class QueryRendererTest extends TestCase
         $this->assertSql('"group"."id","addresses"."id","postcode"', "$expression");
     }
 
-    /**
-     * @test
-     */
-    public function renderGroupBy_renders_columns_and_raw()
+    #[Test] public function renderGroupBy_renders_columns_and_raw()
     {
         $groupBys = [new Expression('SUM(points)'), 'group.id'];
         $renderer = $this->newRenderer();
@@ -360,10 +302,7 @@ class QueryRendererTest extends TestCase
         $this->assertSql('SUM(points),"group"."id"', "$expression");
     }
 
-    /**
-     * @test
-     */
-    public function renderGroupBy_without_columns()
+    #[Test] public function renderGroupBy_without_columns()
     {
         $groupBys = [];
         $renderer = $this->newRenderer();
@@ -373,10 +312,7 @@ class QueryRendererTest extends TestCase
         $this->assertSame('', "$expression");
     }
 
-    /**
-     * @test
-     */
-    public function renderOrderBy_without_columns()
+    #[Test] public function renderOrderBy_without_columns()
     {
         $groupBys = [];
         $renderer = $this->newRenderer();
@@ -386,10 +322,7 @@ class QueryRendererTest extends TestCase
         $this->assertSame('', "$expression");
     }
 
-    /**
-     * @test
-     */
-    public function renderOrderBy_renders_simple_column()
+    #[Test] public function renderOrderBy_renders_simple_column()
     {
         $groupBys = ['addresses.id' => 'DESC'];
         $renderer = $this->newRenderer();
@@ -399,10 +332,7 @@ class QueryRendererTest extends TestCase
         $this->assertSql('"addresses"."id" DESC', "$expression");
     }
 
-    /**
-     * @test
-     */
-    public function renderOrderBy_renders_multiple_columns()
+    #[Test] public function renderOrderBy_renders_multiple_columns()
     {
         $groupBys = ['addresses.id' => 'DESC', 'id' => 'ASC'];
         $renderer = $this->newRenderer();
@@ -412,10 +342,7 @@ class QueryRendererTest extends TestCase
         $this->assertSql('"addresses"."id" DESC,"id" ASC', "$expression");
     }
 
-    /**
-     * @test
-     */
-    public function renderOrderBy_renders_columns_and_raw()
+    #[Test] public function renderOrderBy_renders_columns_and_raw()
     {
         $groupBys = ['addresses.id' => 'DESC', new SQLExpression('COUNT(*)'), 'id' => 'ASC'];
         $renderer = $this->newRenderer();
@@ -425,10 +352,7 @@ class QueryRendererTest extends TestCase
         $this->assertSql('"addresses"."id" DESC,COUNT(*),"id" ASC', "$expression");
     }
 
-    /**
-     * @test
-     */
-    public function renderConditions_renders_Predicate()
+    #[Test] public function renderConditions_renders_Predicate()
     {
         $renderer = $this->newRenderer();
         $predicate = new Predicate('id', '>', 18);
@@ -440,10 +364,7 @@ class QueryRendererTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function renderConditions_renders_Predicates()
+    #[Test] public function renderConditions_renders_Predicates()
     {
         $renderer = $this->newRenderer();
         $group = new Parentheses('AND');
@@ -458,10 +379,7 @@ class QueryRendererTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function renderConditions_renders_Expression()
+    #[Test] public function renderConditions_renders_Expression()
     {
         $renderer = $this->newRenderer();
         $group = new Parentheses('AND');
@@ -476,10 +394,7 @@ class QueryRendererTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function renderConditions_renders_raw_strings()
+    #[Test] public function renderConditions_renders_raw_strings()
     {
         $renderer = $this->newRenderer();
         $group = new Parentheses('AND');
@@ -494,19 +409,15 @@ class QueryRendererTest extends TestCase
 
     }
 
-    /**
-     * @test
-     * @expectedException \Ems\Core\Exceptions\UnsupportedParameterException
-     */
-    public function renderConditions_throws_exception_on_unsupported_condition()
+    #[Test] public function renderConditions_throws_exception_on_unsupported_condition()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\UnsupportedParameterException::class
+        );
         $this->newRenderer()->renderConditions([new stdClass()]);
     }
 
-    /**
-     * @test
-     */
-    public function renderConditions_renders_WHERE_IN()
+    #[Test] public function renderConditions_renders_WHERE_IN()
     {
         $renderer = $this->newRenderer();
         $group = new Parentheses('AND');
@@ -520,10 +431,7 @@ class QueryRendererTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function renderConditions_renders_WHERE_NOT_IN()
+    #[Test] public function renderConditions_renders_WHERE_NOT_IN()
     {
         $renderer = $this->newRenderer();
         $group = new Parentheses('AND');
@@ -538,10 +446,7 @@ class QueryRendererTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function renderConditions_renders_Predicate_with_Expression()
+    #[Test] public function renderConditions_renders_Predicate_with_Expression()
     {
         $renderer = $this->newRenderer();
         $group = new Parentheses('AND');
@@ -553,10 +458,7 @@ class QueryRendererTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function renderConditions_renders_unknown_null_operator()
+    #[Test] public function renderConditions_renders_unknown_null_operator()
     {
         $renderer = $this->newRenderer();
         $group = new Parentheses('AND');
@@ -570,21 +472,17 @@ class QueryRendererTest extends TestCase
 
     }
 
-    /**
-     * @test
-     * @expectedException \Ems\Core\Exceptions\UnsupportedParameterException
-     */
-    public function renderPredicatePart_with_unknown_mode_throws_exception()
+    #[Test] public function renderPredicatePart_with_unknown_mode_throws_exception()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\UnsupportedParameterException::class
+        );
         $renderer = $this->newRenderer();
         $bindings = [];
         Cheat::call($renderer, 'renderPredicatePart', ['foo', &$bindings, 'bar']);
     }
 
-    /**
-     * @test
-     */
-    public function renderSelect_with_condition()
+    #[Test] public function renderSelect_with_condition()
     {
         $query = $this->newQuery()->from('users')
                                   ->where('id', '>', 333);
@@ -595,10 +493,7 @@ class QueryRendererTest extends TestCase
         $this->assertSame([333], $exp->getBindings());
     }
 
-    /**
-     * @test
-     */
-    public function renderSelect_with_conditions()
+    #[Test] public function renderSelect_with_conditions()
     {
         $query = $this->newQuery()
             ->select('id', 'login', 'age')
@@ -612,10 +507,7 @@ class QueryRendererTest extends TestCase
         $this->assertSame([333, '%@gmail.com'], $exp->getBindings());
     }
 
-    /**
-     * @test
-     */
-    public function renderSelect_with_join()
+    #[Test] public function renderSelect_with_join()
     {
         $query = $this->newQuery()->from('users');
 
@@ -634,10 +526,7 @@ class QueryRendererTest extends TestCase
         $this->assertSame([333], $exp->getBindings());
     }
 
-    /**
-     * @test
-     */
-    public function renderSelect_with_joins()
+    #[Test] public function renderSelect_with_joins()
     {
         $query = $this->newQuery()->from('users');
 
@@ -672,10 +561,7 @@ class QueryRendererTest extends TestCase
         $this->assertSame([$from->format('Y-m-d H:i:s'), $to->format('Y-m-d H:i:s'), 333], $exp->getBindings());
     }
 
-    /**
-     * @test
-     */
-    public function render_groupBy()
+    #[Test] public function render_groupBy()
     {
         $query = $this->newQuery()->from('users')
             ->where('id', '>', 333)
@@ -687,10 +573,7 @@ class QueryRendererTest extends TestCase
         $this->assertSame([333], $exp->getBindings());
     }
 
-    /**
-     * @test
-     */
-    public function render_groupBy_having()
+    #[Test] public function render_groupBy_having()
     {
         $query = $this->newQuery()
             ->select('id', new Expression('MAX(id) AS max_id'))
@@ -709,10 +592,7 @@ class QueryRendererTest extends TestCase
         $this->assertSame([333, 55], $exp->getBindings());
     }
 
-    /**
-     * @test
-     */
-    public function render_orderBy()
+    #[Test] public function render_orderBy()
     {
         $query = $this->newQuery()->from('users')
             ->where('id', '>', 333)
@@ -724,10 +604,7 @@ class QueryRendererTest extends TestCase
         $this->assertSame([333], $exp->getBindings());
     }
 
-    /**
-     * @test
-     */
-    public function render_insert()
+    #[Test] public function render_insert()
     {
         $query = $this->newQuery()->from('users');
         $values = [
@@ -744,10 +621,7 @@ class QueryRendererTest extends TestCase
         $this->assertEquals(array_values($values), $exp->getBindings());
     }
 
-    /**
-     * @test
-     */
-    public function render_insert_with_raw_expression()
+    #[Test] public function render_insert_with_raw_expression()
     {
         $query = $this->newQuery()->from('users');
         $raw = '(SELECT last_name FROM users LIMIT 1)';
@@ -765,10 +639,7 @@ class QueryRendererTest extends TestCase
         $this->assertEquals(['John', 45], $exp->getBindings());
     }
 
-    /**
-     * @test
-     */
-    public function render_insert_with_sql_expression()
+    #[Test] public function render_insert_with_sql_expression()
     {
         $query = $this->newQuery()->from('users');
         $raw = '(SELECT last_name FROM users WHERE first_name LIKE ? LIMIT 1)';
@@ -786,10 +657,7 @@ class QueryRendererTest extends TestCase
         $this->assertEquals(['John', "Sophie", 45], $exp->getBindings());
     }
 
-    /**
-     * @test
-     */
-    public function render_update()
+    #[Test] public function render_update()
     {
         $query = $this->newQuery()->from('users');
         $values = [
@@ -805,10 +673,7 @@ class QueryRendererTest extends TestCase
         $this->assertEquals(array_values($values), $exp->getBindings());
     }
 
-    /**
-     * @test
-     */
-    public function render_update_with_condition()
+    #[Test] public function render_update_with_condition()
     {
         $query = $this->newQuery()->from('users');
         $query->where('id', 88);
@@ -827,10 +692,7 @@ class QueryRendererTest extends TestCase
         $this->assertEquals($bindings, $exp->getBindings());
     }
 
-    /**
-     * @test
-     */
-    public function render_update_with_SQLExpression()
+    #[Test] public function render_update_with_SQLExpression()
     {
         $query = $this->newQuery()->from('users');
         $query->where('id', 88);
@@ -851,10 +713,7 @@ class QueryRendererTest extends TestCase
         $this->assertEquals($bindings, $exp->getBindings());
     }
 
-    /**
-     * @test
-     */
-    public function render_update_with_Expression()
+    #[Test] public function render_update_with_Expression()
     {
         $query = $this->newQuery()->from('users');
         $query->where('id', 88);
@@ -875,10 +734,7 @@ class QueryRendererTest extends TestCase
         $this->assertEquals($bindings, $exp->getBindings());
     }
 
-    /**
-     * @test
-     */
-    public function render_delete()
+    #[Test] public function render_delete()
     {
         $query = $this->newQuery()->from('users');
         $exp = $this->newRenderer()->renderDelete($query);
@@ -889,10 +745,7 @@ class QueryRendererTest extends TestCase
         $this->assertEquals([], $exp->getBindings());
     }
 
-    /**
-     * @test
-     */
-    public function render_delete_with_condition()
+    #[Test] public function render_delete_with_condition()
     {
         $query = $this->newQuery()->from('users');
         $query->where('id', 88);

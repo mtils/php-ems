@@ -8,23 +8,18 @@ namespace Ems\Core;
 use Ems\Contracts\Core\Message;
 use Ems\Contracts\Core\Stringable;
 use Ems\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 class ResponseTest extends TestCase
 {
-    /**
-     * @test
-     */
-    public function it_implements_interfaces()
+    #[Test] public function it_implements_interfaces()
     {
         $response = $this->response();
         $this->assertInstanceOf(ImmutableMessage::class, $response);
         $this->assertInstanceOf(Stringable::class, $response);
     }
 
-    /**
-     * @test
-     */
-    public function construct_applies_properties_and_attributes()
+    #[Test] public function construct_applies_properties_and_attributes()
     {
         $attributes = [
             'type' => Message::TYPE_OUTPUT,
@@ -45,10 +40,7 @@ class ResponseTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function construct_applies_payload_if_only_one_parameter()
+    #[Test] public function construct_applies_payload_if_only_one_parameter()
     {
         $response = $this->response('blob');
         $this->assertEquals('blob', $response->payload);
@@ -58,10 +50,7 @@ class ResponseTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function construct_applies_all_passed_parameters()
+    #[Test] public function construct_applies_all_passed_parameters()
     {
         $response = $this->response(['foo' => 'bar'], ['type'=>'console'],-1);
         $this->assertEquals(['foo' => 'bar'], $response->payload);
@@ -72,10 +61,7 @@ class ResponseTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function withStatus_changes_status()
+    #[Test] public function withStatus_changes_status()
     {
         $response = $this->response('', [], 12);
         $this->assertEquals(12, $response->status);
@@ -94,10 +80,7 @@ class ResponseTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function withContentType_changes_contentType()
+    #[Test] public function withContentType_changes_contentType()
     {
         $response = $this->response(['contentType' => 'text/html']);
         $this->assertEquals('text/html', $response->contentType);
@@ -107,10 +90,7 @@ class ResponseTest extends TestCase
         $this->assertEquals('application/json', $fork->contentType);
     }
 
-    /**
-     * @test
-     */
-    public function toString_creates_string_from_payload()
+    #[Test] public function toString_creates_string_from_payload()
     {
         $this->assertEquals('blob', (string)$this->response('blob'));
         $urlString = 'https://web-utils.de';

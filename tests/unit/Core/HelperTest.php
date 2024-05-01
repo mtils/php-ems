@@ -463,6 +463,8 @@ class HelperTestArray implements ArrayAccess, IteratorAggregate
 class HelperTestTraversable implements IteratorAggregate
 {
     public $array = [];
+
+    #[\ReturnTypeWillChange]
     public function getIterator()
     {
         return new ArrayIterator($this->array);

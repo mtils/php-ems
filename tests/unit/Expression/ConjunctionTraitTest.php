@@ -6,6 +6,7 @@ use Ems\Contracts\Expression\Condition as ConditionContract;
 use Ems\Contracts\Expression\LogicalGroup as LogicalGroupContract;
 use Ems\Core\Expression;
 use Ems\Core\Support\StringableTrait;
+use InvalidArgumentException;
 
 class LogicalGroupTraitTest extends \Ems\TestCase
 {
@@ -25,11 +26,9 @@ class LogicalGroupTraitTest extends \Ems\TestCase
         $this->assertEquals('or', $c->operator());
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     **/
     public function test_setOperator_throws_exception_without_unknown_operator()
     {
+        $this->expectException(InvalidArgumentException::class);
         $c = $this->c();
         $c->setOperator('foo');
     }

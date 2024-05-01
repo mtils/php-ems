@@ -57,22 +57,20 @@ class EntityManagerTest extends TestCase
         $this->assertInstanceOf(GenericResourceProvider::class, $manager->provider(stdClass::class));
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     */
     public function test_setProvider_with_unknown_parameter_throws_exception()
     {
+        $this->expectException(\InvalidArgumentException::class);
         $manager = $this->newManager();
 
         $manager->setProvider(stdClass::class, 42);
 
     }
 
-    /**
-     * @expectedException \Ems\Core\Exceptions\HandlerNotFoundException
-     */
     public function test_provider_for_unregistered_class_throws_exception()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\HandlerNotFoundException::class
+        );
         $manager = $this->newManager();
 
         $manager->setProvider(stdClass::class, GenericResourceProvider::class);
@@ -176,22 +174,22 @@ class EntityManagerTest extends TestCase
 
     }
 
-    /**
-     * @expectedException \Ems\Core\Exceptions\ResourceNotFoundException
-     */
     public function test_getOrFail_throws_NotFound()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\ResourceNotFoundException::class
+        );
         $manager = $this->newManager();
 
         $manager->getOrFail(NamedObject::class, 12);
 
     }
 
-    /**
-     * @expectedException \Ems\Core\Exceptions\MissingArgumentException
-     */
     public function test_only_passing_class_throws_exception()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\MissingArgumentException::class
+        );
         $this->newManager()->get(static::class);
     }
 

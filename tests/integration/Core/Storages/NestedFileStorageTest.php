@@ -25,11 +25,11 @@ class NestedFileStorageTest extends \Ems\IntegrationTest
         $this->assertInstanceOf(StorageContract::class, $this->newStorage());
     }
 
-    /**
-     * @expectedException \Ems\Core\Exceptions\UnconfiguredException
-     **/
     public function test_offsetExists_throws_exception_if_url_not_assigned()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\UnconfiguredException::class
+        );
         $this->newStorage()->offsetExists('foo');
     }
 
@@ -83,11 +83,9 @@ class NestedFileStorageTest extends \Ems\IntegrationTest
         $this->assertEquals($data, $storage2['de']);
     }
 
-    /**
-     * @expectedException \RuntimeException
-     **/
     public function test_persist_throws_exception_if_directory_not_creatable()
     {
+        $this->expectException(\RuntimeException::class);
 
         $data = ['foo' => 'bar'];
 
@@ -99,11 +97,11 @@ class NestedFileStorageTest extends \Ems\IntegrationTest
 
     }
 
-    /**
-     * @expectedException \Ems\Core\Exceptions\UnsupportedParameterException
-     **/
     public function test_filesystem_incompatible_key_throws_exception()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\UnsupportedParameterException::class
+        );
 
         $data = ['foo' => 'bar'];
 
@@ -115,11 +113,9 @@ class NestedFileStorageTest extends \Ems\IntegrationTest
 
     }
 
-    /**
-     * @expectedException \OutOfBoundsException
-     **/
     public function test_setNestingLevel_too_high_throws_exception()
     {
+        $this->expectException(\OutOfBoundsException::class);
 
         $data = ['foo' => 'bar'];
 
@@ -131,11 +127,9 @@ class NestedFileStorageTest extends \Ems\IntegrationTest
         $storage->setNestingLevel(10);
     }
 
-    /**
-     * @expectedException \BadMethodCallException
-     **/
     public function test_setNestingLevel_after_file_access_throws_exception()
     {
+        $this->expectException(\BadMethodCallException::class);
 
         $data = ['foo' => 'bar'];
 
@@ -231,11 +225,9 @@ class NestedFileStorageTest extends \Ems\IntegrationTest
 
     }
 
-    /**
-     * @expectedException \Ems\Core\Exceptions\KeyLengthException
-     **/
     public function test_key_with_less_segments_than_nesting_level_throws_exception()
     {
+        $this->expectException(\Ems\Core\Exceptions\KeyLengthException::class);
 
         $dirName = $this->tempDirName();
         $url = new Url($dirName);
@@ -272,11 +264,9 @@ class NestedFileStorageTest extends \Ems\IntegrationTest
         $this->assertEquals('hello', $storage2['de.foo.bar']);
     }
 
-    /**
-     * @expectedException \Ems\Contracts\Core\Errors\Unsupported
-     **/
     public function test_offsetSet_throws_exception_if_root_is_no_array()
     {
+        $this->expectException(\Ems\Contracts\Core\Errors\Unsupported::class);
 
         $dirName = $this->tempDirName();
         $url = new Url($dirName);
@@ -379,15 +369,15 @@ class NestedFileStorageTest extends \Ems\IntegrationTest
 
         $this->assertFalse(isset($storage['de']));
 
-        
+
     }
-    
+
 
     public function test_offsetSet_creates_file_for_content()
     {
         $storage = $this->newStorage();
     }
-    
+
     public function test_keys_returns_all_keys()
     {
 
@@ -735,7 +725,7 @@ class NestedFileStorageTest extends \Ems\IntegrationTest
         });
 
         $storage->createFileStorageBy($creator);
-        
+
         try {
             $value = $storage['bla'];
             $this->fail('The custom fileStorageCreator was not called');

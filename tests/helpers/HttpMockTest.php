@@ -9,13 +9,20 @@ namespace Ems;
 use InterNations\Component\HttpMock\PHPUnit\HttpMockFacade;
 use InterNations\Component\HttpMock\PHPUnit\HttpMockTrait;
 
+use PHPUnit\Framework\Attributes\After;
+use PHPUnit\Framework\Attributes\AfterClass;
+
+use PHPUnit\Framework\Attributes\Before;
+
+use PHPUnit\Framework\Attributes\BeforeClass;
+
 use function explode;
 use function strlen;
 use function substr;
 
 abstract class HttpMockTest extends IntegrationTest
 {
-    use HttpMockTrait;
+    //use HttpMockTrait;
 
     /**
      * @var string
@@ -27,34 +34,22 @@ abstract class HttpMockTest extends IntegrationTest
      */
     protected static $port = 8082;
 
-    /**
-     * @beforeClass
-     */
-    public static function bootHttpMock()
+    #[BeforeClass] public static function bootHttpMock()
     {
         static::setUpHttpMockBeforeClass(static::$port, static::$host);
     }
 
-    /**
-     * @afterClass
-     */
-    public static function shutdownHttpMock()
+    #[AfterClass] public static function shutdownHttpMock()
     {
         static::tearDownHttpMockAfterClass();
     }
 
-    /**
-     * @before
-     */
-    public function setUpHttp()
+    #[Before] public function setUpHttp()
     {
         $this->setUpHttpMock();
     }
 
-    /**
-     * @after
-     */
-    public function tearDownHttp()
+    #[After] public function tearDownHttp()
     {
         $this->tearDownHttpMock();
     }

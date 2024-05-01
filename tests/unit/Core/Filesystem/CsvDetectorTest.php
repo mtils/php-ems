@@ -2,6 +2,7 @@
 
 namespace Ems\Core\Filesystem;
 
+use Ems\Core\Exceptions\DetectionFailedException;
 use Ems\Testing\Cheat;
 
 class CsvDetectorTest extends \Ems\IntegrationTest
@@ -33,20 +34,20 @@ class CsvDetectorTest extends \Ems\IntegrationTest
 
     }
 
-    /**
-     * @expectedException Ems\Core\Exceptions\DetectionFailedException
-     **/
     public function test_separator_throws_exception_if_no_newlines_found()
     {
+        $this->expectException(
+            Ems\Core\Exceptions\DetectionFailedException::class
+        );
         $detector = $this->newDetector();
         $this->assertEquals(',', $detector->separator(''));
     }
 
-    /**
-     * @expectedException Ems\Core\Exceptions\DetectionFailedException
-     **/
     public function test_separator_throws_exception_if_column_count_does_not_match()
     {
+        $this->expectException(
+            DetectionFailedException::class
+        );
         $csv = $this->csvContent('simple-pipe-placeholder.csv');
 
         // Original file has 5 cols
@@ -162,11 +163,11 @@ class CsvDetectorTest extends \Ems\IntegrationTest
         $this->assertEquals(range(0,4), $detector->header("$firstLine\n$secondLine", ','));
     }
 
-    /**
-     * @expectedException Ems\Core\Exceptions\DetectionFailedException
-     **/
     public function test_header_throws_exception_if_following_line_count_doesnt_match()
     {
+        $this->expectException(
+            DetectionFailedException::class
+        );
         $detector = $this->newDetector();
         $csv = $this->csvContent('simple-pipe-placeholder.csv');
         // Original file has 5 cols
@@ -175,22 +176,22 @@ class CsvDetectorTest extends \Ems\IntegrationTest
         $detector->header($csv, ',');
     }
 
-    /**
-     * @expectedException Ems\Core\Exceptions\DetectionFailedException
-     **/
     public function test_header_throws_exception_if_header_is_forced_and_file_contains_doubled_columns()
     {
+        $this->expectException(
+            DetectionFailedException::class
+        );
         $detector = $this->newDetector()->setOption(CsvDetector::FORCE_HEADER_LINE, true);
         $csv = $this->csvContent('simple-pipe-placeholder.csv');
         $csv = str_replace(',street', ',name', $csv);
         $header = $detector->header($csv, ',');
     }
 
-    /**
-     * @expectedException Ems\Core\Exceptions\DetectionFailedException
-     **/
     public function test_header_throws_exception_if_header_is_forced_and_file_contains_invalid_columns()
     {
+        $this->expectException(
+            DetectionFailedException::class
+        );
         $detector = $this->newDetector()->setOption(CsvDetector::FORCE_HEADER_LINE, true);
         $csv = $this->csvContent('simple-pipe-placeholder.csv');
         $csv = str_replace(',street', ',17', $csv);

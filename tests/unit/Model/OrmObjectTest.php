@@ -334,19 +334,19 @@ class OrmObjectTest extends \Ems\TestCase
         $this->assertEquals(42, $object->getId());
     }
 
-    /**
-     * @expectedException \Ems\Core\Exceptions\NotImplementedException
-     */
     public function test_resourceName_throws_exception_if_not_implemented()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\NotImplementedException::class
+        );
         $this->newObject()->resourceName();
     }
 
-    /**
-     * @expectedException \Ems\Contracts\Model\Exceptions\RelationNotFoundException
-     */
     public function test_getRelation_throws_exception_if_key_is_no_relation()
     {
+        $this->expectException(
+            \Ems\Contracts\Model\Exceptions\RelationNotFoundException::class
+        );
         $object = $this->newObject();
         $object->getRelation('users');
     }
@@ -371,11 +371,11 @@ class OrmObjectTest extends \Ems\TestCase
         $this->assertFalse($this->newObject()->isRelation('foo'));
     }
 
-    /**
-     * @expectedException \Ems\Contracts\Model\Exceptions\RelationNotFoundException
-     */
     public function test_getRelated_throws_exception_if_key_is_no_relation()
     {
+        $this->expectException(
+            \Ems\Contracts\Model\Exceptions\RelationNotFoundException::class
+        );
         $object = $this->newObject();
         $object->getRelated('users');
     }
@@ -389,11 +389,11 @@ class OrmObjectTest extends \Ems\TestCase
         $this->assertSame($user, $object->getRelated('users'));
     }
 
-    /**
-     * @expectedException \Ems\Contracts\Core\Errors\ConfigurationError
-     */
     public function test_getRelated_throws_exception_if_no_relation_loader_assigned()
     {
+        $this->expectException(
+            \Ems\Contracts\Core\Errors\ConfigurationError::class
+        );
         $object = $this->newObjectWithRelations();
         $object->getRelated('users');
     }

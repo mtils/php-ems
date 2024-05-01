@@ -3,6 +3,7 @@
 namespace Ems\Testing;
 
 use Ems\Core\LocalFilesystem;
+use PHPUnit\Framework\Attributes\After;
 
 trait FilesystemMethods
 {
@@ -153,10 +154,7 @@ trait FilesystemMethods
         return [$tempDir, $pathStructure];
     }
 
-    /**
-     * @after
-     **/
-    protected function purgeTempFiles()
+    #[After] protected function purgeTempFiles(): void
     {
         if (!$this->_createdDirectories) {
             return;

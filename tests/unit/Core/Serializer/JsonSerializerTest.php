@@ -3,6 +3,7 @@
 namespace Ems\Core\Serializer;
 
 
+use Ems\Contracts\Core\Errors\UnSupported;
 use Ems\Contracts\Core\Serializer as SerializerContract;
 use Ems\Testing\Cheat;
 
@@ -86,31 +87,25 @@ class SerializerTest extends \Ems\TestCase
 
     }
 
-    /**
-     * @expectedException Ems\Contracts\Core\Errors\UnSupported
-     **/
     public function _test_serializing_of_resource_throws_exception()
     {
+        $this->expectException(UnSupported::class);
         $serializer = $this->newSerializer();
         $res = opendir(sys_get_temp_dir());
         $serializer->serialize($res);
     }
 
-    /**
-     * @expectedException Ems\Contracts\Core\Errors\UnSupported
-     **/
     public function _test_deserializing_of_malformed_string_throws_exception_without_error()
     {
+        $this->expectException(UnSupported::class);
         $hook = function () { return false; };
         $serializer = $this->newSerializer($hook);
         $serializer->deserialize('foo');
     }
 
-    /**
-     * @expectedException Ems\Contracts\Core\Errors\UnSupported
-     **/
     public function _test_deserializing_of_malformed_string_throws_exception()
     {
+        $this->expectException(UnSupported::class);
         $serializer = $this->newSerializer();
         $serializer->deserialize('foo');
     }

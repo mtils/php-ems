@@ -13,6 +13,7 @@ use Ems\Expression\Constraint;
 use Ems\Expression\ConstraintGroup;
 use Ems\TestCase;
 use Ems\Testing\LoggingCallable;
+use PHPUnit\Framework\Attributes\Test;
 use stdClass;
 use UnderflowException;
 
@@ -34,21 +35,17 @@ class CheckerTest extends TestCase
         $this->assertFalse($checker->equals(2, 3));
     }
 
-    /**
-     * @expectedException UnderflowException
-     */
     public function test___call_throws_exception_if_no_arguments_passed()
     {
+        $this->expectException(UnderflowException::class);
         $checker = $this->newChecker();
 
         $checker->equals();
     }
 
-    /**
-     * @expectedException \Ems\Contracts\Core\Errors\UnSupported
-     */
     public function test___call_throws_exception_if_constraint_not_supported()
     {
+        $this->expectException(\Ems\Contracts\Core\Errors\UnSupported::class);
         $checker = $this->newChecker();
 
         $checker->foo('bar');
@@ -280,11 +277,9 @@ class CheckerTest extends TestCase
 
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     */
     public function test_compare_throws_exception_with_unknown_operator()
     {
+        $this->expectException(\InvalidArgumentException::class);
         $this->newChecker()->compare(1, 'doo', 2);
     }
 
@@ -639,10 +634,7 @@ class CheckerTest extends TestCase
         $this->assertFails('1234567','length:2-5');
     }
 
-    /**
-     * @test
-     */
-    public function array_if_passed()
+    #[Test] public function array_if_passed()
     {
         $this->assertPasses([], 'array');
         $this->assertFails('Hello', 'array');

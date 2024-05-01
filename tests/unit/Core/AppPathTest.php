@@ -3,6 +3,8 @@
 namespace Ems\Core;
 
 
+use InvalidArgumentException;
+
 class AppPathTest extends \Ems\TestCase
 {
     public function test_implements_interface()
@@ -62,11 +64,9 @@ class AppPathTest extends \Ems\TestCase
         $this->assertEquals('.', $appPath->relative('/'));
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     **/
     public function test_relative_throws_exception_on_positional_paths()
     {
+        $this->expectException(InvalidArgumentException::class);
         $basePath = '/srv/www/htdocs/app/public';
         $baseUrl = 'http://localhost';
 
@@ -152,11 +152,9 @@ class AppPathTest extends \Ems\TestCase
         $this->assertEquals($baseUrl, $appPath->getBaseUrl());
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     **/
     public function test_setBaseUrl_with_empty_url_throws_InvalidArgumentException()
     {
+        $this->expectException(InvalidArgumentException::class);
         $basePath = '/srv/www/htdocs/app/public';
 
         $appPath = $this->newAppPath($basePath, '');

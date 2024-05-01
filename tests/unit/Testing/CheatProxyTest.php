@@ -3,6 +3,7 @@
 namespace Ems\Testing;
 
 use Ems\TestCase;
+use InvalidArgumentException;
 
 
 require_once __DIR__ .'/CheatTest.php';
@@ -36,11 +37,9 @@ class CheatProxyTest extends TestCase
 
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     **/
     public function test_instatiate_with_non_object_throws_exception()
     {
+        $this->expectException(InvalidArgumentException::class);
         $proxy = $this->newProxy('no-object');
     }
 

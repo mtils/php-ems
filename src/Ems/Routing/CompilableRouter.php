@@ -132,6 +132,7 @@ class CompilableRouter implements RouterContract
      *
      * @throws Exception
      */
+    #[\ReturnTypeWillChange]
     public function getIterator()
     {
         $this->callListenersOnce();

@@ -3,12 +3,18 @@
 
 namespace Ems\Expression;
 
+use BadMethodCallException;
+use Ems\Contracts\Core\Errors\SyntaxError;
+use Ems\Contracts\Core\Errors\UnSupported;
 use Ems\Contracts\Expression\Condition as ConditionContract;
 use Ems\Contracts\Expression\ConditionGroup as ConditionGroupContract;
+use Ems\Core\Exceptions\NotImplementedException;
 use Ems\Core\Expression;
 use Ems\Core\KeyExpression;
 use Ems\Testing\Cheat;
 use Ems\Core\Collections\StringList;
+use InvalidArgumentException;
+use OutOfBoundsException;
 
 class ConditionGroupTest extends \Ems\TestCase
 {
@@ -246,33 +252,29 @@ class ConditionGroupTest extends \Ems\TestCase
 
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     **/
     public function test_addWhere_with_unsupported_argument_throws_exception()
     {
+        $this->expectException(InvalidArgumentException::class);
         $group = $this->newGroup();
 
         $group = $group->where(new \ArrayObject);
 
     }
 
-    /**
-     * @expectedException Ems\Contracts\Core\Errors\SyntaxError
-     **/
     public function test_addWhere_without_operator_throws_exception()
     {
+        $this->expectException(SyntaxError::class);
         $group = $this->newGroup();
 
         $group = $group->where('login');
 
     }
 
-    /**
-     * @expectedException Ems\Core\Exceptions\NotImplementedException
-     **/
     public function test_fork_throws_exception_if_not_implements()
     {
+        $this->expectException(
+            NotImplementedException::class
+        );
         $group = new ConditionGroupTest_ConditionGroup;
 
         $group = $group->where('login', 'dieter');
@@ -492,19 +494,15 @@ class ConditionGroupTest extends \Ems\TestCase
         $this->assertCount(1, $group->findExpressions(['class' => Condition::class,  'string' => 'login = dieter']));
     }
 
-    /**
-     * @expectedException BadMethodCallException
-     **/
     public function test_allowConnectives_twice_throws_exception()
     {
+        $this->expectException(BadMethodCallException::class);
         $group = $this->newGroup()->allowConnectives('or')->allowConnectives('and');
     }
 
-    /**
-     * @expectedException Ems\Contracts\Core\Errors\UnSupported
-     **/
     public function test_addWhere_with_unsupported_connective_throws_exception()
     {
+        $this->expectException(UnSupported::class);
         $group = $this->newGroup()->allowConnectives('or');
         $this->assertEquals(['or'], $group->allowedConnectives());
 
@@ -514,11 +512,9 @@ class ConditionGroupTest extends \Ems\TestCase
 
     }
 
-    /**
-     * @expectedException Ems\Contracts\Core\Errors\UnSupported
-     **/
     public function test_addWhere_with_unsupported_connective_added_later_throws_exception()
     {
+        $this->expectException(UnSupported::class);
         $group = $this->newGroup()->allowConnectives('or');
         $this->assertEquals(['or'], $group->allowedConnectives());
         $this->assertFalse($group->areMultipleConnectivesAllowed());
@@ -541,11 +537,9 @@ class ConditionGroupTest extends \Ems\TestCase
 
     }
 
-    /**
-     * @expectedException Ems\Contracts\Core\Errors\UnSupported
-     **/
     public function test_addExpression_with_unsupported_connective_throws_exception()
     {
+        $this->expectException(UnSupported::class);
         $group = $this->newGroup()->allowConnectives('and');
         $this->assertEquals(['and'], $group->allowedConnectives());
 
@@ -555,11 +549,9 @@ class ConditionGroupTest extends \Ems\TestCase
 
     }
 
-    /**
-     * @expectedException Ems\Contracts\Core\Errors\UnSupported
-     **/
     public function test_addWhere_with_changing_connective_throws_excepion_if_forbidden()
     {
+        $this->expectException(UnSupported::class);
 
         $group = $this->newGroup()->forbidMultipleConnectives();
 
@@ -578,11 +570,9 @@ class ConditionGroupTest extends \Ems\TestCase
 
     }
 
-    /**
-     * @expectedException Ems\Contracts\Core\Errors\UnSupported
-     **/
     public function test_addExpression_with_changing_connective_throws_excepion_if_forbidden()
     {
+        $this->expectException(UnSupported::class);
 
         $group = $this->newGroup()->forbidMultipleConnectives();
 
@@ -598,11 +588,9 @@ class ConditionGroupTest extends \Ems\TestCase
 
     }
 
-    /**
-     * @expectedException Ems\Contracts\Core\Errors\UnSupported
-     **/
     public function test_addExpression_with_different_connective_in_subgroup_throws_excepion_if_forbidden()
     {
+        $this->expectException(UnSupported::class);
 
         $group = $this->newGroup()->forbidMultipleConnectives();
 
@@ -622,11 +610,9 @@ class ConditionGroupTest extends \Ems\TestCase
 
     }
 
-    /**
-     * @expectedException Ems\Contracts\Core\Errors\UnSupported
-     **/
     public function test_addWhere_with_forbidden_nesting_throws_exception()
     {
+        $this->expectException(UnSupported::class);
 
         $group = $this->newGroup()->forbidNesting();
 
@@ -649,19 +635,15 @@ class ConditionGroupTest extends \Ems\TestCase
 
     }
 
-    /**
-     * @expectedException BadMethodCallException
-     **/
     public function test_allowOperators_twice_throws_exception()
     {
+        $this->expectException(BadMethodCallException::class);
         $this->newGroup()->allowOperators('=')->allowOperators('=');
     }
 
-    /**
-     * @expectedException Ems\Contracts\Core\Errors\UnSupported
-     **/
     public function test_addWhere_with_unsuppored_operator_throws_exception()
     {
+        $this->expectException(UnSupported::class);
 
         $group = $this->newGroup()->allowOperators('=');
         $this->assertEquals(['='], $group->allowedOperators());
@@ -670,11 +652,9 @@ class ConditionGroupTest extends \Ems\TestCase
 
     }
 
-    /**
-     * @expectedException Ems\Contracts\Core\Errors\UnSupported
-     **/
     public function test_add_with_unsupported_operator_throws_exception()
     {
+        $this->expectException(UnSupported::class);
 
         $group = $this->newGroup()->allowOperators('=');
         $this->assertEquals(['='], $group->allowedOperators());
@@ -693,11 +673,9 @@ class ConditionGroupTest extends \Ems\TestCase
 
     }
 
-    /**
-     * @expectedException Ems\Contracts\Core\Errors\UnSupported
-     **/
     public function test_add_with_unsupported_operator_in_subGroup_throws_exception()
     {
+        $this->expectException(UnSupported::class);
 
         $group = $this->newGroup()->allowOperators('=');
         $this->assertEquals(['='], $group->allowedOperators());
@@ -719,11 +697,9 @@ class ConditionGroupTest extends \Ems\TestCase
 
     }
 
-    /**
-     * @expectedException Ems\Contracts\Core\Errors\UnSupported
-     **/
     public function test_add_with_unsupported_operator_in_subGroup_throws_exception_if_set_before_adding()
     {
+        $this->expectException(UnSupported::class);
 
         $group = $this->newGroup()->allowOperators('=');
         $this->assertEquals(['='], $group->allowedOperators());
@@ -735,19 +711,15 @@ class ConditionGroupTest extends \Ems\TestCase
 
     }
 
-    /**
-     * @expectedException BadMethodCallException
-     **/
     public function test_allowMaxConditions_twice_throws_exception()
     {
+        $this->expectException(BadMethodCallException::class);
         $this->newGroup()->allowMaxConditions(3)->allowMaxConditions(3);
     }
 
-    /**
-     * @expectedException OutOfBoundsException
-     **/
     public function test_addWhere_with_more_than_max_conditions_throws_exception()
     {
+        $this->expectException(OutOfBoundsException::class);
         $group = $this->newGroup()->allowMaxConditions(3);
         $this->assertEquals(3, $group->maxConditions());
         $group->where('a', 'b')
@@ -765,11 +737,9 @@ class ConditionGroupTest extends \Ems\TestCase
               ->where('e', 'f');
     }
 
-    /**
-     * @expectedException OutOfBoundsException
-     **/
     public function test_add_with_more_than_max_conditions_throws_exception()
     {
+        $this->expectException(OutOfBoundsException::class);
         $group = $this->newGroup()->allowMaxConditions(3);
         $this->assertEquals(3, $group->maxConditions());
         $group->add($this->cond('a', '=', 'b'))
@@ -778,11 +748,9 @@ class ConditionGroupTest extends \Ems\TestCase
               ->add($this->cond('g', '=', 'h'));
     }
 
-    /**
-     * @expectedException OutOfBoundsException
-     **/
     public function test_add_with_more_than_max_conditions_throws_exception_if_restricted_after_adding()
     {
+        $this->expectException(OutOfBoundsException::class);
         $group = $this->newGroup();
         $this->assertEquals(0, $group->maxConditions());
         $group->add($this->cond('a', '=', 'b'))
@@ -797,7 +765,7 @@ class ConditionGroupTest extends \Ems\TestCase
     {
         return new ConditionGroup($conditions, $operator);
     }
-    
+
     protected function cond($key, $operator, $parameters)
     {
         return new Condition($key, new Constraint($operator, (array)$parameters, $operator));

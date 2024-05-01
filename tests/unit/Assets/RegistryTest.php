@@ -180,41 +180,33 @@ class RegistryTest extends \Ems\TestCase
         $this->assertFalse(isset($registry['less']));
     }
 
-    /**
-     * @expectedException \BadMethodCallException
-     **/
     public function test_offsetSet_throws_BadMethodCallException()
     {
+        $this->expectException(\BadMethodCallException::class);
         $registry = $this->newRegistry();
 
         $registry['js'] = 'Crash';
     }
 
-    /**
-     * @expectedException \BadMethodCallException
-     **/
     public function test_offsetUnset_throws_BadMethodCallException()
     {
+        $this->expectException(\BadMethodCallException::class);
         $registry = $this->newRegistry();
 
         unset($registry['js']);
     }
 
-    /**
-     * @expectedException \RuntimeException
-     **/
     public function test_before_without_previous_import_throws_RuntimeException()
     {
+        $this->expectException(\RuntimeException::class);
         $registry = $this->newRegistry();
 
         $registry->before('jquery.js');
     }
 
-    /**
-     * @expectedException \RuntimeException
-     **/
     public function test_after_without_previous_import_throws_RuntimeException()
     {
+        $this->expectException(\RuntimeException::class);
         $registry = $this->newRegistry();
 
         $registry->after('jquery.js');
@@ -237,11 +229,9 @@ class RegistryTest extends \Ems\TestCase
         $this->assertCount(1, $css);
     }
 
-    /**
-     * @expectedException \OutOfBoundsException
-     **/
     public function test_offsetGet_throws_OutOfBoundsException_if_group_not_found()
     {
+        $this->expectException(\OutOfBoundsException::class);
         $registry = $this->newRegistry();
 
         $registry->import('jquery.js');
@@ -251,11 +241,9 @@ class RegistryTest extends \Ems\TestCase
         $less = $registry['less'];
     }
 
-    /**
-     * @expectedException \OutOfBoundsException
-     **/
     public function test_offsetGet_throws_OutOfBoundsException_if_mimeType_not_found()
     {
+        $this->expectException(\OutOfBoundsException::class);
         $registry = $this->newRegistry();
 
         $registry->import('jquery.foo');

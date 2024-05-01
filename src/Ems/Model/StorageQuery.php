@@ -45,6 +45,7 @@ class StorageQuery extends ConditionGroup implements StorageQueryContract
      *
      * @return \Iterator
      **/
+    #[\ReturnTypeWillChange]
     public function getIterator()
     {
         $results = call_user_func($this->selector, $this);

@@ -22,6 +22,7 @@ use Models\Project;
 use Models\ProjectType;
 use Models\Token;
 use Models\User;
+use PHPUnit\Framework\Attributes\Test;
 
 /**
  * Class OrmQueryBuilderIntegrationTest
@@ -45,18 +46,13 @@ use Models\User;
 class OrmQueryBuilderIntegrationTest extends IntegrationTest
 {
     use TestOrm;
-    /**
-     * @test
-     */
-    public function it_instantiates()
+
+    #[Test] public function it_instantiates()
     {
         $this->assertInstanceOf(OrmQueryBuilder::class, $this->queryBuilder());
     }
 
-    /**
-     * @test
-     */
-    public function select_from_contact()
+    #[Test] public function select_from_contact()
     {
         $query = new OrmQuery(Contact::class);
         $inspector = $this->newInspector();
@@ -70,10 +66,7 @@ class OrmQueryBuilderIntegrationTest extends IntegrationTest
         $this->assertCount(0, $dbQuery->joins);
     }
 
-    /**
-     * @test
-     */
-    public function select_from_contact_where()
+    #[Test] public function select_from_contact_where()
     {
         $query = new OrmQuery(Contact::class);
         $inspector = $this->newInspector();
@@ -91,10 +84,7 @@ class OrmQueryBuilderIntegrationTest extends IntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function select_from_user_where_related()
+    #[Test] public function select_from_user_where_related()
     {
         $query = new OrmQuery(User::class);
         $inspector = $this->newInspector();
@@ -114,10 +104,7 @@ class OrmQueryBuilderIntegrationTest extends IntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function select_from_user_where_multiple_related()
+    #[Test] public function select_from_user_where_multiple_related()
     {
         $query = new OrmQuery(User::class);
         $inspector = $this->newInspector();
@@ -139,10 +126,7 @@ class OrmQueryBuilderIntegrationTest extends IntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function select_from_projects_where_many_to_many()
+    #[Test] public function select_from_projects_where_many_to_many()
     {
         $query = new OrmQuery(Project::class);
 
@@ -163,10 +147,7 @@ class OrmQueryBuilderIntegrationTest extends IntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function select_from_projects_where_many_to_level2()
+    #[Test] public function select_from_projects_where_many_to_level2()
     {
         $query = new OrmQuery(User::class);
         $inspector = $this->newInspector();
@@ -187,10 +168,7 @@ class OrmQueryBuilderIntegrationTest extends IntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function select_from_user_where_parent()
+    #[Test] public function select_from_user_where_parent()
     {
         $query = new OrmQuery(User::class);
         $inspector = $this->newInspector();
@@ -211,10 +189,7 @@ class OrmQueryBuilderIntegrationTest extends IntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function select_from_user_where_parent_parent()
+    #[Test] public function select_from_user_where_parent_parent()
     {
         $query = new OrmQuery(User::class);
         $inspector = $this->newInspector();
@@ -234,10 +209,7 @@ class OrmQueryBuilderIntegrationTest extends IntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function select_from_user_with_contact()
+    #[Test] public function select_from_user_with_contact()
     {
         $query = (new OrmQuery(User::class))->with('contact');
 
@@ -258,10 +230,7 @@ class OrmQueryBuilderIntegrationTest extends IntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function select_from_user_with_parent_contact()
+    #[Test] public function select_from_user_with_parent_contact()
     {
         $query = (new OrmQuery(User::class))->with('contact', 'parent.contact');
         $inspector = $this->newInspector();
@@ -281,10 +250,7 @@ class OrmQueryBuilderIntegrationTest extends IntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function select_from_user_with_tokens()
+    #[Test] public function select_from_user_with_tokens()
     {
         $query = (new OrmQuery(User::class))->with('tokens');
         $inspector = $this->newInspector();
@@ -314,10 +280,7 @@ class OrmQueryBuilderIntegrationTest extends IntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function select_from_user_with_to_many_that_has_to_one()
+    #[Test] public function select_from_user_with_to_many_that_has_to_one()
     {
         $query = (new OrmQuery(User::class))->with('projects.type', 'projects.files');
         $inspector = $this->newInspector();
@@ -348,10 +311,7 @@ class OrmQueryBuilderIntegrationTest extends IntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function select_from_user_with_to_one_and_to_many_that_has_to_one()
+    #[Test] public function select_from_user_with_to_one_and_to_many_that_has_to_one()
     {
         $query = (new OrmQuery(User::class))->with('projects.type', 'projects.files', 'contact', 'parent');
         $inspector = $this->newInspector();

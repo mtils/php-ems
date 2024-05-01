@@ -38,11 +38,9 @@ class HookableTraitTest extends \Ems\TestCase
         $this->assertSame($listener, $hookable->getListeners('get', 'after')[0]);
     }
 
-    /**
-     * @expectedException \Ems\Contracts\Core\Errors\UnSupported
-     **/
     public function test_getListeners_with_unknown_position_throws_exception()
     {
+        $this->expectException(\Ems\Contracts\Core\Errors\UnSupported::class);
         $hookable = $this->newHookable(['get']);
 
         $listener = function () {};
@@ -148,11 +146,9 @@ class HookableTraitTest extends \Ems\TestCase
         $this->assertEquals(['a'], $listener4->args(0));
     }
 
-    /**
-     * @expectedException \Ems\Contracts\Core\Errors\UnSupported
-     **/
     public function test_listen_on_unknown_event_throws_exception()
     {
+        $this->expectException(\Ems\Contracts\Core\Errors\UnSupported::class);
         $hookable = $this->newHookable(['get']);
 
         $listener = new LoggingCallable();
@@ -176,11 +172,9 @@ class HookableTraitTest extends \Ems\TestCase
         return $object;
     }
 
-    /**
-     * @expectedException \Ems\Contracts\Core\Errors\UnSupported
-     **/
     public function test_listen_on_object_event_throws_exception()
     {
+        $this->expectException(\Ems\Contracts\Core\Errors\UnSupported::class);
         $hookable = $this->newHookableWithoutMethodHooks();
 
         $listener = new LoggingCallable();
@@ -188,11 +182,9 @@ class HookableTraitTest extends \Ems\TestCase
         $hookable->onAfter(new \stdClass(), $listener);
     }
 
-    /**
-     * @expectedException \Ems\Contracts\Core\Errors\UnSupported
-     **/
     public function test_listen_on_class_like_event_throws_exception()
     {
+        $this->expectException(\Ems\Contracts\Core\Errors\UnSupported::class);
         $hookable = $this->newHookableWithoutMethodHooks();
 
         $listener = new LoggingCallable();

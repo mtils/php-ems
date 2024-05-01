@@ -13,7 +13,7 @@ use Ems\Core\Exceptions\ResourceNotFoundException;
 use Ems\Core\Filesystem\FileStream;
 use function is_resource;
 use League\Flysystem\FileNotFoundException;
-use League\Flysystem\FilesystemInterface;
+use League\Flysystem\FilesystemOperator as FilesystemInterface;
 use Ems\Contracts\Core\Url as UrlContract;
 use RuntimeException;
 

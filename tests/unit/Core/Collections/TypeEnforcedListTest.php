@@ -1,8 +1,10 @@
-<?php 
+<?php
 
 namespace Ems\Core\Collections;
 
+use BadMethodCallException;
 use Ems\Testing\LoggingCallable;
+use InvalidArgumentException;
 
 require_once __DIR__.'/OrderedListTest.php';
 
@@ -21,75 +23,59 @@ class TypeEnforcedListTest extends OrderedListTest
         $this->assertEquals('int', $list->getForcedType());
     }
 
-    /**
-     * @expectedException BadMethodCallException
-     **/
     public function test_setForcedType_throws_exception_if_type_is_frozen()
     {
+        $this->expectException(BadMethodCallException::class);
         $list = $this->newList()->setForcedType('int');
         $list->freezeType();
         $list->setForcedType('string');
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     **/
     public function test_append_non_int_items_throws_InvalidArgumentException()
     {
+        $this->expectException(InvalidArgumentException::class);
         $list = $this->newList()->setForcedType('int');
         $list->append('string');
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     **/
     public function test_append_non_bool_items_throws_InvalidArgumentException()
     {
+        $this->expectException(InvalidArgumentException::class);
         $list = $this->newList()->setForcedType('bool');
         $list->append(1);
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     **/
     public function test_append_non_float_items_throws_InvalidArgumentException()
     {
+        $this->expectException(InvalidArgumentException::class);
         $list = $this->newList()->setForcedType('float');
         $list->append(1);
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     **/
     public function test_append_non_resource_items_throws_InvalidArgumentException()
     {
+        $this->expectException(InvalidArgumentException::class);
         $list = $this->newList()->setForcedType('resource');
         $list->append(1);
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     **/
     public function test_append_non_array_items_throws_InvalidArgumentException()
     {
+        $this->expectException(InvalidArgumentException::class);
         $list = $this->newList()->setForcedType('array');
         $list->append(1);
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     **/
     public function test_append_non_object_items_throws_InvalidArgumentException()
     {
+        $this->expectException(InvalidArgumentException::class);
         $list = $this->newList()->setForcedType('object');
         $list->append(1);
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     **/
     public function test_append_non_class_items_throws_InvalidArgumentException()
     {
+        $this->expectException(InvalidArgumentException::class);
         $list = $this->newList()->setForcedType(_ForcedClass::class);
         $list->append(new \stdClass());
     }

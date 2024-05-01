@@ -9,22 +9,17 @@ use Ems\Contracts\Core\Message;
 use Ems\Core\Exceptions\UnsupportedUsageException;
 use Ems\TestCase;
 use Ems\Contracts\Core\Message as AbstractMessage;
+use PHPUnit\Framework\Attributes\Test;
 
 class ImmutableMessageTest extends TestCase
 {
 
-    /**
-     * @test
-     */
-    public function it_inherits_message()
+    #[Test] public function it_inherits_message()
     {
         $this->assertInstanceOf(AbstractMessage::class, $this->message());
     }
 
-    /**
-     * @test
-     */
-    public function offsetSet_throws_exception()
+    #[Test] public function offsetSet_throws_exception()
     {
         $attributes = [
             'foo' => 'bar',
@@ -39,10 +34,7 @@ class ImmutableMessageTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function offsetUnset_throws_exception()
+    #[Test] public function offsetUnset_throws_exception()
     {
         $attributes = [
             'foo' => 'bar',
@@ -57,10 +49,7 @@ class ImmutableMessageTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function with_returns_changed_instance()
+    #[Test] public function with_returns_changed_instance()
     {
         $attributes = [
             'foo' => 'bar',
@@ -78,10 +67,7 @@ class ImmutableMessageTest extends TestCase
         $this->assertEquals('baz', $fork['foo']);
     }
 
-    /**
-     * @test
-     */
-    public function without_returns_changed_instance()
+    #[Test] public function without_returns_changed_instance()
     {
         $attributes = [
             'foo' => 'bar',
@@ -97,10 +83,7 @@ class ImmutableMessageTest extends TestCase
         $this->assertFalse(isset($fork['foo']));
     }
 
-    /**
-     * @test
-     */
-    public function construct_applies_all_attributes()
+    #[Test] public function construct_applies_all_attributes()
     {
         $attributes = [
             'type' => Message::TYPE_INPUT,
@@ -119,10 +102,7 @@ class ImmutableMessageTest extends TestCase
         $this->assertEquals($attributes['payload'], $message->payload);
     }
 
-    /**
-     * @test
-     */
-    public function withType_creates_new_instance_with_changed_type()
+    #[Test] public function withType_creates_new_instance_with_changed_type()
     {
         $attributes = [
             'type' => Message::TYPE_INPUT,
@@ -138,10 +118,7 @@ class ImmutableMessageTest extends TestCase
         $this->assertEquals(Message::TYPE_OUTPUT, $fork->type);
     }
 
-    /**
-     * @test
-     */
-    public function withTransport_creates_new_instance_with_changed_transport()
+    #[Test] public function withTransport_creates_new_instance_with_changed_transport()
     {
         $attributes = [
             'type' => Message::TYPE_INPUT,
@@ -157,10 +134,7 @@ class ImmutableMessageTest extends TestCase
         $this->assertEquals(Message::TRANSPORT_IPC, $fork->transport);
     }
 
-    /**
-     * @test
-     */
-    public function withEnvelope_creates_new_instance_with_changed_envelope()
+    #[Test] public function withEnvelope_creates_new_instance_with_changed_envelope()
     {
         $attributes = [
             'type' => Message::TYPE_INPUT,
@@ -178,10 +152,7 @@ class ImmutableMessageTest extends TestCase
         $this->assertEquals($newEnvelope, $fork->envelope);
     }
 
-    /**
-     * @test
-     */
-    public function withPayload_creates_new_instance_with_changed_payload()
+    #[Test] public function withPayload_creates_new_instance_with_changed_payload()
     {
         $attributes = [
             'type' => Message::TYPE_INPUT,

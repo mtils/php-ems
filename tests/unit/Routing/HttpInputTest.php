@@ -9,26 +9,21 @@ use Ems\Contracts\Routing\Input;
 use Ems\Core\Url;
 use Ems\Http\Psr\UploadedFile;
 use Ems\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Psr\Http\Message\ServerRequestInterface;
 
 use const UPLOAD_ERR_OK;
 
 class HttpInputTest extends TestCase
 {
-    /**
-     * @test
-     */
-    public function it_implements_interfaces()
+    #[Test] public function it_implements_interfaces()
     {
         $input = $this->input();
         $this->assertInstanceOf(Input::class, $input);
         $this->assertInstanceOf(ServerRequestInterface::class, $input);
     }
 
-    /**
-     * @test
-     */
-    public function instantiate_with_payload_and_headers()
+    #[Test] public function instantiate_with_payload_and_headers()
     {
         $data = ['foo' => 'bar'];
         $headers = ['Accept' => '*'];
@@ -37,10 +32,7 @@ class HttpInputTest extends TestCase
         $this->assertEquals($headers, $input->headers);
     }
 
-    /**
-     * @test
-     */
-    public function apply_all_constructor_args()
+    #[Test] public function apply_all_constructor_args()
     {
         $payload = 'foo';
         $headers = [
@@ -94,10 +86,7 @@ class HttpInputTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function withCookieParams_changes_cookie_parameters()
+    #[Test] public function withCookieParams_changes_cookie_parameters()
     {
         $payload = 'foo';
         $headers = [
@@ -144,10 +133,7 @@ class HttpInputTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function withQueryParams_changes_query_parameters()
+    #[Test] public function withQueryParams_changes_query_parameters()
     {
         $payload = 'foo';
         $headers = [
@@ -194,10 +180,7 @@ class HttpInputTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function withParsedBody_changes_body_parameters()
+    #[Test] public function withParsedBody_changes_body_parameters()
     {
         $payload = 'foo';
         $headers = [
@@ -244,10 +227,7 @@ class HttpInputTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function withUploadedFiles_changes_files()
+    #[Test] public function withUploadedFiles_changes_files()
     {
         $payload = 'foo';
         $headers = [
@@ -319,10 +299,7 @@ class HttpInputTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function working_with_attributes()
+    #[Test] public function working_with_attributes()
     {
         $custom = ['foo' => 'bar'];
         $input = $this->input(['custom' => $custom]);
@@ -339,10 +316,7 @@ class HttpInputTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function withUrl_changes_url()
+    #[Test] public function withUrl_changes_url()
     {
         $url = new Url('https://web-utils.de/api/users');
         $input = $this->input($url);
@@ -368,10 +342,7 @@ class HttpInputTest extends TestCase
         $this->assertSame($url3, $fork2->getUri());
     }
 
-    /**
-     * @test
-     */
-    public function url_parameter_in_construct_works()
+    #[Test] public function url_parameter_in_construct_works()
     {
         $url = new Url('https://web-utils.de/api/users');
 
@@ -389,10 +360,7 @@ class HttpInputTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function withClientType_changes_clientType()
+    #[Test] public function withClientType_changes_clientType()
     {
         $attributes = [
             'clientType' => Input::CLIENT_DESKTOP
@@ -404,10 +372,7 @@ class HttpInputTest extends TestCase
         $this->assertEquals(Input::CLIENT_API, $fork->clientType);
     }
 
-    /**
-     * @test
-     */
-    public function withApiVersion_changes_api_version()
+    #[Test] public function withApiVersion_changes_api_version()
     {
         $attributes = [
             'apiVersion' => '1.1'
@@ -419,10 +384,7 @@ class HttpInputTest extends TestCase
         $this->assertEquals('1.2', $fork->apiVersion);
     }
 
-    /**
-     * @test
-     */
-    public function get_method_chooses_from_all_sources()
+    #[Test] public function get_method_chooses_from_all_sources()
     {
         $payload = 'foo';
         $headers = [];
@@ -447,10 +409,7 @@ class HttpInputTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function get_method_chooses_from_right_sources()
+    #[Test] public function get_method_chooses_from_right_sources()
     {
         $payload = 'foo';
         $headers = [];
@@ -480,10 +439,7 @@ class HttpInputTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function offsetExists_method_checks_all_sources()
+    #[Test] public function offsetExists_method_checks_all_sources()
     {
         $payload = 'foo';
         $headers = [];
@@ -508,10 +464,7 @@ class HttpInputTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function toArray_merges_all_sources()
+    #[Test] public function toArray_merges_all_sources()
     {
         $payload = 'foo';
         $headers = [];

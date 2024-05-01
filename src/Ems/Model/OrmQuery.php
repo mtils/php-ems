@@ -51,6 +51,7 @@ class OrmQuery extends BaseOrmQuery implements Result, Paginatable
      *
      * @throws Exception on failure.
      */
+    #[\ReturnTypeWillChange]
     public function getIterator()
     {
         foreach ($this->createResult() as $item) {

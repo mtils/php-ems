@@ -7,7 +7,10 @@ use DateTimeZone;
 use Ems\Contracts\Core\None;
 use Ems\Contracts\Core\PointInTime as TemporalContract;
 use Ems\Contracts\Core\Type;
+use Exception;
 use InvalidArgumentException;
+use OutOfBoundsException;
+
 use function method_exists;
 
 /**
@@ -231,17 +234,19 @@ class PointInTime extends DateTime implements TemporalContract
     }
 
     /**
-     * @param string       $format
-     * @param string       $string
-     * @param DateTimeZone $timezone (optional)
+     * @param string $format
+     * @param string $datetime
+     * @param DateTimeZone|null $timezone (optional)
      *
      * @return PointInTime
+     * @throws Exception
      */
-    public static function createFromFormat($format, $string, $timezone = null)
+    public static function createFromFormat(string $format, string $datetime, ?DateTimeZone $timezone = null) : PointInTime
     {
+        /** @noinspection PhpUnhandledExceptionInspection */
         $timezone = $timezone ?: new DateTimeZone(date_default_timezone_get());
-        if (!$other = DateTime::createFromFormat($format, $string, $timezone)) {
-            throw new InvalidArgumentException("Unable to parse date '$string' with format '$format'");
+        if (!$other = DateTime::createFromFormat($format, $datetime, $timezone)) {
+            throw new InvalidArgumentException("Unable to parse date '$datetime' with format '$format'");
         }
 
         return (new static())->setTimestamp($other->getTimestamp())

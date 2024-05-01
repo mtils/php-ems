@@ -18,6 +18,8 @@ use Ems\HttpMockTest;
 use Ems\Routing\SessionHandler\ArraySessionHandler;
 use Ems\Skeleton\Application;
 
+use PHPUnit\Framework\Attributes\Test;
+
 use function print_r;
 use function spl_object_hash;
 
@@ -48,10 +50,7 @@ class RoutingIntegrationTest extends HttpMockTest
         ]
     ];
 
-    /**
-     * @test
-     */
-    public function call_simple_route()
+    #[Test] public function call_simple_route()
     {
         $output = (new RoutingIntegrationTest_Controller())->foo();
         $response = $this->get('/foo');
@@ -60,10 +59,7 @@ class RoutingIntegrationTest extends HttpMockTest
         $this->assertEquals($output, $response->body);
     }
 
-    /**
-     * @test
-     */
-    public function session_gets_configured()
+    #[Test] public function session_gets_configured()
     {
         // Trigger loading of middleware and bindings
         $this->app(InputHandlerContract::class);
@@ -76,10 +72,7 @@ class RoutingIntegrationTest extends HttpMockTest
 
     }
 
-    /**
-     * @test
-     */
-    public function session_is_started_when_accessed()
+    #[Test] public function session_is_started_when_accessed()
     {
         $input = $this->request([
             'method'        =>  Input::GET,
@@ -100,10 +93,7 @@ class RoutingIntegrationTest extends HttpMockTest
         self::$session = [];
     }
 
-    /**
-     * @test
-     */
-    public function session_is_restored()
+    #[Test] public function session_is_restored()
     {
         $input = $this->request([
             'method'        =>  Input::GET,

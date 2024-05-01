@@ -34,6 +34,8 @@ use Ems\Skeleton\Application;
 use Ems\Skeleton\ErrorHandler;
 use Ems\Skeleton\Testing\HttpCalls;
 
+use PHPUnit\Framework\Attributes\Test;
+
 use function is_array;
 
 class AuthIntegrationTest extends IntegrationTest
@@ -64,10 +66,7 @@ class AuthIntegrationTest extends IntegrationTest
         ]
     ];
 
-    /**
-     * @test
-     */
-    public function call_simple_route()
+    #[Test] public function call_simple_route()
     {
         $output = (new AuthIntegrationTest_Controller())->foo();
         $response = $this->get('/foo');
@@ -77,10 +76,7 @@ class AuthIntegrationTest extends IntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function check_user_is_assigned()
+    #[Test] public function check_user_is_assigned()
     {
         $response = $this->get('/user-check');
         $this->assertInstanceOf(HttpResponse::class, $response);
@@ -89,20 +85,14 @@ class AuthIntegrationTest extends IntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function check_auth_protected_route_fails_without_logged_in_user()
+    #[Test] public function check_auth_protected_route_fails_without_logged_in_user()
     {
         $response = $this->get('/bar');
         $this->assertInstanceOf(HttpResponse::class, $response);
         $this->assertEquals(401, $response->status);
     }
 
-    /**
-     * @test
-     */
-    public function check_complete_login_process()
+    #[Test] public function check_complete_login_process()
     {
 
         $response = $this->get('/bar');
@@ -145,10 +135,7 @@ class AuthIntegrationTest extends IntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function check_allowed_middleware()
+    #[Test] public function check_allowed_middleware()
     {
         $response = $this->get('/orders/1422/edit');
         $this->assertInstanceOf(HttpResponse::class, $response);

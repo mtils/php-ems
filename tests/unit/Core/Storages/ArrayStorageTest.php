@@ -12,47 +12,33 @@ use Ems\Contracts\Core\Storage;
 use Ems\Core\Url;
 use Ems\IntegrationTest;
 use Ems\Testing\FilesystemMethods;
+use PHPUnit\Framework\Attributes\Test;
 
 class ArrayStorageTest extends IntegrationTest
 {
     use FilesystemMethods;
 
-    /**
-     * @test
-     */
-    public function implements_interface()
+    #[Test] public function implements_interface()
     {
         $this->assertInstanceOf(Storage::class, $this->newStorage());
     }
 
-    /**
-     * @test
-     */
-    public function storageType_is_memory()
+    #[Test] public function storageType_is_memory()
     {
         $this->assertEquals(Storage::MEMORY, $this->newStorage()->storageType());
     }
 
-    /**
-     * @test
-     */
-    public function persist_returns_true()
+    #[Test] public function persist_returns_true()
     {
         $this->assertTrue($this->newStorage()->persist());
     }
 
-    /**
-     * @test
-     */
-    public function isBuffered_returns_true()
+    #[Test] public function isBuffered_returns_true()
     {
         $this->assertFalse($this->newStorage()->isBuffered());
     }
 
-    /**
-     * @test
-     */
-    public function purge_clears_storage()
+    #[Test] public function purge_clears_storage()
     {
         $data = ['test' => 'one'];
         $storage = $this->newStorage($data);

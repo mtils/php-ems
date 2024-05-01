@@ -9,15 +9,13 @@ use DateTime;
 use Ems\Model\Eloquent\Contracts\ProxyModel;
 use Ems\TestCase;
 use Ems\Testing\Eloquent\MigratedDatabase;
+use PHPUnit\Framework\Attributes\Test;
 
 class ProxyModelTest extends TestCase
 {
     use MigratedDatabase;
 
-    /**
-     * @test
-     */
-    public function it_implements_interface_by_trait()
+    #[Test] public function it_implements_interface_by_trait()
     {
         /** The ProxyModel interface is what your repository uses internally */
         $this->assertInstanceOf(ProxyModel::class, $this->newProxy());
@@ -27,10 +25,7 @@ class ProxyModelTest extends TestCase
         $this->assertInstanceOf(ProxyModelTest_User::class, new ProxyModelTest_StdClass_User());
     }
 
-    /**
-     * @test
-     */
-    public function it_allows_to_assign_model()
+    #[Test] public function it_allows_to_assign_model()
     {
         $proxy = $this->newProxy();
         $user = $this->newModel();
@@ -38,10 +33,7 @@ class ProxyModelTest extends TestCase
         $this->assertSame($user, $proxy->getModel());
     }
 
-    /**
-     * @test
-     */
-    public function it_forwards_isset_to_model()
+    #[Test] public function it_forwards_isset_to_model()
     {
         $proxy = $this->newProxy($this->newModel());
         $this->assertFalse(isset($proxy->login));
@@ -49,10 +41,7 @@ class ProxyModelTest extends TestCase
         $this->assertTrue(isset($proxy->login));
     }
 
-    /**
-     * @test
-     */
-    public function it_forwards_get_to_model()
+    #[Test] public function it_forwards_get_to_model()
     {
         $proxy = $this->newProxy($this->newModel());
         $this->assertNull($proxy->login);
@@ -60,10 +49,7 @@ class ProxyModelTest extends TestCase
         $this->assertEquals('foo', $proxy->login);
     }
 
-    /**
-     * @test
-     */
-    public function it_forwards_set_to_model()
+    #[Test] public function it_forwards_set_to_model()
     {
         $proxy = $this->newProxy($this->newModel());
         $this->assertNull($proxy->login);
@@ -72,10 +58,7 @@ class ProxyModelTest extends TestCase
         $this->assertEquals('foo', $proxy->login);
     }
 
-    /**
-     * @test
-     */
-    public function it_forwards_unset_to_model()
+    #[Test] public function it_forwards_unset_to_model()
     {
         $proxy = $this->newProxy($this->newModel());
         $this->assertFalse(isset($proxy->login));

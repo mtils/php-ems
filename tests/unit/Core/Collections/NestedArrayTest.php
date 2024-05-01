@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace Ems\Core\Collections;
 
@@ -355,20 +355,16 @@ class NestedArrayTest extends \Ems\TestCase
         $this->assertEquals(4, count($grouper));
     }
 
-    /**
-     * @expectedException \RuntimeException
-     **/
     public function testSetKeyThrowsException()
     {
+        $this->expectException(\RuntimeException::class);
         $grouper = $this->newGrouper([]);
         $grouper['bla'] = 'blub';
     }
 
-    /**
-     * @expectedException \RuntimeException
-     **/
     public function testUnsetKeyThrowsException()
     {
+        $this->expectException(\RuntimeException::class);
         $grouper = $this->newGrouper([]);
         unset($grouper['bla']);
     }

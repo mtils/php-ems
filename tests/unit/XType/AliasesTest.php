@@ -38,11 +38,9 @@ class AliasesTest extends \Ems\TestCase
         $this->assertEquals('kg', $type->unit);
     }
 
-    /**
-     * @expectedException \Ems\Contracts\Core\Errors\NotFound
-     **/
     public function test_non_existing_type_throws_exception()
     {
+        $this->expectException(\Ems\Contracts\Core\Errors\NotFound::class);
         $aliases = $this->newAliases();
         $factory = new TypeFactory;
         $type = $aliases->toType('unpaid-bills', $factory);
@@ -55,11 +53,11 @@ class AliasesTest extends \Ems\TestCase
         $type = $factory->toType('time');
     }
 
-    /**
-     * @expectedException \Ems\Contracts\Core\Errors\ConfigurationError
-     **/
     public function test_double_named_type_throws_exception()
     {
+        $this->expectException(
+            \Ems\Contracts\Core\Errors\ConfigurationError::class
+        );
         $aliases = $this->newAliases();
 
         $proxy = Cheat::a($aliases);

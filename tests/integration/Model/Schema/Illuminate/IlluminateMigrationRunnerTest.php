@@ -16,25 +16,20 @@ use Ems\Model\Skeleton\MigrationBootstrapper;
 use Illuminate\Database\Connection;
 use Illuminate\Database\Schema\Builder;
 use Illuminate\Database\Schema\Grammars\Grammar;
+use PHPUnit\Framework\Attributes\Test;
 
 class IlluminateMigrationRunnerTest extends IntegrationTest
 {
     protected $extraBootstrappers = [MigrationBootstrapper::class];
 
-    /**
-     * @test
-     */
-    public function it_implements_interface()
+    #[Test] public function it_implements_interface()
     {
         $runner = $this->make();
         $this->assertInstanceOf(MigrationRunner::class, $runner);
         $this->assertInstanceOf(IlluminateMigrationRunner::class, $runner);
     }
 
-    /**
-     * @test
-     */
-    public function it_pretends_on_simulate()
+    #[Test] public function it_pretends_on_simulate()
     {
         $connections = $this->mock(EmsConnectionFactory::class);
         $connection = $this->mock(Connection::class);
@@ -52,10 +47,7 @@ class IlluminateMigrationRunnerTest extends IntegrationTest
         $runner->upgrade($file, true);
     }
 
-    /**
-     * @test
-     */
-    public function it_runs_within_transaction_if_supported()
+    #[Test] public function it_runs_within_transaction_if_supported()
     {
         $connections = $this->mock(EmsConnectionFactory::class);
         $connection = $this->mock(Connection::class);
@@ -76,10 +68,7 @@ class IlluminateMigrationRunnerTest extends IntegrationTest
         $runner->upgrade($file, false);
     }
 
-    /**
-     * @test
-     */
-    public function it_runs_without_transaction_if_not_supported()
+    #[Test] public function it_runs_without_transaction_if_not_supported()
     {
         $connections = $this->mock(EmsConnectionFactory::class);
         $connection = $this->mock(Connection::class);
@@ -102,10 +91,7 @@ class IlluminateMigrationRunnerTest extends IntegrationTest
         $runner->upgrade($file, false);
     }
 
-    /**
-     * @test
-     */
-    public function it_uses_custom_migration_connection()
+    #[Test] public function it_uses_custom_migration_connection()
     {
         $connections = $this->mock(EmsConnectionFactory::class);
         $connection = $this->mock(Connection::class);
@@ -126,10 +112,7 @@ class IlluminateMigrationRunnerTest extends IntegrationTest
         $runner->upgrade($file, false);
     }
 
-    /**
-     * @test
-     */
-    public function it_supports_standard_classes()
+    #[Test] public function it_supports_standard_classes()
     {
         $connections = $this->mock(EmsConnectionFactory::class);
         $connection = $this->mock(Connection::class);
@@ -150,10 +133,7 @@ class IlluminateMigrationRunnerTest extends IntegrationTest
         $runner->upgrade($file, false);
     }
 
-    /**
-     * @test
-     */
-    public function it_supports_standard_classes_with_dependencies()
+    #[Test] public function it_supports_standard_classes_with_dependencies()
     {
         $connections = $this->mock(EmsConnectionFactory::class);
         $connection = $this->mock(Connection::class);
@@ -174,10 +154,7 @@ class IlluminateMigrationRunnerTest extends IntegrationTest
         $runner->downgrade($file, false);
     }
 
-    /**
-     * @test
-     */
-    public function it_throws_exception_if_migration_class_not_found()
+    #[Test] public function it_throws_exception_if_migration_class_not_found()
     {
         $file = $this->migrationFile('2017_05_26_092001_no_class_in_file.php');
         $this->expectException(MigrationClassNotFoundException::class);

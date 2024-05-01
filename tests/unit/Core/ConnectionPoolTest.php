@@ -4,6 +4,7 @@
 namespace Ems\Core;
 
 use Ems\Contracts\Core\ConnectionPool as ConnectionPoolContract;
+use Ems\Contracts\Core\Errors\NotFound;
 
 class ConnectionPoolTest extends \Ems\TestCase
 {
@@ -25,11 +26,9 @@ class ConnectionPoolTest extends \Ems\TestCase
         $this->assertEquals('foo', $pool->defaultConnectionName());
     }
 
-    /**
-     * @expectedException Ems\Contracts\Core\Errors\NotFound
-     **/
     public function test_connection_throws_exception_if_no_handler_found()
     {
+        $this->expectException(NotFound::class);
         $pool = $this->newPool();
 
         $connection = $pool->connection();

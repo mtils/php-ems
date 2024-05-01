@@ -7,21 +7,16 @@ namespace Ems\Contracts\Model\Database;
 
 
 use Ems\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 class JoinClauseTest extends TestCase
 {
-    /**
-     * @test
-     */
-    public function it_instantiates()
+    #[Test] public function it_instantiates()
     {
         $this->assertInstanceOf(JoinClause::class, $this->newClause());
     }
 
-    /**
-     * @test
-     */
-    public function on_adds_condition()
+    #[Test] public function on_adds_condition()
     {
         $clause = $this->newClause('addresses')
                        ->on('addresses.user_id', '=', 'users.id');
@@ -35,10 +30,7 @@ class JoinClauseTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function on_adds_condition_with_two_args()
+    #[Test] public function on_adds_condition_with_two_args()
     {
         $clause = $this->newClause('addresses')
             ->on('addresses.user_id',  'users.id');
@@ -52,10 +44,7 @@ class JoinClauseTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function on_adds_predicate_condition()
+    #[Test] public function on_adds_predicate_condition()
     {
         $predicate = new Predicate();
         $clause = $this->newClause('addresses')
@@ -66,10 +55,7 @@ class JoinClauseTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function as_sets_alias()
+    #[Test] public function as_sets_alias()
     {
         $clause = $this->newClause('addresses')->as('delivery_address')
             ->on('addresses.user_id', '=', 'users.id');
@@ -83,10 +69,7 @@ class JoinClauseTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function get_and_set_join_direction()
+    #[Test] public function get_and_set_join_direction()
     {
         $clause = $this->newClause('addresses')->as('delivery_address')
             ->on('addresses.user_id', '=', 'users.id');
@@ -100,10 +83,7 @@ class JoinClauseTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function get_and_set_unification()
+    #[Test] public function get_and_set_unification()
     {
         $clause = $this->newClause('addresses')->as('delivery_address')
             ->on('addresses.user_id', '=', 'users.id');
@@ -117,10 +97,7 @@ class JoinClauseTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function invoke_creates_inner_parentheses()
+    #[Test] public function invoke_creates_inner_parentheses()
     {
         $clause = $this->newClause('addresses');
 
@@ -134,10 +111,7 @@ class JoinClauseTest extends TestCase
         $this->assertSame('b', $clause->conditions->first()->expressions[0]->right);
     }
 
-    /**
-     * @test
-     */
-    public function id_property_returns_alias_or_table()
+    #[Test] public function id_property_returns_alias_or_table()
     {
         $clause = $this->newClause('addresses')
             ->on('addresses.user_id', '=', 'users.id');
@@ -151,26 +125,17 @@ class JoinClauseTest extends TestCase
         $this->assertEquals($clause->table, $clause->id);
     }
 
-    /**
-     * @test
-     */
-    public function get_unknown_property_returns_null()
+    #[Test] public function get_unknown_property_returns_null()
     {
         $this->assertNull($this->newClause()->__get('foo'));
     }
 
-    /**
-     * @test
-     */
-    public function set_unknown_property()
+    #[Test] public function set_unknown_property()
     {
         $this->assertNull($this->newClause()->__set('foo', 'bar'));
     }
 
-    /**
-     * @test
-     */
-    public function select_forwards_to_query()
+    #[Test] public function select_forwards_to_query()
     {
         $params = ['a', 'b'];
         $query = new Query();
@@ -181,10 +146,7 @@ class JoinClauseTest extends TestCase
         $this->assertEquals($params, $query->columns);
     }
 
-    /**
-     * @test
-     */
-    public function from_forwards_to_query()
+    #[Test] public function from_forwards_to_query()
     {
         $table = 'addresses';
         $query = new Query();
@@ -195,10 +157,7 @@ class JoinClauseTest extends TestCase
         $this->assertEquals($table, $query->table);
     }
 
-    /**
-     * @test
-     */
-    public function join_forwards_to_query()
+    #[Test] public function join_forwards_to_query()
     {
         $table = 'addresses';
         $testJoin = $this->newClause();
@@ -212,10 +171,7 @@ class JoinClauseTest extends TestCase
         //$this->assertEquals($table, $query->table);
     }
 
-    /**
-     * @test
-     */
-    public function where_forwards_to_query()
+    #[Test] public function where_forwards_to_query()
     {
         $query = new Query();
 
@@ -226,10 +182,7 @@ class JoinClauseTest extends TestCase
         $this->assertEquals('b', $query->conditions->first()->right);
     }
 
-    /**
-     * @test
-     */
-    public function groupBy_forwards_to_query()
+    #[Test] public function groupBy_forwards_to_query()
     {
         $params = ['a', 'b'];
         $query = new Query();
@@ -240,10 +193,7 @@ class JoinClauseTest extends TestCase
         $this->assertEquals($params, $query->groupBys);
     }
 
-    /**
-     * @test
-     */
-    public function orderBy_forwards_to_query()
+    #[Test] public function orderBy_forwards_to_query()
     {
         $query = new Query();
 
@@ -253,10 +203,7 @@ class JoinClauseTest extends TestCase
         $this->assertEquals(['id' => 'DESC'], $query->orderBys);
     }
 
-    /**
-     * @test
-     */
-    public function having_forwards_to_query()
+    #[Test] public function having_forwards_to_query()
     {
         $query = new Query();
 
@@ -267,10 +214,7 @@ class JoinClauseTest extends TestCase
         $this->assertEquals('b', $query->havings->first()->right);
     }
 
-    /**
-     * @test
-     */
-    public function offset_forwards_to_query()
+    #[Test] public function offset_forwards_to_query()
     {
         $query = new Query();
 
@@ -281,10 +225,7 @@ class JoinClauseTest extends TestCase
         $this->assertEquals(10, $query->limit);
     }
 
-    /**
-     * @test
-     */
-    public function limit_forwards_to_query()
+    #[Test] public function limit_forwards_to_query()
     {
         $query = new Query();
 
@@ -295,10 +236,7 @@ class JoinClauseTest extends TestCase
         $this->assertEquals(30, $query->limit);
     }
 
-    /**
-     * @test
-     */
-    public function values_forwards_to_query()
+    #[Test] public function values_forwards_to_query()
     {
         $values = ['a' => 'b'];
         $query = new Query();

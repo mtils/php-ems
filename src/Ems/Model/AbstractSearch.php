@@ -43,6 +43,7 @@ abstract class AbstractSearch implements SearchContract, OrmCollection, CanSort
      * <b>Traversable</b>
      * @since 5.0.0
      */
+    #[\ReturnTypeWillChange]
     public function getIterator()
     {
 

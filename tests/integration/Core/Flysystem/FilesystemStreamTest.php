@@ -8,7 +8,7 @@ namespace Ems\Core\Flysystem;
 include_once __DIR__ . '/../Filesystem/FileStreamTest.php';
 
 use Ems\Core\Filesystem\FileStreamTest;
-use League\Flysystem\Adapter\Local;
+use League\Flysystem\Local\LocalFilesystemAdapter;
 use League\Flysystem\Filesystem;
 
 class FilesystemStreamTest extends FileStreamTest
@@ -22,7 +22,7 @@ class FilesystemStreamTest extends FileStreamTest
      */
     protected function newStream($path = '/foo', $mode = 'r+', $lock = false)
     {
-        $adapter = new Local('/');
+        $adapter = new LocalFilesystemAdapter('/');
         $fs = new Filesystem($adapter);
 
         return new FilesystemStream($fs, $path, $mode, $lock);

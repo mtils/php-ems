@@ -16,6 +16,7 @@ use Ems\Http\HttpResponse;
 use Ems\TestCase;
 use Ems\Testing\LoggingCallable;
 use Mockery;
+use PHPUnit\Framework\Attributes\Test;
 use function func_get_args;
 use function implode;
 use function is_callable;
@@ -24,30 +25,25 @@ use ReflectionException;
 class RoutedInputHandlerTest extends TestCase
 {
 
-    /**
-     * @test
-     */
-    public function it_implements_interface()
+    #[Test] public function it_implements_interface()
     {
         $this->assertInstanceOf(\Ems\Contracts\Routing\InputHandler::class, $this->make());
     }
 
-    /**
-     * @test
-     * @expectedException \Ems\Core\Exceptions\UnConfiguredException
-     */
-    public function it_throws_exception_if_input_not_routed()
+    #[Test] public function it_throws_exception_if_input_not_routed()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\UnConfiguredException::class
+        );
         $handler = $this->make();
         $handler($this->input('home'));
     }
 
-    /**
-     * @test
-     * @expectedException \Ems\Core\Exceptions\UnConfiguredException
-     */
-    public function it_throws_exception_if_input_handler_not_callable()
+    #[Test] public function it_throws_exception_if_input_handler_not_callable()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\UnConfiguredException::class
+        );
         $handler = $this->make();
         /** @var Input|Mockery\MockInterface $input */
         $input = $this->mock(Input::class);
@@ -57,10 +53,7 @@ class RoutedInputHandlerTest extends TestCase
         $handler($input);
     }
 
-    /**
-     * @test
-     */
-    public function it_calls_the_route_handler_and_creates_HttpResponse()
+    #[Test] public function it_calls_the_route_handler_and_creates_HttpResponse()
     {
         $handler = $this->make();
         $f = new LoggingCallable(function () {
@@ -73,10 +66,7 @@ class RoutedInputHandlerTest extends TestCase
         $this->assertEquals('bar', $response->payload);
     }
 
-    /**
-     * @test
-     */
-    public function it_calls_the_route_handler_and_creates_CoreResponse()
+    #[Test] public function it_calls_the_route_handler_and_creates_CoreResponse()
     {
         $handler = $this->make();
         $f = new LoggingCallable(function () {
@@ -91,10 +81,7 @@ class RoutedInputHandlerTest extends TestCase
         $this->assertEquals('bar', $response->payload);
     }
 
-    /**
-     * @test
-     */
-    public function it_calls_the_route_handler_and_passes_response_if_is_already_Response()
+    #[Test] public function it_calls_the_route_handler_and_passes_response_if_is_already_Response()
     {
         $handler = $this->make();
         $awaited = new HttpResponse('hello');
@@ -108,10 +95,9 @@ class RoutedInputHandlerTest extends TestCase
     }
 
     /**
-     * @test
      * @throws ReflectionException
      */
-    public function it_assigns_factory_if_lambda_and_none_assigned()
+    #[Test] public function it_assigns_factory_if_lambda_and_none_assigned()
     {
         $factory = function ($class) {
             $instance = new $class;

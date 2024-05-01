@@ -7,24 +7,20 @@ namespace Ems\Config\Processors;
 
 use Ems\TestCase;
 
+use PHPUnit\Framework\Attributes\Test;
+
 use function is_callable;
 
 class ConfigVariablesParserTest extends TestCase
 {
-    /**
-     * @test
-     */
-    public function it_instantiates()
+    #[Test] public function it_instantiates()
     {
         $instance = $this->make();
         $this->assertInstanceOf(ConfigVariablesParser::class, $instance);
         $this->assertTrue(is_callable($instance));
     }
 
-    /**
-     * @test
-     */
-    public function replace_simple_variables()
+    #[Test] public function replace_simple_variables()
     {
         $instance = $this->make();
         $env = [
@@ -40,10 +36,7 @@ class ConfigVariablesParserTest extends TestCase
         $this->assertEquals('bla', $instance->parse('bla'));
     }
 
-    /**
-     * @test
-     */
-    public function replace_string_without_placeholder_returns_same_string()
+    #[Test] public function replace_string_without_placeholder_returns_same_string()
     {
         $instance = $this->make();
         $env = [
@@ -56,10 +49,7 @@ class ConfigVariablesParserTest extends TestCase
         $this->assertEquals('bla', $instance->parse('bla'));
     }
 
-    /**
-     * @test
-     */
-    public function replace_string_with_not_existing_pool()
+    #[Test] public function replace_string_with_not_existing_pool()
     {
         $instance = $this->make();
         $env = [
@@ -74,10 +64,7 @@ class ConfigVariablesParserTest extends TestCase
         $this->assertEquals('{foo.PATH}', $instance->parse('{foo.PATH}'));
     }
 
-    /**
-     * @test
-     */
-    public function replace_variables_from_multiple_sources()
+    #[Test] public function replace_variables_from_multiple_sources()
     {
         $instance = $this->make();
         $env = [
@@ -109,10 +96,7 @@ class ConfigVariablesParserTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function replace_variables_with_default_values()
+    #[Test] public function replace_variables_with_default_values()
     {
         $instance = $this->make();
         $env = [
@@ -149,10 +133,7 @@ class ConfigVariablesParserTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function invoke_replaces_all_variables()
+    #[Test] public function invoke_replaces_all_variables()
     {
         $instance = $this->make();
         $env = [
@@ -203,10 +184,7 @@ class ConfigVariablesParserTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function invoke_replaces_default_variables_if_other_not_assigned()
+    #[Test] public function invoke_replaces_default_variables_if_other_not_assigned()
     {
         $instance = $this->make();
         $configPath = 'local/storage/cache/routes.json';
@@ -232,10 +210,7 @@ class ConfigVariablesParserTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function invoke_replaces_default_variables_if_other_set()
+    #[Test] public function invoke_replaces_default_variables_if_other_set()
     {
         $instance = $this->make();
         $configPath = 'local/storage/cache/routes.json';
@@ -263,10 +238,7 @@ class ConfigVariablesParserTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function invoke_replaces_default_variables_if_other_empty()
+    #[Test] public function invoke_replaces_default_variables_if_other_empty()
     {
         $instance = $this->make();
         $configPath = 'local/storage/cache/routes.json';
@@ -294,10 +266,7 @@ class ConfigVariablesParserTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function invoke_replaces_false_bool_variables()
+    #[Test] public function invoke_replaces_false_bool_variables()
     {
         $instance = $this->make();
         $envValue = false;
@@ -322,10 +291,7 @@ class ConfigVariablesParserTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function invoke_replaces_true_variables()
+    #[Test] public function invoke_replaces_true_variables()
     {
         $instance = $this->make();
         $envValue = true;
@@ -350,10 +316,7 @@ class ConfigVariablesParserTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function invoke_replaces_boolean_default_variables()
+    #[Test] public function invoke_replaces_boolean_default_variables()
     {
         $instance = $this->make();
 

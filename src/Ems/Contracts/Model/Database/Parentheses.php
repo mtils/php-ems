@@ -115,6 +115,7 @@ class Parentheses implements IteratorAggregate, Queryable, Countable
      * @throws Exception on failure.
      * @since  5.0
      */
+    #[\ReturnTypeWillChange]
     public function getIterator()
     {
         return new ArrayIterator($this->expressions);
@@ -127,6 +128,7 @@ class Parentheses implements IteratorAggregate, Queryable, Countable
      * @return int The custom count as an integer.
      * @since  5.1
      */
+    #[\ReturnTypeWillChange]
     public function count()
     {
         return count($this->expressions);

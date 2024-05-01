@@ -76,6 +76,7 @@ class ByTypeContainer implements ArrayAccess, IteratorAggregate, Countable
      * <p>
      * The return value will be casted to boolean if non-boolean was returned.
      */
+    #[\ReturnTypeWillChange]
     public function offsetExists($offset)
     {
         return isset($this->extensions[$offset]);
@@ -89,6 +90,7 @@ class ByTypeContainer implements ArrayAccess, IteratorAggregate, Countable
      * </p>
      * @return mixed Can return all value types.
      */
+    #[\ReturnTypeWillChange]
     public function offsetGet($offset)
     {
         return $this->extensions[$offset];
@@ -105,6 +107,7 @@ class ByTypeContainer implements ArrayAccess, IteratorAggregate, Countable
      * </p>
      * @return void
      */
+    #[\ReturnTypeWillChange]
     public function offsetSet($offset, $value)
     {
         $this->extensions[$offset] = $value;
@@ -119,6 +122,7 @@ class ByTypeContainer implements ArrayAccess, IteratorAggregate, Countable
      * </p>
      * @return void
      */
+    #[\ReturnTypeWillChange]
     public function offsetUnset($offset)
     {
         unset($this->extensions[$offset]);
@@ -128,6 +132,7 @@ class ByTypeContainer implements ArrayAccess, IteratorAggregate, Countable
     /**
      * @return ArrayIterator
      */
+    #[\ReturnTypeWillChange]
     public function getIterator()
     {
         return new ArrayIterator($this->extensions);
@@ -136,6 +141,7 @@ class ByTypeContainer implements ArrayAccess, IteratorAggregate, Countable
     /**
      * @return int
      */
+    #[\ReturnTypeWillChange]
     public function count()
     {
         return count($this->extensions);

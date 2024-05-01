@@ -37,11 +37,9 @@ class CompilerTest extends \Ems\TestCase
         $this->assertSame($parser, $compiler->parser('test'));
     }
 
-    /**
-     * @expectedException \Ems\Contracts\Core\Errors\NotFound
-     **/
     public function test_parser_throws_exception_if_not_found()
     {
+        $this->expectException(\Ems\Contracts\Core\Errors\NotFound::class);
         $compiler = $this->newCompiler();
         $parser = $this->mockParser();
         $compiler->addParser('test', $parser);
@@ -264,11 +262,11 @@ class CompilerTest extends \Ems\TestCase
                 ->andReturn('test2-parsed')
                 ->once();
 
-        
+
 
         $this->assertEquals('test2-parsed',  $compiler->compile($collection, ['test1', 'test2'], $parserOptions));
     }
-    
+
     public function test_compile_calls_passed_parsers_with_parser_options_assigned_with_wildcard()
     {
         $registry = $this->mockRegistry();
@@ -349,7 +347,7 @@ class CompilerTest extends \Ems\TestCase
                 ->andReturn('test2-parsed')
                 ->once();
 
-        
+
 
         $this->assertEquals('test2-parsed',  $compiler->compile($collection, ['test1', 'test2'], $parserOptions));
     }

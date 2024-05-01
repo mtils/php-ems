@@ -16,6 +16,8 @@ use Ems\Model\MapSchemaInspector;
 use Ems\Model\StaticClassMap;
 use Models\User;
 
+use PHPUnit\Framework\Attributes\BeforeClass;
+
 use function class_exists;
 
 class MapStorage
@@ -67,10 +69,9 @@ trait TestOrm
     }
 
     /**
-     * @beforeClass
      * @noinspection PhpIncludeInspection
      */
-    public static function loadOrm()
+    #[BeforeClass] public static function loadOrm()
     {
         if(class_exists(User::class)) {
             return;

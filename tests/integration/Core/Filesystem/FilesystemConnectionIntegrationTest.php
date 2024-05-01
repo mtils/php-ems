@@ -12,6 +12,7 @@ use Ems\Core\Url;
 use Ems\Testing\FilesystemMethods;
 use Ems\Testing\LoggingCallable;
 
+use PHPUnit\Framework\Attributes\Test;
 use function is_resource;
 use Iterator;
 
@@ -19,10 +20,7 @@ class FilesystemConnectionIntegrationTest extends \Ems\IntegrationTest
 {
     use FilesystemMethods;
 
-    /**
-     * @test
-     */
-    public function implements_interface()
+    #[Test] public function implements_interface()
     {
         $this->assertInstanceOf(
             Connection::class,
@@ -30,10 +28,7 @@ class FilesystemConnectionIntegrationTest extends \Ems\IntegrationTest
         );
     }
 
-    /**
-     * @test
-     */
-    public function read_returns_file_content()
+    #[Test] public function read_returns_file_content()
     {
         $file = __FILE__;
 
@@ -46,10 +41,7 @@ class FilesystemConnectionIntegrationTest extends \Ems\IntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function write_writes_file_content()
+    #[Test] public function write_writes_file_content()
     {
         $file = __FILE__;
 
@@ -66,10 +58,7 @@ class FilesystemConnectionIntegrationTest extends \Ems\IntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function read_in_chunks()
+    #[Test] public function read_in_chunks()
     {
         $file = __FILE__;
 
@@ -90,10 +79,7 @@ class FilesystemConnectionIntegrationTest extends \Ems\IntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function open_and_close()
+    #[Test] public function open_and_close()
     {
         $file = __FILE__;
 

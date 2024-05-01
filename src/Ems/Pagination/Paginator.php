@@ -113,6 +113,7 @@ class Paginator implements PaginatorContract
      *
      * @return Traversable
      */
+    #[\ReturnTypeWillChange]
     public function getIterator()
     {
         return new ArrayIterator($this->items);

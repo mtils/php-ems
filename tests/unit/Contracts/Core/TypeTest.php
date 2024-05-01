@@ -54,19 +54,19 @@ class TypeTest extends TestCase
 
     }
 
-    /**
-     * @expectedException \Ems\Contracts\Core\Exceptions\TypeException
-     */
     public function test_toArray_throws_exception_when_not_castable()
     {
+        $this->expectException(
+            \Ems\Contracts\Core\Exceptions\TypeException::class
+        );
         Type::toArray(0.127);
     }
 
-    /**
-     * @expectedException \Ems\Contracts\Core\Exceptions\TypeException
-     */
     public function test_force_throws_exception_if_type_does_not_match()
     {
+        $this->expectException(
+            \Ems\Contracts\Core\Exceptions\TypeException::class
+        );
         Type::force(145, 'string');
     }
 

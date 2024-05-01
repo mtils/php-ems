@@ -49,6 +49,7 @@ class GenericResult implements Result
      *
      * @return \Iterator
      **/
+    #[\ReturnTypeWillChange]
     public function getIterator()
     {
 

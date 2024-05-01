@@ -3,6 +3,7 @@
 namespace Ems\Core\Storages;
 
 
+use Ems\Contracts\Core\Errors\DataCorruption;
 use Ems\Contracts\Core\Filesystem;
 use Ems\Contracts\Core\Serializer as SerializerContract;
 use Ems\Contracts\Core\Storage as StorageContract;
@@ -113,11 +114,9 @@ class SingleFileStorageTest extends \Ems\TestCase
         $this->assertEquals('b', $storage2['a']);
     }
 
-    /**
-     * @expectedException Ems\Contracts\Core\Errors\DataCorruption
-     **/
     public function test_persist_throws_exception_if_checksum_failed()
     {
+        $this->expectException(DataCorruption::class);
         $storage = $this->newStorage(null, null, false);
 
         $storage->createChecksumBy(function ($method, $data) {
@@ -197,7 +196,7 @@ class SingleFileStorageTest extends \Ems\TestCase
 //             $storage->onAfter('offsetSet', function () use ($storage) { $storage->persist(); });
 //             $storage->onAfter('offsetUnset', function () use ($storage) { $storage->persist(); });
         }
-        
+
         return $storage;
     }
 

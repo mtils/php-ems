@@ -3,12 +3,14 @@
 
 namespace Ems\Foundation;
 
+use Ems\Contracts\Core\Errors\UnSupported;
 use Ems\Contracts\Foundation\InputNormalizer as InputNormalizerContract;
 use Ems\Contracts\Foundation\InputProcessor as InputProcessorContract;
 use Ems\Contracts\Validation\Validator;
 use Ems\Contracts\Validation\ValidatorFactory;
 use Ems\Core\NamedObject;
 use Ems\Testing\LoggingCallable;
+use UnexpectedValueException;
 
 
 class InputNormalizerTest extends \Ems\TestCase
@@ -362,11 +364,9 @@ class InputNormalizerTest extends \Ems\TestCase
         $this->assertEquals($awaited, $casted);
     }
 
-    /**
-     * @expectedException Ems\Contracts\Core\Errors\Unsupported
-     **/
     public function test_normalize_with_unsupported_validation_parameter_throws_exception()
     {
+        $this->expectException(Unsupported::class);
         $adjuster = $this->mock(InputProcessorContract::class);
         $validator = $this->mock(Validator::class);
         $validatorFactory = $this->mock(ValidatorFactory::class);
@@ -595,11 +595,9 @@ class InputNormalizerTest extends \Ems\TestCase
         $this->assertEquals($casted, $listeners['cast.after']->arg(0));
     }
 
-    /**
-     * @expectedException UnexpectedValueException
-     **/
     public function test_normalize_with_listeners_which_dont_return_array_throws_exception()
     {
+        $this->expectException(UnexpectedValueException::class);
         $adjuster = $this->mock(InputProcessorContract::class);
         $validator = $this->mock(Validator::class);
         $validatorFactory = $this->mock(ValidatorFactory::class);

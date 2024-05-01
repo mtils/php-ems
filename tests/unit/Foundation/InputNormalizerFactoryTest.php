@@ -12,6 +12,7 @@ use Ems\Testing\Cheat;
 use Ems\Testing\LoggingCallable;
 use Ems\Validation\Validator;
 use Ems\Validation\ValidatorFactory;
+use InvalidArgumentException;
 
 require_once __DIR__ . '/InputNormalizerTest.php';
 
@@ -47,27 +48,21 @@ class InputNormalizerFactoryTest extends \Ems\TestCase
         $this->assertSame($factory, $normalizer->validatorFactory());
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     **/
     public function test_normalizer_with_wrong_segment_count_throws_exception()
     {
+        $this->expectException(InvalidArgumentException::class);
         $normalizer = $this->newFactory()->normalizer('http.get');
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     **/
     public function test_normalizer_with_wildcards_throws_exception()
     {
+        $this->expectException(InvalidArgumentException::class);
         $normalizer = $this->newFactory()->normalizer('http.*.get');
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     **/
     public function test_extend_with_wrong_segment_count_throws_exception()
     {
+        $this->expectException(InvalidArgumentException::class);
         $normalizer = $this->newFactory()->extend('http.get', function () {});
     }
 

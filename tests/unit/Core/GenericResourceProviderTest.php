@@ -3,12 +3,14 @@
 namespace Ems\Core;
 
 
+use Ems\Contracts\Core\Errors\NotFound;
 use Ems\Contracts\Core\Provider;
 use Ems\Contracts\Core\AllProvider;
 use Ems\Contracts\Core\AppliesToResource;
 use Ems\Contracts\Core\Named;
 use Ems\Contracts\Core\TextProvider;
 use Ems\Core\NamedObject;
+use InvalidArgumentException;
 
 class GenericResourceProviderTest extends \Ems\TestCase
 {
@@ -24,11 +26,9 @@ class GenericResourceProviderTest extends \Ems\TestCase
         $this->assertEquals('foo', $this->newProvider()->get('bar', 'foo'));
     }
 
-    /**
-     * @expectedException Ems\Contracts\Core\Errors\NotFound
-     **/
     public function test_getOrFail_throws_exception_if_item_not_found()
     {
+        $this->expectException(NotFound::class);
         $this->assertEquals('foo', $this->newProvider()->getOrFail('bar'));
     }
 
@@ -106,11 +106,9 @@ class GenericResourceProviderTest extends \Ems\TestCase
         $this->assertEquals('My nice object', $provider->get('my.object')->getName());
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     **/
     public function test_adding_not_named_object_throws_exception()
     {
+        $this->expectException(InvalidArgumentException::class);
         $provider = $this->newProvider();
         $provider->set('foo', new \stdClass());
     }

@@ -8,21 +8,16 @@ namespace Ems\Core\Storages;
 
 use Ems\Contracts\Core\Storage;
 use Ems\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 class OneItemProxyStorageTest extends TestCase
 {
-    /**
-     * @test
-     */
-    public function it_implements_storage_interface()
+    #[Test] public function it_implements_storage_interface()
     {
         $this->assertInstanceOf(Storage::class, $this->newStorage());
     }
 
-    /**
-     * @test
-     */
-    public function offsetExists_returns_right_value()
+    #[Test] public function offsetExists_returns_right_value()
     {
         $storage = $this->newStorage();
         $this->assertFalse(isset($storage['foo']));
@@ -32,10 +27,7 @@ class OneItemProxyStorageTest extends TestCase
         $this->assertTrue(isset($storage['foo']));
     }
 
-    /**
-     * @test
-     */
-    public function offsetGet_returns_right_value()
+    #[Test] public function offsetGet_returns_right_value()
     {
         $storage = $this->newStorage();
 
@@ -46,19 +38,15 @@ class OneItemProxyStorageTest extends TestCase
         $this->assertEquals($data, $storage['foo']);
     }
 
-    /**
-     * @test
-     * @expectedException \Ems\Core\Exceptions\KeyNotFoundException
-     */
-    public function offsetGet_throws_exception_if_key_not_found()
+    #[Test] public function offsetGet_throws_exception_if_key_not_found()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\KeyNotFoundException::class
+        );
         echo $this->newStorage()['foo'];
     }
 
-    /**
-     * @test
-     */
-    public function offsetSet_sets_value_on_UnPushable_Storage()
+    #[Test] public function offsetSet_sets_value_on_UnPushable_Storage()
     {
         $storage = $this->newStorage();
 
@@ -80,10 +68,7 @@ class OneItemProxyStorageTest extends TestCase
         $this->assertEquals('it', $storage['test']);
     }
 
-    /**
-     * @test
-     */
-    public function offsetSet_sets_value_on_Pushable_Storage()
+    #[Test] public function offsetSet_sets_value_on_Pushable_Storage()
     {
         $storage = $this->newStorage($this->newPushableStorage());
 
@@ -105,10 +90,7 @@ class OneItemProxyStorageTest extends TestCase
         $this->assertEquals('it', $storage['test']);
     }
 
-    /**
-     * @test
-     */
-    public function offsetUnset_removes_set_values()
+    #[Test] public function offsetUnset_removes_set_values()
     {
         $storage = $this->newStorage();
 
@@ -123,21 +105,17 @@ class OneItemProxyStorageTest extends TestCase
         $this->assertFalse(isset($storage['foo']));
     }
 
-    /**
-     * @test
-     */
-    public function offsetUnset_does_nothing_if_data_not_stored()
+    #[Test] public function offsetUnset_does_nothing_if_data_not_stored()
     {
         $storage = $this->newStorage();
         unset($storage['foo']);
     }
 
-    /**
-     * @test
-     * @expectedException \Ems\Core\Exceptions\KeyNotFoundException
-     */
-    public function offsetUnset_throws_exception_if_key_not_found()
+    #[Test] public function offsetUnset_throws_exception_if_key_not_found()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\KeyNotFoundException::class
+        );
         $storage = $this->newStorage();
         $data = ['my' => 'funny bar'];
 
@@ -145,10 +123,7 @@ class OneItemProxyStorageTest extends TestCase
         unset($storage['bar']);
     }
 
-    /**
-     * @test
-     */
-    public function purge_does_nothing_if_empty_array_passed()
+    #[Test] public function purge_does_nothing_if_empty_array_passed()
     {
         $storage = $this->newStorage();
         $data = ['my' => 'funny bar'];
@@ -159,10 +134,7 @@ class OneItemProxyStorageTest extends TestCase
         $this->assertEquals($data, $storage['foo']);
     }
 
-    /**
-     * @test
-     */
-    public function purge_removes_all_data()
+    #[Test] public function purge_removes_all_data()
     {
         $storage = $this->newStorage();
 
@@ -185,10 +157,7 @@ class OneItemProxyStorageTest extends TestCase
         $this->assertSame([], $storage->toArray());
     }
 
-    /**
-     * @test
-     */
-    public function purge_removes_passed_keys()
+    #[Test] public function purge_removes_passed_keys()
     {
         $storage = $this->newStorage();
 
@@ -211,10 +180,7 @@ class OneItemProxyStorageTest extends TestCase
         $this->assertEquals(['password' => 123456], $storage->toArray());
     }
 
-    /**
-     * @test
-     */
-    public function clear_removes_passed_keys()
+    #[Test] public function clear_removes_passed_keys()
     {
         $storage = $this->newStorage();
 
@@ -237,10 +203,7 @@ class OneItemProxyStorageTest extends TestCase
         $this->assertEquals(['password' => 123456], $storage->toArray());
     }
 
-    /**
-     * @test
-     */
-    public function keys_returns_all_keys()
+    #[Test] public function keys_returns_all_keys()
     {
         $storage = $this->newStorage();
 
@@ -257,28 +220,19 @@ class OneItemProxyStorageTest extends TestCase
         $this->assertEquals('name password age', (string)$storage->keys());
     }
 
-    /**
-     * @test
-     */
-    public function keys_returns_empty_list_if_no_keys()
+    #[Test] public function keys_returns_empty_list_if_no_keys()
     {
         $storage = $this->newStorage();
 
         $this->assertCount(0, $storage->keys());
     }
 
-    /**
-     * @test
-     */
-    public function purge_does_nothing_if_no_data_stored()
+    #[Test] public function purge_does_nothing_if_no_data_stored()
     {
         $this->newStorage()->purge();
     }
 
-    /**
-     * @test
-     */
-    public function setFictitiousId_sets_is()
+    #[Test] public function setFictitiousId_sets_is()
     {
         $this->assertEquals('foo', $this->newStorage()->setFictitiousId('foo')->getFictitiousId());
     }

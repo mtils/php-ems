@@ -31,11 +31,11 @@ class IlluminateConnectionTest extends PDOConnectionTest
         $this->assertEquals(SQL::SQLITE, $this->newConnection()->dialect());
     }
 
-    /**
-     * @expectedException \Ems\Core\Exceptions\UnsupportedUsageException
-     **/
     public function test_setDialect_throws_exception_on_unsupported_value()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\UnsupportedUsageException::class
+        );
         $con = $this->newConnection()->setDialect('mysql');
     }
 
@@ -111,11 +111,11 @@ class IlluminateConnectionTest extends PDOConnectionTest
         }
     }
 
-    /**
-     * @expectedException \Ems\Core\Exceptions\NotImplementedException
-     */
     public function test_dialect_throws_exception_if_dialect_not_known()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\NotImplementedException::class
+        );
         $connection = new IlluminateConnectionTest_Connection(function () {});
         $con = $this->blankConnection($connection);
 
@@ -129,29 +129,27 @@ class IlluminateConnectionTest extends PDOConnectionTest
         $this->assertTrue($con->getOption(PDOConnection::RETURN_LAST_AFFECTED));
     }
 
-    /**
-     * @expectedException \Ems\Core\Exceptions\UnsupportedUsageException
-     */
     public function test_setOption_throws_exception_on_non_ems_option()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\UnsupportedUsageException::class
+        );
         $con = $this->newConnection(false);
         $con->setOption(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
     }
 
-    /**
-     * @expectedException \Ems\Core\Exceptions\UnConfiguredException
-     */
     public function test_make_connection_without_provider_throws_exception()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\UnConfiguredException::class
+        );
         $con = $this->blankConnection();
         $con->url();
     }
 
-    /**
-     * @expectedException \UnexpectedValueException
-     */
     public function test_it_throws_exception_if_provider_does_not_return_an_laravel_connection()
     {
+        $this->expectException(\UnexpectedValueException::class);
         $con = $this->blankConnection();
         $con->provideConnectionBy(function () {
             return new stdClass();

@@ -4,6 +4,7 @@
 namespace Ems\Model\Database\Dialects;
 
 use DateTime;
+use Ems\Contracts\Core\Errors\UnSupported;
 use Ems\Core\Expression;
 use Ems\Core\KeyExpression;
 use Ems\Core\Url;
@@ -21,6 +22,7 @@ use Ems\Model\Database\SQLIOException;
 use Ems\Model\Database\SQLLockException;
 use Ems\Model\Database\SQLNameNotFoundException;
 use Ems\Model\Database\SQLSyntaxException;
+use InvalidArgumentException;
 
 require_once(__DIR__.'/../PDOBaseTest.php');
 
@@ -50,11 +52,9 @@ class SQLiteDialectTest extends PDOBaseTest
         $this->assertEquals('"us""er"', $d->quote('us"er', 'name'));
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     **/
     public function test_quote_throws_expception_with_unknown_type()
     {
+        $this->expectException(InvalidArgumentException::class);
         $this->newDialect()->quote('foo', 'bar');
     }
 
@@ -148,11 +148,9 @@ class SQLiteDialectTest extends PDOBaseTest
 
     }
 
-    /**
-     * @expectedException Ems\Contracts\Core\Errors\Unsupported
-     **/
     public function test_render_without_constraint_parameters_throws_exception()
     {
+        $this->expectException(Unsupported::class);
 
         $bindings = [];
 
@@ -164,11 +162,9 @@ class SQLiteDialectTest extends PDOBaseTest
 
     }
 
-    /**
-     * @expectedException Ems\Contracts\Core\Errors\Unsupported
-     **/
     public function test_render_with_unsupported_operator_throws_exception()
     {
+        $this->expectException(Unsupported::class);
 
         $bindings = [];
 
@@ -265,11 +261,9 @@ class SQLiteDialectTest extends PDOBaseTest
 
     }
 
-    /**
-     * @expectedException Ems\Contracts\Core\Errors\Unsupported
-     **/
     public function test_render_with_unsupported_parameter_in_constraint_throws_exception()
     {
+        $this->expectException(Unsupported::class);
 
         $bindings = [];
 

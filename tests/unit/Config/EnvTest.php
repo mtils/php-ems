@@ -13,6 +13,7 @@ use Ems\TestCase;
 use Ems\TestData;
 use Ems\Testing\Cheat;
 use OutOfBoundsException;
+use PHPUnit\Framework\Attributes\Test;
 use Traversable;
 
 use function file_get_contents;
@@ -25,10 +26,7 @@ class EnvTest extends TestCase
 {
     use TestData;
 
-    /**
-     * @test
-     */
-    public function it_instantiates_and_implements_interfaces()
+    #[Test] public function it_instantiates_and_implements_interfaces()
     {
         $instance = $this->make();
         $this->assertInstanceOf(Env::class, $instance);
@@ -36,10 +34,7 @@ class EnvTest extends TestCase
         $this->assertInstanceOf(Traversable::class, $instance);
     }
 
-    /**
-     * @test
-     */
-    public function load_sample_file()
+    #[Test] public function load_sample_file()
     {
         $instance = $this->make();
         $file = $this->dataFile('config/simple.env');
@@ -56,10 +51,7 @@ class EnvTest extends TestCase
         $this->assertSame('', $config['CNULL']);
     }
 
-    /**
-     * @test
-     */
-    public function load_sample_file_by_resource()
+    #[Test] public function load_sample_file_by_resource()
     {
         $instance = $this->make();
         $file = fopen($this->dataFile('config/simple.env'), 'r');
@@ -76,10 +68,7 @@ class EnvTest extends TestCase
         $this->assertSame('', $config['CNULL']);
     }
 
-    /**
-     * @test
-     */
-    public function load_sample_file_by_string()
+    #[Test] public function load_sample_file_by_string()
     {
         $instance = $this->make();
         $file = file_get_contents($this->dataFile('config/simple.env'));
@@ -96,10 +85,7 @@ class EnvTest extends TestCase
         $this->assertSame('', $config['CNULL']);
     }
 
-    /**
-     * @test
-     */
-    public function load_casted_file()
+    #[Test] public function load_casted_file()
     {
         $instance = $this->make();
 
@@ -154,40 +140,28 @@ class EnvTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function it_sets_values_in_env()
+    #[Test] public function it_sets_values_in_env()
     {
         $this->assertFalse(isset($_ENV['foo']));
         Env::set('foo', 'bar');
         $this->assertEquals('bar', $_ENV['foo']);
     }
 
-    /**
-     * @test
-     */
-    public function it_sets_values_in_server()
+    #[Test] public function it_sets_values_in_server()
     {
         $this->assertFalse(isset($_SERVER['foo2']));
         Env::set('foo2', 'bar');
         $this->assertEquals('bar', $_SERVER['foo2']);
     }
 
-    /**
-     * @test
-     */
-    public function it_sets_values_in_environment()
+    #[Test] public function it_sets_values_in_environment()
     {
         $this->assertFalse(getenv('foo3'));
         Env::set('foo3', 'bar');
         $this->assertEquals('bar', getenv('foo3'));
     }
 
-    /**
-     * @test
-     */
-    public function get_returns_from_env_array()
+    #[Test] public function get_returns_from_env_array()
     {
         $var = 'some_special_var';
         $value = 'spongebob';
@@ -197,10 +171,7 @@ class EnvTest extends TestCase
         $this->assertEquals($value, Env::get($var));
     }
 
-    /**
-     * @test
-     */
-    public function get_returns_from_server_array()
+    #[Test] public function get_returns_from_server_array()
     {
         $var = 'some_special_var2';
         $value = 'patrick';
@@ -210,10 +181,7 @@ class EnvTest extends TestCase
         $this->assertEquals($value, Env::get($var));
     }
 
-    /**
-     * @test
-     */
-    public function get_returns_from_environment()
+    #[Test] public function get_returns_from_environment()
     {
         $var = 'some_special_var3';
         $value = 'sandy';
@@ -224,20 +192,14 @@ class EnvTest extends TestCase
         $this->assertEquals($value, Env::get($var));
     }
 
-    /**
-     * @test
-     */
-    public function get_returns_forced_from_environment()
+    #[Test] public function get_returns_forced_from_environment()
     {
         $var = 'PATH';
         $value = getenv($var);
         $this->assertEquals($value, Env::get($var, true));
     }
 
-    /**
-     * @test
-     */
-    public function clear_removes_variable()
+    #[Test] public function clear_removes_variable()
     {
         $var = 'bull';
         $val = 'green';
@@ -252,27 +214,18 @@ class EnvTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function getSetter_returns_setter()
+    #[Test] public function getSetter_returns_setter()
     {
         $this->assertInstanceOf(Closure::class, Env::getSetter(Env::SERVER_ARRAY_SETTER));
     }
 
-    /**
-     * @test
-     */
-    public function getSetter_throws_Exception_if_setter_not_found()
+    #[Test] public function getSetter_throws_Exception_if_setter_not_found()
     {
         $this->expectException(OutOfBoundsException::class);
         $this->assertInstanceOf(Closure::class, Env::getSetter('foo'));
     }
 
-    /**
-     * @test
-     */
-    public function setSetter_sets_and_uses_custom_setter()
+    #[Test] public function setSetter_sets_and_uses_custom_setter()
     {
         $testArray = [];
         $setter = function ($name, $value) use (&$testArray) {
@@ -292,10 +245,7 @@ class EnvTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function unquoted_values_with_spaces_throw_exception()
+    #[Test] public function unquoted_values_with_spaces_throw_exception()
     {
         $test = 'THE_NEW_VALUE=some words with spaces';
 
@@ -309,20 +259,14 @@ class EnvTest extends TestCase
         }
     }
 
-    /**
-     * @test
-     */
-    public function escaped_values_with_spaces_throw_exception()
+    #[Test] public function escaped_values_with_spaces_throw_exception()
     {
         $test = 'THE_NEW_VALUE="some\ words\ with\ spaces"';
         $config = $this->make()->load($test);
         $this->assertEquals('some\ words\ with\ spaces',$config['THE_NEW_VALUE']);
     }
 
-    /**
-     * @test
-     */
-    public function ArrayAccess_works()
+    #[Test] public function ArrayAccess_works()
     {
         $instance = $this->make();
         $file = $this->dataFile('config/simple.env');
@@ -341,10 +285,7 @@ class EnvTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function toArray_returns_all()
+    #[Test] public function toArray_returns_all()
     {
         $instance = $this->make();
         $file = $this->dataFile('config/simple.env');
@@ -362,10 +303,7 @@ class EnvTest extends TestCase
         $this->assertSame('', $array['CNULL']);
     }
 
-    /**
-     * @test
-     */
-    public function getIterator_iterates_over_values()
+    #[Test] public function getIterator_iterates_over_values()
     {
         $instance = $this->make();
         $file = $this->dataFile('config/simple.env');
@@ -386,10 +324,7 @@ class EnvTest extends TestCase
         $this->assertSame('', $array['CNULL']);
     }
 
-    /**
-     * @test
-     */
-    public function split_without_mb_str_split()
+    #[Test] public function split_without_mb_str_split()
     {
         $instance = $this->make();
         Cheat::set($instance, 'hideMbStrSplit', true);

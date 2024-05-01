@@ -49,11 +49,11 @@ class TextFormatterTest extends \Ems\TestCase
         $this->assertEquals($result, $formatter->__call('trim', [$input]));
     }
 
-    /**
-     * @expectedException \Ems\Core\Exceptions\HandlerNotFoundException
-     **/
     public function test_call_throws_HandlerNotFoundException_if_filter_unknown()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\HandlerNotFoundException::class
+        );
         $formatter = $this->newFormatter();
 
         $input = ' whitespace ';

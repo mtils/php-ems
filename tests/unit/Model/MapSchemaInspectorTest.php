@@ -19,24 +19,19 @@ use Models\Contact;
 use Models\File;
 use Models\ProjectType;
 use Models\User;
+use PHPUnit\Framework\Attributes\Test;
 use stdClass;
 
 class MapSchemaInspectorTest extends TestCase
 {
     use TestOrm;
 
-    /**
-     * @test
-     */
-    public function it_implements_interface()
+    #[Test] public function it_implements_interface()
     {
         $this->assertInstanceOf(SchemaInspector::class, $this->make());
     }
 
-    /**
-     * @test
-     */
-    public function map_object()
+    #[Test] public function map_object()
     {
         $inspector = $this->make();
         $map = new ClassMap();
@@ -44,10 +39,7 @@ class MapSchemaInspectorTest extends TestCase
         $this->assertSame($map, $inspector->getMap(TestCase::class));
     }
 
-    /**
-     * @test
-     */
-    public function map_closure()
+    #[Test] public function map_closure()
     {
         $inspector = $this->make();
         $map = new ClassMap();
@@ -57,40 +49,32 @@ class MapSchemaInspectorTest extends TestCase
         $this->assertSame($map, $inspector->getMap(TestCase::class));
     }
 
-    /**
-     * @test
-     */
-    public function map_class()
+    #[Test] public function map_class()
     {
         $inspector = $this->make();
         $this->assertSame($inspector, $inspector->map(TestCase::class, MapSchemaInspectorTest_ClassMap::class));
         $this->assertInstanceOf(MapSchemaInspectorTest_ClassMap::class, $inspector->getMap(TestCase::class));
     }
 
-    /**
-     * @test
-     * @expectedException \Ems\Contracts\Core\Exceptions\TypeException
-     */
-    public function map_unknown_type_throws_exception()
+    #[Test] public function map_unknown_type_throws_exception()
     {
+        $this->expectException(
+            \Ems\Contracts\Core\Exceptions\TypeException::class
+        );
         $inspector = $this->make();
         $inspector->map(TestCase::class, new stdClass());
     }
 
-    /**
-     * @test
-     * @expectedException \Ems\Core\Exceptions\HandlerNotFoundException
-     */
-    public function get_unknown_map_throws_exception()
+    #[Test] public function get_unknown_map_throws_exception()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\HandlerNotFoundException::class
+        );
         $inspector = $this->make();
         $inspector->getMap(TestCase::class);
     }
 
-    /**
-     * @test
-     */
-    public function getters_are_forwarded_to_ClassMap()
+    #[Test] public function getters_are_forwarded_to_ClassMap()
     {
         $map = new ClassMap();
         $map->setOrmClass(TestCase::class)
@@ -114,10 +98,7 @@ class MapSchemaInspectorTest extends TestCase
         $this->assertSame($map->getAutoUpdates(), $inspector->getAutoUpdates(TestCase::class));
     }
 
-    /**
-     * @test
-     */
-    public function defaults_and_updates_support_closures()
+    #[Test] public function defaults_and_updates_support_closures()
     {
         $map = new ClassMap();
         $map->setOrmClass(TestCase::class)
@@ -143,10 +124,7 @@ class MapSchemaInspectorTest extends TestCase
         $this->assertSame($updates, $inspector->getAutoUpdates(TestCase::class));
     }
 
-    /**
-     * @test
-     */
-    public function defaults_and_updates_support_Generator()
+    #[Test] public function defaults_and_updates_support_Generator()
     {
         $map = new ClassMap();
         $map->setOrmClass(TestCase::class)
@@ -170,10 +148,7 @@ class MapSchemaInspectorTest extends TestCase
         $this->assertInstanceOf(DateTime::class, $inspector->getAutoUpdates(TestCase::class)['c']);
     }
 
-    /**
-    * @test
-    */
-    public function type_returns_string_on_existing_key()
+    #[Test] public function type_returns_string_on_existing_key()
     {
         $map = new ClassMap();
         $map->setOrmClass(TestCase::class)
@@ -191,38 +166,26 @@ class MapSchemaInspectorTest extends TestCase
         $this->assertNull($inspector->type(TestCase::class, 'd'));
     }
 
-    /**
-     * @test
-     */
-    public function type_returns_type_on_relation()
+    #[Test] public function type_returns_type_on_relation()
     {
         $inspector = $this->newInspector();
         $this->assertEquals(Contact::class, $inspector->type(User::class, 'contact'));
         $this->assertEquals(User::class, $inspector->type(Contact::class, 'user'));
     }
 
-    /**
-     * @test
-     */
-    public function type_returns_null_on_unknown_class()
+    #[Test] public function type_returns_null_on_unknown_class()
     {
         $inspector = $this->newInspector();
         $this->assertNull($inspector->type(Exception::class, 'contact'));
     }
 
-    /**
-     * @test
-     */
-    public function type_returns_null_on_unknown_relation()
+    #[Test] public function type_returns_null_on_unknown_relation()
     {
         $inspector = $this->newInspector();
         $this->assertNull($inspector->type(User::class, 'contacts'));
     }
 
-    /**
-     * @test
-     */
-    public function type_returns_type_on_nested_relation()
+    #[Test] public function type_returns_type_on_nested_relation()
     {
         $inspector = $this->newInspector();
         $this->assertEquals(ProjectType::class, $inspector->type(User::class, 'projects.type'));

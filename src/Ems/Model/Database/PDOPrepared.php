@@ -117,6 +117,7 @@ class PDOPrepared implements Prepared
      *
      * @return \Iterator
      **/
+    #[\ReturnTypeWillChange]
     public function getIterator()
     {
 

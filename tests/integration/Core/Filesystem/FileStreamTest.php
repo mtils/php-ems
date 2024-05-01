@@ -6,6 +6,8 @@ use Ems\Contracts\Core\Stream;
 use Ems\Contracts\Core\Stringable;
 use Ems\Core\Url;
 use Ems\Testing\FilesystemMethods;
+use PHPUnit\Framework\Attributes\Test;
+
 use function file_get_contents;
 use function filesize;
 use function ftell;
@@ -14,10 +16,7 @@ class FileStreamTest extends \Ems\IntegrationTest
 {
     use FilesystemMethods;
 
-    /**
-     * @test
-     */
-    public function implements_interfaces()
+    #[Test] public function implements_interfaces()
     {
         $stream = $this->newStream();
         $this->assertInstanceOf(
@@ -30,19 +29,13 @@ class FileStreamTest extends \Ems\IntegrationTest
         );
     }
 
-    /**
-     * @test
-     */
-    public function type_returns_right_type_in_AbstractStream()
+    #[Test] public function type_returns_right_type_in_AbstractStream()
     {
         $stream = new FileStreamTest_AbstractStream();
         $this->assertEquals('', $stream->type());
     }
 
-    /**
-     * @test
-     */
-    public function type_returns_right_type_even_without_resource()
+    #[Test] public function type_returns_right_type_even_without_resource()
     {
         $this->assertEquals('stream', $this->newStream()->type());
 
@@ -57,10 +50,7 @@ class FileStreamTest extends \Ems\IntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function methods_that_need_a_stream_also_work_without_one()
+    #[Test] public function methods_that_need_a_stream_also_work_without_one()
     {
         $stream = new FileStreamTest_ResourceLessStream();
 
@@ -78,56 +68,38 @@ class FileStreamTest extends \Ems\IntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function setting_and_getting_chunkSize()
+    #[Test] public function setting_and_getting_chunkSize()
     {
         $reader = $this->newStream();
         $this->assertSame($reader, $reader->setChunkSize(1024));
         $this->assertEquals(1024, $reader->getChunkSize());
     }
 
-    /**
-     * @test
-     */
-    public function getting_isReadable()
+    #[Test] public function getting_isReadable()
     {
         $this->assertTrue($this->newStream('/foo', 'r')->isReadable());
         $this->assertFalse($this->newStream('/foo', 'w')->isReadable());
     }
 
-    /**
-     * @test
-     */
-    public function getting_isWritable()
+    #[Test] public function getting_isWritable()
     {
         $this->assertTrue($this->newStream('/foo', 'w')->isWritable());
         $this->assertFalse($this->newStream('/foo', 'r')->isWritable());
     }
 
-    /**
-     * @test
-     */
-    public function test_getting_url()
+    #[Test] public function test_getting_url()
     {
         $url = new Url('/tmp');
         $stream = $this->newStream($url);
         $this->assertSame($url, $stream->url());
     }
 
-    /**
-     * @test
-     */
-    public function test_isSeekable()
+    #[Test] public function test_isSeekable()
     {
         $this->assertTrue(is_bool($this->newStream('/dev/null')->open()->isSeekable()));
     }
 
-    /**
-     * @test
-     */
-    public function reads_filled_txt_file_in_chunks()
+    #[Test] public function reads_filled_txt_file_in_chunks()
     {
         $file = static::dataFile('ascii-data-eol-l.txt');
 
@@ -165,10 +137,7 @@ class FileStreamTest extends \Ems\IntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function read_chunk()
+    #[Test] public function read_chunk()
     {
         $file = static::dataFile('ascii-data-eol-l.txt');
 
@@ -179,10 +148,7 @@ class FileStreamTest extends \Ems\IntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function reads_filled_txt_file_in_toString()
+    #[Test] public function reads_filled_txt_file_in_toString()
     {
         $file = static::dataFile('ascii-data-eol-l.txt');
 
@@ -193,10 +159,7 @@ class FileStreamTest extends \Ems\IntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function reads_empty_file()
+    #[Test] public function reads_empty_file()
     {
         $file = static::dataFile('empty.txt');
 
@@ -212,12 +175,9 @@ class FileStreamTest extends \Ems\IntegrationTest
 
     }
 
-    /**
-     * @test
-     * @expectedException \LogicException
-     */
-    public function read_complete_string_throws_exception_if_write_only()
+    #[Test] public function test_read_complete_string_throws_exception_if_write_only()
     {
+        $this->expectException(\LogicException::class);
         $file = static::dataFile('ascii-data-eol-l.txt');
 
         $stream = $this->newStream($file, 'w');
@@ -225,12 +185,9 @@ class FileStreamTest extends \Ems\IntegrationTest
 
     }
 
-    /**
-     * @test
-     * @expectedException \LogicException
-     */
-    public function read_string_in_chunks_throws_exception_if_write_only()
+    #[Test] public function read_string_in_chunks_throws_exception_if_write_only()
     {
+        $this->expectException(\LogicException::class);
         $file = static::dataFile('ascii-data-eol-l.txt');
 
         $stream = $this->newStream($file, 'w');
@@ -241,21 +198,15 @@ class FileStreamTest extends \Ems\IntegrationTest
 
     }
 
-    /**
-     * @test
-     * @expectedException \Ems\Contracts\Core\Errors\NotFound
-     */
-    public function read_throws_exception_if_path_not_found()
+    #[Test] public function read_throws_exception_if_path_not_found()
     {
+        $this->expectException(\Ems\Contracts\Core\Errors\NotFound::class);
         $stream = $this->newStream('/foo');
         $stream->rewind();
 
     }
 
-    /**
-     * @test
-     */
-    public function count_returns_filesize()
+    #[Test] public function count_returns_filesize()
     {
         $file = static::dataFile('ascii-data-eol-l.txt');
 
@@ -264,10 +215,7 @@ class FileStreamTest extends \Ems\IntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function open_creates_handle()
+    #[Test] public function open_creates_handle()
     {
         $file = static::dataFile('ascii-data-eol-l.txt');
 
@@ -279,10 +227,7 @@ class FileStreamTest extends \Ems\IntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function seek_moves_cursor()
+    #[Test] public function seek_moves_cursor()
     {
         $file = static::dataFile('ascii-data-eol-l.txt');
 
@@ -312,19 +257,13 @@ class FileStreamTest extends \Ems\IntegrationTest
 
     }
 
-    /**
-     * @test
-     * @expectedException \Ems\Contracts\Core\Errors\UnSupported
-     */
-    public function seek_throws_exception_if_resource_not_seekable()
+    #[Test] public function seek_throws_exception_if_resource_not_seekable()
     {
+        $this->expectException(\Ems\Contracts\Core\Errors\UnSupported::class);
         (new FileStreamTest_ResourceLessStream())->seek(10);
     }
 
-    /**
-     * @test
-     */
-    public function metaData_returns_data()
+    #[Test] public function metaData_returns_data()
     {
         $file = static::dataFile('ascii-data-eol-l.txt');
 
@@ -343,20 +282,14 @@ class FileStreamTest extends \Ems\IntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function mode_returns_mode()
+    #[Test] public function mode_returns_mode()
     {
         $stream = new FileStreamTest_ResourceLessStream();
         $this->assertEquals('r+', $stream->mode());
 
     }
 
-    /**
-     * @test
-     */
-    public function isLocal_returns_correct_value_is_no_resource_present()
+    #[Test] public function isLocal_returns_correct_value_is_no_resource_present()
     {
 
         $stream = new FileStreamTest_ResourceLessStream();
@@ -375,10 +308,7 @@ class FileStreamTest extends \Ems\IntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function write_file_in_one_row()
+    #[Test] public function write_file_in_one_row()
     {
         $inFile = static::dataFile('ascii-data-eol-l.txt');
         $content = file_get_contents($inFile);
@@ -394,10 +324,7 @@ class FileStreamTest extends \Ems\IntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function write_file_in_chunks()
+    #[Test] public function write_file_in_chunks()
     {
         $inFile = static::dataFile('ascii-data-eol-l.txt');
         $content = file_get_contents($inFile);
@@ -419,10 +346,7 @@ class FileStreamTest extends \Ems\IntegrationTest
         $this->assertEquals($content, file_get_contents($outFile));
     }
 
-    /**
-     * @test
-     */
-    public function write_file_by_other_stream()
+    #[Test] public function write_file_by_other_stream()
     {
         $inFile = static::dataFile('ascii-data-eol-l.txt');
         $content = file_get_contents($inFile);

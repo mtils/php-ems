@@ -21,7 +21,7 @@ class TestCase extends BaseTestCase
         return $mock;
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         Mockery::close();
     }

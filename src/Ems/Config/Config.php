@@ -84,6 +84,7 @@ class Config implements ArrayAccess, IteratorAggregate
     /**
      * @return ArrayIterator
      */
+    #[\ReturnTypeWillChange]
     public function getIterator()
     {
         $this->compileIfNeeded();

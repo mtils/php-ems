@@ -8,32 +8,24 @@ namespace Ems\Http\Serializer;
 
 use Ems\Contracts\Core\Serializer;
 use Ems\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 use stdClass;
 use function http_build_query;
 use function urlencode;
 
 class UrlEncodeSerializerTest extends TestCase
 {
-    /**
-     * @test
-     */
-    public function it_implements_interface()
+    #[Test] public function it_implements_interface()
     {
         $this->assertInstanceOf(Serializer::class, $this->make());
     }
 
-    /**
-     * @test
-     */
-    public function it_returns_correct_mimeType()
+    #[Test] public function it_returns_correct_mimeType()
     {
         $this->assertEquals('application/x-www-form-urlencoded', $this->make()->mimeType());
     }
 
-    /**
-     * @test
-     */
-    public function it_serializes_strings_correctly()
+    #[Test] public function it_serializes_strings_correctly()
     {
         $serializer = $this->make();
         $this->assertEquals('hello+you', $serializer->serialize('hello you'));
@@ -41,10 +33,7 @@ class UrlEncodeSerializerTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function it_serializes_arrays_correctly()
+    #[Test] public function it_serializes_arrays_correctly()
     {
         $serializer = $this->make();
         $data = [
@@ -58,10 +47,7 @@ class UrlEncodeSerializerTest extends TestCase
         $this->assertEquals(http_build_query($data), $serialized);
     }
 
-    /**
-     * @test
-     */
-    public function it_serializes_multidimensional_arrays_correctly()
+    #[Test] public function it_serializes_multidimensional_arrays_correctly()
     {
         $serializer = $this->make();
         $data = [
@@ -83,19 +69,13 @@ class UrlEncodeSerializerTest extends TestCase
         $this->assertEquals(http_build_query($data), $serialized);
     }
 
-    /**
-     * @test
-     * @expectedException \UnexpectedValueException
-     */
-    public function it_throws_exception_if_not_stringable()
+    #[Test] public function it_throws_exception_if_not_stringable()
     {
+        $this->expectException(\UnexpectedValueException::class);
         $this->make()->deserialize(new stdClass());
     }
 
-    /**
-     * @test
-     */
-    public function it_deserializes_simple_strings()
+    #[Test] public function it_deserializes_simple_strings()
     {
         $serializer = $this->make();
         $testSentence = 'Grüße zur Märchenstunde Schröder! Kostet 6 €';
@@ -103,10 +83,7 @@ class UrlEncodeSerializerTest extends TestCase
         $this->assertEquals($testSentence, $serializer->deserialize(urlencode($testSentence)));
     }
 
-    /**
-     * @test
-     */
-    public function it_deserializes_arrays()
+    #[Test] public function it_deserializes_arrays()
     {
         $serializer = $this->make();
         $data = [
@@ -119,10 +96,7 @@ class UrlEncodeSerializerTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function it_deserializes_multidimensional_arrays()
+    #[Test] public function it_deserializes_multidimensional_arrays()
     {
         $serializer = $this->make();
         $data = [

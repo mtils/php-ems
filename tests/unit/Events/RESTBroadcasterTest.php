@@ -28,7 +28,7 @@ class RESTBroadcasterTest extends \Ems\TestCase
      */
     protected $remoteUrl;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         $this->url = new Url('https://web-utils.de/api/v1');
@@ -61,11 +61,11 @@ class RESTBroadcasterTest extends \Ems\TestCase
         $this->assertEquals(['signalize', 'receive'], $broadcaster->methodHooks());
     }
 
-    /**
-     * @expectedException \Ems\Contracts\Core\Errors\ConfigurationError
-     */
     public function test_signalsUrl_throws_exception_if_no_url_setted()
     {
+        $this->expectException(
+            \Ems\Contracts\Core\Errors\ConfigurationError::class
+        );
         $broadcaster = $this->newBroadcaster();
         $broadcaster->getSignalsUrl();
     }
@@ -80,11 +80,11 @@ class RESTBroadcasterTest extends \Ems\TestCase
         $this->assertSame($url, $broadcaster->getSlotsUrl());
     }
 
-    /**
-     * @expectedException \Ems\Contracts\Core\Errors\ConfigurationError
-     */
     public function test_slotsUrl_throws_exception_if_no_url_setted()
     {
+        $this->expectException(
+            \Ems\Contracts\Core\Errors\ConfigurationError::class
+        );
         $broadcaster = $this->newBroadcaster();
         $broadcaster->getSlotsUrl();
     }
@@ -107,11 +107,9 @@ class RESTBroadcasterTest extends \Ems\TestCase
         $this->assertEquals((string)$this->url->append('signals/users.updated'), (string)$signal->url);
     }
 
-    /**
-     * @expectedException \OverflowException
-     */
     public function test_addSignal_twice_throws_exception()
     {
+        $this->expectException(\OverflowException::class);
         $broadcaster = $this->newBroadcaster()->setBaseUrl($this->url);
 
         $event = 'users.updated';
@@ -145,11 +143,9 @@ class RESTBroadcasterTest extends \Ems\TestCase
 
     }
 
-    /**
-     * @expectedException \Ems\Contracts\Core\Errors\NotFound
-     */
     public function test_add_receiver_by_parameters_throws_exception_if_signal_does_not_exist()
     {
+        $this->expectException(\Ems\Contracts\Core\Errors\NotFound::class);
         $broadcaster = $this->newBroadcaster()->setBaseUrl($this->url);
 
         $receiver = $broadcaster->addReceiver('users.updated', $this->remoteUrl->append('slots/user-changed'));
@@ -179,11 +175,11 @@ class RESTBroadcasterTest extends \Ems\TestCase
         $this->assertEquals('My nice receiver', $receiver->getName());
     }
 
-    /**
-     * @expectedException \Ems\Contracts\Core\Errors\ConstraintFailure
-     */
     public function test_add_with_same_url_twice_throws_exception()
     {
+        $this->expectException(
+            \Ems\Contracts\Core\Errors\ConstraintFailure::class
+        );
         $broadcaster = $this->newBroadcaster()->setBaseUrl($this->url);
 
         $tests = [
@@ -204,11 +200,11 @@ class RESTBroadcasterTest extends \Ems\TestCase
         $url2 = $this->remoteUrl->scheme('http')->append('slots/user-changed');
     }
 
-    /**
-     * @expectedException \Ems\Contracts\Core\Errors\ConstraintFailure
-     */
     public function test_add_with_same_url_and_different_scheme_twice_throws_exception()
     {
+        $this->expectException(
+            \Ems\Contracts\Core\Errors\ConstraintFailure::class
+        );
         $broadcaster = $this->newBroadcaster()->setBaseUrl($this->url);
 
         $tests = [
@@ -230,11 +226,11 @@ class RESTBroadcasterTest extends \Ems\TestCase
         $broadcaster->addReceiver('users.updated', $url2, 'My nice second receiver');
     }
 
-    /**
-     * @expectedException \Ems\Contracts\Core\Errors\ConstraintFailure
-     */
     public function test_add_with_own_broadcaster_url_throws_exception()
     {
+        $this->expectException(
+            \Ems\Contracts\Core\Errors\ConstraintFailure::class
+        );
         $broadcaster = $this->newBroadcaster()->setBaseUrl($this->url);
 
         $tests = [
@@ -274,11 +270,9 @@ class RESTBroadcasterTest extends \Ems\TestCase
         $this->assertSame($receiver, $broadcaster->getReceiver($receiver->getId()));
     }
 
-    /**
-     * @expectedException \Ems\Contracts\Core\Errors\NotFound
-     */
     public function test_getReceiver_throws_exception_if_not_found()
     {
+        $this->expectException(\Ems\Contracts\Core\Errors\NotFound::class);
         $broadcaster = $this->newBroadcaster()->setBaseUrl($this->url);
 
         $broadcaster->getReceiver('blabla');
@@ -413,11 +407,9 @@ class RESTBroadcasterTest extends \Ems\TestCase
         $this->assertFalse($hasReceiver($first->getSignalName(), $first));
     }
 
-    /**
-     * @expectedException \Ems\Contracts\Core\Errors\NotFound
-     */
     public function test_removeReceiver_throws_exception_if_receiver_not_found()
     {
+        $this->expectException(\Ems\Contracts\Core\Errors\NotFound::class);
         $broadcaster = $this->newBroadcaster()->setBaseUrl($this->url);
 
         $receiver = new GenericReceiver('foo', $this->remoteUrl);
@@ -441,11 +433,9 @@ class RESTBroadcasterTest extends \Ems\TestCase
         $this->assertEquals((string)$this->url->append('slots/users.updated'), (string)$slot->url);
     }
 
-    /**
-     * @expectedException \OverflowException
-     */
     public function test_addSlot_twice_throws_exception()
     {
+        $this->expectException(\OverflowException::class);
         $broadcaster = $this->newBroadcaster()->setBaseUrl($this->url);
 
         $event = 'users.updated';
@@ -587,11 +577,9 @@ class RESTBroadcasterTest extends \Ems\TestCase
 
     }
 
-    /**
-     * @expectedException \Ems\Contracts\Core\Errors\NotFound
-     */
     public function test_receive_unknown_slot_throws_exception()
     {
+        $this->expectException(\Ems\Contracts\Core\Errors\NotFound::class);
         $bus = $this->newBus();
         $client = $this->mockClient();
         $broadcaster = $this->newBroadcaster($bus, $client)->setBaseUrl($this->url);

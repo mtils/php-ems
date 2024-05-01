@@ -2,9 +2,15 @@
 
 namespace Ems\Events;
 
+use Ems\Contracts\Core\Errors\UnSupported;
 use Ems\Contracts\Core\Subscribable;
 use Ems\Core\Patterns\SubscribableTrait;
 use Ems\Testing\LoggingCallable;
+
+use LogicException;
+
+use OutOfBoundsException;
+use OverflowException;
 
 use function print_r;
 
@@ -387,11 +393,9 @@ class BusTest extends \Ems\TestCase
         $this->assertEquals(['a', 'b', false], $dispatcher->fire('foo', 'e'));
     }
 
-    /**
-     * @expectedException Ems\Contracts\Core\Errors\Unsupported
-     **/
     public function test_getListeners_with_unknown_position_throws_exception()
     {
+        $this->expectException(Unsupported::class);
         $dispatcher = $this->newBus();
         $dispatcher->getListeners('foo', 'bar');
     }
@@ -408,21 +412,17 @@ class BusTest extends \Ems\TestCase
         $dispatcher->mark('no-broadcast')->fire('users.updated');
     }
 
-    /**
-     * @expectedException LogicException
-     **/
     public function test_mark_with_explicit_falsed_mark_throws_exception()
     {
+        $this->expectException(LogicException::class);
         $dispatcher = $this->newBus();
 
         $dispatcher->mark('!no-broadcast')->fire('users.updated');
     }
 
-    /**
-     * @expectedException Ems\Contracts\Core\Errors\Unsupported
-     **/
     public function test_mark_with_unknown_mark_throws_exception()
     {
+        $this->expectException(Unsupported::class);
         $dispatcher = $this->newBus();
 
         $dispatcher->mark('foo');
@@ -656,11 +656,9 @@ class BusTest extends \Ems\TestCase
         $this->assertEquals(['a', 'b'], $listener->args());
     }
 
-    /**
-     * @expectedException LogicException
-     **/
     public function test_forward_throws_exception_if_two_events_passed()
     {
+        $this->expectException(LogicException::class);
         $bus = $this->newBus();
         $bus2 = $this->newBus();
 
@@ -882,11 +880,9 @@ class BusTest extends \Ems\TestCase
 
     }
 
-    /**
-     * @expectedException OverflowException
-     **/
     public function test_addBus_twice_with_same_name_throws_exception()
     {
+        $this->expectException(OverflowException::class);
         $bus = $this->newBus();
         $ormBus = $bus->addBus('orm');
         $bus->addBus('orm');
@@ -904,11 +900,9 @@ class BusTest extends \Ems\TestCase
 
     }
 
-    /**
-     * @expectedException OutOfBoundsException
-     **/
     public function test_remove_unknown_bus_throws_exception()
     {
+        $this->expectException(OutOfBoundsException::class);
         $bus = $this->newBus();
         $bus->removeBus('orm');
     }
@@ -938,11 +932,9 @@ class BusTest extends \Ems\TestCase
 
     }
 
-    /**
-     * @expectedException LogicException
-     **/
     public function test_addBus_named_default_throws_exception()
     {
+        $this->expectException(LogicException::class);
 
         $bus = $this->newBus();
         $ormBus = $bus->addBus('default');

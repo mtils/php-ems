@@ -26,6 +26,8 @@ use Models\Project;
 use Models\ProjectType;
 use Models\User;
 
+use PHPUnit\Framework\Attributes\Test;
+
 use function get_class;
 use function is_object;
 use function iterator_to_array;
@@ -39,10 +41,7 @@ class SkeletonAppTest extends DatabaseIntegrationTest
 
     protected $extraBootstrappers = [OrmBootstrapper::class];
 
-    /**
-     * @test
-     */
-    public function create_ProjectType()
+    #[Test] public function create_ProjectType()
     {
         $response = $this->post('/project-types', ['name' => 'TestType']);
         $this->assertEquals('application/json', $response->contentType);
@@ -60,10 +59,7 @@ class SkeletonAppTest extends DatabaseIntegrationTest
         $this->assertInstanceOf(ProjectType::class, $type);
     }
 
-    /**
-     * @test
-     */
-    public function list_ProjectTypes()
+    #[Test] public function list_ProjectTypes()
     {
         $response = $this->get('/project-types');
         $data = iterator_to_array($response);
@@ -77,10 +73,7 @@ class SkeletonAppTest extends DatabaseIntegrationTest
         }
     }
 
-    /**
-     * @test
-     */
-    public function create_Project()
+    #[Test] public function create_Project()
     {
         /** @var Orm $orm */
         $orm = $this->app(Orm::class);

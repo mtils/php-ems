@@ -172,6 +172,7 @@ class RouteCollector implements IteratorAggregate
      *
      * @since 5.0.0
      */
+    #[\ReturnTypeWillChange]
     public function getIterator()
     {
         if (!$this->common) {

@@ -17,6 +17,7 @@ use Ems\Contracts\Routing\RouteScope;
 use Ems\Core\Lambda;
 use Ems\RoutingTrait;
 use Ems\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 use ReflectionException;
 
 use function array_values;
@@ -28,18 +29,12 @@ class RouterTest extends TestCase
 {
     use RoutingTrait;
 
-    /**
-     * @test
-     */
-    public function it_implements_interface()
+    #[Test] public function it_implements_interface()
     {
         $this->assertInstanceOf(RouterContract::class, $this->router());
     }
 
-    /**
-     * @test
-     */
-    public function it_routes_simple_routes()
+    #[Test] public function it_routes_simple_routes()
     {
 
         $routes = [
@@ -92,10 +87,9 @@ class RouterTest extends TestCase
     }
 
     /**
-     * @test
      * @throws ReflectionException
      */
-    public function it_routes_with_parameters()
+    #[Test] public function it_routes_with_parameters()
     {
 
         $routes = [
@@ -147,10 +141,9 @@ class RouterTest extends TestCase
     }
 
     /**
-     * @test
      * @throws ReflectionException
      */
-    public function it_routes_with_optional_parameters()
+    #[Test] public function it_routes_with_optional_parameters()
     {
 
         $routes = [
@@ -203,10 +196,9 @@ class RouterTest extends TestCase
     }
 
     /**
-     * @test
      * @throws ReflectionException
      */
-    public function it_routes_commands()
+    #[Test] public function it_routes_commands()
     {
 
         $routes = [
@@ -315,10 +307,9 @@ class RouterTest extends TestCase
     }
 
     /**
-     * @test
      * @throws ReflectionException
      */
-    public function it_routes_only_for_registered_clientType()
+    #[Test] public function it_routes_only_for_registered_clientType()
     {
 
         $routes = [
@@ -378,10 +369,9 @@ class RouterTest extends TestCase
     }
 
     /**
-     * @test
      * @throws ReflectionException
      */
-    public function it_routes_only_for_registered_scope()
+    #[Test] public function it_routes_only_for_registered_scope()
     {
 
         $routes = [
@@ -439,10 +429,9 @@ class RouterTest extends TestCase
     }
 
     /**
-     * @test
      * @throws ReflectionException
      */
-    public function it_handles_routes()
+    #[Test] public function it_handles_routes()
     {
 
         $routes = [

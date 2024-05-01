@@ -2,9 +2,11 @@
 
 namespace Ems\XType;
 
+use Ems\Contracts\Core\Errors\NotFound;
 use Ems\Contracts\XType\XType;
 use Ems\Contracts\XType\SelfExplanatory;
 use Ems\Contracts\XType\TypeFactory as TypeFactoryContract;
+use InvalidArgumentException;
 
 class TypeFactoryTest extends \Ems\TestCase
 {
@@ -41,11 +43,9 @@ class TypeFactoryTest extends \Ems\TestCase
         $this->assertFalse($factory->canCreate(['id','false']));
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     **/
     public function test_toType_throws_InvalidArgumentException_if_type_is_not_supported()
     {
+        $this->expectException(InvalidArgumentException::class);
         $factory = $this->newFactory();
         $factory->toType(15);
     }
@@ -65,11 +65,9 @@ class TypeFactoryTest extends \Ems\TestCase
         $this->assertInstanceOf(NumberType::class, $type);
     }
 
-    /**
-     * @expectedException Ems\Contracts\Core\Errors\NotFound
-     **/
     public function test_factory_throws_NotFound_if_class_not_found()
     {
+        $this->expectException(NotFound::class);
         $this->newFactory()->toType('foo');
     }
 

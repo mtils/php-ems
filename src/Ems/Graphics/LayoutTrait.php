@@ -198,6 +198,7 @@ trait LayoutTrait
      *
      * @return \ArrayIterator
      **/
+    #[\ReturnTypeWillChange]
     public function getIterator()
     {
         return new ArrayIterator($this->collectItems());

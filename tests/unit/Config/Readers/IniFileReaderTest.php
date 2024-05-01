@@ -8,6 +8,7 @@ namespace Ems\Config\Readers;
 
 use Ems\TestCase;
 use Ems\TestData;
+use PHPUnit\Framework\Attributes\Test;
 use RuntimeException;
 use Traversable;
 
@@ -20,20 +21,14 @@ class IniFileReaderTest extends TestCase
 {
     use TestData;
 
-    /**
-     * @test
-     */
-    public function it_instantiates()
+    #[Test] public function it_instantiates()
     {
         $reader = $this->make('');
         $this->assertInstanceOf(IniFileReader::class, $reader);
         $this->assertInstanceOf(Traversable::class, $reader);
     }
 
-    /**
-     * @test
-     */
-    public function get_and_set_path()
+    #[Test] public function get_and_set_path()
     {
         $file = $this->dataFile('config/application.ini');
         $reader = $this->make($file);
@@ -42,10 +37,7 @@ class IniFileReaderTest extends TestCase
         $this->assertEquals('foo', $reader->getPath());
     }
 
-    /**
-     * @test
-     */
-    public function get_and_set_readMode()
+    #[Test] public function get_and_set_readMode()
     {
         $file = $this->dataFile('config/application.ini');
         $reader = $this->make($file);
@@ -54,10 +46,7 @@ class IniFileReaderTest extends TestCase
         $this->assertEquals(INI_SCANNER_RAW, $reader->getReadMode());
     }
 
-    /**
-     * @test
-     */
-    public function get_and_set_processSections()
+    #[Test] public function get_and_set_processSections()
     {
         $file = $this->dataFile('config/application.ini');
         $reader = $this->make($file);
@@ -66,10 +55,7 @@ class IniFileReaderTest extends TestCase
         $this->assertFalse($reader->shouldProcessSections());
     }
 
-    /**
-     * @test
-     */
-    public function get_and_set_expandNestedSections()
+    #[Test] public function get_and_set_expandNestedSections()
     {
         $file = $this->dataFile('config/application.ini');
         $reader = $this->make($file);
@@ -78,10 +64,7 @@ class IniFileReaderTest extends TestCase
         $this->assertFalse($reader->shouldExpandNestedSections());
     }
 
-    /**
-     * @test
-     */
-    public function getIterator_returns_data()
+    #[Test] public function getIterator_returns_data()
     {
         $reader = $this->make($this->dataFile('config/application.ini'));
         $data = iterator_to_array($reader);
@@ -89,10 +72,7 @@ class IniFileReaderTest extends TestCase
         $this->assertEquals('file', $data['cache']['stores']['file']['driver']);
     }
 
-    /**
-     * @test
-     */
-    public function getIterator_returns_data_without_sections()
+    #[Test] public function getIterator_returns_data_without_sections()
     {
         $reader = $this->make($this->dataFile('config/application.ini'));
         $reader->setProcessSections(false);
@@ -100,10 +80,7 @@ class IniFileReaderTest extends TestCase
         $this->assertEquals('en', $data['fallback_locale']);
     }
 
-    /**
-     * @test
-     */
-    public function getIterator_returns_data_without_nested_sections()
+    #[Test] public function getIterator_returns_data_without_nested_sections()
     {
         $reader = $this->make($this->dataFile('config/application.ini'));
         $reader->setExpandNestedSections(false);
@@ -111,10 +88,7 @@ class IniFileReaderTest extends TestCase
         $this->assertEquals('file', $data['cache.stores.file']['driver']);
     }
 
-    /**
-     * @test
-     */
-    public function invalid_file_throws_exception()
+    #[Test] public function invalid_file_throws_exception()
     {
         $this->expectException(RuntimeException::class);
         $reader = $this->make('some-not-existing-file.ini');

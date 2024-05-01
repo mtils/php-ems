@@ -29,11 +29,9 @@ class IOCContainerTest extends \Ems\TestCase
         $this->assertTrue($container->bound('foo'));
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     **/
     public function test_binding_of_uncallable_and_nonstring_arg_throws_exception()
     {
+        $this->expectException(\InvalidArgumentException::class);
         $container = $this->newContainer();
         $container->bind('foo', 43);
     }

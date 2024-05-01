@@ -3,6 +3,7 @@
 namespace Ems\Assets\Parser;
 
 use Ems\Testing\FilesystemMethods;
+use RuntimeException;
 
 class CssUrlReplaceParserTest extends \Ems\IntegrationTest
 {
@@ -16,21 +17,17 @@ class CssUrlReplaceParserTest extends \Ems\IntegrationTest
         );
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     **/
     public function test_parse_throws_exception_if_file_path_not_passed()
     {
+        $this->expectException(\InvalidArgumentException::class);
         $this->newParser()->parse('foo', [
             'target_path' => '/tmp/out.css'
         ]);
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     **/
     public function test_parse_throws_exception_if_target_path_not_passed()
     {
+        $this->expectException(\InvalidArgumentException::class);
         $this->newParser()->parse('foo', [
             'file_path' => '/tmp/out.css'
         ]);
@@ -129,11 +126,9 @@ class CssUrlReplaceParserTest extends \Ems\IntegrationTest
         $this->assertNotContains('url(../images/bg.png)', $result);
     }
 
-    /**
-     * @expectedException RuntimeException
-     **/
     public function test_parse_throws_exception_if_referenced_file_does_not_exist()
     {
+        $this->expectException(RuntimeException::class);
         $testLayout = [
             'lib' => [
                 'infile.css' => ''

@@ -8,22 +8,18 @@ namespace Ems\Contracts\Model\Database;
 use Ems\Contracts\Model\Database\Query;
 use Ems\Core\Expression;
 use Ems\TestCase;
+use PHPUnit\Framework\Attributes\Test;
+
 use function str_replace;
 
 class QueryTest extends TestCase
 {
-    /**
-     * @test
-     */
-    public function it_instantiates()
+    #[Test] public function it_instantiates()
     {
         $this->assertInstanceOf(Query::class, $this->newQuery());
     }
 
-    /**
-     * @test
-     */
-    public function setting_and_getting_table()
+    #[Test] public function setting_and_getting_table()
     {
         $table = 'users';
         $query = $this->newQuery()->from($table);
@@ -34,10 +30,7 @@ class QueryTest extends TestCase
         $this->assertEquals($newTable, $query->table);
     }
 
-    /**
-     * @test
-     */
-    public function select_adds_columns()
+    #[Test] public function select_adds_columns()
     {
         $query = $this->newQuery();
         $this->assertEquals([], $query->columns);
@@ -49,10 +42,7 @@ class QueryTest extends TestCase
         $this->assertEquals(['one', 'two', 'three','four','five'], $query->columns);
     }
 
-    /**
-     * @test
-     */
-    public function select_adds_array_of_columns()
+    #[Test] public function select_adds_array_of_columns()
     {
         $query = $this->newQuery();
         $this->assertEquals([], $query->columns);
@@ -64,10 +54,7 @@ class QueryTest extends TestCase
         $this->assertEquals(['one', 'two', 'three','four','five'], $query->columns);
     }
 
-    /**
-     * @test
-     */
-    public function reset_columns()
+    #[Test] public function reset_columns()
     {
         $query = $this->newQuery();
         $this->assertEquals([], $query->columns);
@@ -79,10 +66,7 @@ class QueryTest extends TestCase
         $this->assertEquals([], $query->columns);
     }
 
-    /**
-     * @test
-     */
-    public function set_columns_resets_columns()
+    #[Test] public function set_columns_resets_columns()
     {
         $query = $this->newQuery();
         $this->assertEquals([], $query->columns);
@@ -94,10 +78,7 @@ class QueryTest extends TestCase
         $this->assertEquals(['four','five'], $query->columns);
     }
 
-    /**
-     * @test
-     */
-    public function distinct_makes_query_distinct()
+    #[Test] public function distinct_makes_query_distinct()
     {
         $query = $this->newQuery();
         $this->assertFalse($query->distinct);
@@ -111,10 +92,7 @@ class QueryTest extends TestCase
         $this->assertFalse($query->distinct);
     }
 
-    /**
-     * @test
-     */
-    public function join_creates_join()
+    #[Test] public function join_creates_join()
     {
         $query = $this->newQuery();
         $query->from('users')
@@ -131,10 +109,7 @@ class QueryTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function where_adds_predicate()
+    #[Test] public function where_adds_predicate()
     {
         $query = $this->newQuery();
         $this->assertSame($query, $query->where('foo', 'bar'));
@@ -143,10 +118,7 @@ class QueryTest extends TestCase
         $this->assertEquals('bar', $query->conditions->first()->right);
     }
 
-    /**
-     * @test
-     */
-    public function where_adds_predicates()
+    #[Test] public function where_adds_predicates()
     {
         $query = $this->newQuery();
 
@@ -161,10 +133,7 @@ class QueryTest extends TestCase
         $this->assertEquals(30, $query->conditions->expressions[1]->right);
     }
 
-    /**
-     * @test
-     */
-    public function invoke_adds_parentheses()
+    #[Test] public function invoke_adds_parentheses()
     {
         $query = $this->newQuery();
         $query('OR')->where('age', '<', 30)
@@ -176,10 +145,7 @@ class QueryTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function groupBy_adds_groupBy()
+    #[Test] public function groupBy_adds_groupBy()
     {
         $query = $this->newQuery();
         $query->groupBy('birthday');
@@ -190,10 +156,7 @@ class QueryTest extends TestCase
         $this->assertEquals(['birthday', 'department', 'cost_centre'], $query->groupBys);
     }
 
-    /**
-     * @test
-     */
-    public function groupBy_add_many_groupBy()
+    #[Test] public function groupBy_add_many_groupBy()
     {
         $query = $this->newQuery();
         $query->groupBy('birthday', 'department');
@@ -207,10 +170,7 @@ class QueryTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function orderBy_adds_orderBy()
+    #[Test] public function orderBy_adds_orderBy()
     {
         $query = $this->newQuery();
         $query->orderBy('id');
@@ -225,10 +185,7 @@ class QueryTest extends TestCase
         ], $query->orderBys);
     }
 
-    /**
-     * @test
-     */
-    public function orderBy_adds_orderBy_Expression()
+    #[Test] public function orderBy_adds_orderBy_Expression()
     {
         $query = $this->newQuery();
         $sort = new Expression('SUM(amount) AS amount_sum');
@@ -238,10 +195,7 @@ class QueryTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function reset_orderBy()
+    #[Test] public function reset_orderBy()
     {
         $query = $this->newQuery();
         $query->orderBy('id');
@@ -254,10 +208,7 @@ class QueryTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function having_adds_predicate()
+    #[Test] public function having_adds_predicate()
     {
         $query = $this->newQuery();
         $this->assertSame($query, $query->having('foo', 'bar'));
@@ -266,10 +217,7 @@ class QueryTest extends TestCase
         $this->assertEquals('bar', $query->havings->first()->right);
     }
 
-    /**
-     * @test
-     */
-    public function get_and_set_offset()
+    #[Test] public function get_and_set_offset()
     {
         $query = $this->newQuery();
         $this->assertNull($query->offset);
@@ -286,10 +234,7 @@ class QueryTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function get_and_set_limit()
+    #[Test] public function get_and_set_limit()
     {
         $query = $this->newQuery();
         $this->assertNull($query->offset);
@@ -306,10 +251,7 @@ class QueryTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function get_and_set_values()
+    #[Test] public function get_and_set_values()
     {
         $query = $this->newQuery();
         $query->values('first_name', 'Aaron');
@@ -327,58 +269,40 @@ class QueryTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function operation_is_select_without_values()
+    #[Test] public function operation_is_select_without_values()
     {
         $query = $this->newQuery();
         $this->assertEquals('SELECT', $query->operation);
     }
 
-    /**
-     * @test
-     */
-    public function operation_is_insert_with_values()
+    #[Test] public function operation_is_insert_with_values()
     {
         $query = $this->newQuery();
         $query->values('first_name', 'Olaf');
         $this->assertEquals('INSERT', $query->operation);
     }
 
-    /**
-     * @test
-     */
-    public function operation_is_update_with_values_and_conditions()
+    #[Test] public function operation_is_update_with_values_and_conditions()
     {
         $query = $this->newQuery();
         $query->values('first_name', 'Olaf')->where('id', 88);
         $this->assertEquals('UPDATE', $query->operation);
     }
 
-    /**
-     * @test
-     */
-    public function operation_is_what_setted_by_property()
+    #[Test] public function operation_is_what_setted_by_property()
     {
         $query = $this->newQuery();
         $query->operation = 'DELETE';
         $this->assertEquals('DELETE', $query->operation);
     }
 
-    /**
-     * @test
-     */
-    public function get_unknown_property()
+    #[Test] public function get_unknown_property()
     {
         $query = $this->newQuery();
         $this->assertNull($query->__get('foo'));
     }
 
-    /**
-     * @test
-     */
-    public function attach_and_detach_queries()
+    #[Test] public function attach_and_detach_queries()
     {
         $query = $this->newQuery();
         $countQuery = $this->newQuery();

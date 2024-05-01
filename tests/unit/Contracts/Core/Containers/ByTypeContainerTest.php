@@ -13,16 +13,14 @@ use Ems\Core\Collections\OrderedList;
 use Ems\Core\Collections\StringList;
 use Ems\Core\Collections\TypeEnforcedList;
 use Ems\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 use stdClass;
 use Traversable;
 
 class ByTypeContainerTest extends TestCase
 {
 
-    /**
-     * @test
-     */
-    public function it_implements_array_interfaces()
+    #[Test] public function it_implements_array_interfaces()
     {
         $container = $this->make();
         $this->assertInstanceOf(ArrayAccess::class, $container);
@@ -30,10 +28,7 @@ class ByTypeContainerTest extends TestCase
         $this->assertInstanceOf(Traversable::class, $container);
     }
 
-    /**
-     * @test
-     */
-    public function it_has_working_array_interfaces()
+    #[Test] public function it_has_working_array_interfaces()
     {
         $container = $this->make();
         $this->assertCount(0, $container);
@@ -69,10 +64,7 @@ class ByTypeContainerTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function forInstanceOf_searches_by_exact_class_match()
+    #[Test] public function forInstanceOf_searches_by_exact_class_match()
     {
         $container = $this->make();
 
@@ -84,10 +76,7 @@ class ByTypeContainerTest extends TestCase
         $this->assertSame($extension, $container->forInstanceOf(OrderedList::class));
     }
 
-    /**
-     * @test
-     */
-    public function forInstanceOf_searches_by_class_inheritance()
+    #[Test] public function forInstanceOf_searches_by_class_inheritance()
     {
         $container = $this->make();
 
@@ -102,10 +91,7 @@ class ByTypeContainerTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function forInstanceOf_misses_by_inverse_class_inheritance()
+    #[Test] public function forInstanceOf_misses_by_inverse_class_inheritance()
     {
         $container = $this->make();
 
@@ -117,10 +103,7 @@ class ByTypeContainerTest extends TestCase
         $this->assertNull($container->forInstanceOf(OrderedList::class));
     }
 
-    /**
-     * @test
-     */
-    public function forInstanceOf_searches_by_interface_implementation()
+    #[Test] public function forInstanceOf_searches_by_interface_implementation()
     {
         $container = $this->make();
 
@@ -141,10 +124,7 @@ class ByTypeContainerTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function forInstanceOf_searches_by_extension_insertion_order()
+    #[Test] public function forInstanceOf_searches_by_extension_insertion_order()
     {
         $container = $this->make();
 

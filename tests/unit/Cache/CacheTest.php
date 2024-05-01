@@ -2,6 +2,7 @@
 
 namespace Ems\Cache;
 
+use Ems\Contracts\Core\Errors\NotFound;
 use Ems\Testing\Cheat;
 use Ems\Contracts\Cache\Cache as CacheContract;
 use Ems\Contracts\Cache\Categorizer;
@@ -237,11 +238,9 @@ class CacheTest extends \Ems\TestCase
         $this->assertEquals('bar', $cache->getOrFail('a'));
     }
 
-    /**
-     * @expectedException Ems\Cache\Exception\CacheMissException
-     **/
     public function test_getOrFail_throws_exception_if_value_not_found()
     {
+        $this->expectException(Ems\Cache\Exception\CacheMissException::class);
         $categorizer = $this->mockCategorizer();
         $cache = $this->newCache($categorizer);
         $storage = $this->mockStorage();
@@ -361,7 +360,7 @@ class CacheTest extends \Ems\TestCase
         $storage = $this->mockStorage();
         $storage2 = $this->mockStorage();
         $cache->addStorage('default', $storage);
-        $cache->addStorage('storage1', function ($name) use ($storage2) { 
+        $cache->addStorage('storage1', function ($name) use ($storage2) {
             return $storage2;
         });
 
@@ -390,11 +389,11 @@ class CacheTest extends \Ems\TestCase
         $storage = $this->mockStorage();
         $storage2 = $this->mockStorage();
         $cache->addStorage('default', $storage);
-        $cache->addStorage('storage1', function ($name) use ($storage2) { 
+        $cache->addStorage('storage1', function ($name) use ($storage2) {
             return $storage2;
         });
 
-        $cache->addStorage('storage2', function ($name) use ($storage2) { 
+        $cache->addStorage('storage2', function ($name) use ($storage2) {
             return $storage2;
         });
 
@@ -470,7 +469,7 @@ class CacheTest extends \Ems\TestCase
         $categorizer->shouldReceive('tags')->with($invalid)->andReturn([]);
 
         $this->assertSame($cache, $cache->forget($invalid));
-        
+
     }
 
     public function test_forget_with_non_key_automatically_prunes_determined_tags()
@@ -496,11 +495,9 @@ class CacheTest extends \Ems\TestCase
 
     }
 
-    /**
-     * @expectedException Ems\Contracts\Core\Errors\NotFound
-     **/
     public function test_forget_with_non_key_throws_exception_if_categorizer_finds_no_key()
     {
+        $this->expectException(NotFound::class);
         $storage = $this->mockStorage();
         $categorizer = $this->mockCategorizer();
         $cache = $this->newCache($categorizer);
@@ -516,7 +513,7 @@ class CacheTest extends \Ems\TestCase
         $categorizer->shouldReceive('tags')->with($invalid)->andReturn([]);
 
         $this->assertSame($cache, $cache->forget($invalid));
-        
+
     }
 
     public function test_prune_forwards_to_storage()
@@ -630,11 +627,9 @@ class CacheTest extends \Ems\TestCase
         $this->assertSame($storage2, $cache->getStorage('fast'));
     }
 
-    /**
-     * @expectedException Ems\Contracts\Core\Errors\NotFound
-     **/
     public function test_getStorage_throws_NotFound_if_storage_not_assigned()
     {
+        $this->expectException(NotFound::class);
         $cache = $this->newCache();
         $storage = $this->mockStorage();
 

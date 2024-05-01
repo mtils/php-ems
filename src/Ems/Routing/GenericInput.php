@@ -36,11 +36,13 @@ class GenericInput extends Message implements Input
         return $this;
     }
 
+    #[\ReturnTypeWillChange]
     public function offsetSet($offset, $value)
     {
         $this->custom[$offset] = $value;
     }
 
+    #[\ReturnTypeWillChange]
     public function offsetUnset($offset)
     {
         unset($this->custom[$offset]);

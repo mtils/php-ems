@@ -9,67 +9,47 @@ namespace Ems\Contracts\Routing;
 use Ems\Contracts\Core\Arrayable;
 use Ems\Contracts\Core\DataObject;
 use Ems\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 class RouteTest extends TestCase
 {
-    /**
-     * @test
-     */
-    public function it_can_be_constructed_without_parameters()
+    #[Test] public function it_can_be_constructed_without_parameters()
     {
         $this->assertInstanceOf(Route::class, $this->newRoute());
         $this->assertInstanceOf(Arrayable::class, $this->newRoute());
     }
 
-    /**
-     * @test
-     */
-    public function method_sets_method_by_string()
+    #[Test] public function method_sets_method_by_string()
     {
         $this->assertEquals(['GET'], $this->newRoute('GET')->methods);
         $this->assertEquals(['PUT'], $this->newRoute('PUT')->methods);
     }
 
-    /**
-     * @test
-     */
-    public function method_sets_method_by_array()
+    #[Test] public function method_sets_method_by_array()
     {
         $this->assertEquals(['GET'], $this->newRoute(['GET'])->methods);
         $this->assertEquals(['GET', 'HEAD'], $this->newRoute(['GET', 'HEAD'])->methods);
         $this->assertEquals(['PUT'], $this->newRoute(['PUT'])->methods);
     }
 
-    /**
-     * @test
-     */
-    public function pattern_sets_pattern()
+    #[Test] public function pattern_sets_pattern()
     {
         $this->assertEquals('/foo', $this->newRoute('GET', '/foo')->pattern);
     }
 
-    /**
-     * @test
-     */
-    public function handler_sets_handler()
+    #[Test] public function handler_sets_handler()
     {
         $handler = [static::class, 'index'];
         $this->assertSame($handler, $this->newRoute('GET', '/foo', $handler)->handler);
         $this->assertSame($handler, $this->newRoute('','',$handler)->handler);
     }
 
-    /**
-     * @test
-     */
-    public function name_sets_name()
+    #[Test] public function name_sets_name()
     {
         $this->assertEquals('addresses.index', $this->newRoute()->name('addresses.index')->name);
     }
 
-    /**
-     * @test
-     */
-    public function entity_sets_entity_and_action()
+    #[Test] public function entity_sets_entity_and_action()
     {
         $handler = [static::class, 'index'];
         $route = $this->newRoute('GET', '/users', $handler);
@@ -85,10 +65,7 @@ class RouteTest extends TestCase
         $this->assertSame('destroy', $route->action);
     }
 
-    /**
-     * @test
-     */
-    public function middleware_assigns_middleware_by_string()
+    #[Test] public function middleware_assigns_middleware_by_string()
     {
         $this->assertEquals(['a'], $this->newRoute()->middleware('a')->middlewares);
         $this->assertEquals(['a', 'b'], $this->newRoute()->middleware('a', 'b')->middlewares);
@@ -99,10 +76,7 @@ class RouteTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function middleware_assigns_middleware_by_array()
+    #[Test] public function middleware_assigns_middleware_by_array()
     {
         $this->assertEquals(['a'], $this->newRoute()->middleware(['a'])->middlewares);
         $this->assertEquals(['a', 'b'], $this->newRoute()->middleware(['a', 'b'])->middlewares);
@@ -113,10 +87,7 @@ class RouteTest extends TestCase
         $this->assertEquals(['a', 'b', 'c', 'd', 'e'], $route->middleware(['d', 'e'])->middlewares);
     }
 
-    /**
-     * @test
-     */
-    public function middleware_resets_middleware_if_called_without_parameters()
+    #[Test] public function middleware_resets_middleware_if_called_without_parameters()
     {
         $route = $this->newRoute()->middleware(['a', 'b']);
         $this->assertEquals(['a', 'b'], $route->middlewares);
@@ -124,49 +95,34 @@ class RouteTest extends TestCase
         $this->assertEquals([], $route->middlewares);
     }
 
-    /**
-     * @test
-     */
-    public function clientType_sets_clientTypes_by_string()
+    #[Test] public function clientType_sets_clientTypes_by_string()
     {
         $this->assertEquals(['api'], $this->newRoute()->clientType('api')->clientTypes);
         $this->assertEquals(['api', 'web'], $this->newRoute()->clientType('api', 'web')->clientTypes);
 
     }
 
-    /**
-     * @test
-     */
-    public function clientType_sets_clientTypes_by_array()
+    #[Test] public function clientType_sets_clientTypes_by_array()
     {
         $this->assertEquals(['api'], $this->newRoute()->clientType(['api'])->clientTypes);
         $this->assertEquals(['api', 'web'], $this->newRoute()->clientType(['api', 'web'])->clientTypes);
 
     }
 
-    /**
-     * @test
-     */
-    public function scope_sets_scope_by_string()
+    #[Test] public function scope_sets_scope_by_string()
     {
         $this->assertEquals(['admin'], $this->newRoute()->scope('admin')->scopes);
         $this->assertEquals(['admin', 'cms'], $this->newRoute()->scope('admin', 'cms')->scopes);
 
     }
 
-    /**
-     * @test
-     */
-    public function scope_sets_scope_by_array()
+    #[Test] public function scope_sets_scope_by_array()
     {
         $this->assertEquals(['admin'], $this->newRoute()->scope(['admin'])->scopes);
         $this->assertEquals(['admin', 'cms'], $this->newRoute()->scope(['admin', 'cms'])->scopes);
     }
 
-    /**
-     * @test
-     */
-    public function defaults_sets_all_defaults()
+    #[Test] public function defaults_sets_all_defaults()
     {
         $defaults = [
             'foo' => 'boo',
@@ -178,10 +134,7 @@ class RouteTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function defaults_sets_one_default_value()
+    #[Test] public function defaults_sets_one_default_value()
     {
         $defaults = [
             'foo' => 'boo',
@@ -195,10 +148,7 @@ class RouteTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function toArray_returns_data()
+    #[Test] public function toArray_returns_data()
     {
         $route = $this->newRoute('GET', '/foo');
         $data = $route->toArray();

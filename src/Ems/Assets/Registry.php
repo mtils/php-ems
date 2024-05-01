@@ -314,6 +314,7 @@ class Registry extends PathFinderProxy implements RegistryContract
      *
      * @return ArrayIterator
      **/
+    #[\ReturnTypeWillChange]
     public function getIterator()
     {
         $array = [];

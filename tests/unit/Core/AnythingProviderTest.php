@@ -3,9 +3,11 @@
 namespace Ems\Core;
 
 
+use Ems\Contracts\Core\Errors\NotFound;
 use Ems\Contracts\Core\Provider;
 use Ems\Contracts\Core\AllProvider;
 use Ems\Testing\LoggingCallable;
+use InvalidArgumentException;
 
 class AnythingProviderTest extends \Ems\TestCase
 {
@@ -20,11 +22,9 @@ class AnythingProviderTest extends \Ems\TestCase
         $this->assertEquals('foo', $this->newProvider()->get('bar', 'foo'));
     }
 
-    /**
-     * @expectedException Ems\Contracts\Core\Errors\NotFound
-     **/
     public function test_getOrFail_throws_exception_if_item_not_found()
     {
+        $this->expectException(NotFound::class);
         $this->assertEquals('foo', $this->newProvider()->getOrFail('bar'));
     }
 
@@ -54,11 +54,9 @@ class AnythingProviderTest extends \Ems\TestCase
         $this->assertEquals($items, $provider->all());
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     **/
     public function test_set_throws_exception_if_different_type_enforced()
     {
+        $this->expectException(InvalidArgumentException::class);
         $provider = new _AnytingTestProviderTest();
         $item = (object)['id'=>'foo', 'name'=>'henry'] ;
         $provider->set('foo', $item);

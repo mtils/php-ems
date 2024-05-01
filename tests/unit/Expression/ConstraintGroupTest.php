@@ -4,7 +4,9 @@
 namespace Ems\Expression;
 
 use Ems\Contracts\Expression\ConstraintGroup as ConstraintGroupContract;
+use Ems\Core\Exceptions\KeyNotFoundException;
 use Ems\Core\Expression;
+use InvalidArgumentException;
 
 /**
  * @group validation
@@ -25,11 +27,9 @@ class ConstraintGroupTest extends \Ems\TestCase
         $this->assertEquals('or', $definition->operator());
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     **/
     public function test_setOperator_throws_exception_without_unknown_operator()
     {
+        $this->expectException(InvalidArgumentException::class);
         $rules = ['required','exists:users.id','unique'];
         $definition = $this->newGroup($rules);
         $definition->setOperator('foo');
@@ -128,20 +128,16 @@ class ConstraintGroupTest extends \Ems\TestCase
         $this->assertEquals(['users.parent_id'], $definition['exists']->parameters());
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     **/
     public function test_offsetSet_throws_exception_if_offset_not_name()
     {
+        $this->expectException(InvalidArgumentException::class);
         $definition = $this->newGroup();
         $definition['exists'] = new Constraint('different', ['users.parent_id']);
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     **/
     public function test_offsetSet_throws_exception_if_expression_is_no_constraint()
     {
+        $this->expectException(InvalidArgumentException::class);
         $definition = $this->newGroup();
         $definition['exists'] = new Expression('exists');
     }
@@ -220,11 +216,9 @@ class ConstraintGroupTest extends \Ems\TestCase
         $this->assertEquals($awaited, "$definition");
     }
 
-    /**
-     * @expectedException Ems\Core\Exceptions\KeyNotFoundException
-     **/
     public function test_get_throws_exception_if_key_not_found()
     {
+        $this->expectException(KeyNotFoundException::class);
         return $this->newGroup()->hello;
     }
 

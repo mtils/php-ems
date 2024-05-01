@@ -197,6 +197,7 @@ class RouteSearch implements Search
     /**
      * @return ArrayIterator
      */
+    #[\ReturnTypeWillChange]
     public function getIterator()
     {
         $this->parseInput();

@@ -191,11 +191,9 @@ class TaskerTest extends TestCase
         $this->assertEquals('foo', $taskRepo->get(11546878974, 'foo'));
     }
 
-    /**
-     * @expectedException  \Ems\Contracts\Core\Errors\NotFound
-     */
     public function test_NullTaskRepository_getOrFail_throws_exception()
     {
+        $this->expectException(\Ems\Contracts\Core\Errors\NotFound::class);
         $taskRepo = $this->nullRepo();
         $taskRepo->getOrFail('hihihaha');
     }
@@ -250,11 +248,9 @@ class TaskerTest extends TestCase
 
     }
 
-    /**
-     * @expectedException  \RuntimeException
-     */
     public function test_NullTaskRepository_failing_transaction()
     {
+        $this->expectException(\RuntimeException::class);
         $taskRepo = $this->nullRepo();
 
         $taskRepo->transaction(function($repo){
@@ -268,11 +264,9 @@ class TaskerTest extends TestCase
 
     }
 
-    /**
-     * @expectedException  \RuntimeException
-     */
     public function test_NullTaskRepository_failing_transaction_without_task_creation()
     {
+        $this->expectException(\RuntimeException::class);
         $taskRepo = $this->nullRepo();
 
         $taskRepo->transaction(function($repo){

@@ -3,7 +3,9 @@
 namespace Ems\Core\Serializer;
 
 
+use Ems\Contracts\Core\Errors\UnSupported;
 use Ems\Contracts\Core\Serializer as SerializerContract;
+use Ems\Core\Exceptions\DataIntegrityException;
 use Ems\Testing\Cheat;
 
 class GDSerializerTest extends \Ems\TestCase
@@ -20,11 +22,9 @@ class GDSerializerTest extends \Ems\TestCase
         $this->assertEquals('image/gif', $serializer->mimeType());
     }
 
-    /**
-     * @expectedException Ems\Contracts\Core\Errors\UnSupported
-     **/
     public function test_set_unsupported_mimetype_throws_exception()
     {
+        $this->expectException(UnSupported::class);
         $serializer = $this->newSerializer();
         $serializer->setMimeType('image/maya-13-propietary-format');
     }
@@ -71,36 +71,32 @@ class GDSerializerTest extends \Ems\TestCase
 
     }
 
-    /**
-     * @expectedException Ems\Contracts\Core\Errors\UnSupported
-     **/
     public function test_serialize_unsupported_value_throws_exception()
     {
+        $this->expectException(UnSupported::class);
         $serializer = $this->newSerializer()->setMimeType('image/png');
 
         $serializer->serialize('bob');
     }
 
-    /**
-     * @expectedException Ems\Contracts\Core\Errors\UnSupported
-     **/
     public function test_serialize_unsupported_resource_throws_exception()
     {
+        $this->expectException(UnSupported::class);
         $serializer = $this->newSerializer()->setMimeType('image/png');
 
         $serializer->serialize(fopen(__FILE__, 'r'));
     }
 
-    /**
-     * @expectedException Ems\Core\Exceptions\DataIntegrityException
-     **/
     public function test_deserialize_invalid_data_throws_exception()
     {
+        $this->expectException(
+            DataIntegrityException::class
+        );
         $serializer = $this->newSerializer()->setMimeType('image/png');
 
         $serializer->deserialize('hihihahaha');
     }
-    
+
     protected function newSerializer(callable $errorGetter=null)
     {
         return new GDSerializer;

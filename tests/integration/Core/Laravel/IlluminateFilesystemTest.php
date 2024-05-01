@@ -8,7 +8,7 @@ namespace Ems\Core\Laravel;
 use Ems\Core\Exceptions\NotImplementedException;
 use Illuminate\Contracts\Filesystem\Filesystem as IlluminateFilesystemContract;
 use Illuminate\Filesystem\FilesystemAdapter;
-use League\Flysystem\Adapter\Local as LocalFSAdapter;
+use League\Flysystem\Local\LocalFilesystemAdapter as LocalFSAdapter;
 use League\Flysystem\Filesystem as Flysystem;
 use Mockery;
 use function stream_context_get_default;
@@ -48,11 +48,11 @@ class IlluminateFilesystemTest extends \Ems\Core\LocalFilesystemTest
         $this->assertEquals('file:///', (string)$fs->url());
     }
 
-    /**
-     * @expectedException \Ems\Core\Exceptions\NotImplementedException
-     */
     public function test_write_throws_exception_if_should_be_locked()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\NotImplementedException::class
+        );
         $this->newTestFileSystem()->write('/', 'blue', true);
     }
 
@@ -66,29 +66,29 @@ class IlluminateFilesystemTest extends \Ems\Core\LocalFilesystemTest
         $this->assertEquals($contentsOfThisFile, $fs->read(__FILE__));
     }
 
-    /**
-     * @expectedException \Ems\Core\Exceptions\NotImplementedException
-     */
     public function test_makeDirectory_throws_NotImplementedException_when_passing_mode()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\NotImplementedException::class
+        );
         $this->newTestFileSystem()->makeDirectory('/test', 655);
     }
 
-    /**
-     * @expectedException \Ems\Core\Exceptions\NotImplementedException
-     */
     public function test_read_returns_contents_with_file_locking()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\NotImplementedException::class
+        );
         $fs = $this->newTestFilesystem();
         $contentsOfThisFile = file_get_contents(__FILE__);
         $this->assertEquals($contentsOfThisFile, $fs->read(__FILE__, 0, true));
     }
 
-    /**
-     * @expectedException \Ems\Core\Exceptions\NotImplementedException
-     **/
     public function test_read_throws_exception_when_trying_to_read_a_locked_file()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\NotImplementedException::class
+        );
         $fs = $this->newTestFilesystem();
         $fileName = $this->tempFileName();
         $testString = 'Foo is a buddy of bar';
@@ -183,7 +183,10 @@ class IlluminateFilesystemTest extends \Ems\Core\LocalFilesystemTest
      */
     protected function createLaravelAdapter(array $args=[])
     {
-        return new FilesystemAdapter($this->createFlysystem($args));
+        $adapter = $this->createFlysystemAdapter($args);
+        $url = $args['url'] ?? '/';
+        $fs = new Flysystem($adapter, ['url' => $url]);
+        return new FilesystemAdapter($fs, $adapter);
     }
 
     /**
@@ -193,9 +196,9 @@ class IlluminateFilesystemTest extends \Ems\Core\LocalFilesystemTest
      */
     protected function createFlysystem(array $args=[])
     {
-        $flySystem = new Flysystem($this->createFlysystemAdapter($args));
-        $url = isset($args['url']) ? $args['url'] : '/';
-        $flySystem->getConfig()->set('url', $url);
+        $url = $args['url'] ?? '/';
+        $flySystem = new Flysystem($this->createFlysystemAdapter($args), ['url' => $url]);
+        //$flySystem->getConfig()->set('url', $url);
         return $flySystem;
     }
 

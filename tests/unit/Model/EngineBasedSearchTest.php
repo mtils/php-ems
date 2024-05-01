@@ -406,11 +406,9 @@ class EngineBasedSearchTest extends TestCase
 
     }
 
-    /**
-     * @expectedException \Ems\Contracts\Core\Errors\Unsupported
-     */
     public function test_paginate_with_unpaginatable_result_throws_exception()
     {
+        $this->expectException(\Ems\Contracts\Core\Errors\Unsupported::class);
         $engine = $this->mockEngine();
         $ormObject = new SearchTest_OrmObject();
 

@@ -222,6 +222,7 @@ class SQLStorage extends ArrayWithState implements QueryableStorage, IteratorAgg
     /**
      * @return \Iterator
      **/
+    #[\ReturnTypeWillChange]
     public function getIterator()
     {
         foreach ($this->keys() as $key) {

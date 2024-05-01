@@ -14,14 +14,13 @@ use Ems\Core\Exceptions\KeyNotFoundException;
 use Ems\TestCase;
 use IteratorAggregate;
 
+use PHPUnit\Framework\Attributes\Test;
+
 use function json_encode;
 
 class MessageTest extends TestCase
 {
-    /**
-     * @test
-     */
-    public function it_implements_all_interfaces()
+    #[Test] public function it_implements_all_interfaces()
     {
         $message = $this->message();
         $this->assertInstanceOf(ArrayAccess::class, $message);
@@ -30,28 +29,19 @@ class MessageTest extends TestCase
         $this->assertInstanceOf(Message::class, $message);
     }
 
-    /**
-     * @test
-     */
-    public function get_returns_value()
+    #[Test] public function get_returns_value()
     {
         $message = $this->message(['foo' => 'bar']);
         $this->assertEquals('bar', $message->get('foo'));
     }
 
-    /**
-     * @test
-     */
-    public function get_returns_no_value()
+    #[Test] public function get_returns_no_value()
     {
         $message = $this->message();
         $this->assertNull($message->get('foo'));
     }
 
-    /**
-     * @test
-     */
-    public function getOrFail_throws_exception()
+    #[Test] public function getOrFail_throws_exception()
     {
         $message = $this->message(['foo' => 'bar']);
         $this->assertEquals('bar', $message->getOrFail('foo'));
@@ -59,10 +49,7 @@ class MessageTest extends TestCase
         $message->getOrFail('foofoo');
     }
 
-    /**
-     * @test
-     */
-    public function property_read_access()
+    #[Test] public function property_read_access()
     {
         $data = [
             'foo' => 'bar'
@@ -82,10 +69,7 @@ class MessageTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function accept_and_ignore_message()
+    #[Test] public function accept_and_ignore_message()
     {
         $message = $this->message();
         $this->assertFalse($message->isAccepted());
@@ -103,10 +87,7 @@ class MessageTest extends TestCase
         $this->assertTrue($message->isIgnored());
     }
 
-    /**
-     * @test
-     */
-    public function offsetExist_and_offsetGet()
+    #[Test] public function offsetExist_and_offsetGet()
     {
         $attributes = [
             'foo' => 'bar',
@@ -124,10 +105,7 @@ class MessageTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function it_is_countable()
+    #[Test] public function it_is_countable()
     {
         $attributes = [
             'foo' => 'bar',
@@ -138,10 +116,7 @@ class MessageTest extends TestCase
         $this->assertCount(count($attributes), $this->message($attributes));
     }
 
-    /**
-     * @test
-     */
-    public function it_is_iterable()
+    #[Test] public function it_is_iterable()
     {
         $attributes = [
             'foo' => 'bar',
@@ -156,10 +131,7 @@ class MessageTest extends TestCase
         $this->assertEquals($attributes, $copy);
     }
 
-    /**
-     * @test
-     */
-    public function offsetSet_sets_custom_value()
+    #[Test] public function offsetSet_sets_custom_value()
     {
         $message = $this->message();
         $this->assertFalse(isset($message['foo']));
@@ -171,10 +143,7 @@ class MessageTest extends TestCase
         $this->assertFalse(isset($message['foo']));
     }
 
-    /**
-     * @test
-     */
-    public function set_sets_custom_value()
+    #[Test] public function set_sets_custom_value()
     {
         $message = $this->message();
         $this->assertFalse(isset($message['foo']));
@@ -186,10 +155,7 @@ class MessageTest extends TestCase
         $this->assertFalse(isset($message['foo']));
     }
 
-    /**
-     * @test
-     */
-    public function property_write_access()
+    #[Test] public function property_write_access()
     {
         $data = [
             'foo' => 'bar'

@@ -206,11 +206,11 @@ class FormatterIntegrationTest extends IntegrationTest
         $this->assertSame($formatter, $formatter->mapViewToVerbosity('short', CoreFormatterContract::VERBOSE));
     }
 
-    /**
-     * @expectedException \Ems\Core\Exceptions\UnsupportedParameterException
-     */
     public function test_mapViewToVerbosity_throws_exception_on_unknown_verbosity()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\UnsupportedParameterException::class
+        );
         $formatter = $this->formatter();
         $formatter->mapViewToVerbosity('short', 'foo');
     }

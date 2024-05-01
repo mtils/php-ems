@@ -11,6 +11,7 @@ use Ems\Routing\SessionHandler\ArraySessionHandler;
 use Ems\Contracts\Routing\Session as SessionContract;
 use Ems\TestCase;
 use LogicException;
+use PHPUnit\Framework\Attributes\Test;
 use SessionHandlerInterface;
 
 use stdClass;
@@ -23,18 +24,12 @@ use function unserialize;
 
 class SessionTest extends TestCase
 {
-    /**
-     * @test
-     */
-    public function it_implements_interface()
+    #[Test] public function it_implements_interface()
     {
         $this->assertInstanceOf(SessionContract::class, $this->session());
     }
 
-    /**
-     * @test
-     */
-    public function isStarted_returns_right_state()
+    #[Test] public function isStarted_returns_right_state()
     {
         $session = $this->session();
         $this->assertFalse($session->isStarted());
@@ -45,10 +40,7 @@ class SessionTest extends TestCase
         $session->start();
     }
 
-    /**
-     * @test
-     */
-    public function session_starts_when_checking_data()
+    #[Test] public function session_starts_when_checking_data()
     {
         $session = $this->session();
         $this->assertFalse($session->isStarted());
@@ -56,10 +48,7 @@ class SessionTest extends TestCase
         $this->assertTrue($session->isStarted());
     }
 
-    /**
-     * @test
-     */
-    public function session_starts_when_accessing_data()
+    #[Test] public function session_starts_when_accessing_data()
     {
         $session = $this->session();
         $this->assertFalse($session->isStarted());
@@ -73,10 +62,7 @@ class SessionTest extends TestCase
         $this->assertTrue($session->isStarted());
     }
 
-    /**
-     * @test
-     */
-    public function session_starts_when_deleting_data()
+    #[Test] public function session_starts_when_deleting_data()
     {
         $session = $this->session();
         $this->assertFalse($session->isStarted());
@@ -89,10 +75,7 @@ class SessionTest extends TestCase
         $this->assertTrue($session->isStarted());
     }
 
-    /**
-     * @test
-     */
-    public function get_and_set_data()
+    #[Test] public function get_and_set_data()
     {
         $id = 'ABCD';
         $data = ['foo' => 'bar'];
@@ -118,10 +101,7 @@ class SessionTest extends TestCase
         $this->assertEquals(['a'=>'b'], $sessionData);
     }
 
-    /**
-     * @test
-     */
-    public function clear_deletes_keys()
+    #[Test] public function clear_deletes_keys()
     {
         $session = $this->session();
         $session['a'] = 'b';
@@ -132,10 +112,7 @@ class SessionTest extends TestCase
         $this->assertEquals(['c'=>'d'], $session->toArray());
     }
 
-    /**
-     * @test
-     */
-    public function clear_deletes_all()
+    #[Test] public function clear_deletes_all()
     {
         $session = $this->session();
         $session['a'] = 'b';
@@ -146,10 +123,7 @@ class SessionTest extends TestCase
         $this->assertSame([], $session->toArray());
     }
 
-    /**
-     * @test
-     */
-    public function clear_does_not_delete_if_empty_array_passed()
+    #[Test] public function clear_does_not_delete_if_empty_array_passed()
     {
         $session = $this->session();
         $session['a'] = 'b';
@@ -160,10 +134,7 @@ class SessionTest extends TestCase
         $this->assertEquals(['a'=>'b','c'=>'d', 'e'=>'f'], $session->toArray());
     }
 
-    /**
-     * @test
-     */
-    public function empty_data_results_in_session_destroy()
+    #[Test] public function empty_data_results_in_session_destroy()
     {
         $id = 'ABCD';
         $data = serialize(['a' => 'b']);
@@ -186,18 +157,12 @@ class SessionTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function it_exposes_itself_as_buffered()
+    #[Test] public function it_exposes_itself_as_buffered()
     {
         $this->assertTrue($this->session()->isBuffered());
     }
 
-    /**
-     * @test
-     */
-    public function it_exposes_itself_as_utility_storage()
+    #[Test] public function it_exposes_itself_as_utility_storage()
     {
         $this->assertEquals(Storage::UTILITY, $this->session()->storageType());
     }
@@ -209,10 +174,7 @@ class SessionTest extends TestCase
         return new Session($handler, $serializer);
     }
 
-    /**
-     * @test
-     */
-    public function it_supports_custom_id_generator()
+    #[Test] public function it_supports_custom_id_generator()
     {
         $session = $this->session();
         $id = 'ABCD';
@@ -223,10 +185,7 @@ class SessionTest extends TestCase
         $this->assertEquals($id, $session->getId());
     }
 
-    /**
-     * @test
-     */
-    public function it_throws_exception_if_handler_returns_no_array()
+    #[Test] public function it_throws_exception_if_handler_returns_no_array()
     {
         $id = 'ABCD';
         $data = serialize(new stdClass());

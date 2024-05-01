@@ -49,11 +49,11 @@ class FormatterTest extends \Ems\TestCase
         $this->assertEquals($result, $formatter->__call('trim', [$input]));
     }
 
-    /**
-     * @expectedException \Ems\Core\Exceptions\HandlerNotFoundException
-     **/
     public function test_call_throws_HandlerNotFoundException_if_filter_unknown()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\HandlerNotFoundException::class
+        );
         $formatter = $this->newFormatter();
 
         $input = ' whitespace ';
@@ -314,11 +314,9 @@ class FormatterTest extends \Ems\TestCase
 
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     */
     public function test_date_with_unsupported_date_throws_exception()
     {
+        $this->expectException(\InvalidArgumentException::class);
 
         $formatter = $this->newFormatter()->setLocale('de_DE');
 
@@ -326,11 +324,9 @@ class FormatterTest extends \Ems\TestCase
 
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     */
     public function test_date_with_unsupported_datestring_throws_exception()
     {
+        $this->expectException(\InvalidArgumentException::class);
 
         $formatter = $this->newFormatter()->setLocale('de_DE');
 
@@ -391,11 +387,11 @@ class FormatterTest extends \Ems\TestCase
         $this->assertEquals($html, $formatter->html($text));
     }
 
-    /**
-     * @expectedException \Ems\Core\Exceptions\KeyNotFoundException
-     */
     public function test_getFormat_throws_exception_if_key_not_found()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\KeyNotFoundException::class
+        );
         $formatter = $this->newFormatter([]);
 
         $formatter->getFormat('foo');

@@ -5,6 +5,8 @@ namespace Ems\Validation;
 
 use Ems\Contracts\Validation\Rule as RuleContract;
 use Ems\Contracts\Validation\Validator as ValidatorContract;
+use Ems\Core\Exceptions\KeyNotFoundException;
+use InvalidArgumentException;
 
 /**
  * @group validation
@@ -131,22 +133,18 @@ class RuleTest extends \Ems\TestCase
         $this->assertSame($definition, $definition->setOperator('and'));
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     **/
     public function test_setOperator_with_not_and_throws_exception()
     {
+        $this->expectException(InvalidArgumentException::class);
         $rules = 'required|exists:users.id|unique|in:one,two,three';
         $definition = $this->newRule($rules);
 
         $this->assertSame($definition, $definition->setOperator('or'));
     }
 
-    /**
-     * @expectedException Ems\Core\Exceptions\KeyNotFoundException
-     **/
     public function test_get_throws_exception_if_key_not_found()
     {
+        $this->expectException(KeyNotFoundException::class);
         return $this->newRule()->hello;
     }
 

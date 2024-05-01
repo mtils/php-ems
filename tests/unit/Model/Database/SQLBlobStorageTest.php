@@ -72,12 +72,11 @@ class SQLBlobStorageTest extends TestCase
 
     }
 
-    /**
-     * @expectedException \Ems\Core\Exceptions\UnConfiguredException
-     *
-     */
     public function test_offsetExists_throws_exception_if_discriminator_not_set()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\UnConfiguredException::class
+        );
 
         $con = $this->con();
 
@@ -110,11 +109,11 @@ class SQLBlobStorageTest extends TestCase
 
     }
 
-    /**
-     * @expectedException \Ems\Core\Exceptions\DataIntegrityException
-     */
     public function test_offsetPush_throws_exception_if_insert_failed()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\DataIntegrityException::class
+        );
 
         $con = $this->mock(Connection::class);
         $con->shouldReceive('dialect')->andReturn(
@@ -215,11 +214,11 @@ class SQLBlobStorageTest extends TestCase
 
     }
 
-    /**
-     * @expectedException \Ems\Core\Exceptions\DataIntegrityException
-     */
     public function test_offsetSet_throws_exception_if_update_changed_more_than_one_row()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\DataIntegrityException::class
+        );
 
         $con = $this->mock(Connection::class);
         $con->shouldReceive('dialect')->andReturn(
@@ -251,11 +250,11 @@ class SQLBlobStorageTest extends TestCase
 
     }
 
-    /**
-     * @expectedException \Ems\Core\Exceptions\KeyNotFoundException
-     */
     public function test_offsetSet_throws_exception_if_update_failed()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\KeyNotFoundException::class
+        );
 
         $con = $this->mock(Connection::class);
         $con->shouldReceive('dialect')->andReturn(
@@ -313,11 +312,11 @@ class SQLBlobStorageTest extends TestCase
 
     }
 
-    /**
-     * @expectedException \Ems\Core\Exceptions\DataIntegrityException
-     */
     public function test_offsetUnset_throws_exception_if_delete_changed_more_than_one_row()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\DataIntegrityException::class
+        );
 
         $con = $this->mock(Connection::class);
         $con->shouldReceive('dialect')->andReturn(
@@ -339,11 +338,11 @@ class SQLBlobStorageTest extends TestCase
 
     }
 
-    /**
-     * @expectedException \Ems\Core\Exceptions\KeyNotFoundException
-     */
     public function test_offsetUnset_throws_exception_if_delete_failed()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\KeyNotFoundException::class
+        );
 
         $con = $this->mock(Connection::class);
         $con->shouldReceive('dialect')->andReturn(

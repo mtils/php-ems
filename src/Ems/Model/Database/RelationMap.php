@@ -93,6 +93,7 @@ class RelationMap implements IteratorAggregate
      * <b>Traversable</b>
      * @throws Exception on failure.
      */
+    #[\ReturnTypeWillChange]
     public function getIterator()
     {
         $relations = [];

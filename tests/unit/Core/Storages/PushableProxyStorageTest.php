@@ -12,23 +12,18 @@ use Ems\Contracts\Core\Storage;
 use Ems\Core\Url;
 use Ems\IntegrationTest;
 use Ems\Testing\FilesystemMethods;
+use PHPUnit\Framework\Attributes\Test;
 
 class PushableProxyStorageTest extends IntegrationTest
 {
     use FilesystemMethods;
 
-    /**
-     * @test
-     */
-    public function implements_interface()
+    #[Test] public function implements_interface()
     {
         $this->assertInstanceOf(PushableStorage::class, $this->newStorage());
     }
 
-    /**
-     * @test
-     */
-    public function offsetPush_creates_offset()
+    #[Test] public function offsetPush_creates_offset()
     {
         $storage = $this->newStorage();
 
@@ -61,10 +56,7 @@ class PushableProxyStorageTest extends IntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function offsetPush_creates_offset_in_already_filled_array()
+    #[Test] public function offsetPush_creates_offset_in_already_filled_array()
     {
 
         $numbers = [

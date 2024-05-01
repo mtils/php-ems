@@ -305,21 +305,19 @@ class MatcherTest extends TestCase
 
     }
 
-    /**
-     * @expectedException \Ems\Core\Exceptions\NotImplementedException
-     */
     public function test_matching_not_and_or_or_throws_exception()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\NotImplementedException::class
+        );
         $group = new ConditionGroup([],'nor');
 
         $this->newMatcher()->matches([], $group);
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     */
     public function test_matches_throws_exception_on_wrong_type()
     {
+        $this->expectException(\InvalidArgumentException::class);
         $matcher = $this->newMatcher();
         $matcher->matches('foo', new KeyExpression());
 

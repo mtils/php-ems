@@ -115,6 +115,7 @@ class FilterableArray implements ArrayData, Filterable, IteratorAggregate
      * @return Iterator
      * @throws Exception
      */
+    #[\ReturnTypeWillChange]
     public function getIterator() : Iterator
     {
         if ($this->source instanceof IteratorAggregate) {

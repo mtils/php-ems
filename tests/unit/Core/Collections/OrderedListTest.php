@@ -1,8 +1,11 @@
-<?php 
+<?php
 
 namespace Ems\Core\Collections;
 
 use Ems\Testing\LoggingCallable;
+use InvalidArgumentException;
+use OutOfBoundsException;
+use OutOfRangeException;
 
 class OrderedListTest extends \Ems\TestCase
 {
@@ -45,20 +48,16 @@ class OrderedListTest extends \Ems\TestCase
         $this->assertEquals(['c', 'd', 'e', 'f'], $list->insert(count($list), 'f')->getSource());
     }
 
-    /**
-     * @expectedException OutOfRangeException
-     **/
     public function test_insert_before_zero_throws_exception()
     {
+        $this->expectException(OutOfRangeException::class);
         $list = $this->newList(['c', 'd', 'e']);
         $list->insert(-1, 'f');
     }
 
-    /**
-     * @expectedException OutOfRangeException
-     **/
     public function test_insert_after_count_throws_exception()
     {
+        $this->expectException(OutOfRangeException::class);
         $list = $this->newList(['c', 'd', 'e']);
         $list->insert(5, 'h');
     }
@@ -95,11 +94,9 @@ class OrderedListTest extends \Ems\TestCase
         $this->assertEquals(['c', 'e'], $list->getSource());
     }
 
-    /**
-     * @expectedException OutOfBoundsException
-     **/
     public function test_indexOf_throws_exception_if_value_not_found()
     {
+        $this->expectException(OutOfBoundsException::class);
         $list = $this->newList(['c', 'd', 'e']);
         $list->indexOf('h');
     }
@@ -176,11 +173,11 @@ class OrderedListTest extends \Ems\TestCase
         $this->assertEquals('c', $list->find($filter));
     }
 
-    /**
-     * @expectedException Ems\Core\Collections\ItemNotFoundException
-     **/
     public function test_find_throws_exception_on_miss()
     {
+        $this->expectException(
+            ItemNotFoundException::class
+        );
         $list = $this->newList(str_split('abcdef'));
 
         $filter = function ($item) {
@@ -190,11 +187,9 @@ class OrderedListTest extends \Ems\TestCase
         $list->find($filter);
     }
 
-    /**
-     * @expectedException OutOfRangeException
-     **/
     public function test_offsetGet_throws_exception_on_miss()
     {
+        $this->expectException(OutOfRangeException::class);
         $list = $this->newList(str_split('abcdef'));
         $list[8];
     }
@@ -244,11 +239,9 @@ class OrderedListTest extends \Ems\TestCase
         $this->assertEquals($list1->getSource(), $list2->getSource());
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     **/
     public function test_construct_with_unteraversable_object_throws_exception()
     {
+        $this->expectException(InvalidArgumentException::class);
         $list1 = $this->newList(new \stdClass());
     }
 

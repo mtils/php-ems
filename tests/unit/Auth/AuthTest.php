@@ -11,32 +11,25 @@ use Ems\Contracts\Auth\Auth as AuthInterface;
 use Ems\Core\FilterableArray;
 use Ems\TestCase;
 
+use PHPUnit\Framework\Attributes\Test;
+
 use function is_numeric;
 
 class AuthTest extends TestCase
 {
-    /**
-     * @test
-     */
-    public function it_implements_interface()
+    #[Test] public function it_implements_interface()
     {
         $this->assertInstanceOf(AuthInterface::class, $this->auth());
     }
 
-    /**
-     * @test
-     */
-    public function userByCredentials_loads_user()
+    #[Test] public function userByCredentials_loads_user()
     {
         $user = $this->auth()->userByCredentials(['id' => 2]);
         $this->assertInstanceOf(User::class, $user);
         $this->assertEquals(2, $user->id);
     }
 
-    /**
-     * @test
-     */
-    public function specialUser_returns_users()
+    #[Test] public function specialUser_returns_users()
     {
         $auth = $this->auth();
         $auth->setCredentialsForSpecialUser(AuthInterface::GUEST, ['email' => 'nobody@somewhere.com']);
@@ -51,10 +44,7 @@ class AuthTest extends TestCase
         $this->assertEquals(2, $system->id);
     }
 
-    /**
-     * @test
-     */
-    public function is_returns_true_if_user_is_special_user_of_passed_type()
+    #[Test] public function is_returns_true_if_user_is_special_user_of_passed_type()
     {
         $auth = $this->auth();
         $auth->setCredentialsForSpecialUser(AuthInterface::GUEST, ['email' => 'nobody@somewhere.com']);
@@ -75,10 +65,7 @@ class AuthTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function isAuthenticated_returns_true_on_non_guest()
+    #[Test] public function isAuthenticated_returns_true_on_non_guest()
     {
         $auth = $this->auth();
         $auth->setCredentialsForSpecialUser(AuthInterface::GUEST, ['email' => 'nobody@somewhere.com']);
@@ -94,10 +81,7 @@ class AuthTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function allowed_forwards_to_added_callables()
+    #[Test] public function allowed_forwards_to_added_callables()
     {
         $auth = $this->auth();
         $auth->setCredentialsForSpecialUser(AuthInterface::GUEST, ['email' => 'nobody@somewhere.com']);

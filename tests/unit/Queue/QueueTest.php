@@ -222,11 +222,9 @@ class QueueTest extends TestCase
         $this->assertEquals([], $queue->all());
     }
 
-    /**
-     * @expectedException \Ems\Contracts\Core\Errors\NotFound
-     */
     public function test_push_to_unknown_channel_throws_exception()
     {
+        $this->expectException(\Ems\Contracts\Core\Errors\NotFound::class);
         $queue = $this->newQueue();
         $queue->onChannel('foo')->run('strpos');
     }

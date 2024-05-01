@@ -5,6 +5,7 @@ namespace Ems\Core;
 use Closure;
 use Ems\Testing\LoggingCallable;
 use Ems\Core\Exceptions\KeyNotFoundException;
+use PHPUnit\Framework\Attributes\Test;
 use stdClass;
 use function func_get_args;
 
@@ -22,11 +23,9 @@ class LambdaTest extends \Ems\TestCase
         );
     }
 
-    /**
-     * @expectedException \UnexpectedValueException
-     **/
     public function test_constructing_with_lambda_throws_exception()
     {
+        $this->expectException(\UnexpectedValueException::class);
         $lambda = $this->lambda();
         new Lambda($lambda);
     }
@@ -310,10 +309,7 @@ class LambdaTest extends \Ems\TestCase
 
     }
 
-    /**
-     * @test
-     **/
-    public function toArguments_throws_exception_if_optional_parameter_is_not_passed()
+    #[Test] public function toArguments_throws_exception_if_optional_parameter_is_not_passed()
     {
 
         $f = function ($a, $b, $c=null) {};
@@ -479,11 +475,9 @@ class LambdaTest extends \Ems\TestCase
 
     }
 
-    /**
-     * @expectedException \LogicException
-     */
     public function test_passing_not_public_method_throws_exception()
     {
+        $this->expectException(\LogicException::class);
         $f = $this->lambda([static::class, 'f']);
         $f->isClosure();
     }
@@ -517,11 +511,9 @@ class LambdaTest extends \Ems\TestCase
         $this->assertEquals([1,2,3], $f(1,2,3));
     }
 
-    /**
-     * @expectedException \Ems\Contracts\Core\Errors\Unsupported
-     */
     public function test_call_with_unknown_syntax_throws_exception()
     {
+        $this->expectException(\Ems\Contracts\Core\Errors\Unsupported::class);
         $f = $this->lambda('Ems\Core\LambdaTestObject||runStatic');
 
         $f(1,2,3);

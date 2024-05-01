@@ -2,6 +2,7 @@
 
 namespace Ems\Core\Filesystem;
 
+use Ems\Contracts\Core\Errors\UnSupported;
 use Ems\Contracts\Core\RowContent;
 
 class CsvContentTest extends \Ems\IntegrationTest
@@ -15,11 +16,9 @@ class CsvContentTest extends \Ems\IntegrationTest
         );
     }
 
-    /**
-     * @expectedException Ems\Contracts\Core\Errors\Unsupported
-     **/
     public function test_rows_throws_exception_if_layers_were_passed()
     {
+        $this->expectException(UnSupported::class);
         $this->newContent()->rows('layer_1');
     }
 

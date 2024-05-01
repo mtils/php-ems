@@ -128,11 +128,9 @@ class ApplicationTest extends \Ems\TestCase
 
     }
 
-    /**
-     * @expectedException \Ems\Contracts\Core\Errors\NotFound
-     */
     public function test_path_throws_exception_if_scope_unknown()
     {
+        $this->expectException(\Ems\Contracts\Core\Errors\NotFound::class);
         $app = $this->newApp();
         $app->path('bla::home');
     }
@@ -222,11 +220,11 @@ class ApplicationTest extends \Ems\TestCase
         $this->assertContains('boot', $this->newApp()->methodHooks());
     }
 
-    /**
-     * @expectedException \Ems\Core\Exceptions\UnsupportedUsageException
-     */
     public function test_configure_throws_exception_when_app_was_booted()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\UnsupportedUsageException::class
+        );
         $app = $this->newApp();
         $app->boot();
         $this->assertTrue($app->isBooted());
@@ -235,11 +233,11 @@ class ApplicationTest extends \Ems\TestCase
 
     }
 
-    /**
-     * @expectedException \Ems\Core\Exceptions\UnsupportedUsageException
-     */
     public function test_setConfig_throws_exception_when_app_was_booted()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\UnsupportedUsageException::class
+        );
         $app = $this->newApp();
         $config = [
             'assets'    => 'public/theme',

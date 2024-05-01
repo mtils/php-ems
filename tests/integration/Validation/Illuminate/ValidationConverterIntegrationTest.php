@@ -7,6 +7,7 @@ use Ems\Contracts\Validation\ValidationConverter as ValidationConverterContract;
 use Ems\Contracts\Validation\ValidatorFactory as ValidatorFactoryContract;
 use Ems\Contracts\Validation\Validation;
 use Ems\Contracts\Expression\ConstraintParsingMethods;
+use Ems\Core\Exceptions\UnsupportedParameterException;
 use Ems\Validation\Validator;
 use Illuminate\Support\MessageBag;
 use Illuminate\Translation\ArrayLoader;
@@ -70,11 +71,11 @@ class ValidationConverterIntegrationTest extends \Ems\LaravelIntegrationTest
 
     }
 
-    /**
-     * @expectedException Ems\Core\Exceptions\UnsupportedParameterException
-     **/
     public function test_convert_throws_exception_if_format_unsupported()
     {
+        $this->expectException(
+            UnsupportedParameterException::class
+        );
 
         $validation = new ValidationException;
 

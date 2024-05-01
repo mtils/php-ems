@@ -13,24 +13,19 @@ use Ems\Core\Support\ChattySupport;
 use Ems\Skeleton\StreamLogger;
 use Ems\Core\Url;
 use Ems\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Psr\Log\LoggerInterface;
 use stdClass;
 use function strtolower;
 
 class StreamLoggerTest extends TestCase
 {
-    /**
-     * @test
-     */
-    public function it_implements_interface()
+    #[Test] public function it_implements_interface()
     {
         $this->assertInstanceOf(LoggerInterface::class, $this->make());
     }
 
-    /**
-     * @test
-     */
-    public function get_and_set_target()
+    #[Test] public function get_and_set_target()
     {
         $logger = $this->make();
         $string = '';
@@ -39,10 +34,7 @@ class StreamLoggerTest extends TestCase
         $this->assertSame($stream, $logger->getTarget());
     }
 
-    /**
-     * @test
-     */
-    public function emergency_does_log()
+    #[Test] public function emergency_does_log()
     {
         $string = '';
         $stream = new StringStream($string);
@@ -51,10 +43,7 @@ class StreamLoggerTest extends TestCase
         $this->assertContains('Boom', "$stream");
     }
 
-    /**
-     * @test
-     */
-    public function alert_does_log()
+    #[Test] public function alert_does_log()
     {
         $string = '';
         $stream = new StringStream($string);
@@ -63,10 +52,7 @@ class StreamLoggerTest extends TestCase
         $this->assertContains('Boom', "$stream");
     }
 
-    /**
-     * @test
-     */
-    public function critical_does_log()
+    #[Test] public function critical_does_log()
     {
         $string = '';
         $stream = new StringStream($string);
@@ -75,10 +61,7 @@ class StreamLoggerTest extends TestCase
         $this->assertContains('Boom', "$stream");
     }
 
-    /**
-     * @test
-     */
-    public function error_does_log()
+    #[Test] public function error_does_log()
     {
         $string = '';
         $stream = new StringStream($string);
@@ -87,10 +70,7 @@ class StreamLoggerTest extends TestCase
         $this->assertContains('Boom', "$stream");
     }
 
-    /**
-     * @test
-     */
-    public function warning_does_log()
+    #[Test] public function warning_does_log()
     {
         $string = '';
         $stream = new StringStream($string);
@@ -99,10 +79,7 @@ class StreamLoggerTest extends TestCase
         $this->assertContains('Boom', "$stream");
     }
 
-    /**
-     * @test
-     */
-    public function notice_does_log()
+    #[Test] public function notice_does_log()
     {
         $string = '';
         $stream = new StringStream($string);
@@ -111,10 +88,7 @@ class StreamLoggerTest extends TestCase
         $this->assertContains('Boom', "$stream");
     }
 
-    /**
-     * @test
-     */
-    public function info_does_log()
+    #[Test] public function info_does_log()
     {
         $string = '';
         $stream = new StringStream($string);
@@ -123,10 +97,7 @@ class StreamLoggerTest extends TestCase
         $this->assertContains('Boom', "$stream");
     }
 
-    /**
-     * @test
-     */
-    public function debug_does_log()
+    #[Test] public function debug_does_log()
     {
         $string = '';
         $stream = new StringStream($string);
@@ -135,10 +106,7 @@ class StreamLoggerTest extends TestCase
         $this->assertContains('Boom', "$stream");
     }
 
-    /**
-     * @test
-     */
-    public function it_does_log_context()
+    #[Test] public function it_does_log_context()
     {
         $string = '';
         $stream = new StringStream($string);
@@ -149,10 +117,7 @@ class StreamLoggerTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function it_forwards_write_to_stream()
+    #[Test] public function it_forwards_write_to_stream()
     {
         $stream = $this->mock(Stream::class);
         $output = 'foo';
@@ -161,10 +126,7 @@ class StreamLoggerTest extends TestCase
         $this->assertEquals('bar', $logger->write($output));
     }
 
-    /**
-     * @test
-     */
-    public function it_forwards_url_to_stream()
+    #[Test] public function it_forwards_url_to_stream()
     {
         $stream = $this->mock(Stream::class);
         $url = new Url('https://foo.org');
@@ -173,10 +135,7 @@ class StreamLoggerTest extends TestCase
         $this->assertSame($url, $logger->url());
     }
 
-    /**
-     * @test
-     */
-    public function it_forwards_isOpen_to_stream()
+    #[Test] public function it_forwards_isOpen_to_stream()
     {
         $stream = $this->mock(Stream::class);
         $url = new Url('https://foo.org');
@@ -185,10 +144,7 @@ class StreamLoggerTest extends TestCase
         $this->assertTrue($logger->isOpen());
     }
 
-    /**
-     * @test
-     */
-    public function it_forwards_open_to_stream()
+    #[Test] public function it_forwards_open_to_stream()
     {
         $stream = $this->mock(Stream::class);
         $stream->shouldReceive('open')->once()->andReturn($stream);
@@ -196,10 +152,7 @@ class StreamLoggerTest extends TestCase
         $this->assertSame($logger, $logger->open());
     }
 
-    /**
-     * @test
-     */
-    public function it_forwards_close_to_stream()
+    #[Test] public function it_forwards_close_to_stream()
     {
         $stream = $this->mock(Stream::class);
         $stream->shouldReceive('close')->once()->andReturn($stream);
@@ -207,10 +160,7 @@ class StreamLoggerTest extends TestCase
         $this->assertSame($logger, $logger->close());
     }
 
-    /**
-     * @test
-     */
-    public function it_forwards_resource_to_stream()
+    #[Test] public function it_forwards_resource_to_stream()
     {
         $resource = new stdClass();
         $stream = $this->mock(Stream::class);
@@ -219,10 +169,7 @@ class StreamLoggerTest extends TestCase
         $this->assertSame($resource, $logger->resource());
     }
 
-    /**
-     * @test
-     */
-    public function it_forwards_chatty_to_log()
+    #[Test] public function it_forwards_chatty_to_log()
     {
         $string = '';
         $stream = new StringStream($string);

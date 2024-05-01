@@ -12,6 +12,8 @@ use Ems\Core\ConnectionPool;
 use Ems\Core\Url;
 use Ems\Model\Database\Dialects\SQLiteDialect;
 use Ems\Model\Database\PDOConnection;
+use PHPUnit\Framework\Attributes\AfterClass;
+use PHPUnit\Framework\Attributes\BeforeClass;
 
 trait TestCaseConnectionTrait
 {
@@ -50,20 +52,14 @@ trait TestCaseConnectionTrait
 
     }
 
-    /**
-     * @beforeClass
-     */
-    public static function openConnection()
+    #[BeforeClass] public static function openConnection()
     {
         $dialect = new SQLiteDialect();
         static::$con = new PDOConnection(new Url('sqlite://memory'));
         static::$con->setDialect($dialect);
     }
 
-    /**
-     * @afterClass
-     */
-    public static function closeConnection()
+    #[AfterClass] public static function closeConnection()
     {
         static::$con->close();
     }

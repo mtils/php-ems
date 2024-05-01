@@ -15,23 +15,19 @@ use Ems\Core\NamedObject;
 use Ems\TestCase;
 use Ems\Testing\LoggingCallable;
 
+use PHPUnit\Framework\Attributes\Test;
+
 use function implode;
 use function var_export;
 
 class ValidatorTest extends TestCase
 {
-    /**
-     * @test
-     */
-    public function it_implements_interface()
+    #[Test] public function it_implements_interface()
     {
         $this->assertInstanceOf(ValidatorContract::class, $this->make());
     }
 
-    /**
-     * @test
-     */
-    public function it_validates_simple_input()
+    #[Test] public function it_validates_simple_input()
     {
         $rules = [
             'login'     => 'required|min:5|max:64',
@@ -50,10 +46,7 @@ class ValidatorTest extends TestCase
         $this->assertPasses($input, $rules);
     }
 
-    /**
-     * @test
-     */
-    public function it_validates_dates_without_format()
+    #[Test] public function it_validates_dates_without_format()
     {
         $rules = [
             'birthday'  => 'date'
@@ -79,10 +72,7 @@ class ValidatorTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function it_validates_dates_with_format()
+    #[Test] public function it_validates_dates_with_format()
     {
         $rules = [
             'birthday'  => 'date'
@@ -104,10 +94,7 @@ class ValidatorTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function it_validates_datetime_without_format()
+    #[Test] public function it_validates_datetime_without_format()
     {
         $rules = [
             'created'  => 'datetime'
@@ -133,10 +120,7 @@ class ValidatorTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function it_validates_datetime_with_format()
+    #[Test] public function it_validates_datetime_with_format()
     {
         $rules = [
             'created'  => 'datetime:m Y d H;i'
@@ -156,10 +140,7 @@ class ValidatorTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function it_validates_after()
+    #[Test] public function it_validates_after()
     {
         $rules = [
             'created'  => 'after:2020-05-22'
@@ -188,10 +169,7 @@ class ValidatorTest extends TestCase
         $this->assertPasses($input, $rules);
     }
 
-    /**
-     * @test
-     */
-    public function validate_validates_base_rules_with_invalid_data()
+    #[Test] public function validate_validates_base_rules_with_invalid_data()
     {
 
         $rules = [
@@ -261,10 +239,7 @@ class ValidatorTest extends TestCase
         }
     }
 
-    /**
-     * @test
-     */
-    public function validate_stops_when_rule_not_required()
+    #[Test] public function validate_stops_when_rule_not_required()
     {
 
         $rules = [
@@ -330,10 +305,7 @@ class ValidatorTest extends TestCase
         }
     }
 
-    /**
-     * @test
-     */
-    public function validate_required_if_without_value_when_found()
+    #[Test] public function validate_required_if_without_value_when_found()
     {
 
         $rules = [
@@ -363,10 +335,7 @@ class ValidatorTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function validate_required_if_without_value_on_not_found()
+    #[Test] public function validate_required_if_without_value_on_not_found()
     {
 
         $rules = [
@@ -387,10 +356,7 @@ class ValidatorTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function validate_required_if_with_value_when_equals()
+    #[Test] public function validate_required_if_with_value_when_equals()
     {
 
         $rules = [
@@ -420,10 +386,7 @@ class ValidatorTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function validate_required_if_with_value_when_not_equals()
+    #[Test] public function validate_required_if_with_value_when_not_equals()
     {
 
         $rules = [
@@ -444,10 +407,7 @@ class ValidatorTest extends TestCase
         }
     }
 
-    /**
-     * @test
-     */
-    public function validate_required_unless_without_value_when_found()
+    #[Test] public function validate_required_unless_without_value_when_found()
     {
 
         $rules = [
@@ -469,10 +429,7 @@ class ValidatorTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function validate_required_unless_without_value_when_not_found()
+    #[Test] public function validate_required_unless_without_value_when_not_found()
     {
 
         $rules = [
@@ -500,10 +457,7 @@ class ValidatorTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function validate_required_unless_without_values_when_found()
+    #[Test] public function validate_required_unless_without_values_when_found()
     {
 
         $rules = [
@@ -524,10 +478,7 @@ class ValidatorTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function validate_required_unless_without_values_when_not_found()
+    #[Test] public function validate_required_unless_without_values_when_not_found()
     {
 
         $rules = [
@@ -949,10 +900,7 @@ class ValidatorTest extends TestCase
         }
     }
 
-    /**
-     * @test
-     */
-    public function required_without_not_required_array_throws_no_exception()
+    #[Test] public function required_without_not_required_array_throws_no_exception()
     {
         $rules = [
             'name' => 'string',
@@ -962,10 +910,7 @@ class ValidatorTest extends TestCase
         $this->assertEquals($input, $this->make($rules)->validate($input));
     }
 
-    /**
-     * @test
-     */
-    public function required_without_required_array_throws_exception()
+    #[Test] public function required_without_required_array_throws_exception()
     {
         $rules = [
             'name' => 'string',
@@ -976,10 +921,7 @@ class ValidatorTest extends TestCase
         $this->assertEquals($input, $this->make($rules)->validate($input));
     }
 
-    /**
-     * @test
-     */
-    public function required_with_array_throws_no_exception()
+    #[Test] public function required_with_array_throws_no_exception()
     {
         $rules = [
             'name' => 'string',
@@ -989,10 +931,7 @@ class ValidatorTest extends TestCase
         $this->assertEquals($input, $this->make($rules)->validate($input));
     }
 
-    /**
-     * @test
-     */
-    public function required_with_no_array_throws_exception()
+    #[Test] public function required_with_no_array_throws_exception()
     {
         $rules = [
             'name' => 'string',
@@ -1003,10 +942,7 @@ class ValidatorTest extends TestCase
         $this->assertEquals($input, $this->make($rules)->validate($input));
     }
 
-    /**
-     * @test
-     */
-    public function required_with_min_array_size()
+    #[Test] public function required_with_min_array_size()
     {
         $rules = [
             'name' => 'string',
@@ -1016,10 +952,7 @@ class ValidatorTest extends TestCase
         $this->assertFailsWith($input, $rules, 'min');
     }
 
-    /**
-     * @test
-     */
-    public function required_with_max_array_size()
+    #[Test] public function required_with_max_array_size()
     {
         $rules = [
             'name' => 'string',
@@ -1029,10 +962,7 @@ class ValidatorTest extends TestCase
         $this->assertFailsWith($input, $rules, 'max');
     }
 
-    /**
-     * @test
-     */
-    public function test_array_items_rule()
+    #[Test] public function test_array_items_rule()
     {
         $rules = [
             'name' => 'string',
@@ -1043,10 +973,7 @@ class ValidatorTest extends TestCase
         $this->assertFailsWith($input, $rules, 'max');
     }
 
-    /**
-     * @test
-     */
-    public function test_nested_jsonpath_rule()
+    #[Test] public function test_nested_jsonpath_rule()
     {
         $rules = [
             'projects[*].name' => 'numeric'

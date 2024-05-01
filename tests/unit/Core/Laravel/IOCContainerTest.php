@@ -36,11 +36,11 @@ class IOCContainerTest extends BaseContainerTest
         $this->assertInstanceOf(Container::class, $container->laravel());
     }
 
-    /**
-     * @expectedException \Ems\Core\Exceptions\UnsupportedUsageException
-     */
     public function test_create_uses_exact_class_if_forced()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\UnsupportedUsageException::class
+        );
         parent::test_create_uses_exact_class_if_forced();
     }
 

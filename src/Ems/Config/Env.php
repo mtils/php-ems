@@ -164,6 +164,7 @@ class Env implements ArrayAccess, IteratorAggregate
     /**
      * @return ArrayIterator
      */
+    #[\ReturnTypeWillChange]
     public function getIterator()
     {
         return new ArrayIterator($this->toArray());

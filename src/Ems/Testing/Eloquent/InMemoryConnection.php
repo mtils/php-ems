@@ -10,6 +10,7 @@ use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\SQLiteConnection;
 use PDO;
+use PHPUnit\Framework\Attributes\BeforeClass;
 
 /**
  * The InMemoryConnection uses a :memory: sqlite connection
@@ -25,15 +26,12 @@ trait InMemoryConnection
      **/
     protected static $_testConnection;
 
-    public function assertPreConditions()
+    public function assertPreConditions(): void
     {
         $this->refreshConnectionIfNeeded();
     }
 
-    /**
-     * @beforeClass
-     **/
-    public function refreshConnectionIfNeeded()
+    #[BeforeClass] public function refreshConnectionIfNeeded()
     {
         if (!static::$_testConnection) {
             $this->refreshConnection();

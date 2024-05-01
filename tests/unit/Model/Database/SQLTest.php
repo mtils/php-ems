@@ -98,11 +98,11 @@ class SQLTest extends \Ems\TestCase
         $this->assertInstanceOf(MySQLDialect::class, SQL::dialect('mysql'));
     }
 
-    /**
-     * @expectedException \Ems\Core\Exceptions\NotImplementedException
-     */
     public function test_dialect_throws_Exception_if_not_supported()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\NotImplementedException::class
+        );
         SQL::dialect('informix');
     }
 }

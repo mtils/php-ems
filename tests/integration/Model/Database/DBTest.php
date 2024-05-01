@@ -9,15 +9,14 @@ use Ems\Contracts\Core\Url as UrlContract;
 use Ems\Core\Url;
 use Ems\TestCase;
 
+use PHPUnit\Framework\Attributes\Test;
+
 use function dirname;
 use function var_dump;
 
 class DBTest extends TestCase
 {
-    /**
-     * @test
-     */
-    public function configToUrl_creates_a_sqlite_connection()
+    #[Test] public function configToUrl_creates_a_sqlite_connection()
     {
         $config = [
             'driver' => 'sqlite',
@@ -29,10 +28,7 @@ class DBTest extends TestCase
         $this->assertEquals($config['driver'] . "://$absolutePath", (string)$url);
     }
 
-    /**
-     * @test
-     */
-    public function configToUrl_creates_a_sqlite_connection_with_absolute_database_path()
+    #[Test] public function configToUrl_creates_a_sqlite_connection_with_absolute_database_path()
     {
         $config = [
             'driver' => 'sqlite',
@@ -44,10 +40,7 @@ class DBTest extends TestCase
         $this->assertEquals($config['driver'] . "://$absolutePath", (string)$url);
     }
 
-    /**
-     * @test
-     */
-    public function configToUrl_creates_a_sqlite_connection_with_memory_database()
+    #[Test] public function configToUrl_creates_a_sqlite_connection_with_memory_database()
     {
         $config = [
             'driver' => 'sqlite',
@@ -58,10 +51,7 @@ class DBTest extends TestCase
         $this->assertEquals($config['driver'] . "://memory", (string)$url);
     }
 
-    /**
-     * @test
-     */
-    public function configToUrl_creates_a_mysql_connection()
+    #[Test] public function configToUrl_creates_a_mysql_connection()
     {
         $config = [
             'driver' => 'mysql',
@@ -76,10 +66,7 @@ class DBTest extends TestCase
         $this->assertEquals($config['password'], $url->password);
     }
 
-    /**
-     * @test
-     */
-    public function configurationToUrls_creates_connection_urls()
+    #[Test] public function configurationToUrls_creates_connection_urls()
     {
         $sqliteConfig = [
             'driver' => 'sqlite',
@@ -106,10 +93,7 @@ class DBTest extends TestCase
         $this->assertEquals($sqliteConfig['driver'] . "://$absolutePath", (string)$urls['default']);
     }
 
-    /**
-     * @test
-     */
-    public function makeConnectionHandler_creates_correct_connection()
+    #[Test] public function makeConnectionHandler_creates_correct_connection()
     {
         $sqliteConfig = [
             'driver' => 'sqlite',
@@ -137,10 +121,7 @@ class DBTest extends TestCase
         $this->assertNull($connectionFactory('foo'));
     }
 
-    /**
-     * @test
-     */
-    public function urlToConfig_creates_a_mysql_config()
+    #[Test] public function urlToConfig_creates_a_mysql_config()
     {
         $config = [
             'driver' => 'mysql',
@@ -155,10 +136,7 @@ class DBTest extends TestCase
         $this->assertEquals($config, Db::urlToConfig($url));
     }
 
-    /**
-     * @test
-     */
-    public function urlToConfig_creates_a_sqlite_config()
+    #[Test] public function urlToConfig_creates_a_sqlite_config()
     {
         $config = [
             'driver' => 'sqlite',
@@ -172,10 +150,7 @@ class DBTest extends TestCase
         $this->assertEquals($config, Db::urlToConfig($url));
     }
 
-    /**
-     * @test
-     */
-    public function urlToConfig_creates_a_sqlite_memory_config()
+    #[Test] public function urlToConfig_creates_a_sqlite_memory_config()
     {
         $config = [
             'driver' => 'sqlite',
@@ -188,10 +163,7 @@ class DBTest extends TestCase
         $this->assertEquals($config, Db::urlToConfig($url));
     }
 
-    /**
-     * @test
-     */
-    public function urlToConfig_creates_a_mysql_config_with_port()
+    #[Test] public function urlToConfig_creates_a_mysql_config_with_port()
     {
         $config = [
             'driver' => 'mysql',
@@ -206,10 +178,8 @@ class DBTest extends TestCase
         $url = new Url($urlString);
         $this->assertEquals($config, Db::urlToConfig($url));
     }
-    /**
-     * @test
-     */
-    public function urlToConfig_creates_a_mysql_config_with_parameters()
+
+    #[Test] public function urlToConfig_creates_a_mysql_config_with_parameters()
     {
         $config = [
             'driver' => 'mysql',

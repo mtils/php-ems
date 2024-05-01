@@ -20,6 +20,10 @@ use Models\Project;
 use Models\ProjectType;
 use Models\User;
 
+use PHPUnit\Framework\Attributes\BeforeClass;
+
+use PHPUnit\Framework\Attributes\Test;
+
 use function class_exists;
 
 class OrmIntegrationTest extends DatabaseIntegrationTest
@@ -28,18 +32,12 @@ class OrmIntegrationTest extends DatabaseIntegrationTest
 
     protected $extraBootstrappers = [OrmBootstrapper::class];
 
-    /**
-     * @test
-     */
-    public function it_instantiates()
+    #[Test] public function it_instantiates()
     {
         $this->assertInstanceOf(Orm::class, $this->app(Orm::class));
     }
 
-    /**
-     * @test
-     */
-    public function select_some_users_with_relations()
+    #[Test] public function select_some_users_with_relations()
     {
         /** @var Orm $orm */
         $orm = $this->app(Orm::class);
@@ -95,10 +93,7 @@ class OrmIntegrationTest extends DatabaseIntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function runner_for_unknown_url_throws_exception()
+    #[Test] public function runner_for_unknown_url_throws_exception()
     {
         $this->expectException(HandlerNotFoundException::class);
         $this->app(Orm::class)->runner(new Url());
@@ -135,19 +130,17 @@ class OrmIntegrationTest extends DatabaseIntegrationTest
     }
 
     /**
-     * @beforeClass
      * @noinspection PhpIncludeInspection
      */
-    public static function loadOrm()
+    #[BeforeClass] public static function loadOrm()
     {
 
     }
 
     /**
-     * @beforeClass
      * @noinspection PhpIncludeInspection
      */
-    public static function manuallyLoadOrm()
+    #[BeforeClass] public static function manuallyLoadOrm()
     {
         if(class_exists(User::class)) {
             return;

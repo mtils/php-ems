@@ -8,83 +8,71 @@ namespace Ems\Core\IdGenerator;
 
 use Ems\Contracts\Core\IdGenerator;
 use Ems\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 class IncrementingIdGeneratorTest extends TestCase
 {
-    /**
-     * @test
-     */
-    public function implements_interface()
+    #[Test] public function implements_interface()
     {
         $this->assertInstanceOf(IdGenerator::class, $this->newGenerator());
     }
 
-    /**
-     * @test
-     */
-    public function setMin_changes_min()
+    #[Test] public function setMin_changes_min()
     {
         $generator = $this->newGenerator();
         $generator->setMin(15);
         $this->assertEquals(15, $generator->min());
     }
 
-    /**
-     * @test
-     * @expectedException \Ems\Core\Exceptions\UnsupportedParameterException
-     */
-    public function setMin_throws_exception_if_not_numeric()
+    #[Test] public function test_setMin_throws_exception_if_not_numeric()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\UnsupportedParameterException::class
+        );
         $generator = $this->newGenerator();
         $generator->setMin('Heinz der Würdevolle');
     }
 
     /**
-     * @test
-     * @expectedException \Ems\Core\Exceptions\UnsupportedParameterException
+     *
      */
-    public function setMin_throws_exception_greater_then_max()
+    public function test_setMin_throws_exception_greater_then_max()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\UnsupportedParameterException::class
+        );
         $generator = $this->newGenerator();
         $generator->setMax(100);
         $generator->setMin(200);
     }
 
-    /**
-     * @test
-     */
-    public function setMax_changes_max()
+    #[Test] public function setMax_changes_max()
     {
         $generator = $this->newGenerator();
         $generator->setMax(150);
         $this->assertEquals(150, $generator->max());
     }
 
-    /**
-     * @test
-     * @expectedException \Ems\Core\Exceptions\UnsupportedParameterException
-     */
-    public function setMax_throws_exception_if_not_numeric()
+    public function test_setMax_throws_exception_if_not_numeric()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\UnsupportedParameterException::class
+        );
         $generator = $this->newGenerator();
         $generator->setMax('Franz die Schönheit');
     }
 
-    /**
-     * @test
-     * @expectedException \Ems\Core\Exceptions\UnsupportedParameterException
-     */
-    public function setMax_throws_exception_smaller_then_min()
+    public function test_setMax_throws_exception_smaller_then_min()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\UnsupportedParameterException::class
+        );
         $generator = $this->newGenerator();
         $generator->setMin(100);
         $generator->setMax(50);
     }
 
-    /**
-     * @test
-     */
-    public function generateFresh_creates_next_int_without_salt()
+    #[Test] public function test_generateFresh_creates_next_int_without_salt()
     {
         $generator = $this->newGenerator();
 
@@ -102,55 +90,40 @@ class IncrementingIdGeneratorTest extends TestCase
 
     }
 
-    /**
-     * @test
-     * @expectedException \Ems\Core\Exceptions\UnsupportedUsageException
-     *
-     */
-    public function passing_length_to_generate_fails()
+    public function test_passing_length_to_generate_fails()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\UnsupportedUsageException::class
+        );
         $this->newGenerator()->generate(null, 45);
     }
 
-    /**
-     * @test
-     * @expectedException \Ems\Core\Exceptions\UnsupportedParameterException
-     */
-    public function passing_non_numeric_salt_fails()
+    public function test_passing_non_numeric_salt_fails()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\UnsupportedParameterException::class
+        );
         $this->newGenerator()->generate('hans', 0);
     }
 
-    /**
-     * @test
-     */
-    public function passing_salt_more_or_equals_real_min_does_not_fail()
+    #[Test] public function passing_salt_more_or_equals_real_min_does_not_fail()
     {
         $this->newGenerator()->generate(0, 0);
     }
 
-    /**
-     * @test
-     * @expectedException \OutOfBoundsException
-     */
-    public function passing_salt_less_than_min_fails()
+    #[Test] public function passing_salt_less_than_min_fails()
     {
+        $this->expectException(\OutOfBoundsException::class);
         $this->newGenerator()->setMin(3)->generate(1, 0);
     }
 
-    /**
-     * @test
-     * @expectedException \OutOfBoundsException
-     */
-    public function passing_salt_greater_than_max_fails()
+    #[Test] public function passing_salt_greater_than_max_fails()
     {
+        $this->expectException(\OutOfBoundsException::class);
         $this->newGenerator()->setMax(10)->generate(12, 0);
     }
 
-    /**
-     * @test
-     */
-    public function passing_salt_leads_to_next_integer()
+    #[Test] public function passing_salt_leads_to_next_integer()
     {
         $generator = $this->newGenerator();
 
@@ -159,12 +132,9 @@ class IncrementingIdGeneratorTest extends TestCase
         $this->assertEquals(300, $generator->generate(299));
     }
 
-    /**
-     * @test
-     * @expectedException \OverflowException
-     */
-    public function generating_id_greater_than_max_fails()
+    #[Test] public function generating_id_greater_than_max_fails()
     {
+        $this->expectException(\OverflowException::class);
         $this->newGenerator()->setMax(10)->generate(10);
     }
 

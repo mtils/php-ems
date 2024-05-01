@@ -8,6 +8,7 @@ namespace Ems\Testing\Skeleton;
 use Ems\Testing\Faker\Factory;
 use Ems\Testing\Faker\Generator;
 use Mockery;
+use PHPUnit\Framework\Attributes\After;
 use PHPUnit\Framework\TestCase as PHPUnitTestCase;
 
 
@@ -28,10 +29,7 @@ class TestCase extends PHPUnitTestCase
         return Mockery::mock($class, ...$args);
     }
 
-    /**
-     * @after
-     */
-    protected function tearDownMockery()
+    #[After] protected function tearDownMockery()
     {
         Mockery::close();
     }

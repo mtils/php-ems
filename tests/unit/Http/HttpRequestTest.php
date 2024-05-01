@@ -12,25 +12,20 @@ use Ems\Core\ImmutableMessage;
 use Ems\Core\Url;
 use Ems\Http\HttpRequest;
 use Ems\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\StreamInterface;
 
 class HttpRequestTest extends TestCase
 {
-    /**
-     * @test
-     */
-    public function it_implements_interface()
+    #[Test] public function it_implements_interface()
     {
         $request = $this->request();
         $this->assertInstanceOf(RequestInterface::class, $request);
         $this->assertInstanceOf(ImmutableMessage::class, $request);
     }
 
-    /**
-     * @test
-     */
-    public function it_applies_all_attributes()
+    #[Test] public function it_applies_all_attributes()
     {
         $url = 'https://web-utils.de/users/12/blog-entries';
         $attributes = [
@@ -52,10 +47,7 @@ class HttpRequestTest extends TestCase
         }
     }
 
-    /**
-     * @test
-     */
-    public function it_applies_separate_constructor_attributes()
+    #[Test] public function it_applies_separate_constructor_attributes()
     {
         $data = ['foo' => 'bar'];
         $headers = ['Content-Type' =>  'application/json'];
@@ -66,10 +58,7 @@ class HttpRequestTest extends TestCase
         $this->assertEquals($headers, $request->headers);
     }
 
-    /**
-     * @test
-     */
-    public function it_creates_body()
+    #[Test] public function it_creates_body()
     {
         $request = $this->request('blob');
 
@@ -80,10 +69,7 @@ class HttpRequestTest extends TestCase
         $this->assertEquals('blob', "$body");
     }
 
-    /**
-     * @test
-     */
-    public function getRequestTarget_returns_target()
+    #[Test] public function getRequestTarget_returns_target()
     {
         $request = $this->request('blob');
         $this->assertSame('/', $request->getRequestTarget());
@@ -96,10 +82,7 @@ class HttpRequestTest extends TestCase
         $this->assertEquals('api/v2/contacts/33',$fork->requestTarget);
     }
 
-    /**
-     * @test
-     */
-    public function getMethod_returns_method()
+    #[Test] public function getMethod_returns_method()
     {
         $request = $this->request('blob');
         $this->assertSame(Input::GET, $request->method);
@@ -111,10 +94,7 @@ class HttpRequestTest extends TestCase
         $this->assertEquals(Input::POST, $fork->getMethod());
     }
 
-    /**
-     * @test
-     */
-    public function getUri_returns_uri()
+    #[Test] public function getUri_returns_uri()
     {
         $url = new Url('https://web-utils.de/api/users/12');
         $request = $this->request(['url' => $url]);

@@ -9,33 +9,25 @@ use DateTime;
 use Ems\Core\Exceptions\KeyNotFoundException;
 use Ems\TestCase;
 use OutOfBoundsException;
+use PHPUnit\Framework\Attributes\Test;
 use stdClass;
 use UnexpectedValueException;
 
 class CookieTest extends TestCase
 {
-    /**
-     * @test
-     */
-    public function it_instantiates()
+    #[Test] public function it_instantiates()
     {
         $this->assertInstanceOf(Cookie::class, $this->cookie('foo', 'bar'));
     }
 
-    /**
-     * @test
-     */
-    public function set_name_and_value()
+    #[Test] public function set_name_and_value()
     {
         $cookie = $this->cookie('foo', 'bar');
         $this->assertEquals('foo', $cookie->name);
         $this->assertEquals('bar', $cookie->value);
     }
 
-    /**
-     * @test
-     */
-    public function set_expire()
+    #[Test] public function set_expire()
     {
         $expire = new DateTime('2022-01-13 21:45:17');
         $cookie = $this->cookie('foo', 'bar', $expire);
@@ -49,10 +41,7 @@ class CookieTest extends TestCase
         $cookie->expire = new stdClass();
     }
 
-    /**
-     * @test
-     */
-    public function set_path()
+    #[Test] public function set_path()
     {
 
         $this->assertEquals('/', $this->cookie('foo', 'bar')->path);
@@ -63,10 +52,7 @@ class CookieTest extends TestCase
         $this->assertEquals('/profile', $cookie->path);
     }
 
-    /**
-     * @test
-     */
-    public function set_domain()
+    #[Test] public function set_domain()
     {
         $this->assertSame('', $this->cookie('foo', 'bar')->domain);
         $expire = new DateTime('2022-01-13 21:45:17');
@@ -74,10 +60,7 @@ class CookieTest extends TestCase
         $this->assertEquals('web-utils.de', $cookie->domain);
     }
 
-    /**
-     * @test
-     */
-    public function set_secure()
+    #[Test] public function set_secure()
     {
         Cookie::$defaultSecure = false;
         $cookie = $this->cookie('foo','bar');
@@ -94,10 +77,7 @@ class CookieTest extends TestCase
         $this->assertTrue($cookie->secure);
     }
 
-    /**
-     * @test
-     */
-    public function set_httpOnly()
+    #[Test] public function set_httpOnly()
     {
         $default = Cookie::$defaultHttpOnly;
         $this->assertSame($default, $this->cookie('foo', 'bar')->httpOnly);
@@ -119,10 +99,7 @@ class CookieTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function set_sameSite()
+    #[Test] public function set_sameSite()
     {
         $default = Cookie::$defaultSameSite;
         $this->assertSame($default, $this->cookie('foo', 'bar')->sameSite);
@@ -140,29 +117,20 @@ class CookieTest extends TestCase
         $cookie->sameSite = 'foo';
     }
 
-    /**
-     * @test
-     */
-    public function get_unknown_property_throws_exception()
+    #[Test] public function get_unknown_property_throws_exception()
     {
         $this->expectException(OutOfBoundsException::class);
         $this->cookie('foo', 'bar')->foo;
     }
 
-    /**
-     * @test
-     */
-    public function set_unknown_property_throws_exception()
+    #[Test] public function set_unknown_property_throws_exception()
     {
         $this->expectException(OutOfBoundsException::class);
         $cookie = $this->cookie('foo', 'bar');
         $cookie->foo = 'bar';
     }
 
-    /**
-     * @test
-     */
-    public function toString_returns_value()
+    #[Test] public function toString_returns_value()
     {
         $cookie = $this->cookie('foo', 'bar');
         $this->assertEquals('bar', "$cookie");

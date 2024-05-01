@@ -6,6 +6,8 @@ use Ems\Contracts\Core\Content;
 use Ems\Contracts\Core\Stream;
 use Ems\Core\Url;
 use Ems\Testing\LoggingCallable;
+use LogicException;
+
 use function fclose;
 use function file_get_contents;
 use function filesize;
@@ -27,11 +29,9 @@ class BinaryContentTest extends \Ems\IntegrationTest
         $this->assertEquals('application/pdf', $content->mimeType());
     }
 
-    /**
-     * @expectedException LogicException
-     **/
     public function test_setting_contentType_twice_throws_LogicException()
     {
+        $this->expectException(LogicException::class);
         $content = $this->newContent()->setMimeType('application/pdf');
         $this->assertEquals('application/pdf', $content->mimeType());
         $content->setMimetype('application/json');
@@ -52,11 +52,9 @@ class BinaryContentTest extends \Ems\IntegrationTest
         $this->assertEquals('/home/michi/test.txt', $content->url());
     }
 
-    /**
-     * @expectedException LogicException
-     **/
     public function test_setting_url_twice_throws_LogicException()
     {
+        $this->expectException(LogicException::class);
         $content = $this->newContent()->setUrl('/home/michi/test.txt');
         $this->assertEquals('/home/michi/test.txt', $content->url());
         $content->setUrl('/home/michi/test.log');
@@ -143,11 +141,11 @@ class BinaryContentTest extends \Ems\IntegrationTest
 
     }
 
-    /**
-     * @expectedException \Ems\Contracts\Core\Errors\ConfigurationError
-     */
     public function test_iterate_throws_exception_if_no_stream_and_no_url()
     {
+        $this->expectException(
+            \Ems\Contracts\Core\Errors\ConfigurationError::class
+        );
         $content = $this->newContent('')->setMimeType('text/plain');
 
         $content->getIterator();

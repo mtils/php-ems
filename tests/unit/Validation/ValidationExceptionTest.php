@@ -70,11 +70,9 @@ class ValidationExceptionTest extends \Ems\TestCase
 
     }
 
-    /**
-     * @expectedException \Ems\Contracts\Core\Errors\NotFound
-     **/
     public function test_parameters_does_not_fail_on_missing_key()
     {
+        $this->expectException(\Ems\Contracts\Core\Errors\NotFound::class);
         $validation = $this->newValidation();
 
         $validation->addFailure('age', 'numeric');
@@ -83,11 +81,9 @@ class ValidationExceptionTest extends \Ems\TestCase
         $this->assertEquals([], $validation->parameters('foo', 'max'));
     }
 
-    /**
-     * @expectedException \Ems\Contracts\Core\Errors\NotFound
-     **/
     public function test_parameters_does_not_fail_on_missing_rules()
     {
+        $this->expectException(\Ems\Contracts\Core\Errors\NotFound::class);
         $validation = $this->newValidation();
 
         $validation->addFailure('age', 'numeric');
@@ -196,11 +192,9 @@ class ValidationExceptionTest extends \Ems\TestCase
 
     }
 
-    /**
-     * @expectedException \Ems\Contracts\Core\Errors\Unsupported
-     **/
     public function test_offsetSet_throws_Unsupported()
     {
+        $this->expectException(\Ems\Contracts\Core\Errors\Unsupported::class);
         $validation = $this->newValidation();
         $validation['foo'] = [];
     }

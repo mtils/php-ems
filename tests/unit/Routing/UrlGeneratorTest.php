@@ -14,23 +14,18 @@ use Ems\Contracts\Routing\RouteRegistry as RouteRegistryContract;
 use Ems\Contracts\Routing\UrlGenerator as UrlGeneratorContract;
 use Ems\RoutingTrait;
 use Ems\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 class UrlGeneratorTest extends TestCase
 {
     use RoutingTrait;
 
-    /**
-     * @test
-     */
-    public function it_implements_interface()
+    #[Test] public function it_implements_interface()
     {
         $this->assertInstanceOf(UrlGeneratorContract::class, $this->make());
     }
 
-    /**
-     * @test
-     */
-    public function to_returns_path_plus_url()
+    #[Test] public function to_returns_path_plus_url()
     {
         $urls = $this->make();
         $domain = 'https://web-utils.de';
@@ -47,10 +42,7 @@ class UrlGeneratorTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function to_returns_path_on_different_scope()
+    #[Test] public function to_returns_path_on_different_scope()
     {
         $urls = $this->make();
         $domain = 'https://web-utils.de';
@@ -68,10 +60,7 @@ class UrlGeneratorTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function route_returns_url_to_route()
+    #[Test] public function route_returns_url_to_route()
     {
         $urls = $this->make();
         $domain = 'https://web-utils.de';
@@ -104,10 +93,7 @@ class UrlGeneratorTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function route_returns_url_to_route_in_different_scope()
+    #[Test] public function route_returns_url_to_route_in_different_scope()
     {
         $urls = $this->make();
         $domain = 'https://web-utils.de';
@@ -120,10 +106,7 @@ class UrlGeneratorTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function route_works_with_multiple_parameters()
+    #[Test] public function route_works_with_multiple_parameters()
     {
         $registry = $this->registry();
         $registry->register(function (RouteCollector $collector) {
@@ -141,10 +124,7 @@ class UrlGeneratorTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function entity_returns_route_to_entity()
+    #[Test] public function entity_returns_route_to_entity()
     {
         $registry = $this->registry();
         $registry->register(function (RouteCollector $collector) {
@@ -164,10 +144,7 @@ class UrlGeneratorTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function asset_returns_base_url()
+    #[Test] public function asset_returns_base_url()
     {
         $urls = $this->make();
         $domain = 'https://web-utils.de';
@@ -178,10 +155,7 @@ class UrlGeneratorTest extends TestCase
         $this->assertEquals("$domain/blank.gif", $urls->asset('blank.gif'));
     }
 
-    /**
-     * @test
-     */
-    public function asset_uses_custom_asset_url()
+    #[Test] public function asset_uses_custom_asset_url()
     {
         $urls = $this->make();
         $domain = 'https://web-utils.de';
@@ -193,10 +167,7 @@ class UrlGeneratorTest extends TestCase
         $this->assertEquals("$assetUrl/blank.gif", $urls->asset('blank.gif'));
     }
 
-    /**
-     * @test
-     */
-    public function url_from_different_clientType()
+    #[Test] public function url_from_different_clientType()
     {
         $registry = $this->registry();
         $registry->register(function (RouteCollector $collector) {

@@ -18,6 +18,7 @@ use Ems\Model\Database\SQLStorage;
 use Ems\Testing\Cheat;
 use Ems\Testing\FilesystemMethods;
 use Ems\Testing\LoggingCallable;
+use UnexpectedValueException;
 
 
 class CoreStorageTest extends \Ems\TestCase
@@ -37,7 +38,7 @@ class CoreStorageTest extends \Ems\TestCase
     public function test_implements_interface()
     {
         $this->assertInstanceOf(
-            CacheStorageContract::class, 
+            CacheStorageContract::class,
             $this->newStorage()
         );
     }
@@ -67,7 +68,7 @@ class CoreStorageTest extends \Ems\TestCase
         $storage = $this->newStorage();
         $this->assertEquals(Cheat::get($storage, 'entryTemplate'), $storage->getEntryTemplate());
     }
-    
+
     public function test_get_returns_null_if_entry_not_found()
     {
         $this->assertNull($this->newStorage()->get('foo'));
@@ -80,11 +81,9 @@ class CoreStorageTest extends \Ems\TestCase
         $this->assertEquals('bar', $storage->get('foo'));
     }
 
-    /**
-     * @expectedException UnexpectedValueException
-     **/
     public function test_put_throws_exception_if_unserializable_value_is_passed_and_no_big_storage_assigned()
     {
+        $this->expectException(UnexpectedValueException::class);
         $storage = $this->newStorage();
         $storage->put('foo', fopen(__FILE__, 'r'));
     }
@@ -107,7 +106,7 @@ class CoreStorageTest extends \Ems\TestCase
 
         $this->assertCount(0, $logger, 'An error occured during writing to big storage.');
     }
-    
+
     public function test_get_does_not_return_exceeded_entry()
     {
         // We need two storages here because the memory cache entries will not
@@ -129,11 +128,11 @@ class CoreStorageTest extends \Ems\TestCase
         $this->assertNull($storage2->get('foo'));
     }
 
-    /**
-     * @expectedException \Ems\Contracts\Core\Errors\ConfigurationError
-     **/
     public function test_get_throws_exception_if_entry_marked_as_outside_but_no_bigStorage_assigned()
     {
+        $this->expectException(
+            \Ems\Contracts\Core\Errors\ConfigurationError::class
+        );
         // We need two storages here because the memory cache entries will not
         // be checked for expiration...
         $con = $this->newConnection();
@@ -162,7 +161,7 @@ class CoreStorageTest extends \Ems\TestCase
 
 
     }
-    
+
     public function test_get_many_does_not_return_exceeded_entries()
     {
         // We need two storages here because the memory cache entries will not

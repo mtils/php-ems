@@ -7,22 +7,17 @@ namespace Ems\Contracts\Model\Database;
 
 
 use Ems\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 class PredicateTest extends TestCase
 {
 
-    /**
-     * @test
-     */
-    public function it_instantiates()
+    #[Test] public function it_instantiates()
     {
         $this->assertInstanceOf(Predicate::class, $this->newPredicate());
     }
 
-    /**
-     * @test
-     */
-    public function construct_with_one_arg()
+    #[Test] public function construct_with_one_arg()
     {
         $predicate = $this->newPredicate('name');
         $this->assertEquals('name', $predicate->left);
@@ -30,10 +25,7 @@ class PredicateTest extends TestCase
         $this->assertNull($predicate->right);
     }
 
-    /**
-     * @test
-     */
-    public function construct_with_two_args()
+    #[Test] public function construct_with_two_args()
     {
         $predicate = $this->newPredicate('name', 'John');
         $this->assertEquals('name', $predicate->left);
@@ -41,10 +33,7 @@ class PredicateTest extends TestCase
         $this->assertEquals('John', $predicate->right);
     }
 
-    /**
-     * @test
-     */
-    public function construct_with_three_args()
+    #[Test] public function construct_with_three_args()
     {
         $predicate = $this->newPredicate('age', '>', 5);
         $this->assertEquals('age', $predicate->left);
@@ -52,10 +41,7 @@ class PredicateTest extends TestCase
         $this->assertEquals(5, $predicate->right);
     }
 
-    /**
-     * @test
-     */
-    public function get_and_set_rightIsKey()
+    #[Test] public function get_and_set_rightIsKey()
     {
         $predicate = $this->newPredicate('age', '>', 5);
         $this->assertFalse($predicate->rightIsKey);
@@ -63,10 +49,7 @@ class PredicateTest extends TestCase
         $this->assertTrue($predicate->rightIsKey);
     }
 
-    /**
-     * @test
-     */
-    public function __get_unknown_property()
+    #[Test] public function __get_unknown_property()
     {
         $predicate = $this->newPredicate('age', '>', 5);
         $this->assertNull($predicate->__get('something'));

@@ -16,23 +16,18 @@ use Ems\Testing\Eloquent\MigratedDatabase;
 use Ems\Tree\GenericChildren;
 use Illuminate\Database\Eloquent\Model;
 use OutOfBoundsException;
+use PHPUnit\Framework\Attributes\Test;
 
 class EloquentNodeRepositoryIntegrationTest extends TestCase
 {
     use MigratedDatabase;
 
-    /**
-     * @test
-     */
-    public function implements_interface()
+    #[Test] public function implements_interface()
     {
         $this->assertInstanceOf(NodeRepositoryContract::class, $this->newRepository());
     }
 
-    /**
-     * @test
-     */
-    public function store_creates_rootNode()
+    #[Test] public function store_creates_rootNode()
     {
         $repo = $this->newRepository();
         $this->assertEquals('name', $repo->getSegmentKey());
@@ -42,10 +37,7 @@ class EloquentNodeRepositoryIntegrationTest extends TestCase
         $this->assertGreaterThan(0, $node->getId());
     }
 
-    /**
-     * @test
-     */
-    public function get_created_node_by_getByPath()
+    #[Test] public function get_created_node_by_getByPath()
     {
         $repo = $this->newRepository();
         $rootNode = $repo->getByPath('/root-1');
@@ -53,10 +45,7 @@ class EloquentNodeRepositoryIntegrationTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function get_created_node_by_getByPathOrFail()
+    #[Test] public function get_created_node_by_getByPathOrFail()
     {
         $repo = $this->newRepository();
         $rootNode = $repo->getByPathOrFail('/root-1');
@@ -64,20 +53,14 @@ class EloquentNodeRepositoryIntegrationTest extends TestCase
 
     }
 
-    /**
-     * @test
-     * @expectedException \Ems\Model\Eloquent\NotFoundException
-     */
-    public function getByPathOrFail_throws_exception_if_not_found()
+    #[Test] public function getByPathOrFail_throws_exception_if_not_found()
     {
+        $this->expectException(\Ems\Model\Eloquent\NotFoundException::class);
         $repo = $this->newRepository();
         $repo->getByPathOrFail('/root-2');
     }
 
-    /**
-     * @test
-     */
-    public function get_created_node_by_get()
+    #[Test] public function get_created_node_by_get()
     {
         $repo = $this->newRepository();
         /** @var EloquentNode $rootNode */
@@ -91,20 +74,14 @@ class EloquentNodeRepositoryIntegrationTest extends TestCase
 
     }
 
-    /**
-     * @test
-     * @expectedException \Ems\Model\Eloquent\NotFoundException
-     */
-    public function getOrFail_throws_NotFoundException()
+    #[Test] public function getOrFail_throws_NotFoundException()
     {
+        $this->expectException(\Ems\Model\Eloquent\NotFoundException::class);
         $repo = $this->newRepository();
         $repo->getOrFail(1234567890);
     }
 
-    /**
-     * @test
-     */
-    public function getByPath_returns_default_on_fail()
+    #[Test] public function getByPath_returns_default_on_fail()
     {
         $repo = $this->newRepository();
         $default = $repo->make(['name'=>'default']);
@@ -113,10 +90,7 @@ class EloquentNodeRepositoryIntegrationTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function store_children_on_rootNode()
+    #[Test] public function store_children_on_rootNode()
     {
         $repo = $this->newRepository();
         $rootNode = $repo->getByPath('/root-1');
@@ -134,10 +108,7 @@ class EloquentNodeRepositoryIntegrationTest extends TestCase
         }
     }
 
-    /**
-     * @test
-     */
-    public function children_returns_created_children()
+    #[Test] public function children_returns_created_children()
     {
         $repo = $this->newRepository();
         $rootNode = $repo->getByPath('/root-1');
@@ -146,21 +117,17 @@ class EloquentNodeRepositoryIntegrationTest extends TestCase
         }
     }
 
-    /**
-     * @test
-     * @expectedException \Ems\Core\Exceptions\NotImplementedException
-     */
-    public function children_throws_exception_on_depth()
+    #[Test] public function children_throws_exception_on_depth()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\NotImplementedException::class
+        );
         $repo = $this->newRepository();
         $rootNode = $repo->getByPath('/root-1');
         $repo->recursive(1)->children($rootNode);
     }
 
-    /**
-     * @test
-     */
-    public function get_with_depth_1()
+    #[Test] public function get_with_depth_1()
     {
         $repo = $this->newRepository();
         $rootNode = $repo->getByPath('/root-1');
@@ -187,10 +154,7 @@ class EloquentNodeRepositoryIntegrationTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function get_with_depth_1_without_children()
+    #[Test] public function get_with_depth_1_without_children()
     {
         $repo = $this->newRepository();
 
@@ -205,12 +169,11 @@ class EloquentNodeRepositoryIntegrationTest extends TestCase
 
     }
 
-    /**
-     * @test
-     * @expectedException \Ems\Core\Exceptions\NotImplementedException
-     */
-    public function get_with_depth_2()
+    #[Test] public function get_with_depth_2()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\NotImplementedException::class
+        );
         $repo = $this->newRepository();
         $rootNode = $repo->getByPath('/root-1');
 
@@ -218,10 +181,7 @@ class EloquentNodeRepositoryIntegrationTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function get_with_depth_1_for_non_existing_node()
+    #[Test] public function get_with_depth_1_for_non_existing_node()
     {
         $repo = $this->newRepository();
 
@@ -230,10 +190,7 @@ class EloquentNodeRepositoryIntegrationTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function getByPath_with_depth_1()
+    #[Test] public function getByPath_with_depth_1()
     {
         $repo = $this->newRepository();
 
@@ -255,21 +212,17 @@ class EloquentNodeRepositoryIntegrationTest extends TestCase
 
     }
 
-    /**
-     * @test
-     * @expectedException \Ems\Core\Exceptions\NotImplementedException
-     */
-    public function getByPath_with_depth_2()
+    #[Test] public function getByPath_with_depth_2()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\NotImplementedException::class
+        );
         $repo = $this->newRepository();
         $repo->recursive(2)->getByPath('/root-1');
 
     }
 
-    /**
-     * @test
-     */
-    public function parent_returns_parent()
+    #[Test] public function parent_returns_parent()
     {
         $repo = $this->newRepository();
 
@@ -283,10 +236,7 @@ class EloquentNodeRepositoryIntegrationTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function parent_returns_null_on_no_parent()
+    #[Test] public function parent_returns_null_on_no_parent()
     {
         $repo = $this->newRepository();
 
@@ -296,10 +246,7 @@ class EloquentNodeRepositoryIntegrationTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function rootNodes_returns_one_rootNode()
+    #[Test] public function rootNodes_returns_one_rootNode()
     {
         $repo = $this->newRepository();
 
@@ -309,10 +256,7 @@ class EloquentNodeRepositoryIntegrationTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function rootNodes_returns_many_rootNodes()
+    #[Test] public function rootNodes_returns_many_rootNodes()
     {
         $repo = $this->newRepository();
 
@@ -327,41 +271,31 @@ class EloquentNodeRepositoryIntegrationTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function getPathKey_and_setPathKey()
+    #[Test] public function getPathKey_and_setPathKey()
     {
         $repo = $this->newRepository();
         $this->assertSame($repo, $repo->setPathKey('foo'));
         $this->assertEquals($repo->getPathKey(), 'foo');
     }
 
-    /**
-     * @test
-     */
-    public function getParentIdKey_and_setParentIdKey()
+    #[Test] public function getParentIdKey_and_setParentIdKey()
     {
         $repo = $this->newRepository();
         $this->assertSame($repo, $repo->setParentIdKey('foo_id'));
         $this->assertEquals($repo->getParentIdKey(), 'foo_id');
     }
 
-    /**
-     * @test
-     * @expectedException \Ems\Contracts\Core\Exceptions\TypeException
-     */
-    public function passing_non_node_model_throws_exception()
+    #[Test] public function passing_non_node_model_throws_exception()
     {
+        $this->expectException(
+            \Ems\Contracts\Core\Exceptions\TypeException::class
+        );
         $repo = $this->newRepository();
         $model = new EloquentNodeRepositoryIntegrationTest_Model();
         $repo->save($model);
     }
 
-    /**
-     * @test
-     */
-    public function EloquentNode_clearParent()
+    #[Test] public function EloquentNode_clearParent()
     {
         $repo = $this->newRepository();
         $child = $repo->getByPathOrFail('/root-1/child-2');
@@ -386,10 +320,7 @@ class EloquentNodeRepositoryIntegrationTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function EloquentNode_removeChild()
+    #[Test] public function EloquentNode_removeChild()
     {
         $repo = $this->newRepository();
         $child = $repo->getByPath('/root-1/child-2');
@@ -415,10 +346,7 @@ class EloquentNodeRepositoryIntegrationTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function EloquentNode_getLevel()
+    #[Test] public function EloquentNode_getLevel()
     {
         $repo = $this->newRepository();
         $child = $repo->getByPath('/root-1/child-2');
@@ -428,10 +356,7 @@ class EloquentNodeRepositoryIntegrationTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function EloquentNode_getPathSegment()
+    #[Test] public function EloquentNode_getPathSegment()
     {
         $repo = $this->newRepository();
         $child = $repo->getByPath('/root-1/child-2');
@@ -439,10 +364,7 @@ class EloquentNodeRepositoryIntegrationTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function EloquentNode_getParentId()
+    #[Test] public function EloquentNode_getParentId()
     {
         $repo = $this->newRepository();
         $child = $repo->getByPath('/root-1/child-2');
@@ -451,12 +373,9 @@ class EloquentNodeRepositoryIntegrationTest extends TestCase
 
     }
 
-    /**
-     * @test
-     * @expectedException OutOfBoundsException
-     */
-    public function EloquentNode_removeChild_throws_exception_if_child_not_found()
+    #[Test] public function EloquentNode_removeChild_throws_exception_if_child_not_found()
     {
+        $this->expectException(OutOfBoundsException::class);
         $repo = $this->newRepository();
         $newRoot = $repo->store(['name' => 'root-2']);
 
@@ -467,10 +386,7 @@ class EloquentNodeRepositoryIntegrationTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function EloquentNode_getPath()
+    #[Test] public function EloquentNode_getPath()
     {
         $repo = $this->newRepository();
 
@@ -499,10 +415,7 @@ class EloquentNodeRepositoryIntegrationTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function store_children_on_level3()
+    #[Test] public function store_children_on_level3()
     {
         $repo = $this->newRepository();
 
@@ -529,10 +442,7 @@ class EloquentNodeRepositoryIntegrationTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function ancestors_on_level3()
+    #[Test] public function ancestors_on_level3()
     {
         $repo = $this->newRepository();
 
@@ -550,10 +460,7 @@ class EloquentNodeRepositoryIntegrationTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function ancestors_on_level2()
+    #[Test] public function ancestors_on_level2()
     {
         $repo = $this->newRepository();
 
@@ -569,10 +476,7 @@ class EloquentNodeRepositoryIntegrationTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function ancestors_on_rootNode()
+    #[Test] public function ancestors_on_rootNode()
     {
         $repo = $this->newRepository();
 
@@ -586,10 +490,7 @@ class EloquentNodeRepositoryIntegrationTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function ancestors_on_manually_created_structure()
+    #[Test] public function ancestors_on_manually_created_structure()
     {
         $repo = $this->newRepository();
 
@@ -616,10 +517,7 @@ class EloquentNodeRepositoryIntegrationTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function findBySegment_finds_all_child_1_nodes()
+    #[Test] public function findBySegment_finds_all_child_1_nodes()
     {
         $repo = $this->newRepository();
 

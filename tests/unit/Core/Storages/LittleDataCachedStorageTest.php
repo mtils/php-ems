@@ -9,58 +9,43 @@ namespace Ems\Core\Storages;
 use Ems\Contracts\Core\Storage;
 use Ems\Core\Collections\StringList;
 use Ems\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 
 class LittleDataCachedStorageTest extends TestCase
 {
 
 
-    /**
-     * @test
-     */
-    public function implements_interface()
+    #[Test] public function implements_interface()
     {
         $this->assertInstanceOf(Storage::class, $this->newStorage());
     }
 
-    /**
-     * @test
-     */
-    public function storageType_is_memory()
+    #[Test] public function storageType_is_memory()
     {
         $this->assertEquals(Storage::UTILITY, $this->newStorage()->storageType());
     }
 
-    /**
-     * @test
-     */
-    public function persist_returns_true()
+    #[Test] public function persist_returns_true()
     {
         $this->assertTrue($this->newStorage()->persist());
     }
 
-    /**
-     * @test
-     */
-    public function isBuffered_returns_true()
+    #[Test] public function isBuffered_returns_true()
     {
         $this->assertFalse($this->newStorage()->isBuffered());
     }
 
-    /**
-     * @test
-     * @expectedException \Ems\Core\Exceptions\KeyNotFoundException
-     */
-    public function offsetGet_throws_exception_if_key_not_found()
+    #[Test] public function offsetGet_throws_exception_if_key_not_found()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\KeyNotFoundException::class
+        );
         $storage = $this->newStorage();
         $storage['foo'];
     }
 
-    /**
-     * @test
-     */
-    public function offsetSet_deletes_cache()
+    #[Test] public function offsetSet_deletes_cache()
     {
         $data = ['test' => 'one','test2' => 'two'];
         $array = new ArrayStorage($data);
@@ -70,10 +55,7 @@ class LittleDataCachedStorageTest extends TestCase
         $this->assertEquals('three', $storage['test']);
     }
 
-    /**
-     * @test
-     */
-    public function offsetUnset_deletes_cache()
+    #[Test] public function offsetUnset_deletes_cache()
     {
         $data = ['test' => 'one', 'test2' => 'two'];
         $array = new ArrayStorage($data);
@@ -83,10 +65,7 @@ class LittleDataCachedStorageTest extends TestCase
         $this->assertFalse(isset($storage['test']));
     }
 
-    /**
-     * @test
-     */
-    public function purge_clears_storage()
+    #[Test] public function purge_clears_storage()
     {
         $data = ['test' => 'one'];
         $storage = $this->newStorage(new ArrayStorage($data));
@@ -95,10 +74,7 @@ class LittleDataCachedStorageTest extends TestCase
         $this->assertFalse(isset($storage['test']));
     }
 
-    /**
-     * @test
-     */
-    public function clear_purges_storage()
+    #[Test] public function clear_purges_storage()
     {
         $data = ['test' => 'one'];
         $storage = $this->newStorage(new ArrayStorage($data));
@@ -107,10 +83,7 @@ class LittleDataCachedStorageTest extends TestCase
         $this->assertFalse(isset($storage['test']));
     }
 
-    /**
-     * @test
-     */
-    public function keys()
+    #[Test] public function keys()
     {
         $data = ['test' => 'one','test2' => 'two'];
         $array = new ArrayStorage($data);

@@ -256,6 +256,7 @@ class ValidationException extends RuntimeException implements Validation, JsonSe
     /**
      * @return ArrayIterator
      **/
+    #[\ReturnTypeWillChange]
     public function getIterator() : ArrayIterator
     {
         return new ArrayIterator($this->failures);

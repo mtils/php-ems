@@ -11,6 +11,7 @@ use Ems\Contracts\Validation\ValidatorFactory as ValidatorFactoryContract;
 use Ems\Core\Exceptions\UnsupportedParameterException;
 use Ems\Core\NamedObject;
 use Ems\Testing\LoggingCallable;
+use PHPUnit\Framework\Attributes\Test;
 use stdClass;
 
 use function get_class;
@@ -20,20 +21,14 @@ use function get_class;
  **/
 class ValidatorFactoryTest extends \Ems\TestCase
 {
-    /**
-     * @test
-     */
-    public function implements_interface()
+    #[Test] public function implements_interface()
     {
         $this->assertInstanceOf(ValidatorFactoryContract::class, $this->newFactory());
         $this->assertInstanceOf(SupportsCustomFactory::class, $this->newFactory());
         $this->assertInstanceOf(Subscribable::class, $this->newFactory());
     }
 
-    /**
-     * @test
-     */
-    public function create_makes_validator()
+    #[Test] public function create_makes_validator()
     {
         $rules = [
             'login' => 'required|min:3'
@@ -50,10 +45,7 @@ class ValidatorFactoryTest extends \Ems\TestCase
         $this->assertEquals(self::class, $validator->ormClass());
     }
 
-    /**
-     * @test
-     */
-    public function create_validator_calls_listener()
+    #[Test] public function create_validator_calls_listener()
     {
         $rules = [
             'login' => 'required|min:3'
@@ -69,10 +61,7 @@ class ValidatorFactoryTest extends \Ems\TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function create_validator_without_ormClass_does_not_call_listener()
+    #[Test] public function create_validator_without_ormClass_does_not_call_listener()
     {
         $rules = [
             'login' => 'required|min:3'
@@ -85,10 +74,7 @@ class ValidatorFactoryTest extends \Ems\TestCase
         $this->assertEquals(0, count($listener));
     }
 
-    /**
-     * @test
-     */
-    public function create_validator_with_custom_factory()
+    #[Test] public function create_validator_with_custom_factory()
     {
         $factory = $this->newFactory();
         $custom = function (array $rules, string $ormClass='') {
@@ -101,10 +87,7 @@ class ValidatorFactoryTest extends \Ems\TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function get_registered_validator()
+    #[Test] public function get_registered_validator()
     {
         $factory = $this->newFactory();
         $factory->register(ValidatorFactoryTest_Address::class, function () {
@@ -115,10 +98,7 @@ class ValidatorFactoryTest extends \Ems\TestCase
         $this->assertInstanceOf(ValidatorFactoryTest_AddressValidator::class, $validator);
     }
 
-    /**
-     * @test
-     */
-    public function get_registered_validator_by_class()
+    #[Test] public function get_registered_validator_by_class()
     {
         $factory = $this->newFactory();
         $check = null;
@@ -134,20 +114,14 @@ class ValidatorFactoryTest extends \Ems\TestCase
         $this->assertTrue($check);
     }
 
-    /**
-     * @test
-     */
-    public function get_without_handler_throws_Exception()
+    #[Test] public function get_without_handler_throws_Exception()
     {
         $factory = $this->newFactory();
         $this->expectException(ValidatorFabricationException::class);
         $factory->get(ValidatorFactoryTest_Address::class);
     }
 
-    /**
-     * @test
-     */
-    public function creating_wrong_validator_throws_exception()
+    #[Test] public function creating_wrong_validator_throws_exception()
     {
         $factory = $this->newFactory();
 
@@ -159,10 +133,7 @@ class ValidatorFactoryTest extends \Ems\TestCase
         $factory->get(ValidatorFactoryTest_Address::class);
     }
 
-    /**
-     * @test
-     */
-    public function registered_class_not_implementing_validator_throws_exception()
+    #[Test] public function registered_class_not_implementing_validator_throws_exception()
     {
         $factory = $this->newFactory();
 
@@ -172,30 +143,21 @@ class ValidatorFactoryTest extends \Ems\TestCase
         $factory->get(ValidatorFactoryTest_Address::class);
     }
 
-    /**
-     * @test
-     */
-    public function register_validator_directly_throws_exception()
+    #[Test] public function register_validator_directly_throws_exception()
     {
         $factory = $this->newFactory(function () {});
         $this->expectException(UnsupportedParameterException::class);
         $factory->register(stdClass::class, new ValidatorFactoryTest_AddressValidator());
     }
 
-    /**
-     * @test
-     */
-    public function register_wrong_type_as_validator_throws_exception()
+    #[Test] public function register_wrong_type_as_validator_throws_exception()
     {
         $factory = $this->newFactory(function () {});
         $this->expectException(UnsupportedParameterException::class);
         $factory->register(stdClass::class, 33);
     }
 
-    /**
-     * @test
-     */
-    public function validate_validates_by_validator()
+    #[Test] public function validate_validates_by_validator()
     {
         $object = new ValidatorFactoryTest_Address();
         $factory = $this->newFactory();
@@ -207,10 +169,7 @@ class ValidatorFactoryTest extends \Ems\TestCase
         }
     }
 
-    /**
-     * @test
-     */
-    public function forwardValidatorEvent_forwards_event()
+    #[Test] public function forwardValidatorEvent_forwards_event()
     {
         $factory = $this->newFactory();
         $logger = new LoggingCallable(function () {});

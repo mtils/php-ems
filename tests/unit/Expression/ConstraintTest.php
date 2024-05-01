@@ -2,7 +2,10 @@
 
 namespace Ems\Expression;
 
+use BadMethodCallException;
+use Ems\Contracts\Core\Errors\UnSupported;
 use Ems\Contracts\Expression\Constraint as ConstraintContract;
+use InvalidArgumentException;
 
 class ConstraintTest extends \Ems\TestCase
 {
@@ -51,11 +54,9 @@ class ConstraintTest extends \Ems\TestCase
         $this->assertEquals('operator', $c->getToStringFormat());
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     **/
     public function test_setToStringFormat_with_unknown_format_throws_exception()
     {
+        $this->expectException(InvalidArgumentException::class);
         $c = $this->constraint('max');
         $c->setToStringFormat('foo');
     }
@@ -126,21 +127,17 @@ class ConstraintTest extends \Ems\TestCase
 
     }
 
-    /**
-     * @expectedException BadMethodCallException
-     **/
     public function test_allowOperators_twice_throws_exception()
     {
+        $this->expectException(BadMethodCallException::class);
         $operator = '<=';
         $parameters = [5];
         $this->constraint('max', $parameters, $operator)->allowOperators('<=')->allowOperators('=');
     }
 
-    /**
-     * @expectedException Ems\Contracts\Core\Errors\UnSupported
-     **/
     public function test_operator_throws_exception_if_not_allowed()
     {
+        $this->expectException(UnSupported::class);
         $operator = '<=';
         $parameters = [5];
         $c = $this->constraint('max', $parameters, $operator)->allowOperators('<=');
@@ -149,11 +146,9 @@ class ConstraintTest extends \Ems\TestCase
         $this->assertSame($c, $c->setOperator('<'));
     }
 
-    /**
-     * @expectedException Ems\Contracts\Core\Errors\UnSupported
-     **/
     public function test_allowOperator_throws_exception_if_current_operator_not_allowed()
     {
+        $this->expectException(UnSupported::class);
         $operator = '<';
         $parameters = [5];
         $c = $this->constraint('max', $parameters, $operator)->allowOperators('<=');

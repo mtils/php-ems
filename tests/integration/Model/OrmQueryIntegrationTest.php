@@ -20,24 +20,20 @@ use Models\Ems\ContactMap;
 use Models\ProjectType;
 use Models\User;
 
+use PHPUnit\Framework\Attributes\Test;
+
 use function print_r;
 
 class OrmQueryIntegrationTest extends DatabaseIntegrationTest
 {
     use TestOrm;
 
-    /**
-     * @test
-     */
-    public function it_instantiates()
+    #[Test] public function it_instantiates()
     {
         $this->assertInstanceOf(OrmQuery::class, $this->make());
     }
 
-    /**
-     * @test
-     */
-    public function getters_returns_dependencies()
+    #[Test] public function getters_returns_dependencies()
     {
         $query = $this->make();
         $this->assertInstanceOf(OrmQueryRunner::class, $query->getRunner());
@@ -45,10 +41,7 @@ class OrmQueryIntegrationTest extends DatabaseIntegrationTest
         $this->assertInstanceOf(ObjectArrayConverter::class, $query->getObjectFactory());
     }
 
-    /**
-     * @test
-     */
-    public function select_some_users()
+    #[Test] public function select_some_users()
     {
         $query = $this->make()
             ->from(User::class)
@@ -66,10 +59,7 @@ class OrmQueryIntegrationTest extends DatabaseIntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function select_some_users_with_relations()
+    #[Test] public function select_some_users_with_relations()
     {
         $query = $this->make()
             ->with('contact', 'projects.type')
@@ -96,10 +86,7 @@ class OrmQueryIntegrationTest extends DatabaseIntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function paginate_some_users()
+    #[Test] public function paginate_some_users()
     {
         $query = $this->make()
             ->from(User::class)
@@ -123,10 +110,7 @@ class OrmQueryIntegrationTest extends DatabaseIntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function paginate_some_users_with_relations()
+    #[Test] public function paginate_some_users_with_relations()
     {
         $query = $this->make()
             ->with('contact', 'projects.type')
@@ -176,10 +160,7 @@ class OrmQueryIntegrationTest extends DatabaseIntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function empty_result_getIterator_returns_empty_traversable()
+    #[Test] public function empty_result_getIterator_returns_empty_traversable()
     {
         $query = new OrmQuery();
         $rows = [];
@@ -189,10 +170,7 @@ class OrmQueryIntegrationTest extends DatabaseIntegrationTest
         $this->assertCount(0, $rows);
     }
 
-    /**
-     * @test
-     */
-    public function empty_result_paginate_returns_empty_paginator()
+    #[Test] public function empty_result_paginate_returns_empty_paginator()
     {
         $query = new OrmQuery();
         $result = $query->paginate();
@@ -212,10 +190,7 @@ class OrmQueryIntegrationTest extends DatabaseIntegrationTest
      * insert, update, delete. Muss mit auto attributes, defaults und casting
      * laufen
      **************************************************************************/
-    /**
-     * @test
-     */
-    public function create_contact()
+    #[Test] public function create_contact()
     {
         $query = $this->make()->from(Contact::class);
 
@@ -247,10 +222,7 @@ class OrmQueryIntegrationTest extends DatabaseIntegrationTest
 
     }
 
-    /**
-     * @test
-     */
-    public function save_contact()
+    #[Test] public function save_contact()
     {
         $query = $this->make();
 
@@ -278,10 +250,7 @@ class OrmQueryIntegrationTest extends DatabaseIntegrationTest
         $this->assertEquals($contact->first_name, $dbContact->first_name);
     }
 
-    /**
-     * @test
-     */
-    public function create_and_delete_contact()
+    #[Test] public function create_and_delete_contact()
     {
         $query = $this->make()->from(Contact::class);
 

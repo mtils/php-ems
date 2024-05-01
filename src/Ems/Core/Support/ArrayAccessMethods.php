@@ -21,6 +21,7 @@ trait ArrayAccessMethods
      *
      * @return bool
      **/
+    #[\ReturnTypeWillChange]
     public function offsetExists($offset)
     {
         $this->fillOnce();
@@ -35,6 +36,7 @@ trait ArrayAccessMethods
      *
      * @return mixed
      **/
+    #[\ReturnTypeWillChange]
     public function offsetGet($offset)
     {
         $this->fillOnce();
@@ -48,6 +50,7 @@ trait ArrayAccessMethods
      * @param mixed $offset
      * @param mixed $value
      **/
+    #[\ReturnTypeWillChange]
     public function offsetSet($offset, $value)
     {
         $this->fillOnce();
@@ -60,6 +63,7 @@ trait ArrayAccessMethods
      *
      * @param mixed $offset
      **/
+    #[\ReturnTypeWillChange]
     public function offsetUnset($offset)
     {
         $this->fillOnce();

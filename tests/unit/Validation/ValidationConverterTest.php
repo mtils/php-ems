@@ -29,11 +29,11 @@ class ValidationConverterTest extends \Ems\TestCase
         $this->assertEquals('bar', $converter->convert($this->newValidation(), 'foo'));
     }
 
-    /**
-     * @expectedException \Ems\Core\Exceptions\HandlerNotFoundException
-     **/
     public function test_convert_throws_exception_if_extension_not_found()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\HandlerNotFoundException::class
+        );
         $converter = $this->newConverter();
         $converter->convert($this->newValidation(), 'foo');
     }

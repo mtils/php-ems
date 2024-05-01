@@ -12,6 +12,8 @@ use Ems\Core\Response;
 use Ems\Skeleton\Connection\StdOutputConnection;
 use Ems\Http\HttpResponse;
 use Ems\TestCase;
+use PHPUnit\Framework\Attributes\Test;
+
 use function ob_end_clean;
 use function ob_get_contents;
 use function ob_start;
@@ -21,18 +23,12 @@ use function substr;
 class StdOutputConnectionTest extends TestCase
 {
 
-    /**
-     * @test
-     */
-    public function it_implements_interface()
+    #[Test] public function it_implements_interface()
     {
         $this->assertInstanceOf(OutputConnection::class, $this->make());
     }
 
-    /**
-     * @test
-     */
-    public function open_opens_and_closes_connection()
+    #[Test] public function open_opens_and_closes_connection()
     {
         $con = $this->make();
         $this->assertFalse($con->isOpen());
@@ -42,10 +38,7 @@ class StdOutputConnectionTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function write_string()
+    #[Test] public function write_string()
     {
         $con = $this->make();
         ob_start();
@@ -55,10 +48,7 @@ class StdOutputConnectionTest extends TestCase
         $this->assertEquals('Hello', $string);
     }
 
-    /**
-     * @test
-     */
-    public function write_http_response()
+    #[Test] public function write_http_response()
     {
         $con = $this->make();
         ob_start();
@@ -89,10 +79,7 @@ class StdOutputConnectionTest extends TestCase
         $this->assertTrue($found, 'Added header was in response');
     }
 
-    /**
-     * @test
-     */
-    public function write_http_response_with_sent_headers()
+    #[Test] public function write_http_response_with_sent_headers()
     {
         $con = $this->make();
         ob_start();
@@ -117,10 +104,7 @@ class StdOutputConnectionTest extends TestCase
         $this->assertCount(0, $headers);
     }
 
-    /**
-     * @test
-     */
-    public function write_status_line_without_phrase()
+    #[Test] public function write_status_line_without_phrase()
     {
         $headers = [
             'Content-Type' => 'application/json',
@@ -138,10 +122,7 @@ class StdOutputConnectionTest extends TestCase
         $this->assertEquals("$response", $body);
     }
 
-    /**
-     * @test
-     */
-    public function write_status_line_with_phrase()
+    #[Test] public function write_status_line_with_phrase()
     {
         $headers = [
             'Content-Type' => 'application/json',
@@ -159,10 +140,7 @@ class StdOutputConnectionTest extends TestCase
         $this->assertEquals("$response", $body);
     }
 
-    /**
-     * @test
-     */
-    public function write_cookie_into_headers()
+    #[Test] public function write_cookie_into_headers()
     {
         $headers = [
             'Content-Type' => 'application/json',
@@ -190,10 +168,7 @@ class StdOutputConnectionTest extends TestCase
         $this->assertEquals("$response", $body);
     }
 
-    /**
-     * @test
-     */
-    public function write_cookies_into_headers()
+    #[Test] public function write_cookies_into_headers()
     {
         $headers = [
             'Content-Type' => 'application/json',

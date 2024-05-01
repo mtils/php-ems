@@ -25,6 +25,8 @@ use Illuminate\Database\Migrations\DatabaseMigrationRepository;
 use Illuminate\Database\Migrations\MigrationRepositoryInterface;
 use Mockery\Mock;
 
+use PHPUnit\Framework\Attributes\Test;
+
 use function array_slice;
 use function basename;
 
@@ -32,37 +34,25 @@ class MigratorTest extends IntegrationTest
 {
     protected $extraBootstrappers = [MigrationBootstrapper::class];
 
-    /**
-     * @test
-     */
-    public function it_implements_interface()
+    #[Test] public function it_implements_interface()
     {
         $this->assertInstanceOf(MigratorContract::class, $this->make());
     }
 
-    /**
-     * @test
-     */
-    public function it_throws_exception_if_repository_not_exists()
+    #[Test] public function it_throws_exception_if_repository_not_exists()
     {
         $this->expectException(MigratorInstallationException::class);
         $this->make()->migrations();
     }
 
-    /**
-     * @test
-     */
-    public function it_installs_repository()
+    #[Test] public function it_installs_repository()
     {
         $migrator = $this->make();
         $migrator->install();
         $this->assertCount(count($this->migrationFiles()), $migrator->migrations());
     }
 
-    /**
-     * @test
-     */
-    public function it_does_migrate_and_fires_hooks()
+    #[Test] public function it_does_migrate_and_fires_hooks()
     {
         $migrator = $this->make();
         $migrator->install();
@@ -105,10 +95,7 @@ class MigratorTest extends IntegrationTest
 
     // Test rollback, multiple batches
 
-    /**
-     * @test
-     */
-    public function it_does_simulate_and_fires_queries()
+    #[Test] public function it_does_simulate_and_fires_queries()
     {
 
         $migrator = $this->make();
@@ -153,10 +140,7 @@ class MigratorTest extends IntegrationTest
         $this->assertTrue($foundCreate);
     }
 
-    /**
-     * @test
-     */
-    public function it_does_migrate_and_rollback()
+    #[Test] public function it_does_migrate_and_rollback()
     {
         /** @var Filesystem|Mock $fs */
         $fs = $this->mock(Filesystem::class);

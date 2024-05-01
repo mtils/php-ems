@@ -26,6 +26,7 @@ trait BootingArrayData
      *
      * @return bool
      **/
+    #[\ReturnTypeWillChange]
     public function offsetExists($offset)
     {
         $this->bootOnce();
@@ -39,6 +40,7 @@ trait BootingArrayData
      *
      * @return mixed
      **/
+    #[\ReturnTypeWillChange]
     public function offsetGet($offset)
     {
         $this->bootOnce();
@@ -53,6 +55,7 @@ trait BootingArrayData
      *
      * @return void
      **/
+    #[\ReturnTypeWillChange]
     public function offsetSet($offset, $value)
     {
         $this->bootOnce();
@@ -64,6 +67,7 @@ trait BootingArrayData
      *
      * @param mixed $offset
      **/
+    #[\ReturnTypeWillChange]
     public function offsetUnset($offset)
     {
         $this->bootOnce();

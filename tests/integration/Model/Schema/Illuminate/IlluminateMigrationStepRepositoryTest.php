@@ -14,36 +14,29 @@ use Ems\IntegrationTest;
 use Ems\Model\Schema\Illuminate\IlluminateMigrationStepRepository;
 use Ems\Model\Skeleton\MigrationBootstrapper;
 
+use PHPUnit\Framework\Attributes\Test;
+
 use function basename;
 
 class IlluminateMigrationStepRepositoryTest extends IntegrationTest
 {
     protected $extraBootstrappers = [MigrationBootstrapper::class];
 
-    /**
-     * @test
-     */
-    public function it_implements_interface()
+    #[Test] public function it_implements_interface()
     {
         $repo = $this->make();
         $this->assertInstanceOf(MigrationStepRepository::class, $repo);
         $this->assertInstanceOf(IlluminateMigrationStepRepository::class, $repo);
     }
 
-    /**
-     * @test
-     */
-    public function it_throws_Exception_if_repository_was_not_installed()
+    #[Test] public function it_throws_Exception_if_repository_was_not_installed()
     {
         $repo = $this->make();
         $this->expectException(MigratorInstallationException::class);
         $repo->all();
     }
 
-    /**
-     * @test
-     */
-    public function all_returns_not_migrated_steps_after_installing()
+    #[Test] public function all_returns_not_migrated_steps_after_installing()
     {
         $repo = $this->make();
         $repo->install();
@@ -59,10 +52,7 @@ class IlluminateMigrationStepRepositoryTest extends IntegrationTest
         }
     }
 
-    /**
-     * @test
-     */
-    public function save_saves_migration()
+    #[Test] public function save_saves_migration()
     {
         $repo = $this->make();
         $repo->install();

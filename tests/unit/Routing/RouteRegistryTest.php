@@ -17,6 +17,7 @@ use Ems\RoutingTrait;
 use Ems\TestCase;
 use LogicException;
 use OutOfBoundsException;
+use PHPUnit\Framework\Attributes\Test;
 use ReflectionException;
 
 use function func_get_args;
@@ -27,18 +28,12 @@ class RouteRegistryTest extends TestCase
 {
     use RoutingTrait;
 
-    /**
-     * @test
-     */
-    public function it_implements_interface()
+    #[Test] public function it_implements_interface()
     {
         $this->assertInstanceOf(RegistryContract::class, $this->registry());
     }
 
-    /**
-     * @test
-     */
-    public function getByClientType_returns_only_matching_routes()
+    #[Test] public function getByClientType_returns_only_matching_routes()
     {
 
         $registry = $this->registry();
@@ -72,10 +67,7 @@ class RouteRegistryTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function register_without_collector()
+    #[Test] public function register_without_collector()
     {
 
         $registry = $this->registry();
@@ -109,10 +101,7 @@ class RouteRegistryTest extends TestCase
         }
     }
 
-    /**
-     * @test
-     */
-    public function register_with_common_client_type()
+    #[Test] public function register_with_common_client_type()
     {
 
         $registry = $this->registry();
@@ -140,10 +129,7 @@ class RouteRegistryTest extends TestCase
         }
     }
 
-    /**
-     * @test
-     */
-    public function register_with_common_client_type_and_overwrites()
+    #[Test] public function register_with_common_client_type_and_overwrites()
     {
 
         $registry = $this->registry();
@@ -175,10 +161,7 @@ class RouteRegistryTest extends TestCase
         $this->assertEquals(['api'], $registry->getByName("addresses.edit", Input::CLIENT_API)->clientTypes);
     }
 
-    /**
-     * @test
-     */
-    public function register_with_common_scope()
+    #[Test] public function register_with_common_scope()
     {
 
         $registry = $this->registry();
@@ -216,10 +199,7 @@ class RouteRegistryTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function register_with_common_scope_and_overwrites()
+    #[Test] public function register_with_common_scope_and_overwrites()
     {
 
         $registry = $this->registry();
@@ -264,10 +244,7 @@ class RouteRegistryTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function register_with_common_middleware()
+    #[Test] public function register_with_common_middleware()
     {
 
         $registry = $this->registry();
@@ -302,10 +279,7 @@ class RouteRegistryTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function register_with_common_middleware_and_additional()
+    #[Test] public function register_with_common_middleware_and_additional()
     {
 
         $registry = $this->registry();
@@ -345,10 +319,7 @@ class RouteRegistryTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function register_with_common_middleware_and_same_middleware_with_different_parameters()
+    #[Test] public function register_with_common_middleware_and_same_middleware_with_different_parameters()
     {
 
         $registry = $this->registry();
@@ -378,10 +349,7 @@ class RouteRegistryTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function register_with_common_path_and_controller_prefix()
+    #[Test] public function register_with_common_path_and_controller_prefix()
     {
 
         $registry = $this->registry();
@@ -429,10 +397,7 @@ class RouteRegistryTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function getByPattern_returns_routes_by_pattern()
+    #[Test] public function getByPattern_returns_routes_by_pattern()
     {
         $registry = $this->registry(true);
 
@@ -455,10 +420,7 @@ class RouteRegistryTest extends TestCase
         $this->assertCount(0, $registry->getByPattern('users/{user_id}/move'));
     }
 
-    /**
-     * @test
-     */
-    public function getByName_returns_routes_by_name()
+    #[Test] public function getByName_returns_routes_by_name()
     {
         $registry = $this->registry(true);
 
@@ -469,19 +431,13 @@ class RouteRegistryTest extends TestCase
         }
     }
 
-    /**
-     * @test
-     */
-    public function getByName_throws_exception_if_route_not_found()
+    #[Test] public function getByName_throws_exception_if_route_not_found()
     {
         $this->expectException(NotFound::class);
         $this->registry(true)->getByName('foo');
     }
 
-    /**
-     * @test
-     */
-    public function clientTypes_returns_all_registered_clientTypes()
+    #[Test] public function clientTypes_returns_all_registered_clientTypes()
     {
 
         $registry = $this->registry();
@@ -518,10 +474,7 @@ class RouteRegistryTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function it_fails_when_registers_command_and_route_in_one_call_without_collector()
+    #[Test] public function it_fails_when_registers_command_and_route_in_one_call_without_collector()
     {
         $command = new Command('addresses:index', 'AddressController::index');
         $this->expectException(LogicException::class);
@@ -529,10 +482,9 @@ class RouteRegistryTest extends TestCase
     }
 
     /**
-     * @test
      * @throws ReflectionException
      */
-    public function it_registers_command_and_route_in_one_call()
+    #[Test] public function it_registers_command_and_route_in_one_call()
     {
 
         $registry = $this->registry();
@@ -570,10 +522,7 @@ class RouteRegistryTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function it_registers_route_and_command_in_one_call()
+    #[Test] public function it_registers_route_and_command_in_one_call()
     {
 
         $registry = $this->registry();
@@ -613,10 +562,7 @@ class RouteRegistryTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function it_finds_routes_by_entity_string()
+    #[Test] public function it_finds_routes_by_entity_string()
     {
         $registry = $this->registry();
 
@@ -630,10 +576,7 @@ class RouteRegistryTest extends TestCase
         $this->assertEquals('addresses', $route->pattern);
     }
 
-    /**
-     * @test
-     */
-    public function it_finds_routes_by_direct_class()
+    #[Test] public function it_finds_routes_by_direct_class()
     {
         $registry = $this->registry();
 
@@ -647,10 +590,7 @@ class RouteRegistryTest extends TestCase
         $this->assertEquals('addresses', $route->pattern);
     }
 
-    /**
-     * @test
-     */
-    public function it_finds_routes_by_extended_class()
+    #[Test] public function it_finds_routes_by_extended_class()
     {
         $registry = $this->registry();
 
@@ -667,10 +607,7 @@ class RouteRegistryTest extends TestCase
         $this->assertEquals('addresses', $route->pattern);
     }
 
-    /**
-     * @test
-     */
-    public function it_throws_an_exception_if_entity_not_found()
+    #[Test] public function it_throws_an_exception_if_entity_not_found()
     {
         $registry = $this->registry();
 
@@ -684,10 +621,7 @@ class RouteRegistryTest extends TestCase
         $registry->getByEntityAction('foo');
     }
 
-    /**
-     * @test
-     */
-    public function it_throws_an_exception_if_action_not_found()
+    #[Test] public function it_throws_an_exception_if_action_not_found()
     {
         $registry = $this->registry();
 
@@ -705,10 +639,7 @@ class RouteRegistryTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function compiled_registry_loads_routes_by_name()
+    #[Test] public function compiled_registry_loads_routes_by_name()
     {
         $base = $this->registry(true);
         $router = $this->router();
@@ -728,10 +659,7 @@ class RouteRegistryTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function compiled_registry_loads_all_routes()
+    #[Test] public function compiled_registry_loads_all_routes()
     {
         $base = $this->registry(true);
         $router = $this->router();
@@ -755,10 +683,7 @@ class RouteRegistryTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function compiled_registry_loads_all_clientTypes()
+    #[Test] public function compiled_registry_loads_all_clientTypes()
     {
         $base = $this->registry(true);
         $router = $this->router();
@@ -776,10 +701,7 @@ class RouteRegistryTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function compiled_registry_gets_route_by_pattern()
+    #[Test] public function compiled_registry_gets_route_by_pattern()
     {
         $base = $this->registry(true);
         $router = $this->router();
@@ -798,10 +720,7 @@ class RouteRegistryTest extends TestCase
         $this->assertFalse($optimized->wasRegistrarsCalled(), 'The registry should not call registrars when filled by compiled data');
     }
 
-    /**
-     * @test
-     */
-    public function compiled_registry_returns_by_entity_action()
+    #[Test] public function compiled_registry_returns_by_entity_action()
     {
         $base = $this->registry(true);
 

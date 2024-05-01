@@ -9,24 +9,20 @@ use Ems\TestCase;
 use Ems\TestData;
 use Ems\Contracts\Core\Renderer;
 
+use PHPUnit\Framework\Attributes\Test;
+
 use function json_encode;
 
 class PhpRendererTest extends TestCase
 {
     use TestData;
 
-    /**
-     * @test
-     */
-    public function it_implements_interface()
+    #[Test] public function it_implements_interface()
     {
         $this->assertInstanceOf(Renderer::class, $this->make());
     }
 
-    /**
-     * @test
-     */
-    public function it_renders_view()
+    #[Test] public function it_renders_view()
     {
         $renderer = $this->make();
         $view = new View('users.index');

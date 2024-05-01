@@ -7,6 +7,7 @@ namespace Ems\Contracts\Model\Database;
 
 use Countable;
 use Ems\Contracts\Expression\Queryable;
+use Ems\Core\Exceptions\UnsupportedParameterException;
 use Ems\TestCase;
 use IteratorAggregate;
 use stdClass;
@@ -59,10 +60,11 @@ class ParenthesesTest extends TestCase
 
     /**
      * @test
-     * @expectedException \Ems\Core\Exceptions\UnsupportedParameterException
+     *
      */
-    public function where_with_unsupported_type_throws_exception()
+    public function test_where_with_unsupported_type_throws_exception()
     {
+        $this->expectException(UnsupportedParameterException::class);
         $predicate = new Predicate();
         $test = $this->newParentheses();
         $test->where(new stdClass());

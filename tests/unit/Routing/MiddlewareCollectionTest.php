@@ -16,6 +16,7 @@ use Ems\Core\Response;
 use Ems\Core\Url;
 use Ems\TestCase;
 use LogicException;
+use PHPUnit\Framework\Attributes\Test;
 use ReflectionException;
 use function array_slice;
 use function func_get_args;
@@ -23,18 +24,12 @@ use function func_num_args;
 
 class MiddlewareCollectionTest extends TestCase
 {
-    /**
-     * @test
-     */
-    public function it_instantiates()
+    #[Test] public function it_instantiates()
     {
         $this->assertInstanceOf(CollectionContract::class, $this->make());
     }
 
-    /**
-     * @test
-     */
-    public function add_adds_middleware()
+    #[Test] public function add_adds_middleware()
     {
         $c = $this->make();
         $c->add('a', MiddlewareCollectionTest_AMiddleware::class);
@@ -42,10 +37,9 @@ class MiddlewareCollectionTest extends TestCase
     }
 
     /**
-     * @test
      * @throws ReflectionException
      */
-    public function middleware_makes_middleware()
+    #[Test] public function middleware_makes_middleware()
     {
         $c = $this->make();
         $c->add('a', MiddlewareCollectionTest_AMiddleware::class);
@@ -60,10 +54,9 @@ class MiddlewareCollectionTest extends TestCase
     }
 
     /**
-     * @test
      * @throws ReflectionException
      */
-    public function parameters_returns_assigned_parameters()
+    #[Test] public function parameters_returns_assigned_parameters()
     {
         $c = $this->make();
         $c->add('a', MiddlewareCollectionTest_AMiddleware::class, ['a',1]);
@@ -84,10 +77,9 @@ class MiddlewareCollectionTest extends TestCase
     }
 
     /**
-     * @test
      * @throws ReflectionException
      */
-    public function parameters_returns_assigned_parameters_in_string_format()
+    #[Test] public function parameters_returns_assigned_parameters_in_string_format()
     {
         $c = $this->make();
         $c->add('a', MiddlewareCollectionTest_AMiddleware::class, ['a',1]);
@@ -107,10 +99,7 @@ class MiddlewareCollectionTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function offsetExists_works()
+    #[Test] public function offsetExists_works()
     {
         $c = $this->make();
         $this->assertFalse(isset($c['a']));
@@ -119,10 +108,7 @@ class MiddlewareCollectionTest extends TestCase
         $this->assertFalse(isset($c['b']));
     }
 
-    /**
-     * @test
-     */
-    public function offsetSet_adds_middleware()
+    #[Test] public function offsetSet_adds_middleware()
     {
         $c = $this->make();
         $c['a'] = MiddlewareCollectionTest_AMiddleware::class;
@@ -130,10 +116,9 @@ class MiddlewareCollectionTest extends TestCase
     }
 
     /**
-     * @test
      * @throws ReflectionException
      */
-    public function offsetUnset_clears_everything_added()
+    #[Test] public function offsetUnset_clears_everything_added()
     {
         $c = $this->make();
         $c->add('a', MiddlewareCollectionTest_AMiddleware::class, ['a',1]);
@@ -165,10 +150,9 @@ class MiddlewareCollectionTest extends TestCase
     }
 
     /**
-     * @test
      * @throws ReflectionException
      */
-    public function add_with_same_name_deletes_original_stuff()
+    #[Test] public function add_with_same_name_deletes_original_stuff()
     {
         $c = $this->make();
         $c->add('a', MiddlewareCollectionTest_AMiddleware::class, ['a',1]);
@@ -194,10 +178,7 @@ class MiddlewareCollectionTest extends TestCase
         $this->assertEquals([], $c->parameters('b'));
     }
 
-    /**
-     * @test
-     */
-    public function clear_all()
+    #[Test] public function clear_all()
     {
         $c = $this->make();
         $c->add('a', MiddlewareCollectionTest_AMiddleware::class, ['a',1]);
@@ -210,10 +191,7 @@ class MiddlewareCollectionTest extends TestCase
         $this->assertCount(0, $c);
     }
 
-    /**
-     * @test
-     */
-    public function clear_clears_nothing_if_empty_array_passed()
+    #[Test] public function clear_clears_nothing_if_empty_array_passed()
     {
         $c = $this->make();
         $c->add('a', MiddlewareCollectionTest_AMiddleware::class, ['a',1]);
@@ -226,10 +204,7 @@ class MiddlewareCollectionTest extends TestCase
         $this->assertCount(3, $c);
     }
 
-    /**
-     * @test
-     */
-    public function clear_clears_passed_keys()
+    #[Test] public function clear_clears_passed_keys()
     {
         $c = $this->make();
         $c->add('a', MiddlewareCollectionTest_AMiddleware::class, ['a',1]);
@@ -243,10 +218,7 @@ class MiddlewareCollectionTest extends TestCase
         $this->assertFalse(isset($c['b']));
     }
 
-    /**
-     * @test
-     */
-    public function ordering_middleware_with_before()
+    #[Test] public function ordering_middleware_with_before()
     {
         $c = $this->make();
         $c->add('a', 'A-Binding');
@@ -272,10 +244,7 @@ class MiddlewareCollectionTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function ordering_middleware_with_after()
+    #[Test] public function ordering_middleware_with_after()
     {
         $c = $this->make();
         $c->add('a', 'A-Binding');
@@ -305,10 +274,7 @@ class MiddlewareCollectionTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function offsetUnset_manipulates_ordering()
+    #[Test] public function offsetUnset_manipulates_ordering()
     {
         $c = $this->make();
         $c->add('a', 'A-Binding');
@@ -343,10 +309,7 @@ class MiddlewareCollectionTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function toArray()
+    #[Test] public function toArray()
     {
         $c = $this->make();
         $c->add('a', 'A-Binding');
@@ -365,10 +328,7 @@ class MiddlewareCollectionTest extends TestCase
 
     }
 
-    /**
-     * @test
-     */
-    public function getIterator_returns_right_data()
+    #[Test] public function getIterator_returns_right_data()
     {
         $c = $this->make();
         $c->add('a', 'A-Binding');
@@ -385,10 +345,9 @@ class MiddlewareCollectionTest extends TestCase
     }
 
     /**
-     * @test
      * @throws ReflectionException
      */
-    public function invoke_without_container_utilizes_runner()
+    #[Test] public function invoke_without_container_utilizes_runner()
     {
         $c = $this->make();
         $c->add('a', MiddlewareCollectionTest_AMiddleware::class, 'a');
@@ -401,10 +360,9 @@ class MiddlewareCollectionTest extends TestCase
     }
 
     /**
-     * @test
      * @throws ReflectionException
      */
-    public function invoke_with_ems_container_utilizes_runner()
+    #[Test] public function invoke_with_ems_container_utilizes_runner()
     {
         $container = new IOCContainer();
         $c = $this->make($container);
@@ -418,10 +376,9 @@ class MiddlewareCollectionTest extends TestCase
     }
 
     /**
-     * @test
      * @throws ReflectionException
      */
-    public function invoke_with_laravel_container_utilizes_runner()
+    #[Test] public function invoke_with_laravel_container_utilizes_runner()
     {
         $container = new \Ems\Core\Laravel\IOCContainer();
         $c = $this->make($container);
@@ -435,10 +392,9 @@ class MiddlewareCollectionTest extends TestCase
     }
 
     /**
-     * @test
      * @throws ReflectionException
      */
-    public function invoke_creates_response()
+    #[Test] public function invoke_creates_response()
     {
         $c = $this->make();
         $c->add('a', MiddlewareCollectionTest_AMiddleware::class, 'a');
@@ -462,10 +418,9 @@ class MiddlewareCollectionTest extends TestCase
     }
 
     /**
-     * @test
      * @throws ReflectionException
      */
-    public function invoke_with_manipulating_middleware()
+    #[Test] public function invoke_with_manipulating_middleware()
     {
         $c = $this->make();
         $c->add('a', MiddlewareCollectionTest_AMiddleware::class, 'a');
@@ -486,10 +441,9 @@ class MiddlewareCollectionTest extends TestCase
     }
 
     /**
-     * @test
      * @throws ReflectionException
      */
-    public function invoke_with_multiple_manipulating_middleware()
+    #[Test] public function invoke_with_multiple_manipulating_middleware()
     {
         $c = $this->make();
         $c->add('a', MiddlewareCollectionTest_AMiddleware::class, 'a');
@@ -514,10 +468,9 @@ class MiddlewareCollectionTest extends TestCase
     }
 
     /**
-     * @test
      * @throws ReflectionException
      */
-    public function invoke_with_multiple_manipulating_middleware_if_middleware_was_assigned_before()
+    #[Test] public function invoke_with_multiple_manipulating_middleware_if_middleware_was_assigned_before()
     {
         $c = $this->make();
         $c->add('a', MiddlewareCollectionTest_AMiddleware::class, 'a');
@@ -542,10 +495,9 @@ class MiddlewareCollectionTest extends TestCase
     }
 
     /**
-     * @test
      * @throws ReflectionException
      */
-    public function invoke_with_multiple_manipulating_middleware_if_middleware_was_assigned_before_and_after()
+    #[Test] public function invoke_with_multiple_manipulating_middleware_if_middleware_was_assigned_before_and_after()
     {
         $c = $this->make();
         $c->add('a', MiddlewareCollectionTest_AMiddleware::class, 'a');
@@ -570,10 +522,9 @@ class MiddlewareCollectionTest extends TestCase
     }
 
     /**
-     * @test
      * @throws ReflectionException
      */
-    public function invoke_with_multiple_creating_middleware_returns_first_created_response()
+    #[Test] public function invoke_with_multiple_creating_middleware_returns_first_created_response()
     {
         $c = $this->make();
         $c->add('a', MiddlewareCollectionTest_AMiddleware::class, 'a');
@@ -606,10 +557,9 @@ class MiddlewareCollectionTest extends TestCase
     }
 
     /**
-     * @test
      * @throws ReflectionException
      */
-    public function invoke_with_multiple_creating_middleware_returns_first_created_response_if_next_is_inputHandler()
+    #[Test] public function invoke_with_multiple_creating_middleware_returns_first_created_response_if_next_is_inputHandler()
     {
         $c = $this->make();
         $c->add('a', MiddlewareCollectionTest_AMiddleware::class, 'a');
@@ -642,10 +592,9 @@ class MiddlewareCollectionTest extends TestCase
     }
 
     /**
-     * @test
      * @throws ReflectionException
      */
-    public function invoke_with_multiple_creating_middleware_returns_first_created_response_if_inputHandler_is_last()
+    #[Test] public function invoke_with_multiple_creating_middleware_returns_first_created_response_if_inputHandler_is_last()
     {
         $c = $this->make();
         $c->add('a', MiddlewareCollectionTest_AMiddleware::class, 'a');
@@ -672,12 +621,14 @@ class MiddlewareCollectionTest extends TestCase
     }
 
     /**
-     * @test
-     * @expectedException \Ems\Contracts\Routing\Exceptions\NoInputHandlerException
+     *
      * @throws ReflectionException
      */
-    public function invoke_invoke_without_InputHandler_throws_NoInputHandlerException()
+    #[Test] public function invoke_invoke_without_InputHandler_throws_NoInputHandlerException()
     {
+        $this->expectException(
+            \Ems\Contracts\Routing\Exceptions\NoInputHandlerException::class
+        );
         $c = $this->make();
         $c->add('a', MiddlewareCollectionTest_AMiddleware::class, 'a');
         $c->add('b', MiddlewareCollectionTest_AMiddleware::class, 'b');
@@ -689,12 +640,12 @@ class MiddlewareCollectionTest extends TestCase
     }
 
     /**
-     * @test
-     * @expectedException LogicException
+     *
      * @throws ReflectionException
      */
-    public function invoke_invoke_with_more_then_one_InputHandler_throws_LogicException()
+    #[Test] public function invoke_invoke_with_more_then_one_InputHandler_throws_LogicException()
     {
+        $this->expectException(LogicException::class);
         $c = $this->make();
         $c->add('a', MiddlewareCollectionTest_AMiddleware::class, 'a');
         $c->add('b', MiddlewareCollectionTest_AMiddleware::class, 'b');
@@ -708,12 +659,14 @@ class MiddlewareCollectionTest extends TestCase
     }
 
     /**
-     * @test
      * @throws ReflectionException
-     * @expectedException \Ems\Core\Exceptions\HandlerNotFoundException
+     *
      */
-    public function invoke_without_a_response_throws_HandlerNotFoundException()
+    #[Test] public function invoke_without_a_response_throws_HandlerNotFoundException()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\HandlerNotFoundException::class
+        );
         $c = $this->make();
         $c->add('a', MiddlewareCollectionTest_AMiddleware::class, 'a');
         $c->add('b', MiddlewareCollectionTest_AMiddleware::class, 'b');
@@ -737,10 +690,9 @@ class MiddlewareCollectionTest extends TestCase
     }
 
     /**
-     * @test
      * @throws ReflectionException
      */
-    public function invoke_with_selected_clientType_does_not_call_on_other_clientType()
+    #[Test] public function invoke_with_selected_clientType_does_not_call_on_other_clientType()
     {
 
         $c = $this->make();
@@ -767,10 +719,9 @@ class MiddlewareCollectionTest extends TestCase
     }
 
     /**
-     * @test
      * @throws ReflectionException
      */
-    public function invoke_with_selected_clientType_call_on_matching_clientType()
+    #[Test] public function invoke_with_selected_clientType_call_on_matching_clientType()
     {
 
         $c = $this->make();
@@ -811,10 +762,9 @@ class MiddlewareCollectionTest extends TestCase
     }
 
     /**
-     * @test
      * @throws ReflectionException
      */
-    public function invoke_with_selected_scope_does_not_call_on_other_scope()
+    #[Test] public function invoke_with_selected_scope_does_not_call_on_other_scope()
     {
 
         $c = $this->make();
@@ -841,10 +791,9 @@ class MiddlewareCollectionTest extends TestCase
     }
 
     /**
-     * @test
      * @throws ReflectionException
      */
-    public function invoke_with_selected_scope_call_on_matching_scope()
+    #[Test] public function invoke_with_selected_scope_call_on_matching_scope()
     {
 
         $c = $this->make();

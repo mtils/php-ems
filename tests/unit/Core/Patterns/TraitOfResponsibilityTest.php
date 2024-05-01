@@ -3,6 +3,7 @@
 namespace Ems\Core\Patterns;
 
 use Countable;
+use Ems\Core\Exceptions\HandlerNotFoundException;
 
 class TraitOfResponsibilityTest extends \Ems\TestCase
 {
@@ -122,35 +123,27 @@ class TraitOfResponsibilityTest extends \Ems\TestCase
         $this->assertSame($trueHandler, $chain->canOrFail('foo', 'bar'));
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     **/
     public function test_add_wrong_type_throws_exception()
     {
+        $this->expectException(\InvalidArgumentException::class);
         $this->newChain()->add([]);
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     **/
     public function test_add_wrong_class_throws_exception()
     {
+        $this->expectException(\InvalidArgumentException::class);
         $this->newChain()->add(new DoesNotImplementTestChain);
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     **/
     public function test_add_wrong_manually_fixed_class_throws_exception()
     {
+        $this->expectException(\InvalidArgumentException::class);
         (new FixedClassChain)->add($this->newChain());
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     **/
     public function test_add_to_non_implementing_class()
     {
+        $this->expectException(\InvalidArgumentException::class);
         (new TestChainWithoutInterfaces)->add(new ImplementsTestChain);
     }
 
@@ -169,11 +162,11 @@ class TraitOfResponsibilityTest extends \Ems\TestCase
         $this->assertNull($chain->can('foo', 'bar'));
     }
 
-    /**
-     * @expectedException Ems\Core\Exceptions\HandlerNotFoundException
-     **/
     public function test_findReturningTrueOrFail_throws_exception_if_no_handler_found()
     {
+        $this->expectException(
+            HandlerNotFoundException::class
+        );
         $falseHandler = new ImplementsTestChain;
         $trueHandler = new ImplementsTestChain;
 
@@ -259,11 +252,11 @@ class TraitOfResponsibilityTest extends \Ems\TestCase
         $this->assertEquals('foo', $chain->runOrFail('foo'));
     }
 
-    /**
-     * @expectedException Ems\Core\Exceptions\HandlerNotFoundException
-     **/
     public function test_firstNotNullResultOrFail_throws_exception_if_no_handler_found()
     {
+        $this->expectException(
+            HandlerNotFoundException::class
+        );
         $falseHandler = new ImplementsTestChain;
         $trueHandler = new ImplementsTestChain;
 

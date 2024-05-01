@@ -136,6 +136,7 @@ class RouteRegistry implements RouteRegistryContract
      * <b>Traversable</b>
      * @since 5.0.0
      */
+    #[\ReturnTypeWillChange]
     public function getIterator()
     {
         $this->callRegistrarsOnce();

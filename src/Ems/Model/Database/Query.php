@@ -70,6 +70,7 @@ class Query extends BaseQuery implements Renderable, PaginatableResult
      * @return Traversable
      * @throws \Exception
      */
+    #[\ReturnTypeWillChange]
     public function getIterator()
     {
         $this->operation = 'SELECT';

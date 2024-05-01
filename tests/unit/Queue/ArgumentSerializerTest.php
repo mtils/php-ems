@@ -57,20 +57,20 @@ class ArgumentSerializerTest extends TestCase
         $this->assertSame($entity, $serializer->deserialize($serializedPointer));
     }
 
-    /**
-     * @expectedException \Ems\Core\Exceptions\UnsupportedParameterException
-     */
     public function test_serialize_throws_exception_if_object_not_supported()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\UnsupportedParameterException::class
+        );
         $serializer = $this->serializer();
         $serializer->serialize(new ArgumentSerializerTest_Not_Serializable());
     }
 
-    /**
-     * @expectedException \Ems\Core\Exceptions\UnsupportedParameterException
-     */
     public function test_serialize_throws_exception_if_object_not_supported_by_entity_manager()
     {
+        $this->expectException(
+            \Ems\Core\Exceptions\UnsupportedParameterException::class
+        );
         $serializer = $this->serializer();
         $serializer->serialize(new NamedObject(12));
     }

@@ -3,6 +3,7 @@
 namespace Ems\XType;
 
 
+use Ems\Contracts\Core\Errors\UnSupported;
 use Ems\XType\AbstractTypeTest;
 use Ems\Testing\LoggingCallable;
 
@@ -73,11 +74,9 @@ class ArrayAccessTypeTest extends AbstractTypeTest
         $this->assertEquals($awaited, $output);
     }
 
-    /**
-     * @expectedException \OutOfBoundsException
-     **/
     public function test_get_throws_OutOfBoundsException_if_name_not_assigned()
     {
+        $this->expectException(\OutOfBoundsException::class);
         $type = $this->newType();
         $type->get('foo');
     }
@@ -102,11 +101,9 @@ class ArrayAccessTypeTest extends AbstractTypeTest
         $this->assertSame($selled, $type['selled']);
     }
 
-    /**
-     * @expectedException Ems\Contracts\Core\Errors\Unsupported
-     **/
     public function test_fill_with_unknown_not_xtype_values_throws_exception()
     {
+        $this->expectException(Unsupported::class);
         $type = $this->newType();
 
         $old = new BoolType();

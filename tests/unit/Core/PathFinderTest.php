@@ -3,6 +3,7 @@
 namespace Ems\Core;
 
 use Ems\Contracts\Core\AppPath as AppPathContract;
+use OutOfBoundsException;
 
 class PathFinderTest extends \Ems\TestCase
 {
@@ -88,11 +89,9 @@ class PathFinderTest extends \Ems\TestCase
         $this->assertSame($appPath, $finder->to('assets'));
     }
 
-    /**
-     * @expectedException OutOfBoundsException
-     **/
     public function test_throws_OutOfBoundsException_if_scope_was_not_mapped()
     {
+        $this->expectException(OutOfBoundsException::class);
         $finder = $this->newFinder();
 
         $result = 'bar';

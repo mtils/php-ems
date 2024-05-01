@@ -2,6 +2,7 @@
 
 namespace Ems\Core;
 
+use Ems\Contracts\Core\Errors\NotFound;
 use Ems\Testing\LoggingCallable;
 
 class ManualMimeTypeProviderTest extends \Ems\TestCase
@@ -71,11 +72,9 @@ class ManualMimeTypeProviderTest extends \Ems\TestCase
         $this->assertNotOfType('foo.zip', 'application/xml');
     }
 
-    /**
-     * @expectedException \Ems\Contracts\Core\Errors\NotFound
-     **/
     public function test_isOfType_throws_not_found_if_mimetype_not_found()
     {
+        $this->expectException(\Ems\Contracts\Core\Errors\NotFound::class);
         $this->assertNotOfType('foo.kmgame', 'application/xml');
     }
 
@@ -115,11 +114,9 @@ class ManualMimeTypeProviderTest extends \Ems\TestCase
 
     }
 
-    /**
-     * @expectedException Ems\Contracts\Core\Errors\NotFound
-     **/
     public function test_fileExtensions_throws_exception_if_mimetype_unknown()
     {
+        $this->expectException(NotFound::class);
 
         $provider = $this->newProvider();
         $provider->fileExtensions('application/bitmap');

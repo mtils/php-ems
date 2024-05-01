@@ -134,6 +134,7 @@ class IniFileReader implements IteratorAggregate
     /**
      * @return ArrayIterator
      */
+    #[\ReturnTypeWillChange]
     public function getIterator()
     {
         $data = $this->path ? $this->parseIniFile($this->path) : [];

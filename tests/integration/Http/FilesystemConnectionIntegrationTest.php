@@ -12,16 +12,14 @@ use Ems\Core\Url;
 use Ems\HttpMockTest;
 use Ems\IntegrationTest;
 use Ems\Testing\LoggingCallable;
+use PHPUnit\Framework\Attributes\Test;
 use function file_get_contents;
 use InterNations\Component\HttpMock\PHPUnit\HttpMockTrait;
 use function var_dump;
 
 class FilesystemConnectionIntegrationTest extends HttpMockTest
 {
-    /**
-     * @test
-     */
-    public function read_from_url()
+    #[Test] public function read_from_url()
     {
 
         $path = '/foo';
@@ -51,10 +49,7 @@ class FilesystemConnectionIntegrationTest extends HttpMockTest
 
     }
 
-    /**
-     * @test
-     */
-    public function read_from_url_with_basic_auth()
+    #[Test] public function read_from_url_with_basic_auth()
     {
 
         $path = '/foo';
@@ -98,10 +93,7 @@ class FilesystemConnectionIntegrationTest extends HttpMockTest
 
     }
 
-    /**
-     * @test
-     */
-    public function post_to_url()
+    #[Test] public function post_to_url()
     {
 
         $path = '/foo';
@@ -148,18 +140,12 @@ class FilesystemConnectionIntegrationTest extends HttpMockTest
 
     }
 
-    /**
-     * @test
-     */
-    public function methodHooks_contain_send()
+    #[Test] public function methodHooks_contain_send()
     {
         $this->assertContains('send', $this->con('/')->methodHooks());
     }
 
-    /**
-     * @test
-     */
-    public function read_method_returns_complete_message()
+    #[Test] public function read_method_returns_complete_message()
     {
         $path = '/foo';
         $method = 'GET';

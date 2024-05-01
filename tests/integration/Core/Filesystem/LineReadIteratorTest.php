@@ -104,11 +104,11 @@ class LineReadIteratorTest extends IntegrationTest
 
     }
 
-    /**
-     * @expectedException \Ems\Contracts\Core\Exceptions\TypeException
-     */
     public function test_construct_with_unsupported_parameter()
     {
+        $this->expectException(
+            \Ems\Contracts\Core\Exceptions\TypeException::class
+        );
         new LineReadIterator(15);
     }
 
