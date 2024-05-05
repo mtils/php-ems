@@ -311,7 +311,7 @@ class SQLiteDialectTest extends PDOBaseTest
 
              $this->fail('select on a non existing column should fail');
         } catch (SQLDeniedException $e) {
-             $this->assertContains('unable', $e->getMessage());
+             $this->assertStringContainsString('unable', $e->getMessage());
 
         }
     }
@@ -334,7 +334,7 @@ class SQLiteDialectTest extends PDOBaseTest
 
              $this->fail('Parallel writing to a sqlite file should fail');
         } catch (SQLLockException $e) {
-             $this->assertContains('locked', $e->getMessage());
+             $this->assertStringContainsString('locked', $e->getMessage());
              $con->rollback();
              $this->removeDB($url);
 

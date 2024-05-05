@@ -8,6 +8,8 @@ use Ems\Contracts\Core\Serializer as SerializerContract;
 use Ems\Core\Exceptions\DataIntegrityException;
 use Ems\Testing\Cheat;
 
+use function function_exists;
+
 class GDSerializerTest extends \Ems\TestCase
 {
     public function test_implements_interface()
@@ -31,7 +33,9 @@ class GDSerializerTest extends \Ems\TestCase
 
     public function test_serialize_and_deserialize_png_image()
     {
-
+        if (!function_exists('imagecreatetruecolor')) {
+            $this->markTestSkipped('No GD extension available');
+        }
         $serializer = $this->newSerializer()->setMimeType('image/png');
         $resource = imagecreatetruecolor(60, 60);
 
@@ -45,7 +49,9 @@ class GDSerializerTest extends \Ems\TestCase
 
     public function test_serialize_and_deserialize_gif_image()
     {
-
+        if (!function_exists('imagecreatetruecolor')) {
+            $this->markTestSkipped('No GD extension available');
+        }
         $serializer = $this->newSerializer()->setMimeType('image/gif');
         $resource = imagecreatetruecolor(60, 60);
 
@@ -59,7 +65,9 @@ class GDSerializerTest extends \Ems\TestCase
 
     public function test_serialize_and_deserialize_jpeg_image()
     {
-
+        if (!function_exists('imagecreatetruecolor')) {
+            $this->markTestSkipped('No GD extension available');
+        }
         $serializer = $this->newSerializer()->setMimeType('image/jpeg');
         $resource = imagecreatetruecolor(60, 60);
 
@@ -89,6 +97,9 @@ class GDSerializerTest extends \Ems\TestCase
 
     public function test_deserialize_invalid_data_throws_exception()
     {
+        if (!function_exists('imagecreatetruecolor')) {
+            $this->markTestSkipped('No GD extension available');
+        }
         $this->expectException(
             DataIntegrityException::class
         );

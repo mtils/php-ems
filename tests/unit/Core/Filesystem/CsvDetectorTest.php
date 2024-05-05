@@ -36,9 +36,7 @@ class CsvDetectorTest extends \Ems\IntegrationTest
 
     public function test_separator_throws_exception_if_no_newlines_found()
     {
-        $this->expectException(
-            Ems\Core\Exceptions\DetectionFailedException::class
-        );
+        $this->expectException(DetectionFailedException::class);
         $detector = $this->newDetector();
         $this->assertEquals(',', $detector->separator(''));
     }

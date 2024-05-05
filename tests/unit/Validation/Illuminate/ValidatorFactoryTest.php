@@ -9,7 +9,7 @@ use Ems\Validation\Validator;
 /**
  * @group validation
  **/
-class ValidationFactoryTest extends TestCase
+class ValidatorFactoryTest extends TestCase
 {
     public function test_validator_returns_validator_with_passed_rules()
     {

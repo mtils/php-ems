@@ -444,8 +444,8 @@ class HelperTest extends \Ems\TestCase
 
     public function test_dump()
     {
-        $this->assertContains("int", Helper::dump(42));
-        $this->assertContains("42", Helper::dump(42));
+        $this->assertStringContainsString("int", Helper::dump(42));
+        $this->assertStringContainsString("42", Helper::dump(42));
     }
 }
 

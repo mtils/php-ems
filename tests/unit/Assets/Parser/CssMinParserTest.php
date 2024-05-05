@@ -23,8 +23,8 @@ class CssMinParserTest extends \Ems\TestCase
         $minified = $this->newParser()->parse($fatCss, []);
 
         $this->assertLessThan(strlen($fatCss), strlen($minified));
-        $this->assertContains('table.classic', $minified);
-        $this->assertContains('1px', $minified);
+        $this->assertStringContainsString('table.classic', $minified);
+        $this->assertStringContainsString('1px', $minified);
     }
 
     protected function newParser(JSqueeze $minifier=null)

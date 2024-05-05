@@ -19,6 +19,7 @@ use function call_user_func;
 use function get_class;
 use function is_object;
 use function is_string;
+use function var_dump;
 
 class IOCContainer implements ContainerContract
 {

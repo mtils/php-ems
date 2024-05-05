@@ -57,8 +57,8 @@ class CssUrlReplaceParserTest extends \Ems\IntegrationTest
 
         $result = $this->newParser()->parse($testString, $config);
 
-        $this->assertContains('url(images/blank.gif)', $result);
-        $this->assertNotContains('url(../images/blank.gif)', $result);
+        $this->assertStringContainsString('url(images/blank.gif)', $result);
+        $this->assertStringNotContainsString('url(../images/blank.gif)', $result);
     }
 
     public function test_parse_replaces_background_url_and_background_image()
@@ -86,10 +86,10 @@ class CssUrlReplaceParserTest extends \Ems\IntegrationTest
 
         $result = $this->newParser()->parse($testString, $config);
 
-        $this->assertContains('url(images/blank.gif)', $result);
-        $this->assertNotContains('url(../images/blank.gif)', $result);
-        $this->assertContains('url(images/bg.png)', $result);
-        $this->assertNotContains('url(../images/bg.png)', $result);
+        $this->assertStringContainsString('url(images/blank.gif)', $result);
+        $this->assertStringNotContainsString('url(../images/blank.gif)', $result);
+        $this->assertStringContainsString('url(images/bg.png)', $result);
+        $this->assertStringNotContainsString('url(../images/bg.png)', $result);
     }
 
     public function test_parse_replaces_background_url_and_retains_other_directives()
@@ -117,13 +117,13 @@ class CssUrlReplaceParserTest extends \Ems\IntegrationTest
 
         $result = $this->newParser()->parse($testString, $config);
 
-        $this->assertContains('url(images/blank.gif)', $result);
-        $this->assertContains('0px', $result);
-        $this->assertContains('60px', $result);
-        $this->assertContains('repeat-x', $result);
-        $this->assertNotContains('url(../images/blank.gif)', $result);
-        $this->assertContains('url(images/bg.png)', $result);
-        $this->assertNotContains('url(../images/bg.png)', $result);
+        $this->assertStringContainsString('url(images/blank.gif)', $result);
+        $this->assertStringContainsString('0px', $result);
+        $this->assertStringContainsString('60px', $result);
+        $this->assertStringContainsString('repeat-x', $result);
+        $this->assertStringNotContainsString('url(../images/blank.gif)', $result);
+        $this->assertStringContainsString('url(images/bg.png)', $result);
+        $this->assertStringNotContainsString('url(../images/bg.png)', $result);
     }
 
     public function test_parse_throws_exception_if_referenced_file_does_not_exist()
@@ -177,30 +177,30 @@ class CssUrlReplaceParserTest extends \Ems\IntegrationTest
 
         $result = $this->newParser()->parse($testString, $config);
 
-        $this->assertContains('url(http://localhost/images/blank.gif)', $result);
-        $this->assertNotContains('url(images/blank.gif)', $result);
+        $this->assertStringContainsString('url(http://localhost/images/blank.gif)', $result);
+        $this->assertStringNotContainsString('url(images/blank.gif)', $result);
 
         $testString = 'table {background: url(https://localhost/images/blank.gif);';
 
         $result = $this->newParser()->parse($testString, $config);
 
-        $this->assertContains('url(https://localhost/images/blank.gif)', $result);
-        $this->assertNotContains('url(images/blank.gif)', $result);
+        $this->assertStringContainsString('url(https://localhost/images/blank.gif)', $result);
+        $this->assertStringNotContainsString('url(images/blank.gif)', $result);
 
         $testString = 'table {background: url(//images/blank.gif);';
 
         $result = $this->newParser()->parse($testString, $config);
 
-        $this->assertContains('url(//images/blank.gif)', $result);
-        $this->assertNotContains('url(images/blank.gif)', $result);
+        $this->assertStringContainsString('url(//images/blank.gif)', $result);
+        $this->assertStringNotContainsString('url(images/blank.gif)', $result);
 
 
         $testString = 'table {background: url(/images/blank.gif);';
 
         $result = $this->newParser()->parse($testString, $config);
 
-        $this->assertContains('url(/images/blank.gif)', $result);
-        $this->assertNotContains('url(images/blank.gif)', $result);
+        $this->assertStringContainsString('url(/images/blank.gif)', $result);
+        $this->assertStringNotContainsString('url(images/blank.gif)', $result);
     }
 
     public function test_parse_does_not_replace_data_urls()
@@ -228,7 +228,7 @@ class CssUrlReplaceParserTest extends \Ems\IntegrationTest
 
         $result = $this->newParser()->parse($testString, $config);
 
-        $this->assertContains('url(data:foo)', $result);
+        $this->assertStringContainsString('url(data:foo)', $result);
     }
 
     public function test_parse_replaces_relative_paths_without_dots()
@@ -253,8 +253,8 @@ class CssUrlReplaceParserTest extends \Ems\IntegrationTest
 
         $result = $this->newParser()->parse($testString, $config);
 
-        $this->assertContains('url(lib/blank.gif)', $result);
-        $this->assertNotContains('url(blank.gif)', $result);
+        $this->assertStringContainsString('url(lib/blank.gif)', $result);
+        $this->assertStringNotContainsString('url(blank.gif)', $result);
     }
 
     public function test_parse_replaces_relative_paths_with_tick_marks()
@@ -279,15 +279,15 @@ class CssUrlReplaceParserTest extends \Ems\IntegrationTest
 
         $result = $this->newParser()->parse($testString, $config);
 
-        $this->assertContains('url("lib/blank.gif")', $result);
-        $this->assertNotContains('url("blank.gif")', $result);
+        $this->assertStringContainsString('url("lib/blank.gif")', $result);
+        $this->assertStringNotContainsString('url("blank.gif")', $result);
 
         $testString = 'table {background: url(\'blank.gif\');}';
 
         $result = $this->newParser()->parse($testString, $config);
 
-        $this->assertContains('url(\'lib/blank.gif\')', $result);
-        $this->assertNotContains('url(\'blank.gif\')', $result);
+        $this->assertStringContainsString('url(\'lib/blank.gif\')', $result);
+        $this->assertStringNotContainsString('url(\'blank.gif\')', $result);
     }
 
     public function test_parse_replaces_relative_paths_in_deeper_hierarchy()
@@ -316,8 +316,8 @@ class CssUrlReplaceParserTest extends \Ems\IntegrationTest
 
         $result = $this->newParser()->parse($testString, $config);
 
-        $this->assertContains('url(plugins/jquery-ui/images/bullet.gif)', $result);
-        $this->assertNotContains('url(images/bullet.gif)', $result);
+        $this->assertStringContainsString('url(plugins/jquery-ui/images/bullet.gif)', $result);
+        $this->assertStringNotContainsString('url(images/bullet.gif)', $result);
     }
 
 

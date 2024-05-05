@@ -7,7 +7,7 @@ use Ems\Contracts\Core\Errors\UnSupported;
 use Ems\Contracts\Core\Serializer as SerializerContract;
 use Ems\Testing\Cheat;
 
-class SerializerTest extends \Ems\TestCase
+class JsonSerializerTest extends \Ems\TestCase
 {
     public function test_implements_interface()
     {
@@ -17,8 +17,8 @@ class SerializerTest extends \Ems\TestCase
     public function test_mimeType_returns_string()
     {
         $mimeType = $this->newSerializer()->mimeType();
-        $this->assertInternalType('string', $mimeType);
-        $this->assertContains('/', $mimeType);
+        $this->assertIsString($mimeType);
+        $this->assertStringContainsString('/', $mimeType);
     }
 
     public function test_serialize_and_deserialize_valid_values()
@@ -35,7 +35,7 @@ class SerializerTest extends \Ems\TestCase
 
         foreach ($tests as $test) {
             $serialized = $serializer->serialize($test);
-            $this->assertInternalType('string', $serialized);
+            $this->assertIsString($serialized);
             $deserialized = $serializer->deserialize($serialized, [JsonSerializer::AS_ARRAY=>true]);
             $this->assertEquals($test, $deserialized);
         }
@@ -59,7 +59,7 @@ class SerializerTest extends \Ems\TestCase
 
         $serialized = $serializer->serialize($test);
 
-        $this->assertInternalType('string', $serialized);
+        $this->assertIsString('string', $serialized);
         $deserialized = $serializer->deserialize($serialized, [JsonSerializer::DEPTH=>2]);
 
         $this->assertNull($deserialized);

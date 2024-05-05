@@ -34,7 +34,7 @@ class JavascriptRendererTest extends \Ems\TestCase
         $result = $renderer->render($collection);
 
         foreach ($files as $file) {
-            $this->assertContains("$url/$file", $result);
+            $this->assertStringContainsString("$url/$file", $result);
         }
 
         $this->assertEquals(3, substr_count($result, '<script'));
@@ -56,10 +56,10 @@ class JavascriptRendererTest extends \Ems\TestCase
 
         foreach ($files as $file) {
             if (is_array($file)) {
-                $this->assertContains($file[1], $result);
+                $this->assertStringContainsString($file[1], $result);
                 continue;
             }
-            $this->assertContains("$url/$file", $result);
+            $this->assertStringContainsString("$url/$file", $result);
         }
 
         $this->assertEquals(3, substr_count($result, '<script'));

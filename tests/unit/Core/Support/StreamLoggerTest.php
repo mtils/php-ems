@@ -40,7 +40,7 @@ class StreamLoggerTest extends TestCase
         $stream = new StringStream($string);
         $logger = $this->make($stream);
         $logger->emergency('Boom');
-        $this->assertContains('Boom', "$stream");
+        $this->assertStringContainsString('Boom', "$stream");
     }
 
     #[Test] public function alert_does_log()
@@ -49,7 +49,7 @@ class StreamLoggerTest extends TestCase
         $stream = new StringStream($string);
         $logger = $this->make($stream);
         $logger->alert('Boom');
-        $this->assertContains('Boom', "$stream");
+        $this->assertStringContainsString('Boom', "$stream");
     }
 
     #[Test] public function critical_does_log()
@@ -58,7 +58,7 @@ class StreamLoggerTest extends TestCase
         $stream = new StringStream($string);
         $logger = $this->make($stream);
         $logger->critical('Boom');
-        $this->assertContains('Boom', "$stream");
+        $this->assertStringContainsString('Boom', "$stream");
     }
 
     #[Test] public function error_does_log()
@@ -67,7 +67,7 @@ class StreamLoggerTest extends TestCase
         $stream = new StringStream($string);
         $logger = $this->make($stream);
         $logger->error('Boom');
-        $this->assertContains('Boom', "$stream");
+        $this->assertStringContainsString('Boom', "$stream");
     }
 
     #[Test] public function warning_does_log()
@@ -76,7 +76,7 @@ class StreamLoggerTest extends TestCase
         $stream = new StringStream($string);
         $logger = $this->make($stream);
         $logger->warning('Boom');
-        $this->assertContains('Boom', "$stream");
+        $this->assertStringContainsString('Boom', "$stream");
     }
 
     #[Test] public function notice_does_log()
@@ -85,7 +85,7 @@ class StreamLoggerTest extends TestCase
         $stream = new StringStream($string);
         $logger = $this->make($stream);
         $logger->notice('Boom');
-        $this->assertContains('Boom', "$stream");
+        $this->assertStringContainsString('Boom', "$stream");
     }
 
     #[Test] public function info_does_log()
@@ -94,7 +94,7 @@ class StreamLoggerTest extends TestCase
         $stream = new StringStream($string);
         $logger = $this->make($stream);
         $logger->info('Boom');
-        $this->assertContains('Boom', "$stream");
+        $this->assertStringContainsString('Boom', "$stream");
     }
 
     #[Test] public function debug_does_log()
@@ -103,7 +103,7 @@ class StreamLoggerTest extends TestCase
         $stream = new StringStream($string);
         $logger = $this->make($stream);
         $logger->debug('Boom');
-        $this->assertContains('Boom', "$stream");
+        $this->assertStringContainsString('Boom', "$stream");
     }
 
     #[Test] public function it_does_log_context()
@@ -112,8 +112,8 @@ class StreamLoggerTest extends TestCase
         $stream = new StringStream($string);
         $logger = $this->make($stream);
         $logger->debug('Boom', ['foo' => 'bar']);
-        $this->assertContains('Boom', "$stream");
-        $this->assertContains('bar', "$stream");
+        $this->assertStringContainsString('Boom', "$stream");
+        $this->assertStringContainsString('bar', "$stream");
 
     }
 
@@ -180,7 +180,7 @@ class StreamLoggerTest extends TestCase
 
         $chatty->trigger('Hello', Chatty::INFO);
 
-        $this->assertContains('hello', strtolower($stream));
+        $this->assertStringContainsString('hello', strtolower($stream));
 
     }
 

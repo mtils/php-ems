@@ -182,7 +182,7 @@ class ValidatorFactory implements ValidatorFactoryContract, SupportsCustomFactor
             return $this->createObject(ValidatorObject::class, [
                 'rules'     => $rules,
                 'ormClass'  => $ormClass,
-                $this->createObject(CheckerBaseValidator::class)
+                'baseValidator' => $this->createObject(CheckerBaseValidator::class)
             ]);
         };
     }

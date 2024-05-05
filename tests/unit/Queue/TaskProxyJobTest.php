@@ -86,8 +86,8 @@ class TaskProxyJobTest extends TestCase
 
 
         $this->assertNull($result);
-        $this->assertContains(LogicException::class, $task->getMessage());
-        $this->assertContains('makes no sense', $task->getMessage());
+        $this->assertStringContainsString(LogicException::class, $task->getMessage());
+        $this->assertStringContainsString('makes no sense', $task->getMessage());
         $this->assertEquals(Queue::FAILED, $task->getState());
 
     }

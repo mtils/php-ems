@@ -825,6 +825,13 @@ class ContainerTest_Class2 extends ContainerTest_Class
 
 class ContainerTest_ClassDependencies
 {
+    public $interface;
+    public $classObject;
+
+    public $class2Object;
+
+    public $param;
+
     public function __construct(ContainerTest_Interface $interface,
                                 ContainerTest_Class $classObject,
                                 ContainerTest_Class2 $class2Object,

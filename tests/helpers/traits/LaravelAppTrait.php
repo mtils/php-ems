@@ -4,6 +4,7 @@ namespace Ems;
 
 use Ems\Core\Laravel\IOCContainer;
 use Ems\Skeleton\Application;
+use Illuminate\Container\Container;
 use Illuminate\Contracts\Container\Container as Laravel;
 
 trait LaravelAppTrait
@@ -55,7 +56,14 @@ trait LaravelAppTrait
      **/
     protected function createApplication($appPath)
     {
-        $app = new Application($appPath, new IOCContainer());
+
+        $laravel = new class extends Container {
+            public function terminating($callable) {
+
+            }
+        };
+
+        $app = new Application($appPath, new IOCContainer($laravel));
 
         $app->setVersion('0.1.9.4')
             ->setName('Integration Test Application');

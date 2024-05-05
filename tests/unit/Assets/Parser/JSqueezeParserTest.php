@@ -24,8 +24,8 @@ class JSqueezeParserTest extends \Ems\TestCase
         $minified = $this->newParser()->parse($fatJs, []);
 
         $this->assertLessThan(strlen($fatJs), strlen($minified));
-        $this->assertContains('_blank', $minified);
-        $this->assertContains('bold', $minified);
+        $this->assertStringContainsString('_blank', $minified);
+        $this->assertStringContainsString('bold', $minified);
     }
 
     protected function newParser(JSqueeze $minifier=null)

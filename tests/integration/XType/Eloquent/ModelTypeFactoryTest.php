@@ -18,6 +18,8 @@ use Ems\XType\SequenceType;
 use Ems\Model\Eloquent\EntityTrait;
 use Ems\Contracts\Core\Entity;
 
+use function var_dump;
+
 require_once(__DIR__.'/test_models.php');
 
 
@@ -63,7 +65,7 @@ class ModelTypeFactoryTest extends \Ems\IntegrationTest
         }
 
         foreach (['created_at','updated_at','deleted_at','activated_at', 'last_login'] as $key) {
-            $this->assertInstanceOf(TemporalType::class, $type[$key]);
+            $this->assertInstanceOf(TemporalType::class, $type[$key], "$key is no temporal type");
             if (!in_array($key, ['activated_at', 'last_login'])) {
                 $this->assertTrue($type[$key]->readonly);
             }

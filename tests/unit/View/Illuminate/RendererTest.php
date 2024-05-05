@@ -7,7 +7,7 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Ems\View\Highlight;
 
-class HighlightTest extends \Ems\TestCase
+class RendererTest extends \Ems\TestCase
 {
     public function test_implements_interface()
     {

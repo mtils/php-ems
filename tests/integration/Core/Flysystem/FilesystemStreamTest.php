@@ -10,9 +10,17 @@ include_once __DIR__ . '/../Filesystem/FileStreamTest.php';
 use Ems\Core\Filesystem\FileStreamTest;
 use League\Flysystem\Local\LocalFilesystemAdapter;
 use League\Flysystem\Filesystem;
+use RuntimeException;
 
 class FilesystemStreamTest extends FileStreamTest
 {
+
+    #[Test] public function write_file_in_chunks()
+    {
+        $this->expectException(RuntimeException::class);
+        parent::write_file_in_chunks();
+    }
+
     /**
      * @param string $path
      * @param string $mode

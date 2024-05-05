@@ -254,8 +254,8 @@ class EnvTest extends TestCase
             $this->fail("The test '$test' must lead to an fatal error");
         } catch (EnvFileException $e) {
             $this->assertEquals(1, $e->getEnvFileLine());
-            $this->assertContains('in line', $e->getMessage());
-            $this->assertContains('surrounded by spaces', $e->getMessage());
+            $this->assertStringContainsString('in line', $e->getMessage());
+            $this->assertStringContainsString('surrounded by spaces', $e->getMessage());
         }
     }
 

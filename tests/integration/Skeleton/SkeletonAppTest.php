@@ -51,7 +51,8 @@ class SkeletonAppTest extends DatabaseIntegrationTest
         $this->assertEquals('TestType', $data['name']);
 
         $headers = $response->envelope;
-        $this->assertContains("project-types/$id", $headers['Link']);
+        $this->assertStringContainsString("project-types/$id", $headers['Link']);
+
 
         /** @var Orm $orm */
         $orm = $this->app(Orm::class);
@@ -88,7 +89,7 @@ class SkeletonAppTest extends DatabaseIntegrationTest
 
         $data = iterator_to_array($response);
         $headers = $response->envelope;
-        $this->assertContains("projects/".$data['id'], $headers['Link']);
+        $this->assertStringContainsString("projects/".$data['id'], $headers['Link']);
         $this->assertEquals('TestProject', $data['name']);
     }
 

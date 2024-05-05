@@ -43,6 +43,13 @@ class StandardUser extends EloquentModel
         'paw_patrol'  => 'collection',
         'mother'      => 'string'
     ];
+
+    public function getDates()
+    {
+        $parentDates = parent::getDates();
+        $parentDates[] = 'activated_at';
+        return $parentDates;
+    }
 }
 
 abstract class BaseModel extends EloquentModel implements Entity

@@ -17,8 +17,8 @@ class SerializerTest extends \Ems\TestCase
     public function test_mimeType_returns_string()
     {
         $mimeType = $this->newSerializer()->mimeType();
-        $this->assertInternalType('string', $mimeType);
-        $this->assertContains('/', $mimeType);
+        $this->assertIsString($mimeType);
+        $this->assertStringContainsString('/', $mimeType);
     }
 
     public function test_serialize_and_deserialize_scalar_values()
@@ -35,7 +35,7 @@ class SerializerTest extends \Ems\TestCase
 
         foreach ($tests as $test) {
             $serialized = $serializer->serialize($test);
-            $this->assertInternalType('string', $serialized);
+            $this->assertIsString($serialized);
             $this->assertEquals($test, $serializer->deserialize($serialized));
         }
     }

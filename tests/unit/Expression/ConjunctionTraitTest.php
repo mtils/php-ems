@@ -8,7 +8,7 @@ use Ems\Core\Expression;
 use Ems\Core\Support\StringableTrait;
 use InvalidArgumentException;
 
-class LogicalGroupTraitTest extends \Ems\TestCase
+class ConjunctionTraitTest extends \Ems\TestCase
 {
     public function test_implements_interface()
     {

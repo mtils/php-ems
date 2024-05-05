@@ -120,7 +120,7 @@ class CharsetGuardTest extends \Ems\TestCase
             $this->assertEquals($e->awaitedCharset(), 'utf-8');
             $this->assertEquals($e->failedString(), $iso);
             $this->assertEquals(strtolower($e->suggestedCharset()), 'iso-8859-1');
-            $this->assertContains('iso-8859-1', strtolower($e->getHelp()));
+            $this->assertStringContainsString('iso-8859-1', strtolower($e->getHelp()));
         }
 
     }
@@ -141,7 +141,7 @@ class CharsetGuardTest extends \Ems\TestCase
             $this->assertEquals($e->awaitedCharset(), 'iso-8859-1');
             $this->assertEquals($e->failedString(), $test);
             $this->assertEquals(strtolower($e->suggestedCharset()), 'utf-8');
-            $this->assertContains('utf-8', strtolower($e->getHelp()));
+            $this->assertStringContainsString('utf-8', strtolower($e->getHelp()));
         }
 
     }
@@ -164,8 +164,8 @@ class CharsetGuardTest extends \Ems\TestCase
 
         $e = (new InvalidCharsetException($test, $awaited))->useGuard($guard);
 
-        $this->assertContains('undetectable', $e->getHelp());
-        $this->assertContains('utf-8', $e->getHelp());
+        $this->assertStringContainsString('undetectable', $e->getHelp());
+        $this->assertStringContainsString('utf-8', $e->getHelp());
 
     }
 

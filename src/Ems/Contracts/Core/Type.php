@@ -438,7 +438,7 @@ class Type
                 }
 
                 if ($startedNamespace) {
-                    if (in_array($token[0], [T_STRING, T_NS_SEPARATOR])) {
+                    if (in_array($token[0], [T_STRING, T_NS_SEPARATOR,T_NAME_FULLY_QUALIFIED,T_NAME_QUALIFIED,T_NAME_RELATIVE])) {
                         $namespace .= $token[1];
                         continue;
                     }

@@ -29,7 +29,7 @@ use function file_get_contents;
 use function in_array;
 use function str_split;
 
-class DatabaseIntegrationTest extends IntegrationTest
+abstract class DatabaseIntegrationTest extends IntegrationTest
 {
     /**
      * @var Connection

@@ -2,6 +2,7 @@
 
 namespace Ems\Model\Eloquent;
 
+use Ems\Contracts\Core\Errors\NotFound;
 use Illuminate\Database\Eloquent\Model as EloquentModel;
 use Ems\Contracts\Model\HookableRepository as HookableRepositoryContract;
 use Ems\Testing\Eloquent\MigratedDatabase;
@@ -34,7 +35,7 @@ class HookableRepositoryTest extends \Ems\TestCase
 
     public function test_getOrFail_throws_NotFound_if_model_not_found()
     {
-        $this->expectException(Ems\Contracts\Core\Errors\NotFound::class);
+        $this->expectException(NotFound::class);
         $repo = $this->newRepo();
         $this->assertEquals('foo', $repo->getOrFail(12));
     }

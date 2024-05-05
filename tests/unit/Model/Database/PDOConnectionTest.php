@@ -170,7 +170,7 @@ class PDOConnectionTest extends PDOBaseTest
             $con->begin();
             $this->fail('To begins should fail.');
         } catch (SQLException $e) {
-            $this->assertContains('transaction', $e->nativeMessage());
+            $this->assertStringContainsString('transaction', $e->nativeMessage());
             $this->assertInstanceOf(NativeError::class, $e->nativeError());
         }
 
@@ -498,7 +498,7 @@ class PDOConnectionTest extends PDOBaseTest
         } catch (SQLException $e) {
             $error = $e->nativeError();
             $this->assertInstanceOf(NativeError::class, $error);
-            $this->assertContains('trying attempt #', $e->getMessage());
+            $this->assertStringContainsString('trying attempt #', $e->getMessage());
         }
 
     }

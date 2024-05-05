@@ -15,6 +15,7 @@ use ArrayAccess;
  */
 class ArrayLocalizer implements Localizer
 {
+    protected $config;
     /**
      * @param array|ArrayAccess $config (optional)
      **/

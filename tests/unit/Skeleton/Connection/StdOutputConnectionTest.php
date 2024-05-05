@@ -115,9 +115,9 @@ class StdOutputConnectionTest extends TestCase
         list($headerLines, $body) = $this->render($response);
 
         $this->assertStringStartsWith('HTTP/', $headerLines[0]);
-        $this->assertContains($response->protocolVersion, $headerLines[0]);
-        $this->assertContains((string)$response->status, $headerLines[0]);
-        $this->assertNotContains('Found', $headerLines[0]);
+        $this->assertStringContainsString($response->protocolVersion, $headerLines[0]);
+        $this->assertStringContainsString((string)$response->status, $headerLines[0]);
+        $this->assertStringNotContainsString('Found', $headerLines[0]);
 
         $this->assertEquals("$response", $body);
     }
@@ -134,9 +134,9 @@ class StdOutputConnectionTest extends TestCase
         list($headerLines, $body) = $this->render($response);
 
         $this->assertStringStartsWith('HTTP/', $headerLines[0]);
-        $this->assertContains($response->protocolVersion, $headerLines[0]);
-        $this->assertContains((string)$response->status, $headerLines[0]);
-        $this->assertContains($response->getReasonPhrase(), $headerLines[0]);
+        $this->assertStringContainsString($response->protocolVersion, $headerLines[0]);
+        $this->assertStringContainsString((string)$response->status, $headerLines[0]);
+        $this->assertStringContainsString($response->getReasonPhrase(), $headerLines[0]);
         $this->assertEquals("$response", $body);
     }
 
@@ -154,15 +154,15 @@ class StdOutputConnectionTest extends TestCase
 
         $cookieHeaders = $this->cookieHeaders($headerLines);
 
-        $this->assertContains('bar', $cookieHeaders['foo']);
-        $this->assertContains('content', $cookieHeaders['test']);
-        $this->assertContains('expires', $cookieHeaders['test']);
-        $this->assertContains('Max-Age', $cookieHeaders['test']);
-        $this->assertContains('/users', $cookieHeaders['test']);
-        $this->assertContains('localhost', $cookieHeaders['test']);
-        $this->assertContains('secure', $cookieHeaders['test']);
-        $this->assertContains('httponly', $cookieHeaders['test']);
-        $this->assertContains(Cookie::STRICT, $cookieHeaders['test']);
+        $this->assertStringContainsString('bar', $cookieHeaders['foo']);
+        $this->assertStringContainsString('content', $cookieHeaders['test']);
+        $this->assertStringContainsString('expires', $cookieHeaders['test']);
+        $this->assertStringContainsString('Max-Age', $cookieHeaders['test']);
+        $this->assertStringContainsString('/users', $cookieHeaders['test']);
+        $this->assertStringContainsString('localhost', $cookieHeaders['test']);
+        $this->assertStringContainsString('secure', $cookieHeaders['test']);
+        $this->assertStringContainsString('httponly', $cookieHeaders['test']);
+        $this->assertStringContainsString(Cookie::STRICT, $cookieHeaders['test']);
 
 
         $this->assertEquals("$response", $body);
@@ -181,7 +181,7 @@ class StdOutputConnectionTest extends TestCase
 
         $cookieHeaders = $this->cookieHeaders($headerLines);
 
-        $this->assertContains('bar', $cookieHeaders['foo']);
+        $this->assertStringContainsString('bar', $cookieHeaders['foo']);
         $this->assertEquals("$response", $body);
     }
 

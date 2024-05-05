@@ -17,7 +17,7 @@ use InvalidArgumentException;
 
 require_once(__DIR__.'/../PDOBaseTest.php');
 
-class MySQLiteDialectTest extends PDOBaseTest
+class MySQLDialectTest extends PDOBaseTest
 {
 
     public function test_implements_interface()

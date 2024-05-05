@@ -9,7 +9,7 @@ use Ems\Skeleton\Application;
 /**
  * Use this test if you need a running app
  **/
-class LaravelIntegrationTest extends TestCase
+abstract class LaravelIntegrationTest extends TestCase
 {
     use LaravelAppTrait;
 

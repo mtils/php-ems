@@ -2,6 +2,7 @@
 
 namespace Ems\Cache;
 
+use Ems\Cache\Exception\CacheMissException;
 use Ems\Contracts\Core\Errors\NotFound;
 use Ems\Testing\Cheat;
 use Ems\Contracts\Cache\Cache as CacheContract;
@@ -240,7 +241,7 @@ class CacheTest extends \Ems\TestCase
 
     public function test_getOrFail_throws_exception_if_value_not_found()
     {
-        $this->expectException(Ems\Cache\Exception\CacheMissException::class);
+        $this->expectException(CacheMissException::class);
         $categorizer = $this->mockCategorizer();
         $cache = $this->newCache($categorizer);
         $storage = $this->mockStorage();
