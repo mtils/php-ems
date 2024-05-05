@@ -22,6 +22,7 @@ use Ems\Core\LocalFilesystem;
 use Ems\Core\ManualMimeTypeProvider;
 use Ems\Core\PointInTime;
 use Ems\Core\Url;
+use Ems\Testing\Cheat;
 use Illuminate\Contracts\Filesystem\Cloud;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Contracts\Filesystem\Filesystem as IlluminateFilesystemContract;
@@ -29,6 +30,9 @@ use Illuminate\Filesystem\FilesystemAdapter;
 use League\Flysystem\Adapter\Local;
 use League\Flysystem\AdapterInterface;
 use League\Flysystem\FilesystemInterface;
+use League\Flysystem\FilesystemOperator;
+use League\Flysystem\Local\LocalFilesystemAdapter;
+use League\Flysystem\PathPrefixer;
 use RuntimeException;
 use function array_merge;
 use function func_get_args;
@@ -48,7 +52,7 @@ class IlluminateFilesystem implements Filesystem
     protected $laravelFS;
 
     /**
-     * @var FilesystemInterface
+     * @var FilesystemOperator
      */
     protected $flysystem;
 
@@ -58,7 +62,7 @@ class IlluminateFilesystem implements Filesystem
     protected $mimeTypes;
 
     /**
-     * @var \Ems\Contracts\Core\Url
+     * @var UrlContract
      */
     protected $baseUrl;
 
@@ -113,7 +117,11 @@ class IlluminateFilesystem implements Filesystem
         }
 
         try {
-            return $this->laravelFS->get($source);
+            $string = $this->laravelFS->get($source);
+            if ($string === null) {
+                throw new ResourceNotFoundException("File $source not found.");
+            }
+            return $string;
         } catch (FileNotFoundException $e) {
             throw new ResourceNotFoundException("File $source not found.");
         }
@@ -502,7 +510,7 @@ class IlluminateFilesystem implements Filesystem
     /**
      * @param string $path
      *
-     * @return \Ems\Contracts\Core\Url
+     * @return UrlContract
      */
     protected function buildUrl($path)
     {
@@ -516,10 +524,13 @@ class IlluminateFilesystem implements Filesystem
 
         $adapter = $this->flysystemAdapterOrFail();
 
-        if ($adapter instanceof Local) {
-            $pathPrefix = rtrim($adapter->getPathPrefix(), '/');
+        if ($adapter instanceof LocalFilesystemAdapter) {
+            /** @var PathPrefixer $prefixer */
+            $prefixer = Cheat::get($adapter, 'prefixer');
+            $fullPath = $prefixer->prefixPath($path);
+            //$pathPrefix = rtrim($adapter->getPathPrefix(), '/');
             $path = trim($path, '/');
-            $fullPath = $pathPrefix ? "$pathPrefix/$path" : "/$path";
+            //$fullPath = $pathPrefix ? "$pathPrefix/$path" : "/$path";
             return (new Url($fullPath))->scheme('file');
         }
 
@@ -528,19 +539,19 @@ class IlluminateFilesystem implements Filesystem
     }
 
     /**
-     * @return AdapterInterface
+     * @return FilesystemAdapter
      */
     protected function flysystemAdapterOrFail()
     {
-        $flysystem = $this->flysystemOrFail();
+        /*$flysystem = $this->flysystemOrFail();
 
         if (!method_exists($flysystem, 'getAdapter')) {
             throw new TypeException('I need the flysystem adapter but it is not exposed by the filesystem.');
-        }
+        }*/
 
-        $adapter = $flysystem->getAdapter();
+        $adapter = $this->laravelFS->getAdapter();
 
-        if ($adapter instanceof AdapterInterface) {
+        if ($adapter instanceof \League\Flysystem\FilesystemAdapter) {
             return $adapter;
         }
 
@@ -548,7 +559,7 @@ class IlluminateFilesystem implements Filesystem
     }
 
     /**
-     * @return FilesystemInterface
+     * @return FilesystemOperator
      * @throws RuntimeException
      */
     protected function flysystemOrFail()

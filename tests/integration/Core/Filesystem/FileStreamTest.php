@@ -8,6 +8,8 @@ use Ems\Core\Url;
 use Ems\Testing\FilesystemMethods;
 use PHPUnit\Framework\Attributes\Test;
 
+use RuntimeException;
+
 use function file_get_contents;
 use function filesize;
 use function ftell;
@@ -338,12 +340,11 @@ class FileStreamTest extends \Ems\IntegrationTest
         $stream = $this->newStream($outFile, 'a')->setChunkSize($chunkSize);
 
 
+        $this->expectException(RuntimeException::class);
         foreach ($readStream as $chunk) {
             $this->assertTrue($stream->write($chunk));
         }
 
-        $stream->close();
-        $this->assertEquals($content, file_get_contents($outFile));
     }
 
     #[Test] public function write_file_by_other_stream()

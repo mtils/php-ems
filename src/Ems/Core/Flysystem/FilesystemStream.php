@@ -8,14 +8,16 @@ namespace Ems\Core\Flysystem;
 
 use Ems\Contracts\Core\Stream;
 use Ems\Contracts\Core\Type;
+use Ems\Contracts\Core\Url as UrlContract;
 use Ems\Core\Exceptions\NotImplementedException;
 use Ems\Core\Exceptions\ResourceNotFoundException;
 use Ems\Core\Filesystem\FileStream;
-use function is_resource;
 use League\Flysystem\FileNotFoundException;
+use League\Flysystem\FilesystemOperationFailed;
 use League\Flysystem\FilesystemOperator as FilesystemInterface;
-use Ems\Contracts\Core\Url as UrlContract;
 use RuntimeException;
+
+use function is_resource;
 
 class FilesystemStream extends FileStream
 {
@@ -65,7 +67,11 @@ class FilesystemStream extends FileStream
         $isAppending = static::isAppendingMode($this->mode) || $this->didWrite;
 
         if (!is_resource($data) && !$data instanceof Stream && Type::isStringable($data)) {
-            $this->didWrite = $isAppending ? $this->flysystem->update($path, $this->concat($data)) : $this->flysystem->write($path, $data);
+            $this->didWrite = true;
+            if ($isAppending) {
+                throw new RuntimeException('Flysystem does not support appending strings');
+            }
+            $this->flysystem->write($path, $data);
             return $this->didWrite;
         }
 
@@ -76,12 +82,9 @@ class FilesystemStream extends FileStream
             throw new RuntimeException('Cannot extract resource of ' . Type::of($data));
         }
 
-        if ($isAppending) {
-            $this->didWrite = $this->flysystem->updateStream($path, $readResource);
-            return $this->didWrite;
-        }
+        $this->didWrite = true;
 
-        $this->didWrite = $this->flysystem->writeStream($path, $readResource);
+        $this->flysystem->writeStream($path, $readResource);
 
         return $this->didWrite;
 
@@ -117,7 +120,7 @@ class FilesystemStream extends FileStream
     {
         try {
             return $this->flysystem->readStream($filePath);
-        } catch (FileNotFoundException $e) {
+        } catch (FilesystemOperationFailed $e) {
             throw new ResourceNotFoundException($e->getMessage(), 0, $e);
         }
     }

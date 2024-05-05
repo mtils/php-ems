@@ -9,6 +9,7 @@ use Illuminate\Database\Migrations\Migrator;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use RuntimeException;
 
 trait MigratedDatabase
 {
@@ -141,10 +142,19 @@ trait MigratedDatabase
     protected function fakeSchemaFacade()
     {
         $app = new Container();
+
         $app->instance('db', Model::getConnectionResolver());
 
         $app->bind('db.schema', function () use ($app) {
-            return $app->make('db')->connection()->getSchemaBuilder();
+            if (!$con = $app->make('db')->connection()) {
+                if (!$con = $app->make('db')->getDefaultConnection()) {
+                    if (!$con = $app->make('db')->connection('tests')) {
+                        throw new RuntimeException('Cannot find test sqlite connection in connection resolver');
+                    }
+                }
+            }
+
+            return $con->getSchemaBuilder();
         });
 
 
