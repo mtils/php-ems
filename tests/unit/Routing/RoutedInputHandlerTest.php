@@ -22,6 +22,31 @@ use function implode;
 use function is_callable;
 use ReflectionException;
 
+class RoutedInputHandlerTest_TestController
+{
+    public $add = '';
+
+    public function index()
+    {
+        return 'index was called: ' . implode(',', func_get_args());
+    }
+
+    public function edit()
+    {
+        return 'edit was called: ' . implode(',', func_get_args());
+    }
+
+    public function store()
+    {
+        return 'update was called: ' . implode(',', func_get_args());
+    }
+
+    public function show()
+    {
+        return 'show was called:' . $this->add  . implode(',', func_get_args());
+    }
+}
+
 class RoutedInputHandlerTest extends TestCase
 {
 
@@ -148,30 +173,5 @@ class RoutedInputHandlerTest extends TestCase
         $route = new Route($input->getMethod(), $uri, $handler);
         $handler = is_callable($handler) ? $handler : function () {};
         return $input->makeRouted($route, $realHandler ?: $handler);
-    }
-}
-
-class RoutedInputHandlerTest_TestController
-{
-    public $add = '';
-
-    public function index()
-    {
-        return 'index was called: ' . implode(',', func_get_args());
-    }
-
-    public function edit()
-    {
-        return 'edit was called: ' . implode(',', func_get_args());
-    }
-
-    public function store()
-    {
-        return 'update was called: ' . implode(',', func_get_args());
-    }
-
-    public function show()
-    {
-        return 'show was called:' . $this->add  . implode(',', func_get_args());
     }
 }

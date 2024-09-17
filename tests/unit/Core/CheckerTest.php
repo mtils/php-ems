@@ -23,6 +23,24 @@ class CheckerTest extends TestCase
     {
         $this->assertInstanceOf(CheckerContract::class, $this->newChecker());
     }
+    public function test___call_calls_extension()
+    {
+        $exists = new LoggingCallable(function ($value) {
+            return true;
+        });
+
+        $checker = $this->newChecker();
+        $checker->extend('exists', $exists);
+
+        $this->assertTrue($checker->exists('foo'));
+
+        $this->assertCount(1, $exists);
+        $this->assertEquals('foo', $exists->arg(0));
+
+        $this->assertGreaterThan(1, $checker->names());
+        $this->assertTrue($checker->supports('exists'));
+    }
+
 
     public function test___call_with_own_methods()
     {
@@ -49,24 +67,6 @@ class CheckerTest extends TestCase
         $checker = $this->newChecker();
 
         $checker->foo('bar');
-    }
-
-    public function test___call_calls_extension()
-    {
-        $exists = new LoggingCallable(function ($value) {
-            return true;
-        });
-
-        $checker = $this->newChecker();
-        $checker->extend('exists', $exists);
-
-        $this->assertTrue($checker->exists('foo'));
-
-        $this->assertCount(1, $exists);
-        $this->assertEquals('foo', $exists->arg(0));
-
-        $this->assertGreaterThan(1, $checker->names());
-        $this->assertTrue($checker->supports('exists'));
     }
 
     public function test___call_calls_extension_with_resource()

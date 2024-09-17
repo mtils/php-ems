@@ -19,6 +19,14 @@ use PHPUnit\Framework\Attributes\Test;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 
+class HttpResponseTest_String
+{
+    public function __toString()
+    {
+        return 'hi';
+    }
+}
+
 class HttpResponseTest extends TestCase
 {
     #[Test] public function it_implements_interface()
@@ -425,13 +433,5 @@ class HttpResponseTest extends TestCase
     protected function serializer()
     {
         return (new JsonSerializer())->asArrayByDefault();
-    }
-}
-
-class HttpResponseTest_String
-{
-    public function __toString()
-    {
-        return 'hi';
     }
 }
