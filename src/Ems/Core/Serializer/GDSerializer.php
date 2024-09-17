@@ -6,6 +6,7 @@ use Ems\Contracts\Core\Serializer;
 use Ems\Core\Exceptions\DataIntegrityException;
 use Ems\Core\Exceptions\UnsupportedParameterException;
 use Ems\Contracts\Core\Type;
+use GdImage;
 
 /**
  * This serializer serializes a GD resource into a string and
@@ -78,7 +79,6 @@ class GDSerializer implements Serializer
             throw new UnsupportedParameterException('I can only serialize gd resource not ' . Type::of($value));
         }
 
-
         // Didnt get this to work...
         // $streamUri = 'php://memory';
         // $stream = fopen($streamUri, 'w');
@@ -130,9 +130,14 @@ class GDSerializer implements Serializer
      **/
     protected function isGDResource($resource)
     {
+        if ($resource instanceof GdImage) {
+            return true;
+        }
+
         if (!is_resource($resource)) {
             return false;
         }
+
 
         if (strtolower(get_resource_type($resource) != 'gd')) {
             return false;

@@ -8,6 +8,8 @@ use Ems\Contracts\Core\Serializer as SerializerContract;
 use Ems\Core\Exceptions\DataIntegrityException;
 use Ems\Testing\Cheat;
 
+use GdImage;
+
 use function function_exists;
 
 class GDSerializerTest extends \Ems\TestCase
@@ -43,6 +45,10 @@ class GDSerializerTest extends \Ems\TestCase
 
         $resource2 = $serializer->deserialize($blob);
 
+        if ($resource2 instanceof GdImage) {
+            return;
+        }
+
         $this->assertEquals('gd', strtolower(get_resource_type($resource2)));
 
     }
@@ -59,6 +65,10 @@ class GDSerializerTest extends \Ems\TestCase
 
         $resource2 = $serializer->deserialize($blob);
 
+        if ($resource2 instanceof GdImage) {
+            return;
+        }
+
         $this->assertEquals('gd', strtolower(get_resource_type($resource2)));
 
     }
@@ -74,6 +84,10 @@ class GDSerializerTest extends \Ems\TestCase
         $blob = $serializer->serialize($resource);
 
         $resource2 = $serializer->deserialize($blob);
+
+        if ($resource2 instanceof GdImage) {
+            return;
+        }
 
         $this->assertEquals('gd', strtolower(get_resource_type($resource2)));
 
