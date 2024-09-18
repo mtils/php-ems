@@ -89,6 +89,7 @@ class StringStream extends AbstractStream implements Countable
      *
      * @since 5.1.0
      */
+    #[\ReturnTypeWillChange]
     public function count()
     {
         return is_string($this->string) ? strlen($this->string) : 0;

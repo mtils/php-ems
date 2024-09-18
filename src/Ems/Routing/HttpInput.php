@@ -107,6 +107,7 @@ class HttpInput extends HttpRequest implements Input, ServerRequestInterface
         return $this->get($offset);
     }
 
+    #[\ReturnTypeWillChange]
     public function offsetExists($offset): bool
     {
         if (isset($this->custom[$offset])) {

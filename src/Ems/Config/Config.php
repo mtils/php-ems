@@ -45,6 +45,7 @@ class Config implements ArrayAccess, IteratorAggregate
      * @param mixed $offset
      * @return bool
      */
+    #[\ReturnTypeWillChange]
     public function offsetExists($offset)
     {
         $this->compileIfNeeded();
@@ -55,6 +56,7 @@ class Config implements ArrayAccess, IteratorAggregate
      * @param mixed $offset
      * @return mixed
      */
+    #[\ReturnTypeWillChange]
     public function offsetGet($offset)
     {
         $this->compileIfNeeded();
@@ -65,6 +67,7 @@ class Config implements ArrayAccess, IteratorAggregate
      * @param string $offset
      * @param mixed $value
      */
+    #[\ReturnTypeWillChange]
     public function offsetSet($offset, $value)
     {
         $this->compileIfNeeded();
@@ -74,6 +77,7 @@ class Config implements ArrayAccess, IteratorAggregate
     /**
      * @param string $offset
      */
+    #[\ReturnTypeWillChange]
     public function offsetUnset($offset)
     {
         if ($this->offsetExists($offset)) {

@@ -61,6 +61,7 @@ class SendResult implements ResultContract
      *
      * @return int
      **/
+    #[\ReturnTypeWillChange]
     public function count()
     {
         return $this->sendCounter;

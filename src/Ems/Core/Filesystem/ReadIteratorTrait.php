@@ -39,6 +39,7 @@ trait ReadIteratorTrait
     /**
      * Reset the internal pointer to the beginning.
      **/
+    #[\ReturnTypeWillChange]
     public function rewind()
     {
         $this->onRewind();
@@ -50,6 +51,7 @@ trait ReadIteratorTrait
     /**
      * @return string
      **/
+    #[\ReturnTypeWillChange]
     public function current()
     {
         if ($this->position === 0 && $this->currentValue instanceof None) {
@@ -61,11 +63,13 @@ trait ReadIteratorTrait
     /**
      * @return int
      **/
+    #[\ReturnTypeWillChange]
     public function key()
     {
         return $this->position;
     }
 
+    #[\ReturnTypeWillChange]
     public function next()
     {
         $this->currentValue = $this->readNext(
@@ -78,6 +82,7 @@ trait ReadIteratorTrait
     /**
      * @return bool
      **/
+    #[\ReturnTypeWillChange]
     public function valid()
     {
         return $this->stream->valid() && $this->position !== -1;

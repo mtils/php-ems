@@ -74,6 +74,7 @@ class MailConfigProviderChain implements MailConfigProvider, Countable
      *
      * @return int
      **/
+    #[\ReturnTypeWillChange]
     public function count()
     {
         return count($this->providers);

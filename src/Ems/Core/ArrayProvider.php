@@ -153,6 +153,7 @@ class ArrayProvider implements Provider, ArrayAccess
      * @throws \Ems\Contracts\Core\Errors\NotFound
      *
      */
+    #[\ReturnTypeWillChange]
     public function offsetExists($offset)
     {
         try {
@@ -174,6 +175,7 @@ class ArrayProvider implements Provider, ArrayAccess
      * @return mixed Can return all value types.
      * @since 5.0.0
      */
+    #[\ReturnTypeWillChange]
     public function offsetGet($offset)
     {
         return $this->get($offset);
@@ -191,6 +193,7 @@ class ArrayProvider implements Provider, ArrayAccess
      * @return void
      * @since 5.0.0
      */
+    #[\ReturnTypeWillChange]
     public function offsetSet($offset, $value)
     {
         list($namespace, $dataKey) = $this->namespaceAndKey($offset);
@@ -227,6 +230,7 @@ class ArrayProvider implements Provider, ArrayAccess
      * @return void
      * @since 5.0.0
      */
+    #[\ReturnTypeWillChange]
     public function offsetUnset($offset)
     {
         throw new NotImplementedException('Unsetting offets is not supported currently');

@@ -187,6 +187,7 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
      *
      * @return int
      **/
+    #[\ReturnTypeWillChange]
     public function count()
     {
         if (func_num_args() > 0) {
@@ -350,6 +351,7 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
      *
      * @return bool
      **/
+    #[\ReturnTypeWillChange]
     public function offsetExists($offset)
     {
         return isset($this->source[$offset]);
@@ -362,6 +364,7 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
      *
      * @return mixed
      **/
+    #[\ReturnTypeWillChange]
     public function offsetGet($offset)
     {
         if (isset($this->source[$offset])) {
@@ -376,6 +379,7 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
      * @param int   $offset
      * @param mixed $value
      **/
+    #[\ReturnTypeWillChange]
     public function offsetSet($offset, $value)
     {
         $this->insert($offset, $value);
@@ -386,6 +390,7 @@ class OrderedList implements Countable, IteratorAggregate, ArrayAccess
      *
      * @param int $offset
      **/
+    #[\ReturnTypeWillChange]
     public function offsetUnset($offset)
     {
         $this->pop($offset);

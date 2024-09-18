@@ -50,6 +50,7 @@ class GenericTemporalQuantity extends PointInTime implements TemporalQuantity, A
      *
      * @see \Ems\Contracts\Core\NamedQuantity
      **/
+    #[\ReturnTypeWillChange]
     public function count()
     {
         return $this->count;

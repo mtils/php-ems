@@ -113,7 +113,7 @@ class BinaryContent implements Content
      *
      * @return int
      **/
-    public function count()
+    public function count() : int
     {
         $iterator = $this->getIterator();
 

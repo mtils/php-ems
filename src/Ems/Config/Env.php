@@ -111,6 +111,7 @@ class Env implements ArrayAccess, IteratorAggregate
      * @param mixed $offset
      * @return bool
      */
+    #[\ReturnTypeWillChange]
     public function offsetExists($offset)
     {
         return static::get($offset) !== null;
@@ -120,6 +121,7 @@ class Env implements ArrayAccess, IteratorAggregate
      * @param mixed $offset
      * @return mixed|null
      */
+    #[\ReturnTypeWillChange]
     public function offsetGet($offset)
     {
         return static::get($offset);
@@ -129,6 +131,7 @@ class Env implements ArrayAccess, IteratorAggregate
      * @param mixed $offset
      * @param mixed $value
      */
+    #[\ReturnTypeWillChange]
     public function offsetSet($offset, $value)
     {
         static::set($offset, $value);
@@ -137,6 +140,7 @@ class Env implements ArrayAccess, IteratorAggregate
     /**
      * @param mixed $offset
      */
+    #[\ReturnTypeWillChange]
     public function offsetUnset($offset)
     {
         static::clear($offset);

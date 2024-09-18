@@ -216,6 +216,7 @@ class ValidationException extends RuntimeException implements Validation, JsonSe
      *
      * @return bool
      **/
+    #[\ReturnTypeWillChange]
     public function offsetExists($key)
     {
         return isset($this->failures[$key]);
@@ -226,6 +227,7 @@ class ValidationException extends RuntimeException implements Validation, JsonSe
      *
      * @return array
      **/
+    #[\ReturnTypeWillChange]
     public function offsetGet($key)
     {
         return $this->failures[$key];
@@ -237,6 +239,7 @@ class ValidationException extends RuntimeException implements Validation, JsonSe
      * @param string $key
      * @param array  $value
      **/
+    #[\ReturnTypeWillChange]
     public function offsetSet($key, $value)
     {
         throw new NotImplementedException('Validation does not support array set access. Use addFailure instead');
@@ -247,6 +250,7 @@ class ValidationException extends RuntimeException implements Validation, JsonSe
      *
      * @param string $key
      **/
+    #[\ReturnTypeWillChange]
     public function offsetUnset($key)
     {
         $this->wasManipulated = true;

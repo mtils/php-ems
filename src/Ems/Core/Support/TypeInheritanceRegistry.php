@@ -61,6 +61,7 @@ class TypeInheritanceRegistry implements Provider, ArrayAccess, Countable
      * The return value will be casted to boolean if non-boolean was returned.
      * @since 5.0.0
      */
+    #[\ReturnTypeWillChange]
     public function offsetExists($offset)
     {
         return isset($this->types[$offset]);
@@ -75,6 +76,7 @@ class TypeInheritanceRegistry implements Provider, ArrayAccess, Countable
      * @return mixed Can return all value types.
      * @since 5.0.0
      */
+    #[\ReturnTypeWillChange]
     public function offsetGet($offset)
     {
         return $this->types[$offset];
@@ -92,6 +94,7 @@ class TypeInheritanceRegistry implements Provider, ArrayAccess, Countable
      * @return void
      * @since 5.0.0
      */
+    #[\ReturnTypeWillChange]
     public function offsetSet($offset, $value)
     {
         $this->types[$offset] = $value;
@@ -106,6 +109,7 @@ class TypeInheritanceRegistry implements Provider, ArrayAccess, Countable
      * @return void
      * @since 5.0.0
      */
+    #[\ReturnTypeWillChange]
     public function offsetUnset($offset)
     {
         unset($this->types[$offset]);
@@ -114,6 +118,7 @@ class TypeInheritanceRegistry implements Provider, ArrayAccess, Countable
     /**
      * @return int
      */
+    #[\ReturnTypeWillChange]
     public function count()
     {
         return count($this->types);

@@ -89,6 +89,7 @@ class Message extends AbstractMessage
      * @param mixed $value
      * @return void
      */
+    #[\ReturnTypeWillChange]
     public function offsetSet($offset, $value)
     {
         $this->custom[$offset] = $value;
@@ -98,6 +99,7 @@ class Message extends AbstractMessage
      * @param string|int $offset
      * @return void
      */
+    #[\ReturnTypeWillChange]
     public function offsetUnset($offset)
     {
         unset($this->custom[$offset]);

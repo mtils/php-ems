@@ -32,6 +32,7 @@ class LittleDataCachedStorage extends AbstractProxyStorage
      *
      * @return bool
      **/
+    #[\ReturnTypeWillChange]
     public function offsetExists($offset)
     {
         $all = $this->toArray();
@@ -46,6 +47,7 @@ class LittleDataCachedStorage extends AbstractProxyStorage
      *
      * @return mixed
      **/
+    #[\ReturnTypeWillChange]
     public function offsetGet($offset)
     {
         $all = $this->toArray();
@@ -63,6 +65,7 @@ class LittleDataCachedStorage extends AbstractProxyStorage
      *
      * @return void
      **/
+    #[\ReturnTypeWillChange]
     public function offsetSet($offset, $value)
     {
         parent::offsetSet($offset,$value);
@@ -77,6 +80,7 @@ class LittleDataCachedStorage extends AbstractProxyStorage
      *
      * @return void
      **/
+    #[\ReturnTypeWillChange]
     public function offsetUnset($offset)
     {
         parent::offsetUnset($offset);

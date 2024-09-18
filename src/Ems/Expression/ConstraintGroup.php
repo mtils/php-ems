@@ -244,6 +244,7 @@ class ConstraintGroup implements ConstraintGroupContract
      *
      * @return bool
      **/
+    #[\ReturnTypeWillChange]
     public function offsetExists($offset)
     {
         return $this->__isset($offset);
@@ -256,6 +257,7 @@ class ConstraintGroup implements ConstraintGroupContract
      *
      * @return mixed
      **/
+    #[\ReturnTypeWillChange]
     public function offsetGet($offset)
     {
         return $this->constraints[$offset];
@@ -267,6 +269,7 @@ class ConstraintGroup implements ConstraintGroupContract
      * @param mixed $offset
      * @param mixed $value
      **/
+    #[\ReturnTypeWillChange]
     public function offsetSet($offset, $value)
     {
         $this->checkType($value);
@@ -281,6 +284,7 @@ class ConstraintGroup implements ConstraintGroupContract
      *
      * @param mixed $offset
      **/
+    #[\ReturnTypeWillChange]
     public function offsetUnset($offset)
     {
         $this->__unset($offset);

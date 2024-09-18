@@ -15,6 +15,7 @@ class QueryableArrayWithState extends ArrayWithState
      *
      * @return bool
      **/
+    #[\ReturnTypeWillChange]
     public function offsetExists($offset)
     {
         $this->bootOnce();
@@ -28,6 +29,7 @@ class QueryableArrayWithState extends ArrayWithState
      *
      * @return mixed
      **/
+    #[\ReturnTypeWillChange]
     public function offsetGet($offset)
     {
         $this->bootOnce();
@@ -40,6 +42,7 @@ class QueryableArrayWithState extends ArrayWithState
      * @param mixed $offset
      * @param mixed $value
      **/
+    #[\ReturnTypeWillChange]
     public function offsetSet($offset, $value)
     {
         $this->bootOnce();
@@ -51,6 +54,7 @@ class QueryableArrayWithState extends ArrayWithState
      *
      * @param mixed $offset
      **/
+    #[\ReturnTypeWillChange]
     public function offsetUnset($offset)
     {
         $this->bootOnce();

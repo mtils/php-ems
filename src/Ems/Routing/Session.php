@@ -101,24 +101,28 @@ class Session implements SessionContract
         return $this->data;
     }
 
+    #[\ReturnTypeWillChange]
     public function offsetExists($offset) : bool
     {
         $this->startIfNotStarted();
         return array_key_exists($offset, $this->data);
     }
 
+    #[\ReturnTypeWillChange]
     public function offsetGet($offset)
     {
         $this->startIfNotStarted();
         return $this->data[$offset];
     }
 
+    #[\ReturnTypeWillChange]
     public function offsetSet($offset, $value)
     {
         $this->startIfNotStarted();
         $this->data[$offset] = $value;
     }
 
+    #[\ReturnTypeWillChange]
     public function offsetUnset($offset)
     {
         $this->startIfNotStarted();

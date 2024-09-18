@@ -69,6 +69,7 @@ class GenericChildren extends GenericResult implements Children
     /**
      * @inheritDoc
      */
+    #[\ReturnTypeWillChange]
     public function count()
     {
         return count($this->data);

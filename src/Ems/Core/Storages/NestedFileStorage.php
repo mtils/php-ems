@@ -163,6 +163,7 @@ class NestedFileStorage implements Storage, Configurable, HasKeys
      *
      * @return bool
      **/
+    #[\ReturnTypeWillChange]
     public function offsetExists($offset)
     {
 
@@ -191,6 +192,7 @@ class NestedFileStorage implements Storage, Configurable, HasKeys
      *
      * @return mixed
      **/
+    #[\ReturnTypeWillChange]
     public function offsetGet($offset)
     {
 
@@ -213,6 +215,7 @@ class NestedFileStorage implements Storage, Configurable, HasKeys
      *
      * @return void
      **/
+    #[\ReturnTypeWillChange]
     public function offsetSet($offset, $value)
     {
         $this->ensureRootDirectory();
@@ -245,6 +248,7 @@ class NestedFileStorage implements Storage, Configurable, HasKeys
      *
      * @return void
      **/
+    #[\ReturnTypeWillChange]
     public function offsetUnset($offset)
     {
         list($url, $key) = $this->fileUrlAndKey($offset);

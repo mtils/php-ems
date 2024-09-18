@@ -315,6 +315,7 @@ class CsvReadIterator implements Iterator, Countable
      *
      * @return int
      **/
+    #[\ReturnTypeWillChange]
     public function count()
     {
         foreach ($this->newCountInstance() as $i=>$row) {

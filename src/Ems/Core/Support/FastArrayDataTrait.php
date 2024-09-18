@@ -22,6 +22,7 @@ trait FastArrayDataTrait
      *
      * @return bool
      **/
+    #[\ReturnTypeWillChange]
     public function offsetExists($offset)
     {
         return isset($this->_attributes[$offset]);
@@ -34,6 +35,7 @@ trait FastArrayDataTrait
      *
      * @return mixed
      **/
+    #[\ReturnTypeWillChange]
     public function offsetGet($offset)
     {
         return $this->_attributes[$offset];
@@ -45,6 +47,7 @@ trait FastArrayDataTrait
      * @param mixed $offset
      * @param mixed $value
      **/
+    #[\ReturnTypeWillChange]
     public function offsetSet($offset, $value)
     {
         $this->_attributes[$offset] = $value;
@@ -55,6 +58,7 @@ trait FastArrayDataTrait
      *
      * @param mixed $offset
      **/
+    #[\ReturnTypeWillChange]
     public function offsetUnset($offset)
     {
         unset($this->_attributes[$offset]);

@@ -46,21 +46,25 @@ class FilterableArray implements ArrayData, Filterable, IteratorAggregate
         $this->setSource($source);
     }
 
+    #[\ReturnTypeWillChange]
     public function offsetExists($offset) : bool
     {
         return isset($this->source[$offset]);
     }
 
+    #[\ReturnTypeWillChange]
     public function offsetGet($offset)
     {
         return $this->source[$offset];
     }
 
+    #[\ReturnTypeWillChange]
     public function offsetSet($offset, $value)
     {
         $this->source[$offset] = $value;
     }
 
+    #[\ReturnTypeWillChange]
     public function offsetUnset($offset)
     {
         unset($this->source[$offset]);

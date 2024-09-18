@@ -255,6 +255,7 @@ abstract class Message implements ArrayAccess, IteratorAggregate, Countable
      * @param string|int $offset
      * @return bool
      */
+    #[\ReturnTypeWillChange]
     public function offsetExists($offset) : bool
     {
         return isset($this->custom[$offset]);

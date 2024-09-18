@@ -242,6 +242,7 @@ class Pair implements ArrayAccess
      * The return value will be casted to boolean if non-boolean was returned.
      * @since 5.0.0
      */
+    #[\ReturnTypeWillChange]
     public function offsetExists($offset)
     {
         return ($offset == 1) || ($offset == 2);
@@ -256,6 +257,7 @@ class Pair implements ArrayAccess
      * @return mixed Can return all value types.
      * @since 5.0.0
      */
+    #[\ReturnTypeWillChange]
     public function offsetGet($offset)
     {
         return $this->{$this->property($offset)};
@@ -273,6 +275,7 @@ class Pair implements ArrayAccess
      * @return void
      * @since 5.0.0
      */
+    #[\ReturnTypeWillChange]
     public function offsetSet($offset, $value)
     {
         $this->{$this->property($offset)} = $this->checkType($value);
@@ -287,6 +290,7 @@ class Pair implements ArrayAccess
      * @return void
      * @since 5.0.0
      */
+    #[\ReturnTypeWillChange]
     public function offsetUnset($offset)
     {
         $this->{$this->property($offset)} = null;

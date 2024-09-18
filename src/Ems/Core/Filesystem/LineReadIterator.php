@@ -51,6 +51,7 @@ class LineReadIterator implements Iterator, Countable
      *
      * @return int
      **/
+    #[\ReturnTypeWillChange]
     public function count()
     {
         if (!$this->stream) {

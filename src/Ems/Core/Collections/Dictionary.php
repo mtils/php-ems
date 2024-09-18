@@ -36,6 +36,7 @@ class Dictionary implements Countable, IteratorAggregate, ArrayAccess
      *
      * @return int
      */
+    #[\ReturnTypeWillChange]
     public function count()
     {
         return count($this->source);
@@ -48,6 +49,7 @@ class Dictionary implements Countable, IteratorAggregate, ArrayAccess
      *
      * @return bool
      */
+    #[\ReturnTypeWillChange]
     public function offsetExists($offset)
     {
         return array_key_exists($offset, $this->source);
@@ -60,6 +62,7 @@ class Dictionary implements Countable, IteratorAggregate, ArrayAccess
      *
      * @param mixed $offset
      */
+    #[\ReturnTypeWillChange]
     public function offsetUnset($offset)
     {
         if ($this->offsetExists($offset)) {
@@ -79,6 +82,7 @@ class Dictionary implements Countable, IteratorAggregate, ArrayAccess
      *
      * @return mixed
      */
+    #[\ReturnTypeWillChange]
     public function offsetGet($offset)
     {
         if ($this->offsetExists($offset)) {
@@ -95,6 +99,7 @@ class Dictionary implements Countable, IteratorAggregate, ArrayAccess
      * @param mixed $offset
      * @param mixed $value
      */
+    #[\ReturnTypeWillChange]
     public function offsetSet($offset, $value)
     {
         $this->source[$offset] = $value;

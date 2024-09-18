@@ -226,9 +226,9 @@ class Highlight extends View implements HighlightContract
     /**
      * Count all results.
      *
-     * @return array
+     * @return int
      **/
-    public function count()
+    public function count() : int
     {
         if ($this->count == null) {
             $this->count = $this->itemProvider->count($this->method, $this->criterias());

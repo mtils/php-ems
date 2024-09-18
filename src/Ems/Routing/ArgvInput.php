@@ -163,6 +163,7 @@ class ArgvInput extends ImmutableMessage implements Input
         return $default;
     }
 
+    #[\ReturnTypeWillChange]
     public function offsetExists($offset) : bool
     {
         if (isset($this->custom[$offset])) {
@@ -174,6 +175,7 @@ class ArgvInput extends ImmutableMessage implements Input
         return isset($this->routeParameters[$offset]);
     }
 
+    #[\ReturnTypeWillChange]
     public function offsetGet($offset)
     {
         return $this->get($offset);

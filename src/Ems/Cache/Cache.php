@@ -373,6 +373,7 @@ class Cache implements CacheContract
      *
      * @return bool
      **/
+    #[\ReturnTypeWillChange]
     public function offsetExists($offset)
     {
         return $this->has($offset);
@@ -387,6 +388,7 @@ class Cache implements CacheContract
      *
      * @return mixed
      **/
+    #[\ReturnTypeWillChange]
     public function offsetGet($offset)
     {
         return $this->get($offset);
@@ -400,6 +402,7 @@ class Cache implements CacheContract
      * @param mixed $offset
      * @param mixed $value
      **/
+    #[\ReturnTypeWillChange]
     public function offsetSet($offset, $value)
     {
         $this->put($offset, $value);
@@ -412,6 +415,7 @@ class Cache implements CacheContract
      *
      * @param mixed $offset
      **/
+    #[\ReturnTypeWillChange]
     public function offsetUnset($offset)
     {
         $this->forget($offset);

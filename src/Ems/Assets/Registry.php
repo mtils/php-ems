@@ -248,6 +248,7 @@ class Registry extends PathFinderProxy implements RegistryContract
      *
      * @return int
      **/
+    #[\ReturnTypeWillChange]
     public function count()
     {
         return count($this->addedAssets);
@@ -260,6 +261,7 @@ class Registry extends PathFinderProxy implements RegistryContract
      *
      * @return bool
      **/
+    #[\ReturnTypeWillChange]
     public function offsetExists($offset)
     {
         return isset($this->imports[$offset]);
@@ -272,6 +274,7 @@ class Registry extends PathFinderProxy implements RegistryContract
      *
      * @return array
      **/
+    #[\ReturnTypeWillChange]
     public function offsetGet($offset)
     {
         if (isset($this->imports[$offset])) {
@@ -290,6 +293,7 @@ class Registry extends PathFinderProxy implements RegistryContract
      *
      * @throws \BadMethodCallException
      **/
+    #[\ReturnTypeWillChange]
     public function offsetSet($offset, $value)
     {
         throw new BadMethodCallException('Cannot set values on '.__CLASS__);
@@ -304,6 +308,7 @@ class Registry extends PathFinderProxy implements RegistryContract
      *
      * @throws \BadMethodCallException
      **/
+    #[\ReturnTypeWillChange]
     public function offsetUnset($offset)
     {
         throw new BadMethodCallException('Cannot unset values on '.__CLASS__);

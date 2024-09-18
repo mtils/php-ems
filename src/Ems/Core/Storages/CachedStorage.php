@@ -41,6 +41,7 @@ class CachedStorage extends AbstractProxyStorage
      *
      * @return bool
      **/
+    #[\ReturnTypeWillChange]
     public function offsetExists($offset)
     {
         if (isset($this->cache[$offset])) {

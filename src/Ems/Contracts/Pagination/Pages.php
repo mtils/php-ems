@@ -11,6 +11,7 @@ use ArrayIterator;
 use Countable;
 use Ems\Contracts\Model\Result;
 use Ems\Core\Exceptions\UnsupportedUsageException;
+use ReturnTypeWillChange;
 use Traversable;
 
 /**
@@ -145,6 +146,7 @@ class Pages implements Result, ArrayAccess, Countable
      * The return value will be casted to boolean if non-boolean was returned.
      * @since 5.0.0
      */
+    #[\ReturnTypeWillChange]
     public function offsetExists($offset)
     {
         return isset($this->pages[$offset]);
@@ -159,6 +161,7 @@ class Pages implements Result, ArrayAccess, Countable
      * @return mixed Can return all value types.
      * @since 5.0.0
      */
+    #[\ReturnTypeWillChange]
     public function offsetGet($offset)
     {
         return $this->pages[$offset];
@@ -176,6 +179,7 @@ class Pages implements Result, ArrayAccess, Countable
      * @return void
      * @since 5.0.0
      */
+    #[\ReturnTypeWillChange]
     public function offsetSet($offset, $value)
     {
         throw new UnsupportedUsageException('You cannot set Pages directly. Use self::add()');
@@ -190,6 +194,7 @@ class Pages implements Result, ArrayAccess, Countable
      * @return void
      * @since 5.0.0
      */
+    #[\ReturnTypeWillChange]
     public function offsetUnset($offset)
     {
         throw new UnsupportedUsageException('You unset Pages. Use a new Pages object.');
@@ -204,6 +209,7 @@ class Pages implements Result, ArrayAccess, Countable
      * The return value is cast to an integer.
      * @since 5.1.0
      */
+    #[ReturnTypeWillChange]
     public function count()
     {
         return count($this->pages);

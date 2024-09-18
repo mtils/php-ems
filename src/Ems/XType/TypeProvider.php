@@ -261,6 +261,9 @@ class TypeProvider implements TypeProviderContract
      **/
     protected function nativeToXType($nativeType)
     {
+        if ($nativeType === null) {
+            return new StringType();
+        }
 
         if (class_exists($nativeType)) {
             return new ObjectType(['class'=>$nativeType]);

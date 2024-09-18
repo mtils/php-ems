@@ -49,6 +49,7 @@ class SQLBlobStorage extends KeyValueStorage implements PushableStorage, HasKeys
      * @return void
      * @since 5.0.0
      */
+    #[\ReturnTypeWillChange]
     public function offsetSet($offset, $value)
     {
         $value = $this->serializer->serialize($value);

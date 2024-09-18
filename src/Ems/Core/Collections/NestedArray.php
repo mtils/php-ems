@@ -124,6 +124,7 @@ class NestedArray implements ArrayAccess, Countable, IteratorAggregate
      *
      * @return bool
      **/
+    #[\ReturnTypeWillChange]
     public function offsetExists($offset)
     {
         if ($offset == $this->querySeparator) {
@@ -147,6 +148,7 @@ class NestedArray implements ArrayAccess, Countable, IteratorAggregate
      *
      * @return mixed
      **/
+    #[\ReturnTypeWillChange]
     public function offsetGet($offset)
     {
         if ($offset == $this->querySeparator) {
@@ -174,6 +176,7 @@ class NestedArray implements ArrayAccess, Countable, IteratorAggregate
      *
      * @throws \RuntimeException
      **/
+    #[\ReturnTypeWillChange]
     public function offsetSet($offset, $value)
     {
         throw new RuntimeException('Setting values is not supported');
@@ -186,6 +189,7 @@ class NestedArray implements ArrayAccess, Countable, IteratorAggregate
      *
      * @throws \RuntimeException
      **/
+    #[\ReturnTypeWillChange]
     public function offsetUnset($offset)
     {
         throw new RuntimeException('Currently only reading is supported');
@@ -196,6 +200,7 @@ class NestedArray implements ArrayAccess, Countable, IteratorAggregate
      *
      * @return int
      **/
+    #[\ReturnTypeWillChange]
     public function count()
     {
         return count($this->root());

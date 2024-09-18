@@ -414,6 +414,7 @@ class Url implements UrlContract, UriInterface
      *
      * @return bool
      **/
+    #[\ReturnTypeWillChange]
     public function offsetExists($offset)
     {
         return isset($this->query[$offset]);
@@ -426,6 +427,7 @@ class Url implements UrlContract, UriInterface
      *
      * @return mixed
      **/
+    #[\ReturnTypeWillChange]
     public function offsetGet($offset)
     {
         return $this->query[$offset];
@@ -437,6 +439,7 @@ class Url implements UrlContract, UriInterface
      * @param mixed $offset
      * @param mixed $value
      **/
+    #[\ReturnTypeWillChange]
     public function offsetSet($offset, $value)
     {
         throw new RuntimeException('An url is immutable, you can only get its query values');
@@ -447,6 +450,7 @@ class Url implements UrlContract, UriInterface
      *
      * @param mixed $offset
      **/
+    #[\ReturnTypeWillChange]
     public function offsetUnset($offset)
     {
         return $this->offsetSet($offset, 'foo');

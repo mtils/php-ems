@@ -191,6 +191,7 @@ class HttpResponse extends Response implements ResponseInterface
      * @param $offset
      * @return bool
      */
+    #[\ReturnTypeWillChange]
     public function offsetExists($offset): bool
     {
         $this->tryDeserializePayload();
@@ -201,6 +202,7 @@ class HttpResponse extends Response implements ResponseInterface
      * @param $offset
      * @return mixed
      */
+    #[\ReturnTypeWillChange]
     public function offsetGet($offset)
     {
         $this->tryDeserializePayload();
@@ -211,6 +213,7 @@ class HttpResponse extends Response implements ResponseInterface
      * @param $offset
      * @param $value
      */
+    #[\ReturnTypeWillChange]
     public function offsetSet($offset, $value)
     {
         $this->tryDeserializePayload();
@@ -221,6 +224,7 @@ class HttpResponse extends Response implements ResponseInterface
      * @param $offset
      * @return void
      */
+    #[\ReturnTypeWillChange]
     public function offsetUnset($offset)
     {
         $this->tryDeserializePayload();

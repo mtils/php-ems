@@ -33,6 +33,7 @@ class UnbufferedProxyStorage extends AbstractProxyStorage implements Storage
      *
      * @return void
      **/
+    #[\ReturnTypeWillChange]
     public function offsetSet($offset, $value)
     {
         parent::offsetSet($offset, $value);
@@ -47,6 +48,7 @@ class UnbufferedProxyStorage extends AbstractProxyStorage implements Storage
      *
      * @return void
      **/
+    #[\ReturnTypeWillChange]
     public function offsetUnset($offset)
     {
         $this->storage->purge([$offset]);

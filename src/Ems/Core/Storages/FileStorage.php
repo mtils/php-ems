@@ -115,6 +115,7 @@ class FileStorage implements Storage, Configurable, HasKeys
      *
      * @return bool
      **/
+    #[\ReturnTypeWillChange]
     public function offsetExists($offset)
     {
         return $this->filesystem->exists($this->fileOfKey($offset));
@@ -128,6 +129,7 @@ class FileStorage implements Storage, Configurable, HasKeys
      *
      * @return mixed
      **/
+    #[\ReturnTypeWillChange]
     public function offsetGet($offset)
     {
         $file = $this->fileOfKey($offset);
@@ -142,6 +144,7 @@ class FileStorage implements Storage, Configurable, HasKeys
      *
      * @return void
      **/
+    #[\ReturnTypeWillChange]
     public function offsetSet($offset, $value)
     {
         $this->ensureDirectory($this->urlOrFail());
@@ -184,6 +187,7 @@ class FileStorage implements Storage, Configurable, HasKeys
      *
      * @return void
      **/
+    #[\ReturnTypeWillChange]
     public function offsetUnset($offset)
     {
         // Just ignore unset keys that do not exist

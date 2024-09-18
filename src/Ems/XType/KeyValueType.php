@@ -52,6 +52,7 @@ abstract class KeyValueType extends AbstractType implements ArrayAccess, Countab
      *
      * @return \Ems\Contracts\XType\XType
      **/
+    #[\ReturnTypeWillChange]
     public function offsetGet($name)
     {
         $this->loadKeysIfNotLoaded();
@@ -64,6 +65,7 @@ abstract class KeyValueType extends AbstractType implements ArrayAccess, Countab
      * @param string                     $name
      * @param \Ems\Contracts\XType\XType $type
      **/
+    #[\ReturnTypeWillChange]
     public function offsetSet($name, $type)
     {
         $this->set($name, $type);
@@ -76,6 +78,7 @@ abstract class KeyValueType extends AbstractType implements ArrayAccess, Countab
      *
      * @return bool
      **/
+    #[\ReturnTypeWillChange]
     public function offsetExists($name)
     {
         $this->loadKeysIfNotLoaded();
@@ -87,6 +90,7 @@ abstract class KeyValueType extends AbstractType implements ArrayAccess, Countab
      *
      * @param string $name
      **/
+    #[\ReturnTypeWillChange]
     public function offsetUnset($name)
     {
         $this->loadKeysIfNotLoaded();
@@ -130,6 +134,7 @@ abstract class KeyValueType extends AbstractType implements ArrayAccess, Countab
     /**
      * @return int
      **/
+    #[\ReturnTypeWillChange]
     public function count()
     {
         $this->loadKeysIfNotLoaded();

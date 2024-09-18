@@ -250,6 +250,7 @@ class SQLStorage extends ArrayWithState implements QueryableStorage, IteratorAgg
      *
      * @return bool
      **/
+    #[\ReturnTypeWillChange]
     public function offsetExists($key)
     {
         if (parent::offsetExists($key)) {
@@ -280,6 +281,7 @@ class SQLStorage extends ArrayWithState implements QueryableStorage, IteratorAgg
      *
      * @return mixed
      **/
+    #[\ReturnTypeWillChange]
     public function offsetGet($key)
     {
         $this->offsetExists($key); // Trigger all the loading stuff
@@ -293,6 +295,7 @@ class SQLStorage extends ArrayWithState implements QueryableStorage, IteratorAgg
      *
      * @return void
      **/
+    #[\ReturnTypeWillChange]
     public function offsetUnset($offset)
     {
         $this->offsetExists($offset); // Trigger loading

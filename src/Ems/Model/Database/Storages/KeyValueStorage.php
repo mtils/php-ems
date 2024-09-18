@@ -72,6 +72,7 @@ class KeyValueStorage implements Storage, HasKeys
      *
      * @return boolean true on success or false on failure.
      **/
+    #[\ReturnTypeWillChange]
     public function offsetExists($offset)
     {
         return $this->getDriver()->exists($offset);
@@ -85,6 +86,7 @@ class KeyValueStorage implements Storage, HasKeys
      * @return mixed Can return all value types.
      * @since 5.0.0
      */
+    #[\ReturnTypeWillChange]
     public function offsetGet($offset)
     {
         if (!$row = $this->getDriver()->selectOne($offset)) {
@@ -102,6 +104,7 @@ class KeyValueStorage implements Storage, HasKeys
      * @return void
      * @since 5.0.0
      */
+    #[\ReturnTypeWillChange]
     public function offsetSet($offset, $value)
     {
         $value = $this->serializer->serialize($value);
@@ -122,6 +125,7 @@ class KeyValueStorage implements Storage, HasKeys
      * @return void
      * @since 5.0.0
      */
+    #[\ReturnTypeWillChange]
     public function offsetUnset($offset)
     {
         $this->getDriver()->delete($offset, 1);

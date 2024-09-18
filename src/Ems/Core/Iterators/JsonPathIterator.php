@@ -130,6 +130,7 @@ class JsonPathIterator implements Iterator
     /**
      * @return mixed|null
      */
+    #[\ReturnTypeWillChange]
     public function current()
     {
         if (!$iterator = $this->sourceIterator()) {
@@ -164,6 +165,7 @@ class JsonPathIterator implements Iterator
      * Move cursor forward
      * @return void
      */
+    #[\ReturnTypeWillChange]
     public function next()
     {
         if ($iterator = $this->sourceIterator()) {
@@ -175,6 +177,7 @@ class JsonPathIterator implements Iterator
      * Rewind the cursor. This is typically done at start of foreach
      * @return void
      */
+    #[\ReturnTypeWillChange]
     public function rewind()
     {
         $this->stack = [];

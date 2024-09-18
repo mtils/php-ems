@@ -51,6 +51,7 @@ class OneItemProxyStorage extends AbstractProxyStorage
      *
      * @return bool
      **/
+    #[\ReturnTypeWillChange]
     public function offsetExists($offset)
     {
         $data = $this->toArray();
@@ -64,6 +65,7 @@ class OneItemProxyStorage extends AbstractProxyStorage
      *
      * @return mixed
      **/
+    #[\ReturnTypeWillChange]
     public function offsetGet($offset)
     {
         $data = $this->toArray();
@@ -81,6 +83,7 @@ class OneItemProxyStorage extends AbstractProxyStorage
      *
      * @return void
      **/
+    #[\ReturnTypeWillChange]
     public function offsetSet($offset, $value)
     {
         if($storedData = $this->readAll()) {
@@ -106,6 +109,7 @@ class OneItemProxyStorage extends AbstractProxyStorage
      *
      * @return void
      **/
+    #[\ReturnTypeWillChange]
     public function offsetUnset($offset)
     {
         if(!$storedData = $this->readAll()) {

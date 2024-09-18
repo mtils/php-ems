@@ -159,6 +159,7 @@ class MiddlewareCollection implements MiddlewareCollectionContract
      * The return value will be casted to boolean if non-boolean was returned.
      * @since 5.0.0
      */
+    #[\ReturnTypeWillChange]
     public function offsetExists($offset)
     {
         return isset($this->middlewares[$offset]);
@@ -173,6 +174,7 @@ class MiddlewareCollection implements MiddlewareCollectionContract
      * @return mixed Can return all value types.
      * @since 5.0.0
      */
+    #[\ReturnTypeWillChange]
     public function offsetGet($offset)
     {
         $this->failOnMissingName($offset);
@@ -191,6 +193,7 @@ class MiddlewareCollection implements MiddlewareCollectionContract
      * @return void
      * @since 5.0.0
      */
+    #[\ReturnTypeWillChange]
     public function offsetSet($offset, $value)
     {
         $this->add($offset, $value);
@@ -205,6 +208,7 @@ class MiddlewareCollection implements MiddlewareCollectionContract
      * @return void
      * @since 5.0.0
      */
+    #[\ReturnTypeWillChange]
     public function offsetUnset($offset)
     {
         $this->failOnMissingName($offset);

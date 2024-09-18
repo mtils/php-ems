@@ -89,6 +89,7 @@ class FileStream extends AbstractStream implements Countable
      * @return int The custom count as an integer.
      *
      */
+    #[\ReturnTypeWillChange]
     public function count()
     {
         return filesize((string)$this->url);

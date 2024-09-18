@@ -22,7 +22,7 @@ class Rule extends ConstraintGroup implements RuleContract
     /**
      * @return int
      **/
-    public function count()
+    public function count() : int
     {
         return count($this->constraints);
     }
