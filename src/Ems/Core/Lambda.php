@@ -14,6 +14,7 @@ use ReflectionException;
 use ReflectionFunction;
 use ReflectionFunctionAbstract;
 use ReflectionMethod;
+use ReflectionNamedType;
 use UnexpectedValueException;
 
 use function array_merge;
@@ -643,9 +644,11 @@ class Lambda implements Stringable
 
         foreach(static::getReflection($callable)->getParameters() as $parameter) {
             $type = null;
-            if ($classReflection = $parameter->getClass()) {
-                $type = $classReflection->getName();
+
+            if ($classReflection = $parameter->getType()) {
+                $type = $classReflection instanceof ReflectionNamedType && !$classReflection->isBuiltin() ? $classReflection->getName() : null;
             }
+
             $parameters[$parameter->getName()] = [
                 'optional' => $parameter->isOptional(),
                 'type'     => $type
