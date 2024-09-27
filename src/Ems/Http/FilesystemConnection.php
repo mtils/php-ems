@@ -66,7 +66,6 @@ class FilesystemConnection extends BaseConnection implements HttpConnection, Con
      */
     public function send($method, array $headers = [], $content = null, $protocolVersion = '1.1')
     {
-
         $headers = $this->addCredentials($headers);
 
         $this->callBeforeListeners('send', [$this->url, $method, &$headers]);
@@ -84,10 +83,13 @@ class FilesystemConnection extends BaseConnection implements HttpConnection, Con
 
         list($responseHeader, $content) = $this->parseMessage($raw);
 
+        $statusCode = $this->parseStatusCode($responseHeader);
+
         $response = new HttpResponse([
             'payload' => $content,
             'headers' => $responseHeader,
-            'raw'     => $raw
+            'raw'     => $raw,
+            'status'  => $statusCode
         ]);
 
         $this->callAfterListeners('send', [$this->url, $method, &$headers, $response]);
@@ -116,9 +118,17 @@ class FilesystemConnection extends BaseConnection implements HttpConnection, Con
     {
         $headerAndBody = explode("\r\n\r\n", $message, 2);
         $headers = explode("\r\n", $headerAndBody[0]);
-
         return [$this->parseHeader($headers), $headerAndBody[1]];
 
+    }
+
+    protected function parseStatusCode(array $headers) : ?int
+    {
+        if (!isset($headers[0]) || stripos($headers[0], 'http/') !== 0) {
+            return null;
+        }
+        $parts = explode(' ', $headers[0]);
+        return $parts[1] ? (int)$parts[1] : null;
     }
 
     /**
@@ -218,7 +228,6 @@ class FilesystemConnection extends BaseConnection implements HttpConnection, Con
     protected function createHttpStream($method, $header = '', $content = null, $protocolVersion = '1.1')
     {
         $stream = new HttpFileStream($this->url());
-
         $stream->setMethod($method)
             ->setHeader($header)
             ->setProtocolVersion($protocolVersion);
